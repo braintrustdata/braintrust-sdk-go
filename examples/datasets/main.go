@@ -10,10 +10,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/braintrustdata/braintrust-x-go/braintrust/api"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/autoevals"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/eval"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/trace"
+
+	"github.com/braintrustdata/braintrust-sdk-go"
+	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/eval"
 )
 
 // QuestionInput represents the input structure for a question
@@ -29,10 +31,10 @@ type AnswerExpected struct {
 }
 
 // initializeDataset creates a dataset with sample data and returns the dataset ID
-func initializeDataset(projectID string) (string, error) {
+func initializeDataset(bt *braintrust.Client, projectID string) (string, error) {
 	// Create a dataset with timestamp to make it unique
 	timestamp := fmt.Sprintf("%d", time.Now().Unix())
-	datasetInfo, err := api.CreateDataset(api.DatasetRequest{
+	datasetInfo, err := bt.API().Datasets().Create(context.Background(), api.DatasetRequest{
 		ProjectID:   projectID,
 		Name:        "Sample Struct Dataset " + timestamp,
 		Description: "A sample dataset for demonstrating struct-based evaluation",
@@ -79,7 +81,7 @@ func initializeDataset(projectID string) (string, error) {
 		},
 	}
 
-	err = api.InsertDatasetEvents(datasetInfo.ID, sampleEvents)
+	err = bt.API().Datasets().Insert(context.Background(), datasetInfo.ID, sampleEvents)
 	if err != nil {
 		return "", fmt.Errorf("failed to insert events: %v", err)
 	}
@@ -90,32 +92,44 @@ func initializeDataset(projectID string) (string, error) {
 
 func main() {
 	// Initialize OpenTelemetry tracing for Braintrust
-	teardown, err := trace.Quickstart()
+	tp := trace.NewTracerProvider()
+	defer tp.Shutdown(context.Background()) //nolint:errcheck
+	otel.SetTracerProvider(tp)
+
+	bt, err := braintrust.New(tp,
+		braintrust.WithProject("go-sdk-examples"),
+		braintrust.WithBlockingLogin(true),
+	)
 	if err != nil {
-		log.Fatalf("Failed to initialize tracing: %v", err)
+		log.Fatalf("Failed to initialize Braintrust: %v", err)
 	}
-	defer teardown() // Ensure traces are flushed on exit
 
 	// First, create a project
-	project, err := api.RegisterProject("go-sdk-examples")
+	project, err := bt.API().Projects().Register(context.Background(), "go-sdk-examples")
 	if err != nil {
 		log.Fatalf("Failed to create project: %v", err)
 	}
 	fmt.Printf("📁 Created project: %s (ID: %s)\n", project.Name, project.ID)
 
 	// Initialize dataset
-	datasetID, err := initializeDataset(project.ID)
+	datasetID, err := initializeDataset(bt, project.ID)
 	if err != nil {
 		log.Fatalf("Failed to initialize dataset: %v", err)
 	}
 
 	fmt.Println("\n🚀 Running evaluation (limiting to 2 of 3 rows)...")
-	_, err = eval.Run(context.Background(), eval.Opts[QuestionInput, AnswerExpected]{
-		ProjectID:    project.ID,
-		Experiment:   "Capitalization Task Demo",
-		DatasetID:    datasetID, // Use DatasetID directly - eval.Run handles fetching
-		DatasetLimit: 2,         // Only evaluate the first 2 rows
-		Task: func(ctx context.Context, input QuestionInput) (AnswerExpected, error) {
+	evaluator := braintrust.NewEvaluator[QuestionInput, AnswerExpected](bt)
+
+	// Fetch the dataset cases
+	cases, err := evaluator.Datasets().Get(context.Background(), datasetID)
+	if err != nil {
+		log.Fatalf("Failed to get dataset: %v", err)
+	}
+
+	_, err = evaluator.Run(context.Background(), eval.Opts[QuestionInput, AnswerExpected]{
+		Experiment: "Capitalization Task Demo",
+		Cases:      cases, // Use fetched cases
+		Task: eval.T(func(ctx context.Context, input QuestionInput) (AnswerExpected, error) {
 			// Simple example: capitalize the first letter of each word
 			fmt.Printf("🔄 Processing text: '%s' (context: %s, language: %s)\n",
 				input.Text, input.Context, input.Language)
@@ -137,9 +151,14 @@ func main() {
 			return AnswerExpected{
 				Response: response,
 			}, nil
-		},
+		}),
 		Scorers: []eval.Scorer[QuestionInput, AnswerExpected]{
-			autoevals.NewEquals[QuestionInput, AnswerExpected](),
+			eval.NewScorer("equals", func(ctx context.Context, taskResult eval.TaskResult[QuestionInput, AnswerExpected]) (eval.Scores, error) {
+				if taskResult.Output.Response == taskResult.Expected.Response {
+					return eval.S(1.0), nil
+				}
+				return eval.S(0.0), nil
+			}),
 		},
 	})
 	if err != nil {

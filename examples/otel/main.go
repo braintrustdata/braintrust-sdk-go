@@ -1,5 +1,5 @@
 // This example demonstrates adding Braintrust tracing to an existing OpenTelemetry setup.
-// It shows how to use trace.Enable() to add Braintrust to an app that already has
+// It shows how to use braintrust.New() to add Braintrust to an app that already has
 // other exporters (console exporter in this case).
 
 package main
@@ -10,40 +10,35 @@ import (
 	"log"
 
 	"go.opentelemetry.io/otel"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-x-go/braintrust"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace"
+	"github.com/braintrustdata/braintrust-sdk-go"
 )
 
 func main() {
 	log.Println("🔧 Setting up existing OpenTelemetry infrastructure...")
 
-	// Create a tracer providor with an existing processor / exporter
-	tp := sdktrace.NewTracerProvider()
-	defer func() {
-		_ = tp.Shutdown(context.Background())
-	}()
+	// Create a tracer provider with an existing processor / exporter
+	tp := trace.NewTracerProvider()
+	defer tp.Shutdown(context.Background()) //nolint:errcheck
 
 	otel.SetTracerProvider(tp)
 
-	// Enable Braintrust tracing with blocking login to ensure permalinks work
-	err := trace.Enable(tp, braintrust.WithBlockingLogin(true))
+	// Add Braintrust tracing with blocking login to ensure permalinks work
+	bt, err := braintrust.New(tp,
+		braintrust.WithProject("go-sdk-examples"),
+		braintrust.WithBlockingLogin(true),
+	)
 	if err != nil {
-		log.Fatalf("❌ Failed to enable Braintrust tracing: %v", err)
+		log.Fatalf("❌ Failed to initialize Braintrust: %v", err)
 	}
 
 	log.Println("✅ Braintrust tracing enabled successfully")
 
 	tracer := otel.Tracer("otel-enable-demo")
-	_, span := tracer.Start(context.Background(), "demo-operation")
+	_, span := tracer.Start(context.Background(), "examples/otel/main.go")
 	span.End()
 
 	// Print permalink so user can view the trace in the UI
-	link, err := trace.Permalink(span)
-	if err != nil {
-		log.Printf("⚠️  Could not generate permalink: %v", err)
-	} else {
-		fmt.Printf("\n🔗 View trace: %s\n", link)
-	}
+	fmt.Printf("\n🔗 View trace: %s\n", bt.Permalink(span))
 }

@@ -13,11 +13,11 @@ import (
 	"github.com/openai/openai-go/responses"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-x-go/braintrust"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/eval"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace/traceopenai"
+	"github.com/braintrustdata/braintrust-sdk-go"
+	"github.com/braintrustdata/braintrust-sdk-go/eval"
+	traceopenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"
 )
 
 var tracer = otel.Tracer("email-subject-optimizer")
@@ -42,15 +42,20 @@ func main() {
 	log.Println("📧 Starting Email Subject Line Optimization Evaluation")
 	log.Println("======================================================")
 
-	client := openai.NewClient(
-		option.WithMiddleware(traceopenai.Middleware),
-	)
+	// Create Braintrust client with TracerProvider
+	tp := trace.NewTracerProvider()
+	defer tp.Shutdown(context.Background()) //nolint:errcheck
 
-	teardown, err := trace.Quickstart(braintrust.WithDefaultProject("go-sdk-examples"))
+	bt, err := braintrust.New(tp,
+		braintrust.WithProject("go-sdk-examples"),
+	)
 	if err != nil {
-		log.Fatalf("Error starting trace: %v", err)
+		log.Fatalf("Error creating Braintrust client: %v", err)
 	}
-	defer teardown()
+
+	client := openai.NewClient(
+		option.WithMiddleware(traceopenai.NewMiddleware(traceopenai.WithTracerProvider(tp))),
+	)
 
 	// Subject line generation task
 	generateSubjectLine := func(ctx context.Context, campaign EmailCampaign) (SubjectLineResponse, error) {
@@ -192,8 +197,8 @@ Respond with just the subject line, no quotes or explanations.`,
 
 	scorers := []eval.Scorer[EmailCampaign, SubjectLineResponse]{
 		// Length compliance scorer
-		eval.NewScorer("length_compliance", func(ctx context.Context, input EmailCampaign, expected, result SubjectLineResponse, _ eval.Metadata) (eval.Scores, error) {
-			length := len(result.SubjectLine)
+		eval.NewScorer("length_compliance", func(ctx context.Context, taskResult eval.TaskResult[EmailCampaign, SubjectLineResponse]) (eval.Scores, error) {
+			length := len(taskResult.Output.SubjectLine)
 			v := 0.0
 			if length <= 50 {
 				v = 1.0
@@ -204,14 +209,14 @@ Respond with just the subject line, no quotes or explanations.`,
 		}),
 
 		// AI-powered engagement prediction scorer
-		eval.NewScorer("engagement_prediction", func(ctx context.Context, input EmailCampaign, _, result SubjectLineResponse, _ eval.Metadata) (eval.Scores, error) {
+		eval.NewScorer("engagement_prediction", func(ctx context.Context, taskResult eval.TaskResult[EmailCampaign, SubjectLineResponse]) (eval.Scores, error) {
 			_, span := tracer.Start(ctx, "custom_engagement_scoring")
 			defer span.End()
 
 			span.SetAttributes(
 				attribute.String("scorer.type", "engagement_prediction"),
-				attribute.String("subject_line", result.SubjectLine),
-				attribute.String("campaign_type", input.CampaignType),
+				attribute.String("subject_line", taskResult.Output.SubjectLine),
+				attribute.String("campaign_type", taskResult.Input.CampaignType),
 			)
 
 			evalPrompt := fmt.Sprintf(`Rate this email subject line's engagement potential (0-10):
@@ -231,11 +236,11 @@ Evaluate based on:
 Consider: Will %s want to open this email?
 
 Respond with only a number 0-10.`,
-				result.SubjectLine,
-				input.CampaignType,
-				input.TargetAudience,
-				input.BrandVoice,
-				input.TargetAudience)
+				taskResult.Output.SubjectLine,
+				taskResult.Input.CampaignType,
+				taskResult.Input.TargetAudience,
+				taskResult.Input.BrandVoice,
+				taskResult.Input.TargetAudience)
 
 			params := responses.ResponseNewParams{
 				Input:        responses.ResponseNewParamsInputUnion{OfString: openai.String(evalPrompt)},
@@ -265,14 +270,14 @@ Respond with only a number 0-10.`,
 		}),
 
 		// Spam filter risk scorer
-		eval.NewScorer("spam_risk", func(ctx context.Context, input EmailCampaign, expected, result SubjectLineResponse, _ eval.Metadata) (eval.Scores, error) {
+		eval.NewScorer("spam_risk", func(ctx context.Context, taskResult eval.TaskResult[EmailCampaign, SubjectLineResponse]) (eval.Scores, error) {
 			spamTriggers := []string{
 				"FREE", "URGENT", "ACT NOW", "LIMITED TIME", "CLICK HERE",
 				"GUARANTEE", "NO OBLIGATION", "RISK FREE", "CASH", "MONEY",
 				"!!!", "100%", "AMAZING", "INCREDIBLE", "UNBELIEVABLE",
 			}
 
-			subjectUpper := strings.ToUpper(result.SubjectLine)
+			subjectUpper := strings.ToUpper(taskResult.Output.SubjectLine)
 			triggerCount := 0
 
 			for _, trigger := range spamTriggers {
@@ -282,7 +287,7 @@ Respond with only a number 0-10.`,
 			}
 
 			// Check for excessive punctuation
-			exclamationCount := strings.Count(result.SubjectLine, "!")
+			exclamationCount := strings.Count(taskResult.Output.SubjectLine, "!")
 			if exclamationCount > 1 {
 				triggerCount++
 			}
@@ -301,9 +306,9 @@ Respond with only a number 0-10.`,
 		}),
 
 		// Product mention scorer
-		eval.NewScorer("product_relevance", func(ctx context.Context, input EmailCampaign, expected, result SubjectLineResponse, _ eval.Metadata) (eval.Scores, error) {
-			subjectLower := strings.ToLower(result.SubjectLine)
-			productLower := strings.ToLower(input.ProductName)
+		eval.NewScorer("product_relevance", func(ctx context.Context, taskResult eval.TaskResult[EmailCampaign, SubjectLineResponse]) (eval.Scores, error) {
+			subjectLower := strings.ToLower(taskResult.Output.SubjectLine)
+			productLower := strings.ToLower(taskResult.Input.ProductName)
 
 			// Check if product name or key terms are mentioned
 			productWords := strings.Fields(productLower)
@@ -328,7 +333,7 @@ Respond with only a number 0-10.`,
 				"event_invitation": {"webinar", "event", "join"},
 			}
 
-			if terms, exists := campaignTerms[input.CampaignType]; exists {
+			if terms, exists := campaignTerms[taskResult.Input.CampaignType]; exists {
 				for _, term := range terms {
 					if strings.Contains(subjectLower, term) {
 						return eval.S(0.7), nil
@@ -341,11 +346,11 @@ Respond with only a number 0-10.`,
 	}
 
 	log.Println("🚀 Running email subject line evaluation...")
-	_, err = eval.Run(context.Background(), eval.Opts[EmailCampaign, SubjectLineResponse]{
-		Project:    "go-sdk-examples",
+	evaluator := braintrust.NewEvaluator[EmailCampaign, SubjectLineResponse](bt)
+	_, err = evaluator.Run(context.Background(), eval.Opts[EmailCampaign, SubjectLineResponse]{
 		Experiment: "Subject Line A/B Testing v1",
 		Cases:      eval.NewCases(testCases),
-		Task:       generateSubjectLine,
+		Task:       eval.T(generateSubjectLine),
 		Scorers:    scorers,
 	})
 	if err != nil {

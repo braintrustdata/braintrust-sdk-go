@@ -1,11 +1,11 @@
-module github.com/braintrustdata/braintrust-x-go/examples/temporal
+module github.com/braintrustdata/braintrust-sdk-go/examples/temporal
 
 go 1.23.0
 
-replace github.com/braintrustdata/braintrust-x-go => ../..
+replace github.com/braintrustdata/braintrust-sdk-go => ../..
 
 require (
-	github.com/braintrustdata/braintrust-x-go v0.0.0-00010101000000-000000000000
+	github.com/braintrustdata/braintrust-sdk-go v0.0.0-00010101000000-000000000000
 	github.com/stretchr/testify v1.11.1
 	go.temporal.io/sdk v1.37.0
 )

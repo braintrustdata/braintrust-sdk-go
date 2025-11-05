@@ -15,44 +15,49 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/sdk/trace"
+	oteltrace "go.opentelemetry.io/otel/trace"
 
-	"github.com/braintrustdata/braintrust-x-go/braintrust"
-	bttrace "github.com/braintrustdata/braintrust-x-go/braintrust/trace"
+	"github.com/braintrustdata/braintrust-sdk-go"
 )
 
 func main() {
 	fmt.Println("Manual LLM Logging Example")
 
-	// Initialize Braintrust tracing with org and app URL for permalink generation
-	teardown, err := bttrace.Quickstart(
+	tp := trace.NewTracerProvider()
+	defer tp.Shutdown(context.Background()) //nolint:errcheck
+	otel.SetTracerProvider(tp)
+
+	// Initialize Braintrust with org and app URL for permalink generation
+	bt, err := braintrust.New(tp,
+		braintrust.WithProject("manual-llm-logging"),
 		braintrust.WithOrgName("matt-test-org"),
 		braintrust.WithAppURL("https://www.braintrust.dev"),
+		braintrust.WithBlockingLogin(true),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer teardown()
 
 	ctx := context.Background()
 
 	// Example 1: Simple LLM call
-	simpleExample(ctx)
+	simpleExample(ctx, bt)
 
 	// Example 2: Multi-turn conversation
-	conversationExample(ctx)
+	conversationExample(ctx, bt)
 
 	// Example 3: LLM call with tool/function calling
-	toolCallingExample(ctx)
+	toolCallingExample(ctx, bt)
 
 	// Example 4: Reasoning model (like GPT-5, o1)
-	reasoningExample(ctx)
+	reasoningExample(ctx, bt)
 
 	fmt.Println("\nAll examples logged! Check your Braintrust dashboard to view the traces.")
 }
 
 // simpleExample shows a basic LLM call with all the key attributes
-func simpleExample(ctx context.Context) {
+func simpleExample(ctx context.Context, bt *braintrust.Client) {
 	fmt.Println("\nExample 1: Simple LLM Call")
 
 	tracer := otel.Tracer("manual-llm-example")
@@ -101,12 +106,12 @@ func simpleExample(ctx context.Context) {
 	setJSONAttr(span, "braintrust.metrics", metrics)
 
 	// 6. Generate a permalink to view this span in the Braintrust UI
-	link, _ := bttrace.Permalink(span)
+	link := bt.Permalink(span)
 	fmt.Println(link)
 }
 
 // conversationExample shows logging a multi-turn conversation
-func conversationExample(ctx context.Context) {
+func conversationExample(ctx context.Context, bt *braintrust.Client) {
 	fmt.Println("\nExample 2: Multi-turn Conversation")
 
 	tracer := otel.Tracer("manual-llm-example")
@@ -148,12 +153,12 @@ func conversationExample(ctx context.Context) {
 	}
 	setJSONAttr(span, "braintrust.metrics", metrics)
 
-	link, _ := bttrace.Permalink(span)
+	link := bt.Permalink(span)
 	fmt.Println(link)
 }
 
 // toolCallingExample shows logging an LLM call with function/tool calling
-func toolCallingExample(ctx context.Context) {
+func toolCallingExample(ctx context.Context, bt *braintrust.Client) {
 	fmt.Println("\nExample 3: LLM with Tool Calling")
 
 	tracer := otel.Tracer("manual-llm-example")
@@ -221,12 +226,12 @@ func toolCallingExample(ctx context.Context) {
 	}
 	setJSONAttr(span, "braintrust.metrics", metrics)
 
-	link, _ := bttrace.Permalink(span)
+	link := bt.Permalink(span)
 	fmt.Println(link)
 }
 
 // reasoningExample shows logging a reasoning model call (like GPT-5, o1)
-func reasoningExample(ctx context.Context) {
+func reasoningExample(ctx context.Context, bt *braintrust.Client) {
 	fmt.Println("\nExample 4: Reasoning Model")
 
 	tracer := otel.Tracer("manual-llm-example")
@@ -298,7 +303,7 @@ func reasoningExample(ctx context.Context) {
 }
 
 // setJSONAttr marshals a value to JSON and sets it as a span attribute
-func setJSONAttr(span trace.Span, key string, value any) {
+func setJSONAttr(span oteltrace.Span, key string, value any) {
 	jsonBytes, err := json.Marshal(value)
 	if err != nil {
 		log.Printf("Warning: failed to marshal %s: %v", key, err)

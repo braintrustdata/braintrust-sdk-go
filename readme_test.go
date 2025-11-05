@@ -1,9 +1,11 @@
-package main
+package braintrust
 
 import (
 	_ "embed"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -12,6 +14,9 @@ import (
 var readme string
 
 func TestReadmeSnippets(t *testing.T) {
+	// Create temp directory for building snippets
+	tmpDir := t.TempDir()
+
 	lines := strings.Split(readme, "\n")
 	var snippet []string
 	snippetCount := 0
@@ -24,7 +29,7 @@ func TestReadmeSnippets(t *testing.T) {
 		if strings.HasPrefix(line, "```") && snippet != nil {
 			snippetCount++
 			code := strings.Join(snippet, "\n")
-			if err := tryCompile(code); err != nil {
+			if err := tryCompile(t, tmpDir, snippetCount, code); err != nil {
 				t.Errorf("README snippet %d failed to compile: %v\n%s", snippetCount, err, code)
 			} else {
 				t.Logf("README snippet %d compiled successfully", snippetCount)
@@ -44,22 +49,24 @@ func TestReadmeSnippets(t *testing.T) {
 	}
 }
 
-func tryCompile(code string) error {
-	tmp := "snippet.go"
-	defer func() {
-		_ = os.Remove(tmp)
-		_ = os.Remove("snippet") // Remove binary if created
-	}()
+func tryCompile(t *testing.T, tmpDir string, snippetNum int, code string) error {
+	t.Helper()
+
+	// Create snippet file in temp directory
+	snippetPath := filepath.Join(tmpDir, "snippet"+strconv.Itoa(snippetNum)+".go")
 
 	// Don't add "package main" if it's already there
 	if !strings.HasPrefix(strings.TrimSpace(code), "package main") {
 		code = "package main\n\n" + code
 	}
 
-	if err := os.WriteFile(tmp, []byte(code), 0644); err != nil {
+	if err := os.WriteFile(snippetPath, []byte(code), 0644); err != nil {
 		return err
 	}
-	cmd := exec.Command("go", "build", tmp)
+
+	// Build in temp directory to avoid conflicts
+	outputBinary := filepath.Join(tmpDir, "snippet")
+	cmd := exec.Command("go", "build", "-o", outputBinary, snippetPath)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return &compileError{err: err, output: string(output)}

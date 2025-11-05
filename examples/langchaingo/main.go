@@ -9,29 +9,34 @@ import (
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-x-go/braintrust"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace/tracelangchaingo"
+	"github.com/braintrustdata/braintrust-sdk-go"
+	tracelangchaingo "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo"
 )
 
 func main() {
 	fmt.Println("=== Braintrust LangChainGo Simple Example ===\n")
 
 	// Step 1: Initialize Braintrust tracing with blocking login
-	teardown, err := trace.Quickstart(
+	tp := trace.NewTracerProvider()
+	defer tp.Shutdown(context.Background()) //nolint:errcheck
+	otel.SetTracerProvider(tp)
+
+	bt, err := braintrust.New(tp,
+		braintrust.WithProject("go-sdk-examples"),
 		braintrust.WithBlockingLogin(true),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer teardown()
 
 	// Step 2: Create the Braintrust callback handler
 	// Optionally provide model and provider information for richer traces
 	handler := tracelangchaingo.NewHandlerWithOptions(tracelangchaingo.HandlerOptions{
-		Model:    "gpt-4o-mini",
-		Provider: "openai",
+		Model:          "gpt-4o-mini",
+		Provider:       "openai",
+		TracerProvider: tp,
 	})
 
 	// Step 3: Create LangChainGo LLM with the callback handler
@@ -42,7 +47,7 @@ func main() {
 
 	// Step 4: Create a root span to group all operations
 	tracer := otel.Tracer("langchaingo-example")
-	ctx, rootSpan := tracer.Start(context.Background(), "examples/langchaingo/main")
+	ctx, rootSpan := tracer.Start(context.Background(), "examples/langchaingo/main.go")
 
 	// Simple completion
 	fmt.Println("Simple LLM call:")
@@ -90,10 +95,5 @@ func main() {
 	fmt.Println("✓ All calls traced to Braintrust!")
 
 	// Print the permalink to view traces
-	link, err := trace.Permalink(rootSpan)
-	if err != nil {
-		fmt.Printf("Error getting permalink: %v\n", err)
-	} else {
-		fmt.Printf("\nView traces: %s\n", link)
-	}
+	fmt.Printf("\nView traces: %s\n", bt.Permalink(rootSpan))
 }

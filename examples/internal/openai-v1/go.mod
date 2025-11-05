@@ -1,11 +1,11 @@
-module github.com/braintrustdata/braintrust-x-go/examples/internal/openai-v1
+module github.com/braintrustdata/braintrust-sdk-go/examples/internal/openai-v1
 
 go 1.23.12
 
-replace github.com/braintrustdata/braintrust-x-go => ../../..
+replace github.com/braintrustdata/braintrust-sdk-go => ../../..
 
 require (
-	github.com/braintrustdata/braintrust-x-go v0.0.0-00010101000000-000000000000
+	github.com/braintrustdata/braintrust-sdk-go v0.0.0-00010101000000-000000000000
 	github.com/openai/openai-go v1.12.0
 )
 

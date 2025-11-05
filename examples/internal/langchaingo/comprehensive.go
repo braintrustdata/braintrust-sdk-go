@@ -29,30 +29,33 @@ import (
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/tools"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/trace"
 	oteltrace "go.opentelemetry.io/otel/trace"
 
-	"github.com/braintrustdata/braintrust-x-go/braintrust"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace/tracelangchaingo"
+	"github.com/braintrustdata/braintrust-sdk-go"
+	tracelangchaingo "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo"
 )
 
 func main() {
 	fmt.Println("=== Braintrust LangChainGo Comprehensive Example ===")
 
 	// Initialize Braintrust tracing with blocking login to ensure permalinks work immediately
-	teardown, err := trace.Quickstart(
+	tp := trace.NewTracerProvider()
+	defer tp.Shutdown(context.Background())
+
+	bt, err := braintrust.New(tp,
 		braintrust.WithBlockingLogin(true),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer teardown()
 
 	// Create the Braintrust callback handler with model information
 	// This enables the "Try prompt" button in the Braintrust UI
 	handler := tracelangchaingo.NewHandlerWithOptions(tracelangchaingo.HandlerOptions{
-		Model:    "gpt-4o-mini",
-		Provider: "openai",
+		TracerProvider: tp,
+		Model:          "gpt-4o-mini",
+		Provider:       "openai",
 	})
 
 	// Create LangChainGo OpenAI LLM with callback
@@ -143,10 +146,8 @@ func main() {
 	fmt.Println("\n=== All examples completed! ===")
 
 	// Get a link to the root span in Braintrust
-	link, err := trace.Permalink(rootSpan)
-	if err != nil {
-		fmt.Printf("Error getting permalink: %v\n", err)
-	} else {
+	link := bt.Permalink(rootSpan)
+	if link != "" {
 		fmt.Printf("\nView all traces: %s\n", link)
 	}
 }

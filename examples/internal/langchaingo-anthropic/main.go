@@ -13,10 +13,10 @@ import (
 	"github.com/tmc/langchaingo/llms/anthropic"
 	"github.com/tmc/langchaingo/llms/openai"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-x-go/braintrust"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace/tracelangchaingo"
+	"github.com/braintrustdata/braintrust-sdk-go"
+	tracelangchaingo "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo"
 )
 
 var tracer = otel.Tracer("langchaingo-anthropic-example")
@@ -26,14 +26,16 @@ func main() {
 	fmt.Println("==================================================")
 
 	// Initialize Braintrust tracing
-	teardown, err := trace.Quickstart(
-		braintrust.WithDefaultProject("langchaingo-anthropic-example"),
+	tp := trace.NewTracerProvider()
+	defer tp.Shutdown(context.Background())
+
+	bt, err := braintrust.New(tp,
+		braintrust.WithProject("langchaingo-anthropic-example"),
 		braintrust.WithBlockingLogin(true),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer teardown()
 
 	ctx := context.Background()
 
@@ -48,8 +50,9 @@ func main() {
 	}
 
 	anthropicHandler := tracelangchaingo.NewHandlerWithOptions(tracelangchaingo.HandlerOptions{
-		Model:    "claude-3-5-sonnet-20241022",
-		Provider: "anthropic",
+		TracerProvider: tp,
+		Model:          "claude-3-5-sonnet-20241022",
+		Provider:       "anthropic",
 	})
 
 	anthropicLLM, err := anthropic.New(
@@ -68,8 +71,9 @@ func main() {
 	}
 
 	openaiHandler := tracelangchaingo.NewHandlerWithOptions(tracelangchaingo.HandlerOptions{
-		Model:    "gpt-4o",
-		Provider: "openai",
+		TracerProvider: tp,
+		Model:          "gpt-4o",
+		Provider:       "openai",
 	})
 
 	openaiLLM, err := openai.New(
@@ -120,10 +124,8 @@ func main() {
 	fmt.Println("All queries completed successfully!")
 
 	// Print permalink to the root span
-	link, err := trace.Permalink(rootSpan)
-	if err != nil {
-		fmt.Printf("Error generating permalink: %v\n", err)
-	} else {
+	link := bt.Permalink(rootSpan)
+	if link != "" {
 		fmt.Printf("View trace: %s\n", link)
 	}
 }

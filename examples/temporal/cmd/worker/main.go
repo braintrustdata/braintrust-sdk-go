@@ -6,24 +6,28 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/contrib/opentelemetry"
 	"go.temporal.io/sdk/interceptor"
 	"go.temporal.io/sdk/worker"
 
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace"
-	temporal "github.com/braintrustdata/braintrust-x-go/examples/temporal"
+	"github.com/braintrustdata/braintrust-sdk-go"
+	temporal "github.com/braintrustdata/braintrust-sdk-go/examples/temporal"
 )
 
 func main() {
 	// Initialize Braintrust tracing
-	tp := sdktrace.NewTracerProvider()
-	err := trace.Enable(tp)
+	tp := trace.NewTracerProvider()
+	defer tp.Shutdown(context.Background()) //nolint:errcheck
+
+	_, err := braintrust.New(tp,
+		braintrust.WithProject("go-sdk-examples"),
+		braintrust.WithBlockingLogin(true),
+	)
 	if err != nil {
 		log.Fatalln("Unable to initialize Braintrust tracing:", err)
 	}
-	defer tp.Shutdown(context.Background())
 
 	// Set the tracer provider globally
 	otel.SetTracerProvider(tp)

@@ -14,6 +14,9 @@ watchexec = "latest"
 [tasks.test]
 run = "make test"
 
+[tasks.test_quiet]
+run = "make test_quiet"
+
 [tasks.lint]
 run = "make lint"
 
@@ -30,6 +33,32 @@ alias = "wtc"
 [tasks.verify-fmt]
 silent=true
 run = "golangci-lint fmt -d || (golangci-lint fmt && exit 1)"
+
+[tasks.cover]
+description = "Generate HTML coverage report for a specific path"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+
+TEST_PATH="${1:-.}"
+OUTPUT="${2:-coverage.html}"
+
+# Normalize path - add ./ prefix if it doesn't start with . or /
+if [[ ! "$TEST_PATH" =~ ^[./] ]]; then
+    TEST_PATH="./$TEST_PATH"
+fi
+
+echo "Running tests with coverage for: $TEST_PATH"
+mise exec -- go test "$TEST_PATH" -coverprofile=coverage.out
+echo ""
+echo "Coverage summary:"
+mise exec -- go tool cover -func=coverage.out | tail -1
+echo ""
+echo "Generating HTML report: $OUTPUT"
+mise exec -- go tool cover -html=coverage.out -o "$OUTPUT"
+echo "Coverage report generated: $OUTPUT"
+open "$OUTPUT"
+"""
 
 [hooks]
 postinstall = "mise generate git-pre-commit --write --task=verify-fmt"

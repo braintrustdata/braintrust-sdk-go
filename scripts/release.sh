@@ -107,7 +107,7 @@ echo "Running goreleaser to update changelog..."
 goreleaser release --clean
 
 echo "Indexing package."
-curl "https://proxy.golang.org/github.com/braintrustdata/braintrust-x-go/@v/$VERSION.info"
+curl "https://proxy.golang.org/github.com/braintrustdata/braintrust-sdk-go/@v/$VERSION.info"
 echo ""
 
 echo "================================================"
@@ -117,6 +117,6 @@ echo
 echo "Note: Docs should be updated within the next hour. Request manually at the URL below"
 echo "if they don't show up"
 echo
-echo "- Index:   https://proxy.golang.org/github.com/braintrustdata/braintrust-x-go/@v/$VERSION.info"
-echo "- Docs:    https://pkg.go.dev/github.com/braintrustdata/braintrust-x-go@$VERSION/braintrust"
+echo "- Index:   https://proxy.golang.org/github.com/braintrustdata/braintrust-sdk-go/@v/$VERSION.info"
+echo "- Docs:    https://pkg.go.dev/github.com/braintrustdata/braintrust-sdk-go@$VERSION/braintrust"
 echo "- Release: $REPO_URL/releases/tag/$VERSION"

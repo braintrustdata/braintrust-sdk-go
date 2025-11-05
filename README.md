@@ -1,7 +1,7 @@
 
 # Braintrust Go Tracing & Eval SDK
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/braintrustdata/braintrust-x-go.svg)](https://pkg.go.dev/github.com/braintrustdata/braintrust-x-go)
+[![Go Reference](https://pkg.go.dev/badge/github.com/braintrustdata/braintrust-sdk-go.svg)](https://pkg.go.dev/github.com/braintrustdata/braintrust-sdk-go)
 ![Beta](https://img.shields.io/badge/status-beta-yellow)
 
 ## Overview
@@ -17,7 +17,7 @@ This SDK is currently in BETA status and APIs may change.
 ## Installation
 
 ```bash
-go get github.com/braintrustdata/braintrust-x-go
+go get github.com/braintrustdata/braintrust-sdk-go
 ```
 
 ## Quick Start
@@ -36,33 +36,45 @@ package main
 import (
     "context"
     "log"
-    
-    "github.com/braintrustdata/braintrust-x-go/braintrust/eval"
-    "github.com/braintrustdata/braintrust-x-go/braintrust/trace"
+
+    "go.opentelemetry.io/otel"
+    "go.opentelemetry.io/otel/sdk/trace"
+
+    "github.com/braintrustdata/braintrust-sdk-go"
+    "github.com/braintrustdata/braintrust-sdk-go/eval"
 )
 
 func main() {
-    // Set up tracing
-    teardown, err := trace.Quickstart()
+    // Set up OpenTelemetry tracer
+    tp := trace.NewTracerProvider()
+    defer tp.Shutdown(context.Background())
+    otel.SetTracerProvider(tp)
+
+    // Initialize Braintrust
+    bt, err := braintrust.New(tp,
+        braintrust.WithProject("my-project"),
+        braintrust.WithBlockingLogin(true),
+    )
     if err != nil {
         log.Fatal(err)
     }
-    defer teardown()
+
+    // Create evaluator
+    evaluator := braintrust.NewEvaluator[string, string](bt)
 
     // Run an evaluation
-    _, err = eval.Run(context.Background(), eval.Opts[string, string]{
-        Project:    "my-project",
+    _, err = evaluator.Run(context.Background(), eval.Opts[string, string]{
         Experiment: "greeting-experiment",
         Cases: eval.NewCases([]eval.Case[string, string]{
             {Input: "World", Expected: "Hello World"},
             {Input: "Alice", Expected: "Hello Alice"},
         }),
-        Task: func(ctx context.Context, input string) (string, error) {
+        Task: eval.T(func(ctx context.Context, input string) (string, error) {
             return "Hello " + input, nil
-        },
+        }),
         Scorers: []eval.Scorer[string, string]{
-            eval.NewScorer("exact_match", func(ctx context.Context, input, expected, result string, _ eval.Metadata) (eval.Scores, error) {
-                if expected == result {
+            eval.NewScorer("exact_match", func(ctx context.Context, taskResult eval.TaskResult[string, string]) (eval.Scores, error) {
+                if taskResult.Expected == taskResult.Output {
                     return eval.S(1.0), nil
                 }
                 return eval.S(0.0), nil
@@ -81,26 +93,35 @@ func main() {
 package main
 
 import (
+    "context"
     "log"
 
     "github.com/openai/openai-go"
     "github.com/openai/openai-go/option"
+    "go.opentelemetry.io/otel"
+    "go.opentelemetry.io/otel/sdk/trace"
 
-    "github.com/braintrustdata/braintrust-x-go/braintrust/trace"
-    "github.com/braintrustdata/braintrust-x-go/braintrust/trace/traceopenai"
+    "github.com/braintrustdata/braintrust-sdk-go"
+    traceopenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"
 )
 
 func main() {
-    // Start tracing
-    teardown, err := trace.Quickstart()
+    // Set up OpenTelemetry tracer
+    tp := trace.NewTracerProvider()
+    defer tp.Shutdown(context.Background())
+    otel.SetTracerProvider(tp)
+
+    // Initialize Braintrust
+    _, err := braintrust.New(tp,
+        braintrust.WithProject("my-project"),
+    )
     if err != nil {
         log.Fatal(err)
     }
-    defer teardown()
 
     // Create OpenAI client with tracing middleware
     client := openai.NewClient(
-        option.WithMiddleware(traceopenai.Middleware),
+        option.WithMiddleware(traceopenai.NewMiddleware()),
     )
 
     // Your OpenAI API calls will now be automatically traced
@@ -114,26 +135,35 @@ func main() {
 package main
 
 import (
+    "context"
     "log"
 
     "github.com/anthropics/anthropic-sdk-go"
     "github.com/anthropics/anthropic-sdk-go/option"
+    "go.opentelemetry.io/otel"
+    "go.opentelemetry.io/otel/sdk/trace"
 
-    "github.com/braintrustdata/braintrust-x-go/braintrust/trace"
-    "github.com/braintrustdata/braintrust-x-go/braintrust/trace/traceanthropic"
+    "github.com/braintrustdata/braintrust-sdk-go"
+    traceanthropic "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic"
 )
 
 func main() {
-    // Start tracing
-    teardown, err := trace.Quickstart()
+    // Set up OpenTelemetry tracer
+    tp := trace.NewTracerProvider()
+    defer tp.Shutdown(context.Background())
+    otel.SetTracerProvider(tp)
+
+    // Initialize Braintrust
+    _, err := braintrust.New(tp,
+        braintrust.WithProject("my-project"),
+    )
     if err != nil {
         log.Fatal(err)
     }
-    defer teardown()
 
     // Create Anthropic client with tracing middleware
     client := anthropic.NewClient(
-        option.WithMiddleware(traceanthropic.Middleware),
+        option.WithMiddleware(traceanthropic.NewMiddleware()),
     )
 
     // Your Anthropic API calls will now be automatically traced
@@ -151,19 +181,27 @@ import (
     "log"
     "os"
 
+    "go.opentelemetry.io/otel"
+    "go.opentelemetry.io/otel/sdk/trace"
     "google.golang.org/genai"
 
-    "github.com/braintrustdata/braintrust-x-go/braintrust/trace"
-    "github.com/braintrustdata/braintrust-x-go/braintrust/trace/tracegenai"
+    "github.com/braintrustdata/braintrust-sdk-go"
+    tracegenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"
 )
 
 func main() {
-    // Start tracing
-    teardown, err := trace.Quickstart()
+    // Set up OpenTelemetry tracer
+    tp := trace.NewTracerProvider()
+    defer tp.Shutdown(context.Background())
+    otel.SetTracerProvider(tp)
+
+    // Initialize Braintrust
+    _, err := braintrust.New(tp,
+        braintrust.WithProject("my-project"),
+    )
     if err != nil {
         log.Fatal(err)
     }
-    defer teardown()
 
     // Create Gemini client with tracing
     client, err := genai.NewClient(context.Background(), &genai.ClientConfig{
@@ -206,7 +244,7 @@ Check out the [`examples/`](./examples/) directory for complete working examples
 ## Documentation
 
 - [Braintrust Documentation](https://www.braintrust.dev/docs)
-- [API Reference](https://pkg.go.dev/github.com/braintrustdata/braintrust-x-go)
+- [API Reference](https://pkg.go.dev/github.com/braintrustdata/braintrust-sdk-go)
 
 ## Contributing
 

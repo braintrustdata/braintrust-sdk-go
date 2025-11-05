@@ -8,24 +8,27 @@ import (
 	"os"
 
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/genai"
 
-	"github.com/braintrustdata/braintrust-x-go/braintrust"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace/tracegenai"
+	"github.com/braintrustdata/braintrust-sdk-go"
+	tracegenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"
 )
 
 func main() {
 	fmt.Println("Braintrust Google Gemini Basic Example")
 
-	// Initialize Braintrust tracing with blocking login to ensure permalinks work immediately
-	teardown, err := trace.Quickstart(
+	tp := trace.NewTracerProvider()
+	defer tp.Shutdown(context.Background()) //nolint:errcheck
+	otel.SetTracerProvider(tp)
+
+	bt, err := braintrust.New(tp,
+		braintrust.WithProject("go-sdk-examples"),
 		braintrust.WithBlockingLogin(true),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer teardown()
 
 	// Create Gemini client with Braintrust tracing
 	client, err := genai.NewClient(context.Background(), &genai.ClientConfig{
@@ -41,7 +44,7 @@ func main() {
 	tracer := otel.Tracer("genai-example")
 
 	// Create a parent span to wrap the Gemini call
-	ctx, span := tracer.Start(context.Background(), "ask-question")
+	ctx, span := tracer.Start(context.Background(), "examples/genai/main.go")
 	defer span.End()
 
 	// Make a simple generateContent request
@@ -56,8 +59,5 @@ func main() {
 	}
 
 	fmt.Printf("Response: %s\n", resp.Text())
-
-	// Get a link to the span in Braintrust
-	link, _ := trace.Permalink(span)
-	fmt.Printf("View trace: %s\n", link)
+	fmt.Printf("View trace: %s\n", bt.Permalink(span))
 }

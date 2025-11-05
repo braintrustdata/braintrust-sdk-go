@@ -12,24 +12,21 @@ import (
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-x-go/braintrust"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace"
+	"github.com/braintrustdata/braintrust-sdk-go"
 )
 
-const projectName = "openrouter-example"
-
 func main() {
-	teardown, err := trace.Quickstart(
-		braintrust.WithDefaultProject(projectName),
+	tp := trace.NewTracerProvider()
+	defer tp.Shutdown(context.Background()) //nolint:errcheck
+	otel.SetTracerProvider(tp)
+
+	bt, err := braintrust.New(tp,
+		braintrust.WithProject("openrouter-example"),
+		braintrust.WithBlockingLogin(true),
 	)
 	if err != nil {
-		log.Fatal(err)
-	}
-	defer teardown()
-
-	// Login is only required to view links.
-	if _, err = braintrust.Login(); err != nil {
 		log.Fatal(err)
 	}
 
@@ -39,12 +36,12 @@ func main() {
 	// 3. Use OpenRouter's model naming convention (e.g., "openai/gpt-3.5-turbo")
 	// 4. Include the optional OpenRouter headers
 
-	// Note: traceopenai.Middleware has compatibility issues with OpenRouter
+	// Note: traceopenai.NewMiddleware() has compatibility issues with OpenRouter
 	// Using manual tracing instead
 	client := openai.NewClient(
 		option.WithBaseURL("https://openrouter.ai/api/v1"),
 		option.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-		option.WithHeader("HTTP-Referer", "https://github.com/braintrustdata/braintrust-x-go"),
+		option.WithHeader("HTTP-Referer", "https://github.com/braintrustdata/braintrust-sdk-go"),
 		option.WithHeader("X-Title", "Braintrust Go SDK Example"),
 	)
 
@@ -73,8 +70,5 @@ func main() {
 	}
 
 	fmt.Printf("Response: %s\n", resp.Choices[0].Message.Content)
-
-	// Get a link to the span in Braintrust
-	link, _ := trace.Permalink(span)
-	fmt.Printf("View trace: %s\n", link)
+	fmt.Printf("View trace: %s\n", bt.Permalink(span))
 }

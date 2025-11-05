@@ -1,11 +1,13 @@
-.PHONY: help ci build clean test cover lint fmt mod-verify fix godoc examples
+.PHONY: help ci build clean test test_quiet cover cover-path lint fmt mod-verify fix godoc examples
 
 help:
 	@echo "Available commands:"
 	@echo "  help          - Show this help message"
 	@echo "  build         - Build all packages"
 	@echo "  test          - Run all tests"
+	@echo "  test_quiet    - Run all tests (quiet - no 'ok' lines)"
 	@echo "  cover         - Run tests with coverage report"
+	@echo "  cover-path    - Run coverage for specific path (e.g., make cover-path PATH=./config)"
 	@echo "  clean         - Clean build artifacts and coverage files"
 	@echo "  fmt           - Format Go code"
 	@echo "  lint          - Run golangci-lint"
@@ -27,8 +29,11 @@ clean:
 test:
 	go test ./...
 
+test_quiet:
+	go test ./... | grep -v -E "^ok|no test files" || true
+
 cover:
-	go test ./... -coverprofile=coverage.out
+	go test $$(go list ./... | grep -v /examples/) -coverpkg=./... -coverprofile=coverage.out
 	go tool cover -func=coverage.out
 	go tool cover -html=coverage.out -o coverage.html
 
@@ -52,8 +57,8 @@ godoc:
 	go run golang.org/x/tools/cmd/godoc@latest -http=:6060
 
 examples:
-	@echo "Running all examples..."
-	@find examples -name "*.go" -exec sh -c 'echo "Running $$(dirname "{}")..." && cd "$$(dirname "{}")" && go run .' \;
+	@echo "Running all examples (skipping temporal)..."
+	@find examples -name "*.go" ! -path "*/temporal/*" -exec sh -c 'echo "Running $$(dirname "{}")..." && cd "$$(dirname "{}")" && go run .' \;
 	@echo "All examples completed!"
 
 precommit: fmt ci

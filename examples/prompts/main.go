@@ -11,10 +11,11 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/braintrustdata/braintrust-x-go/braintrust/autoevals"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/eval"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/eval/functions"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/trace"
+
+	"github.com/braintrustdata/braintrust-sdk-go"
+	"github.com/braintrustdata/braintrust-sdk-go/eval"
 )
 
 func main() {
@@ -22,12 +23,20 @@ func main() {
 	fmt.Println("Note: This example requires a prompt with slug 'sdk-greeter-prompt-195e' to exist in the 'go-sdk-examples' project")
 	fmt.Println()
 
-	// Initialize Braintrust tracing
-	teardown, err := trace.Quickstart()
+	tp := trace.NewTracerProvider()
+	defer tp.Shutdown(context.Background()) //nolint:errcheck
+	otel.SetTracerProvider(tp)
+
+	bt, err := braintrust.New(tp,
+		braintrust.WithProject("go-sdk-examples"),
+		braintrust.WithBlockingLogin(true),
+	)
 	if err != nil {
-		log.Fatalf("Error starting trace: %v", err)
+		log.Fatalf("Error initializing Braintrust: %v", err)
 	}
-	defer teardown()
+
+	// Create evaluator
+	evaluator := braintrust.NewEvaluator[string, string](bt)
 
 	ctx := context.Background()
 
@@ -47,25 +56,26 @@ func main() {
 		},
 	}
 
-	// Run evaluation using a hosted prompt
-	_, err = eval.Run(ctx, eval.Opts[string, string]{
-		Project:    "go-sdk-examples",
+	// Get hosted task/prompt
+	task, err := evaluator.Tasks().Get(ctx, "sdk-greeter-prompt-195e")
+	if err != nil {
+		log.Fatalf("Failed to get task: %v", err)
+	}
+
+	// Run evaluation using the hosted prompt
+	_, err = evaluator.Run(ctx, eval.Opts[string, string]{
 		Experiment: "greeter-test",
 		Cases:      eval.NewCases(cases),
+		Task:       task,
 
-		// Use GetTask to create a task from a hosted prompt
-		// The prompt will be invoked for each test case with the input data
-		Task: functions.GetTask[string, string](functions.Opts{
-			Project: "go-sdk-examples",
-			Slug:    "sdk-greeter-prompt-195e",
-			// Environment: "production",
-			// Optional: specify version
-			// Version: "v1.2.3",
-		}),
-
-		// Add scorers - using autoevals Equals scorer
+		// Add scorers - simple equals scorer
 		Scorers: []eval.Scorer[string, string]{
-			autoevals.NewEquals[string, string](),
+			eval.NewScorer("equals", func(ctx context.Context, taskResult eval.TaskResult[string, string]) (eval.Scores, error) {
+				if taskResult.Output == taskResult.Expected {
+					return eval.S(1.0), nil
+				}
+				return eval.S(0.0), nil
+			}),
 		},
 	})
 

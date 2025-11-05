@@ -9,19 +9,30 @@ import (
 	"log"
 	"math/rand"
 
-	"github.com/braintrustdata/braintrust-x-go/braintrust/autoevals"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/eval"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/eval/functions"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/trace"
+
+	"github.com/braintrustdata/braintrust-sdk-go"
+	"github.com/braintrustdata/braintrust-sdk-go/eval"
 )
 
 func main() {
 	log.Println("🧪 Testing Online Scorers")
-	teardown, err := trace.Quickstart()
+
+	tp := trace.NewTracerProvider()
+	defer tp.Shutdown(context.Background()) //nolint:errcheck
+	otel.SetTracerProvider(tp)
+
+	bt, err := braintrust.New(tp,
+		braintrust.WithProject("go-sdk-examples"),
+		braintrust.WithBlockingLogin(true),
+	)
 	if err != nil {
-		log.Fatalf("❌ Failed to start trace: %v", err)
+		log.Fatalf("❌ Failed to initialize Braintrust: %v", err)
 	}
-	defer teardown()
+
+	// Create evaluator
+	evaluator := braintrust.NewEvaluator[int, int](bt)
 
 	// Helper function for absolute value
 	abs := func(x int) int {
@@ -33,14 +44,20 @@ func main() {
 
 	// Build scorers list with local scorers
 	scorers := []eval.Scorer[int, int]{
-		autoevals.NewEquals[int, int](),
+		// Simple equals scorer
+		eval.NewScorer("equals", func(ctx context.Context, taskResult eval.TaskResult[int, int]) (eval.Scores, error) {
+			if taskResult.Output == taskResult.Expected {
+				return eval.S(1.0), nil
+			}
+			return eval.S(0.0), nil
+		}),
 		// an example of a scorer that returns a single number
-		eval.NewScorer[int, int]("random", func(ctx context.Context, input, expected, result int, _ eval.Metadata) (eval.Scores, error) {
+		eval.NewScorer[int, int]("random", func(ctx context.Context, taskResult eval.TaskResult[int, int]) (eval.Scores, error) {
 			score := rand.Float64()
 			return eval.S(score), nil
 		}),
 		// an example of a scorer that returns more than one score
-		eval.NewScorer[int, int]("list", func(ctx context.Context, input, expected, result int, _ eval.Metadata) (eval.Scores, error) {
+		eval.NewScorer[int, int]("list", func(ctx context.Context, taskResult eval.TaskResult[int, int]) (eval.Scores, error) {
 			return eval.Scores{
 				{Name: "poor", Score: 0},
 				{Name: "average", Score: 0.5},
@@ -48,8 +65,8 @@ func main() {
 			}, nil
 		}),
 		// an example of a scorer that returns a score with metadata
-		eval.NewScorer[int, int]("scorer_with_metadata", func(ctx context.Context, input, expected, result int, _ eval.Metadata) (eval.Scores, error) {
-			diff := result - expected
+		eval.NewScorer[int, int]("scorer_with_metadata", func(ctx context.Context, taskResult eval.TaskResult[int, int]) (eval.Scores, error) {
+			diff := taskResult.Output - taskResult.Expected
 			accuracy := 1.0
 			if diff != 0 {
 				accuracy = 1.0 / (1.0 + float64(abs(diff)))
@@ -60,12 +77,12 @@ func main() {
 					Name:  "scorer_with_metadata",
 					Score: accuracy,
 					Metadata: map[string]any{
-						"input":      input,
-						"expected":   expected,
-						"result":     result,
+						"input":      taskResult.Input,
+						"expected":   taskResult.Expected,
+						"result":     taskResult.Output,
 						"difference": diff,
 						"is_exact":   diff == 0,
-						"error_rate": float64(abs(diff)) / float64(expected),
+						"error_rate": float64(abs(diff)) / float64(taskResult.Expected),
 					},
 				},
 			}, nil
@@ -73,7 +90,7 @@ func main() {
 	}
 
 	// Try to get online scorer - add if available
-	onlineScorer, err := functions.GetScorer[int, int]("go-sdk-examples", "fail-scorer-d879")
+	onlineScorer, err := evaluator.Scorers().Get(context.Background(), "fail-scorer-d879")
 	if err != nil {
 		log.Printf("⚠️ Online scorer not available: %v", err)
 		log.Println("📊 Running with local scorers only...")
@@ -83,17 +100,16 @@ func main() {
 	}
 
 	log.Println("🚀 Running evaluation...")
-	_, err = eval.Run(context.Background(), eval.Opts[int, int]{
-		Project:    "go-sdk-examples",
+	_, err = evaluator.Run(context.Background(), eval.Opts[int, int]{
 		Experiment: "go-sdk-examples",
 		Cases: eval.NewCases([]eval.Case[int, int]{
 			{Input: 5, Expected: 10},
 			{Input: 3, Expected: 6},
 			{Input: 7, Expected: 14},
 		}),
-		Task: func(ctx context.Context, input int) (int, error) {
+		Task: eval.T(func(ctx context.Context, input int) (int, error) {
 			return input * 2, nil
-		},
+		}),
 		Scorers: scorers,
 	})
 	if err != nil {

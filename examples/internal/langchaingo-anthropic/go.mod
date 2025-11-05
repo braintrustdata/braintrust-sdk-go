@@ -1,11 +1,11 @@
-module github.com/braintrustdata/braintrust-x-go/examples/internal/langchaingo-anthropic
+module github.com/braintrustdata/braintrust-sdk-go/examples/internal/langchaingo-anthropic
 
 go 1.24.4
 
 toolchain go1.24.9
 
 require (
-	github.com/braintrustdata/braintrust-x-go v0.0.0
+	github.com/braintrustdata/braintrust-sdk-go v0.0.0
 	github.com/tmc/langchaingo v0.1.13
 	go.opentelemetry.io/otel v1.36.0
 )
@@ -35,6 +35,6 @@ require (
 	google.golang.org/protobuf v1.36.5 // indirect
 )
 
-replace github.com/braintrustdata/braintrust-x-go => ../../..
+replace github.com/braintrustdata/braintrust-sdk-go => ../../..
 
 replace github.com/tmc/langchaingo => github.com/clutchski/langchaingo v0.0.0-20251028011745-5d819833dead

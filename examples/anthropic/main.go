@@ -5,40 +5,40 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-x-go/braintrust"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace/traceanthropic"
+	"github.com/braintrustdata/braintrust-sdk-go"
+	traceanthropic "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic"
 )
 
 func main() {
 	fmt.Println("Braintrust Anthropic Basic Example")
 
-	// Initialize Braintrust tracing with blocking login to ensure permalinks work immediately
-	teardown, err := trace.Quickstart(
+	tp := trace.NewTracerProvider()
+	defer tp.Shutdown(context.Background()) //nolint:errcheck
+	otel.SetTracerProvider(tp)
+
+	bt, err := braintrust.New(tp,
+		braintrust.WithProject("go-sdk-examples"),
 		braintrust.WithBlockingLogin(true),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer teardown()
 
-	// Create Anthropic client with Braintrust tracing middleware
 	client := anthropic.NewClient(
-		option.WithAPIKey(os.Getenv("ANTHROPIC_API_KEY")),
-		option.WithMiddleware(traceanthropic.Middleware),
+		option.WithMiddleware(traceanthropic.NewMiddleware()),
 	)
 
-	// Get a tracer instance
+	// Get a tracer instance from the global TracerProvider
 	tracer := otel.Tracer("anthropic-example")
 
 	// Create a parent span to wrap the Anthropic call
-	ctx, span := tracer.Start(context.Background(), "ask-question")
+	ctx, span := tracer.Start(context.Background(), "examples/anthropic/main.go")
 	defer span.End()
 
 	// Make a simple message request
@@ -54,8 +54,5 @@ func main() {
 	}
 
 	fmt.Printf("Response: %s\n", message.Content[0].Text)
-
-	// Get a link to the span in Braintrust
-	link, _ := trace.Permalink(span)
-	fmt.Printf("View trace: %s\n", link)
+	fmt.Printf("View trace: %s\n", bt.Permalink(span))
 }

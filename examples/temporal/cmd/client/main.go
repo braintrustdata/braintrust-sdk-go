@@ -7,24 +7,28 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/contrib/opentelemetry"
 	"go.temporal.io/sdk/interceptor"
 
-	"github.com/braintrustdata/braintrust-x-go/braintrust/eval"
-	bttrace "github.com/braintrustdata/braintrust-x-go/braintrust/trace"
-	temporal "github.com/braintrustdata/braintrust-x-go/examples/temporal"
+	"github.com/braintrustdata/braintrust-sdk-go"
+	"github.com/braintrustdata/braintrust-sdk-go/eval"
+	temporal "github.com/braintrustdata/braintrust-sdk-go/examples/temporal"
 )
 
 func main() {
 	// Initialize Braintrust tracing
-	tp := sdktrace.NewTracerProvider()
-	err := bttrace.Enable(tp)
+	tp := trace.NewTracerProvider()
+	defer tp.Shutdown(context.Background()) //nolint:errcheck
+
+	bt, err := braintrust.New(tp,
+		braintrust.WithProject("go-sdk-examples"),
+		braintrust.WithBlockingLogin(true),
+	)
 	if err != nil {
 		log.Fatalln("Unable to initialize Braintrust tracing:", err)
 	}
-	defer tp.Shutdown(context.Background())
 
 	// Set the tracer provider globally
 	otel.SetTracerProvider(tp)
@@ -79,19 +83,19 @@ func main() {
 	}
 
 	// Run Braintrust eval
-	_, err = eval.Run(context.Background(), eval.Opts[int, string]{
-		Project:    temporal.ProjectName,
+	evaluator := braintrust.NewEvaluator[int, string](bt)
+	_, err = evaluator.Run(context.Background(), eval.Opts[int, string]{
 		Experiment: "temporal-distributed-tracing",
 		Cases: eval.NewCases([]eval.Case[int, string]{
 			{Input: 10, Expected: "processed number: 10"},
 			{Input: 20, Expected: "processed number: 20"},
 			{Input: 30, Expected: "processed number: 30"},
 		}),
-		Task: task,
+		Task: eval.T(task),
 		Scorers: []eval.Scorer[int, string]{
-			eval.NewScorer("exact_match", func(_ context.Context, _ int, expected, result string, _ eval.Metadata) (eval.Scores, error) {
+			eval.NewScorer("exact_match", func(_ context.Context, taskResult eval.TaskResult[int, string]) (eval.Scores, error) {
 				score := 0.0
-				if expected == result {
+				if taskResult.Expected == taskResult.Output {
 					score = 1.0
 				}
 				return eval.S(score), nil

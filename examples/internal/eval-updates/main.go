@@ -9,17 +9,23 @@ import (
 	"strings"
 	"time"
 
-	"github.com/braintrustdata/braintrust-x-go/braintrust"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/eval"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace"
+	"go.opentelemetry.io/otel/sdk/trace"
+
+	"github.com/braintrustdata/braintrust-sdk-go"
+	"github.com/braintrustdata/braintrust-sdk-go/eval"
 )
 
 func main() {
-	teardown, err := trace.Quickstart(braintrust.WithDefaultProject("go-sdk-examples"))
+	// Create Braintrust client with TracerProvider
+	tp := trace.NewTracerProvider()
+	defer tp.Shutdown(context.Background()) //nolint:errcheck
+
+	bt, err := braintrust.New(tp,
+		braintrust.WithProject("go-sdk-examples"),
+	)
 	if err != nil {
-		log.Fatalf("Error starting trace: %v", err)
+		log.Fatalf("Error creating Braintrust client: %v", err)
 	}
-	defer teardown()
 
 	// Simple task: convert text to uppercase
 	uppercaseTask := func(ctx context.Context, input string) (string, error) {
@@ -27,12 +33,15 @@ func main() {
 	}
 
 	// Simple scorer: check if result is uppercase
-	isUppercaseScorer := eval.NewScorer("is_uppercase", func(ctx context.Context, input, expected, result string, _ eval.Metadata) (eval.Scores, error) {
-		if result == strings.ToUpper(result) {
+	isUppercaseScorer := eval.NewScorer("is_uppercase", func(ctx context.Context, taskResult eval.TaskResult[string, string]) (eval.Scores, error) {
+		if taskResult.Output == strings.ToUpper(taskResult.Output) {
 			return eval.S(1.0), nil
 		}
 		return eval.S(0.0), nil
 	})
+
+	// Create evaluator for string -> string evaluations
+	evaluator := braintrust.NewEvaluator[string, string](bt)
 
 	// Round 1: Create a new experiment with initial test cases
 	log.Println("Round 1: Creating new experiment")
@@ -42,11 +51,10 @@ func main() {
 		{Input: "round 1: test", Expected: "ROUND 1: TEST"},
 	}
 
-	result1, err := eval.Run(context.Background(), eval.Opts[string, string]{
-		Project:    "go-sdk-examples",
+	result1, err := evaluator.Run(context.Background(), eval.Opts[string, string]{
 		Experiment: "uppercase-eval-demo",
 		Cases:      eval.NewCases(firstCases),
-		Task:       uppercaseTask,
+		Task:       eval.T(uppercaseTask),
 		Scorers:    []eval.Scorer[string, string]{isUppercaseScorer},
 		Update:     false, // Create new experiment (default behavior)
 	})
@@ -74,11 +82,10 @@ func main() {
 		{Input: "round 2: update", Expected: "ROUND 2: UPDATE"},
 	}
 
-	result2, err := eval.Run(context.Background(), eval.Opts[string, string]{
-		Project:    "go-sdk-examples",
+	result2, err := evaluator.Run(context.Background(), eval.Opts[string, string]{
 		Experiment: experimentName, // Use the EXACT name from Round 1 (including any suffix)
 		Cases:      eval.NewCases(secondCases),
-		Task:       uppercaseTask,
+		Task:       eval.T(uppercaseTask),
 		Scorers:    []eval.Scorer[string, string]{isUppercaseScorer},
 		Update:     true, // Append to existing experiment
 	})
@@ -103,11 +110,10 @@ func main() {
 		{Input: "round 3: testing", Expected: "ROUND 3: TESTING"},
 	}
 
-	result3, err := eval.Run(context.Background(), eval.Opts[string, string]{
-		Project:    "go-sdk-examples",
+	result3, err := evaluator.Run(context.Background(), eval.Opts[string, string]{
 		Experiment: experimentName, // Use the EXACT name from Round 1 (including any suffix)
 		Cases:      eval.NewCases(thirdCases),
-		Task:       uppercaseTask,
+		Task:       eval.T(uppercaseTask),
 		Scorers:    []eval.Scorer[string, string]{isUppercaseScorer},
 		Update:     true, // Continue appending to the same experiment
 	})

@@ -1,5 +1,5 @@
 version: 2
-project_name: braintrust-x-go
+project_name: braintrust-sdk-go
 
 builds:
   - skip: true
@@ -7,7 +7,7 @@ builds:
 release:
   github:
     owner: braintrustdata
-    name: braintrust-x-go
+    name: braintrust-sdk-go
   draft: false
   prerelease: auto
 

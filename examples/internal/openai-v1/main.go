@@ -10,23 +10,26 @@ import (
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-x-go/braintrust"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace/traceopenai"
+	"github.com/braintrustdata/braintrust-sdk-go"
+	traceopenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"
 )
 
 func main() {
-	teardown, err := trace.Quickstart(
-		braintrust.WithDefaultProject("go-sdk-internal-examples"),
+	tp := trace.NewTracerProvider()
+	defer tp.Shutdown(context.Background()) //nolint:errcheck
+	otel.SetTracerProvider(tp)
+
+	bt, err := braintrust.New(tp,
+		braintrust.WithProject("go-sdk-internal-examples"),
 		braintrust.WithBlockingLogin(true),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer teardown()
 
-	client := openai.NewClient(option.WithMiddleware(traceopenai.Middleware))
+	client := openai.NewClient(option.WithMiddleware(traceopenai.NewMiddleware()))
 
 	// Create a root span to wrap all examples
 	tracer := otel.Tracer("openai-v1-examples")
@@ -203,12 +206,5 @@ func main() {
 	fmt.Printf("✓ %s\n", visionResp.Choices[0].Message.Content)
 
 	fmt.Println("\n✅ All OpenAI v1 features tested!")
-
-	// Print permalink to the top-level span
-	link, err := trace.Permalink(rootSpan)
-	if err != nil {
-		fmt.Printf("Error generating permalink: %v\n", err)
-	} else {
-		fmt.Printf("View trace: %s\n", link)
-	}
+	fmt.Printf("View trace: %s\n", bt.Permalink(rootSpan))
 }

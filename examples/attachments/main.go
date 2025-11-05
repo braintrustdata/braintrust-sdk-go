@@ -20,28 +20,26 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace"
 	oteltrace "go.opentelemetry.io/otel/trace"
 
-	"github.com/braintrustdata/braintrust-x-go/braintrust"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace/attachment"
+	"github.com/braintrustdata/braintrust-sdk-go"
+	"github.com/braintrustdata/braintrust-sdk-go/trace/attachment"
 )
 
 func main() {
-	// Create a tracer provider and enable Braintrust tracing on it
-	// This gives us direct access to the provider for flushing
-	tp := sdktrace.NewTracerProvider()
-	err := trace.Enable(tp, braintrust.WithBlockingLogin(true))
-	if err != nil {
-		log.Fatalf("Failed to enable tracing: %v", err)
-	}
+	// Create a tracer provider and add Braintrust tracing
+	tp := trace.NewTracerProvider()
+	defer tp.Shutdown(context.Background()) //nolint:errcheck
 	otel.SetTracerProvider(tp)
-	defer func() {
-		if err := tp.Shutdown(context.Background()); err != nil {
-			log.Printf("Failed to shutdown tracer provider: %v", err)
-		}
-	}()
+
+	bt, err := braintrust.New(tp,
+		braintrust.WithProject("go-sdk-examples"),
+		braintrust.WithBlockingLogin(true),
+	)
+	if err != nil {
+		log.Fatalf("Failed to initialize Braintrust: %v", err)
+	}
 
 	tracer := otel.Tracer("attachments-example")
 	ctx := context.Background()
@@ -80,12 +78,7 @@ func main() {
 	}
 
 	// Get a link to the span in Braintrust
-	link, err := trace.Permalink(span)
-	if err != nil {
-		fmt.Printf("Error getting permalink: %v\n", err)
-	} else {
-		fmt.Printf("\n🔗 View in Braintrust: %s\n", link)
-	}
+	fmt.Printf("\n🔗 View in Braintrust: %s\n", bt.Permalink(span))
 }
 
 func exampleFromFile(ctx context.Context, tracer oteltrace.Tracer) {

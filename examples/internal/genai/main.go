@@ -10,9 +10,10 @@ import (
 	"go.opentelemetry.io/otel"
 	"google.golang.org/genai"
 
-	"github.com/braintrustdata/braintrust-x-go/braintrust"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace"
-	"github.com/braintrustdata/braintrust-x-go/braintrust/trace/tracegenai"
+	"go.opentelemetry.io/otel/sdk/trace"
+
+	"github.com/braintrustdata/braintrust-sdk-go"
+	tracegenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"
 )
 
 var tracer = otel.Tracer("genai-examples")
@@ -332,18 +333,20 @@ func main() {
 	fmt.Println("==========================================")
 
 	// Initialize braintrust tracing with a specific project
-	teardown, err := trace.Quickstart(
-		braintrust.WithDefaultProject("go-sdk-internal-examples"),
+	tp := trace.NewTracerProvider()
+	defer tp.Shutdown(context.Background())
+
+	bt, err := braintrust.New(tp,
+		braintrust.WithProject("go-sdk-internal-examples"),
 		braintrust.WithBlockingLogin(true), // Ensure org name is available for permalinks
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer teardown()
 
 	// Create a Gemini client with tracing
 	client, err := genai.NewClient(context.Background(), &genai.ClientConfig{
-		HTTPClient: tracegenai.Client(),
+		HTTPClient: tracegenai.Client(tracegenai.WithTracerProvider(tp)),
 		APIKey:     os.Getenv("GOOGLE_API_KEY"),
 		Backend:    genai.BackendGeminiAPI,
 	})
@@ -403,11 +406,10 @@ func main() {
 	fmt.Println("All examples completed successfully!")
 
 	// Print the root span link
-	link, err := trace.Permalink(rootSpan)
-	if err != nil {
-		fmt.Printf("Note: Could not generate permalink: %v\n", err)
-		fmt.Println("Check your Braintrust dashboard to view the traces.")
-	} else {
+	link := bt.Permalink(rootSpan)
+	if link != "" {
 		fmt.Printf("View trace: %s\n", link)
+	} else {
+		fmt.Println("Check your Braintrust dashboard to view the traces.")
 	}
 }
