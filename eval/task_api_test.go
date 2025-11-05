@@ -32,7 +32,7 @@ func TestTaskAPI_Get(t *testing.T) {
 	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
 	require.NoError(t, err)
 
-	testSlug := "test-task-api-get"
+	testSlug := tests.RandomName(t, "task")
 
 	// Clean up any existing function with this slug from previous failed test runs
 	if existing, _ := functions.Query(ctx, api.FunctionQueryOpts{

@@ -29,7 +29,7 @@ func TestScorerAPI_Get(t *testing.T) {
 	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
 	require.NoError(t, err)
 
-	testSlug := "test-scorer-api-get"
+	testSlug := tests.RandomName(t, "scorer")
 
 	// Clean up any existing function with this slug from previous failed test runs
 	if existing, _ := functions.Query(ctx, api.FunctionQueryOpts{
@@ -171,8 +171,8 @@ func TestScorerAPI_Query(t *testing.T) {
 	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
 	require.NoError(t, err)
 
-	testSlug1 := "test-scorer-query-1"
-	testSlug2 := "test-scorer-query-2"
+	testSlug1 := tests.RandomName(t, "scorer1")
+	testSlug2 := tests.RandomName(t, "scorer2")
 
 	// Clean up any existing functions
 	for _, slug := range []string{testSlug1, testSlug2} {

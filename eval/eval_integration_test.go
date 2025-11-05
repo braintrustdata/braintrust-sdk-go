@@ -10,6 +10,7 @@ import (
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/config"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
 )
 
 // TestEval_Integration tests creating a task function and running a full evaluation
@@ -35,7 +36,7 @@ func TestEval_Integration(t *testing.T) {
 	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
 	require.NoError(t, err)
 
-	testSlug := "test-eval-integration-task"
+	testSlug := tests.RandomName(t, "task")
 
 	// Clean up any existing function from previous test runs
 	if existing, _ := functions.Query(ctx, api.FunctionQueryOpts{
@@ -125,10 +126,11 @@ func TestEval_Integration(t *testing.T) {
 
 	// Run the evaluation
 	result, err := Run(ctx, Opts[string, string]{
-		Experiment: "test-eval-integration",
+		Experiment: tests.RandomName(t, "exp"),
 		Cases:      cases,
 		Task:       task,
 		Scorers:    []Scorer[string, string]{containsScorer},
+		Quiet:      true,
 	}, cfg, session, tp)
 
 	require.NoError(t, err)
@@ -162,7 +164,7 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
 	require.NoError(t, err)
 
-	testSlug := "test-string-to-struct"
+	testSlug := tests.RandomName(t, "struct")
 
 	// Clean up any existing function from previous test runs
 	if existing, _ := functions.Query(ctx, api.FunctionQueryOpts{
@@ -252,10 +254,11 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 
 	// Run the evaluation - this should handle string-to-struct conversion
 	result, err := Run(ctx, Opts[QuestionInput, AnswerOutput]{
-		Experiment: "test-string-to-struct",
+		Experiment: tests.RandomName(t, "exp"),
 		Cases:      cases,
 		Task:       task,
 		Scorers:    []Scorer[QuestionInput, AnswerOutput]{scorer},
+		Quiet:      true,
 	}, cfg, session, tp)
 
 	require.NoError(t, err, "evaluation should succeed when prompt returns JSON that can be parsed to struct")
@@ -285,7 +288,7 @@ func TestEval_Integration_DatasetByID(t *testing.T) {
 	datasets := apiClient.Datasets()
 	dataset, err := datasets.Create(ctx, api.DatasetRequest{
 		ProjectID:   project.ID,
-		Name:        "test-dataset-by-id",
+		Name:        tests.RandomName(t, "dataset"),
 		Description: "Test dataset for eval integration",
 	})
 	require.NoError(t, err)
@@ -309,7 +312,7 @@ func TestEval_Integration_DatasetByID(t *testing.T) {
 
 	// Run evaluation
 	result, err := Run(ctx, Opts[int, int]{
-		Experiment: "test-dataset-by-id",
+		Experiment: tests.RandomName(t, "exp"),
 		Cases:      cases,
 		Task: T(func(ctx context.Context, input int) (int, error) {
 			return input * 2, nil
@@ -322,6 +325,7 @@ func TestEval_Integration_DatasetByID(t *testing.T) {
 				return S(0.0), nil
 			}),
 		},
+		Quiet: true,
 	}, cfg, session, tp)
 
 	require.NoError(t, err)
@@ -347,7 +351,7 @@ func TestEval_Integration_DatasetByName(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create dataset with unique name
-	datasetName := "test-dataset-by-name"
+	datasetName := tests.RandomName(t, "dataset")
 	datasets := apiClient.Datasets()
 	dataset, err := datasets.Create(ctx, api.DatasetRequest{
 		ProjectID:   project.ID,
@@ -375,7 +379,7 @@ func TestEval_Integration_DatasetByName(t *testing.T) {
 
 	// Run evaluation
 	result, err := Run(ctx, Opts[int, int]{
-		Experiment: "test-dataset-by-name",
+		Experiment: tests.RandomName(t, "exp"),
 		Cases:      cases,
 		Task: T(func(ctx context.Context, input int) (int, error) {
 			return input * input, nil
@@ -388,6 +392,7 @@ func TestEval_Integration_DatasetByName(t *testing.T) {
 				return S(0.0), nil
 			}),
 		},
+		Quiet: true,
 	}, cfg, session, tp)
 
 	require.NoError(t, err)
@@ -416,7 +421,7 @@ func TestEval_Integration_DatasetWithTagsAndMetadata(t *testing.T) {
 	datasets := apiClient.Datasets()
 	dataset, err := datasets.Create(ctx, api.DatasetRequest{
 		ProjectID:   project.ID,
-		Name:        "test-dataset-tags-metadata",
+		Name:        tests.RandomName(t, "dataset"),
 		Description: "Test dataset with tags and metadata",
 	})
 	require.NoError(t, err)
@@ -447,7 +452,7 @@ func TestEval_Integration_DatasetWithTagsAndMetadata(t *testing.T) {
 
 	// Run evaluation - tags and metadata should be preserved
 	result, err := Run(ctx, Opts[int, int]{
-		Experiment: "test-dataset-tags-metadata",
+		Experiment: tests.RandomName(t, "exp"),
 		Cases:      cases,
 		Task: T(func(ctx context.Context, input int) (int, error) {
 			return input * 2, nil
@@ -463,6 +468,7 @@ func TestEval_Integration_DatasetWithTagsAndMetadata(t *testing.T) {
 				return S(0.0), nil
 			}),
 		},
+		Quiet: true,
 	}, cfg, session, tp)
 
 	require.NoError(t, err)
@@ -488,7 +494,7 @@ func TestEval_Integration_ExperimentTags(t *testing.T) {
 
 	// Run eval with experiment-level tags
 	result, err := Run(ctx, Opts[string, string]{
-		Experiment: "test-experiment-tags",
+		Experiment: tests.RandomName(t, "exp"),
 		Cases:      cases,
 		Task: T(func(ctx context.Context, input string) (string, error) {
 			return input, nil
@@ -498,7 +504,8 @@ func TestEval_Integration_ExperimentTags(t *testing.T) {
 				return S(1.0), nil
 			}),
 		},
-		Tags: []string{"production", "baseline", "v2.0"},
+		Tags:  []string{"production", "baseline", "v2.0"},
+		Quiet: true,
 	}, cfg, session, tp)
 
 	require.NoError(t, err)
@@ -524,7 +531,7 @@ func TestEval_Integration_ExperimentMetadata(t *testing.T) {
 
 	// Run eval with experiment-level metadata
 	result, err := Run(ctx, Opts[string, string]{
-		Experiment: "test-experiment-metadata",
+		Experiment: tests.RandomName(t, "exp"),
 		Cases:      cases,
 		Task: T(func(ctx context.Context, input string) (string, error) {
 			return input, nil
@@ -539,6 +546,7 @@ func TestEval_Integration_ExperimentMetadata(t *testing.T) {
 			"temperature": 0.7,
 			"version":     "1.0.0",
 		},
+		Quiet: true,
 	}, cfg, session, tp)
 
 	require.NoError(t, err)
@@ -556,7 +564,7 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 	}
 
 	// Create unique experiment name
-	experimentName := "test-update-flag"
+	experimentName := tests.RandomName(t, "update-test")
 
 	cases1 := NewCases([]Case[string, string]{
 		{Input: "hello", Expected: "hello"},
@@ -578,6 +586,7 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 		}),
 		Scorers: []Scorer[string, string]{scorer},
 		Update:  false, // Create new
+		Quiet:   true,
 	}, cfg, session, tp)
 	require.NoError(t, err)
 	require.NotNil(t, result1)
@@ -597,6 +606,7 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 		}),
 		Scorers: []Scorer[string, string]{scorer},
 		Update:  true, // Append to existing
+		Quiet:   true,
 	}, cfg, session, tp)
 	require.NoError(t, err)
 	require.NotNil(t, result2)
@@ -615,6 +625,7 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 		}),
 		Scorers: []Scorer[string, string]{scorer},
 		Update:  false, // Create new
+		Quiet:   true,
 	}, cfg, session, tp)
 	require.NoError(t, err)
 	require.NotNil(t, result3)

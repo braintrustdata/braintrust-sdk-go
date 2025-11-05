@@ -11,6 +11,7 @@ import (
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
@@ -64,12 +65,12 @@ func TestDatasetAPI_Get_Integration(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create a test dataset
-	project, err := apiClient.Projects().Register(ctx, "dataset-api-test")
+	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
 	require.NoError(t, err)
 
 	dataset, err := apiClient.Datasets().Create(ctx, api.DatasetRequest{
 		ProjectID:   project.ID,
-		Name:        "test-dataset-get",
+		Name:        tests.RandomName(t, "dataset"),
 		Description: "Test dataset for DatasetAPI.Get",
 	})
 	require.NoError(t, err)
@@ -166,12 +167,13 @@ func TestDatasetAPI_Query_Integration(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create a test dataset
-	project, err := apiClient.Projects().Register(ctx, "dataset-api-test")
+	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
 	require.NoError(t, err)
 
+	datasetName := tests.RandomName(t, "dataset")
 	dataset, err := apiClient.Datasets().Create(ctx, api.DatasetRequest{
 		ProjectID:   project.ID,
-		Name:        "test-dataset-query",
+		Name:        datasetName,
 		Description: "Test dataset for DatasetAPI.Query",
 	})
 	require.NoError(t, err)
