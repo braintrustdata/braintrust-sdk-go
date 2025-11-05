@@ -7,12 +7,12 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 	oteltrace "go.opentelemetry.io/otel/trace"
 
-	"github.com/braintrustdata/braintrust-x-go/api"
-	"github.com/braintrustdata/braintrust-x-go/config"
-	"github.com/braintrustdata/braintrust-x-go/eval"
-	"github.com/braintrustdata/braintrust-x-go/internal/auth"
-	"github.com/braintrustdata/braintrust-x-go/logger"
-	bttrace "github.com/braintrustdata/braintrust-x-go/trace"
+	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/config"
+	"github.com/braintrustdata/braintrust-sdk-go/eval"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
+	"github.com/braintrustdata/braintrust-sdk-go/logger"
+	bttrace "github.com/braintrustdata/braintrust-sdk-go/trace"
 )
 
 // Client is the main Braintrust SDK client

@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/braintrustdata/braintrust-x-go/internal/https"
-	"github.com/braintrustdata/braintrust-x-go/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
+	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
 // API is the main API client for Braintrust.

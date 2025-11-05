@@ -7,9 +7,9 @@ import (
 
 	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-x-go"
-	"github.com/braintrustdata/braintrust-x-go/api"
-	"github.com/braintrustdata/braintrust-x-go/eval"
+	"github.com/braintrustdata/braintrust-sdk-go"
+	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/eval"
 )
 
 // QuestionInput represents a question

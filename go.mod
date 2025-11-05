@@ -1,4 +1,4 @@
-module github.com/braintrustdata/braintrust-x-go
+module github.com/braintrustdata/braintrust-sdk-go
 
 go 1.23.0
 

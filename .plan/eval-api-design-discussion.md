@@ -10,7 +10,7 @@
 
 ### What Exists in `braintrust/eval/` Today
 
-**Package Location:** `github.com/braintrustdata/braintrust-x-go/braintrust/eval`
+**Package Location:** `github.com/braintrustdata/braintrust-sdk-go/braintrust/eval`
 
 **Main Entry Point:**
 ```go
@@ -778,7 +778,7 @@ Don't add fields until implemented.
 #### Option A: Move to `eval/` Now
 
 ```
-github.com/braintrustdata/braintrust-x-go/eval/
+github.com/braintrustdata/braintrust-sdk-go/eval/
 ```
 
 **Pros:**
@@ -796,7 +796,7 @@ github.com/braintrustdata/braintrust-x-go/eval/
 #### Option B: Keep at `braintrust/eval/` for Now
 
 ```
-github.com/braintrustdata/braintrust-x-go/braintrust/eval/
+github.com/braintrustdata/braintrust-sdk-go/braintrust/eval/
 ```
 
 **Pros:**
@@ -874,7 +874,7 @@ Similar to Python:
 
 **Before (current braintrust/eval/):**
 ```go
-import "github.com/braintrustdata/braintrust-x-go/braintrust/eval"
+import "github.com/braintrustdata/braintrust-sdk-go/braintrust/eval"
 
 result, err := eval.Run(context.Background(), eval.Opts[string, string]{
     Project:    "my-project",
@@ -898,7 +898,7 @@ result, err := eval.Run(context.Background(), eval.Opts[string, string]{
 
 **After (with client parameter):**
 ```go
-import "github.com/braintrustdata/braintrust-x-go/eval"  // or braintrust/eval
+import "github.com/braintrustdata/braintrust-sdk-go/eval"  // or braintrust/eval
 
 client, err := braintrust.NewWithOtel(
     braintrust.WithAPIKey(os.Getenv("BRAINTRUST_API_KEY")),

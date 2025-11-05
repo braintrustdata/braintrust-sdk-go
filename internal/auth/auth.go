@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/braintrustdata/braintrust-x-go/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
 const (

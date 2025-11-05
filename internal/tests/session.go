@@ -4,8 +4,8 @@ package tests
 import (
 	"testing"
 
-	"github.com/braintrustdata/braintrust-x-go/internal/auth"
-	intlogger "github.com/braintrustdata/braintrust-x-go/internal/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
+	intlogger "github.com/braintrustdata/braintrust-sdk-go/internal/logger"
 )
 
 // NewSession creates a static test session with hardcoded data.

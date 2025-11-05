@@ -11,7 +11,7 @@ import (
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/braintrustdata/braintrust-x-go/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
 // MiddlewareTracer adds tracing to API requests by parsing bodies of the request and response.

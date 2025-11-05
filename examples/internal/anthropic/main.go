@@ -11,8 +11,8 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-x-go"
-	traceanthropic "github.com/braintrustdata/braintrust-x-go/trace/contrib/anthropic"
+	"github.com/braintrustdata/braintrust-sdk-go"
+	traceanthropic "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic"
 )
 
 var tracer = otel.Tracer("anthropic-examples")

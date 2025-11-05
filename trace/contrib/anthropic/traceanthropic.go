@@ -38,8 +38,8 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/braintrustdata/braintrust-x-go/logger"
-	"github.com/braintrustdata/braintrust-x-go/trace/internal"
+	"github.com/braintrustdata/braintrust-sdk-go/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/trace/internal"
 )
 
 // NextMiddleware represents the next middleware to run in the OpenAI client middleware chain

@@ -12,7 +12,7 @@ The Braintrust Go SDK has been refactored to eliminate global state and provide 
 
 ### Old API
 ```go
-import "github.com/braintrustdata/braintrust-x-go/braintrust/trace"
+import "github.com/braintrustdata/braintrust-sdk-go/braintrust/trace"
 
 teardown, err := trace.Quickstart()
 if err != nil {
@@ -26,7 +26,7 @@ defer teardown()
 import (
     "go.opentelemetry.io/otel"
     "go.opentelemetry.io/otel/sdk/trace"
-    "github.com/braintrustdata/braintrust-x-go"
+    "github.com/braintrustdata/braintrust-sdk-go"
 )
 
 tp := trace.NewTracerProvider()
@@ -51,7 +51,7 @@ if err != nil {
 
 ### Old API
 ```go
-import "github.com/braintrustdata/braintrust-x-go/braintrust/eval"
+import "github.com/braintrustdata/braintrust-sdk-go/braintrust/eval"
 
 _, err = eval.Run(context.Background(), eval.Opts[string, string]{
     Project:    "my-project",
@@ -71,8 +71,8 @@ _, err = eval.Run(context.Background(), eval.Opts[string, string]{
 ### New API
 ```go
 import (
-    "github.com/braintrustdata/braintrust-x-go"
-    "github.com/braintrustdata/braintrust-x-go/eval"
+    "github.com/braintrustdata/braintrust-sdk-go"
+    "github.com/braintrustdata/braintrust-sdk-go/eval"
 )
 
 evaluator := braintrust.NewEvaluator[string, string](bt)
@@ -103,8 +103,8 @@ _, err = evaluator.Run(context.Background(), eval.Opts[string, string]{
 ### Old API
 ```go
 import (
-    "github.com/braintrustdata/braintrust-x-go/braintrust/trace"
-    "github.com/braintrustdata/braintrust-x-go/braintrust/trace/traceopenai"
+    "github.com/braintrustdata/braintrust-sdk-go/braintrust/trace"
+    "github.com/braintrustdata/braintrust-sdk-go/braintrust/trace/traceopenai"
 )
 
 teardown, err := trace.Quickstart()
@@ -119,8 +119,8 @@ client := openai.NewClient(
 ```go
 import (
     "go.opentelemetry.io/otel/sdk/trace"
-    "github.com/braintrustdata/braintrust-x-go"
-    traceopenai "github.com/braintrustdata/braintrust-x-go/trace/contrib/openai"
+    "github.com/braintrustdata/braintrust-sdk-go"
+    traceopenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"
 )
 
 tp := trace.NewTracerProvider()
@@ -143,8 +143,8 @@ client := openai.NewClient(
 ### Old API
 ```go
 import (
-    "github.com/braintrustdata/braintrust-x-go/braintrust/trace"
-    "github.com/braintrustdata/braintrust-x-go/braintrust/trace/traceanthropic"
+    "github.com/braintrustdata/braintrust-sdk-go/braintrust/trace"
+    "github.com/braintrustdata/braintrust-sdk-go/braintrust/trace/traceanthropic"
 )
 
 teardown, err := trace.Quickstart()
@@ -159,8 +159,8 @@ client := anthropic.NewClient(
 ```go
 import (
     "go.opentelemetry.io/otel/sdk/trace"
-    "github.com/braintrustdata/braintrust-x-go"
-    traceanthropic "github.com/braintrustdata/braintrust-x-go/trace/contrib/anthropic"
+    "github.com/braintrustdata/braintrust-sdk-go"
+    traceanthropic "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic"
 )
 
 tp := trace.NewTracerProvider()
@@ -182,8 +182,8 @@ client := anthropic.NewClient(
 ### Old API
 ```go
 import (
-    "github.com/braintrustdata/braintrust-x-go/braintrust/trace"
-    "github.com/braintrustdata/braintrust-x-go/braintrust/trace/tracegenai"
+    "github.com/braintrustdata/braintrust-sdk-go/braintrust/trace"
+    "github.com/braintrustdata/braintrust-sdk-go/braintrust/trace/tracegenai"
 )
 
 teardown, err := trace.Quickstart()
@@ -198,8 +198,8 @@ client, err := genai.NewClient(ctx, &genai.ClientConfig{
 ```go
 import (
     "go.opentelemetry.io/otel/sdk/trace"
-    "github.com/braintrustdata/braintrust-x-go"
-    tracegenai "github.com/braintrustdata/braintrust-x-go/trace/contrib/genai"
+    "github.com/braintrustdata/braintrust-sdk-go"
+    tracegenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"
 )
 
 tp := trace.NewTracerProvider()
@@ -221,7 +221,7 @@ client, err := genai.NewClient(ctx, &genai.ClientConfig{
 ### Old API
 ```go
 import (
-    "github.com/braintrustdata/braintrust-x-go/braintrust/eval/functions"
+    "github.com/braintrustdata/braintrust-sdk-go/braintrust/eval/functions"
 )
 
 task, err := functions.GetTask[string, string](ctx, functions.TaskQueryOpts{
@@ -250,7 +250,7 @@ scorer, err := evaluator.Scorers().Get(ctx, "my-scorer-slug")
 
 ### Old API
 ```go
-import "github.com/braintrustdata/braintrust-x-go/braintrust/eval"
+import "github.com/braintrustdata/braintrust-sdk-go/braintrust/eval"
 
 _, err = eval.Run(ctx, eval.Opts[Input, Output]{
     DatasetID: datasetID,
@@ -281,7 +281,7 @@ _, err = evaluator.Run(ctx, eval.Opts[Input, Output]{
 
 ### Old API
 ```go
-import "github.com/braintrustdata/braintrust-x-go/braintrust/autoevals"
+import "github.com/braintrustdata/braintrust-sdk-go/braintrust/autoevals"
 
 Scorers: []eval.Scorer[string, string]{
     autoevals.NewEquals[string, string](),
@@ -309,10 +309,10 @@ Scorers: []eval.Scorer[string, string]{
 
 | Old Import | New Import |
 |------------|------------|
-| `github.com/braintrustdata/braintrust-x-go/braintrust/trace` | `github.com/braintrustdata/braintrust-x-go` |
-| `github.com/braintrustdata/braintrust-x-go/braintrust/eval` | `github.com/braintrustdata/braintrust-x-go/eval` |
-| `github.com/braintrustdata/braintrust-x-go/braintrust/trace/traceopenai` | `github.com/braintrustdata/braintrust-x-go/trace/contrib/openai` |
-| `github.com/braintrustdata/braintrust-x-go/braintrust/trace/traceanthropic` | `github.com/braintrustdata/braintrust-x-go/trace/contrib/anthropic` |
-| `github.com/braintrustdata/braintrust-x-go/braintrust/trace/tracegenai` | `github.com/braintrustdata/braintrust-x-go/trace/contrib/genai` |
-| `github.com/braintrustdata/braintrust-x-go/braintrust/eval/functions` | Use `evaluator.Tasks()` / `evaluator.Scorers()` |
-| `github.com/braintrustdata/braintrust-x-go/braintrust/autoevals` | *Removed* - use inline scorers |
+| `github.com/braintrustdata/braintrust-sdk-go/braintrust/trace` | `github.com/braintrustdata/braintrust-sdk-go` |
+| `github.com/braintrustdata/braintrust-sdk-go/braintrust/eval` | `github.com/braintrustdata/braintrust-sdk-go/eval` |
+| `github.com/braintrustdata/braintrust-sdk-go/braintrust/trace/traceopenai` | `github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai` |
+| `github.com/braintrustdata/braintrust-sdk-go/braintrust/trace/traceanthropic` | `github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic` |
+| `github.com/braintrustdata/braintrust-sdk-go/braintrust/trace/tracegenai` | `github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai` |
+| `github.com/braintrustdata/braintrust-sdk-go/braintrust/eval/functions` | Use `evaluator.Tasks()` / `evaluator.Scorers()` |
+| `github.com/braintrustdata/braintrust-sdk-go/braintrust/autoevals` | *Removed* - use inline scorers |

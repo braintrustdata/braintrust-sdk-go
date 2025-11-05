@@ -17,7 +17,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 
-	"github.com/braintrustdata/braintrust-x-go/internal/oteltest"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 )
 
 func TestMiddleware(t *testing.T) {

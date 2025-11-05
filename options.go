@@ -3,8 +3,8 @@ package braintrust
 import (
 	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-x-go/config"
-	"github.com/braintrustdata/braintrust-x-go/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/config"
+	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
 // Option is a functional option for configuring a Braintrust client

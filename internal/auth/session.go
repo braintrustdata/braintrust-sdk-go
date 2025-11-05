@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/braintrustdata/braintrust-x-go/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
 // Session manages authentication and login state.

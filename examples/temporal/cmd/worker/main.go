@@ -12,8 +12,8 @@ import (
 	"go.temporal.io/sdk/interceptor"
 	"go.temporal.io/sdk/worker"
 
-	"github.com/braintrustdata/braintrust-x-go"
-	temporal "github.com/braintrustdata/braintrust-x-go/examples/temporal"
+	"github.com/braintrustdata/braintrust-sdk-go"
+	temporal "github.com/braintrustdata/braintrust-sdk-go/examples/temporal"
 )
 
 func main() {

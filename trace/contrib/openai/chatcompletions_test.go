@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/codes"
 
-	"github.com/braintrustdata/braintrust-x-go/internal/oteltest"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 )
 
 func TestOpenAIChatCompletions(t *testing.T) {
@@ -1116,7 +1116,7 @@ func assertChatSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.Ti
 }
 
 func TestMultipleMessagesIssue33(t *testing.T) {
-	// This is a test for issue #33: https://github.com/braintrustdata/braintrust-x-go/issues/33
+	// This is a test for issue #33: https://github.com/braintrustdata/braintrust-sdk-go/issues/33
 	client, exporter := setUpTest(t)
 	require := require.New(t)
 	assert := assert.New(t)

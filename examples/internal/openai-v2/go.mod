@@ -2,9 +2,9 @@ module examples
 
 go 1.23.12
 
-require github.com/braintrustdata/braintrust-x-go v0.0.6
+require github.com/braintrustdata/braintrust-sdk-go v0.0.6
 
-replace github.com/braintrustdata/braintrust-x-go => ../../..
+replace github.com/braintrustdata/braintrust-sdk-go => ../../..
 
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect

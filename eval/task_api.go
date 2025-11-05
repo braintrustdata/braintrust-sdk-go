@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/braintrustdata/braintrust-x-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/api"
 )
 
 // TaskAPI provides methods for loading tasks/prompts for evaluation.

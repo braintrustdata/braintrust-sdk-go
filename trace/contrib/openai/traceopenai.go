@@ -38,8 +38,8 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/braintrustdata/braintrust-x-go/logger"
-	"github.com/braintrustdata/braintrust-x-go/trace/internal"
+	"github.com/braintrustdata/braintrust-sdk-go/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/trace/internal"
 )
 
 // NextMiddleware represents the next middleware to run in the OpenAI client middleware chain.
@@ -105,7 +105,7 @@ func openaiRouter(cfg *middlewareConfig, path string) internal.MiddlewareTracer 
 	// therefore a different path here. For example:
 	// 	- OpenAI has /v1/chat/completions
 	//  - OpenRouter has /api/v1/chat/completions.
-	// See https://github.com/braintrustdata/braintrust-x-go/issues/36
+	// See https://github.com/braintrustdata/braintrust-sdk-go/issues/36
 	if strings.HasSuffix(path, "/v1/chat/completions") {
 		return newChatCompletionsTracer(cfg)
 	}

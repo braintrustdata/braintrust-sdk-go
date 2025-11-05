@@ -5,9 +5,9 @@ import (
 
 	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-x-go/api"
-	"github.com/braintrustdata/braintrust-x-go/config"
-	"github.com/braintrustdata/braintrust-x-go/internal/auth"
+	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/config"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 )
 
 // Evaluator provides a reusable way to run multiple evaluations with the same

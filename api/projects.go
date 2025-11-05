@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/braintrustdata/braintrust-x-go/config"
-	"github.com/braintrustdata/braintrust-x-go/internal/auth"
+	"github.com/braintrustdata/braintrust-sdk-go/config"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 )
 
 // Project represents a project from the API

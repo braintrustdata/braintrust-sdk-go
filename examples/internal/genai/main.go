@@ -12,8 +12,8 @@ import (
 
 	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-x-go"
-	tracegenai "github.com/braintrustdata/braintrust-x-go/trace/contrib/genai"
+	"github.com/braintrustdata/braintrust-sdk-go"
+	tracegenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"
 )
 
 var tracer = otel.Tracer("genai-examples")

@@ -42,7 +42,7 @@ import (
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 
-	"github.com/braintrustdata/braintrust-x-go/trace/internal"
+	"github.com/braintrustdata/braintrust-sdk-go/trace/internal"
 )
 
 // spanEntry represents a span with its type in the stack

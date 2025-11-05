@@ -9,9 +9,9 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 
-	"github.com/braintrustdata/braintrust-x-go/internal/auth"
-	intlogger "github.com/braintrustdata/braintrust-x-go/internal/logger"
-	"github.com/braintrustdata/braintrust-x-go/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
+	intlogger "github.com/braintrustdata/braintrust-sdk-go/internal/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
 func TestNew_WithMinimalConfig(t *testing.T) {

@@ -11,9 +11,9 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 
-	"github.com/braintrustdata/braintrust-x-go/config"
-	"github.com/braintrustdata/braintrust-x-go/internal/oteltest"
-	"github.com/braintrustdata/braintrust-x-go/internal/tests"
+	"github.com/braintrustdata/braintrust-sdk-go/config"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
 )
 
 // testInput and testOutput are simple types for testing

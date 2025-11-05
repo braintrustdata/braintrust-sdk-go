@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-x-go/api"
-	"github.com/braintrustdata/braintrust-x-go/config"
+	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/config"
 )
 
 // TestEval_Integration tests creating a task function and running a full evaluation

@@ -3,12 +3,12 @@ module openrouter-example
 go 1.23.12
 
 require (
-	github.com/braintrustdata/braintrust-x-go v0.0.5
+	github.com/braintrustdata/braintrust-sdk-go v0.0.5
 	github.com/openai/openai-go v1.12.0
 	go.opentelemetry.io/otel v1.36.0
 )
 
-replace github.com/braintrustdata/braintrust-x-go => ../..
+replace github.com/braintrustdata/braintrust-sdk-go => ../..
 
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect

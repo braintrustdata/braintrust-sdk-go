@@ -12,9 +12,9 @@ import (
 	"go.temporal.io/sdk/contrib/opentelemetry"
 	"go.temporal.io/sdk/interceptor"
 
-	"github.com/braintrustdata/braintrust-x-go"
-	"github.com/braintrustdata/braintrust-x-go/eval"
-	temporal "github.com/braintrustdata/braintrust-x-go/examples/temporal"
+	"github.com/braintrustdata/braintrust-sdk-go"
+	"github.com/braintrustdata/braintrust-sdk-go/eval"
+	temporal "github.com/braintrustdata/braintrust-sdk-go/examples/temporal"
 )
 
 func main() {

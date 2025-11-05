@@ -14,7 +14,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-x-go"
+	"github.com/braintrustdata/braintrust-sdk-go"
 )
 
 func main() {
@@ -41,7 +41,7 @@ func main() {
 	client := openai.NewClient(
 		option.WithBaseURL("https://openrouter.ai/api/v1"),
 		option.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-		option.WithHeader("HTTP-Referer", "https://github.com/braintrustdata/braintrust-x-go"),
+		option.WithHeader("HTTP-Referer", "https://github.com/braintrustdata/braintrust-sdk-go"),
 		option.WithHeader("X-Title", "Braintrust Go SDK Example"),
 	)
 

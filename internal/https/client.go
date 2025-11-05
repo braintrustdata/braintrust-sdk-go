@@ -12,7 +12,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/braintrustdata/braintrust-x-go/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
 // Client is a unified HTTP client for API requests.

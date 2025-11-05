@@ -10,7 +10,7 @@ import (
 	"go.opentelemetry.io/otel/codes"
 	"google.golang.org/genai"
 
-	"github.com/braintrustdata/braintrust-x-go/internal/oteltest"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 )
 
 // setUpTest is a helper function that sets up a new tracer provider for each test.

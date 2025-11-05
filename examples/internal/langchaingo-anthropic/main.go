@@ -15,8 +15,8 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-x-go"
-	tracelangchaingo "github.com/braintrustdata/braintrust-x-go/trace/contrib/langchaingo"
+	"github.com/braintrustdata/braintrust-sdk-go"
+	tracelangchaingo "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo"
 )
 
 var tracer = otel.Tracer("langchaingo-anthropic-example")

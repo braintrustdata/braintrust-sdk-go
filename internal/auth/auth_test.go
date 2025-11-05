@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	intlogger "github.com/braintrustdata/braintrust-x-go/internal/logger"
-	"github.com/braintrustdata/braintrust-x-go/logger"
+	intlogger "github.com/braintrustdata/braintrust-sdk-go/internal/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
 // TestSession_WithTestAPIKey tests login with the special test API key

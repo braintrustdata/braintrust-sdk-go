@@ -4,7 +4,7 @@ package logger
 import (
 	"testing"
 
-	"github.com/braintrustdata/braintrust-x-go/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
 // FailTestLogger is a logger that fails tests when the application emits warnings or errors.

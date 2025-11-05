@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/braintrustdata/braintrust-x-go/api"
-	"github.com/braintrustdata/braintrust-x-go/config"
-	"github.com/braintrustdata/braintrust-x-go/internal/auth"
+	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/config"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 )
 
 // registerExperiment creates or gets an experiment for the eval.

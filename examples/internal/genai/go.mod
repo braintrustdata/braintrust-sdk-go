@@ -2,10 +2,10 @@ module example.com/genai
 
 go 1.24.8
 
-replace github.com/braintrustdata/braintrust-x-go => ../../..
+replace github.com/braintrustdata/braintrust-sdk-go => ../../..
 
 require (
-	github.com/braintrustdata/braintrust-x-go v0.0.12
+	github.com/braintrustdata/braintrust-sdk-go v0.0.12
 	go.opentelemetry.io/otel v1.38.0
 	google.golang.org/genai v1.30.0
 )

@@ -5,7 +5,7 @@ go 1.24.4
 toolchain go1.24.9
 
 require (
-	github.com/braintrustdata/braintrust-x-go v0.0.0
+	github.com/braintrustdata/braintrust-sdk-go v0.0.0
 	github.com/tmc/langchaingo v0.1.14
 	go.opentelemetry.io/otel v1.36.0
 	go.opentelemetry.io/otel/trace v1.36.0
@@ -58,4 +58,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/braintrustdata/braintrust-x-go => ../..
+replace github.com/braintrustdata/braintrust-sdk-go => ../..

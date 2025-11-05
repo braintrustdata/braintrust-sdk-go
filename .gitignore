@@ -25,7 +25,7 @@ go.work.sum
 
 .env
 .vscode
-braintrust-x-go
+braintrust-sdk-go
 kitchen-sink
 
 # Example binaries (in their directories)

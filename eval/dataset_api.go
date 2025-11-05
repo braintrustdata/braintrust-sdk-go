@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/braintrustdata/braintrust-x-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/api"
 )
 
 // DatasetAPI provides methods for loading datasets for evaluation.

@@ -1,7 +1,7 @@
 
 # Braintrust Go Tracing & Eval SDK
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/braintrustdata/braintrust-x-go.svg)](https://pkg.go.dev/github.com/braintrustdata/braintrust-x-go)
+[![Go Reference](https://pkg.go.dev/badge/github.com/braintrustdata/braintrust-sdk-go.svg)](https://pkg.go.dev/github.com/braintrustdata/braintrust-sdk-go)
 ![Beta](https://img.shields.io/badge/status-beta-yellow)
 
 ## Overview
@@ -17,7 +17,7 @@ This SDK is currently in BETA status and APIs may change.
 ## Installation
 
 ```bash
-go get github.com/braintrustdata/braintrust-x-go
+go get github.com/braintrustdata/braintrust-sdk-go
 ```
 
 ## Quick Start
@@ -40,8 +40,8 @@ import (
     "go.opentelemetry.io/otel"
     "go.opentelemetry.io/otel/sdk/trace"
 
-    "github.com/braintrustdata/braintrust-x-go"
-    "github.com/braintrustdata/braintrust-x-go/eval"
+    "github.com/braintrustdata/braintrust-sdk-go"
+    "github.com/braintrustdata/braintrust-sdk-go/eval"
 )
 
 func main() {
@@ -101,8 +101,8 @@ import (
     "go.opentelemetry.io/otel"
     "go.opentelemetry.io/otel/sdk/trace"
 
-    "github.com/braintrustdata/braintrust-x-go"
-    traceopenai "github.com/braintrustdata/braintrust-x-go/trace/contrib/openai"
+    "github.com/braintrustdata/braintrust-sdk-go"
+    traceopenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"
 )
 
 func main() {
@@ -143,8 +143,8 @@ import (
     "go.opentelemetry.io/otel"
     "go.opentelemetry.io/otel/sdk/trace"
 
-    "github.com/braintrustdata/braintrust-x-go"
-    traceanthropic "github.com/braintrustdata/braintrust-x-go/trace/contrib/anthropic"
+    "github.com/braintrustdata/braintrust-sdk-go"
+    traceanthropic "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic"
 )
 
 func main() {
@@ -185,8 +185,8 @@ import (
     "go.opentelemetry.io/otel/sdk/trace"
     "google.golang.org/genai"
 
-    "github.com/braintrustdata/braintrust-x-go"
-    tracegenai "github.com/braintrustdata/braintrust-x-go/trace/contrib/genai"
+    "github.com/braintrustdata/braintrust-sdk-go"
+    tracegenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"
 )
 
 func main() {
@@ -244,7 +244,7 @@ Check out the [`examples/`](./examples/) directory for complete working examples
 ## Documentation
 
 - [Braintrust Documentation](https://www.braintrust.dev/docs)
-- [API Reference](https://pkg.go.dev/github.com/braintrustdata/braintrust-x-go)
+- [API Reference](https://pkg.go.dev/github.com/braintrustdata/braintrust-sdk-go)
 
 ## Contributing
 

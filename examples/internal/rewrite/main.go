@@ -10,9 +10,9 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/trace"
 
-	braintrust "github.com/braintrustdata/braintrust-x-go"
-	"github.com/braintrustdata/braintrust-x-go/eval"
-	bttrace "github.com/braintrustdata/braintrust-x-go/trace"
+	braintrust "github.com/braintrustdata/braintrust-sdk-go"
+	"github.com/braintrustdata/braintrust-sdk-go/eval"
+	bttrace "github.com/braintrustdata/braintrust-sdk-go/trace"
 )
 
 func main() {

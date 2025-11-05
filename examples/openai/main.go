@@ -11,8 +11,8 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-x-go"
-	traceopenai "github.com/braintrustdata/braintrust-x-go/trace/contrib/openai"
+	"github.com/braintrustdata/braintrust-sdk-go"
+	traceopenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"
 )
 
 func main() {

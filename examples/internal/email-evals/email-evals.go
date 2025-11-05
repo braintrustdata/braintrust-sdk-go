@@ -15,9 +15,9 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-x-go"
-	"github.com/braintrustdata/braintrust-x-go/eval"
-	traceopenai "github.com/braintrustdata/braintrust-x-go/trace/contrib/openai"
+	"github.com/braintrustdata/braintrust-sdk-go"
+	"github.com/braintrustdata/braintrust-sdk-go/eval"
+	traceopenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"
 )
 
 var tracer = otel.Tracer("email-subject-optimizer")

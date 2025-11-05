@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/braintrustdata/braintrust-x-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/api"
 )
 
 // ScorerAPI provides methods for loading scorers for evaluation.

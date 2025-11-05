@@ -7,7 +7,7 @@ import (
 
 	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-x-go/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
 // Config holds immutable configuration for the Braintrust SDK.

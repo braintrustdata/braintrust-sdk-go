@@ -32,4 +32,4 @@ formatters:
   settings:
     goimports:
       local-prefixes:
-        - github.com/braintrustdata/braintrust-x-go
+        - github.com/braintrustdata/braintrust-sdk-go

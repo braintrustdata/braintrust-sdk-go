@@ -11,8 +11,8 @@ can start.
 
 ```bash
 # Clone the repo.
-git clone git@github.com:braintrustdata/braintrust-x-go.git
-cd braintrust-x-go
+git clone git@github.com:braintrustdata/braintrust-sdk-go.git
+cd braintrust-sdk-go
 
 # Install our dependencies.
 mise trust
