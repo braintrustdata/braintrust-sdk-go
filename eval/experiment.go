@@ -12,15 +12,15 @@ import (
 
 // registerExperiment creates or gets an experiment for the eval.
 // This is an internal helper that uses the api package.
-func registerExperiment(ctx context.Context, cfg *config.Config, session *auth.Session, name string, tags []string, metadata map[string]interface{}, update bool) (*api.Experiment, error) {
+// projectName must be already resolved (not empty) by the caller.
+func registerExperiment(ctx context.Context, cfg *config.Config, session *auth.Session, name string, projectName string, tags []string, metadata map[string]interface{}, update bool) (*api.Experiment, error) {
 	if name == "" {
 		return nil, fmt.Errorf("experiment name is required")
 	}
 
-	// First get or create the project
-	projectName := cfg.DefaultProjectName
+	// Validate project name (should already be resolved by caller)
 	if projectName == "" {
-		return nil, fmt.Errorf("project name is required (set via WithProject option)")
+		return nil, fmt.Errorf("project name is required (set via WithProject option or Opts.ProjectName)")
 	}
 
 	endpoints := session.Endpoints()

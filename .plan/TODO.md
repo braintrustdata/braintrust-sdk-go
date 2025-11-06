@@ -48,7 +48,12 @@ See `.plan/DONE.md` for completed work history.
 - [x] Verify all examples build: `go build ./examples/...` ✅
 - [ ] Verify all examples run: `make examples`
 
-### B. Solidify API design (Priority 3)
+### B. Solidify API design (Priority 3) 🚧 IN PROGRESS
+- [x] Refactor api/ to use subpackages (api/projects/, api/datasets/, api/experiments/, api/functions/)
+  - [x] Projects refactor: api/projects/types.go + projects.go with Create(), Get(), List()
+  - [ ] Datasets refactor: api/datasets/types.go + datasets.go with Create(), Insert(), Delete(), Get(), List()
+  - [ ] Experiments refactor: api/experiments/types.go + experiments.go
+  - [ ] Functions refactor: api/functions/types.go + functions.go
 - [ ] Review public API surface (client.go, eval/, api/)
 - [ ] Add godoc comments to all exported functions/types
 - [ ] Decide: TaskAPI.Query() - implement or remove stub (eval/task_api.go:82)

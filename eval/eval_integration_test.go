@@ -636,3 +636,177 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 	// When Update: false, should create a different experiment ID
 	assert.NotEqual(t, firstExpID, thirdExpID, "Update: false should create a new experiment ID")
 }
+
+// TestEval_DifferentProject tests running an eval with a different project name
+func TestEval_DifferentProject(t *testing.T) {
+	session := createIntegrationTestSession(t)
+	t.Parallel()
+
+	ctx := context.Background()
+
+	// Get endpoints and create API client
+	endpoints := session.Endpoints()
+	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+	require.NoError(t, err)
+
+	// Create a different project (use fixed suffix instead of random)
+	differentProjectName := integrationTestProject + "-other"
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: differentProjectName})
+	require.NoError(t, err)
+	require.NotNil(t, project)
+
+	// Create config with default project (should be overridden by opts.Project)
+	cfg := &config.Config{
+		DefaultProjectName: integrationTestProject,
+	}
+
+	// Create a TracerProvider
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(ctx) }()
+
+	// Create test cases
+	cases := NewCases([]Case[string, string]{
+		{Input: "test1", Expected: "test1"},
+		{Input: "test2", Expected: "test2"},
+	})
+
+	// Create a simple scorer
+	scorer := NewScorer("exact-match", func(ctx context.Context, result TaskResult[string, string]) (Scores, error) {
+		if result.Output == result.Expected {
+			return S(1.0), nil
+		}
+		return S(0.0), nil
+	})
+
+	// Run eval with the different project specified in opts
+	result, err := Run(ctx, Opts[string, string]{
+		Experiment:  tests.RandomName(t, "exp"),
+		ProjectName: differentProjectName, // Override config.DefaultProjectName
+		Cases:       cases,
+		Task: T(func(ctx context.Context, input string) (string, error) {
+			return input, nil
+		}),
+		Scorers: []Scorer[string, string]{scorer},
+		Quiet:   true,
+	}, cfg, session, tp)
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	// Verify the result
+	assert.NotEmpty(t, result.ID())
+	assert.NotEmpty(t, result.Name())
+	assert.NotEmpty(t, result.String())
+
+	// Verify the experiment was created in the correct project by querying the project's experiments
+	experiments := apiClient.Experiments()
+
+	// Get the experiment by its ID to verify it's in the correct project
+	// We'll use the experiments client to verify the project ID matches
+	expFromAPI, err := experiments.Register(ctx, result.Name(), project.ID, api.RegisterExperimentOpts{
+		Update: true, // Use Update:true to get existing experiment
+	})
+	require.NoError(t, err)
+	assert.Equal(t, result.ID(), expFromAPI.ID, "Should get the same experiment")
+	assert.Equal(t, project.ID, expFromAPI.ProjectID, "Experiment should be in the different project")
+}
+
+// TestEval_ProjectNameFallback tests that the project name fallback logic works correctly
+func TestEval_ProjectNameFallback(t *testing.T) {
+	session := createIntegrationTestSession(t)
+	t.Parallel()
+
+	ctx := context.Background()
+
+	// Get endpoints and create API client
+	endpoints := session.Endpoints()
+	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+	require.NoError(t, err)
+
+	// Create a project
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
+	require.NoError(t, err)
+	require.NotNil(t, project)
+
+	// Create config with default project
+	cfg := &config.Config{
+		DefaultProjectName: integrationTestProject,
+	}
+
+	// Create a TracerProvider
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(ctx) }()
+
+	// Create test cases
+	cases := NewCases([]Case[string, string]{
+		{Input: "test1", Expected: "test1"},
+	})
+
+	// Create a simple scorer
+	scorer := NewScorer("exact-match", func(ctx context.Context, result TaskResult[string, string]) (Scores, error) {
+		if result.Output == result.Expected {
+			return S(1.0), nil
+		}
+		return S(0.0), nil
+	})
+
+	// Run eval WITHOUT specifying ProjectName (should use cfg.DefaultProjectName)
+	result, err := Run(ctx, Opts[string, string]{
+		Experiment: tests.RandomName(t, "exp"),
+		// ProjectName not specified - should fall back to cfg.DefaultProjectName
+		Cases: cases,
+		Task: T(func(ctx context.Context, input string) (string, error) {
+			return input, nil
+		}),
+		Scorers: []Scorer[string, string]{scorer},
+		Quiet:   true,
+	}, cfg, session, tp)
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	// Verify the experiment was created in the correct project (cfg.DefaultProjectName)
+	experiments := apiClient.Experiments()
+	expFromAPI, err := experiments.Register(ctx, result.Name(), project.ID, api.RegisterExperimentOpts{
+		Update: true, // Use Update:true to get existing experiment
+	})
+	require.NoError(t, err)
+	assert.Equal(t, result.ID(), expFromAPI.ID, "Should get the same experiment")
+	assert.Equal(t, project.ID, expFromAPI.ProjectID, "Experiment should be in the default project from config")
+}
+
+// TestEval_NoProjectName tests that eval fails when no project name is provided
+func TestEval_NoProjectName(t *testing.T) {
+	session := createIntegrationTestSession(t)
+	t.Parallel()
+
+	ctx := context.Background()
+
+	// Create config with NO default project
+	cfg := &config.Config{
+		DefaultProjectName: "", // No default project
+	}
+
+	// Create a TracerProvider
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(ctx) }()
+
+	// Create test cases
+	cases := NewCases([]Case[string, string]{
+		{Input: "test1", Expected: "test1"},
+	})
+
+	// Run eval WITHOUT specifying ProjectName and NO config default (should fail)
+	result, err := Run(ctx, Opts[string, string]{
+		Experiment: tests.RandomName(t, "exp"),
+		// ProjectName not specified AND cfg.DefaultProjectName is empty
+		Cases: cases,
+		Task: T(func(ctx context.Context, input string) (string, error) {
+			return input, nil
+		}),
+		Quiet: true,
+	}, cfg, session, tp)
+
+	// Should error because no project name is available
+	require.Error(t, err)
+	assert.Nil(t, result)
+	assert.Contains(t, err.Error(), "project name is required")
+}

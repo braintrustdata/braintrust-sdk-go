@@ -43,6 +43,10 @@ type Opts[I, R any] struct {
 	// Required.
 	Experiment string
 
+	// ProjectName is the name of the project to create the experiment in.
+	// Optional. If not specified, uses the default project from config.
+	ProjectName string
+
 	// Cases is an iterator over the test cases to evaluate.
 	// Required.
 	Cases Cases[I, R]
@@ -225,16 +229,16 @@ type nextCase[I, R any] struct {
 // newEval creates a new eval executor with dependency injection.
 // This replaces the old New() constructor which used global state.
 func newEval[I, R any](ctx context.Context, cfg *config.Config, session *auth.Session, tp *trace.TracerProvider, opts Opts[I, R]) (*eval[I, R], error) {
-	// Register/get experiment
-	exp, err := registerExperiment(ctx, cfg, session, opts.Experiment, opts.Tags, opts.Metadata, opts.Update)
-	if err != nil {
-		return nil, fmt.Errorf("failed to register experiment: %w", err)
+	// Determine project name (use opts.ProjectName if specified, otherwise cfg.DefaultProjectName)
+	projectName := opts.ProjectName
+	if projectName == "" {
+		projectName = cfg.DefaultProjectName
 	}
 
-	// Get project info for Result
-	projectName := cfg.DefaultProjectName
-	if projectName == "" {
-		projectName = "unknown"
+	// Register/get experiment (registerExperiment will validate that projectName is not empty)
+	exp, err := registerExperiment(ctx, cfg, session, opts.Experiment, projectName, opts.Tags, opts.Metadata, opts.Update)
+	if err != nil {
+		return nil, fmt.Errorf("failed to register experiment: %w", err)
 	}
 
 	// Get project ID from the experiment (it already has the project ID)
