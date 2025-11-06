@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/api/experiments"
 	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
@@ -13,7 +14,7 @@ import (
 // registerExperiment creates or gets an experiment for the eval.
 // This is an internal helper that uses the api package.
 // projectName must be already resolved (not empty) by the caller.
-func registerExperiment(ctx context.Context, cfg *config.Config, session *auth.Session, name string, projectName string, tags []string, metadata map[string]interface{}, update bool) (*api.Experiment, error) {
+func registerExperiment(ctx context.Context, cfg *config.Config, session *auth.Session, name string, projectName string, tags []string, metadata map[string]interface{}, update bool) (*experiments.Experiment, error) {
 	if name == "" {
 		return nil, fmt.Errorf("experiment name is required")
 	}
@@ -38,7 +39,7 @@ func registerExperiment(ctx context.Context, cfg *config.Config, session *auth.S
 	}
 
 	// Register the experiment
-	experiment, err := c.Experiments().Register(ctx, name, project.ID, api.RegisterExperimentOpts{
+	experiment, err := c.Experiments().Register(ctx, name, project.ID, experiments.RegisterOpts{
 		Tags:     tags,
 		Metadata: metadata,
 		Update:   update,

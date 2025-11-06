@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
 )
 
 // ScorerAPI provides methods for loading scorers for evaluation.
@@ -36,7 +37,7 @@ func (s *ScorerAPI[I, R]) Get(ctx context.Context, slug string) (Scorer[I, R], e
 	}
 
 	// Query for the function/scorer
-	functions, err := s.api.Functions().Query(ctx, api.FunctionQueryOpts{
+	functions, err := s.api.Functions().Query(ctx, functionsapi.QueryParams{
 		ProjectName: s.projectName,
 		Slug:        slug,
 		Limit:       1,
@@ -107,7 +108,7 @@ func (s *ScorerAPI[I, R]) Query(ctx context.Context, opts ScorerQueryOpts) ([]Sc
 	}
 
 	// Query for functions
-	functions, err := s.api.Functions().Query(ctx, api.FunctionQueryOpts{
+	functions, err := s.api.Functions().Query(ctx, functionsapi.QueryParams{
 		ProjectName:  projectName,
 		FunctionName: opts.Name,
 	})

@@ -165,6 +165,86 @@ func TestDatasets_Fetch_Integration(t *testing.T) {
 	assert.GreaterOrEqual(t, len(response.Events), 3)
 }
 
+// TestDatasets_EventFields_Integration tests that all Event fields are properly unmarshaled
+func TestDatasets_EventFields_Integration(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+
+	// Create API client
+	client := tests.GetTestHTTPSClient(t)
+	api := New(client)
+
+	// Create a project and dataset
+	project := createTestProject(t)
+	dataset, err := api.Create(ctx, CreateParams{
+		ProjectID: project.ID,
+		Name:      tests.RandomName(t, "test-dataset-fields"),
+	})
+	require.NoError(t, err)
+
+	// Insert an event with comprehensive data
+	testInput := map[string]interface{}{
+		"question": "What is the meaning of life?",
+		"context":  "philosophical",
+	}
+	testExpected := map[string]interface{}{
+		"answer":     "42",
+		"confidence": 0.95,
+	}
+	testMetadata := map[string]interface{}{
+		"source": "test",
+		"model":  "test-model",
+	}
+	testTags := []string{"philosophy", "test", "integration"}
+
+	events := []Event{
+		{
+			Input:    testInput,
+			Expected: testExpected,
+			Metadata: testMetadata,
+			Tags:     testTags,
+		},
+	}
+	err = api.InsertEvents(ctx, dataset.ID, events)
+	require.NoError(t, err)
+
+	// Fetch the events back
+	response, err := api.Fetch(ctx, dataset.ID, "", 10)
+	require.NoError(t, err)
+	require.NotNil(t, response)
+	require.NotEmpty(t, response.Events)
+
+	// Unmarshal the first event
+	var event Event
+	err = json.Unmarshal(response.Events[0], &event)
+	require.NoError(t, err)
+
+	// Verify core data fields
+	assert.NotEmpty(t, event.ID, "Event should have an ID")
+	assert.NotNil(t, event.Input, "Event should have Input")
+	assert.NotNil(t, event.Expected, "Event should have Expected")
+	assert.NotNil(t, event.Metadata, "Event should have Metadata")
+	assert.Equal(t, testTags, event.Tags, "Event tags should match")
+
+	// Verify system fields are populated
+	assert.NotEmpty(t, event.XactID, "Event should have _xact_id")
+	assert.NotEmpty(t, event.Created, "Event should have created timestamp")
+	assert.Equal(t, project.ID, event.ProjectID, "Event should have project_id")
+	assert.Equal(t, dataset.ID, event.DatasetID, "Event should have dataset_id")
+
+	// Verify tracing fields are populated
+	assert.NotEmpty(t, event.SpanID, "Event should have span_id")
+	assert.NotEmpty(t, event.RootSpanID, "Event should have root_span_id")
+
+	// Log all fields for inspection
+	t.Logf("Event fields: ID=%s, XactID=%s, Created=%s, ProjectID=%s, DatasetID=%s",
+		event.ID, event.XactID, event.Created, event.ProjectID, event.DatasetID)
+	t.Logf("Tracing fields: SpanID=%s, RootSpanID=%s, SpanParents=%v, IsRoot=%v",
+		event.SpanID, event.RootSpanID, event.SpanParents, event.IsRoot)
+	t.Logf("PaginationKey=%s", event.PaginationKey)
+}
+
 // TestDatasets_Fetch_Pagination tests paginated fetching
 func TestDatasets_Fetch_Pagination(t *testing.T) {
 	t.Parallel()

@@ -2,12 +2,11 @@
 package api
 
 import (
-	"context"
 	"fmt"
-	"net/http"
-	"net/url"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
+	"github.com/braintrustdata/braintrust-sdk-go/api/experiments"
+	"github.com/braintrustdata/braintrust-sdk-go/api/functions"
 	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
@@ -68,44 +67,14 @@ func NewClient(apiKey string, opts ...Option) (*API, error) {
 	}, nil
 }
 
-// doRequest makes an HTTP request with authentication
-func (a *API) doRequest(ctx context.Context, method, path string, body interface{}) (*http.Response, error) {
-	return a.doRequestWithParams(ctx, method, path, body, nil)
-}
-
-// doRequestWithParams makes an HTTP request with query parameters (for GET) or body (for POST/etc)
-func (a *API) doRequestWithParams(ctx context.Context, method, path string, body interface{}, params url.Values) (*http.Response, error) {
-	// Convert url.Values to map[string]string for the https client
-	var paramsMap map[string]string
-	if params != nil {
-		paramsMap = make(map[string]string)
-		for key, values := range params {
-			if len(values) > 0 {
-				paramsMap[key] = values[0] // Use first value
-			}
-		}
-	}
-
-	switch method {
-	case "GET":
-		return a.client.GET(ctx, path, paramsMap)
-	case "POST":
-		return a.client.POST(ctx, path, body)
-	case "DELETE":
-		return a.client.DELETE(ctx, path)
-	default:
-		return a.client.POST(ctx, path, body)
-	}
-}
-
 // Projects returns a client for project operations
 func (a *API) Projects() *projects.API {
 	return projects.New(a.client)
 }
 
-// Experiments returns a client for experiment operations
-func (a *API) Experiments() *ExperimentsClient {
-	return &ExperimentsClient{client: a}
+// Experiments is used to access the Experiments API
+func (a *API) Experiments() *experiments.API {
+	return experiments.New(a.client)
 }
 
 // Datasets returns a client for dataset operations
@@ -113,7 +82,7 @@ func (a *API) Datasets() *datasets.API {
 	return datasets.New(a.client)
 }
 
-// Functions returns a client for function operations
-func (a *API) Functions() *FunctionsClient {
-	return &FunctionsClient{client: a}
+// Functions is used to access the Functions API
+func (a *API) Functions() *functions.API {
+	return functions.New(a.client)
 }

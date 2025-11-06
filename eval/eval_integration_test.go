@@ -10,6 +10,8 @@ import (
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
+	"github.com/braintrustdata/braintrust-sdk-go/api/experiments"
+	functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
 	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
@@ -41,7 +43,7 @@ func TestEval_Integration(t *testing.T) {
 	testSlug := tests.RandomName(t, "task")
 
 	// Clean up any existing function from previous test runs
-	if existing, _ := functions.Query(ctx, api.FunctionQueryOpts{
+	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
 		ProjectName: integrationTestProject,
 		Slug:        testSlug,
 		Limit:       1,
@@ -51,7 +53,7 @@ func TestEval_Integration(t *testing.T) {
 
 	// Create a simple prompt
 	// Note: function_type should be omitted for prompts, not "prompt"
-	function, err := functions.Create(ctx, api.FunctionCreateRequest{
+	function, err := functions.Create(ctx, functionsapi.CreateParams{
 		ProjectID: project.ID,
 		Name:      "Test Echo Task",
 		Slug:      testSlug,
@@ -80,7 +82,7 @@ func TestEval_Integration(t *testing.T) {
 	}()
 
 	// Verify the function is queryable
-	foundFuncs, err := functions.Query(ctx, api.FunctionQueryOpts{
+	foundFuncs, err := functions.Query(ctx, functionsapi.QueryParams{
 		ProjectName: integrationTestProject,
 		Slug:        testSlug,
 		Limit:       1,
@@ -169,7 +171,7 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 	testSlug := tests.RandomName(t, "struct")
 
 	// Clean up any existing function from previous test runs
-	if existing, _ := functions.Query(ctx, api.FunctionQueryOpts{
+	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
 		ProjectName: integrationTestProject,
 		Slug:        testSlug,
 		Limit:       1,
@@ -178,7 +180,7 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 	}
 
 	// Create a prompt that returns JSON
-	function, err := functions.Create(ctx, api.FunctionCreateRequest{
+	function, err := functions.Create(ctx, functionsapi.CreateParams{
 		ProjectID: project.ID,
 		Name:      "JSON Answer Prompt",
 		Slug:      testSlug,
@@ -699,11 +701,11 @@ func TestEval_DifferentProject(t *testing.T) {
 	assert.NotEmpty(t, result.String())
 
 	// Verify the experiment was created in the correct project by querying the project's experiments
-	experiments := apiClient.Experiments()
+	experimentsAPI := apiClient.Experiments()
 
 	// Get the experiment by its ID to verify it's in the correct project
 	// We'll use the experiments client to verify the project ID matches
-	expFromAPI, err := experiments.Register(ctx, result.Name(), project.ID, api.RegisterExperimentOpts{
+	expFromAPI, err := experimentsAPI.Register(ctx, result.Name(), project.ID, experiments.RegisterOpts{
 		Update: true, // Use Update:true to get existing experiment
 	})
 	require.NoError(t, err)
@@ -765,8 +767,8 @@ func TestEval_ProjectNameFallback(t *testing.T) {
 	require.NotNil(t, result)
 
 	// Verify the experiment was created in the correct project (cfg.DefaultProjectName)
-	experiments := apiClient.Experiments()
-	expFromAPI, err := experiments.Register(ctx, result.Name(), project.ID, api.RegisterExperimentOpts{
+	experimentsAPI := apiClient.Experiments()
+	expFromAPI, err := experimentsAPI.Register(ctx, result.Name(), project.ID, experiments.RegisterOpts{
 		Update: true, // Use Update:true to get existing experiment
 	})
 	require.NoError(t, err)

@@ -10,6 +10,7 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go"
 	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
+	functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
 	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/eval"
 )
@@ -121,7 +122,7 @@ func createPrompt(ctx context.Context, apiClient *api.API, slug string) error {
 
 	// Check if the prompt already exists and delete it
 	functions := apiClient.Functions()
-	if existing, _ := functions.Query(ctx, api.FunctionQueryOpts{
+	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
 		ProjectName: "go-sdk-examples",
 		Slug:        slug,
 		Limit:       1,
@@ -131,7 +132,7 @@ func createPrompt(ctx context.Context, apiClient *api.API, slug string) error {
 
 	// Create a prompt that answers questions
 	// The prompt will receive the question as input and should return an answer
-	_, err = functions.Create(ctx, api.FunctionCreateRequest{
+	_, err = functions.Create(ctx, functionsapi.CreateParams{
 		ProjectID: project.ID,
 		Name:      "QA Answer Prompt",
 		Slug:      slug,

@@ -7,32 +7,13 @@ import (
 	"reflect"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
 )
 
 // TaskAPI provides methods for loading tasks/prompts for evaluation.
 type TaskAPI[I, R any] struct {
 	api         *api.API
 	projectName string
-}
-
-// TaskInfo contains metadata about a task/prompt.
-type TaskInfo struct {
-	ID      string
-	Name    string
-	Slug    string
-	Project string
-}
-
-// TaskQueryOpts contains options for querying tasks.
-type TaskQueryOpts struct {
-	// Project filters tasks by project
-	Project string
-
-	// Slug filters by specific slug
-	Slug string
-
-	// Version specifies a specific version
-	Version string
 }
 
 // Get loads a task/prompt by slug and returns a TaskFunc.
@@ -42,7 +23,7 @@ func (t *TaskAPI[I, R]) Get(ctx context.Context, slug string) (TaskFunc[I, R], e
 	}
 
 	// Query for the function/prompt
-	functions, err := t.api.Functions().Query(ctx, api.FunctionQueryOpts{
+	functions, err := t.api.Functions().Query(ctx, functionsapi.QueryParams{
 		ProjectName: t.projectName,
 		Slug:        slug,
 		Limit:       1,
@@ -75,12 +56,6 @@ func (t *TaskAPI[I, R]) Get(ctx context.Context, slug string) (TaskFunc[I, R], e
 			Value: result,
 		}, nil
 	}, nil
-}
-
-// Query searches for tasks matching the given options.
-func (t *TaskAPI[I, R]) Query(ctx context.Context, opts TaskQueryOpts) ([]TaskInfo, error) {
-	// TODO: Implement
-	panic("not implemented")
 }
 
 // convertToType converts the function output to the expected type R.
