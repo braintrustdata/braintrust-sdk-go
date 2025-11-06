@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -384,23 +385,37 @@ func TestDatasets_Query_ByProjectName(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	// Query by project name
-	response, err := api.Query(ctx, QueryParams{
-		ProjectName: integrationTestProject,
-		Limit:       10,
-	})
-	require.NoError(t, err)
-	require.NotNil(t, response)
-	assert.GreaterOrEqual(t, len(response.Objects), 1)
+	// Query by project name (with retry for eventual consistency)
+	var found bool
+	var response *QueryResponse
+	for i := 0; i < 3; i++ {
+		response, err = api.Query(ctx, QueryParams{
+			ProjectName: integrationTestProject,
+			Limit:       10,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, response)
 
-	// Verify at least one dataset belongs to our project
-	found := false
-	for _, ds := range response.Objects {
-		if ds.ID == dataset.ID {
-			found = true
+		// Check if dataset is in results
+		found = false
+		for _, ds := range response.Objects {
+			if ds.ID == dataset.ID {
+				found = true
+				break
+			}
+		}
+
+		if found {
 			break
 		}
+
+		// Wait a bit before retrying (eventual consistency)
+		if i < 2 {
+			time.Sleep(500 * time.Millisecond)
+		}
 	}
+
+	assert.GreaterOrEqual(t, len(response.Objects), 1)
 	assert.True(t, found, "Should find dataset in project")
 }
 
