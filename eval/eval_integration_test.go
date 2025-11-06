@@ -9,6 +9,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
 )
@@ -33,7 +34,7 @@ func TestEval_Integration(t *testing.T) {
 	functions := apiClient.Functions()
 
 	// Register project
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	testSlug := tests.RandomName(t, "task")
@@ -161,7 +162,7 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 	functions := apiClient.Functions()
 
 	// Register project
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	testSlug := tests.RandomName(t, "struct")
@@ -281,7 +282,7 @@ func TestEval_Integration_DatasetByID(t *testing.T) {
 	}
 
 	// Create project
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	// Create dataset
@@ -347,7 +348,7 @@ func TestEval_Integration_DatasetByName(t *testing.T) {
 	}
 
 	// Create project
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	// Create dataset with unique name
@@ -414,7 +415,7 @@ func TestEval_Integration_DatasetWithTagsAndMetadata(t *testing.T) {
 	}
 
 	// Create project
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	// Create dataset

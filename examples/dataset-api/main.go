@@ -9,6 +9,7 @@ import (
 
 	"github.com/braintrustdata/braintrust-sdk-go"
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/eval"
 )
 
@@ -110,9 +111,11 @@ func main() {
 // createPrompt creates a prompt function for answering questions
 func createPrompt(ctx context.Context, apiClient *api.API, slug string) error {
 	// First, get or create the project
-	project, err := apiClient.Projects().Register(ctx, "go-sdk-examples")
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{
+		Name: "go-sdk-examples",
+	})
 	if err != nil {
-		return fmt.Errorf("failed to register project: %w", err)
+		return fmt.Errorf("failed to create project: %w", err)
 	}
 
 	// Check if the prompt already exists and delete it
@@ -168,9 +171,11 @@ func createPrompt(ctx context.Context, apiClient *api.API, slug string) error {
 // createDataset creates a test dataset and returns its ID
 func createDataset(ctx context.Context, apiClient *api.API) (string, error) {
 	// First, get or create the project
-	project, err := apiClient.Projects().Register(ctx, "go-sdk-examples")
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{
+		Name: "go-sdk-examples",
+	})
 	if err != nil {
-		return "", fmt.Errorf("failed to register project: %w", err)
+		return "", fmt.Errorf("failed to create project: %w", err)
 	}
 
 	// Create the dataset

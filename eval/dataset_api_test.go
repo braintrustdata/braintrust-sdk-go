@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
@@ -65,7 +66,7 @@ func TestDatasetAPI_Get_Integration(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create a test dataset
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	dataset, err := apiClient.Datasets().Create(ctx, api.DatasetRequest{
@@ -167,7 +168,7 @@ func TestDatasetAPI_Query_Integration(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create a test dataset
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	datasetName := tests.RandomName(t, "dataset")

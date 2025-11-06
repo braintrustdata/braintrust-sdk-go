@@ -15,6 +15,7 @@ import (
 
 	"github.com/braintrustdata/braintrust-sdk-go"
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/eval"
 )
 
@@ -105,7 +106,9 @@ func main() {
 	}
 
 	// First, create a project
-	project, err := bt.API().Projects().Register(context.Background(), "go-sdk-examples")
+	project, err := bt.API().Projects().Create(context.Background(), projects.CreateParams{
+		Name: "go-sdk-examples",
+	})
 	if err != nil {
 		log.Fatalf("Failed to create project: %v", err)
 	}

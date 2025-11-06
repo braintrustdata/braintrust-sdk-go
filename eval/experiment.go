@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 )
@@ -22,21 +23,22 @@ func registerExperiment(ctx context.Context, cfg *config.Config, session *auth.S
 		return nil, fmt.Errorf("project name is required (set via WithProject option)")
 	}
 
-	// Create API client using session endpoints (prefers logged-in info, falls back to opts)
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+	c, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create API client: %w", err)
 	}
 
-	// Register the project
-	project, err := apiClient.Projects().Register(ctx, projectName)
+	// Create the project
+	project, err := c.Projects().Create(ctx, projects.CreateParams{
+		Name: projectName,
+	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to register project: %w", err)
+		return nil, fmt.Errorf("failed to create project: %w", err)
 	}
 
 	// Register the experiment
-	experiment, err := apiClient.Experiments().Register(ctx, name, project.ID, api.RegisterExperimentOpts{
+	experiment, err := c.Experiments().Register(ctx, name, project.ID, api.RegisterExperimentOpts{
 		Tags:     tags,
 		Metadata: metadata,
 		Update:   update,

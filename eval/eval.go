@@ -17,7 +17,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 	oteltrace "go.opentelemetry.io/otel/trace"
 
-	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 )
@@ -238,12 +237,8 @@ func newEval[I, R any](ctx context.Context, cfg *config.Config, session *auth.Se
 		projectName = "unknown"
 	}
 
-	// Get project ID (registerExperiment already called RegisterProject)
-	project, _ := api.RegisterProject(ctx, cfg, session, projectName)
-	projectID := ""
-	if project != nil {
-		projectID = project.ID
-	}
+	// Get project ID from the experiment (it already has the project ID)
+	projectID := exp.ProjectID
 
 	// Create tracer from injected TracerProvider (instead of global)
 	tracer := tp.Tracer("braintrust.eval")

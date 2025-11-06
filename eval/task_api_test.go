@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
@@ -29,7 +30,7 @@ func TestTaskAPI_Get(t *testing.T) {
 	functions := apiClient.Functions()
 
 	// Register project
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	testSlug := tests.RandomName(t, "task")

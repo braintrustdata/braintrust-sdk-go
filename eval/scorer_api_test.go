@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
 )
 
@@ -26,7 +27,7 @@ func TestScorerAPI_Get(t *testing.T) {
 	functions := apiClient.Functions()
 
 	// Register project
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	testSlug := tests.RandomName(t, "scorer")
@@ -168,7 +169,7 @@ func TestScorerAPI_Query(t *testing.T) {
 	functions := apiClient.Functions()
 
 	// Register project
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	testSlug1 := tests.RandomName(t, "scorer1")

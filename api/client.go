@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
@@ -97,8 +98,8 @@ func (a *API) doRequestWithParams(ctx context.Context, method, path string, body
 }
 
 // Projects returns a client for project operations
-func (a *API) Projects() *ProjectsClient {
-	return &ProjectsClient{client: a}
+func (a *API) Projects() *projects.API {
+	return projects.New(a.client)
 }
 
 // Experiments returns a client for experiment operations
