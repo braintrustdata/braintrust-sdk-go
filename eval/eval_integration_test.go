@@ -658,6 +658,14 @@ func TestEval_DifferentProject(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, project)
 
+	// Clean up: Delete the project when test completes
+	defer func() {
+		err := apiClient.Projects().Delete(ctx, project.ID)
+		if err != nil {
+			t.Logf("Failed to delete test project %s: %v", project.ID, err)
+		}
+	}()
+
 	// Create config with default project (should be overridden by opts.Project)
 	cfg := &config.Config{
 		DefaultProjectName: integrationTestProject,
