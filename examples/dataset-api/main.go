@@ -9,6 +9,7 @@ import (
 
 	"github.com/braintrustdata/braintrust-sdk-go"
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
 	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/eval"
 )
@@ -179,7 +180,7 @@ func createDataset(ctx context.Context, apiClient *api.API) (string, error) {
 	}
 
 	// Create the dataset
-	dataset, err := apiClient.Datasets().Create(ctx, api.DatasetRequest{
+	dataset, err := apiClient.Datasets().Create(ctx, datasets.CreateParams{
 		ProjectID:   project.ID,
 		Name:        "qa-test-dataset",
 		Description: "Test dataset for DatasetAPI example",
@@ -189,7 +190,7 @@ func createDataset(ctx context.Context, apiClient *api.API) (string, error) {
 	}
 
 	// Insert test data
-	events := []api.DatasetEvent{
+	events := []datasets.Event{
 		{
 			Input: map[string]interface{}{
 				"question": "What is 2 + 2?",
@@ -228,7 +229,7 @@ func createDataset(ctx context.Context, apiClient *api.API) (string, error) {
 		},
 	}
 
-	if err := apiClient.Datasets().Insert(ctx, dataset.ID, events); err != nil {
+	if err := apiClient.Datasets().InsertEvents(ctx, dataset.ID, events); err != nil {
 		return "", fmt.Errorf("failed to insert events: %w", err)
 	}
 

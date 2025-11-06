@@ -9,6 +9,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
 	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
@@ -286,17 +287,17 @@ func TestEval_Integration_DatasetByID(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create dataset
-	datasets := apiClient.Datasets()
-	dataset, err := datasets.Create(ctx, api.DatasetRequest{
+	datasetsAPI := apiClient.Datasets()
+	dataset, err := datasetsAPI.Create(ctx, datasets.CreateParams{
 		ProjectID:   project.ID,
 		Name:        tests.RandomName(t, "dataset"),
 		Description: "Test dataset for eval integration",
 	})
 	require.NoError(t, err)
-	defer func() { _ = datasets.Delete(ctx, dataset.ID) }()
+	defer func() { _ = datasetsAPI.Delete(ctx, dataset.ID) }()
 
 	// Insert test data
-	err = datasets.Insert(ctx, dataset.ID, []api.DatasetEvent{
+	err = datasetsAPI.InsertEvents(ctx, dataset.ID, []datasets.Event{
 		{Input: 2, Expected: 4},
 		{Input: 5, Expected: 10},
 	})
@@ -353,17 +354,17 @@ func TestEval_Integration_DatasetByName(t *testing.T) {
 
 	// Create dataset with unique name
 	datasetName := tests.RandomName(t, "dataset")
-	datasets := apiClient.Datasets()
-	dataset, err := datasets.Create(ctx, api.DatasetRequest{
+	datasetsAPI := apiClient.Datasets()
+	dataset, err := datasetsAPI.Create(ctx, datasets.CreateParams{
 		ProjectID:   project.ID,
 		Name:        datasetName,
 		Description: "Test dataset for name-based eval",
 	})
 	require.NoError(t, err)
-	defer func() { _ = datasets.Delete(ctx, dataset.ID) }()
+	defer func() { _ = datasetsAPI.Delete(ctx, dataset.ID) }()
 
 	// Insert test data
-	err = datasets.Insert(ctx, dataset.ID, []api.DatasetEvent{
+	err = datasetsAPI.InsertEvents(ctx, dataset.ID, []datasets.Event{
 		{Input: 3, Expected: 9},
 		{Input: 4, Expected: 16},
 	})
@@ -419,17 +420,17 @@ func TestEval_Integration_DatasetWithTagsAndMetadata(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create dataset
-	datasets := apiClient.Datasets()
-	dataset, err := datasets.Create(ctx, api.DatasetRequest{
+	datasetsAPI := apiClient.Datasets()
+	dataset, err := datasetsAPI.Create(ctx, datasets.CreateParams{
 		ProjectID:   project.ID,
 		Name:        tests.RandomName(t, "dataset"),
 		Description: "Test dataset with tags and metadata",
 	})
 	require.NoError(t, err)
-	defer func() { _ = datasets.Delete(ctx, dataset.ID) }()
+	defer func() { _ = datasetsAPI.Delete(ctx, dataset.ID) }()
 
 	// Insert test data WITH TAGS AND METADATA
-	err = datasets.Insert(ctx, dataset.ID, []api.DatasetEvent{
+	err = datasetsAPI.InsertEvents(ctx, dataset.ID, []datasets.Event{
 		{
 			Input:    2,
 			Expected: 4,

@@ -14,7 +14,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 
 	"github.com/braintrustdata/braintrust-sdk-go"
-	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
 	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/eval"
 )
@@ -35,7 +35,7 @@ type AnswerExpected struct {
 func initializeDataset(bt *braintrust.Client, projectID string) (string, error) {
 	// Create a dataset with timestamp to make it unique
 	timestamp := fmt.Sprintf("%d", time.Now().Unix())
-	datasetInfo, err := bt.API().Datasets().Create(context.Background(), api.DatasetRequest{
+	datasetInfo, err := bt.API().Datasets().Create(context.Background(), datasets.CreateParams{
 		ProjectID:   projectID,
 		Name:        "Sample Struct Dataset " + timestamp,
 		Description: "A sample dataset for demonstrating struct-based evaluation",
@@ -46,7 +46,7 @@ func initializeDataset(bt *braintrust.Client, projectID string) (string, error) 
 	fmt.Printf("📊 Created dataset: %s (ID: %s)\n", datasetInfo.Name, datasetInfo.ID)
 
 	// Insert some sample data into the dataset
-	sampleEvents := []api.DatasetEvent{
+	sampleEvents := []datasets.Event{
 		{
 			Input: map[string]interface{}{
 				"text":     "hello world",
@@ -82,7 +82,7 @@ func initializeDataset(bt *braintrust.Client, projectID string) (string, error) 
 		},
 	}
 
-	err = bt.API().Datasets().Insert(context.Background(), datasetInfo.ID, sampleEvents)
+	err = bt.API().Datasets().Insert(context.Background(), datasetInfo.ID, datasets.InsertParams{Events: sampleEvents})
 	if err != nil {
 		return "", fmt.Errorf("failed to insert events: %v", err)
 	}

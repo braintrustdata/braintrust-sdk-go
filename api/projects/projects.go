@@ -56,7 +56,7 @@ func (a *API) Get(ctx context.Context, id string) (*Project, error) {
 		return nil, fmt.Errorf("project ID is required")
 	}
 
-	path := fmt.Sprintf("/v1/projects/%s", id)
+	path := fmt.Sprintf("/v1/project/%s", id)
 	resp, err := a.client.GET(ctx, path, nil)
 	if err != nil {
 		return nil, err
@@ -88,7 +88,7 @@ func (a *API) List(ctx context.Context, params ListParams) (*ListResponse, error
 		queryParams["limit"] = strconv.Itoa(params.Limit)
 	}
 
-	resp, err := a.client.GET(ctx, "/v1/projects", queryParams)
+	resp, err := a.client.GET(ctx, "/v1/project", queryParams)
 	if err != nil {
 		return nil, err
 	}

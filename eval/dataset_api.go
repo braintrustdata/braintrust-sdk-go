@@ -7,6 +7,7 @@ import (
 	"io"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
 )
 
 // DatasetAPI provides methods for loading datasets for evaluation.
@@ -51,17 +52,17 @@ func (d *DatasetAPI[I, R]) Query(ctx context.Context, opts DatasetQueryOpts) (Ca
 	}
 
 	// Otherwise query for datasets using api.Client
-	params := map[string]string{
-		"limit": "1", // Only get the most recent
+	queryParams := datasets.QueryParams{
+		Limit: 1, // Only get the most recent
 	}
 	if opts.Name != "" {
-		params["dataset_name"] = opts.Name
+		queryParams.Name = opts.Name
 	}
 	if opts.Version != "" {
-		params["version"] = opts.Version
+		queryParams.Version = opts.Version
 	}
 
-	response, err := d.apiClient.Datasets().Query(ctx, params)
+	response, err := d.apiClient.Datasets().Query(ctx, queryParams)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query datasets: %w", err)
 	}
@@ -77,7 +78,7 @@ func (d *DatasetAPI[I, R]) Query(ctx context.Context, opts DatasetQueryOpts) (Ca
 }
 
 // dataset handles fetching events from Braintrust with pagination.
-// It maintains pagination state and calls api.DatasetsClient for each page.
+// It maintains pagination state and calls datasets.API for each page.
 type dataset struct {
 	datasetID      string
 	events         []json.RawMessage
@@ -86,11 +87,11 @@ type dataset struct {
 	exhausted      bool
 	maxRecords     int
 	recordCount    int
-	datasetsClient *api.DatasetsClient
+	datasetsClient *datasets.API
 }
 
 // newDataset creates a new dataset iterator
-func newDataset(datasetID string, maxRecords int, datasetsClient *api.DatasetsClient) *dataset {
+func newDataset(datasetID string, maxRecords int, datasetsClient *datasets.API) *dataset {
 	return &dataset{
 		datasetID:      datasetID,
 		maxRecords:     maxRecords,

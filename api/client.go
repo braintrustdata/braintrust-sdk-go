@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
 	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
@@ -108,8 +109,8 @@ func (a *API) Experiments() *ExperimentsClient {
 }
 
 // Datasets returns a client for dataset operations
-func (a *API) Datasets() *DatasetsClient {
-	return &DatasetsClient{client: a}
+func (a *API) Datasets() *datasets.API {
+	return datasets.New(a.client)
 }
 
 // Functions returns a client for function operations
