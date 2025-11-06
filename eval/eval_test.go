@@ -97,7 +97,7 @@ func TestNewEval_Success(t *testing.T) {
 	t.Parallel()
 
 	// Create test cases with tags and metadata
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{
 			Input:    testInput{Value: "test1"},
 			Expected: testOutput{Result: "expected1"},
@@ -234,7 +234,7 @@ func TestNewEval_Success(t *testing.T) {
 func TestNewEval_Parallelism(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test"}},
 	})
 	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
@@ -248,7 +248,7 @@ func TestNewEval_Parallelism(t *testing.T) {
 func TestNewEval_DefaultParallelism(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test"}},
 	})
 	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
@@ -267,7 +267,7 @@ func TestNewEval_DefaultParallelism(t *testing.T) {
 func TestEval_Run_TaskError(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test1"}},
 		{Input: testInput{Value: "error"}},
 		{Input: testInput{Value: "test2"}},
@@ -321,7 +321,7 @@ func TestEval_Run_TaskError(t *testing.T) {
 func TestEval_Run_ScorerError(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test1"}},
 		{Input: testInput{Value: "test2"}},
 	})
@@ -384,7 +384,7 @@ func TestEval_Run_ScorerError(t *testing.T) {
 func TestEval_Run_PrintsSummary(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test1"}},
 		{Input: testInput{Value: "test2"}},
 	})
@@ -416,7 +416,7 @@ func TestEval_Run_PrintsSummary(t *testing.T) {
 func TestEval_Run_QuietSuppressesSummary(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test1"}},
 	})
 
@@ -445,7 +445,7 @@ func TestTaskFunc_ReceivesTaskHooks(t *testing.T) {
 	t.Parallel()
 
 	// Create test case with metadata, tags, and expected value
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{
 			Input:    testInput{Value: "test"},
 			Expected: testOutput{Result: "expected-result"},
@@ -502,7 +502,7 @@ func TestTaskFunc_ReceivesTaskHooks(t *testing.T) {
 func TestTaskFunc_ModifyTaskSpan(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test"}},
 	})
 
@@ -539,7 +539,7 @@ func TestTaskFunc_ModifyTaskSpan(t *testing.T) {
 func TestTaskFunc_ModifyEvalSpan(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test"}},
 	})
 
@@ -576,7 +576,7 @@ func TestTaskFunc_ModifyEvalSpan(t *testing.T) {
 func TestTaskFunc_ReturnsTaskResult(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test1"}},
 		{Input: testInput{Value: "test2"}},
 	})
@@ -614,7 +614,7 @@ func TestTaskFunc_ReturnsTaskResult(t *testing.T) {
 func TestTaskFunc_TAdapter(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test"}},
 	})
 
@@ -648,7 +648,7 @@ func TestEval_ParallelWithTaskErrors(t *testing.T) {
 	t.Parallel()
 
 	// Test that parallel execution properly handles multiple task errors
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "pass1"}},
 		{Input: testInput{Value: "fail1"}},
 		{Input: testInput{Value: "pass2"}},
@@ -693,7 +693,7 @@ func TestEval_ParallelWithScorerErrors(t *testing.T) {
 	t.Parallel()
 
 	// Test that parallel execution properly handles multiple scorer errors
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test1"}},
 		{Input: testInput{Value: "test2"}},
 		{Input: testInput{Value: "test3"}},
@@ -743,7 +743,7 @@ func TestEval_ParallelAllTasksFail(t *testing.T) {
 	t.Parallel()
 
 	// Test that parallel execution handles the case where all tasks fail
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test1"}},
 		{Input: testInput{Value: "test2"}},
 		{Input: testInput{Value: "test3"}},
@@ -840,7 +840,7 @@ func TestEval_ScoreMetadata_SingleScorer(t *testing.T) {
 
 	// Test single scorer with metadata - matches Python/TypeScript behavior
 	// Single score: metadata and output should be flat at top level
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test"}},
 	})
 
@@ -892,7 +892,7 @@ func TestEval_ScoreMetadata_MultipleScorers(t *testing.T) {
 
 	// Test multiple scorers with mixed metadata - matches Python/TypeScript behavior
 	// Multiple scores: metadata and output should be nested by score name
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test"}},
 	})
 
@@ -956,7 +956,7 @@ func TestEval_ScoreMetadata_NoMetadata(t *testing.T) {
 	t.Parallel()
 
 	// Test that when a single score has no metadata, metadata attribute is not set
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test"}},
 	})
 
@@ -1045,7 +1045,7 @@ func TestEval_OriginAttributeFromDataset(t *testing.T) {
 	})
 
 	// Create eval with the dataset case
-	testEval := newUnitTestEval(t, NewCases([]Case[testInput, testOutput]{datasetCase}), task, nil, 1)
+	testEval := newUnitTestEval(t, NewDataset([]Case[testInput, testOutput]{datasetCase}), task, nil, 1)
 
 	// Run the eval
 	ctx := context.Background()
@@ -1093,7 +1093,7 @@ func TestEval_NoOriginAttributeForInMemoryCase(t *testing.T) {
 	})
 
 	// Create eval with the in-memory case
-	testEval := newUnitTestEval(t, NewCases([]Case[testInput, testOutput]{inMemoryCase}), task, nil, 1)
+	testEval := newUnitTestEval(t, NewDataset([]Case[testInput, testOutput]{inMemoryCase}), task, nil, 1)
 
 	// Run the eval
 	ctx := context.Background()

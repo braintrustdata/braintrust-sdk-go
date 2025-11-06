@@ -12,12 +12,6 @@ func NewDataset[I, R any](cases []Case[I, R]) Dataset[I, R] {
 	}
 }
 
-// NewCases is an alias for NewDataset for backward compatibility.
-// Deprecated: Use NewDataset instead.
-func NewCases[I, R any](cases []Case[I, R]) Dataset[I, R] {
-	return NewDataset(cases)
-}
-
 // sliceCases implements the Dataset interface for a slice of cases.
 type sliceCases[I, R any] struct {
 	cases []Case[I, R]

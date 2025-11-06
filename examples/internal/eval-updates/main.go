@@ -53,7 +53,7 @@ func main() {
 
 	result1, err := evaluator.Run(context.Background(), eval.Opts[string, string]{
 		Experiment: "uppercase-eval-demo",
-		Dataset:    eval.NewCases(firstCases),
+		Dataset:    eval.NewDataset(firstCases),
 		Task:       eval.T(uppercaseTask),
 		Scorers:    []eval.Scorer[string, string]{isUppercaseScorer},
 		Update:     false, // Create new experiment (default behavior)
@@ -84,7 +84,7 @@ func main() {
 
 	result2, err := evaluator.Run(context.Background(), eval.Opts[string, string]{
 		Experiment: experimentName, // Use the EXACT name from Round 1 (including any suffix)
-		Dataset:    eval.NewCases(secondCases),
+		Dataset:    eval.NewDataset(secondCases),
 		Task:       eval.T(uppercaseTask),
 		Scorers:    []eval.Scorer[string, string]{isUppercaseScorer},
 		Update:     true, // Append to existing experiment
@@ -112,7 +112,7 @@ func main() {
 
 	result3, err := evaluator.Run(context.Background(), eval.Opts[string, string]{
 		Experiment: experimentName, // Use the EXACT name from Round 1 (including any suffix)
-		Dataset:    eval.NewCases(thirdCases),
+		Dataset:    eval.NewDataset(thirdCases),
 		Task:       eval.T(uppercaseTask),
 		Scorers:    []eval.Scorer[string, string]{isUppercaseScorer},
 		Update:     true, // Continue appending to the same experiment

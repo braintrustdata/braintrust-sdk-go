@@ -101,7 +101,7 @@ func TestEval_Integration(t *testing.T) {
 	require.NotNil(t, task)
 
 	// Create evaluation cases
-	cases := NewCases([]Case[string, string]{
+	cases := NewDataset([]Case[string, string]{
 		{
 			Input:    "hello",
 			Expected: "hello",
@@ -237,7 +237,7 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 	require.NotNil(t, task)
 
 	// Create evaluation cases
-	cases := NewCases([]Case[QuestionInput, AnswerOutput]{
+	cases := NewDataset([]Case[QuestionInput, AnswerOutput]{
 		{
 			Input:    QuestionInput{Question: "What is 2+2?"},
 			Expected: AnswerOutput{Answer: "4"},
@@ -489,7 +489,7 @@ func TestEval_Integration_ExperimentTags(t *testing.T) {
 		DefaultProjectName: integrationTestProject,
 	}
 
-	cases := NewCases([]Case[string, string]{
+	cases := NewDataset([]Case[string, string]{
 		{Input: "hello", Expected: "hello"},
 	})
 
@@ -526,7 +526,7 @@ func TestEval_Integration_ExperimentMetadata(t *testing.T) {
 		DefaultProjectName: integrationTestProject,
 	}
 
-	cases := NewCases([]Case[string, string]{
+	cases := NewDataset([]Case[string, string]{
 		{Input: "test", Expected: "test"},
 	})
 
@@ -570,7 +570,7 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 	// Create unique experiment name
 	experimentName := tests.RandomName(t, "update-test")
 
-	cases1 := NewCases([]Case[string, string]{
+	cases1 := NewDataset([]Case[string, string]{
 		{Input: "hello", Expected: "hello"},
 	})
 
@@ -597,7 +597,7 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 
 	firstExpID := result1.ID()
 
-	cases2 := NewCases([]Case[string, string]{
+	cases2 := NewDataset([]Case[string, string]{
 		{Input: "world", Expected: "world"},
 	})
 
@@ -668,7 +668,7 @@ func TestEval_DifferentProject(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Create test cases
-	cases := NewCases([]Case[string, string]{
+	cases := NewDataset([]Case[string, string]{
 		{Input: "test1", Expected: "test1"},
 		{Input: "test2", Expected: "test2"},
 	})
@@ -740,7 +740,7 @@ func TestEval_ProjectNameFallback(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Create test cases
-	cases := NewCases([]Case[string, string]{
+	cases := NewDataset([]Case[string, string]{
 		{Input: "test1", Expected: "test1"},
 	})
 
@@ -793,7 +793,7 @@ func TestEval_NoProjectName(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Create test cases
-	cases := NewCases([]Case[string, string]{
+	cases := NewDataset([]Case[string, string]{
 		{Input: "test1", Expected: "test1"},
 	})
 

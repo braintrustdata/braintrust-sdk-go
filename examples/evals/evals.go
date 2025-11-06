@@ -56,7 +56,7 @@ func main() {
 	evaluator := braintrust.NewEvaluator[string, string](bt)
 	_, err = evaluator.Run(context.Background(), eval.Opts[string, string]{
 		Experiment: "go-eval-example",
-		Dataset: eval.NewCases([]eval.Case[string, string]{
+		Dataset: eval.NewDataset([]eval.Case[string, string]{
 			{Input: "strawberry", Expected: "fruit", Metadata: map[string]interface{}{"color": "red"}},
 			{Input: "asparagus", Expected: "vegetable", Metadata: map[string]interface{}{"color": "green"}},
 			{Input: "apple", Expected: "fruit", Metadata: map[string]interface{}{"color": "red"}},

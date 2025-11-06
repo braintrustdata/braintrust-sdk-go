@@ -77,7 +77,7 @@ func exampleNewEvaluator(client *braintrust.Client) {
 	})
 
 	// Run first evaluation
-	cases1 := eval.NewCases([]eval.Case[string, string]{
+	cases1 := eval.NewDataset([]eval.Case[string, string]{
 		{Input: "World", Expected: "Hello, World!"},
 		{Input: "Alice", Expected: "Hello, Alice!"},
 	})
@@ -96,7 +96,7 @@ func exampleNewEvaluator(client *braintrust.Client) {
 	}
 
 	// Run second evaluation with the same evaluator
-	cases2 := eval.NewCases([]eval.Case[string, string]{
+	cases2 := eval.NewDataset([]eval.Case[string, string]{
 		{Input: "Bob", Expected: "Hello, Bob!"},
 		{Input: "Charlie", Expected: "Hello, Charlie!"},
 	})

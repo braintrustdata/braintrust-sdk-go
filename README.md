@@ -65,7 +65,7 @@ func main() {
     // Run an evaluation
     _, err = evaluator.Run(context.Background(), eval.Opts[string, string]{
         Experiment: "greeting-experiment",
-        Dataset: eval.NewCases([]eval.Case[string, string]{
+        Dataset: eval.NewDataset([]eval.Case[string, string]{
             {Input: "World", Expected: "Hello World"},
             {Input: "Alice", Expected: "Hello Alice"},
         }),
