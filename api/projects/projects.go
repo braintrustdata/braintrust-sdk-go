@@ -101,3 +101,23 @@ func (a *API) List(ctx context.Context, params ListParams) (*ListResponse, error
 
 	return &result, nil
 }
+
+// Delete deletes a project by ID.
+//
+// Example:
+//
+//	err := client.Projects().Delete(ctx, "proj_123")
+func (a *API) Delete(ctx context.Context, id string) error {
+	if id == "" {
+		return fmt.Errorf("project ID is required")
+	}
+
+	path := fmt.Sprintf("/v1/project/%s", id)
+	resp, err := a.client.DELETE(ctx, path)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	return nil
+}
