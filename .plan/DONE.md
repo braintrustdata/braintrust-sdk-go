@@ -386,26 +386,51 @@ fmt.Printf("View trace: %s\n", bt.Permalink(span))
 
 ## Latest Achievement
 
-**Permalink Test Coverage Complete!** Added comprehensive tests for the `Permalink` function with all span types (trace/trace_test.go):
+**API Refactoring Complete!** Successfully refactored all API packages to use subpackages with comprehensive integration tests:
+
+### API Packages Refactored (2025-11-06)
+1. **Projects API** (`api/projects/`)
+   - Create(), Get(), List() methods
+   - 86.8% test coverage
+   - 9 integration tests
+
+2. **Datasets API** (`api/datasets/`)
+   - Create(), Insert(), Delete(), Fetch(), Query() methods
+   - Enhanced Event struct with all fields (system, tracing, merge controls)
+   - Added Origin type for event provenance
+   - 84.5% test coverage
+   - 11 integration tests including EventFields test
+
+3. **Experiments API** (`api/experiments/`)
+   - Full CRUD: Create(), Register(), Get(), List(), Delete()
+   - Support for all experiment fields (description, base_exp_id, dataset_id, etc.)
+   - 85.2% test coverage
+   - 11 integration tests
+
+4. **Functions API** (`api/functions/`)
+   - Create(), Query(), Invoke(), Delete() methods
+   - Import alias pattern for variable shadowing
+   - 78.6% test coverage
+   - 8 integration tests
+
+### API Cleanup
+- **Removed** `TaskAPI.Query()` - unused method, not needed (users can use `api.Functions().Query()`)
+- **Removed** unused types: `TaskInfo`, `TaskQueryOpts`
+- **Removed** skipped test for removed functionality
+- All tests passing ✅
+- Full CI suite passing: `make ci` ✅
+
+**Previous Achievement:** Permalink Test Coverage Complete! Added comprehensive tests for the `Permalink` function with all span types (trace/trace_test.go):
 - TestPermalink_ReadWriteSpan - Tests live, recording spans
 - TestPermalink_EndedSpan - Tests spans before and after End() call
 - TestPermalink_NoopSpan - Tests noop tracer fallback behavior
 - All 10 trace tests passing ✅
-- Updated test helper to use `auth.NewTestSession()` with proper org/app URL
-- Full CI suite passing: `make ci` ✅
 
-**Previous Achievement:** All Examples Migrated! Successfully updated all 18 examples to use the new `braintrust.New()` API pattern. All examples:
+**Earlier Achievement:** All Examples Migrated! Successfully updated all 18 examples to use the new `braintrust.New()` API pattern. All examples:
 - Use consistent project name ("go-sdk-examples")
 - Use file paths for top-level span names
 - Use simplified Client.Permalink() method
 - Build successfully: `go build ./examples/...` ✅
-- All tests still passing: `make ci` ✅
-
-**Earlier Achievement:** 100% Test Parity! The new eval API has complete test coverage matching the old API. Added 13 new tests covering:
-- Parallel execution edge cases (4 tests)
-- Score metadata formatting (3 tests)
-- Dataset integration (3 tests)
-- Experiment features (3 tests: tags, metadata, update)
 
 All 41+ tests passing. The new API supports 100% of old API functionality plus enhancements (TaskHooks, cleaner signatures, better type safety).
 
@@ -437,6 +462,83 @@ Added comprehensive test coverage for the `Permalink` function with all span typ
 
 **Files Modified:**
 - `/trace/trace_test.go` - Added 3 new Permalink tests (lines 483-579)
+
+---
+
+## API Subpackage Refactoring (`/api/*/`) ✅
+
+Complete refactoring of API client to use subpackages with comprehensive integration tests.
+
+**Completed Tasks:**
+- [x] Refactor Projects API to api/projects/
+- [x] Refactor Datasets API to api/datasets/
+- [x] Refactor Experiments API to api/experiments/
+- [x] Refactor Functions API to api/functions/
+- [x] Add integration tests for all API packages (39 tests total)
+- [x] Enhanced Dataset Event struct with all API fields
+- [x] Remove unused TaskAPI.Query() method
+- [x] All tests passing: `make ci` ✅
+
+**Projects API** (`api/projects/`):
+- Types: Project, CreateParams, ListParams, ListResponse
+- Methods: New(), Create(), Get(), List()
+- Coverage: 86.8%
+- Tests: 9 integration tests
+
+**Datasets API** (`api/datasets/`):
+- Types: Dataset, Event, Origin, CreateParams, InsertParams, QueryParams, FetchResponse
+- Enhanced Event struct with 20+ fields:
+  - Core: ID, Input, Expected, Metadata, Tags
+  - System: XactID, Created, PaginationKey, ProjectID, DatasetID
+  - Tracing: SpanID, RootSpanID, SpanParents, IsRoot, ParentID, Origin
+  - Merge: IsMerge, MergePaths, ObjectDelete
+- Methods: New(), Create(), Insert(), InsertEvents(), Delete(), Fetch(), Query()
+- Coverage: 84.5%
+- Tests: 11 integration tests including EventFields validation
+
+**Experiments API** (`api/experiments/`):
+- Types: Experiment, CreateParams, RegisterOpts, ListParams, ListResponse
+- Full experiment fields: ID, Name, ProjectID, Description, BaseExpID, DatasetID, DatasetVersion, Public, Tags, Metadata
+- Methods: New(), Create(), Register(), Get(), List(), Delete()
+- Coverage: 85.2%
+- Tests: 11 integration tests including full lifecycle and EnsureNew
+
+**Functions API** (`api/functions/`):
+- Types: Function, QueryParams, CreateParams, InvokeParams, QueryResponse
+- Import alias pattern (functionsapi) to avoid variable shadowing
+- Methods: New(), Create(), Query(), Invoke(), Delete()
+- Coverage: 78.6%
+- Tests: 8 integration tests
+
+**Files Created:**
+- `/api/projects/types.go` - Project types
+- `/api/projects/projects.go` - Project operations
+- `/api/projects/projects_test.go` - 9 integration tests
+- `/api/datasets/types.go` - Dataset and enhanced Event types
+- `/api/datasets/datasets.go` - Dataset operations
+- `/api/datasets/datasets_test.go` - 11 integration tests
+- `/api/experiments/types.go` - Experiment types
+- `/api/experiments/experiments.go` - Experiment CRUD operations
+- `/api/experiments/experiments_test.go` - 11 integration tests
+- `/api/functions/types.go` - Function types
+- `/api/functions/functions.go` - Function operations
+- `/api/functions/functions_test.go` - 8 integration tests
+
+**Files Modified:**
+- `/api/client.go` - Updated to use subpackages, removed unused helper methods
+- `/eval/experiment.go` - Updated imports to use experiments package
+- `/eval/eval_integration_test.go` - Updated imports to use experiments package
+- `/eval/task_api.go` - Removed unused Query() method and types
+- `/eval/task_api_test.go` - Removed skipped test for removed functionality
+- `/eval/scorer_api.go` - Updated imports to use functions package
+- `/eval/task_api.go` - Updated imports to use functions package
+- `/examples/dataset-api/main.go` - Updated to use functionsapi import alias
+
+**Deleted Files:**
+- `/api/projects.go` - Moved to api/projects/
+- `/api/datasets.go` - Moved to api/datasets/
+- `/api/experiments.go` - Moved to api/experiments/
+- `/api/functions.go` - Moved to api/functions/
 
 ---
 
