@@ -10,6 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
+	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
@@ -65,10 +67,10 @@ func TestDatasetAPI_Get_Integration(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create a test dataset
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
-	dataset, err := apiClient.Datasets().Create(ctx, api.DatasetRequest{
+	dataset, err := apiClient.Datasets().Create(ctx, datasets.CreateParams{
 		ProjectID:   project.ID,
 		Name:        tests.RandomName(t, "dataset"),
 		Description: "Test dataset for DatasetAPI.Get",
@@ -79,7 +81,7 @@ func TestDatasetAPI_Get_Integration(t *testing.T) {
 	}()
 
 	// Insert test data
-	events := []api.DatasetEvent{
+	events := []datasets.Event{
 		{
 			Input: map[string]interface{}{
 				"question": "What is 2+2?",
@@ -100,7 +102,7 @@ func TestDatasetAPI_Get_Integration(t *testing.T) {
 		},
 	}
 
-	err = apiClient.Datasets().Insert(ctx, dataset.ID, events)
+	err = apiClient.Datasets().InsertEvents(ctx, dataset.ID, events)
 	require.NoError(t, err)
 
 	// Now test the DatasetAPI
@@ -167,11 +169,11 @@ func TestDatasetAPI_Query_Integration(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create a test dataset
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	datasetName := tests.RandomName(t, "dataset")
-	dataset, err := apiClient.Datasets().Create(ctx, api.DatasetRequest{
+	dataset, err := apiClient.Datasets().Create(ctx, datasets.CreateParams{
 		ProjectID:   project.ID,
 		Name:        datasetName,
 		Description: "Test dataset for DatasetAPI.Query",
@@ -182,7 +184,7 @@ func TestDatasetAPI_Query_Integration(t *testing.T) {
 	}()
 
 	// Insert test data
-	events := []api.DatasetEvent{
+	events := []datasets.Event{
 		{
 			Input: map[string]interface{}{
 				"question": "Test question 1",
@@ -209,7 +211,7 @@ func TestDatasetAPI_Query_Integration(t *testing.T) {
 		},
 	}
 
-	err = apiClient.Datasets().Insert(ctx, dataset.ID, events)
+	err = apiClient.Datasets().InsertEvents(ctx, dataset.ID, events)
 	require.NoError(t, err)
 
 	// Test Query with ID and Limit

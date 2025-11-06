@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
+	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
 )
 
@@ -26,13 +28,13 @@ func TestScorerAPI_Get(t *testing.T) {
 	functions := apiClient.Functions()
 
 	// Register project
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	testSlug := tests.RandomName(t, "scorer")
 
 	// Clean up any existing function with this slug from previous failed test runs
-	if existing, _ := functions.Query(ctx, api.FunctionQueryOpts{
+	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
 		ProjectName: integrationTestProject,
 		Slug:        testSlug,
 		Limit:       1,
@@ -60,7 +62,7 @@ func TestScorerAPI_Get(t *testing.T) {
 		},
 	}
 
-	function, err := functions.Create(ctx, api.FunctionCreateRequest{
+	function, err := functions.Create(ctx, functionsapi.CreateParams{
 		ProjectID:    project.ID,
 		Name:         "Test Scorer",
 		Slug:         testSlug,
@@ -168,7 +170,7 @@ func TestScorerAPI_Query(t *testing.T) {
 	functions := apiClient.Functions()
 
 	// Register project
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	testSlug1 := tests.RandomName(t, "scorer1")
@@ -176,7 +178,7 @@ func TestScorerAPI_Query(t *testing.T) {
 
 	// Clean up any existing functions
 	for _, slug := range []string{testSlug1, testSlug2} {
-		if existing, _ := functions.Query(ctx, api.FunctionQueryOpts{
+		if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
 			ProjectName: integrationTestProject,
 			Slug:        slug,
 			Limit:       1,
@@ -203,7 +205,7 @@ func TestScorerAPI_Query(t *testing.T) {
 		},
 	}
 
-	function1, err := functions.Create(ctx, api.FunctionCreateRequest{
+	function1, err := functions.Create(ctx, functionsapi.CreateParams{
 		ProjectID:    project.ID,
 		Name:         "Scorer 1",
 		Slug:         testSlug1,
@@ -214,7 +216,7 @@ func TestScorerAPI_Query(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { _ = functions.Delete(ctx, function1.ID) }()
 
-	function2, err := functions.Create(ctx, api.FunctionCreateRequest{
+	function2, err := functions.Create(ctx, functionsapi.CreateParams{
 		ProjectID:    project.ID,
 		Name:         "Scorer 2",
 		Slug:         testSlug2,

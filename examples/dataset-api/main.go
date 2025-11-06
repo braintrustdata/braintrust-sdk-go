@@ -9,6 +9,9 @@ import (
 
 	"github.com/braintrustdata/braintrust-sdk-go"
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
+	functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
+	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/eval"
 )
 
@@ -110,14 +113,16 @@ func main() {
 // createPrompt creates a prompt function for answering questions
 func createPrompt(ctx context.Context, apiClient *api.API, slug string) error {
 	// First, get or create the project
-	project, err := apiClient.Projects().Register(ctx, "go-sdk-examples")
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{
+		Name: "go-sdk-examples",
+	})
 	if err != nil {
-		return fmt.Errorf("failed to register project: %w", err)
+		return fmt.Errorf("failed to create project: %w", err)
 	}
 
 	// Check if the prompt already exists and delete it
 	functions := apiClient.Functions()
-	if existing, _ := functions.Query(ctx, api.FunctionQueryOpts{
+	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
 		ProjectName: "go-sdk-examples",
 		Slug:        slug,
 		Limit:       1,
@@ -127,7 +132,7 @@ func createPrompt(ctx context.Context, apiClient *api.API, slug string) error {
 
 	// Create a prompt that answers questions
 	// The prompt will receive the question as input and should return an answer
-	_, err = functions.Create(ctx, api.FunctionCreateRequest{
+	_, err = functions.Create(ctx, functionsapi.CreateParams{
 		ProjectID: project.ID,
 		Name:      "QA Answer Prompt",
 		Slug:      slug,
@@ -168,13 +173,15 @@ func createPrompt(ctx context.Context, apiClient *api.API, slug string) error {
 // createDataset creates a test dataset and returns its ID
 func createDataset(ctx context.Context, apiClient *api.API) (string, error) {
 	// First, get or create the project
-	project, err := apiClient.Projects().Register(ctx, "go-sdk-examples")
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{
+		Name: "go-sdk-examples",
+	})
 	if err != nil {
-		return "", fmt.Errorf("failed to register project: %w", err)
+		return "", fmt.Errorf("failed to create project: %w", err)
 	}
 
 	// Create the dataset
-	dataset, err := apiClient.Datasets().Create(ctx, api.DatasetRequest{
+	dataset, err := apiClient.Datasets().Create(ctx, datasets.CreateParams{
 		ProjectID:   project.ID,
 		Name:        "qa-test-dataset",
 		Description: "Test dataset for DatasetAPI example",
@@ -184,7 +191,7 @@ func createDataset(ctx context.Context, apiClient *api.API) (string, error) {
 	}
 
 	// Insert test data
-	events := []api.DatasetEvent{
+	events := []datasets.Event{
 		{
 			Input: map[string]interface{}{
 				"question": "What is 2 + 2?",
@@ -223,7 +230,7 @@ func createDataset(ctx context.Context, apiClient *api.API) (string, error) {
 		},
 	}
 
-	if err := apiClient.Datasets().Insert(ctx, dataset.ID, events); err != nil {
+	if err := apiClient.Datasets().InsertEvents(ctx, dataset.ID, events); err != nil {
 		return "", fmt.Errorf("failed to insert events: %w", err)
 	}
 

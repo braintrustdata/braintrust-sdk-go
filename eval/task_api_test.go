@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
+	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
@@ -29,13 +31,13 @@ func TestTaskAPI_Get(t *testing.T) {
 	functions := apiClient.Functions()
 
 	// Register project
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	testSlug := tests.RandomName(t, "task")
 
 	// Clean up any existing function with this slug from previous failed test runs
-	if existing, _ := functions.Query(ctx, api.FunctionQueryOpts{
+	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
 		ProjectName: integrationTestProject,
 		Slug:        testSlug,
 		Limit:       1,
@@ -44,7 +46,7 @@ func TestTaskAPI_Get(t *testing.T) {
 	}
 
 	// Create a test function/prompt
-	function, err := functions.Create(ctx, api.FunctionCreateRequest{
+	function, err := functions.Create(ctx, functionsapi.CreateParams{
 		ProjectID:    project.ID,
 		Name:         "Test Task",
 		Slug:         testSlug,
@@ -85,7 +87,7 @@ func TestTaskAPI_Get(t *testing.T) {
 	var _ = task
 
 	// Test: Query should find the function
-	foundFunctions, err := functions.Query(ctx, api.FunctionQueryOpts{
+	foundFunctions, err := functions.Query(ctx, functionsapi.QueryParams{
 		ProjectName: integrationTestProject,
 		Slug:        testSlug,
 	})
@@ -129,11 +131,6 @@ func TestTaskAPI_Get_EmptySlug(t *testing.T) {
 // TestTaskAPI_Get_ReturnsCallableTask tests that returned TaskFunc is executable
 func TestTaskAPI_Get_ReturnsCallableTask(t *testing.T) {
 	t.Skip("TODO: Implement with real function")
-}
-
-// TestTaskAPI_Query tests querying tasks with options
-func TestTaskAPI_Query(t *testing.T) {
-	t.Skip("TODO: Implement Query method")
 }
 
 // TestTaskAPI_TypeSafety verifies compile-time type safety

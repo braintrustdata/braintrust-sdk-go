@@ -48,15 +48,25 @@ See `.plan/DONE.md` for completed work history.
 - [x] Verify all examples build: `go build ./examples/...` ✅
 - [ ] Verify all examples run: `make examples`
 
-### B. Solidify API design (Priority 3)
+### B. Solidify API design (Priority 3) ✅ COMPLETE
+- [x] Refactor api/ to use subpackages (api/projects/, api/datasets/, api/experiments/, api/functions/)
+  - [x] Projects refactor: api/projects/types.go + projects.go with Create(), Get(), List()
+  - [x] Datasets refactor: api/datasets/types.go + datasets.go with Create(), Insert(), Delete(), Fetch(), Query()
+  - [x] Experiments refactor: api/experiments/types.go + experiments.go with Create(), Register(), Get(), List(), Delete()
+  - [x] Functions refactor: api/functions/types.go + functions.go with Create(), Query(), Invoke(), Delete()
+- [x] Enhanced Dataset Event struct with all fields (system, tracing, merge controls)
+- [x] Added comprehensive integration tests for all API packages
+  - [x] Projects: 86.8% coverage
+  - [x] Datasets: 84.5% coverage (+ EventFields test)
+  - [x] Experiments: 85.2% coverage
+  - [x] Functions: 78.6% coverage
+- [x] Decide: TaskAPI.Query() - REMOVED (unused, not needed)
+- [x] Decide: Experiments API - Added full CRUD (Create, Register, Get, List, Delete)
+- [ ] Address 2 remaining skipped tests:
+  - [ ] task_api_test.go:132 (TestTaskAPI_Get_ReturnsCallableTask)
+  - [ ] scorer_api_test.go:288 (TestScorerAPI_Get)
 - [ ] Review public API surface (client.go, eval/, api/)
 - [ ] Add godoc comments to all exported functions/types
-- [ ] Decide: TaskAPI.Query() - implement or remove stub (eval/task_api.go:82)
-- [ ] Decide: Experiments API - is Register() enough or need Get/List?
-- [ ] Address 3 skipped tests:
-  - [ ] task_api_test.go:131 (TestTaskAPI_Integration)
-  - [ ] task_api_test.go:136 (TestTaskAPI_Get)
-  - [ ] scorer_api_test.go:288 (TestScorerAPI_Get)
 - [ ] Lock in API for v0.1 (no breaking changes after this)
 
 ### C. Test coverage - target >85% (Priority 4)

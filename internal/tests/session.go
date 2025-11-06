@@ -3,10 +3,12 @@ package tests
 
 import (
 	"math/rand"
+	"os"
 	"strings"
 	"testing"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 	intlogger "github.com/braintrustdata/braintrust-sdk-go/internal/logger"
 )
 
@@ -54,4 +56,35 @@ func RandomName(t *testing.T, suffixes ...string) string {
 	}
 	parts = append(parts, suffixes...)
 	return strings.Join(parts, "-")
+}
+
+// GetTestHTTPSClient creates an HTTPS client for integration tests.
+// It reads BRAINTRUST_API_KEY and BRAINTRUST_API_URL from environment variables.
+// Uses the fail logger to report errors immediately.
+// Skips the test if running in short mode (-short flag).
+// Fails the test if BRAINTRUST_API_KEY is not set.
+func GetTestHTTPSClient(t *testing.T) *https.Client {
+	t.Helper()
+
+	if testing.Short() {
+		t.Skip("Skipping integration test in short mode")
+	}
+
+	apiKey := os.Getenv("BRAINTRUST_API_KEY")
+	if apiKey == "" {
+		t.Fatal("BRAINTRUST_API_KEY not set")
+	}
+
+	apiURL := os.Getenv("BRAINTRUST_API_URL")
+	if apiURL == "" {
+		apiURL = "https://api.braintrust.dev"
+	}
+
+	log := intlogger.NewFailTestLogger(t)
+	client, err := https.NewClient(apiKey, apiURL, log)
+	if err != nil {
+		t.Fatalf("Failed to create HTTPS client: %v", err)
+	}
+
+	return client
 }

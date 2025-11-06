@@ -9,6 +9,10 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
+	"github.com/braintrustdata/braintrust-sdk-go/api/experiments"
+	functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
+	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
 )
@@ -33,13 +37,13 @@ func TestEval_Integration(t *testing.T) {
 	functions := apiClient.Functions()
 
 	// Register project
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	testSlug := tests.RandomName(t, "task")
 
 	// Clean up any existing function from previous test runs
-	if existing, _ := functions.Query(ctx, api.FunctionQueryOpts{
+	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
 		ProjectName: integrationTestProject,
 		Slug:        testSlug,
 		Limit:       1,
@@ -49,7 +53,7 @@ func TestEval_Integration(t *testing.T) {
 
 	// Create a simple prompt
 	// Note: function_type should be omitted for prompts, not "prompt"
-	function, err := functions.Create(ctx, api.FunctionCreateRequest{
+	function, err := functions.Create(ctx, functionsapi.CreateParams{
 		ProjectID: project.ID,
 		Name:      "Test Echo Task",
 		Slug:      testSlug,
@@ -78,7 +82,7 @@ func TestEval_Integration(t *testing.T) {
 	}()
 
 	// Verify the function is queryable
-	foundFuncs, err := functions.Query(ctx, api.FunctionQueryOpts{
+	foundFuncs, err := functions.Query(ctx, functionsapi.QueryParams{
 		ProjectName: integrationTestProject,
 		Slug:        testSlug,
 		Limit:       1,
@@ -161,13 +165,13 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 	functions := apiClient.Functions()
 
 	// Register project
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	testSlug := tests.RandomName(t, "struct")
 
 	// Clean up any existing function from previous test runs
-	if existing, _ := functions.Query(ctx, api.FunctionQueryOpts{
+	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
 		ProjectName: integrationTestProject,
 		Slug:        testSlug,
 		Limit:       1,
@@ -176,7 +180,7 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 	}
 
 	// Create a prompt that returns JSON
-	function, err := functions.Create(ctx, api.FunctionCreateRequest{
+	function, err := functions.Create(ctx, functionsapi.CreateParams{
 		ProjectID: project.ID,
 		Name:      "JSON Answer Prompt",
 		Slug:      testSlug,
@@ -281,21 +285,21 @@ func TestEval_Integration_DatasetByID(t *testing.T) {
 	}
 
 	// Create project
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	// Create dataset
-	datasets := apiClient.Datasets()
-	dataset, err := datasets.Create(ctx, api.DatasetRequest{
+	datasetsAPI := apiClient.Datasets()
+	dataset, err := datasetsAPI.Create(ctx, datasets.CreateParams{
 		ProjectID:   project.ID,
 		Name:        tests.RandomName(t, "dataset"),
 		Description: "Test dataset for eval integration",
 	})
 	require.NoError(t, err)
-	defer func() { _ = datasets.Delete(ctx, dataset.ID) }()
+	defer func() { _ = datasetsAPI.Delete(ctx, dataset.ID) }()
 
 	// Insert test data
-	err = datasets.Insert(ctx, dataset.ID, []api.DatasetEvent{
+	err = datasetsAPI.InsertEvents(ctx, dataset.ID, []datasets.Event{
 		{Input: 2, Expected: 4},
 		{Input: 5, Expected: 10},
 	})
@@ -347,22 +351,22 @@ func TestEval_Integration_DatasetByName(t *testing.T) {
 	}
 
 	// Create project
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	// Create dataset with unique name
 	datasetName := tests.RandomName(t, "dataset")
-	datasets := apiClient.Datasets()
-	dataset, err := datasets.Create(ctx, api.DatasetRequest{
+	datasetsAPI := apiClient.Datasets()
+	dataset, err := datasetsAPI.Create(ctx, datasets.CreateParams{
 		ProjectID:   project.ID,
 		Name:        datasetName,
 		Description: "Test dataset for name-based eval",
 	})
 	require.NoError(t, err)
-	defer func() { _ = datasets.Delete(ctx, dataset.ID) }()
+	defer func() { _ = datasetsAPI.Delete(ctx, dataset.ID) }()
 
 	// Insert test data
-	err = datasets.Insert(ctx, dataset.ID, []api.DatasetEvent{
+	err = datasetsAPI.InsertEvents(ctx, dataset.ID, []datasets.Event{
 		{Input: 3, Expected: 9},
 		{Input: 4, Expected: 16},
 	})
@@ -414,21 +418,21 @@ func TestEval_Integration_DatasetWithTagsAndMetadata(t *testing.T) {
 	}
 
 	// Create project
-	project, err := apiClient.Projects().Register(ctx, integrationTestProject)
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
 	// Create dataset
-	datasets := apiClient.Datasets()
-	dataset, err := datasets.Create(ctx, api.DatasetRequest{
+	datasetsAPI := apiClient.Datasets()
+	dataset, err := datasetsAPI.Create(ctx, datasets.CreateParams{
 		ProjectID:   project.ID,
 		Name:        tests.RandomName(t, "dataset"),
 		Description: "Test dataset with tags and metadata",
 	})
 	require.NoError(t, err)
-	defer func() { _ = datasets.Delete(ctx, dataset.ID) }()
+	defer func() { _ = datasetsAPI.Delete(ctx, dataset.ID) }()
 
 	// Insert test data WITH TAGS AND METADATA
-	err = datasets.Insert(ctx, dataset.ID, []api.DatasetEvent{
+	err = datasetsAPI.InsertEvents(ctx, dataset.ID, []datasets.Event{
 		{
 			Input:    2,
 			Expected: 4,
@@ -634,4 +638,178 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 
 	// When Update: false, should create a different experiment ID
 	assert.NotEqual(t, firstExpID, thirdExpID, "Update: false should create a new experiment ID")
+}
+
+// TestEval_DifferentProject tests running an eval with a different project name
+func TestEval_DifferentProject(t *testing.T) {
+	session := createIntegrationTestSession(t)
+	t.Parallel()
+
+	ctx := context.Background()
+
+	// Get endpoints and create API client
+	endpoints := session.Endpoints()
+	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+	require.NoError(t, err)
+
+	// Create a different project (use fixed suffix instead of random)
+	differentProjectName := integrationTestProject + "-other"
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: differentProjectName})
+	require.NoError(t, err)
+	require.NotNil(t, project)
+
+	// Create config with default project (should be overridden by opts.Project)
+	cfg := &config.Config{
+		DefaultProjectName: integrationTestProject,
+	}
+
+	// Create a TracerProvider
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(ctx) }()
+
+	// Create test cases
+	cases := NewCases([]Case[string, string]{
+		{Input: "test1", Expected: "test1"},
+		{Input: "test2", Expected: "test2"},
+	})
+
+	// Create a simple scorer
+	scorer := NewScorer("exact-match", func(ctx context.Context, result TaskResult[string, string]) (Scores, error) {
+		if result.Output == result.Expected {
+			return S(1.0), nil
+		}
+		return S(0.0), nil
+	})
+
+	// Run eval with the different project specified in opts
+	result, err := Run(ctx, Opts[string, string]{
+		Experiment:  tests.RandomName(t, "exp"),
+		ProjectName: differentProjectName, // Override config.DefaultProjectName
+		Cases:       cases,
+		Task: T(func(ctx context.Context, input string) (string, error) {
+			return input, nil
+		}),
+		Scorers: []Scorer[string, string]{scorer},
+		Quiet:   true,
+	}, cfg, session, tp)
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	// Verify the result
+	assert.NotEmpty(t, result.ID())
+	assert.NotEmpty(t, result.Name())
+	assert.NotEmpty(t, result.String())
+
+	// Verify the experiment was created in the correct project by querying the project's experiments
+	experimentsAPI := apiClient.Experiments()
+
+	// Get the experiment by its ID to verify it's in the correct project
+	// We'll use the experiments client to verify the project ID matches
+	expFromAPI, err := experimentsAPI.Register(ctx, result.Name(), project.ID, experiments.RegisterOpts{
+		Update: true, // Use Update:true to get existing experiment
+	})
+	require.NoError(t, err)
+	assert.Equal(t, result.ID(), expFromAPI.ID, "Should get the same experiment")
+	assert.Equal(t, project.ID, expFromAPI.ProjectID, "Experiment should be in the different project")
+}
+
+// TestEval_ProjectNameFallback tests that the project name fallback logic works correctly
+func TestEval_ProjectNameFallback(t *testing.T) {
+	session := createIntegrationTestSession(t)
+	t.Parallel()
+
+	ctx := context.Background()
+
+	// Get endpoints and create API client
+	endpoints := session.Endpoints()
+	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+	require.NoError(t, err)
+
+	// Create a project
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
+	require.NoError(t, err)
+	require.NotNil(t, project)
+
+	// Create config with default project
+	cfg := &config.Config{
+		DefaultProjectName: integrationTestProject,
+	}
+
+	// Create a TracerProvider
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(ctx) }()
+
+	// Create test cases
+	cases := NewCases([]Case[string, string]{
+		{Input: "test1", Expected: "test1"},
+	})
+
+	// Create a simple scorer
+	scorer := NewScorer("exact-match", func(ctx context.Context, result TaskResult[string, string]) (Scores, error) {
+		if result.Output == result.Expected {
+			return S(1.0), nil
+		}
+		return S(0.0), nil
+	})
+
+	// Run eval WITHOUT specifying ProjectName (should use cfg.DefaultProjectName)
+	result, err := Run(ctx, Opts[string, string]{
+		Experiment: tests.RandomName(t, "exp"),
+		// ProjectName not specified - should fall back to cfg.DefaultProjectName
+		Cases: cases,
+		Task: T(func(ctx context.Context, input string) (string, error) {
+			return input, nil
+		}),
+		Scorers: []Scorer[string, string]{scorer},
+		Quiet:   true,
+	}, cfg, session, tp)
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	// Verify the experiment was created in the correct project (cfg.DefaultProjectName)
+	experimentsAPI := apiClient.Experiments()
+	expFromAPI, err := experimentsAPI.Register(ctx, result.Name(), project.ID, experiments.RegisterOpts{
+		Update: true, // Use Update:true to get existing experiment
+	})
+	require.NoError(t, err)
+	assert.Equal(t, result.ID(), expFromAPI.ID, "Should get the same experiment")
+	assert.Equal(t, project.ID, expFromAPI.ProjectID, "Experiment should be in the default project from config")
+}
+
+// TestEval_NoProjectName tests that eval fails when no project name is provided
+func TestEval_NoProjectName(t *testing.T) {
+	session := createIntegrationTestSession(t)
+	t.Parallel()
+
+	ctx := context.Background()
+
+	// Create config with NO default project
+	cfg := &config.Config{
+		DefaultProjectName: "", // No default project
+	}
+
+	// Create a TracerProvider
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(ctx) }()
+
+	// Create test cases
+	cases := NewCases([]Case[string, string]{
+		{Input: "test1", Expected: "test1"},
+	})
+
+	// Run eval WITHOUT specifying ProjectName and NO config default (should fail)
+	result, err := Run(ctx, Opts[string, string]{
+		Experiment: tests.RandomName(t, "exp"),
+		// ProjectName not specified AND cfg.DefaultProjectName is empty
+		Cases: cases,
+		Task: T(func(ctx context.Context, input string) (string, error) {
+			return input, nil
+		}),
+		Quiet: true,
+	}, cfg, session, tp)
+
+	// Should error because no project name is available
+	require.Error(t, err)
+	assert.Nil(t, result)
+	assert.Contains(t, err.Error(), "project name is required")
 }
