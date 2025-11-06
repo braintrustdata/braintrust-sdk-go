@@ -31,23 +31,27 @@ type DatasetQueryOpts struct {
 	Limit int
 }
 
-// Get loads a dataset by ID and returns a Cases iterator.
-func (d *DatasetAPI[I, R]) Get(ctx context.Context, id string) (Cases[I, R], error) {
+// Get loads a dataset by ID and returns a Dataset iterator.
+func (d *DatasetAPI[I, R]) Get(ctx context.Context, id string) (Dataset[I, R], error) {
 	if id == "" {
 		return nil, fmt.Errorf("dataset ID is required")
 	}
 
 	return &datasetIterator[I, R]{
 		dataset: newDataset(id, 0, d.apiClient.Datasets()), // 0 = no limit
+		id:      id,
+		version: "", // Unknown when loading by ID directly
 	}, nil
 }
 
 // Query loads a dataset with advanced query options.
-func (d *DatasetAPI[I, R]) Query(ctx context.Context, opts DatasetQueryOpts) (Cases[I, R], error) {
-	// If ID is provided directly, use it
+func (d *DatasetAPI[I, R]) Query(ctx context.Context, opts DatasetQueryOpts) (Dataset[I, R], error) {
+	// If ID is provided directly, use Get
 	if opts.ID != "" {
 		return &datasetIterator[I, R]{
 			dataset: newDataset(opts.ID, opts.Limit, d.apiClient.Datasets()),
+			id:      opts.ID,
+			version: opts.Version,
 		}, nil
 	}
 
@@ -71,9 +75,12 @@ func (d *DatasetAPI[I, R]) Query(ctx context.Context, opts DatasetQueryOpts) (Ca
 		return nil, fmt.Errorf("no datasets found matching the criteria")
 	}
 
-	// Return the first (most recent) dataset
+	// Return the first (most recent) dataset with full metadata
+	ds := response.Objects[0]
 	return &datasetIterator[I, R]{
-		dataset: newDataset(response.Objects[0].ID, opts.Limit, d.apiClient.Datasets()),
+		dataset: newDataset(ds.ID, opts.Limit, d.apiClient.Datasets()),
+		id:      ds.ID,
+		version: opts.Version,
 	}, nil
 }
 
@@ -156,9 +163,11 @@ func (d *dataset) fetchNextBatch() error {
 	return nil
 }
 
-// datasetIterator implements Cases[I, R] for dataset events
+// datasetIterator implements Dataset[I, R] for dataset events
 type datasetIterator[I, R any] struct {
 	dataset *dataset
+	id      string
+	version string
 }
 
 // Next returns the next case from the dataset
@@ -168,6 +177,10 @@ func (di *datasetIterator[I, R]) Next() (Case[I, R], error) {
 		Expected R        `json:"expected"`
 		Tags     []string `json:"tags"`
 		Metadata Metadata `json:"metadata"`
+		// Dataset-specific fields for linking eval results back to dataset rows
+		ID      string `json:"id"`
+		XactID  string `json:"_xact_id"`
+		Created string `json:"created"`
 	}
 
 	err := di.dataset.nextAs(&fullEvent)
@@ -181,5 +194,18 @@ func (di *datasetIterator[I, R]) Next() (Case[I, R], error) {
 		Expected: fullEvent.Expected,
 		Tags:     fullEvent.Tags,
 		Metadata: fullEvent.Metadata,
+		ID:       fullEvent.ID,
+		XactID:   fullEvent.XactID,
+		Created:  fullEvent.Created,
 	}, nil
+}
+
+// ID returns the dataset ID.
+func (di *datasetIterator[I, R]) ID() string {
+	return di.id
+}
+
+// Version returns the dataset version.
+func (di *datasetIterator[I, R]) Version() string {
+	return di.version
 }

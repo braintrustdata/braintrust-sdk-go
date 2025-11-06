@@ -47,9 +47,10 @@ type Opts[I, R any] struct {
 	// Optional. If not specified, uses the default project from config.
 	ProjectName string
 
-	// Cases is an iterator over the test cases to evaluate.
+	// Dataset is an iterator over the test cases to evaluate.
+	// Can be literal in-memory cases or API-backed dataset.
 	// Required.
-	Cases Cases[I, R]
+	Dataset Dataset[I, R]
 
 	// Task is the function to evaluate for each case.
 	// It receives the input and should return the output.
@@ -99,14 +100,29 @@ type Case[I, R any] struct {
 	// Metadata is additional metadata for this case.
 	// Optional.
 	Metadata map[string]interface{}
+
+	// These fields are only set if the Case is part of a Dataset.
+	// They link the eval result back to the source dataset row.
+	ID      string // Dataset record ID
+	XactID  string // Transaction ID
+	Created string // Creation timestamp
 }
 
-// Cases is an iterator interface for test cases.
+// Dataset is an iterator interface for evaluation datasets.
 // This allows lazy loading of cases without requiring them all in memory.
 // Implementations must return io.EOF when iteration is complete.
-type Cases[I, R any] interface {
+// Can represent literal in-memory cases or API-backed datasets.
+type Dataset[I, R any] interface {
 	// Next returns the next case, or io.EOF if there are no more cases.
 	Next() (Case[I, R], error)
+
+	// ID returns the dataset ID if backed by a Braintrust dataset.
+	// Returns empty string for literal in-memory cases.
+	ID() string
+
+	// Version returns the dataset version if applicable.
+	// Returns empty string for literal cases or unversioned datasets.
+	Version() string
 }
 
 // Metadata is a map of strings to a JSON-encodable value. It is used to store arbitrary metadata about a case.
@@ -211,7 +227,8 @@ type eval[I, R any] struct {
 	experimentName string
 	projectID      string
 	projectName    string
-	cases          Cases[I, R]
+	dataset        Dataset[I, R]
+	datasetID      string // For origin.object_id
 	task           TaskFunc[I, R]
 	scorers        []Scorer[I, R]
 	tracer         oteltrace.Tracer
@@ -235,8 +252,12 @@ func newEval[I, R any](ctx context.Context, cfg *config.Config, session *auth.Se
 		projectName = cfg.DefaultProjectName
 	}
 
+	// Extract dataset ID and version from Dataset interface
+	datasetID := opts.Dataset.ID()
+	datasetVersion := opts.Dataset.Version()
+
 	// Register/get experiment (registerExperiment will validate that projectName is not empty)
-	exp, err := registerExperiment(ctx, cfg, session, opts.Experiment, projectName, opts.Tags, opts.Metadata, opts.Update)
+	exp, err := registerExperiment(ctx, cfg, session, opts.Experiment, projectName, opts.Tags, opts.Metadata, opts.Update, datasetID, datasetVersion)
 	if err != nil {
 		return nil, fmt.Errorf("failed to register experiment: %w", err)
 	}
@@ -264,7 +285,8 @@ func newEval[I, R any](ctx context.Context, cfg *config.Config, session *auth.Se
 		experimentName: exp.Name,
 		projectID:      projectID,
 		projectName:    projectName,
-		cases:          opts.Cases,
+		dataset:        opts.Dataset,
+		datasetID:      datasetID,
 		task:           opts.Task,
 		scorers:        opts.Scorers,
 		tracer:         tracer,
@@ -307,7 +329,7 @@ func (e *eval[I, R]) run(ctx context.Context) (*Result, error) {
 
 	// Fill our channel with the cases.
 	for {
-		c, err := e.cases.Next()
+		c, err := e.dataset.Next()
 		if err == io.EOF {
 			close(nextCases)
 			break
@@ -390,6 +412,18 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 	// Add case metadata if present
 	if c.Metadata != nil {
 		meta["braintrust.metadata"] = c.Metadata
+	}
+
+	// Add origin if this case came from a dataset
+	// Origin links the eval result back to the source dataset row
+	if c.ID != "" && c.XactID != "" {
+		meta["braintrust.origin"] = map[string]any{
+			"object_type": "dataset",
+			"object_id":   e.datasetID,
+			"id":          c.ID,
+			"created":     c.Created,
+			"_xact_id":    c.XactID,
+		}
 	}
 
 	return setJSONAttrs(span, meta)
@@ -563,8 +597,8 @@ func Run[I, R any](ctx context.Context, opts Opts[I, R], cfg *config.Config, ses
 	if opts.Experiment == "" {
 		return nil, fmt.Errorf("%w: Experiment is required", errEval)
 	}
-	if opts.Cases == nil {
-		return nil, fmt.Errorf("%w: Cases is required", errEval)
+	if opts.Dataset == nil {
+		return nil, fmt.Errorf("%w: Dataset is required", errEval)
 	}
 	if opts.Task == nil {
 		return nil, fmt.Errorf("%w: Task is required", errEval)
@@ -662,7 +696,7 @@ func testNewEval[I, R any](
 	experimentName string,
 	projectID string,
 	projectName string,
-	cases Cases[I, R],
+	dataset Dataset[I, R],
 	task TaskFunc[I, R],
 	scorers []Scorer[I, R],
 	parallelism int,
@@ -684,7 +718,8 @@ func testNewEval[I, R any](
 		experimentName: experimentName,
 		projectID:      projectID,
 		projectName:    projectName,
-		cases:          cases,
+		dataset:        dataset,
+		datasetID:      dataset.ID(),
 		task:           task,
 		scorers:        scorers,
 		tracer:         tracer,

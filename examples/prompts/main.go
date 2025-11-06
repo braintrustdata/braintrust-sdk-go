@@ -65,7 +65,7 @@ func main() {
 	// Run evaluation using the hosted prompt
 	_, err = evaluator.Run(ctx, eval.Opts[string, string]{
 		Experiment: "greeter-test",
-		Cases:      eval.NewCases(cases),
+		Dataset:    eval.NewCases(cases),
 		Task:       task,
 
 		// Add scorers - simple equals scorer

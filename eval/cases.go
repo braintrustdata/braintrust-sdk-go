@@ -2,16 +2,23 @@ package eval
 
 import "io"
 
-// NewCases creates a Cases iterator from a slice of cases.
+// NewDataset creates a Dataset iterator from a slice of cases.
 // This is a convenience function for the common case of having all cases in memory.
-func NewCases[I, R any](cases []Case[I, R]) Cases[I, R] {
+// The resulting dataset has no ID or version (literal in-memory cases).
+func NewDataset[I, R any](cases []Case[I, R]) Dataset[I, R] {
 	return &sliceCases[I, R]{
 		cases: cases,
 		index: 0,
 	}
 }
 
-// sliceCases implements the Cases interface for a slice of cases.
+// NewCases is an alias for NewDataset for backward compatibility.
+// Deprecated: Use NewDataset instead.
+func NewCases[I, R any](cases []Case[I, R]) Dataset[I, R] {
+	return NewDataset(cases)
+}
+
+// sliceCases implements the Dataset interface for a slice of cases.
 type sliceCases[I, R any] struct {
 	cases []Case[I, R]
 	index int
@@ -27,4 +34,14 @@ func (s *sliceCases[I, R]) Next() (Case[I, R], error) {
 	c := s.cases[s.index]
 	s.index++
 	return c, nil
+}
+
+// ID returns empty string for literal in-memory cases.
+func (s *sliceCases[I, R]) ID() string {
+	return ""
+}
+
+// Version returns empty string for literal in-memory cases.
+func (s *sliceCases[I, R]) Version() string {
+	return ""
 }

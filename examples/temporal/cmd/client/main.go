@@ -86,7 +86,7 @@ func main() {
 	evaluator := braintrust.NewEvaluator[int, string](bt)
 	_, err = evaluator.Run(context.Background(), eval.Opts[int, string]{
 		Experiment: "temporal-distributed-tracing",
-		Cases: eval.NewCases([]eval.Case[int, string]{
+		Dataset: eval.NewCases([]eval.Case[int, string]{
 			{Input: 10, Expected: "processed number: 10"},
 			{Input: 20, Expected: "processed number: 20"},
 			{Input: 30, Expected: "processed number: 30"},

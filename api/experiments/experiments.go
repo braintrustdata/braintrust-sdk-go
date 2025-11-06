@@ -49,11 +49,13 @@ func (a *API) Register(ctx context.Context, name, projectID string, opts Registe
 	}
 
 	return a.Create(ctx, CreateParams{
-		ProjectID: projectID,
-		Name:      name,
-		EnsureNew: !opts.Update, // When Update=true, allow reusing existing experiment
-		Tags:      opts.Tags,
-		Metadata:  opts.Metadata,
+		ProjectID:      projectID,
+		Name:           name,
+		EnsureNew:      !opts.Update, // When Update=true, allow reusing existing experiment
+		Tags:           opts.Tags,
+		Metadata:       opts.Metadata,
+		DatasetID:      opts.DatasetID,
+		DatasetVersion: opts.DatasetVersion,
 	})
 }
 

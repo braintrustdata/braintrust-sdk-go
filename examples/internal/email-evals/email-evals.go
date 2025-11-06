@@ -349,7 +349,7 @@ Respond with only a number 0-10.`,
 	evaluator := braintrust.NewEvaluator[EmailCampaign, SubjectLineResponse](bt)
 	_, err = evaluator.Run(context.Background(), eval.Opts[EmailCampaign, SubjectLineResponse]{
 		Experiment: "Subject Line A/B Testing v1",
-		Cases:      eval.NewCases(testCases),
+		Dataset:    eval.NewCases(testCases),
 		Task:       eval.T(generateSubjectLine),
 		Scorers:    scorers,
 	})

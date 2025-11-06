@@ -84,7 +84,7 @@ func exampleNewEvaluator(client *braintrust.Client) {
 
 	_, err := evaluator.Run(ctx, eval.Opts[string, string]{
 		Experiment: "greeting-evaluator-1",
-		Cases:      cases1,
+		Dataset:    cases1,
 		Task:       task,
 		Scorers: []eval.Scorer[string, string]{
 			exactMatch[string, string](),
@@ -103,7 +103,7 @@ func exampleNewEvaluator(client *braintrust.Client) {
 
 	_, err = evaluator.Run(ctx, eval.Opts[string, string]{
 		Experiment: "greeting-evaluator-2",
-		Cases:      cases2,
+		Dataset:    cases2,
 		Task:       task,
 		Scorers: []eval.Scorer[string, string]{
 			exactMatch[string, string](),

@@ -14,7 +14,7 @@ import (
 // registerExperiment creates or gets an experiment for the eval.
 // This is an internal helper that uses the api package.
 // projectName must be already resolved (not empty) by the caller.
-func registerExperiment(ctx context.Context, cfg *config.Config, session *auth.Session, name string, projectName string, tags []string, metadata map[string]interface{}, update bool) (*experiments.Experiment, error) {
+func registerExperiment(ctx context.Context, cfg *config.Config, session *auth.Session, name string, projectName string, tags []string, metadata map[string]interface{}, update bool, datasetID string, datasetVersion string) (*experiments.Experiment, error) {
 	if name == "" {
 		return nil, fmt.Errorf("experiment name is required")
 	}
@@ -40,9 +40,11 @@ func registerExperiment(ctx context.Context, cfg *config.Config, session *auth.S
 
 	// Register the experiment
 	experiment, err := c.Experiments().Register(ctx, name, project.ID, experiments.RegisterOpts{
-		Tags:     tags,
-		Metadata: metadata,
-		Update:   update,
+		Tags:           tags,
+		Metadata:       metadata,
+		Update:         update,
+		DatasetID:      datasetID,
+		DatasetVersion: datasetVersion,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to register experiment: %w", err)
