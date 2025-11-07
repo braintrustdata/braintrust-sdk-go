@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"strconv"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
@@ -79,13 +80,13 @@ func (a *API) Get(ctx context.Context, id string) (*Project, error) {
 //	    Limit: 10,
 //	})
 func (a *API) List(ctx context.Context, params ListParams) (*ListResponse, error) {
-	queryParams := make(map[string]string)
+	queryParams := url.Values{}
 
 	if params.OrgID != "" {
-		queryParams["org_id"] = params.OrgID
+		queryParams.Set("org_id", params.OrgID)
 	}
 	if params.Limit > 0 {
-		queryParams["limit"] = strconv.Itoa(params.Limit)
+		queryParams.Set("limit", strconv.Itoa(params.Limit))
 	}
 
 	resp, err := a.client.GET(ctx, "/v1/project", queryParams)

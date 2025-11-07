@@ -47,16 +47,12 @@ func NewClient(apiKey, apiURL string, log logger.Logger) (*Client, error) {
 }
 
 // GET makes a GET request with query parameters.
-func (c *Client) GET(ctx context.Context, path string, params map[string]string) (*http.Response, error) {
+func (c *Client) GET(ctx context.Context, path string, params url.Values) (*http.Response, error) {
 	fullURL := c.apiURL + path
 
 	// Add query parameters if provided
 	if len(params) > 0 {
-		urlValues := url.Values{}
-		for k, v := range params {
-			urlValues.Add(k, v)
-		}
-		fullURL = fullURL + "?" + urlValues.Encode()
+		fullURL = fullURL + "?" + params.Encode()
 	}
 
 	req, err := http.NewRequestWithContext(ctx, "GET", fullURL, nil)
@@ -81,6 +77,31 @@ func (c *Client) POST(ctx context.Context, path string, body interface{}) (*http
 	}
 
 	req, err := http.NewRequestWithContext(ctx, "POST", c.apiURL+path, reqBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+
+	return c.doRequest(req)
+}
+
+// PATCH makes a PATCH request with a JSON body.
+func (c *Client) PATCH(ctx context.Context, path string, body interface{}) (*http.Response, error) {
+	var reqBody io.Reader
+	if body != nil {
+		jsonData, err := json.Marshal(body)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling request: %w", err)
+		}
+		reqBody = bytes.NewBuffer(jsonData)
+
+		c.logger.Debug("http request body", "body", string(jsonData))
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "PATCH", c.apiURL+path, reqBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
