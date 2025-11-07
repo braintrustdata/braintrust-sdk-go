@@ -1,0 +1,168 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 104
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"input":"What is the capital of France?","model":"gpt-5","reasoning":{"effort":"low","summary":"auto"}}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+            User-Agent:
+                - OpenAI/Go 1.12.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 1.12.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.23.12
+        url: https://api.openai.com/v1/responses
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |-
+            {
+              "id": "resp_0ee3baaf61efaa0c00690e29b3a0508197bdaaca38b83f77f1",
+              "object": "response",
+              "created_at": 1762535859,
+              "status": "completed",
+              "background": false,
+              "billing": {
+                "payer": "developer"
+              },
+              "error": null,
+              "incomplete_details": null,
+              "instructions": null,
+              "max_output_tokens": null,
+              "max_tool_calls": null,
+              "model": "gpt-5-2025-08-07",
+              "output": [
+                {
+                  "id": "rs_0ee3baaf61efaa0c00690e29b4d3cc8197a530e44b400cca62",
+                  "type": "reasoning",
+                  "summary": []
+                },
+                {
+                  "id": "msg_0ee3baaf61efaa0c00690e29b5c7088197b3f18fdd9e58c275",
+                  "type": "message",
+                  "status": "completed",
+                  "content": [
+                    {
+                      "type": "output_text",
+                      "annotations": [],
+                      "logprobs": [],
+                      "text": "Paris."
+                    }
+                  ],
+                  "role": "assistant"
+                }
+              ],
+              "parallel_tool_calls": true,
+              "previous_response_id": null,
+              "prompt_cache_key": null,
+              "prompt_cache_retention": null,
+              "reasoning": {
+                "effort": "low",
+                "summary": "detailed"
+              },
+              "safety_identifier": null,
+              "service_tier": "default",
+              "store": true,
+              "temperature": 1.0,
+              "text": {
+                "format": {
+                  "type": "text"
+                },
+                "verbosity": "medium"
+              },
+              "tool_choice": "auto",
+              "tools": [],
+              "top_logprobs": 0,
+              "top_p": 1.0,
+              "truncation": "disabled",
+              "usage": {
+                "input_tokens": 13,
+                "input_tokens_details": {
+                  "cached_tokens": 0
+                },
+                "output_tokens": 8,
+                "output_tokens_details": {
+                  "reasoning_tokens": 0
+                },
+                "total_tokens": 21
+              },
+              "user": null,
+              "metadata": {}
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=86400
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - 99ae7c384bc0d67b-IAD
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 07 Nov 2025 17:17:43 GMT
+            Openai-Organization:
+                - braintrust-data
+            Openai-Processing-Ms:
+                - "3776"
+            Openai-Project:
+                - proj_vsCSXafhhByzWOThMrJcZiw9
+            Openai-Version:
+                - "2020-10-01"
+            Server:
+                - cloudflare
+            Set-Cookie:
+                - __cf_bm=CHJSojXEg9uBFXhJanlKSYffffR7FQlLzkbomb0IHpg-1762535863-1.0.1.1-VXz6hRVGguA5QAyZqtcl._W7EINlsLrK.HJZDABfp8C8BfKGjovfsbnQxzOeWw3JtxUIEOA9JiwY4x7qO7lZxUKBvqwo2PPzWkM6HC53sOI; path=/; expires=Fri, 07-Nov-25 17:47:43 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+                - _cfuvid=GlhR4GpyZl20V9ija1r8UY8UmJdTu74BceQaeixnLvM-1762535863224-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            X-Content-Type-Options:
+                - nosniff
+            X-Envoy-Upstream-Service-Time:
+                - "5203"
+            X-Ratelimit-Limit-Requests:
+                - "15000"
+            X-Ratelimit-Limit-Tokens:
+                - "40000000"
+            X-Ratelimit-Remaining-Requests:
+                - "14999"
+            X-Ratelimit-Remaining-Tokens:
+                - "40000000"
+            X-Ratelimit-Reset-Requests:
+                - 4ms
+            X-Ratelimit-Reset-Tokens:
+                - 0s
+            X-Request-Id:
+                - req_75d81009316e4111922a43df4528380e
+        status: 200 OK
+        code: 200
+        duration: 5.277304458s

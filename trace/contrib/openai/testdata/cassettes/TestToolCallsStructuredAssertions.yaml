@@ -1,0 +1,123 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 396
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"messages":[{"content":"What''s the weather in San Francisco?","role":"user"}],"model":"gpt-4o-mini","stream_options":{"include_usage":true},"tools":[{"function":{"name":"get_weather","description":"Get weather for a location","parameters":{"properties":{"location":{"description":"The city and state","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"stream":true}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+            User-Agent:
+                - OpenAI/Go 1.12.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 1.12.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.23.12
+        url: https://api.openai.com/v1/chat/completions
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: |+
+            data: {"id":"chatcmpl-CZKN5W6DU7I1mIQcAPYlVHn3mVKX8","object":"chat.completion.chunk","created":1762535823,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_560af6e559","choices":[{"index":0,"delta":{"role":"assistant","content":null,"tool_calls":[{"index":0,"id":"call_1H3OBjFhn7LKA6SIZsr7fdmz","type":"function","function":{"name":"get_weather","arguments":""}}],"refusal":null},"logprobs":null,"finish_reason":null}],"usage":null,"obfuscation":"Y9Zg"}
+
+            data: {"id":"chatcmpl-CZKN5W6DU7I1mIQcAPYlVHn3mVKX8","object":"chat.completion.chunk","created":1762535823,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_560af6e559","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\""}}]},"logprobs":null,"finish_reason":null}],"usage":null,"obfuscation":"0DnKCPeUbym2oX"}
+
+            data: {"id":"chatcmpl-CZKN5W6DU7I1mIQcAPYlVHn3mVKX8","object":"chat.completion.chunk","created":1762535823,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_560af6e559","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"location"}}]},"logprobs":null,"finish_reason":null}],"usage":null,"obfuscation":"ni4YLGB1x"}
+
+            data: {"id":"chatcmpl-CZKN5W6DU7I1mIQcAPYlVHn3mVKX8","object":"chat.completion.chunk","created":1762535823,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_560af6e559","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\":\""}}]},"logprobs":null,"finish_reason":null}],"usage":null,"obfuscation":"uDL0yKjOMdey"}
+
+            data: {"id":"chatcmpl-CZKN5W6DU7I1mIQcAPYlVHn3mVKX8","object":"chat.completion.chunk","created":1762535823,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_560af6e559","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"San"}}]},"logprobs":null,"finish_reason":null}],"usage":null,"obfuscation":"afMZgyVLtqXUaT"}
+
+            data: {"id":"chatcmpl-CZKN5W6DU7I1mIQcAPYlVHn3mVKX8","object":"chat.completion.chunk","created":1762535823,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_560af6e559","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":" Francisco"}}]},"logprobs":null,"finish_reason":null}],"usage":null,"obfuscation":"vHzINJ6"}
+
+            data: {"id":"chatcmpl-CZKN5W6DU7I1mIQcAPYlVHn3mVKX8","object":"chat.completion.chunk","created":1762535823,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_560af6e559","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":","}}]},"logprobs":null,"finish_reason":null}],"usage":null,"obfuscation":""}
+
+            data: {"id":"chatcmpl-CZKN5W6DU7I1mIQcAPYlVHn3mVKX8","object":"chat.completion.chunk","created":1762535823,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_560af6e559","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":" CA"}}]},"logprobs":null,"finish_reason":null}],"usage":null,"obfuscation":"yzSlCh8uIiPcME"}
+
+            data: {"id":"chatcmpl-CZKN5W6DU7I1mIQcAPYlVHn3mVKX8","object":"chat.completion.chunk","created":1762535823,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_560af6e559","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\"}"}}]},"logprobs":null,"finish_reason":null}],"usage":null,"obfuscation":"Ie3i173Yowio07"}
+
+            data: {"id":"chatcmpl-CZKN5W6DU7I1mIQcAPYlVHn3mVKX8","object":"chat.completion.chunk","created":1762535823,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_560af6e559","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}],"usage":null,"obfuscation":"aHXmbgH52Gdze9N"}
+
+            data: {"id":"chatcmpl-CZKN5W6DU7I1mIQcAPYlVHn3mVKX8","object":"chat.completion.chunk","created":1762535823,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_560af6e559","choices":[],"usage":{"prompt_tokens":56,"completion_tokens":17,"total_tokens":73,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0}},"obfuscation":"nSvEXpQckA"}
+
+            data: [DONE]
+
+        headers:
+            Access-Control-Expose-Headers:
+                - X-Request-ID
+            Alt-Svc:
+                - h3=":443"; ma=86400
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - 99ae7b5c2f61d67b-IAD
+            Content-Type:
+                - text/event-stream; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 17:17:03 GMT
+            Openai-Organization:
+                - braintrust-data
+            Openai-Processing-Ms:
+                - "495"
+            Openai-Project:
+                - proj_vsCSXafhhByzWOThMrJcZiw9
+            Openai-Version:
+                - "2020-10-01"
+            Server:
+                - cloudflare
+            Set-Cookie:
+                - __cf_bm=5NNN_hxCh4NU6AgXESxvZb_J3dj0m5N.cUA5CLxSxTw-1762535823-1.0.1.1-NdSU_j8EQaFLAaMQE9yZ56h9G70t2PBYD9Z_lLw0VHBUV2mSwZAeQaVEvZ9YSjdZhdqgHeb_uTa1PeBCEkWfw69g.TWECGCRGRYPxXGOnWU; path=/; expires=Fri, 07-Nov-25 17:47:03 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+                - _cfuvid=ipw_R1Fc2.ACWRzxUQmT6BI.Fuhl_1Gy818m2eVPZaY-1762535823576-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            X-Content-Type-Options:
+                - nosniff
+            X-Envoy-Upstream-Service-Time:
+                - "734"
+            X-Openai-Proxy-Wasm:
+                - v0.1
+            X-Ratelimit-Limit-Requests:
+                - "30000"
+            X-Ratelimit-Limit-Tokens:
+                - "150000000"
+            X-Ratelimit-Remaining-Requests:
+                - "29999"
+            X-Ratelimit-Remaining-Tokens:
+                - "149999990"
+            X-Ratelimit-Reset-Requests:
+                - 2ms
+            X-Ratelimit-Reset-Tokens:
+                - 0s
+            X-Request-Id:
+                - req_c78ad0c83803485db161893ecaaad386
+        status: 200 OK
+        code: 200
+        duration: 936.381791ms

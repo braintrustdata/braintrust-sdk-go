@@ -18,6 +18,7 @@ import (
 	"go.opentelemetry.io/otel/codes"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 )
 
 func TestMiddleware(t *testing.T) {
@@ -236,11 +237,8 @@ func TestParseUsageTokensWithCache(t *testing.T) {
 
 // TestMiddlewareIntegration tests the middleware with real Anthropic API calls
 func TestMiddlewareIntegration(t *testing.T) {
-	// Skip if no API key is available
-	apiKey := os.Getenv("ANTHROPIC_API_KEY")
-
-	// Set up test tracer and client
-	client, exporter := setUpTest(t, apiKey)
+	// Set up test tracer and client with VCR
+	client, exporter := setUpTest(t)
 
 	// Make a simple API call
 	timer := oteltest.NewTimer()
@@ -292,11 +290,8 @@ func TestMiddlewareIntegration(t *testing.T) {
 
 // TestMiddlewareIntegrationStreaming tests the middleware with real Anthropic streaming API calls
 func TestMiddlewareIntegrationStreaming(t *testing.T) {
-	// Skip if no API key is available
-	apiKey := os.Getenv("ANTHROPIC_API_KEY")
-
 	// Set up test tracer and client
-	client, exporter := setUpTest(t, apiKey)
+	client, exporter := setUpTest(t)
 
 	// Make a streaming API call
 	timer := oteltest.NewTimer()
@@ -362,21 +357,30 @@ func TestMiddlewareIntegrationStreaming(t *testing.T) {
 
 }
 
-// setUpTest is a helper function that sets up a new tracer provider for each test.
-// It returns an anthropic client and an exporter.
-func setUpTest(t *testing.T, apiKey string) (anthropic.Client, *oteltest.Exporter) {
+// setUpTest is a helper function that sets up a new tracer provider and VCR for each test.
+// It returns an anthropic client configured with VCR and an exporter.
+func setUpTest(t *testing.T) (anthropic.Client, *oteltest.Exporter) {
 	t.Helper()
-	// Anthropic was down and blocking a release. Skipping tests for one
-	// day only. Delete me in the future.
-	now := time.Now().Format("Jan 2 2006")
-	if now == "Oct 2 2025" || now == "Oct 3 2025" {
-		t.Skip()
-	}
 
 	_, exporter := oteltest.Setup(t)
 
+	mode := vcr.GetVCRMode()
+
+	// Get API key or use dummy for replay mode
+	apiKey := os.Getenv("ANTHROPIC_API_KEY")
+	if mode != vcr.ModeReplay && apiKey == "" {
+		t.Fatal("ANTHROPIC_API_KEY not set (required in record/off mode)")
+	}
+	if apiKey == "" {
+		apiKey = "dummy-anthropic-key-for-replay"
+	}
+
+	// Create HTTP client with VCR (cassette name from t.Name())
+	httpClient := vcr.NewHTTPClient(t)
+
 	client := anthropic.NewClient(
 		option.WithAPIKey(apiKey),
+		option.WithHTTPClient(httpClient),
 		option.WithMiddleware(NewMiddleware()), //nolint:bodyclose // false positive - NewMiddleware returns middleware func
 	)
 
@@ -434,8 +438,7 @@ func assertSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.TimeRa
 
 // TestMultipleMessages tests tracing with multiple messages (conversation history)
 func TestMultipleMessages(t *testing.T) {
-	apiKey := os.Getenv("ANTHROPIC_API_KEY")
-	client, exporter := setUpTest(t, apiKey)
+	client, exporter := setUpTest(t)
 
 	timer := oteltest.NewTimer()
 	ctx := context.Background()
@@ -471,8 +474,7 @@ func TestMultipleMessages(t *testing.T) {
 
 // TestWithTools tests tracing with tool use
 func TestWithTools(t *testing.T) {
-	apiKey := os.Getenv("ANTHROPIC_API_KEY")
-	client, exporter := setUpTest(t, apiKey)
+	client, exporter := setUpTest(t)
 
 	timer := oteltest.NewTimer()
 	ctx := context.Background()
@@ -528,8 +530,7 @@ func TestWithTools(t *testing.T) {
 
 // TestStreamingWithTools tests tracing with streaming and tool use
 func TestStreamingWithTools(t *testing.T) {
-	apiKey := os.Getenv("ANTHROPIC_API_KEY")
-	client, exporter := setUpTest(t, apiKey)
+	client, exporter := setUpTest(t)
 
 	timer := oteltest.NewTimer()
 	ctx := context.Background()

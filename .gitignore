@@ -17,7 +17,11 @@ coverage.html
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-testdata
+
+# VCR cassettes (committed)
+# testdata/cassettes/*.yaml are committed
+# Temporary cassette files during recording
+*.cassette.tmp
 
 # Go workspace file
 go.work

@@ -1,0 +1,96 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 94
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"What is 2+2? Answer with just the number."}],"role":"user"}]}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-genai-sdk/1.23.0 gl-go/go1.23.12
+            X-Goog-Api-Client:
+                - google-genai-sdk/1.23.0 gl-go/go1.23.12
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "4\n"
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "STOP",
+                  "avgLogprobs": -2.5708461180329323e-05
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 13,
+                "candidatesTokenCount": 2,
+                "totalTokenCount": 15,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 13
+                  }
+                ],
+                "candidatesTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 2
+                  }
+                ]
+              },
+              "modelVersion": "gemini-2.0-flash-exp",
+              "responseId": "hSkOabSeMo6o_uMPuvGCqAk"
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Type:
+                - application/json; charset=UTF-8
+            Date:
+                - Fri, 07 Nov 2025 17:16:54 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=456
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Xss-Protection:
+                - "0"
+        status: 200 OK
+        code: 200
+        duration: 523.688792ms

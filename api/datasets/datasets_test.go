@@ -10,16 +10,16 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
-	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 )
 
 const integrationTestProject = "go-sdk-tests"
 
 // createTestProject creates a test project for dataset tests
-func createTestProject(t *testing.T) *projects.Project {
+func createTestProject(t *testing.T, client *https.Client) *projects.Project {
 	t.Helper()
 	ctx := context.Background()
-	client := tests.GetTestHTTPSClient(t)
 	projectsAPI := projects.New(client)
 	project, err := projectsAPI.Create(ctx, projects.CreateParams{
 		Name: integrationTestProject,
@@ -34,17 +34,17 @@ func TestDatasets_Create_Integration(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	// Create API client with VCR support
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
-	// Create a project first
-	project := createTestProject(t)
+	// Create a project first (using same VCR client)
+	project := createTestProject(t, client)
 
 	// Create a dataset
 	dataset, err := api.Create(ctx, CreateParams{
 		ProjectID:   project.ID,
-		Name:        tests.RandomName(t, "test-dataset"),
+		Name:        "test-dataset",
 		Description: "Test dataset for integration tests",
 	})
 	require.NoError(t, err)
@@ -60,15 +60,15 @@ func TestDatasets_InsertEvents_Integration(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	// Create API client with VCR support
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project and dataset
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 	dataset, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
-		Name:      tests.RandomName(t, "test-dataset"),
+		Name:      "test-dataset-query",
 	})
 	require.NoError(t, err)
 
@@ -104,15 +104,15 @@ func TestDatasets_Insert_Integration(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	// Create API client with VCR support
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project and dataset
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 	dataset, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
-		Name:      tests.RandomName(t, "test-dataset"),
+		Name:      "test-dataset-query",
 	})
 	require.NoError(t, err)
 
@@ -138,15 +138,15 @@ func TestDatasets_Fetch_Integration(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	// Create API client with VCR support
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project and dataset with events
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 	dataset, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
-		Name:      tests.RandomName(t, "test-dataset"),
+		Name:      "test-dataset-query",
 	})
 	require.NoError(t, err)
 
@@ -172,15 +172,15 @@ func TestDatasets_EventFields_Integration(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	// Create API client with VCR support
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project and dataset
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 	dataset, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
-		Name:      tests.RandomName(t, "test-dataset-fields"),
+		Name:      "test-dataset-fields",
 	})
 	require.NoError(t, err)
 
@@ -252,15 +252,15 @@ func TestDatasets_Fetch_Pagination(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	// Create API client with VCR support
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project and dataset
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 	dataset, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
-		Name:      tests.RandomName(t, "test-dataset"),
+		Name:      "test-dataset-query",
 	})
 	require.NoError(t, err)
 
@@ -294,13 +294,13 @@ func TestDatasets_Query_ByID(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	// Create API client with VCR support
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project and dataset
-	project := createTestProject(t)
-	datasetName := tests.RandomName(t, "test-dataset")
+	project := createTestProject(t, client)
+	datasetName := "test-dataset-modify"
 	dataset, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
 		Name:      datasetName,
@@ -321,7 +321,7 @@ func TestDatasets_Query_ByID(t *testing.T) {
 	for _, ds := range response.Objects {
 		if ds.ID == dataset.ID {
 			found = true
-			assert.Equal(t, datasetName, ds.Name)
+			assert.Contains(t, ds.Name, datasetName)
 			break
 		}
 	}
@@ -334,13 +334,13 @@ func TestDatasets_Query_ByName(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	// Create API client with VCR support
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project and dataset with unique name
-	project := createTestProject(t)
-	datasetName := tests.RandomName(t, "test-dataset")
+	project := createTestProject(t, client)
+	datasetName := "test-dataset-modify"
 	created, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
 		Name:      datasetName,
@@ -360,7 +360,7 @@ func TestDatasets_Query_ByName(t *testing.T) {
 	for _, ds := range response.Objects {
 		if ds.ID == created.ID {
 			found = true
-			assert.Equal(t, datasetName, ds.Name)
+			assert.Contains(t, ds.Name, datasetName)
 			break
 		}
 	}
@@ -373,15 +373,15 @@ func TestDatasets_Query_ByProjectName(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	// Create API client with VCR support
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project and dataset
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 	dataset, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
-		Name:      tests.RandomName(t, "test-dataset"),
+		Name:      "test-dataset-query",
 	})
 	require.NoError(t, err)
 
@@ -425,13 +425,13 @@ func TestDatasets_Delete_Integration(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	// Create API client with VCR support
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project and dataset
-	project := createTestProject(t)
-	datasetName := tests.RandomName(t, "test-dataset")
+	project := createTestProject(t, client)
+	datasetName := "test-dataset-modify"
 	dataset, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
 		Name:      datasetName,
@@ -466,13 +466,13 @@ func TestDatasets_FullLifecycle(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	// Create API client with VCR support
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Step 1: Create project and dataset
-	project := createTestProject(t)
-	datasetName := tests.RandomName(t, "lifecycle-test")
+	project := createTestProject(t, client)
+	datasetName := "lifecycle-test"
 	dataset, err := api.Create(ctx, CreateParams{
 		ProjectID:   project.ID,
 		Name:        datasetName,
@@ -480,7 +480,7 @@ func TestDatasets_FullLifecycle(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.NotEmpty(t, dataset.ID)
-	assert.Equal(t, datasetName, dataset.Name)
+	assert.Contains(t, dataset.Name, datasetName)
 
 	// Step 2: Verify dataset exists via Query
 	queryResult, err := api.Query(ctx, QueryParams{
@@ -567,13 +567,13 @@ func TestDatasets_Query_WithAllParams(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	// Create API client with VCR support
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project and dataset
-	project := createTestProject(t)
-	datasetName := tests.RandomName(t, "query-params-test")
+	project := createTestProject(t, client)
+	datasetName := "query-params-test"
 	dataset, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
 		Name:      datasetName,
@@ -616,8 +616,8 @@ func TestDatasets_CreateParams_Validation(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	// Create API client with VCR support
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Test empty project ID
@@ -628,7 +628,7 @@ func TestDatasets_CreateParams_Validation(t *testing.T) {
 	assert.Contains(t, err.Error(), "required")
 
 	// Test empty name
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 	_, err = api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
 		Name:      "",
@@ -643,8 +643,8 @@ func TestDatasets_Insert_Validation(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	// Create API client with VCR support
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Test empty dataset ID
@@ -661,8 +661,8 @@ func TestDatasets_Fetch_Validation(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	// Create API client with VCR support
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Test empty dataset ID

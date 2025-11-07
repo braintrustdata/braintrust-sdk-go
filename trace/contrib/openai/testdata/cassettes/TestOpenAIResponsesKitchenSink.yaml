@@ -1,0 +1,163 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 237
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"instructions":"Answer the question in a concise manner.","max_output_tokens":100,"parallel_tool_calls":true,"store":false,"temperature":0.5,"top_p":1,"user":"test user","truncation":"auto","input":"what is 13+4?","model":"gpt-4o-mini"}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+            User-Agent:
+                - OpenAI/Go 1.12.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 1.12.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.23.12
+        url: https://api.openai.com/v1/responses
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |-
+            {
+              "id": "resp_0bc55e235781291b01690e2998a8148197a6ec8eefd368e32e",
+              "object": "response",
+              "created_at": 1762535832,
+              "status": "completed",
+              "background": false,
+              "billing": {
+                "payer": "developer"
+              },
+              "error": null,
+              "incomplete_details": null,
+              "instructions": "Answer the question in a concise manner.",
+              "max_output_tokens": 100,
+              "max_tool_calls": null,
+              "model": "gpt-4o-mini-2024-07-18",
+              "output": [
+                {
+                  "id": "msg_0bc55e235781291b01690e299953108197843ebe59f615f227",
+                  "type": "message",
+                  "status": "completed",
+                  "content": [
+                    {
+                      "type": "output_text",
+                      "annotations": [],
+                      "logprobs": [],
+                      "text": "13 + 4 equals 17."
+                    }
+                  ],
+                  "role": "assistant"
+                }
+              ],
+              "parallel_tool_calls": true,
+              "previous_response_id": null,
+              "prompt_cache_key": null,
+              "prompt_cache_retention": null,
+              "reasoning": {
+                "effort": null,
+                "summary": null
+              },
+              "safety_identifier": null,
+              "service_tier": "default",
+              "store": false,
+              "temperature": 0.5,
+              "text": {
+                "format": {
+                  "type": "text"
+                },
+                "verbosity": "medium"
+              },
+              "tool_choice": "auto",
+              "tools": [],
+              "top_logprobs": 0,
+              "top_p": 1.0,
+              "truncation": "auto",
+              "usage": {
+                "input_tokens": 26,
+                "input_tokens_details": {
+                  "cached_tokens": 0
+                },
+                "output_tokens": 9,
+                "output_tokens_details": {
+                  "reasoning_tokens": 0
+                },
+                "total_tokens": 35
+              },
+              "user": "test user",
+              "metadata": {}
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=86400
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - 99ae7b99be4fd67b-IAD
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 07 Nov 2025 17:17:13 GMT
+            Openai-Organization:
+                - braintrust-data
+            Openai-Processing-Ms:
+                - "1031"
+            Openai-Project:
+                - proj_vsCSXafhhByzWOThMrJcZiw9
+            Openai-Version:
+                - "2020-10-01"
+            Server:
+                - cloudflare
+            Set-Cookie:
+                - __cf_bm=9yOP1Ie4tFfi5.21.mpaOWpi8mwPnt2UKVdHcZV8Lvg-1762535833-1.0.1.1-KNqGI8NzDLkUZkp0l0OVHDRQJ4wTmUPGF1K_aAhKY2Cgw9ktpg9FwccMfq5v_4.zJ3kg78set.KzdixpoPo1KXsqg2yhWmEspRZLVWzY9B8; path=/; expires=Fri, 07-Nov-25 17:47:13 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+                - _cfuvid=ZXefODrhuk29oM.9EHSy_Zw._dhfYtNcMS3tMb1_XMg-1762535833696-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            X-Content-Type-Options:
+                - nosniff
+            X-Envoy-Upstream-Service-Time:
+                - "1042"
+            X-Ratelimit-Limit-Requests:
+                - "30000"
+            X-Ratelimit-Limit-Tokens:
+                - "150000000"
+            X-Ratelimit-Remaining-Requests:
+                - "29999"
+            X-Ratelimit-Remaining-Tokens:
+                - "149999955"
+            X-Ratelimit-Reset-Requests:
+                - 2ms
+            X-Ratelimit-Reset-Tokens:
+                - 0s
+            X-Request-Id:
+                - req_f668ae8cd8fb4510a0e2177f6216d670
+        status: 200 OK
+        code: 200
+        duration: 1.129040917s

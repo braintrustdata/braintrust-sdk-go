@@ -8,16 +8,16 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
-	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 )
 
 const integrationTestProject = "go-sdk-tests"
 
 // createTestProject creates a test project for function tests
-func createTestProject(t *testing.T) *projects.Project {
+func createTestProject(t *testing.T, client *https.Client) *projects.Project {
 	t.Helper()
 	ctx := context.Background()
-	client := tests.GetTestHTTPSClient(t)
 	projectsAPI := projects.New(client)
 	project, err := projectsAPI.Create(ctx, projects.CreateParams{
 		Name: integrationTestProject,
@@ -33,17 +33,17 @@ func TestFunctions_Create_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project first
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 
 	// Create a function
 	function, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
-		Name:      tests.RandomName(t, "test-function"),
-		Slug:      tests.RandomName(t, "test-func"),
+		Name:      "test-function",
+		Slug:      "test-func",
 		FunctionData: map[string]any{
 			"type": "prompt",
 		},
@@ -63,16 +63,15 @@ func TestFunctions_Query_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project and function
-	project := createTestProject(t)
-	slug := tests.RandomName(t, "test-func")
+	project := createTestProject(t, client)
 	created, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
-		Name:      tests.RandomName(t, "test-function"),
-		Slug:      slug,
+		Name:      "test-function-query",
+		Slug:      "test-func-query",
 		FunctionData: map[string]any{
 			"type": "prompt",
 		},
@@ -82,7 +81,7 @@ func TestFunctions_Query_Integration(t *testing.T) {
 	// Query by project name and slug
 	functions, err := api.Query(ctx, QueryParams{
 		ProjectName: integrationTestProject,
-		Slug:        slug,
+		Slug:        "test-func-query",
 		Limit:       1,
 	})
 	require.NoError(t, err)
@@ -99,15 +98,15 @@ func TestFunctions_Delete_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project and function
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 	function, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
-		Name:      tests.RandomName(t, "test-function"),
-		Slug:      tests.RandomName(t, "test-func"),
+		Name:      "test-function",
+		Slug:      "test-func",
 		FunctionData: map[string]any{
 			"type": "prompt",
 		},
@@ -126,15 +125,15 @@ func TestFunctions_Invoke_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project and prompt function
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 	function, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
-		Name:      tests.RandomName(t, "test-prompt"),
-		Slug:      tests.RandomName(t, "test-prompt"),
+		Name:      "test-prompt",
+		Slug:      "test-prompt",
 		FunctionData: map[string]any{
 			"type": "prompt",
 		},
@@ -179,18 +178,17 @@ func TestFunctions_FullLifecycle(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Step 1: Create a project
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 
-	// Step 2: Create a function with unique slug
-	slug := tests.RandomName(t, "lifecycle-func")
+	// Step 2: Create a function
 	created, err := api.Create(ctx, CreateParams{
 		ProjectID:   project.ID,
-		Name:        tests.RandomName(t, "lifecycle-function"),
-		Slug:        slug,
+		Name:        "lifecycle-function",
+		Slug:        "lifecycle-func",
 		Description: "Test function for lifecycle testing",
 		FunctionData: map[string]any{
 			"type": "prompt",
@@ -198,13 +196,13 @@ func TestFunctions_FullLifecycle(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.NotEmpty(t, created.ID)
-	assert.Equal(t, slug, created.Slug)
+	assert.Contains(t, created.Slug, "lifecycle-func")
 	assert.Equal(t, project.ID, created.ProjectID)
 
 	// Step 3: Verify function exists via Query
 	functions, err := api.Query(ctx, QueryParams{
 		ProjectName: integrationTestProject,
-		Slug:        slug,
+		Slug:        "lifecycle-func",
 		Limit:       1,
 	})
 	require.NoError(t, err)
@@ -235,7 +233,7 @@ func TestFunctions_FullLifecycle(t *testing.T) {
 	// Step 6: Verify function no longer exists
 	afterDelete, err := api.Query(ctx, QueryParams{
 		ProjectName: integrationTestProject,
-		Slug:        slug,
+		Slug:        "lifecycle-func",
 		Limit:       1,
 	})
 	require.NoError(t, err)
@@ -249,16 +247,16 @@ func TestFunctions_CreateParams_Validation(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 
 	// Test missing required fields - ProjectID
 	_, err := api.Create(ctx, CreateParams{
-		Name: tests.RandomName(t, "test-function"),
-		Slug: tests.RandomName(t, "test-func"),
+		Name: "test-function-validation",
+		Slug: "test-func-validation",
 		FunctionData: map[string]any{
 			"type": "prompt",
 		},
@@ -269,7 +267,7 @@ func TestFunctions_CreateParams_Validation(t *testing.T) {
 	// Test missing required fields - Name
 	_, err = api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
-		Slug:      tests.RandomName(t, "test-func"),
+		Slug:      "test-func-validation",
 		FunctionData: map[string]any{
 			"type": "prompt",
 		},
@@ -280,7 +278,7 @@ func TestFunctions_CreateParams_Validation(t *testing.T) {
 	// Test missing required fields - Slug
 	_, err = api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
-		Name:      tests.RandomName(t, "test-function"),
+		Name:      "test-function-validation",
 		FunctionData: map[string]any{
 			"type": "prompt",
 		},
@@ -296,7 +294,7 @@ func TestFunctions_Delete_Validation(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Test empty function ID
@@ -312,7 +310,7 @@ func TestFunctions_Invoke_Validation(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Test empty function ID

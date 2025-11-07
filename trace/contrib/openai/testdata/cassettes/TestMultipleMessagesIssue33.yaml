@@ -1,0 +1,135 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 271
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"messages":[{"content":"You are a helpful assistant.","role":"system"},{"content":"What is the capital of France?","role":"user"},{"content":"The capital of France is Paris.","role":"assistant"},{"content":"What is the population?","role":"user"}],"model":"gpt-4o-mini"}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+            User-Agent:
+                - OpenAI/Go 1.12.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 1.12.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.23.12
+        url: https://api.openai.com/v1/chat/completions
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "id": "chatcmpl-CZKN6tetI0aiyVh7hrGHvA5wRNnb9",
+              "object": "chat.completion",
+              "created": 1762535824,
+              "model": "gpt-4o-mini-2024-07-18",
+              "choices": [
+                {
+                  "index": 0,
+                  "message": {
+                    "role": "assistant",
+                    "content": "As of my last update in October 2023, the estimated population of Paris is around 2.1 million people. However, the population of the larger metropolitan area, known as the Île-de-France region, is about 12 million. For the most current population figures, it is best to check the latest statistics from a reliable source.",
+                    "refusal": null,
+                    "annotations": []
+                  },
+                  "logprobs": null,
+                  "finish_reason": "stop"
+                }
+              ],
+              "usage": {
+                "prompt_tokens": 44,
+                "completion_tokens": 70,
+                "total_tokens": 114,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0,
+                  "audio_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "reasoning_tokens": 0,
+                  "audio_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "service_tier": "default",
+              "system_fingerprint": "fp_560af6e559"
+            }
+        headers:
+            Access-Control-Expose-Headers:
+                - X-Request-ID
+            Alt-Svc:
+                - h3=":443"; ma=86400
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - 99ae7b6868ead67b-IAD
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 07 Nov 2025 17:17:06 GMT
+            Openai-Organization:
+                - braintrust-data
+            Openai-Processing-Ms:
+                - "1712"
+            Openai-Project:
+                - proj_vsCSXafhhByzWOThMrJcZiw9
+            Openai-Version:
+                - "2020-10-01"
+            Server:
+                - cloudflare
+            Set-Cookie:
+                - __cf_bm=FwqUudsF9iB4api3FyxIaik1SwtlgPI1p9o9z0VUQ.0-1762535826-1.0.1.1-ShoxbQNJvcGKQGzgDVk2a2yBn4NPeUVneaAENDMrYqo8z1Q1CuFaqDSemNWhh476A3YbN4TUa0WnYb.iGNJMlHOq_TnAndu8qXqrzVTJQAM; path=/; expires=Fri, 07-Nov-25 17:47:06 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+                - _cfuvid=yX.J17VG_KMN9z9pnsfZ6iEoUVCLwXXmeSOhATsTKE0-1762535826519-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            X-Content-Type-Options:
+                - nosniff
+            X-Envoy-Upstream-Service-Time:
+                - "1726"
+            X-Openai-Proxy-Wasm:
+                - v0.1
+            X-Ratelimit-Limit-Requests:
+                - "30000"
+            X-Ratelimit-Limit-Tokens:
+                - "150000000"
+            X-Ratelimit-Remaining-Requests:
+                - "29999"
+            X-Ratelimit-Remaining-Tokens:
+                - "149999965"
+            X-Ratelimit-Reset-Requests:
+                - 2ms
+            X-Ratelimit-Reset-Tokens:
+                - 0s
+            X-Request-Id:
+                - req_5f7cc9794219491bb157c5c94a74778c
+        status: 200 OK
+        code: 200
+        duration: 1.833022583s

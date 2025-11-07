@@ -1,0 +1,245 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 23
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"go-sdk-tests"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-tests","created":"2025-11-04T13:38:56.532Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:04:34 GMT
+            Etag:
+                - W/"eb-poL8yUftdUFahhL/Peyi6gN8N/E"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 241db89625f6ef70a00b0e19e0cfc332.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0r6ERjoAMEdGg=
+            X-Amz-Cf-Id:
+                - cs_5vg5ggK7cCCFhxqV1AHxmEm815GIYJCcymag_OWRrx7bdoB3Yow==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - a74a210f-978f-4f7f-902a-feee70f92b5e
+            X-Amzn-Trace-Id:
+                - Root=1-690e34b2-7586f73642422098346471c8;Parent=06617f6604183560;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Found-Existing:
+                - "true"
+            X-Bt-Internal-Trace-Id:
+                - 690e34b20000000026606430a8edaa97
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 223.464375ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 81
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-dataset-query"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/dataset
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"8d016d6f-24df-4190-a9bb-b200c94c41c8","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-dataset-query","description":null,"created":"2025-11-07T18:04:34.763Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:04:34 GMT
+            Etag:
+                - W/"108-a32Je6hE36lzDYjwsnKk5xUcMiE"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 eb2e4893b47f0d155cd51b82c2a8d596.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0r-Gk1IAMEK3A=
+            X-Amz-Cf-Id:
+                - g5QU8DoAcoHoZNoufystln7KWzVti-N7kK2XMW5dYWauhiG8VI-MPg==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 3d90fa8b-2cf2-4928-9728-537e4ec8e8b4
+            X-Amzn-Trace-Id:
+                - Root=1-690e34b2-2b8f49e033343e1824ca0fad;Parent=2b8c9b234e7c6fde;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 690e34b20000000058bdd3361a947577
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 158.00525ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 135
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"events":[{"input":{"q":"1"},"expected":{"a":"1"}},{"input":{"q":"2"},"expected":{"a":"2"}},{"input":{"q":"3"},"expected":{"a":"3"}}]}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/dataset/8d016d6f-24df-4190-a9bb-b200c94c41c8/insert
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"row_ids":["514ad423-9af6-442c-9390-503de6c8df4c","8692461b-c3f0-403e-97f1-9dfafc024594","5f6f1e6c-4d8e-49fb-8953-7b977b0e7e52"]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:04:35 GMT
+            Etag:
+                - W/"82-WWKrNJuxEHlcDDo19gP6/V0FNNY"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 a1546fc751225809c39b89ba9e8d715c.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0sBGpWoAMEqwA=
+            X-Amz-Cf-Id:
+                - HKDaMHOLNaT6v3ok5z4LQoriBLUQDlt2Ia5f8NYP5agaNQy6Pa9t_Q==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - b0eadab1-056c-4033-b926-233b1d66a216
+            X-Amzn-Trace-Id:
+                - Root=1-690e34b2-04f76d292ab52baa15a814c8;Parent=1dcae1f55126973e;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 690e34b2000000002c763ac9f4884768
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 510.046167ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 12
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"limit":10}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/dataset/8d016d6f-24df-4190-a9bb-b200c94c41c8/fetch
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"events":[{"_pagination_key":"p07570045970204721155","_xact_id":"1000196101987613550","created":"2025-11-07T18:04:35.553Z","dataset_id":"8d016d6f-24df-4190-a9bb-b200c94c41c8","expected":{"v":4},"id":"bca4a6ee-6e5d-44ea-afd7-e7be3bbfe520","input":{"n":4},"is_root":true,"metadata":null,"origin":null,"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","root_span_id":"6b2e27d2-56b9-49b1-a031-bb0f8a4738d5","span_id":"6b2e27d2-56b9-49b1-a031-bb0f8a4738d5","tags":null},{"_pagination_key":"p07570045970204721154","_xact_id":"1000196101987613550","created":"2025-11-07T18:04:35.553Z","dataset_id":"8d016d6f-24df-4190-a9bb-b200c94c41c8","expected":{"v":3},"id":"f900e6ea-1c59-4df4-b65d-ab0220c1d7ab","input":{"n":3},"is_root":true,"metadata":null,"origin":null,"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","root_span_id":"426d5cfa-1cb1-4377-9ea1-0b9e767f780d","span_id":"426d5cfa-1cb1-4377-9ea1-0b9e767f780d","tags":null},{"_pagination_key":"p07570045970204721153","_xact_id":"1000196101987613550","created":"2025-11-07T18:04:35.553Z","dataset_id":"8d016d6f-24df-4190-a9bb-b200c94c41c8","expected":{"v":2},"id":"236a92b3-eb38-4cae-bf7c-9bb79d2120fb","input":{"n":2},"is_root":true,"metadata":null,"origin":null,"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","root_span_id":"bd6f18b4-4c90-41b0-8ec3-d939520425ee","span_id":"bd6f18b4-4c90-41b0-8ec3-d939520425ee","tags":null},{"_pagination_key":"p07570045970204721152","_xact_id":"1000196101987613550","created":"2025-11-07T18:04:35.553Z","dataset_id":"8d016d6f-24df-4190-a9bb-b200c94c41c8","expected":{"v":1},"id":"93c4b916-84dd-4f05-a36e-f7047c23c90f","input":{"n":1},"is_root":true,"metadata":null,"origin":null,"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","root_span_id":"598a5199-f7a4-443f-b163-c8ae43eed54f","span_id":"598a5199-f7a4-443f-b163-c8ae43eed54f","tags":null},{"_pagination_key":"p07570045970203410433","_xact_id":"1000196101987613530","created":"2025-11-07T18:04:35.508Z","dataset_id":"8d016d6f-24df-4190-a9bb-b200c94c41c8","expected":{"answer":"Paris"},"id":"4829b907-7a2f-44a1-9aba-468dee9500e3","input":{"question":"What is the capital of France?"},"is_root":true,"metadata":null,"origin":null,"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","root_span_id":"06277a04-20d9-457a-8bbc-2676dd2212c6","span_id":"06277a04-20d9-457a-8bbc-2676dd2212c6","tags":["geography"]},{"_pagination_key":"p07570045970203410432","_xact_id":"1000196101987613530","created":"2025-11-07T18:04:35.507Z","dataset_id":"8d016d6f-24df-4190-a9bb-b200c94c41c8","expected":{"answer":"4"},"id":"e1b22a65-0d05-4e66-a37a-3b8a9dedb8f0","input":{"question":"What is 2+2?"},"is_root":true,"metadata":null,"origin":null,"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","root_span_id":"6ddb6dd8-bf86-4350-aacd-caed00ff6d43","span_id":"6ddb6dd8-bf86-4350-aacd-caed00ff6d43","tags":["math","easy"]},{"_pagination_key":"p07570045970193514498","_xact_id":"1000196101987613379","created":"2025-11-07T18:04:34.998Z","dataset_id":"8d016d6f-24df-4190-a9bb-b200c94c41c8","expected":{"a":"3"},"id":"5f6f1e6c-4d8e-49fb-8953-7b977b0e7e52","input":{"q":"3"},"is_root":true,"metadata":null,"origin":null,"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","root_span_id":"ba1faf88-03da-4afb-8ae2-3fd9c20b30c9","span_id":"ba1faf88-03da-4afb-8ae2-3fd9c20b30c9","tags":null},{"_pagination_key":"p07570045970193514497","_xact_id":"1000196101987613379","created":"2025-11-07T18:04:34.998Z","dataset_id":"8d016d6f-24df-4190-a9bb-b200c94c41c8","expected":{"a":"2"},"id":"8692461b-c3f0-403e-97f1-9dfafc024594","input":{"q":"2"},"is_root":true,"metadata":null,"origin":null,"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","root_span_id":"2783d7c8-7cfa-4aea-b45f-c364b2128518","span_id":"2783d7c8-7cfa-4aea-b45f-c364b2128518","tags":null},{"_pagination_key":"p07570045970193514496","_xact_id":"1000196101987613379","created":"2025-11-07T18:04:34.998Z","dataset_id":"8d016d6f-24df-4190-a9bb-b200c94c41c8","expected":{"a":"1"},"id":"514ad423-9af6-442c-9390-503de6c8df4c","input":{"q":"1"},"is_root":true,"metadata":null,"origin":null,"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","root_span_id":"7b7fa882-4e6a-4644-8d9c-51a4771969a3","span_id":"7b7fa882-4e6a-4644-8d9c-51a4771969a3","tags":null},{"_pagination_key":"p07570045970189582336","_xact_id":"1000196101987613319","created":"2025-11-07T18:04:35.151Z","dataset_id":"8d016d6f-24df-4190-a9bb-b200c94c41c8","expected":{"output":"Hello"},"id":"f73db1ee-c341-4594-b4d8-176b285c5f92","input":{"text":"hello"},"is_root":true,"metadata":null,"origin":null,"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","root_span_id":"fa17709c-9ca6-412e-8e1a-9bff5408c33e","span_id":"fa17709c-9ca6-412e-8e1a-9bff5408c33e","tags":null}],"cursor":"aQ40s7qHAAA"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 07 Nov 2025 18:04:36 GMT
+            Vary:
+                - Origin
+            Via:
+                - 1.1 d8e93128b8c3fa45992684bc1f50eeb8.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0sLHfNIAMENaA=
+            X-Amz-Cf-Id:
+                - 31jSXZCuRUtb4rX1En1baXkajtISxsxEX_4Dfqna6hr2Y9K_OhTOTQ==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 8fce9bc7-5b6d-4579-a8be-ec75760eb0ae
+            X-Amzn-Trace-Id:
+                - Root=1-690e34b3-601aa8a71630c1986fefe7ef;Parent=6b6bd0bb0d303ac8;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Cursor:
+                - aQ40s7qHAAA
+            X-Bt-Internal-Trace-Id:
+                - 690e34b4000000003001b3971555622d
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 129.284792ms

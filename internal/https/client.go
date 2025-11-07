@@ -39,6 +39,21 @@ func NewClient(apiKey, apiURL string, log logger.Logger) *Client {
 	}
 }
 
+// NewWrappedClient creates a new HTTP client with a custom http.Client.
+// This is useful for tests that need to wrap the HTTP client (e.g., with VCR).
+func NewWrappedClient(apiKey, apiURL string, httpClient *http.Client, log logger.Logger) *Client {
+	if log == nil {
+		log = logger.Discard()
+	}
+
+	return &Client{
+		apiKey:     apiKey,
+		apiURL:     apiURL,
+		httpClient: httpClient,
+		logger:     log,
+	}
+}
+
 // GET makes a GET request with query parameters.
 func (c *Client) GET(ctx context.Context, path string, params map[string]string) (*http.Response, error) {
 	fullURL := c.apiURL + path

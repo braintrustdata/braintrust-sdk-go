@@ -8,16 +8,16 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
-	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 )
 
 const integrationTestProject = "go-sdk-tests"
 
 // createTestProject creates a test project for experiment tests
-func createTestProject(t *testing.T) *projects.Project {
+func createTestProject(t *testing.T, client *https.Client) *projects.Project {
 	t.Helper()
 	ctx := context.Background()
-	client := tests.GetTestHTTPSClient(t)
 	projectsAPI := projects.New(client)
 	project, err := projectsAPI.Create(ctx, projects.CreateParams{
 		Name: integrationTestProject,
@@ -33,16 +33,16 @@ func TestExperiments_Create_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project first
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 
 	// Create an experiment
 	experiment, err := api.Create(ctx, CreateParams{
 		ProjectID:   project.ID,
-		Name:        tests.RandomName(t, "test-experiment"),
+		Name:        "test-experiment",
 		Description: "Test experiment for integration tests",
 		Tags:        []string{"test", "integration"},
 		Metadata: map[string]interface{}{
@@ -65,15 +65,14 @@ func TestExperiments_Register_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project first
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 
 	// Register an experiment
-	name := tests.RandomName(t, "test-experiment")
-	experiment, err := api.Register(ctx, name, project.ID, RegisterOpts{
+	experiment, err := api.Register(ctx, "test-experiment-register", project.ID, RegisterOpts{
 		Tags: []string{"test"},
 		Metadata: map[string]interface{}{
 			"purpose": "testing",
@@ -83,7 +82,7 @@ func TestExperiments_Register_Integration(t *testing.T) {
 	require.NotNil(t, experiment)
 	assert.NotEmpty(t, experiment.ID)
 	assert.Equal(t, project.ID, experiment.ProjectID)
-	assert.Equal(t, name, experiment.Name)
+	assert.Contains(t, experiment.Name, "test-experiment-register")
 }
 
 // TestExperiments_List_Integration tests listing experiments
@@ -93,14 +92,14 @@ func TestExperiments_List_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project and experiment
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 	_, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
-		Name:      tests.RandomName(t, "test-experiment"),
+		Name:      "test-experiment-list",
 	})
 	require.NoError(t, err)
 
@@ -131,14 +130,14 @@ func TestExperiments_Get_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project and experiment
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 	created, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
-		Name:      tests.RandomName(t, "test-experiment"),
+		Name:      "test-experiment-list",
 	})
 	require.NoError(t, err)
 
@@ -158,14 +157,14 @@ func TestExperiments_Delete_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project and experiment
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 	experiment, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
-		Name:      tests.RandomName(t, "test-experiment"),
+		Name:      "test-experiment-list",
 	})
 	require.NoError(t, err)
 
@@ -181,17 +180,16 @@ func TestExperiments_FullLifecycle(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Step 1: Create a project
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 
-	// Step 2: Create an experiment with unique name
-	expName := tests.RandomName(t, "lifecycle-exp")
+	// Step 2: Create an experiment
 	created, err := api.Create(ctx, CreateParams{
 		ProjectID:   project.ID,
-		Name:        expName,
+		Name:        "lifecycle-exp",
 		Description: "Test experiment for lifecycle testing",
 		Tags:        []string{"lifecycle", "test"},
 		Metadata: map[string]interface{}{
@@ -200,7 +198,7 @@ func TestExperiments_FullLifecycle(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.NotEmpty(t, created.ID)
-	assert.Equal(t, expName, created.Name)
+	assert.Contains(t, created.Name, "lifecycle-exp")
 	assert.Equal(t, project.ID, created.ProjectID)
 	assert.Equal(t, "Test experiment for lifecycle testing", created.Description)
 
@@ -223,7 +221,7 @@ func TestExperiments_FullLifecycle(t *testing.T) {
 	for _, exp := range listResponse.Objects {
 		if exp.ID == created.ID {
 			found = true
-			assert.Equal(t, expName, exp.Name)
+			assert.Contains(t, exp.Name, "lifecycle-exp")
 			break
 		}
 	}
@@ -232,7 +230,7 @@ func TestExperiments_FullLifecycle(t *testing.T) {
 	// Step 5: Idempotent create - creating with same name returns same experiment
 	idempotent, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
-		Name:      expName,
+		Name:      "lifecycle-exp",
 	})
 	require.NoError(t, err)
 	assert.Equal(t, created.ID, idempotent.ID, "Creating experiment with same name should be idempotent")
@@ -254,12 +252,12 @@ func TestExperiments_CreateParams_Validation(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Test missing required field - ProjectID
 	_, err := api.Create(ctx, CreateParams{
-		Name: tests.RandomName(t, "test-experiment"),
+		Name: "test-experiment-validation",
 	})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "required")
@@ -272,11 +270,11 @@ func TestExperiments_RegisterParams_Validation(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 
 	// Test missing required field - Name
 	_, err := api.Register(ctx, "", project.ID, RegisterOpts{})
@@ -296,7 +294,7 @@ func TestExperiments_Get_Validation(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Test empty experiment ID
@@ -312,7 +310,7 @@ func TestExperiments_Delete_Validation(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Test empty experiment ID
@@ -328,24 +326,23 @@ func TestExperiments_EnsureNew(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project
-	project := createTestProject(t)
+	project := createTestProject(t, client)
 
 	// Create an experiment with a specific name
-	expName := tests.RandomName(t, "ensure-new-test")
 	first, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
-		Name:      expName,
+		Name:      "ensure-new-test",
 	})
 	require.NoError(t, err)
 
 	// Create another experiment with the same name but EnsureNew=true
 	second, err := api.Create(ctx, CreateParams{
 		ProjectID: project.ID,
-		Name:      expName,
+		Name:      "ensure-new-test",
 		EnsureNew: true,
 	})
 	require.NoError(t, err)
@@ -354,5 +351,5 @@ func TestExperiments_EnsureNew(t *testing.T) {
 	assert.NotEqual(t, first.ID, second.ID, "EnsureNew should create a new experiment with different ID")
 
 	// Names should start with the same prefix (API may append suffix to avoid conflicts)
-	assert.Contains(t, second.Name, expName, "EnsureNew experiment name should contain original name")
+	assert.Contains(t, second.Name, "ensure-new-test", "EnsureNew experiment name should contain original name")
 }

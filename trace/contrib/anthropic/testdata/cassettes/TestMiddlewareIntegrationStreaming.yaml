@@ -1,0 +1,145 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 190
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"max_tokens":512,"messages":[{"content":[{"text":"Tell me a very short joke.","type":"text"}],"role":"user"}],"model":"claude-3-haiku-20240307","temperature":0.8,"top_p":0.95,"stream":true}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Anthropic-Version:
+                - "2023-06-01"
+            Content-Type:
+                - application/json
+            User-Agent:
+                - Anthropic/Go 1.4.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 1.4.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.23.12
+        url: https://api.anthropic.com/v1/messages
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: |+
+            event: message_start
+            data: {"type":"message_start","message":{"model":"claude-3-haiku-20240307","id":"msg_01NdokacFChNytTg9sH8zfbs","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":14,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1,"service_tier":"standard"}}         }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Here"}           }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"'s a very short"}      }
+
+            event: ping
+            data: {"type": "ping"}
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" joke for"}              }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" you:"}            }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n\nWhat do you"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" call a bear"}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" with no teeth?"}         }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" A gummy bear"}              }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"!"}         }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":0   }
+
+            event: message_delta
+            data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"input_tokens":14,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":28}     }
+
+            event: message_stop
+            data: {"type":"message_stop"        }
+
+        headers:
+            Anthropic-Ratelimit-Input-Tokens-Limit:
+                - "8000000"
+            Anthropic-Ratelimit-Input-Tokens-Remaining:
+                - "8000000"
+            Anthropic-Ratelimit-Input-Tokens-Reset:
+                - "2025-11-07T17:16:54Z"
+            Anthropic-Ratelimit-Output-Tokens-Limit:
+                - "1500000"
+            Anthropic-Ratelimit-Output-Tokens-Remaining:
+                - "1500000"
+            Anthropic-Ratelimit-Output-Tokens-Reset:
+                - "2025-11-07T17:16:54Z"
+            Anthropic-Ratelimit-Requests-Limit:
+                - "10000"
+            Anthropic-Ratelimit-Requests-Remaining:
+                - "9999"
+            Anthropic-Ratelimit-Requests-Reset:
+                - "2025-11-07T17:16:54Z"
+            Anthropic-Ratelimit-Tokens-Limit:
+                - "9500000"
+            Anthropic-Ratelimit-Tokens-Remaining:
+                - "9500000"
+            Anthropic-Ratelimit-Tokens-Reset:
+                - "2025-11-07T17:16:54Z"
+            Cache-Control:
+                - no-cache
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - 99ae7b269c36e0ee-EWR
+            Content-Type:
+                - text/event-stream; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 17:16:54 GMT
+            Request-Id:
+                - req_011CUtudrqbZokLAaqu5N6du
+            Retry-After:
+                - "6"
+            Server:
+                - cloudflare
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            X-Envoy-Upstream-Service-Time:
+                - "242"
+            X-Robots-Tag:
+                - none
+        status: 200 OK
+        code: 200
+        duration: 273.70375ms
