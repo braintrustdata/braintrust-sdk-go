@@ -47,7 +47,7 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-    // Client is ready to use
+    _ = client // Your client is ready to use
 }
 ```
 
@@ -286,16 +286,55 @@ func main() {
 
 **Google Gemini:**
 ```go
+package main
+
 import (
+    "context"
+    "log"
+    "os"
+
+    "go.opentelemetry.io/otel"
+    "go.opentelemetry.io/otel/sdk/trace"
     "google.golang.org/genai"
+
+    "github.com/braintrustdata/braintrust-sdk-go"
     tracegenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"
 )
 
-client, _ := genai.NewClient(ctx, &genai.ClientConfig{
-    HTTPClient: tracegenai.Client(),
-    APIKey:     os.Getenv("GOOGLE_API_KEY"),
-    Backend:    genai.BackendGeminiAPI,
-})
+func main() {
+    // Set up OpenTelemetry tracer
+    tp := trace.NewTracerProvider()
+    defer tp.Shutdown(context.Background())
+    otel.SetTracerProvider(tp)
+
+    // Initialize Braintrust
+    _, err := braintrust.New(tp,
+        braintrust.WithProject("my-project"),
+    )
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Create Gemini client with tracing
+    client, err := genai.NewClient(context.Background(), &genai.ClientConfig{
+        HTTPClient: tracegenai.Client(),
+        APIKey:     os.Getenv("GOOGLE_API_KEY"),
+        Backend:    genai.BackendGeminiAPI,
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Make API calls - they'll be automatically traced and logged to Braintrust
+    _, err = client.Models.GenerateContent(context.Background(),
+        "gemini-1.5-flash",
+        genai.Text("Hello!"),
+        nil,
+    )
+    if err != nil {
+        log.Fatal(err)
+    }
+}
 ```
 
 **LangChainGo:**
