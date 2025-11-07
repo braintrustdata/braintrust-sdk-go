@@ -652,8 +652,9 @@ func TestEval_DifferentProject(t *testing.T) {
 	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	require.NoError(t, err)
 
-	// Create a different project (use fixed suffix instead of random)
-	differentProjectName := integrationTestProject + "-other"
+	// Create a different project with a unique name to avoid conflicts with parallel tests
+	// The project will be deleted in the defer block below
+	differentProjectName := tests.RandomName(t, "project-other")
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: differentProjectName})
 	require.NoError(t, err)
 	require.NotNil(t, project)

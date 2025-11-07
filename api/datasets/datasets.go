@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"strconv"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
@@ -104,31 +105,31 @@ func (a *API) Fetch(ctx context.Context, datasetID string, cursor string, limit 
 // Query searches for datasets by name, version, or other criteria.
 func (a *API) Query(ctx context.Context, params QueryParams) (*QueryResponse, error) {
 	// Build query parameters
-	queryParams := make(map[string]string)
+	queryParams := url.Values{}
 
 	if params.ID != "" {
-		queryParams["id"] = params.ID
+		queryParams.Set("id", params.ID)
 	}
 	if params.Name != "" {
-		queryParams["dataset_name"] = params.Name
+		queryParams.Set("dataset_name", params.Name)
 	}
 	if params.Version != "" {
-		queryParams["version"] = params.Version
+		queryParams.Set("version", params.Version)
 	}
 	if params.ProjectID != "" {
-		queryParams["project_id"] = params.ProjectID
+		queryParams.Set("project_id", params.ProjectID)
 	}
 	if params.ProjectName != "" {
-		queryParams["project_name"] = params.ProjectName
+		queryParams.Set("project_name", params.ProjectName)
 	}
 	if params.Limit > 0 {
-		queryParams["limit"] = strconv.Itoa(params.Limit)
+		queryParams.Set("limit", strconv.Itoa(params.Limit))
 	}
 	if params.StartingAfter != "" {
-		queryParams["starting_after"] = params.StartingAfter
+		queryParams.Set("starting_after", params.StartingAfter)
 	}
 	if params.EndingBefore != "" {
-		queryParams["ending_before"] = params.EndingBefore
+		queryParams.Set("ending_before", params.EndingBefore)
 	}
 
 	resp, err := a.client.GET(ctx, "/v1/dataset", queryParams)

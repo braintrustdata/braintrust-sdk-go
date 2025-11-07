@@ -356,3 +356,331 @@ func TestExperiments_EnsureNew(t *testing.T) {
 	// Names should start with the same prefix (API may append suffix to avoid conflicts)
 	assert.Contains(t, second.Name, expName, "EnsureNew experiment name should contain original name")
 }
+
+// TestExperiments_List_Pagination tests list pagination with cursors
+func TestExperiments_List_Pagination(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+
+	// Create API client
+	client := tests.GetTestHTTPSClient(t)
+	api := New(client)
+
+	// Create a project
+	project := createTestProject(t)
+
+	// Create multiple experiments
+	for i := 0; i < 5; i++ {
+		_, err := api.Create(ctx, CreateParams{
+			ProjectID: project.ID,
+			Name:      tests.RandomName(t, "pagination-test"),
+		})
+		require.NoError(t, err)
+	}
+
+	// List with limit of 2
+	firstPage, err := api.List(ctx, ListParams{
+		ProjectID: project.ID,
+		Limit:     2,
+	})
+	require.NoError(t, err)
+	require.Len(t, firstPage.Objects, 2)
+
+	// Get second page using starting_after cursor
+	if firstPage.Cursor != "" {
+		secondPage, err := api.List(ctx, ListParams{
+			ProjectID:     project.ID,
+			Limit:         2,
+			StartingAfter: firstPage.Cursor,
+		})
+		require.NoError(t, err)
+		require.NotEmpty(t, secondPage.Objects)
+
+		// Ensure no overlap between pages
+		firstIDs := make(map[string]bool)
+		for _, exp := range firstPage.Objects {
+			firstIDs[exp.ID] = true
+		}
+		for _, exp := range secondPage.Objects {
+			assert.False(t, firstIDs[exp.ID], "Second page should not contain IDs from first page")
+		}
+	}
+}
+
+// TestExperiments_List_FilterByIDs tests filtering by specific IDs
+func TestExperiments_List_FilterByIDs(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+
+	// Create API client
+	client := tests.GetTestHTTPSClient(t)
+	api := New(client)
+
+	// Create a project
+	project := createTestProject(t)
+
+	// Create several experiments
+	exp1, err := api.Create(ctx, CreateParams{
+		ProjectID: project.ID,
+		Name:      tests.RandomName(t, "filter-test-1"),
+	})
+	require.NoError(t, err)
+
+	exp2, err := api.Create(ctx, CreateParams{
+		ProjectID: project.ID,
+		Name:      tests.RandomName(t, "filter-test-2"),
+	})
+	require.NoError(t, err)
+
+	// Create a third one we won't filter for
+	_, err = api.Create(ctx, CreateParams{
+		ProjectID: project.ID,
+		Name:      tests.RandomName(t, "filter-test-3"),
+	})
+	require.NoError(t, err)
+
+	// List filtering by specific IDs
+	response, err := api.List(ctx, ListParams{
+		ProjectID: project.ID,
+		IDs:       []string{exp1.ID, exp2.ID},
+	})
+	require.NoError(t, err)
+	require.Len(t, response.Objects, 2)
+
+	// Verify we got the right experiments
+	ids := make(map[string]bool)
+	for _, exp := range response.Objects {
+		ids[exp.ID] = true
+	}
+	assert.True(t, ids[exp1.ID], "Should include exp1")
+	assert.True(t, ids[exp2.ID], "Should include exp2")
+}
+
+// TestExperiments_Update_Integration tests updating an experiment
+func TestExperiments_Update_Integration(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+
+	// Create API client
+	client := tests.GetTestHTTPSClient(t)
+	api := New(client)
+
+	// Create a project and experiment
+	project := createTestProject(t)
+	experiment, err := api.Create(ctx, CreateParams{
+		ProjectID:   project.ID,
+		Name:        tests.RandomName(t, "update-test"),
+		Description: "Original description",
+		Tags:        []string{"original"},
+		Metadata: map[string]interface{}{
+			"version": "1.0",
+		},
+	})
+	require.NoError(t, err)
+
+	// Update the experiment
+	newDescription := "Updated description"
+	newName := tests.RandomName(t, "updated-name")
+	updated, err := api.Update(ctx, experiment.ID, UpdateParams{
+		Name:        newName,
+		Description: &newDescription,
+		Tags:        []string{"updated", "test"},
+		Metadata: map[string]interface{}{
+			"version": "2.0",
+			"updated": true,
+		},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, updated)
+
+	// Verify the update
+	assert.Equal(t, experiment.ID, updated.ID)
+	assert.Equal(t, newName, updated.Name)
+	assert.Equal(t, "Updated description", updated.Description)
+	assert.Contains(t, updated.Tags, "updated")
+	assert.Contains(t, updated.Tags, "test")
+	assert.Equal(t, "2.0", updated.Metadata["version"])
+	assert.Equal(t, true, updated.Metadata["updated"])
+}
+
+// TestExperiments_InsertEvents_Integration tests inserting events into an experiment
+func TestExperiments_InsertEvents_Integration(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+
+	// Create API client
+	client := tests.GetTestHTTPSClient(t)
+	api := New(client)
+
+	// Create a project and experiment
+	project := createTestProject(t)
+	experiment, err := api.Create(ctx, CreateParams{
+		ProjectID: project.ID,
+		Name:      tests.RandomName(t, "insert-events-test"),
+	})
+	require.NoError(t, err)
+
+	// Insert events
+	events := []ExperimentEvent{
+		{
+			Input: map[string]interface{}{
+				"prompt": "What is 2+2?",
+			},
+			Output: map[string]interface{}{
+				"answer": "4",
+			},
+			Expected: map[string]interface{}{
+				"answer": "4",
+			},
+			Scores: map[string]float64{
+				"accuracy": 1.0,
+			},
+			Metadata: map[string]interface{}{
+				"model": "gpt-4",
+			},
+		},
+		{
+			Input: map[string]interface{}{
+				"prompt": "What is the capital of France?",
+			},
+			Output: map[string]interface{}{
+				"answer": "Paris",
+			},
+			Expected: map[string]interface{}{
+				"answer": "Paris",
+			},
+			Scores: map[string]float64{
+				"accuracy": 1.0,
+			},
+		},
+	}
+
+	result, err := api.InsertEvents(ctx, experiment.ID, events)
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	assert.Len(t, result.RowIDs, 2, "Should return row IDs for inserted events")
+}
+
+// TestExperiments_FetchEvents_Integration tests fetching events from an experiment
+func TestExperiments_FetchEvents_Integration(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+
+	// Create API client
+	client := tests.GetTestHTTPSClient(t)
+	api := New(client)
+
+	// Create a project and experiment
+	project := createTestProject(t)
+	experiment, err := api.Create(ctx, CreateParams{
+		ProjectID: project.ID,
+		Name:      tests.RandomName(t, "fetch-events-test"),
+	})
+	require.NoError(t, err)
+
+	// Insert some events first
+	events := []ExperimentEvent{
+		{
+			Input: map[string]interface{}{
+				"prompt": "Test prompt 1",
+			},
+			Output: map[string]interface{}{
+				"answer": "Test answer 1",
+			},
+			Scores: map[string]float64{
+				"accuracy": 1.0,
+			},
+		},
+		{
+			Input: map[string]interface{}{
+				"prompt": "Test prompt 2",
+			},
+			Output: map[string]interface{}{
+				"answer": "Test answer 2",
+			},
+			Scores: map[string]float64{
+				"accuracy": 0.8,
+			},
+		},
+	}
+	_, err = api.InsertEvents(ctx, experiment.ID, events)
+	require.NoError(t, err)
+
+	// Fetch the events
+	fetchResult, err := api.FetchEvents(ctx, experiment.ID, FetchEventsParams{
+		Limit: 10,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, fetchResult)
+	assert.GreaterOrEqual(t, len(fetchResult.Events), 2, "Should fetch at least the inserted events")
+
+	// Verify event structure
+	for _, event := range fetchResult.Events {
+		assert.NotNil(t, event.Input, "Event should have input")
+		assert.NotNil(t, event.Output, "Event should have output")
+		assert.NotNil(t, event.Scores, "Event should have scores")
+	}
+}
+
+// TestExperiments_Summarize_Integration tests getting experiment summary
+func TestExperiments_Summarize_Integration(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+
+	// Create API client
+	client := tests.GetTestHTTPSClient(t)
+	api := New(client)
+
+	// Create a project and experiment
+	project := createTestProject(t)
+	experiment, err := api.Create(ctx, CreateParams{
+		ProjectID: project.ID,
+		Name:      tests.RandomName(t, "summarize-test"),
+	})
+	require.NoError(t, err)
+
+	// Insert some events with scores
+	events := []ExperimentEvent{
+		{
+			Input: map[string]interface{}{
+				"prompt": "Test 1",
+			},
+			Output: map[string]interface{}{
+				"answer": "Answer 1",
+			},
+			Scores: map[string]float64{
+				"accuracy": 1.0,
+				"quality":  0.9,
+			},
+		},
+		{
+			Input: map[string]interface{}{
+				"prompt": "Test 2",
+			},
+			Output: map[string]interface{}{
+				"answer": "Answer 2",
+			},
+			Scores: map[string]float64{
+				"accuracy": 0.8,
+				"quality":  0.85,
+			},
+		},
+	}
+	_, err = api.InsertEvents(ctx, experiment.ID, events)
+	require.NoError(t, err)
+
+	// Get summary
+	summary, err := api.Summarize(ctx, experiment.ID, SummarizeParams{
+		SummarizeScores: true,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, summary)
+	assert.Equal(t, experiment.Name, summary.ExperimentName)
+	assert.NotEmpty(t, summary.ProjectName)
+}

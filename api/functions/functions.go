@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/url"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 )
@@ -18,28 +19,28 @@ func New(client *https.Client) *API {
 // Returns a list of functions that match the criteria.
 func (a *API) Query(ctx context.Context, params QueryParams) ([]Function, error) {
 	// Build query parameters
-	queryParams := make(map[string]string)
+	queryParams := url.Values{}
 
 	if params.ProjectName != "" {
-		queryParams["project_name"] = params.ProjectName
+		queryParams.Set("project_name", params.ProjectName)
 	}
 	if params.ProjectID != "" {
-		queryParams["project_id"] = params.ProjectID
+		queryParams.Set("project_id", params.ProjectID)
 	}
 	if params.Slug != "" {
-		queryParams["slug"] = params.Slug
+		queryParams.Set("slug", params.Slug)
 	}
 	if params.FunctionName != "" {
-		queryParams["function_name"] = params.FunctionName
+		queryParams.Set("function_name", params.FunctionName)
 	}
 	if params.Version != "" {
-		queryParams["version"] = params.Version
+		queryParams.Set("version", params.Version)
 	}
 	if params.Environment != "" {
-		queryParams["environment"] = params.Environment
+		queryParams.Set("environment", params.Environment)
 	}
 	if params.Limit > 0 {
-		queryParams["limit"] = fmt.Sprintf("%d", params.Limit)
+		queryParams.Set("limit", fmt.Sprintf("%d", params.Limit))
 	}
 
 	resp, err := a.client.GET(ctx, "/v1/function", queryParams)
