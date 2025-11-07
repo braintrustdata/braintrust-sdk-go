@@ -58,31 +58,60 @@ func main() {
 Run systematic evaluations with custom test cases and scoring functions:
 
 ```go
+package main
+
 import (
+    "context"
+    "log"
+
+    "go.opentelemetry.io/otel"
+    "go.opentelemetry.io/otel/sdk/trace"
+
     "github.com/braintrustdata/braintrust-sdk-go"
     "github.com/braintrustdata/braintrust-sdk-go/eval"
 )
 
-evaluator := braintrust.NewEvaluator[string, string](client)
+func main() {
+    ctx := context.Background()
 
-_, err := evaluator.Run(ctx, eval.Opts[string, string]{
-    Experiment: "greeting-experiment",
-    Dataset: eval.NewDataset([]eval.Case[string, string]{
-        {Input: "World", Expected: "Hello World"},
-        {Input: "Alice", Expected: "Hello Alice"},
-    }),
-    Task: eval.T(func(ctx context.Context, input string) (string, error) {
-        return "Hello " + input, nil
-    }),
-    Scorers: []eval.Scorer[string, string]{
-        eval.NewScorer("exact_match", func(ctx context.Context, r eval.TaskResult[string, string]) (eval.Scores, error) {
-            if r.Expected == r.Output {
-                return eval.S(1.0), nil
-            }
-            return eval.S(0.0), nil
+    // Set up OpenTelemetry tracer
+    tp := trace.NewTracerProvider()
+    defer tp.Shutdown(ctx)
+    otel.SetTracerProvider(tp)
+
+    // Initialize Braintrust
+    client, err := braintrust.New(tp)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Create an evaluator with your task's input and output types
+    evaluator := braintrust.NewEvaluator[string, string](client)
+
+    // Run an evaluation
+    _, err = evaluator.Run(ctx, eval.Opts[string, string]{
+        Experiment: "greeting-experiment",
+        Dataset: eval.NewDataset([]eval.Case[string, string]{
+            {Input: "World", Expected: "Hello World"},
+            {Input: "Alice", Expected: "Hello Alice"},
         }),
-    },
-})
+        Task: eval.T(func(ctx context.Context, input string) (string, error) {
+            return "Hello " + input, nil
+        }),
+        Scorers: []eval.Scorer[string, string]{
+            eval.NewScorer("exact_match", func(ctx context.Context, r eval.TaskResult[string, string]) (eval.Scores, error) {
+                score := 0.0
+                if r.Expected == r.Output {
+                    score = 1.0
+                }
+                return eval.S(score), nil
+            }),
+        },
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+}
 ```
 
 ### Tracing LLM Calls
@@ -91,28 +120,99 @@ Automatically trace LLM calls by adding middleware to your client:
 
 **OpenAI:**
 ```go
+package main
+
 import (
+    "context"
+    "log"
+
     "github.com/openai/openai-go"
     "github.com/openai/openai-go/option"
+    "go.opentelemetry.io/otel"
+    "go.opentelemetry.io/otel/sdk/trace"
+
+    "github.com/braintrustdata/braintrust-sdk-go"
     traceopenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"
 )
 
-client := openai.NewClient(
-    option.WithMiddleware(traceopenai.NewMiddleware()),
-)
+func main() {
+    // Set up OpenTelemetry tracer
+    tp := trace.NewTracerProvider()
+    defer tp.Shutdown(context.Background())
+    otel.SetTracerProvider(tp)
+
+    // Initialize Braintrust
+    _, err := braintrust.New(tp)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Create OpenAI client with tracing middleware
+    client := openai.NewClient(
+        option.WithMiddleware(traceopenai.NewMiddleware()),
+    )
+
+    // Make API calls - they'll be automatically traced and logged to Braintrust
+    _, err = client.Chat.Completions.New(context.Background(), openai.ChatCompletionNewParams{
+        Messages: []openai.ChatCompletionMessageParamUnion{
+            openai.UserMessage("Hello!"),
+        },
+        Model: openai.ChatModelGPT4oMini,
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+}
 ```
 
 **Anthropic:**
 ```go
+package main
+
 import (
+    "context"
+    "log"
+
     "github.com/anthropics/anthropic-sdk-go"
     "github.com/anthropics/anthropic-sdk-go/option"
+    "go.opentelemetry.io/otel"
+    "go.opentelemetry.io/otel/sdk/trace"
+
+    "github.com/braintrustdata/braintrust-sdk-go"
     traceanthropic "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic"
 )
 
-client := anthropic.NewClient(
-    option.WithMiddleware(traceanthropic.NewMiddleware()),
-)
+func main() {
+    // Set up OpenTelemetry tracer
+    tp := trace.NewTracerProvider()
+    defer tp.Shutdown(context.Background())
+    otel.SetTracerProvider(tp)
+
+    // Initialize Braintrust
+    _, err := braintrust.New(tp,
+        braintrust.WithProject("my-project"),
+    )
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Create Anthropic client with tracing middleware
+    client := anthropic.NewClient(
+        option.WithMiddleware(traceanthropic.NewMiddleware()),
+    )
+
+    // Make API calls - they'll be automatically traced and logged to Braintrust
+    _, err = client.Messages.New(context.Background(), anthropic.MessageNewParams{
+        Model: anthropic.ModelClaude3_7SonnetLatest,
+        Messages: []anthropic.MessageParam{
+            anthropic.NewUserMessage(anthropic.NewTextBlock("Hello!")),
+        },
+        MaxTokens: 1024,
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+}
 ```
 
 ### API Client
@@ -120,24 +220,68 @@ client := anthropic.NewClient(
 Manage Braintrust resources programmatically:
 
 ```go
-api := client.API()
+package main
 
-prompt, err := api.Functions().Create(ctx, functionsapi.CreateParams{
-    ProjectID: "your-project-id",
-    Name:      "My Prompt",
-    Slug:      "my-prompt",
-    FunctionData: map[string]any{"type": "prompt"},
-    PromptData: map[string]any{
-        "prompt": map[string]any{
-            "type": "chat",
-            "messages": []map[string]any{
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": "{{input}}"},
+import (
+    "context"
+    "log"
+
+    "go.opentelemetry.io/otel/sdk/trace"
+
+    "github.com/braintrustdata/braintrust-sdk-go"
+    functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
+)
+
+func main() {
+    ctx := context.Background()
+
+    // Create tracer provider
+    tp := trace.NewTracerProvider()
+    defer tp.Shutdown(ctx)
+
+    // Initialize Braintrust
+    client, err := braintrust.New(tp,
+        braintrust.WithProject("my-project"),
+    )
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Get API client
+    api := client.API()
+
+    // Create a prompt
+    prompt, err := api.Functions().Create(ctx, functionsapi.CreateParams{
+        ProjectID: "your-project-id",
+        Name:      "My Prompt",
+        Slug:      "my-prompt",
+        FunctionData: map[string]any{
+            "type": "prompt",
+        },
+        PromptData: map[string]any{
+            "prompt": map[string]any{
+                "type": "chat",
+                "messages": []map[string]any{
+                    {
+                        "role":    "system",
+                        "content": "You are a helpful assistant.",
+                    },
+                    {
+                        "role":    "user",
+                        "content": "{{input}}",
+                    },
+                },
+            },
+            "options": map[string]any{
+                "model": "gpt-4o-mini",
             },
         },
-        "options": map[string]any{"model": "gpt-4o-mini"},
-    },
-})
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    _ = prompt // Prompt is ready to use
+}
 ```
 
 **Google Gemini:**
