@@ -1,0 +1,73 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 70
+        transfer_encoding: []
+        trailer: {}
+        host: api.openai.com
+        remote_addr: ""
+        request_uri: ""
+        body: '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Hello"}]}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+        url: https://api.openai.com/v1/chat/completions
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 265
+        uncompressed: false
+        body: |
+            {
+                "error": {
+                    "message": "Incorrect API key provided: invalid-***-key. You can find your API key at https://platform.openai.com/account/api-keys.",
+                    "type": "invalid_request_error",
+                    "param": null,
+                    "code": "invalid_api_key"
+                }
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=86400
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - 99aee235e96c2070-IAD
+            Content-Length:
+                - "265"
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:27:15 GMT
+            Server:
+                - cloudflare
+            Set-Cookie:
+                - __cf_bm=7ppXjbxllPGLZr.u4kobdYqOdKM0MczRiVHWJxO.j7Q-1762540035-1.0.1.1-FjK3rH_N_QUNh6FpnA1b60ekZBzWJS_xzemPNVMRbyHdf74Ruta0LyVC.q_UZ6liMXFUJuWwccLFR7Sbykan5SXPFyLz1pAFF7DYmvNhHSM; path=/; expires=Fri, 07-Nov-25 18:57:15 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+                - _cfuvid=jzhPDZFodEIWzOut1czgfhKuiMeJz4.fENjx9kZJWdU-1762540035578-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            Vary:
+                - Origin
+            X-Content-Type-Options:
+                - nosniff
+            X-Envoy-Upstream-Service-Time:
+                - "2"
+            X-Openai-Proxy-Wasm:
+                - v0.1
+            X-Request-Id:
+                - req_26fb90ab2a774d509b3430e489e3e721
+        status: 401 Unauthorized
+        code: 401
+        duration: 113.903208ms
