@@ -10,7 +10,7 @@ type Scorer[I, R any] interface {
 	Name() string
 	// Run evaluates the task result.
 	// It returns one or more Score results.
-	Run(ctx context.Context, result TaskResult[I, R]) (Scores, error)
+	Run(context.Context, TaskResult[I, R]) (Scores, error)
 }
 
 // Score represents a single score result.

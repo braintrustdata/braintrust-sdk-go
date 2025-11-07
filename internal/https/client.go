@@ -24,14 +24,7 @@ type Client struct {
 }
 
 // NewClient creates a new HTTP client with the given credentials.
-// Both apiKey and apiURL are required and must be non-empty.
-func NewClient(apiKey, apiURL string, log logger.Logger) (*Client, error) {
-	if apiKey == "" {
-		return nil, fmt.Errorf("apiKey is required")
-	}
-	if apiURL == "" {
-		return nil, fmt.Errorf("apiURL is required")
-	}
+func NewClient(apiKey, apiURL string, log logger.Logger) *Client {
 	if log == nil {
 		log = logger.Discard()
 	}
@@ -43,7 +36,7 @@ func NewClient(apiKey, apiURL string, log logger.Logger) (*Client, error) {
 			Timeout: 30 * time.Second,
 		},
 		logger: log,
-	}, nil
+	}
 }
 
 // GET makes a GET request with query parameters.

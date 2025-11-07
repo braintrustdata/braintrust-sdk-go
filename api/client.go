@@ -2,8 +2,6 @@
 package api
 
 import (
-	"fmt"
-
 	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
 	"github.com/braintrustdata/braintrust-sdk-go/api/experiments"
 	"github.com/braintrustdata/braintrust-sdk-go/api/functions"
@@ -43,11 +41,8 @@ func WithLogger(log logger.Logger) Option {
 }
 
 // NewClient creates a new Braintrust API client with the given API key and options.
-func NewClient(apiKey string, opts ...Option) (*API, error) {
-	if apiKey == "" {
-		return nil, fmt.Errorf("apiKey is required")
-	}
-
+// The apiKey must be non-empty (validated at config level).
+func NewClient(apiKey string, opts ...Option) *API {
 	options := &options{
 		apiURL: "https://api.braintrust.dev", // default
 		logger: nil,
@@ -57,14 +52,11 @@ func NewClient(apiKey string, opts ...Option) (*API, error) {
 		opt(options)
 	}
 
-	client, err := https.NewClient(apiKey, options.apiURL, options.logger)
-	if err != nil {
-		return nil, err
-	}
+	client := https.NewClient(apiKey, options.apiURL, options.logger)
 
 	return &API{
 		client: client,
-	}, nil
+	}
 }
 
 // Projects returns a client for project operations

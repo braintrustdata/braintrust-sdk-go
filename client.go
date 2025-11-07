@@ -23,10 +23,9 @@ type Client struct {
 	tracerProvider *trace.TracerProvider
 }
 
-// New creates a new Braintrust client with the provided TracerProvider.
+// New creates a new Braintrust client.
 //
-// The TracerProvider is required and should be managed by the caller.
-// The client will NOT shut down the provider - you must do this yourself.
+// It will add a Braintrust exporter to the given tracer provider..
 //
 // Configuration is loaded from environment variables first, then
 // explicit options are applied (options take precedence).
@@ -51,6 +50,11 @@ func New(tp *trace.TracerProvider, opts ...Option) (*Client, error) {
 	// Apply user options (override env vars)
 	for _, opt := range opts {
 		opt(cfg)
+	}
+
+	// Validate configuration before proceeding
+	if err := cfg.IsValid(); err != nil {
+		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
 
 	// Setup default logger if none provided
@@ -192,7 +196,7 @@ func (c *Client) Tracer(name string, opts ...oteltrace.TracerOption) oteltrace.T
 //
 // Example:
 //
-//	client, _ := braintrust.New(tp, braintrust.WithProject("my-project"))
+//	client, _ := braintrust.New(tp)
 //
 //	// Create an evaluator for string → string evaluations
 //	evaluator := braintrust.NewEvaluator[string, string](client)
@@ -200,14 +204,14 @@ func (c *Client) Tracer(name string, opts ...oteltrace.TracerOption) oteltrace.T
 //	// Run multiple evaluations
 //	result1, _ := evaluator.Run(ctx, eval.Opts[string, string]{
 //	    Experiment: "test-1",
-//	    Cases:      cases1,
+//	    Dataset:    dataset1,
 //	    Task:       task1,
 //	    Scorers:    scorers,
 //	})
 //
 //	result2, _ := evaluator.Run(ctx, eval.Opts[string, string]{
 //	    Experiment: "test-2",
-//	    Cases:      cases2,
+//	    Dataset:    dataset2,
 //	    Task:       task2,
 //	    Scorers:    scorers,
 //	})
@@ -224,7 +228,7 @@ func NewEvaluator[I, R any](client *Client) *eval.Evaluator[I, R] {
 //
 //	// Create a dataset
 //	apiClient := client.API()
-//	project, _ := apiClient.Projects().Register(ctx, "my-project")
+//	project, _ := apiClient.Projects().Create(ctx, "my-project")
 //	dataset, _ := apiClient.Datasets().Create(ctx, api.DatasetRequest{
 //	    ProjectID:   project.ID,
 //	    Name:        "my-dataset",
@@ -234,17 +238,11 @@ func (c *Client) API() *api.API {
 	// Get endpoints from session (prefers logged-in info, falls back to config)
 	endpoints := c.session.Endpoints()
 
-	client, err := api.NewClient(
+	return api.NewClient(
 		endpoints.APIKey,
 		api.WithAPIURL(endpoints.APIURL),
 		api.WithLogger(c.logger),
 	)
-	if err != nil {
-		// Log error but return nil - this shouldn't happen with valid session
-		c.logger.Error("failed to create API client", "error", err)
-		return nil
-	}
-	return client
 }
 
 // Permalink returns a URL to the span in the Braintrust UI.

@@ -2,6 +2,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -71,4 +72,19 @@ func getEnvBool(key string, defaultValue bool) bool {
 		return strings.ToLower(strings.TrimSpace(value)) == "true"
 	}
 	return defaultValue
+}
+
+// IsValid checks if the configuration has all required fields.
+// Returns an error if any required field is missing.
+func (c *Config) IsValid() error {
+	if c.APIKey == "" {
+		return fmt.Errorf("API key is required")
+	}
+	if c.APIURL == "" {
+		return fmt.Errorf("API URL is required")
+	}
+	if c.AppURL == "" {
+		return fmt.Errorf("app URL is required")
+	}
+	return nil
 }

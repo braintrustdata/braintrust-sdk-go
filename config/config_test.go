@@ -90,3 +90,74 @@ func TestFromEnv_BooleanParsing(t *testing.T) {
 		})
 	}
 }
+
+func TestConfig_IsValid(t *testing.T) {
+	tests := []struct {
+		name      string
+		config    *Config
+		wantErr   bool
+		errString string
+	}{
+		{
+			name: "valid config",
+			config: &Config{
+				APIKey: "test-key",
+				APIURL: "https://api.braintrust.dev",
+				AppURL: "https://www.braintrust.dev",
+			},
+			wantErr: false,
+		},
+		{
+			name: "missing API key",
+			config: &Config{
+				APIKey: "",
+				APIURL: "https://api.braintrust.dev",
+				AppURL: "https://www.braintrust.dev",
+			},
+			wantErr:   true,
+			errString: "API key is required",
+		},
+		{
+			name: "missing API URL",
+			config: &Config{
+				APIKey: "test-key",
+				APIURL: "",
+				AppURL: "https://www.braintrust.dev",
+			},
+			wantErr:   true,
+			errString: "API URL is required",
+		},
+		{
+			name: "missing App URL",
+			config: &Config{
+				APIKey: "test-key",
+				APIURL: "https://api.braintrust.dev",
+				AppURL: "",
+			},
+			wantErr:   true,
+			errString: "app URL is required",
+		},
+		{
+			name: "all fields missing",
+			config: &Config{
+				APIKey: "",
+				APIURL: "",
+				AppURL: "",
+			},
+			wantErr:   true,
+			errString: "API key is required",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.config.IsValid()
+			if tt.wantErr {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errString)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}

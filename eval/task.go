@@ -13,15 +13,18 @@ type TaskFunc[I, R any] func(ctx context.Context, input I, hooks *TaskHooks) (Ta
 // TaskHooks provides access to evaluation context within a task.
 // All fields are read-only except for span modification.
 type TaskHooks struct {
-	Expected any            // Expected output (type-assert when needed)
-	Metadata Metadata       // Case metadata (read-only)
-	Tags     []string       // Case tags (read-only)
-	TaskSpan oteltrace.Span // Current task execution span (can modify)
-	EvalSpan oteltrace.Span // Parent case/eval span (can modify)
+	// The eval and task spans are included, if you want to add custom attributes or events.
+	TaskSpan oteltrace.Span
+	EvalSpan oteltrace.Span
+
+	// Readonly fields. These aren't necessarily recommended to be included in the task function,
+	// but are available for advanced use cases.
+	Expected any // type-assert
+	Metadata Metadata
+	Tags     []string
 }
 
 // TaskOutput wraps the output value from a task.
-// Future fields may include metadata, skip flags, etc.
 type TaskOutput[R any] struct {
 	Value R
 }
@@ -35,8 +38,14 @@ type TaskResult[I, R any] struct {
 	Metadata Metadata // Case metadata
 }
 
-// T is a simple adapter that converts a basic task function into a TaskFunc.
-// Use this when you don't need access to TaskHooks.
+// T is a simple adapter that converts a basic task function into a TaskFunc. This is
+// useful if your task is only concerned with inputs and outputs. Example:
+//
+//	task := eval.T(func(ctx context.Context, input string) (string, error) {
+//		return input, nil
+//	})
+//
+//	eval.Run(ctx, eval.Opts[string, string]{Task: task, Dataset: cases}, cfg, session, tp)
 func T[I, R any](fn func(ctx context.Context, input I) (R, error)) TaskFunc[I, R] {
 	return func(ctx context.Context, input I, hooks *TaskHooks) (TaskOutput[R], error) {
 		val, err := fn(ctx, input)

@@ -3,8 +3,6 @@ package eval
 import "io"
 
 // NewDataset creates a Dataset iterator from a slice of cases.
-// This is a convenience function for the common case of having all cases in memory.
-// The resulting dataset has no ID or version (literal in-memory cases).
 func NewDataset[I, R any](cases []Case[I, R]) Dataset[I, R] {
 	return &sliceCases[I, R]{
 		cases: cases,

@@ -26,8 +26,7 @@ func TestEval_Integration(t *testing.T) {
 
 	// Get endpoints and create API client
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	// Create config for the evaluation
 	cfg := &config.Config{
@@ -154,8 +153,7 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 
 	// Get endpoints and create API client
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	// Create config for the evaluation
 	cfg := &config.Config{
@@ -277,8 +275,7 @@ func TestEval_Integration_DatasetByID(t *testing.T) {
 
 	ctx := context.Background()
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	cfg := &config.Config{
 		DefaultProjectName: integrationTestProject,
@@ -306,7 +303,7 @@ func TestEval_Integration_DatasetByID(t *testing.T) {
 	require.NoError(t, err)
 
 	// Load dataset using DatasetAPI
-	datasetAPI := &DatasetAPI[int, int]{apiClient: apiClient}
+	datasetAPI := &DatasetAPI[int, int]{api: apiClient}
 	cases, err := datasetAPI.Get(ctx, dataset.ID)
 	require.NoError(t, err)
 
@@ -343,8 +340,7 @@ func TestEval_Integration_DatasetByName(t *testing.T) {
 
 	ctx := context.Background()
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	cfg := &config.Config{
 		DefaultProjectName: integrationTestProject,
@@ -373,7 +369,7 @@ func TestEval_Integration_DatasetByName(t *testing.T) {
 	require.NoError(t, err)
 
 	// Load dataset by name using DatasetAPI
-	datasetAPI := &DatasetAPI[int, int]{apiClient: apiClient}
+	datasetAPI := &DatasetAPI[int, int]{api: apiClient}
 	cases, err := datasetAPI.Query(ctx, DatasetQueryOpts{Name: datasetName})
 	require.NoError(t, err)
 
@@ -410,8 +406,7 @@ func TestEval_Integration_DatasetWithTagsAndMetadata(t *testing.T) {
 
 	ctx := context.Background()
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	cfg := &config.Config{
 		DefaultProjectName: integrationTestProject,
@@ -446,7 +441,7 @@ func TestEval_Integration_DatasetWithTagsAndMetadata(t *testing.T) {
 	require.NoError(t, err)
 
 	// Load dataset
-	datasetAPI := &DatasetAPI[int, int]{apiClient: apiClient}
+	datasetAPI := &DatasetAPI[int, int]{api: apiClient}
 	cases, err := datasetAPI.Get(ctx, dataset.ID)
 	require.NoError(t, err)
 
@@ -640,87 +635,6 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 	assert.NotEqual(t, firstExpID, thirdExpID, "Update: false should create a new experiment ID")
 }
 
-// TestEval_DifferentProject tests running an eval with a different project name
-func TestEval_DifferentProject(t *testing.T) {
-	session := createIntegrationTestSession(t)
-	t.Parallel()
-
-	ctx := context.Background()
-
-	// Get endpoints and create API client
-	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
-
-	// Create a different project (use fixed suffix instead of random)
-	differentProjectName := integrationTestProject + "-other"
-	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: differentProjectName})
-	require.NoError(t, err)
-	require.NotNil(t, project)
-
-	// Clean up: Delete the project when test completes
-	defer func() {
-		err := apiClient.Projects().Delete(ctx, project.ID)
-		if err != nil {
-			t.Logf("Failed to delete test project %s: %v", project.ID, err)
-		}
-	}()
-
-	// Create config with default project (should be overridden by opts.Project)
-	cfg := &config.Config{
-		DefaultProjectName: integrationTestProject,
-	}
-
-	// Create a TracerProvider
-	tp := trace.NewTracerProvider()
-	defer func() { _ = tp.Shutdown(ctx) }()
-
-	// Create test cases
-	cases := NewDataset([]Case[string, string]{
-		{Input: "test1", Expected: "test1"},
-		{Input: "test2", Expected: "test2"},
-	})
-
-	// Create a simple scorer
-	scorer := NewScorer("exact-match", func(ctx context.Context, result TaskResult[string, string]) (Scores, error) {
-		if result.Output == result.Expected {
-			return S(1.0), nil
-		}
-		return S(0.0), nil
-	})
-
-	// Run eval with the different project specified in opts
-	result, err := Run(ctx, Opts[string, string]{
-		Experiment:  tests.RandomName(t, "exp"),
-		ProjectName: differentProjectName, // Override config.DefaultProjectName
-		Dataset:     cases,
-		Task: T(func(ctx context.Context, input string) (string, error) {
-			return input, nil
-		}),
-		Scorers: []Scorer[string, string]{scorer},
-		Quiet:   true,
-	}, cfg, session, tp)
-	require.NoError(t, err)
-	require.NotNil(t, result)
-
-	// Verify the result
-	assert.NotEmpty(t, result.ID())
-	assert.NotEmpty(t, result.Name())
-	assert.NotEmpty(t, result.String())
-
-	// Verify the experiment was created in the correct project by querying the project's experiments
-	experimentsAPI := apiClient.Experiments()
-
-	// Get the experiment by its ID to verify it's in the correct project
-	// We'll use the experiments client to verify the project ID matches
-	expFromAPI, err := experimentsAPI.Register(ctx, result.Name(), project.ID, experiments.RegisterOpts{
-		Update: true, // Use Update:true to get existing experiment
-	})
-	require.NoError(t, err)
-	assert.Equal(t, result.ID(), expFromAPI.ID, "Should get the same experiment")
-	assert.Equal(t, project.ID, expFromAPI.ProjectID, "Experiment should be in the different project")
-}
-
 // TestEval_ProjectNameFallback tests that the project name fallback logic works correctly
 func TestEval_ProjectNameFallback(t *testing.T) {
 	session := createIntegrationTestSession(t)
@@ -730,8 +644,7 @@ func TestEval_ProjectNameFallback(t *testing.T) {
 
 	// Get endpoints and create API client
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	// Create a project
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})

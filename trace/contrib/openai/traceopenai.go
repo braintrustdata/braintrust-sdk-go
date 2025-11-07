@@ -2,14 +2,16 @@
 //
 // First, set up tracing with braintrust.New():
 //
-//	bt, err := braintrust.New(
-//		braintrust.WithAPIKey(os.Getenv("BRAINTRUST_API_KEY")),
+//	tp := trace.NewTracerProvider()
+//	defer tp.Shutdown(context.Background())
+//	otel.SetTracerProvider(tp)
+//
+//	bt, err := braintrust.New(tp,
 //		braintrust.WithProject("my-project"),
 //	)
 //	if err != nil {
 //		log.Fatal(err)
 //	}
-//	defer bt.Close()
 //
 // Then add the middleware to your OpenAI client:
 //

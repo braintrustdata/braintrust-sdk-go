@@ -1,20 +1,32 @@
 // Package langchaingo provides OpenTelemetry tracing for LangChainGo applications.
 //
-// First, set up tracing with Quickstart (requires BRAINTRUST_API_KEY environment variable):
+// First, set up OpenTelemetry and initialize Braintrust (requires BRAINTRUST_API_KEY environment variable):
 //
-//	// export BRAINTRUST_API_KEY="your-api-key-here"
-//	teardown, err := trace.Quickstart()
+//	import (
+//		"go.opentelemetry.io/otel"
+//		"go.opentelemetry.io/otel/sdk/trace"
+//		"github.com/braintrustdata/braintrust-sdk-go"
+//		tracelangchaingo "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo"
+//	)
+//
+//	// Set up OpenTelemetry tracer
+//	tp := trace.NewTracerProvider()
+//	defer tp.Shutdown(context.Background())
+//	otel.SetTracerProvider(tp)
+//
+//	// Initialize Braintrust
+//	bt, err := braintrust.New(tp, braintrust.WithProject("my-project"))
 //	if err != nil {
 //		log.Fatal(err)
 //	}
-//	defer teardown()
 //
 // Then create a handler and add it to your LangChainGo LLM.
 // It's recommended to provide model and provider information for richer traces:
 //
 //	handler := tracelangchaingo.NewHandlerWithOptions(tracelangchaingo.HandlerOptions{
-//		Model:    "gpt-4o-mini",  // The model you're using
-//		Provider: "openai",        // The provider (e.g., "openai", "anthropic", "google")
+//		TracerProvider: tp,           // Optional: pass your TracerProvider
+//		Model:          "gpt-4o-mini", // The model you're using
+//		Provider:       "openai",      // The provider (e.g., "openai", "anthropic", "google")
 //	})
 //	llm, err := openai.New(openai.WithCallback(handler))
 //

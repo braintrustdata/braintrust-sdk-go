@@ -25,9 +25,7 @@ func TestTaskAPI_Get(t *testing.T) {
 
 	// Get endpoints and create API client
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
-
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	functions := apiClient.Functions()
 
 	// Register project
@@ -114,16 +112,14 @@ func TestTaskAPI_Get_EmptySlug(t *testing.T) {
 
 	// Get endpoints and create API client
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
-
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	taskAPI := &TaskAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,
 		projectName: integrationTestProject,
 	}
 
 	// Should error on empty slug
-	_, err = taskAPI.Get(ctx, "")
+	_, err := taskAPI.Get(ctx, "")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "required")
 }
@@ -142,9 +138,7 @@ func TestTaskAPI_TypeSafety(t *testing.T) {
 
 	// Get endpoints and create API client
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
-
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	// This should compile
 	taskAPI := &TaskAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,

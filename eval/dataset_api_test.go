@@ -63,9 +63,8 @@ func TestDatasetAPI_Get_Integration(t *testing.T) {
 	defer session.Close()
 
 	// Create API client
-	apiClient, err := api.NewClient(apiKey, api.WithAPIURL("https://api.braintrust.dev"))
-	require.NoError(t, err)
-
+	endpoints := session.Endpoints()
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	// Create a test dataset
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
@@ -107,7 +106,7 @@ func TestDatasetAPI_Get_Integration(t *testing.T) {
 
 	// Now test the DatasetAPI
 	datasetAPI := &DatasetAPI[testDatasetInput, testDatasetOutput]{
-		apiClient: apiClient,
+		api: apiClient,
 	}
 
 	cases, err := datasetAPI.Get(ctx, dataset.ID)
@@ -143,15 +142,14 @@ func TestDatasetAPI_Get_EmptyID(t *testing.T) {
 	session := createTestSession(t, apiKey)
 	defer session.Close()
 
-	apiClient, err := api.NewClient(apiKey, api.WithAPIURL("https://api.braintrust.dev"))
-	require.NoError(t, err)
-
+	endpoints := session.Endpoints()
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	datasetAPI := &DatasetAPI[testDatasetInput, testDatasetOutput]{
-		apiClient: apiClient,
+		api: apiClient,
 	}
 
 	// Should error on empty ID
-	_, err = datasetAPI.Get(ctx, "")
+	_, err := datasetAPI.Get(ctx, "")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "required")
 }
@@ -165,9 +163,8 @@ func TestDatasetAPI_Query_Integration(t *testing.T) {
 	defer session.Close()
 
 	// Create API client
-	apiClient, err := api.NewClient(apiKey, api.WithAPIURL("https://api.braintrust.dev"))
-	require.NoError(t, err)
-
+	endpoints := session.Endpoints()
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	// Create a test dataset
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
@@ -216,7 +213,7 @@ func TestDatasetAPI_Query_Integration(t *testing.T) {
 
 	// Test Query with ID and Limit
 	datasetAPI := &DatasetAPI[testDatasetInput, testDatasetOutput]{
-		apiClient: apiClient,
+		api: apiClient,
 	}
 
 	cases, err := datasetAPI.Query(ctx, DatasetQueryOpts{
@@ -255,12 +252,11 @@ func TestDatasetAPI_TypeSafety(t *testing.T) {
 	require.NoError(t, err)
 	defer session.Close()
 
-	apiClient, err := api.NewClient("test-key", api.WithAPIURL("https://api.braintrust.dev"))
-	require.NoError(t, err)
-
+	endpoints := session.Endpoints()
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	// This should compile
 	datasetAPI := &DatasetAPI[testDatasetInput, testDatasetOutput]{
-		apiClient: apiClient,
+		api: apiClient,
 	}
 
 	// The returned Dataset should have the correct type
@@ -281,9 +277,8 @@ func TestDatasetAPI_PopulatesDatasetFields(t *testing.T) {
 	defer session.Close()
 
 	// Create API client
-	apiClient, err := api.NewClient(apiKey, api.WithAPIURL("https://api.braintrust.dev"))
-	require.NoError(t, err)
-
+	endpoints := session.Endpoints()
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	// Create a test dataset
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
@@ -315,7 +310,7 @@ func TestDatasetAPI_PopulatesDatasetFields(t *testing.T) {
 
 	// Load dataset
 	datasetAPI := &DatasetAPI[testDatasetInput, testDatasetOutput]{
-		apiClient: apiClient,
+		api: apiClient,
 	}
 
 	cases, err := datasetAPI.Get(ctx, dataset.ID)
