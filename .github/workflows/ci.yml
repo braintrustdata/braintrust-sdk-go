@@ -34,7 +34,7 @@ jobs:
         run: make ci
 
   ci-passed:
-    name: CI Passed
+    name: ci-passed
     needs: build
     runs-on: ubuntu-latest
     steps:
