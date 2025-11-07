@@ -10,10 +10,10 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
 )
 
-// DatasetAPI provides methods for loading datasets for evaluation.
-// It wraps api.DatasetsClient to provide typed Case[I, R] conversion and pagination handling.
+// DatasetAPI provides methods for loading datasets with automatic type conversion
+// so they can be easily used in evals.
 type DatasetAPI[I, R any] struct {
-	apiClient *api.API
+	api *api.API
 }
 
 // DatasetQueryOpts contains options for querying datasets.
@@ -21,7 +21,7 @@ type DatasetQueryOpts struct {
 	// Name is the dataset name (requires project context)
 	Name string
 
-	// ID is the dataset ID (direct lookup)
+	// ID is the dataset ID
 	ID string
 
 	// Version specifies a specific dataset version
@@ -38,7 +38,7 @@ func (d *DatasetAPI[I, R]) Get(ctx context.Context, id string) (Dataset[I, R], e
 	}
 
 	return &datasetIterator[I, R]{
-		dataset: newDataset(id, 0, d.apiClient.Datasets()), // 0 = no limit
+		dataset: newDataset(id, 0, d.api.Datasets()), // 0 = no limit
 		id:      id,
 		version: "", // Unknown when loading by ID directly
 	}, nil
@@ -49,7 +49,7 @@ func (d *DatasetAPI[I, R]) Query(ctx context.Context, opts DatasetQueryOpts) (Da
 	// If ID is provided directly, use Get
 	if opts.ID != "" {
 		return &datasetIterator[I, R]{
-			dataset: newDataset(opts.ID, opts.Limit, d.apiClient.Datasets()),
+			dataset: newDataset(opts.ID, opts.Limit, d.api.Datasets()),
 			id:      opts.ID,
 			version: opts.Version,
 		}, nil
@@ -66,7 +66,7 @@ func (d *DatasetAPI[I, R]) Query(ctx context.Context, opts DatasetQueryOpts) (Da
 		queryParams.Version = opts.Version
 	}
 
-	response, err := d.apiClient.Datasets().Query(ctx, queryParams)
+	response, err := d.api.Datasets().Query(ctx, queryParams)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query datasets: %w", err)
 	}
@@ -78,7 +78,7 @@ func (d *DatasetAPI[I, R]) Query(ctx context.Context, opts DatasetQueryOpts) (Da
 	// Return the first (most recent) dataset with full metadata
 	ds := response.Objects[0]
 	return &datasetIterator[I, R]{
-		dataset: newDataset(ds.ID, opts.Limit, d.apiClient.Datasets()),
+		dataset: newDataset(ds.ID, opts.Limit, d.api.Datasets()),
 		id:      ds.ID,
 		version: opts.Version,
 	}, nil

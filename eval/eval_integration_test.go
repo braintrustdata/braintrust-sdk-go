@@ -26,8 +26,7 @@ func TestEval_Integration(t *testing.T) {
 
 	// Get endpoints and create API client
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	// Create config for the evaluation
 	cfg := &config.Config{
@@ -154,8 +153,7 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 
 	// Get endpoints and create API client
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	// Create config for the evaluation
 	cfg := &config.Config{
@@ -277,8 +275,7 @@ func TestEval_Integration_DatasetByID(t *testing.T) {
 
 	ctx := context.Background()
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	cfg := &config.Config{
 		DefaultProjectName: integrationTestProject,
@@ -306,7 +303,7 @@ func TestEval_Integration_DatasetByID(t *testing.T) {
 	require.NoError(t, err)
 
 	// Load dataset using DatasetAPI
-	datasetAPI := &DatasetAPI[int, int]{apiClient: apiClient}
+	datasetAPI := &DatasetAPI[int, int]{api: apiClient}
 	cases, err := datasetAPI.Get(ctx, dataset.ID)
 	require.NoError(t, err)
 
@@ -343,8 +340,7 @@ func TestEval_Integration_DatasetByName(t *testing.T) {
 
 	ctx := context.Background()
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	cfg := &config.Config{
 		DefaultProjectName: integrationTestProject,
@@ -373,7 +369,7 @@ func TestEval_Integration_DatasetByName(t *testing.T) {
 	require.NoError(t, err)
 
 	// Load dataset by name using DatasetAPI
-	datasetAPI := &DatasetAPI[int, int]{apiClient: apiClient}
+	datasetAPI := &DatasetAPI[int, int]{api: apiClient}
 	cases, err := datasetAPI.Query(ctx, DatasetQueryOpts{Name: datasetName})
 	require.NoError(t, err)
 
@@ -410,8 +406,7 @@ func TestEval_Integration_DatasetWithTagsAndMetadata(t *testing.T) {
 
 	ctx := context.Background()
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	cfg := &config.Config{
 		DefaultProjectName: integrationTestProject,
@@ -446,7 +441,7 @@ func TestEval_Integration_DatasetWithTagsAndMetadata(t *testing.T) {
 	require.NoError(t, err)
 
 	// Load dataset
-	datasetAPI := &DatasetAPI[int, int]{apiClient: apiClient}
+	datasetAPI := &DatasetAPI[int, int]{api: apiClient}
 	cases, err := datasetAPI.Get(ctx, dataset.ID)
 	require.NoError(t, err)
 
@@ -649,8 +644,7 @@ func TestEval_DifferentProject(t *testing.T) {
 
 	// Get endpoints and create API client
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	// Create a different project (use fixed suffix instead of random)
 	differentProjectName := integrationTestProject + "-other"
@@ -730,8 +724,7 @@ func TestEval_ProjectNameFallback(t *testing.T) {
 
 	// Get endpoints and create API client
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	// Create a project
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})

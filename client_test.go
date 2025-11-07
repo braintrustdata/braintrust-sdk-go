@@ -98,6 +98,50 @@ func TestNew_MissingAPIKey(t *testing.T) {
 	assert.Contains(t, err.Error(), "API key")
 }
 
+func TestNew_MissingAppURL(t *testing.T) {
+	// Note: No t.Parallel() because we're setting environment variables
+
+	t.Setenv("BRAINTRUST_APP_URL", "")
+
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(context.Background()) }()
+
+	// Try to create client without App URL (override the default)
+	client, err := New(tp,
+		WithAPIKey("test-key"),
+		WithProject("test-project"),
+		WithAppURL(""), // Explicitly set to empty
+		WithLogger(logger.Discard()),
+	)
+
+	// Should fail with error about App URL
+	require.Error(t, err)
+	assert.Nil(t, client)
+	assert.Contains(t, err.Error(), "app URL")
+}
+
+func TestNew_MissingAPIURL(t *testing.T) {
+	// Note: No t.Parallel() because we're setting environment variables
+
+	t.Setenv("BRAINTRUST_API_URL", "")
+
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(context.Background()) }()
+
+	// Try to create client without API URL (override the default)
+	client, err := New(tp,
+		WithAPIKey("test-key"),
+		WithProject("test-project"),
+		WithAPIURL(""), // Explicitly set to empty
+		WithLogger(logger.Discard()),
+	)
+
+	// Should fail with error about API URL
+	require.Error(t, err)
+	assert.Nil(t, client)
+	assert.Contains(t, err.Error(), "API URL")
+}
+
 func TestTracing_EndToEnd(t *testing.T) {
 	t.Parallel()
 

@@ -49,30 +49,23 @@ go run cmd/client/main.go
 ## How It Works
 
 1. **Eval Client** (`go run cmd/client/main.go`):
-   - Initializes Braintrust tracing with `trace.Quickstart()`
+   - Initializes Braintrust with `braintrust.New()`
    - Creates Temporal client with OpenTelemetry interceptor
    - Executes workflows with different numeric inputs
    - Each test case creates a root span with experiment context
 
 2. **Worker** (`go run cmd/worker/main.go`):
-   - Initializes Braintrust tracing
+   - Initializes Braintrust with `braintrust.New()`
    - Creates Temporal client with OpenTelemetry interceptor
    - Registers workflow and activities
    - Processes workflow tasks from the queue
    - Activity executions create child spans under the workflow
 
-3. **Distributed Tracing** (Single Trace):
-   - **Temporal's OpenTelemetry interceptor** propagates trace context as headers
-   - All spans in a test case share the same trace ID
-   - Hierarchy: Eval Test Case → Workflow → Activity
-   - Works across remote workers and process boundaries
-   - All spans appear in Braintrust UI as a single connected trace tree
-
-4. **Remote Workers**:
-   - The OpenTelemetry interceptor serializes trace context
-   - Remote workers extract context from Temporal task headers
-   - Trace continues seamlessly across machines/processes
-   - No additional configuration needed beyond the interceptor
+3. **Distributed Tracing**:
+   - Temporal's OpenTelemetry interceptor automatically propagates trace context
+   - All spans in a test case share the same trace ID: Eval Test Case → Workflow → Activity
+   - Works seamlessly across remote workers and process boundaries
+   - View complete trace trees in the Braintrust UI
 
 ## Project Structure
 

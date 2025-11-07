@@ -60,18 +60,20 @@ func WithLogger(l logger.Logger) Option {
 	}
 }
 
-// WithBlockingLogin enables synchronous login
-// By default, login happens asynchronously in the background
-// Set to true for tests or scripts where you need login to complete before proceeding
+// WithBlockingLogin blocks setup until login completes. Authentication
+// normally happens asynchronously in the background.
+//
+// This only enables printing links to spans. This is only useful for
+// scripts, testing and examples. It is not recommended for production use.
 func WithBlockingLogin(enabled bool) Option {
 	return func(c *config.Config) {
 		c.BlockingLogin = enabled
 	}
 }
 
-// WithExporter injects a custom OpenTelemetry SpanExporter
-// If not provided, an OTLP HTTP exporter will be created automatically
-// This is primarily useful for testing with a memory exporter
+// WithExporter injects a custom OpenTelemetry SpanExporter.
+// If not provided, an OTLP HTTP exporter will be created automatically. This
+// is solely for testing purposes.
 func WithExporter(exporter trace.SpanExporter) Option {
 	return func(c *config.Config) {
 		c.Exporter = exporter

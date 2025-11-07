@@ -14,18 +14,47 @@ This library provides tools for **evaluating** and **tracing** AI applications i
 
 This SDK is currently in BETA status and APIs may change.
 
-## Installation
+## Setup
 
 ```bash
 go get github.com/braintrustdata/braintrust-sdk-go
+
+export BRAINTRUST_API_KEY="your-api-key"
 ```
 
-## Quick Start
+### Getting started
 
-### Set up your API key
+Braintrust uses [OpenTelemetry](https://opentelemetry.io/) for distributed tracing. Every application needs:
 
-```bash
-export BRAINTRUST_API_KEY="your-api-key"
+1. **TracerProvider**: Collects and exports traces from your application
+2. **API Key**: Authenticates your application with Braintrust. [Braintrust Settings](https://www.braintrust.dev/app/settings).
+3. **Braintrust Client**: Connects to Braintrust and registers your TracerProvider for automatic instrumentation
+
+### Setup
+
+```go
+package main
+
+import (
+    "context"
+    "log"
+
+    "go.opentelemetry.io/otel"
+    "go.opentelemetry.io/otel/sdk/trace"
+
+    "github.com/braintrustdata/braintrust-sdk-go"
+    "github.com/braintrustdata/braintrust-sdk-go/eval"
+)
+
+func main() {
+    // Setup a global OTel Tracer Provider.
+    tp := trace.NewTracerProvider()
+    defer tp.Shutdown(context.Background())
+    otel.SetTracerProvider(tp)
+
+    bt, err := 
+
+
 ```
 
 ### Evals
@@ -51,16 +80,13 @@ func main() {
     otel.SetTracerProvider(tp)
 
     // Initialize Braintrust
-    bt, err := braintrust.New(tp,
-        braintrust.WithProject("my-project"),
-        braintrust.WithBlockingLogin(true),
-    )
+    client, err := braintrust.New(tp)
     if err != nil {
         log.Fatal(err)
     }
 
-    // Create evaluator
-    evaluator := braintrust.NewEvaluator[string, string](bt)
+    // Create an evaluator with your task's input and output types.
+    evaluator := braintrust.NewEvaluator[string, string](client)
 
     // Run an evaluation
     _, err = evaluator.Run(context.Background(), eval.Opts[string, string]{
@@ -73,11 +99,12 @@ func main() {
             return "Hello " + input, nil
         }),
         Scorers: []eval.Scorer[string, string]{
-            eval.NewScorer("exact_match", func(ctx context.Context, taskResult eval.TaskResult[string, string]) (eval.Scores, error) {
-                if taskResult.Expected == taskResult.Output {
-                    return eval.S(1.0), nil
+            eval.NewScorer("exact_match", func(ctx context.Context, r eval.TaskResult[string, string]) (eval.Scores, error) {
+                score := 0.0
+                if r.Expected == r.Output {
+                    score := 1.0
                 }
-                return eval.S(0.0), nil
+                return eval.S(score), nil
             }),
         },
     })
@@ -112,9 +139,7 @@ func main() {
     otel.SetTracerProvider(tp)
 
     // Initialize Braintrust
-    _, err := braintrust.New(tp,
-        braintrust.WithProject("my-project"),
-    )
+    _, err := braintrust.New(tp)
     if err != nil {
         log.Fatal(err)
     }
@@ -124,8 +149,13 @@ func main() {
         option.WithMiddleware(traceopenai.NewMiddleware()),
     )
 
-    // Your OpenAI API calls will now be automatically traced
-    _ = client // Use the client for your API calls
+    // Make API calls - they'll be automatically traced and logged to Braintrust
+    resp, err := client.Chat.Completions.New(context.Background(), openai.ChatCompletionNewParams{
+        Messages: openai.F([]openai.ChatCompletionMessageParamUnion{
+            openai.UserMessage("Hello!"),
+        }),
+        Model: openai.F(openai.ChatModelGPT4),
+    })
 }
 ```
 
@@ -166,8 +196,14 @@ func main() {
         option.WithMiddleware(traceanthropic.NewMiddleware()),
     )
 
-    // Your Anthropic API calls will now be automatically traced
-    _ = client // Use the client for your API calls
+    // Make API calls - they'll be automatically traced and logged to Braintrust
+    message, err := client.Messages.New(context.Background(), anthropic.MessageNewParams{
+        Model:     anthropic.F(anthropic.ModelClaude_3_5_Sonnet_20241022),
+        MaxTokens: anthropic.Int(1024),
+        Messages: anthropic.F([]anthropic.MessageParam{
+            anthropic.NewUserMessage(anthropic.NewTextBlock("Hello!")),
+        }),
+    })
 }
 ```
 
@@ -213,8 +249,11 @@ func main() {
         log.Fatal(err)
     }
 
-    // Your Gemini API calls will now be automatically traced
-    _ = client // Use the client for your API calls
+    // Make API calls - they'll be automatically traced and logged to Braintrust
+    resp, err := client.Models.GenerateContent(context.Background(),
+        "gemini-1.5-flash",
+        genai.Text("Hello!"),
+    )
 }
 ```
 

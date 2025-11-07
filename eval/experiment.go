@@ -25,10 +25,7 @@ func registerExperiment(ctx context.Context, cfg *config.Config, session *auth.S
 	}
 
 	endpoints := session.Endpoints()
-	c, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	if err != nil {
-		return nil, fmt.Errorf("failed to create API client: %w", err)
-	}
+	c := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	// Create the project
 	project, err := c.Projects().Create(ctx, projects.CreateParams{

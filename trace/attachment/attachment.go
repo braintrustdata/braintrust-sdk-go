@@ -8,7 +8,7 @@
 // securely stored in an object store and associated with your organization.
 //
 // Most users won't need to use this package directly, as the instrumentation
-// middleware (traceopenai, traceanthropic) automatically handles attachment
+// middleware (trace/contrib/openai, trace/contrib/anthropic) automatically handles attachment
 // conversion. This package is primarily useful for:
 //   - Manual logging without instrumentation
 //   - Custom scenarios not covered by auto-instrumentation

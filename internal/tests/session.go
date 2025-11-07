@@ -81,10 +81,7 @@ func GetTestHTTPSClient(t *testing.T) *https.Client {
 	}
 
 	log := intlogger.NewFailTestLogger(t)
-	client, err := https.NewClient(apiKey, apiURL, log)
-	if err != nil {
-		t.Fatalf("Failed to create HTTPS client: %v", err)
-	}
+	client := https.NewClient(apiKey, apiURL, log)
 
 	return client
 }

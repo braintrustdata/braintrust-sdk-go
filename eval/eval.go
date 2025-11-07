@@ -1,6 +1,4 @@
-// Package eval provides evaluation functionality for the Braintrust SDK.
-// This package is designed to work with the client-based architecture and
-// does not rely on global state.
+// Package eval is used to run evals in Braintrust.
 package eval
 
 import (
@@ -108,10 +106,8 @@ type Case[I, R any] struct {
 	Created string // Creation timestamp
 }
 
-// Dataset is an iterator interface for evaluation datasets.
-// This allows lazy loading of cases without requiring them all in memory.
-// Implementations must return io.EOF when iteration is complete.
-// Can represent literal in-memory cases or API-backed datasets.
+// Dataset is an iterator interface for evaluation datasets. It is commonly
+// an in-memory slice of cases, but can also be a dataset lazily loaded from the Braintrust API.
 type Dataset[I, R any] interface {
 	// Next returns the next case, or io.EOF if there are no more cases.
 	Next() (Case[I, R], error)
@@ -125,7 +121,7 @@ type Dataset[I, R any] interface {
 	Version() string
 }
 
-// Metadata is a map of strings to a JSON-encodable value. It is used to store arbitrary metadata about a case.
+// Metadata is a map of strings to a JSON-encodable value.
 type Metadata map[string]any
 
 // Result contains the results of an evaluation.
@@ -134,7 +130,6 @@ type Result struct {
 	err       error
 	elapsed   time.Duration
 	permalink string
-	// TODO: Will be populated with span data, scores, errors, etc. in future iterations
 }
 
 // key contains the data needed to uniquely identify and reference an eval.
@@ -161,7 +156,7 @@ func (r *Result) Permalink() (string, error) {
 	return r.permalink, nil
 }
 
-// Error returns the error from running the eval.
+// Error returns an errors that were encountered while running the eval.
 func (r *Result) Error() error {
 	return r.err
 }

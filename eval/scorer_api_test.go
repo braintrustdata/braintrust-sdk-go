@@ -22,9 +22,7 @@ func TestScorerAPI_Get(t *testing.T) {
 
 	// Get endpoints and create API client
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
-
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	functions := apiClient.Functions()
 
 	// Register project
@@ -118,16 +116,14 @@ func TestScorerAPI_Get_EmptySlug(t *testing.T) {
 
 	// Get endpoints and create API client
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
-
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	scorerAPI := &ScorerAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,
 		projectName: integrationTestProject,
 	}
 
 	// Should error on empty slug
-	_, err = scorerAPI.Get(ctx, "")
+	_, err := scorerAPI.Get(ctx, "")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "required")
 }
@@ -141,16 +137,14 @@ func TestScorerAPI_Get_NotFound(t *testing.T) {
 
 	// Get endpoints and create API client
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
-
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	scorerAPI := &ScorerAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,
 		projectName: integrationTestProject,
 	}
 
 	// Should error on non-existent scorer
-	_, err = scorerAPI.Get(ctx, "nonexistent-scorer-slug-12345")
+	_, err := scorerAPI.Get(ctx, "nonexistent-scorer-slug-12345")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "not found")
 }
@@ -164,9 +158,7 @@ func TestScorerAPI_Query(t *testing.T) {
 
 	// Get endpoints and create API client
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
-
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	functions := apiClient.Functions()
 
 	// Register project
@@ -267,9 +259,7 @@ func TestScorerAPI_TypeSafety(t *testing.T) {
 
 	// Get endpoints and create API client
 	endpoints := session.Endpoints()
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	require.NoError(t, err)
-
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	// This should compile
 	scorerAPI := &ScorerAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,

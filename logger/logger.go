@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-// Logger is the interface for SDK logging.
-// Compatible with slog, zap, logrus, and other structured loggers.
+// Logger is the interface for SDK logging. Implement this interface
+// to plug SDK logging into your logging setup.
 type Logger interface {
 	Debug(msg string, args ...any)
 	Info(msg string, args ...any)

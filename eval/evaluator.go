@@ -12,8 +12,8 @@ import (
 
 // Evaluator provides a reusable way to run multiple evaluations with the same
 // input and output types. This is useful when you need to run several evaluations
-// in sequence with the same type signature, or use hosted prompts, scorers and dataasets
-// with automatirc type conversion.
+// in sequence with the same type signature, or use hosted prompts, scorers and datasets
+// with automatic type conversion.
 type Evaluator[I, R any] struct {
 	session        *auth.Session
 	config         *config.Config
@@ -37,14 +37,10 @@ func (e *Evaluator[I, R]) Datasets() *DatasetAPI[I, R] {
 	endpoints := e.session.Endpoints()
 
 	// Create api.Client for dataset operations
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	if err != nil {
-		// This shouldn't happen since session is validated, but handle it anyway
-		panic("failed to create API client: " + err.Error())
-	}
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	return &DatasetAPI[I, R]{
-		apiClient: apiClient,
+		api: apiClient,
 	}
 }
 
@@ -54,11 +50,7 @@ func (e *Evaluator[I, R]) Tasks() *TaskAPI[I, R] {
 	endpoints := e.session.Endpoints()
 
 	// Create api.API for task operations
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	if err != nil {
-		// This shouldn't happen since session is validated, but handle it anyway
-		panic("failed to create API client: " + err.Error())
-	}
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	return &TaskAPI[I, R]{
 		api:         apiClient,
@@ -72,11 +64,7 @@ func (e *Evaluator[I, R]) Scorers() *ScorerAPI[I, R] {
 	endpoints := e.session.Endpoints()
 
 	// Create api.API for scorer operations
-	apiClient, err := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	if err != nil {
-		// This shouldn't happen since session is validated, but handle it anyway
-		panic("failed to create API client: " + err.Error())
-	}
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	return &ScorerAPI[I, R]{
 		api:         apiClient,
