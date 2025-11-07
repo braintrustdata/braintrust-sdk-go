@@ -43,7 +43,6 @@ import (
     "go.opentelemetry.io/otel/sdk/trace"
 
     "github.com/braintrustdata/braintrust-sdk-go"
-    "github.com/braintrustdata/braintrust-sdk-go/eval"
 )
 
 func main() {
@@ -52,9 +51,81 @@ func main() {
     defer tp.Shutdown(context.Background())
     otel.SetTracerProvider(tp)
 
-    bt, err := 
+    bt, err := braintrust.New(tp)
+    if err != nil {
+        log.Fatal(err)
+    }
+    _ = bt // Your client is ready for use
+}
+```
 
+### API Usage
 
+Use the API client to manage Braintrust resources like prompts, datasets, and projects:
+
+```go
+package main
+
+import (
+    "context"
+    "log"
+
+    "go.opentelemetry.io/otel/sdk/trace"
+
+    "github.com/braintrustdata/braintrust-sdk-go"
+    functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
+)
+
+func main() {
+    ctx := context.Background()
+
+    // Create tracer provider
+    tp := trace.NewTracerProvider()
+    defer tp.Shutdown(ctx)
+
+    // Initialize Braintrust
+    client, err := braintrust.New(tp,
+        braintrust.WithProject("my-project"),
+    )
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Get API client
+    api := client.API()
+
+    // Create a prompt
+    prompt, err := api.Functions().Create(ctx, functionsapi.CreateParams{
+        ProjectID: "your-project-id",
+        Name:      "My Prompt",
+        Slug:      "my-prompt",
+        FunctionData: map[string]any{
+            "type": "prompt",
+        },
+        PromptData: map[string]any{
+            "prompt": map[string]any{
+                "type": "chat",
+                "messages": []map[string]any{
+                    {
+                        "role":    "system",
+                        "content": "You are a helpful assistant.",
+                    },
+                    {
+                        "role":    "user",
+                        "content": "{{input}}",
+                    },
+                },
+            },
+            "options": map[string]any{
+                "model": "gpt-4o-mini",
+            },
+        },
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    _ = prompt // Prompt is ready to use
+}
 ```
 
 ### Evals
@@ -102,7 +173,7 @@ func main() {
             eval.NewScorer("exact_match", func(ctx context.Context, r eval.TaskResult[string, string]) (eval.Scores, error) {
                 score := 0.0
                 if r.Expected == r.Output {
-                    score := 1.0
+                    score = 1.0
                 }
                 return eval.S(score), nil
             }),
@@ -150,12 +221,15 @@ func main() {
     )
 
     // Make API calls - they'll be automatically traced and logged to Braintrust
-    resp, err := client.Chat.Completions.New(context.Background(), openai.ChatCompletionNewParams{
-        Messages: openai.F([]openai.ChatCompletionMessageParamUnion{
+    _, err = client.Chat.Completions.New(context.Background(), openai.ChatCompletionNewParams{
+        Messages: []openai.ChatCompletionMessageParamUnion{
             openai.UserMessage("Hello!"),
-        }),
-        Model: openai.F(openai.ChatModelGPT4),
+        },
+        Model: openai.ChatModelGPT4oMini,
     })
+    if err != nil {
+        log.Fatal(err)
+    }
 }
 ```
 
@@ -197,13 +271,16 @@ func main() {
     )
 
     // Make API calls - they'll be automatically traced and logged to Braintrust
-    message, err := client.Messages.New(context.Background(), anthropic.MessageNewParams{
-        Model:     anthropic.F(anthropic.ModelClaude_3_5_Sonnet_20241022),
-        MaxTokens: anthropic.Int(1024),
-        Messages: anthropic.F([]anthropic.MessageParam{
+    _, err = client.Messages.New(context.Background(), anthropic.MessageNewParams{
+        Model: anthropic.ModelClaude3_7SonnetLatest,
+        Messages: []anthropic.MessageParam{
             anthropic.NewUserMessage(anthropic.NewTextBlock("Hello!")),
-        }),
+        },
+        MaxTokens: 1024,
     })
+    if err != nil {
+        log.Fatal(err)
+    }
 }
 ```
 
@@ -250,10 +327,14 @@ func main() {
     }
 
     // Make API calls - they'll be automatically traced and logged to Braintrust
-    resp, err := client.Models.GenerateContent(context.Background(),
+    _, err = client.Models.GenerateContent(context.Background(),
         "gemini-1.5-flash",
         genai.Text("Hello!"),
+        nil,
     )
+    if err != nil {
+        log.Fatal(err)
+    }
 }
 ```
 
