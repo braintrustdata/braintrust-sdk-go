@@ -39,9 +39,11 @@ type CreateParams struct {
 // RegisterOpts contains optional parameters for registering an experiment.
 // This is a convenience wrapper that provides backward compatibility.
 type RegisterOpts struct {
-	Tags     []string
-	Metadata map[string]interface{}
-	Update   bool // If true, allow reusing existing experiment instead of creating new one
+	Tags           []string
+	Metadata       map[string]interface{}
+	Update         bool   // If true, allow reusing existing experiment instead of creating new one
+	DatasetID      string // Optional dataset ID to link to this experiment
+	DatasetVersion string // Optional dataset version
 }
 
 // ListParams represents parameters for listing experiments

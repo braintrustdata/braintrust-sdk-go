@@ -51,10 +51,15 @@ type Event struct {
 	ObjectDelete *bool      `json:"_object_delete,omitempty"`
 }
 
-// Origin indicates the event was copied from another object
+// Origin indicates the event was copied from another object.
+// When an eval result is linked to a dataset row, the origin contains
+// the dataset ID and the specific record ID, timestamp, and transaction ID.
 type Origin struct {
 	ObjectType string `json:"object_type,omitempty"`
 	ObjectID   string `json:"object_id,omitempty"`
+	ID         string `json:"id,omitempty"`
+	Created    string `json:"created,omitempty"`
+	XactID     string `json:"_xact_id,omitempty"`
 }
 
 // CreateParams contains parameters for creating a dataset.

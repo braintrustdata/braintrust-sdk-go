@@ -89,7 +89,7 @@ func main() {
 	// Run the evaluation
 	result, err := evaluator.Run(ctx, eval.Opts[QuestionInput, AnswerOutput]{
 		Experiment: "qa-dataset-example",
-		Cases:      cases,
+		Dataset:    cases,
 		Task:       task,
 		Scorers:    []eval.Scorer[QuestionInput, AnswerOutput]{exactMatchScorer},
 	})

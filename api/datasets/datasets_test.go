@@ -670,3 +670,30 @@ func TestDatasets_Fetch_Validation(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "required")
 }
+
+// TestOrigin_Serialization tests that the Origin struct properly serializes all fields
+func TestOrigin_Serialization(t *testing.T) {
+	origin := Origin{
+		ObjectType: "dataset",
+		ObjectID:   "dataset-123",
+		ID:         "event-456",
+		Created:    "2024-01-15T10:30:00Z",
+		XactID:     "xact-789",
+	}
+
+	// Marshal to JSON
+	data, err := json.Marshal(origin)
+	require.NoError(t, err)
+
+	// Unmarshal back
+	var unmarshaled Origin
+	err = json.Unmarshal(data, &unmarshaled)
+	require.NoError(t, err)
+
+	// Verify all fields
+	assert.Equal(t, "dataset", unmarshaled.ObjectType)
+	assert.Equal(t, "dataset-123", unmarshaled.ObjectID)
+	assert.Equal(t, "event-456", unmarshaled.ID)
+	assert.Equal(t, "2024-01-15T10:30:00Z", unmarshaled.Created)
+	assert.Equal(t, "xact-789", unmarshaled.XactID)
+}

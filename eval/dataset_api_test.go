@@ -263,11 +263,74 @@ func TestDatasetAPI_TypeSafety(t *testing.T) {
 		apiClient: apiClient,
 	}
 
-	// The returned Cases should have the correct type
-	var _ = func() (Cases[testDatasetInput, testDatasetOutput], error) {
+	// The returned Dataset should have the correct type
+	var _ = func() (Dataset[testDatasetInput, testDatasetOutput], error) {
 		return datasetAPI.Get(ctx, "test-id")
 	}
 
 	// This is a compile-time check - if it compiles, the test passes
 	assert.NotNil(t, datasetAPI)
+}
+
+// TestDatasetAPI_PopulatesDatasetFields tests that dataset iterator populates ID, XactID, and Created
+func TestDatasetAPI_PopulatesDatasetFields(t *testing.T) {
+	apiKey := requireAPIKey(t)
+
+	ctx := context.Background()
+	session := createTestSession(t, apiKey)
+	defer session.Close()
+
+	// Create API client
+	apiClient, err := api.NewClient(apiKey, api.WithAPIURL("https://api.braintrust.dev"))
+	require.NoError(t, err)
+
+	// Create a test dataset
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
+	require.NoError(t, err)
+
+	dataset, err := apiClient.Datasets().Create(ctx, datasets.CreateParams{
+		ProjectID:   project.ID,
+		Name:        tests.RandomName(t, "dataset-fields-test"),
+		Description: "Test dataset for verifying ID, XactID, Created fields",
+	})
+	require.NoError(t, err)
+	defer func() {
+		_ = apiClient.Datasets().Delete(ctx, dataset.ID)
+	}()
+
+	// Insert a test event
+	events := []datasets.Event{
+		{
+			Input: map[string]interface{}{
+				"question": "What is 2+2?",
+			},
+			Expected: map[string]interface{}{
+				"answer": "4",
+			},
+		},
+	}
+
+	err = apiClient.Datasets().InsertEvents(ctx, dataset.ID, events)
+	require.NoError(t, err)
+
+	// Load dataset
+	datasetAPI := &DatasetAPI[testDatasetInput, testDatasetOutput]{
+		apiClient: apiClient,
+	}
+
+	cases, err := datasetAPI.Get(ctx, dataset.ID)
+	require.NoError(t, err)
+	require.NotNil(t, cases)
+
+	// Read the first case
+	testCase, err := cases.Next()
+	require.NoError(t, err)
+
+	// Verify that dataset-specific fields are populated
+	assert.NotEmpty(t, testCase.ID, "Case should have ID populated from dataset record")
+	assert.NotEmpty(t, testCase.XactID, "Case should have XactID populated from dataset record")
+	assert.NotEmpty(t, testCase.Created, "Case should have Created populated from dataset record")
+
+	t.Logf("Dataset record fields: ID=%s, XactID=%s, Created=%s",
+		testCase.ID, testCase.XactID, testCase.Created)
 }

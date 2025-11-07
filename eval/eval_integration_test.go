@@ -101,7 +101,7 @@ func TestEval_Integration(t *testing.T) {
 	require.NotNil(t, task)
 
 	// Create evaluation cases
-	cases := NewCases([]Case[string, string]{
+	cases := NewDataset([]Case[string, string]{
 		{
 			Input:    "hello",
 			Expected: "hello",
@@ -131,7 +131,7 @@ func TestEval_Integration(t *testing.T) {
 	// Run the evaluation
 	result, err := Run(ctx, Opts[string, string]{
 		Experiment: tests.RandomName(t, "exp"),
-		Cases:      cases,
+		Dataset:    cases,
 		Task:       task,
 		Scorers:    []Scorer[string, string]{containsScorer},
 		Quiet:      true,
@@ -237,7 +237,7 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 	require.NotNil(t, task)
 
 	// Create evaluation cases
-	cases := NewCases([]Case[QuestionInput, AnswerOutput]{
+	cases := NewDataset([]Case[QuestionInput, AnswerOutput]{
 		{
 			Input:    QuestionInput{Question: "What is 2+2?"},
 			Expected: AnswerOutput{Answer: "4"},
@@ -259,7 +259,7 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 	// Run the evaluation - this should handle string-to-struct conversion
 	result, err := Run(ctx, Opts[QuestionInput, AnswerOutput]{
 		Experiment: tests.RandomName(t, "exp"),
-		Cases:      cases,
+		Dataset:    cases,
 		Task:       task,
 		Scorers:    []Scorer[QuestionInput, AnswerOutput]{scorer},
 		Quiet:      true,
@@ -317,7 +317,7 @@ func TestEval_Integration_DatasetByID(t *testing.T) {
 	// Run evaluation
 	result, err := Run(ctx, Opts[int, int]{
 		Experiment: tests.RandomName(t, "exp"),
-		Cases:      cases,
+		Dataset:    cases,
 		Task: T(func(ctx context.Context, input int) (int, error) {
 			return input * 2, nil
 		}),
@@ -384,7 +384,7 @@ func TestEval_Integration_DatasetByName(t *testing.T) {
 	// Run evaluation
 	result, err := Run(ctx, Opts[int, int]{
 		Experiment: tests.RandomName(t, "exp"),
-		Cases:      cases,
+		Dataset:    cases,
 		Task: T(func(ctx context.Context, input int) (int, error) {
 			return input * input, nil
 		}),
@@ -457,7 +457,7 @@ func TestEval_Integration_DatasetWithTagsAndMetadata(t *testing.T) {
 	// Run evaluation - tags and metadata should be preserved
 	result, err := Run(ctx, Opts[int, int]{
 		Experiment: tests.RandomName(t, "exp"),
-		Cases:      cases,
+		Dataset:    cases,
 		Task: T(func(ctx context.Context, input int) (int, error) {
 			return input * 2, nil
 		}),
@@ -489,7 +489,7 @@ func TestEval_Integration_ExperimentTags(t *testing.T) {
 		DefaultProjectName: integrationTestProject,
 	}
 
-	cases := NewCases([]Case[string, string]{
+	cases := NewDataset([]Case[string, string]{
 		{Input: "hello", Expected: "hello"},
 	})
 
@@ -499,7 +499,7 @@ func TestEval_Integration_ExperimentTags(t *testing.T) {
 	// Run eval with experiment-level tags
 	result, err := Run(ctx, Opts[string, string]{
 		Experiment: tests.RandomName(t, "exp"),
-		Cases:      cases,
+		Dataset:    cases,
 		Task: T(func(ctx context.Context, input string) (string, error) {
 			return input, nil
 		}),
@@ -526,7 +526,7 @@ func TestEval_Integration_ExperimentMetadata(t *testing.T) {
 		DefaultProjectName: integrationTestProject,
 	}
 
-	cases := NewCases([]Case[string, string]{
+	cases := NewDataset([]Case[string, string]{
 		{Input: "test", Expected: "test"},
 	})
 
@@ -536,7 +536,7 @@ func TestEval_Integration_ExperimentMetadata(t *testing.T) {
 	// Run eval with experiment-level metadata
 	result, err := Run(ctx, Opts[string, string]{
 		Experiment: tests.RandomName(t, "exp"),
-		Cases:      cases,
+		Dataset:    cases,
 		Task: T(func(ctx context.Context, input string) (string, error) {
 			return input, nil
 		}),
@@ -570,7 +570,7 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 	// Create unique experiment name
 	experimentName := tests.RandomName(t, "update-test")
 
-	cases1 := NewCases([]Case[string, string]{
+	cases1 := NewDataset([]Case[string, string]{
 		{Input: "hello", Expected: "hello"},
 	})
 
@@ -584,7 +584,7 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 	// First run: Create new experiment (Update: false)
 	result1, err := Run(ctx, Opts[string, string]{
 		Experiment: experimentName,
-		Cases:      cases1,
+		Dataset:    cases1,
 		Task: T(func(ctx context.Context, input string) (string, error) {
 			return input, nil
 		}),
@@ -597,14 +597,14 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 
 	firstExpID := result1.ID()
 
-	cases2 := NewCases([]Case[string, string]{
+	cases2 := NewDataset([]Case[string, string]{
 		{Input: "world", Expected: "world"},
 	})
 
 	// Second run: Append to existing experiment (Update: true)
 	result2, err := Run(ctx, Opts[string, string]{
 		Experiment: result1.Name(), // Use exact name from first run
-		Cases:      cases2,
+		Dataset:    cases2,
 		Task: T(func(ctx context.Context, input string) (string, error) {
 			return input, nil
 		}),
@@ -623,7 +623,7 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 	// Third run: Create new experiment (Update: false)
 	result3, err := Run(ctx, Opts[string, string]{
 		Experiment: result1.Name(),
-		Cases:      cases1,
+		Dataset:    cases1,
 		Task: T(func(ctx context.Context, input string) (string, error) {
 			return input, nil
 		}),
@@ -658,6 +658,14 @@ func TestEval_DifferentProject(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, project)
 
+	// Clean up: Delete the project when test completes
+	defer func() {
+		err := apiClient.Projects().Delete(ctx, project.ID)
+		if err != nil {
+			t.Logf("Failed to delete test project %s: %v", project.ID, err)
+		}
+	}()
+
 	// Create config with default project (should be overridden by opts.Project)
 	cfg := &config.Config{
 		DefaultProjectName: integrationTestProject,
@@ -668,7 +676,7 @@ func TestEval_DifferentProject(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Create test cases
-	cases := NewCases([]Case[string, string]{
+	cases := NewDataset([]Case[string, string]{
 		{Input: "test1", Expected: "test1"},
 		{Input: "test2", Expected: "test2"},
 	})
@@ -685,7 +693,7 @@ func TestEval_DifferentProject(t *testing.T) {
 	result, err := Run(ctx, Opts[string, string]{
 		Experiment:  tests.RandomName(t, "exp"),
 		ProjectName: differentProjectName, // Override config.DefaultProjectName
-		Cases:       cases,
+		Dataset:     cases,
 		Task: T(func(ctx context.Context, input string) (string, error) {
 			return input, nil
 		}),
@@ -740,7 +748,7 @@ func TestEval_ProjectNameFallback(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Create test cases
-	cases := NewCases([]Case[string, string]{
+	cases := NewDataset([]Case[string, string]{
 		{Input: "test1", Expected: "test1"},
 	})
 
@@ -756,7 +764,7 @@ func TestEval_ProjectNameFallback(t *testing.T) {
 	result, err := Run(ctx, Opts[string, string]{
 		Experiment: tests.RandomName(t, "exp"),
 		// ProjectName not specified - should fall back to cfg.DefaultProjectName
-		Cases: cases,
+		Dataset: cases,
 		Task: T(func(ctx context.Context, input string) (string, error) {
 			return input, nil
 		}),
@@ -793,7 +801,7 @@ func TestEval_NoProjectName(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Create test cases
-	cases := NewCases([]Case[string, string]{
+	cases := NewDataset([]Case[string, string]{
 		{Input: "test1", Expected: "test1"},
 	})
 
@@ -801,7 +809,7 @@ func TestEval_NoProjectName(t *testing.T) {
 	result, err := Run(ctx, Opts[string, string]{
 		Experiment: tests.RandomName(t, "exp"),
 		// ProjectName not specified AND cfg.DefaultProjectName is empty
-		Cases: cases,
+		Dataset: cases,
 		Task: T(func(ctx context.Context, input string) (string, error) {
 			return input, nil
 		}),

@@ -131,7 +131,7 @@ func main() {
 
 	_, err = evaluator.Run(context.Background(), eval.Opts[QuestionInput, AnswerExpected]{
 		Experiment: "Capitalization Task Demo",
-		Cases:      cases, // Use fetched cases
+		Dataset:    cases, // Use fetched dataset
 		Task: eval.T(func(ctx context.Context, input QuestionInput) (AnswerExpected, error) {
 			// Simple example: capitalize the first letter of each word
 			fmt.Printf("🔄 Processing text: '%s' (context: %s, language: %s)\n",

@@ -102,7 +102,7 @@ func main() {
 	log.Println("🚀 Running evaluation...")
 	_, err = evaluator.Run(context.Background(), eval.Opts[int, int]{
 		Experiment: "go-sdk-examples",
-		Cases: eval.NewCases([]eval.Case[int, int]{
+		Dataset: eval.NewDataset([]eval.Case[int, int]{
 			{Input: 5, Expected: 10},
 			{Input: 3, Expected: 6},
 			{Input: 7, Expected: 14},

@@ -33,7 +33,7 @@ type unitTestEval[I, R any] struct {
 
 // newUnitTestEval creates a fully configured eval for unit testing with fake data.
 // It generates its own fake session, config, tracer, experiment/project IDs, etc.
-func newUnitTestEval[I, R any](t *testing.T, cases Cases[I, R], task TaskFunc[I, R], scorers []Scorer[I, R], parallelism int) *unitTestEval[I, R] {
+func newUnitTestEval[I, R any](t *testing.T, dataset Dataset[I, R], task TaskFunc[I, R], scorers []Scorer[I, R], parallelism int) *unitTestEval[I, R] {
 	t.Helper()
 
 	// Create test tracer and exporter using oteltest
@@ -58,7 +58,7 @@ func newUnitTestEval[I, R any](t *testing.T, cases Cases[I, R], task TaskFunc[I,
 		"test-experiment", // fake experiment name
 		"proj-87654321",   // fake project ID
 		"test-project",    // fake project name
-		cases,
+		dataset,
 		task,
 		scorers,
 		parallelism,
@@ -97,7 +97,7 @@ func TestNewEval_Success(t *testing.T) {
 	t.Parallel()
 
 	// Create test cases with tags and metadata
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{
 			Input:    testInput{Value: "test1"},
 			Expected: testOutput{Result: "expected1"},
@@ -234,7 +234,7 @@ func TestNewEval_Success(t *testing.T) {
 func TestNewEval_Parallelism(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test"}},
 	})
 	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
@@ -248,7 +248,7 @@ func TestNewEval_Parallelism(t *testing.T) {
 func TestNewEval_DefaultParallelism(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test"}},
 	})
 	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
@@ -267,7 +267,7 @@ func TestNewEval_DefaultParallelism(t *testing.T) {
 func TestEval_Run_TaskError(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test1"}},
 		{Input: testInput{Value: "error"}},
 		{Input: testInput{Value: "test2"}},
@@ -321,7 +321,7 @@ func TestEval_Run_TaskError(t *testing.T) {
 func TestEval_Run_ScorerError(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test1"}},
 		{Input: testInput{Value: "test2"}},
 	})
@@ -384,7 +384,7 @@ func TestEval_Run_ScorerError(t *testing.T) {
 func TestEval_Run_PrintsSummary(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test1"}},
 		{Input: testInput{Value: "test2"}},
 	})
@@ -416,7 +416,7 @@ func TestEval_Run_PrintsSummary(t *testing.T) {
 func TestEval_Run_QuietSuppressesSummary(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test1"}},
 	})
 
@@ -445,7 +445,7 @@ func TestTaskFunc_ReceivesTaskHooks(t *testing.T) {
 	t.Parallel()
 
 	// Create test case with metadata, tags, and expected value
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{
 			Input:    testInput{Value: "test"},
 			Expected: testOutput{Result: "expected-result"},
@@ -502,7 +502,7 @@ func TestTaskFunc_ReceivesTaskHooks(t *testing.T) {
 func TestTaskFunc_ModifyTaskSpan(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test"}},
 	})
 
@@ -539,7 +539,7 @@ func TestTaskFunc_ModifyTaskSpan(t *testing.T) {
 func TestTaskFunc_ModifyEvalSpan(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test"}},
 	})
 
@@ -576,7 +576,7 @@ func TestTaskFunc_ModifyEvalSpan(t *testing.T) {
 func TestTaskFunc_ReturnsTaskResult(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test1"}},
 		{Input: testInput{Value: "test2"}},
 	})
@@ -614,7 +614,7 @@ func TestTaskFunc_ReturnsTaskResult(t *testing.T) {
 func TestTaskFunc_TAdapter(t *testing.T) {
 	t.Parallel()
 
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test"}},
 	})
 
@@ -648,7 +648,7 @@ func TestEval_ParallelWithTaskErrors(t *testing.T) {
 	t.Parallel()
 
 	// Test that parallel execution properly handles multiple task errors
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "pass1"}},
 		{Input: testInput{Value: "fail1"}},
 		{Input: testInput{Value: "pass2"}},
@@ -693,7 +693,7 @@ func TestEval_ParallelWithScorerErrors(t *testing.T) {
 	t.Parallel()
 
 	// Test that parallel execution properly handles multiple scorer errors
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test1"}},
 		{Input: testInput{Value: "test2"}},
 		{Input: testInput{Value: "test3"}},
@@ -743,7 +743,7 @@ func TestEval_ParallelAllTasksFail(t *testing.T) {
 	t.Parallel()
 
 	// Test that parallel execution handles the case where all tasks fail
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test1"}},
 		{Input: testInput{Value: "test2"}},
 		{Input: testInput{Value: "test3"}},
@@ -827,12 +827,20 @@ func (c *customCases[I, R]) Next() (Case[I, R], error) {
 	return c.nextFunc()
 }
 
+func (c *customCases[I, R]) ID() string {
+	return ""
+}
+
+func (c *customCases[I, R]) Version() string {
+	return ""
+}
+
 func TestEval_ScoreMetadata_SingleScorer(t *testing.T) {
 	t.Parallel()
 
 	// Test single scorer with metadata - matches Python/TypeScript behavior
 	// Single score: metadata and output should be flat at top level
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test"}},
 	})
 
@@ -884,7 +892,7 @@ func TestEval_ScoreMetadata_MultipleScorers(t *testing.T) {
 
 	// Test multiple scorers with mixed metadata - matches Python/TypeScript behavior
 	// Multiple scores: metadata and output should be nested by score name
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test"}},
 	})
 
@@ -948,7 +956,7 @@ func TestEval_ScoreMetadata_NoMetadata(t *testing.T) {
 	t.Parallel()
 
 	// Test that when a single score has no metadata, metadata attribute is not set
-	cases := NewCases([]Case[testInput, testOutput]{
+	cases := NewDataset([]Case[testInput, testOutput]{
 		{Input: testInput{Value: "test"}},
 	})
 
@@ -982,4 +990,125 @@ func TestEval_ScoreMetadata_NoMetadata(t *testing.T) {
 
 	// Verify metadata is NOT present
 	assert.False(t, scoreSpan.HasAttr("braintrust.metadata"), "braintrust.metadata should not be present")
+}
+
+// TestCase_DatasetFields tests that the Case struct can hold dataset-specific fields
+func TestCase_DatasetFields(t *testing.T) {
+	// Create a case with dataset fields populated
+	c := Case[testInput, testOutput]{
+		Input:    testInput{Value: "test"},
+		Expected: testOutput{Result: "expected"},
+		Tags:     []string{"test"},
+		Metadata: map[string]interface{}{"key": "value"},
+		ID:       "event-123",
+		XactID:   "xact-456",
+		Created:  "2024-01-15T10:30:00Z",
+	}
+
+	// Verify all fields are accessible
+	assert.Equal(t, "test", c.Input.Value)
+	assert.Equal(t, "expected", c.Expected.Result)
+	assert.Equal(t, []string{"test"}, c.Tags)
+	assert.Equal(t, "value", c.Metadata["key"])
+	assert.Equal(t, "event-123", c.ID)
+	assert.Equal(t, "xact-456", c.XactID)
+	assert.Equal(t, "2024-01-15T10:30:00Z", c.Created)
+
+	// Create a case without dataset fields (in-memory case)
+	c2 := Case[testInput, testOutput]{
+		Input:    testInput{Value: "test2"},
+		Expected: testOutput{Result: "expected2"},
+	}
+
+	// Verify dataset fields are empty strings by default
+	assert.Empty(t, c2.ID)
+	assert.Empty(t, c2.XactID)
+	assert.Empty(t, c2.Created)
+}
+
+// TestEval_OriginAttributeFromDataset tests that origin attribute is set for dataset cases
+func TestEval_OriginAttributeFromDataset(t *testing.T) {
+	t.Parallel()
+
+	// Create a case that came from a dataset (has ID, XactID, Created populated)
+	datasetCase := Case[testInput, testOutput]{
+		Input:    testInput{Value: "from-dataset"},
+		Expected: testOutput{Result: "expected"},
+		ID:       "event-abc123",
+		XactID:   "xact-def456",
+		Created:  "2024-01-15T10:30:00Z",
+	}
+
+	// Task function
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: input.Value + "-processed"}, nil
+	})
+
+	// Create eval with the dataset case
+	testEval := newUnitTestEval(t, NewDataset([]Case[testInput, testOutput]{datasetCase}), task, nil, 1)
+
+	// Run the eval
+	ctx := context.Background()
+	result, err := testEval.eval.run(ctx)
+	require.NoError(t, err)
+	assert.NotNil(t, result)
+
+	// Check spans
+	spans := testEval.exporter.Flush()
+	require.GreaterOrEqual(t, len(spans), 2, "Expected at least task and eval spans")
+
+	// The eval span is typically the last one
+	evalSpan := spans[len(spans)-1]
+	evalSpan.AssertNameIs("eval")
+
+	// Verify origin attribute is set with the case's dataset fields
+	// For now, we'll check that it's not present (since we haven't implemented it yet)
+	// After implementation, this should pass with the expected origin structure
+	//
+	// Expected structure (after implementation):
+	// evalSpan.AssertJSONAttrEquals("braintrust.origin", map[string]any{
+	// 	"object_type": "dataset",
+	// 	"id":          "event-abc123",
+	// 	"created":     "2024-01-15T10:30:00Z",
+	// 	"_xact_id":    "xact-def456",
+	// })
+
+	// For now, just verify it's not there (test should fail, then we'll implement)
+	assert.True(t, evalSpan.HasAttr("braintrust.origin"), "Origin should be set for dataset cases")
+}
+
+// TestEval_NoOriginAttributeForInMemoryCase tests that origin is NOT set for in-memory cases
+func TestEval_NoOriginAttributeForInMemoryCase(t *testing.T) {
+	t.Parallel()
+
+	// Create an in-memory case (no dataset fields)
+	inMemoryCase := Case[testInput, testOutput]{
+		Input:    testInput{Value: "in-memory"},
+		Expected: testOutput{Result: "expected"},
+	}
+
+	// Task function
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: input.Value + "-processed"}, nil
+	})
+
+	// Create eval with the in-memory case
+	testEval := newUnitTestEval(t, NewDataset([]Case[testInput, testOutput]{inMemoryCase}), task, nil, 1)
+
+	// Run the eval
+	ctx := context.Background()
+	result, err := testEval.eval.run(ctx)
+	require.NoError(t, err)
+	assert.NotNil(t, result)
+
+	// Check spans
+	spans := testEval.exporter.Flush()
+	require.GreaterOrEqual(t, len(spans), 2, "Expected at least task and eval spans")
+
+	// The eval span is typically the last one
+	evalSpan := spans[len(spans)-1]
+	evalSpan.AssertNameIs("eval")
+
+	// Verify origin attribute is NOT present
+	assert.False(t, evalSpan.HasAttr("braintrust.origin"), "Origin should not be set for in-memory cases")
 }

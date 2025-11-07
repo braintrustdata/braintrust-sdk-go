@@ -116,6 +116,14 @@ func TestProjects_FullLifecycle(t *testing.T) {
 	assert.Equal(t, projectName, created.Name)
 	assert.NotEmpty(t, created.OrgID)
 
+	// Clean up: Delete the project when test completes
+	defer func() {
+		err := api.Delete(ctx, created.ID)
+		if err != nil {
+			t.Logf("Failed to delete test project %s: %v", created.ID, err)
+		}
+	}()
+
 	// Step 2: Verify project exists via Get
 	retrieved, err := api.Get(ctx, created.ID)
 	require.NoError(t, err)

@@ -77,14 +77,14 @@ func exampleNewEvaluator(client *braintrust.Client) {
 	})
 
 	// Run first evaluation
-	cases1 := eval.NewCases([]eval.Case[string, string]{
+	cases1 := eval.NewDataset([]eval.Case[string, string]{
 		{Input: "World", Expected: "Hello, World!"},
 		{Input: "Alice", Expected: "Hello, Alice!"},
 	})
 
 	_, err := evaluator.Run(ctx, eval.Opts[string, string]{
 		Experiment: "greeting-evaluator-1",
-		Cases:      cases1,
+		Dataset:    cases1,
 		Task:       task,
 		Scorers: []eval.Scorer[string, string]{
 			exactMatch[string, string](),
@@ -96,14 +96,14 @@ func exampleNewEvaluator(client *braintrust.Client) {
 	}
 
 	// Run second evaluation with the same evaluator
-	cases2 := eval.NewCases([]eval.Case[string, string]{
+	cases2 := eval.NewDataset([]eval.Case[string, string]{
 		{Input: "Bob", Expected: "Hello, Bob!"},
 		{Input: "Charlie", Expected: "Hello, Charlie!"},
 	})
 
 	_, err = evaluator.Run(ctx, eval.Opts[string, string]{
 		Experiment: "greeting-evaluator-2",
-		Cases:      cases2,
+		Dataset:    cases2,
 		Task:       task,
 		Scorers: []eval.Scorer[string, string]{
 			exactMatch[string, string](),
