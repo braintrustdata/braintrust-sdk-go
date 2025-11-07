@@ -3,7 +3,6 @@ package traceopenai
 import (
 	"context"
 	"encoding/json"
-	"net/http"
 	"os"
 	"testing"
 
@@ -12,28 +11,50 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 )
 
-func TestChatCompletions(t *testing.T) {
-	apiKey := os.Getenv("OPENAI_API_KEY")
-	if apiKey == "" {
-		t.Fatal("OPENAI_API_KEY not set")
-	}
+const testModel = openai.GPT4oMini
+
+// setUpTest is a helper function that sets up a new tracer provider and VCR for each test.
+// It returns an openai client configured with VCR and an exporter.
+func setUpTest(t *testing.T) (*openai.Client, *oteltest.Exporter) {
+	t.Helper()
 
 	_, exporter := oteltest.Setup(t)
 
-	// Create traced HTTP client
-	httpClient := Client()
+	mode := vcr.GetVCRMode()
 
-	// Create OpenAI client with traced HTTP client
+	// Get API key or use dummy for replay mode
+	apiKey := os.Getenv("OPENAI_API_KEY")
+	if mode != vcr.ModeReplay && apiKey == "" {
+		t.Fatal("OPENAI_API_KEY not set (required in record/off mode)")
+	}
+	if apiKey == "" {
+		apiKey = "dummy-openai-key-for-replay"
+	}
+
+	// Create HTTP client with VCR (cassette name from t.Name())
+	httpClient := vcr.NewHTTPClient(t)
+
+	// Wrap with tracing
+	tracedClient := WrapClient(httpClient)
+
+	// Create OpenAI client
 	config := openai.DefaultConfig(apiKey)
-	config.HTTPClient = httpClient
+	config.HTTPClient = tracedClient
 	client := openai.NewClientWithConfig(config)
+
+	return client, exporter
+}
+
+func TestChatCompletions(t *testing.T) {
+	client, exporter := setUpTest(t)
 
 	// Make a chat completion request
 	timer := oteltest.NewTimer()
 	resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-		Model: openai.GPT4oMini,
+		Model: testModel,
 		Messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleUser,
@@ -83,28 +104,12 @@ func TestChatCompletions(t *testing.T) {
 }
 
 func TestWrapClient(t *testing.T) {
-	apiKey := os.Getenv("OPENAI_API_KEY")
-	if apiKey == "" {
-		t.Fatal("OPENAI_API_KEY not set")
-	}
-
-	_, exporter := oteltest.Setup(t)
-
-	// Create existing HTTP client
-	existingClient := &http.Client{}
-
-	// Wrap it with tracing
-	httpClient := WrapClient(existingClient)
-
-	// Create OpenAI client with wrapped HTTP client
-	config := openai.DefaultConfig(apiKey)
-	config.HTTPClient = httpClient
-	client := openai.NewClientWithConfig(config)
+	client, exporter := setUpTest(t)
 
 	// Make a chat completion request
 	timer := oteltest.NewTimer()
 	resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-		Model: openai.GPT4oMini,
+		Model: testModel,
 		Messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleUser,
@@ -131,25 +136,12 @@ func TestWrapClient(t *testing.T) {
 }
 
 func TestStreamingChatCompletions(t *testing.T) {
-	apiKey := os.Getenv("OPENAI_API_KEY")
-	if apiKey == "" {
-		t.Fatal("OPENAI_API_KEY not set")
-	}
-
-	_, exporter := oteltest.Setup(t)
-
-	// Create traced HTTP client
-	httpClient := Client()
-
-	// Create OpenAI client with traced HTTP client
-	config := openai.DefaultConfig(apiKey)
-	config.HTTPClient = httpClient
-	client := openai.NewClientWithConfig(config)
+	client, exporter := setUpTest(t)
 
 	// Make a streaming chat completion request
 	timer := oteltest.NewTimer()
 	stream, err := client.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
-		Model: openai.GPT4oMini,
+		Model: testModel,
 		Messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleUser,
@@ -231,18 +223,19 @@ func TestStreamingChatCompletions(t *testing.T) {
 func TestErrorHandling(t *testing.T) {
 	_, exporter := oteltest.Setup(t)
 
-	// Create traced HTTP client
-	httpClient := Client()
+	// Create HTTP client with VCR
+	httpClient := vcr.NewHTTPClient(t)
+	tracedClient := WrapClient(httpClient)
 
 	// Create OpenAI client with invalid API key to trigger an error
 	config := openai.DefaultConfig("invalid-api-key")
-	config.HTTPClient = httpClient
+	config.HTTPClient = tracedClient
 	client := openai.NewClientWithConfig(config)
 
 	// Make a chat completion request that will fail
 	timer := oteltest.NewTimer()
 	_, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-		Model: openai.GPT4oMini,
+		Model: testModel,
 		Messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleUser,
