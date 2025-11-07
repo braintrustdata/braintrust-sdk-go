@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/openai/openai-go"
@@ -18,18 +19,35 @@ import (
 	"go.opentelemetry.io/otel/codes"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 )
 
 const testModel = "gpt-4o-mini"
 
-// setUpTest is a helper function that sets up a new tracer provider for each test.
-// It returns an openai client and an exporter.
+// setUpTest is a helper function that sets up a new tracer provider and VCR for each test.
+// It returns an openai client configured with VCR and an exporter.
 func setUpTest(t *testing.T) (openai.Client, *oteltest.Exporter) {
 	t.Helper()
 
 	_, exporter := oteltest.Setup(t)
 
+	mode := vcr.GetVCRMode()
+
+	// Get API key or use dummy for replay mode
+	apiKey := os.Getenv("OPENAI_API_KEY")
+	if mode != vcr.ModeReplay && apiKey == "" {
+		t.Fatal("OPENAI_API_KEY not set (required in record/off mode)")
+	}
+	if apiKey == "" {
+		apiKey = "dummy-openai-key-for-replay"
+	}
+
+	// Create HTTP client with VCR (cassette name from t.Name())
+	httpClient := vcr.NewHTTPClient(t)
+
 	client := openai.NewClient(
+		option.WithAPIKey(apiKey),
+		option.WithHTTPClient(httpClient),
 		option.WithMiddleware(NewMiddleware()), //nolint:bodyclose // false positive - NewMiddleware returns middleware func
 	)
 

@@ -1,0 +1,245 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 23
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"go-sdk-tests"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-tests","created":"2025-11-04T13:38:56.532Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:04:34 GMT
+            Etag:
+                - W/"eb-poL8yUftdUFahhL/Peyi6gN8N/E"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 58a45bf3f07dfdca95ebcb7935e84994.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0r6FzFIAMEj9A=
+            X-Amz-Cf-Id:
+                - WjZG_AAc7h-xIRSoEcWnYc8LgRNvOVtwji3P41KEDWg6u1eHd7SuZQ==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - ca772de5-6874-40c6-a08b-ca3699e283d0
+            X-Amzn-Trace-Id:
+                - Root=1-690e34b2-46e8125045fccd8a3ff2ddbb;Parent=16d012e2c88b7597;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Found-Existing:
+                - "true"
+            X-Bt-Internal-Trace-Id:
+                - 690e34b20000000033e80f0df284d1a3
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 198.727083ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 82
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-dataset-fields"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/dataset
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"b883bcf1-e436-4c71-8092-b40479019e6b","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-dataset-fields","description":null,"created":"2025-11-07T18:04:34.714Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:04:34 GMT
+            Etag:
+                - W/"109-QOwUYyxawi2j47wDihDIO/eQUYE"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 9750f5ee94b45ad0faba87b3fac2aad6.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0r-GxcIAMEWsw=
+            X-Amz-Cf-Id:
+                - OjVEbYM9IAocXltIpFasOvy3CM5toshZ_VrZWuUJzO_0Gj3LFaaLhQ==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - d5edfbed-5373-44ed-9839-6fdd6e23bbfb
+            X-Amzn-Trace-Id:
+                - Root=1-690e34b2-4518c35e47ccc4a654f773d2;Parent=0c7ed08e6b4c4a2c;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 690e34b2000000007b1166318cd451c2
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 163.980041ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 230
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"events":[{"input":{"context":"philosophical","question":"What is the meaning of life?"},"expected":{"answer":"42","confidence":0.95},"metadata":{"model":"test-model","source":"test"},"tags":["philosophy","test","integration"]}]}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/dataset/b883bcf1-e436-4c71-8092-b40479019e6b/insert
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"row_ids":["157d8a27-ce78-4219-a856-9a70bc7c70aa"]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:04:35 GMT
+            Etag:
+                - W/"34-Nu5tqPxDRsASLrgwDDyblOftwaw"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 b5fe18267507cb61755963d8928a60f4.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0sBHSXIAMEMaw=
+            X-Amz-Cf-Id:
+                - cNxnJSJyD9WvFzuLRTfNBFbBCt7LOJIh3xUghkzxUGNGry9CGdb06A==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 09684762-75d3-495c-98e9-83271ede79f9
+            X-Amzn-Trace-Id:
+                - Root=1-690e34b2-54405137540ad7635ed62012;Parent=5f77a69ce30957c6;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 690e34b20000000058646b9a565e04fb
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 301.498208ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 12
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"limit":10}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/dataset/b883bcf1-e436-4c71-8092-b40479019e6b/fetch
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"events":[{"_pagination_key":"p07570045970184142848","_xact_id":"1000196101987613236","created":"2025-11-07T18:04:34.966Z","dataset_id":"b883bcf1-e436-4c71-8092-b40479019e6b","expected":{"answer":"42","confidence":0.95},"id":"157d8a27-ce78-4219-a856-9a70bc7c70aa","input":{"context":"philosophical","question":"What is the meaning of life?"},"is_root":true,"metadata":{"model":"test-model","source":"test"},"origin":null,"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","root_span_id":"1870ffd7-6a3f-40a3-9ba3-5c53bdcb4c87","span_id":"1870ffd7-6a3f-40a3-9ba3-5c53bdcb4c87","tags":["philosophy","test","integration"]}],"cursor":"aQ40s7o0AAA"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 07 Nov 2025 18:04:35 GMT
+            Vary:
+                - Origin
+            Via:
+                - 1.1 f8b0654d6e6bbf12f54a635de5db7ee4.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0sHEzEIAMESPg=
+            X-Amz-Cf-Id:
+                - PQhbXHglDASSTbtxG1OvxI4AC0QiZQbYDFTQA323FDs1-xAhz0E35w==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - c8e6878f-f65d-4645-aa33-645b1006b030
+            X-Amzn-Trace-Id:
+                - Root=1-690e34b3-62526ada7822faa627ded5e7;Parent=0254adc3e3f78015;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Cursor:
+                - aQ40s7o0AAA
+            X-Bt-Internal-Trace-Id:
+                - 690e34b30000000011084f252080d819
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 127.785542ms

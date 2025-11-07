@@ -2,14 +2,12 @@ package projects
 
 import (
 	"context"
-	"fmt"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 )
 
 const integrationTestProject = "go-sdk-tests"
@@ -21,7 +19,7 @@ func TestProjects_Create_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Create a project
@@ -42,7 +40,7 @@ func TestProjects_Get_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// First create a project
@@ -68,7 +66,7 @@ func TestProjects_List_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// First create a project to ensure we have at least one
@@ -103,17 +101,16 @@ func TestProjects_FullLifecycle(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
-	// Step 1: Create a project with unique name
-	projectName := "go-sdk-lifecycle-test-" + fmt.Sprintf("%d", time.Now().Unix())
+	// Step 1: Create a project
 	created, err := api.Create(ctx, CreateParams{
-		Name: projectName,
+		Name: "go-sdk-lifecycle-test",
 	})
 	require.NoError(t, err)
 	assert.NotEmpty(t, created.ID)
-	assert.Equal(t, projectName, created.Name)
+	assert.Contains(t, created.Name, "go-sdk-lifecycle-test")
 	assert.NotEmpty(t, created.OrgID)
 
 	// Clean up: Delete the project when test completes
@@ -142,7 +139,7 @@ func TestProjects_FullLifecycle(t *testing.T) {
 	for _, project := range listResponse.Objects {
 		if project.ID == created.ID {
 			found = true
-			assert.Equal(t, projectName, project.Name)
+			assert.Contains(t, project.Name, "go-sdk-lifecycle-test")
 			assert.Equal(t, created.OrgID, project.OrgID)
 			break
 		}
@@ -151,7 +148,7 @@ func TestProjects_FullLifecycle(t *testing.T) {
 
 	// Step 4: Idempotent create - creating with same name returns same project
 	idempotent, err := api.Create(ctx, CreateParams{
-		Name: projectName,
+		Name: "go-sdk-lifecycle-test",
 	})
 	require.NoError(t, err)
 	assert.Equal(t, created.ID, idempotent.ID, "Creating project with same name should be idempotent")
@@ -165,7 +162,7 @@ func TestProjects_CreateParams_Validation(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Test empty name
@@ -183,7 +180,7 @@ func TestProjects_Get_Validation(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Test empty ID
@@ -199,7 +196,7 @@ func TestProjects_List_WithOrgID(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// First create a project to get an orgID
@@ -231,7 +228,7 @@ func TestProjects_Get_NotFound(t *testing.T) {
 	ctx := context.Background()
 
 	// Create API client
-	client := tests.GetTestHTTPSClient(t)
+	client := vcr.GetHTTPSClient(t)
 	api := New(client)
 
 	// Try to get a non-existent project

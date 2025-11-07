@@ -14,6 +14,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.36.0
 	go.opentelemetry.io/otel/trace v1.36.0
 	google.golang.org/genai v1.23.0
+	gopkg.in/dnaeon/go-vcr.v3 v3.2.0
 )
 
 require (

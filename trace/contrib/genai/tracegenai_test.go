@@ -11,24 +11,36 @@ import (
 	"google.golang.org/genai"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 )
 
-// setUpTest is a helper function that sets up a new tracer provider for each test.
-// It returns a genai client and an exporter.
+// setUpTest is a helper function that sets up a new tracer provider and VCR for each test.
+// It returns a genai client configured with VCR and an exporter.
 func setUpTest(t *testing.T) (*genai.Client, *oteltest.Exporter) {
 	t.Helper()
 
 	_, exporter := oteltest.Setup(t)
 
-	// Get API key from environment
+	mode := vcr.GetVCRMode()
+
+	// Get API key or use dummy for replay mode
 	apiKey := os.Getenv("GOOGLE_API_KEY")
+	if mode != vcr.ModeReplay && apiKey == "" {
+		t.Fatal("GOOGLE_API_KEY not set (required in record/off mode)")
+	}
 	if apiKey == "" {
-		t.Skip("GOOGLE_API_KEY not set")
+		apiKey = "dummy-google-key-for-replay"
 	}
 
-	// Create client with tracing
+	// Create HTTP client with VCR
+	httpClient := vcr.NewHTTPClient(t)
+
+	// Wrap with tracing
+	tracedClient := WrapClient(httpClient)
+
+	// Create client with tracing and VCR
 	client, err := genai.NewClient(context.Background(), &genai.ClientConfig{
-		HTTPClient: Client(),
+		HTTPClient: tracedClient,
 		APIKey:     apiKey,
 		Backend:    genai.BackendGeminiAPI,
 	})

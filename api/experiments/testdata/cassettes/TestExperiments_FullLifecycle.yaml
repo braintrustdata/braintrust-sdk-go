@@ -1,0 +1,417 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 23
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"go-sdk-tests"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-tests","created":"2025-11-04T13:38:56.532Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:02:46 GMT
+            Etag:
+                - W/"eb-poL8yUftdUFahhL/Peyi6gN8N/E"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 f5527f719bbc0d2932043daaeff80252.cloudfront.net (CloudFront), 1.1 baec235d174153a8f2e92ea724643824.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0bDF1bIAMEtRw=
+            X-Amz-Cf-Id:
+                - xQcP-NsKM2O525lZXKxOAP_zFkrL6KUFJ3_ApFvbgjDcCOi7ro6vEg==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - e2917e3e-ebca-4244-b0c0-01818dbd761b
+            X-Amzn-Trace-Id:
+                - Root=1-690e3446-7c96575c53dd9d9f1c54eb44;Parent=5039a1c702584a81;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Found-Existing:
+                - "true"
+            X-Bt-Internal-Trace-Id:
+                - 690e3446000000005779bd0390f0218b
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 142.641833ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 189
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"lifecycle-exp","description":"Test experiment for lifecycle testing","tags":["lifecycle","test"],"metadata":{"stage":"created"}}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/experiment
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"d1c70c55-c5ef-48e0-9810-1d7105b587ef","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"lifecycle-exp","description":"Test experiment for lifecycle testing","created":"2025-11-07T18:02:46.732Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"stage":"created"},"tags":["lifecycle","test"]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:02:46 GMT
+            Etag:
+                - W/"1b9-V+PPT6zJWDZv/NSHMW5cRdHuUeY"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 8a9cdb228e33f8d52a4b42c56ca26590.cloudfront.net (CloudFront), 1.1 baec235d174153a8f2e92ea724643824.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0bGHz-oAMEsDA=
+            X-Amz-Cf-Id:
+                - -s9M5cxWmVXtyAZLv25uGtKrZRilGO-lKf2MFaytiwGHmES0D70a2A==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 7057a54e-8422-4ef0-9588-4ef2cbbcbfb8
+            X-Amzn-Trace-Id:
+                - Root=1-690e3446-5391a01b59a8c91525417c1b;Parent=715fcb875810ac04;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 690e3446000000001f05917acb510151
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 155.570833ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/experiment/d1c70c55-c5ef-48e0-9810-1d7105b587ef
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"d1c70c55-c5ef-48e0-9810-1d7105b587ef","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"lifecycle-exp","description":"Test experiment for lifecycle testing","created":"2025-11-07T18:02:46.732Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"stage":"created"},"tags":["lifecycle","test"]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:02:47 GMT
+            Etag:
+                - W/"1b9-V+PPT6zJWDZv/NSHMW5cRdHuUeY"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 8a9cdb228e33f8d52a4b42c56ca26590.cloudfront.net (CloudFront), 1.1 baec235d174153a8f2e92ea724643824.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0bJF0OIAMEEcQ=
+            X-Amz-Cf-Id:
+                - 8FgIRw0WYYCUhON-Tx0q5H6BfSd40aX51s4VLCGMEmAre5-A3pjYGg==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 337bf861-3b3c-4546-8cc6-1cc9c10e34ba
+            X-Amzn-Trace-Id:
+                - Root=1-690e3446-552f522815d0e7d1782b4822;Parent=4ae2e36632970e6f;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 690e344600000000001ec5613d7b5d2d
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 182.677916ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/experiment?limit=100&project_id=842c2063-b9c7-4c40-9fb9-fa95f810c57f
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"objects":[{"id":"ad4e00f9-6e3b-4390-8cd3-02cf37b9addd","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"ensure-new-test-14d42f10","description":null,"created":"2025-11-07T18:02:47.023Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"4ccadbc8-f267-4774-a02c-dd516db10eef","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-experiment-register-4a008738","description":null,"created":"2025-11-07T18:02:46.789Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"d1c70c55-c5ef-48e0-9810-1d7105b587ef","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"lifecycle-exp","description":"Test experiment for lifecycle testing","created":"2025-11-07T18:02:46.732Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"stage":"created"},"tags":["lifecycle","test"]},{"id":"fe21ae85-40f2-4fe7-804a-6a222a2aa8f5","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"ensure-new-test-2a83cd25","description":null,"created":"2025-11-07T18:02:25.096Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"6a539c93-7e15-430a-b044-f0a0f1a22733","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-experiment","description":"Test experiment for integration tests","created":"2025-11-07T18:02:24.977Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test","integration"]},{"id":"8526adf8-3af4-4709-8864-206fa329d9cb","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-experiment-register","description":null,"created":"2025-11-07T18:02:24.892Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"2a645444-237a-4f3c-aa76-ad77e7dae0e6","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"ensure-new-test","description":null,"created":"2025-11-07T18:02:24.806Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"d529aa02-41eb-41a4-97f2-54e8c0a1b1d4","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_EnsureNew-up3ie155-ensure-new-test-7d0612cd","description":null,"created":"2025-11-07T17:21:26.504Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"328cd0e9-c36c-4ff4-9e73-f4d5e8e35c59","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Create_Integration-as70nz1k-test-experiment","description":"Test experiment for integration tests","created":"2025-11-07T17:21:26.235Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test","integration"]},{"id":"f77a0081-b45f-4e05-ad8c-8fb5778889e9","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_EnsureNew-up3ie155-ensure-new-test","description":null,"created":"2025-11-07T17:21:26.220Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"15c528e3-185c-40df-9984-19fc9d312eca","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Get_Integration-uumbdfzb-test-experiment","description":null,"created":"2025-11-07T17:21:26.180Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"694dee38-be97-4d5c-886b-d9e914be94ca","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_List_Integration-dmh18gls-test-experiment","description":null,"created":"2025-11-07T17:21:26.166Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"f7309d3f-7187-4eb1-b288-daf0d3b6297e","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Register_Integration-8v1ocs0i-test-experiment","description":null,"created":"2025-11-07T17:21:26.101Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"a2846df9-4334-43c5-b0f3-6b8f0fa2d7cc","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Create_Integration-ho0z8kjv-test-experiment","description":"Test experiment for integration tests","created":"2025-11-07T17:19:00.444Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test","integration"]},{"id":"81d3c4d4-6fa8-4325-a3e8-3c7cfee509f3","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Create_Integration-ku10n4mm-test-experiment","description":"Test experiment for integration tests","created":"2025-11-07T17:16:54.037Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test","integration"]},{"id":"244c7e25-8e43-4b5e-bb52-0bd7683ef554","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_EnsureNew-jkmaht0o-ensure-new-test-a6468fe2","description":null,"created":"2025-11-07T17:16:53.796Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"b61b961f-466e-44a3-be1c-40ac7a1a7e89","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_List_Integration-e141cvq3-test-experiment","description":null,"created":"2025-11-07T17:16:53.771Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"71e85acc-cf56-4c3a-a4a6-e1392256adf7","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Register_Integration-qydbcvnp-test-experiment","description":null,"created":"2025-11-07T17:16:53.594Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"29914483-68b2-4911-9fd7-6e4da27b68c9","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Get_Integration-kqgmte62-test-experiment","description":null,"created":"2025-11-07T17:16:53.447Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"a2d0b3cf-5fa0-448a-a931-ccb65bb5781f","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_EnsureNew-jkmaht0o-ensure-new-test","description":null,"created":"2025-11-07T17:16:53.445Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"922739b9-2d75-4393-b294-f377e4b84e64","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_EnsureNew-abkmrtpr-ensure-new-test-450268d2","description":null,"created":"2025-11-07T17:03:24.852Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"9a0a660e-962b-4fd7-af3a-2426ac1833e7","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_EnsureNew-abkmrtpr-ensure-new-test","description":null,"created":"2025-11-07T17:03:24.485Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"f4a4f50a-04d4-4993-a0fa-634f38537a30","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Register_Integration-4mghsbnw-test-experiment","description":null,"created":"2025-11-07T17:03:24.377Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"8a02eb8a-f33f-4dfc-a9c1-abaea00cd22a","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_List_Integration-74g7elfl-test-experiment","description":null,"created":"2025-11-07T17:03:24.346Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"0d6ad7dc-6b1a-4bcb-9f42-44e02e4e0232","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Create_Integration-4grhaari-test-experiment","description":"Test experiment for integration tests","created":"2025-11-07T17:03:24.333Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test","integration"]},{"id":"ae38365c-5b2e-47ba-921a-df818a94bce7","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Get_Integration-t6ahou7o-test-experiment","description":null,"created":"2025-11-07T17:03:24.327Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"79b1aa2f-acf3-48cd-b774-8677ce4028f4","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration-yx53s8yw-exp","description":null,"created":"2025-11-07T16:49:55.873Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"09c7a79e-51ad-47f4-b697-d0356852c16f","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_DatasetByName-fnwdnrnd-exp","description":null,"created":"2025-11-07T16:49:55.746Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"ae0b1f3d-9d8f-4aaf-a06c-b0636cffe2c4","dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"b283937b-82b3-43b3-8da4-b948dd3f5d2d","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_StringToStruct-53tegrk3-exp","description":null,"created":"2025-11-07T16:49:55.644Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"2de2c1ad-de2a-49dd-8b4b-8b26ec769f3f","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_DatasetByID-e07q1j9d-exp","description":null,"created":"2025-11-07T16:49:55.560Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"ba1bf77e-c8ed-48dd-966a-231006993644","dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"5d0f4d74-9f10-4b00-b217-7a8e9d27d507","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_UpdateFlag-vwksvjow-update-test-df0c708f","description":null,"created":"2025-11-07T16:49:55.454Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"2d3b00d7-b42e-460d-92f8-5df805fbe1e4","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_DatasetWithTagsAndMetadata-a9dj4ykv-exp","description":null,"created":"2025-11-07T16:49:55.366Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"1007e493-9245-4a3a-b136-98bbc47ee3ec","dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"249fef5a-a939-4996-baa7-433aac7b2028","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_UpdateFlag-vwksvjow-update-test","description":null,"created":"2025-11-07T16:49:54.866Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"d8fe4385-826a-4632-81da-5719edf35a43","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_ProjectNameFallback-q3qbdfi8-exp","description":null,"created":"2025-11-07T16:49:54.743Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"50771289-231a-41d3-9be0-896d0fe062f7","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_ExperimentTags-7ogbnppi-exp","description":null,"created":"2025-11-07T16:49:54.692Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":["production","baseline","v2.0"]},{"id":"abadc952-c182-49f6-81cc-97ef79b47237","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_ExperimentMetadata-x2hj6oy1-exp","description":null,"created":"2025-11-07T16:49:54.675Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"model":"gpt-4","version":"1.0.0","temperature":0.7},"tags":null},{"id":"2a0587ef-bb42-4438-a5f0-81333099a29f","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_List_Integration-oe5xvx2m-test-experiment","description":null,"created":"2025-11-07T16:49:50.891Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"db81d62d-5e44-4ee2-927f-45317d401615","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_EnsureNew-3k8uxgom-ensure-new-test-029486a5","description":null,"created":"2025-11-07T16:49:48.712Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"f2b72c69-0dcb-4863-9d5b-dead7a22618c","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Get_Integration-zmqgtfb9-test-experiment","description":null,"created":"2025-11-07T16:49:48.606Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"eecc8c76-204e-429d-ba54-af788615e847","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Register_Integration-94us9b4s-test-experiment","description":null,"created":"2025-11-07T16:49:48.599Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"8fd795a5-6a27-49c4-b5b3-cf246501b2c4","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Create_Integration-5z906yuv-test-experiment","description":"Test experiment for integration tests","created":"2025-11-07T16:49:48.523Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test","integration"]},{"id":"dc66d930-3677-4018-9dd0-0440b623e4e8","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_EnsureNew-3k8uxgom-ensure-new-test","description":null,"created":"2025-11-07T16:49:48.517Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"48e69bef-057c-45a5-a139-e8c470229f62","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_StringToStruct-mp8ph0ft-exp","description":null,"created":"2025-11-07T16:35:36.103Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"c7643290-5332-48a4-a10c-32fab2816dba","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration-euk6u19n-exp","description":null,"created":"2025-11-07T16:35:36.095Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"60993ca2-2669-47ff-8c10-79128afb724b","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_DatasetByName-5vu5sspn-exp","description":null,"created":"2025-11-07T16:35:35.734Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"b689c26d-cbfe-40df-bec8-04eea84d7b44","dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"33dd318a-aad2-4a5d-9a86-c556cc222f93","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_DatasetByID-k4u0onb8-exp","description":null,"created":"2025-11-07T16:35:35.470Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"1cf31b78-50e3-4f41-9f11-03de28d73d88","dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"9c920cde-af83-4210-a5ab-adbcde599dc8","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_DatasetWithTagsAndMetadata-zf1hsbxz-exp","description":null,"created":"2025-11-07T16:35:35.427Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"49f4b99d-f846-460c-b5b3-057624c2df61","dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"cbc5bbcf-f337-45fe-98a2-35a6e5f118ed","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_UpdateFlag-yq0sy4mk-update-test-64c0fc6b","description":null,"created":"2025-11-07T16:35:35.314Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"8f9538a2-7922-47c2-9b9e-19896bdbeaa4","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_ProjectNameFallback-ab76dc0w-exp","description":null,"created":"2025-11-07T16:35:34.882Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"c07c1538-3595-4e11-90bb-b644f4d3002d","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_UpdateFlag-yq0sy4mk-update-test","description":null,"created":"2025-11-07T16:35:34.765Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"c6d49cd3-2f1a-42c3-80b2-186c3581487b","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_ExperimentMetadata-0te3mz8w-exp","description":null,"created":"2025-11-07T16:35:34.734Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"model":"gpt-4","version":"1.0.0","temperature":0.7},"tags":null},{"id":"9262c453-561c-4a08-91d5-0ff334d02561","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_ExperimentTags-bk9xrl1k-exp","description":null,"created":"2025-11-07T16:35:34.727Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":["production","baseline","v2.0"]},{"id":"696804f2-537b-4823-9175-927a755eb70d","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_EnsureNew-1m94vard-ensure-new-test-2605debe","description":null,"created":"2025-11-07T16:35:30.524Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"afa0779b-5e80-407f-954b-df930f6f1d86","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_EnsureNew-1m94vard-ensure-new-test","description":null,"created":"2025-11-07T16:35:30.382Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"e91c0eaf-2d1b-4ec9-93c7-7d336edc6a6c","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Register_Integration-smlobedj-test-experiment","description":null,"created":"2025-11-07T16:35:30.368Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"3a19fff4-86de-443f-8432-83fe183743ee","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Get_Integration-svj6l2jn-test-experiment","description":null,"created":"2025-11-07T16:35:30.350Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"efc42876-07d6-42f3-aca3-1e0e7404507b","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_List_Integration-81t6vwph-test-experiment","description":null,"created":"2025-11-07T16:35:30.337Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"c658a68a-29f4-444b-bfb7-9914a2668179","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Create_Integration-9m247bja-test-experiment","description":"Test experiment for integration tests","created":"2025-11-07T16:35:30.333Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test","integration"]},{"id":"15c2a2c1-370d-47ce-9347-8daabad073c0","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_UpdateFlag-dgsk43ub-update-test-622a7c62","description":null,"created":"2025-11-07T16:33:08.110Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"b59747db-0ac7-48a6-91dc-00815b95530e","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_ExperimentTags-hn4vfbt2-exp","description":null,"created":"2025-11-07T16:33:06.681Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":["production","baseline","v2.0"]},{"id":"e63f3487-40cf-4ef1-9bb0-0d0bef5855a6","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration-tz3on2a1-exp","description":null,"created":"2025-11-07T16:33:06.224Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"2a32fa9f-bd50-41d4-b291-9a67ca078080","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_StringToStruct-hkzf1r4v-exp","description":null,"created":"2025-11-07T16:33:05.628Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"a6652789-85f7-41ac-b426-49e14e2fbeee","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_DatasetByID-gaw74wv0-exp","description":null,"created":"2025-11-07T16:33:05.556Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"ed9552a3-17f8-46e4-b06d-75408090ca2d","dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"bc7bd2e4-4f27-4c26-af3d-57fd1044aca2","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_DatasetByName-0e9vkhm5-exp","description":null,"created":"2025-11-07T16:33:05.443Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"be521eb7-cf0f-40d9-b453-2bb363bc4ab0","dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"3590a388-2ec5-40be-b8a2-933754fbc046","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_DatasetWithTagsAndMetadata-79f7d0kj-exp","description":null,"created":"2025-11-07T16:33:05.209Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"36e04b42-5eab-442d-bad5-0d316468490e","dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"c5fc668c-9ac8-45d5-9ac7-b769ca3d4432","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_ProjectNameFallback-b8imthw8-exp","description":null,"created":"2025-11-07T16:33:04.548Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"a714c163-3755-4dde-9ec9-cfd59a09a52d","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_ExperimentMetadata-bqtnaaoa-exp","description":null,"created":"2025-11-07T16:33:04.466Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"model":"gpt-4","version":"1.0.0","temperature":0.7},"tags":null},{"id":"c0140f73-b73f-4b00-94bb-053e8702795a","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_UpdateFlag-dgsk43ub-update-test","description":null,"created":"2025-11-07T16:33:04.448Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"b62b3388-c5b9-46ab-b60c-337003d0efc3","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_List_Integration-3lj728yj-test-experiment","description":null,"created":"2025-11-07T16:33:02.793Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"ac996968-0e59-4bae-92a7-a688677f4e80","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_EnsureNew-0cfe7j45-ensure-new-test-dd6524eb","description":null,"created":"2025-11-07T16:33:00.522Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"e5b2e463-4676-4654-84b7-d16869ddbb0b","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Create_Integration-iythdktl-test-experiment","description":"Test experiment for integration tests","created":"2025-11-07T16:33:00.478Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test","integration"]},{"id":"fa4e4ed8-ae35-49e3-b2bd-870e946ac277","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Get_Integration-mn3pi39m-test-experiment","description":null,"created":"2025-11-07T16:33:00.368Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"3083de6d-bc78-4ffa-b9c3-cfa1439edbe5","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_EnsureNew-0cfe7j45-ensure-new-test","description":null,"created":"2025-11-07T16:33:00.366Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"289bdb0b-fda2-4269-ad5d-34ef1b565b95","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Register_Integration-avqqxxtj-test-experiment","description":null,"created":"2025-11-07T16:33:00.341Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"dbe13d3b-1baf-4355-a7d0-40ad7796ea8d","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_StringToStruct-3lxowpup-exp","description":null,"created":"2025-11-07T16:24:29.146Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"76132d50-d2be-4dec-9d1f-cc156d7d266d","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration-5es5lk4q-exp","description":null,"created":"2025-11-07T16:24:28.681Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"dc0c018b-ef6d-43cd-924b-9843c0e49b51","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_DatasetByName-rsx5e1e4-exp","description":null,"created":"2025-11-07T16:24:28.443Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"be9a220c-dd83-4c54-b8c9-e3ee2067c826","dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"da0f0ece-36d9-42a2-a562-69a527d5ce08","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_DatasetWithTagsAndMetadata-ff3cbgei-exp","description":null,"created":"2025-11-07T16:24:28.367Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"b8125da9-b0a1-4bd9-af00-d97e3affd4d7","dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"e2dfe83a-b929-4487-bb6c-0dc5e4fbbe46","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_DatasetByID-u483jlcx-exp","description":null,"created":"2025-11-07T16:24:28.352Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"d68b0d84-2d39-4624-825b-9d172cc71f5c","dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"1725d495-d05b-40d6-b929-05ada2656ef1","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_UpdateFlag-i02ywpcl-update-test-aa110e1f","description":null,"created":"2025-11-07T16:24:28.109Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"c4a50a52-b67a-4f0b-ac6f-d579b9be9786","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_ProjectNameFallback-2cqtljl1-exp","description":null,"created":"2025-11-07T16:24:27.789Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"b57d8d0b-1024-49c3-90d4-dc65aca72c30","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_ExperimentMetadata-nfj61g6u-exp","description":null,"created":"2025-11-07T16:24:27.667Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"model":"gpt-4","version":"1.0.0","temperature":0.7},"tags":null},{"id":"88580711-c9ef-4b59-b292-791941db2b4b","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_ExperimentTags-snywtjv5-exp","description":null,"created":"2025-11-07T16:24:27.612Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":["production","baseline","v2.0"]},{"id":"d1da2d00-7722-4ebc-be29-365cd32e76c9","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_UpdateFlag-i02ywpcl-update-test","description":null,"created":"2025-11-07T16:24:27.557Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"61ca852c-499d-49a3-bf52-d61708c0aa0b","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_EnsureNew-pms94wrc-ensure-new-test-49dd15f5","description":null,"created":"2025-11-07T16:24:24.095Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"a2ca8810-33f7-4c7e-af94-3fa164b48414","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Get_Integration-43m8qxgq-test-experiment","description":null,"created":"2025-11-07T16:24:22.988Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"4f2ba6a4-4241-481a-b91a-766570d1186b","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_List_Integration-h5kkjvyw-test-experiment","description":null,"created":"2025-11-07T16:24:22.809Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"ebc1be2b-812c-4af5-b39c-f5c5f375333e","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Register_Integration-h3h0geqd-test-experiment","description":null,"created":"2025-11-07T16:24:21.820Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"1ce7ad66-f2af-4d73-9309-160398b4a952","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Create_Integration-x59ao4ks-test-experiment","description":"Test experiment for integration tests","created":"2025-11-07T16:24:21.804Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test","integration"]},{"id":"106a9ecd-556a-4f04-8bcc-322150dab5f1","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_EnsureNew-pms94wrc-ensure-new-test","description":null,"created":"2025-11-07T16:24:21.748Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"57efa0ce-7588-44e8-a6fd-4d09a4eb367c","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_UpdateFlag-8z9ac24v-update-test-e3850faa","description":null,"created":"2025-11-07T16:14:09.951Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"d5d65daa-e912-4688-905e-fe3bbddd19fd","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_UpdateFlag-8z9ac24v-update-test","description":null,"created":"2025-11-07T16:14:09.408Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"2f10b7f3-e42c-447b-8bc0-1be6fc0b520f","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_ProjectNameFallback-wmyrlbdw-exp","description":null,"created":"2025-11-07T16:14:06.494Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"2ded95b8-8a68-4580-8499-42767f4ba84e","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration-z4n50mxk-exp","description":null,"created":"2025-11-07T16:14:04.754Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"64e70189-ca4b-4d3f-a6e7-62edf6cc6760","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_StringToStruct-eqqmx2wo-exp","description":null,"created":"2025-11-07T16:14:01.737Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"402c8dbb-a51b-4b89-a0ad-03cfb45ebe1d","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_DatasetByID-ma8taspt-exp","description":null,"created":"2025-11-07T16:13:59.864Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"a72649eb-75cc-407d-b8cb-d68255aeb12d","dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"5a1b3416-e324-4fd6-b463-33c5d9654da9","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_DatasetByName-r7qsyh6p-exp","description":null,"created":"2025-11-07T16:13:58.459Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"9b3a4259-cd73-4554-97b6-23e37b80103d","dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"b488130a-8e61-4885-9e42-af0b669fd7e8","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_DatasetWithTagsAndMetadata-m4iz7ct4-exp","description":null,"created":"2025-11-07T16:13:56.923Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"6142a097-b9ad-45c8-839b-43085edfb90e","dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"f22ecead-46b2-4677-93a9-ec1e32f53c23","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_ExperimentMetadata-cmlvryw6-exp","description":null,"created":"2025-11-07T16:13:55.847Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"model":"gpt-4","version":"1.0.0","temperature":0.7},"tags":null},{"id":"c1d915db-08d4-4627-95a1-7b91705c43bb","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestEval_Integration_ExperimentTags-0g56zxtm-exp","description":null,"created":"2025-11-07T16:13:55.561Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":["production","baseline","v2.0"]}]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:02:47 GMT
+            Etag:
+                - W/"acd5-1z+JSiYcFQ6A8ms04Jk2kqHCRWo"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 6e202b767e6bdee837ba15ada7e3120e.cloudfront.net (CloudFront), 1.1 baec235d174153a8f2e92ea724643824.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0bNEypoAMEZdg=
+            X-Amz-Cf-Id:
+                - Th6Wp3fPUkB1BlxZY4IoWdKYa_VH-rXnQcaYBnilQylHjEHtoM9aaw==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - e7a1d214-6d04-4583-93a8-65d877514bf1
+            X-Amzn-Trace-Id:
+                - Root=1-690e3447-478aeb5c125c0bd9715833b5;Parent=691a2ee0dfc7342f;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 690e34470000000029f944180984f65b
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 191.013125ms
+    - id: 4
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 76
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"lifecycle-exp"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/experiment
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"d1c70c55-c5ef-48e0-9810-1d7105b587ef","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"lifecycle-exp","description":"Test experiment for lifecycle testing","created":"2025-11-07T18:02:46.732Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"stage":"created"},"tags":["lifecycle","test"]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:02:47 GMT
+            Etag:
+                - W/"1b9-V+PPT6zJWDZv/NSHMW5cRdHuUeY"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 eb2e4893b47f0d155cd51b82c2a8d596.cloudfront.net (CloudFront), 1.1 baec235d174153a8f2e92ea724643824.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0bQFFSIAMEg0g=
+            X-Amz-Cf-Id:
+                - y4s6yXEtNHjhXHyOGZOdJfoHWEcDP984fRNkO9uVEieNN8FcOGYDbg==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 0a9befba-f332-4a40-a5d1-ad4e7e9850e5
+            X-Amzn-Trace-Id:
+                - Root=1-690e3447-4ddc0601627d922f17a50b6d;Parent=047fabea2b0d0873;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 690e3447000000006504f2c84dff5c75
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 146.326417ms
+    - id: 5
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/experiment/d1c70c55-c5ef-48e0-9810-1d7105b587ef
+        method: DELETE
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"d1c70c55-c5ef-48e0-9810-1d7105b587ef","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"lifecycle-exp","description":"Test experiment for lifecycle testing","created":"2025-11-07T18:02:46.732Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":"2025-11-07T18:02:48.106Z","dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"stage":"created"},"tags":["lifecycle","test"]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:02:48 GMT
+            Etag:
+                - W/"1cf-BNV3M7Lo+zDondyW422RBs7qFv0"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 57a5349e40888d521545fc9b83f270a4.cloudfront.net (CloudFront), 1.1 baec235d174153a8f2e92ea724643824.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0bTGtbIAMEMbg=
+            X-Amz-Cf-Id:
+                - h_kGmRagdG5QgMLvy88_U05TzRBhH3n1yMtoYssKnhBzQkiddi8fmg==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 4a82aef5-2098-4dcf-be02-dce3fb82d51f
+            X-Amzn-Trace-Id:
+                - Root=1-690e3447-66d82eaa563b166f26ee3221;Parent=765795d8e03463ac;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 690e3448000000002e3fbaf84f694350
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 170.443042ms
+    - id: 6
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/experiment/d1c70c55-c5ef-48e0-9810-1d7105b587ef
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"Code":"ForbiddenError","Message":"Missing read access to experiment id d1c70c55-c5ef-48e0-9810-1d7105b587ef, or the experiment does not exist [user_email=matt@braintrustdata.com] [user_org=matt-test-org] [timestamp=1762538568.461]","InternalTraceId":"690e3448000000002872199ffe76f986","Path":"/v1/experiment/d1c70c55-c5ef-48e0-9810-1d7105b587ef","Service":"api"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:02:48 GMT
+            Etag:
+                - W/"16c-+PNPo7gl+7Z6VqIGWfNvAzXR8Bk"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 82139f26335f87e45d45c08d5208817a.cloudfront.net (CloudFront), 1.1 baec235d174153a8f2e92ea724643824.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0bXEBcIAMEBIg=
+            X-Amz-Cf-Id:
+                - y4N8chVehzeoSUtnJqQUy1ZFJfgJ4LMDhot6wS124Dx5b_WERl1EhQ==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 3c45917b-56af-4c57-9109-d2a301a44fc2
+            X-Amzn-Trace-Id:
+                - Root=1-690e3448-00d76afd69dfd1077ea178f8;Parent=78f38f2050a1efc9;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 690e3448000000002872199ffe76f986
+            X-Cache:
+                - Error from cloudfront
+        status: 403 Forbidden
+        code: 403
+        duration: 168.46ms

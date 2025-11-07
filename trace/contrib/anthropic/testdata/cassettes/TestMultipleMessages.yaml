@@ -1,0 +1,100 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 317
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"max_tokens":1024,"messages":[{"content":[{"text":"What is the capital of France?","type":"text"}],"role":"user"},{"content":[{"text":"The capital of France is Paris.","type":"text"}],"role":"assistant"},{"content":[{"text":"What is its population?","type":"text"}],"role":"user"}],"model":"claude-3-haiku-20240307"}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Anthropic-Version:
+                - "2023-06-01"
+            Content-Type:
+                - application/json
+            User-Agent:
+                - Anthropic/Go 1.4.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 1.4.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.23.12
+            X-Stainless-Timeout:
+                - "28"
+        url: https://api.anthropic.com/v1/messages
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"model":"claude-3-haiku-20240307","id":"msg_014rQVz7SxP3K52xEqbA5X5s","type":"message","role":"assistant","content":[{"type":"text","text":"The population of Paris, the capital of France, is around 2.2 million people within the city limits. However, the larger Paris metropolitan area, known as the Île-de-France region, has a population of around 12.6 million people, making it one of the most populous urban areas in Europe.\n\nSome key facts about the population of Paris:\n\n- The city of Paris proper has an area of just 105 square km, making it one of the most densely populated cities in Europe.\n\n- The broader Île-de-France region, which includes the city of Paris and its surrounding suburbs and metropolitan area, has a total population of around 12.6 million.\n\n- Paris is the center of a much larger urban agglomeration that extends well beyond the city limits, with a total population of around 10-12 million in the urban area.\n\n- Paris has experienced relatively slow population growth in recent decades, with the city proper growing only modestly while the metropolitan area has expanded more rapidly.\n\nSo in summary, the city of Paris itself has a population of around 2.2 million, but the larger Paris metropolitan region is home to over 12 million people, making it one of the most populous urban areas in Europe."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":32,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":270,"service_tier":"standard"}}'
+        headers:
+            Anthropic-Ratelimit-Input-Tokens-Limit:
+                - "8000000"
+            Anthropic-Ratelimit-Input-Tokens-Remaining:
+                - "8000000"
+            Anthropic-Ratelimit-Input-Tokens-Reset:
+                - "2025-11-07T17:16:55Z"
+            Anthropic-Ratelimit-Output-Tokens-Limit:
+                - "1500000"
+            Anthropic-Ratelimit-Output-Tokens-Remaining:
+                - "1500000"
+            Anthropic-Ratelimit-Output-Tokens-Reset:
+                - "2025-11-07T17:16:57Z"
+            Anthropic-Ratelimit-Requests-Limit:
+                - "10000"
+            Anthropic-Ratelimit-Requests-Remaining:
+                - "9999"
+            Anthropic-Ratelimit-Requests-Reset:
+                - "2025-11-07T17:16:55Z"
+            Anthropic-Ratelimit-Tokens-Limit:
+                - "9500000"
+            Anthropic-Ratelimit-Tokens-Remaining:
+                - "9500000"
+            Anthropic-Ratelimit-Tokens-Reset:
+                - "2025-11-07T17:16:55Z"
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - 99ae7b2c8a30e0ee-EWR
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 07 Nov 2025 17:16:57 GMT
+            Request-Id:
+                - req_011CUtudvvf6FwMuwPzaSrLJ
+            Retry-After:
+                - "5"
+            Server:
+                - cloudflare
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            X-Envoy-Upstream-Service-Time:
+                - "2641"
+            X-Robots-Tag:
+                - none
+        status: 200 OK
+        code: 200
+        duration: 2.729202958s

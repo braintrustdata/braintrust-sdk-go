@@ -1,0 +1,299 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 32
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"go-sdk-lifecycle-test"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"cb18fe2a-27c4-42e8-8da6-4abb8c783470","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test","created":"2025-11-07T18:02:46.722Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:02:46 GMT
+            Etag:
+                - W/"f4-TpkeGaJn6haNyrOme+6QzfUAqqE"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 c50e3f7de0b772d07240015272b1aff6.cloudfront.net (CloudFront), 1.1 c1685d59e35fdb859ab8a1f97feb5652.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0bGHduIAMEBSQ=
+            X-Amz-Cf-Id:
+                - OuuBo7MsmBUUbnUvIELMfzZ8Ah7Vm3wtPkRLy-Ap1xmP1_NqtXDdYw==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - fe67d4e5-5f22-47da-a9c1-dda74e296029
+            X-Amzn-Trace-Id:
+                - Root=1-690e3446-7939ea337f7d54c470144487;Parent=768c856cd07321b0;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 690e34460000000078e1e559ffc440c1
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 176.870292ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/project/cb18fe2a-27c4-42e8-8da6-4abb8c783470
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"cb18fe2a-27c4-42e8-8da6-4abb8c783470","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test","created":"2025-11-07T18:02:46.722Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:02:47 GMT
+            Etag:
+                - W/"f4-TpkeGaJn6haNyrOme+6QzfUAqqE"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 6e202b767e6bdee837ba15ada7e3120e.cloudfront.net (CloudFront), 1.1 c1685d59e35fdb859ab8a1f97feb5652.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0bJFHtoAMEmWw=
+            X-Amz-Cf-Id:
+                - wOF8EBuK0NYYH94VIBZu9QWWPosJn2rVn0LF0Un3a1p0hW1FJCieqw==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - c515982c-196a-4480-a9ae-6ce5ef9701af
+            X-Amzn-Trace-Id:
+                - Root=1-690e3446-1ff1899e621657186f2926c1;Parent=7d00ade57471df0f;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 690e34460000000047cdb4ce9d86f373
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 117.646125ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/project?limit=100
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"objects":[{"id":"cb18fe2a-27c4-42e8-8da6-4abb8c783470","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test","created":"2025-11-07T18:02:46.722Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"7c8460b6-f890-4715-bef5-408092559666","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"Python Working Origin Demo","created":"2025-11-06T21:08:26.281Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"b3a207b4-9a3b-43e9-8448-077efc35c921","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"Python Dataset Origin Demo","created":"2025-11-06T21:06:56.535Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"ee374af4-28f0-4cda-9a29-cc7afe205773","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"Python Origin Demo Eval","created":"2025-11-06T20:58:22.945Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"b1096ac8-ef55-4a62-8de2-3b194551f224","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"python-origin-demo","created":"2025-11-06T20:58:22.177Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"d922b0d4-5551-455a-812c-5ec8bc628fd2","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test-1762462648","created":"2025-11-06T20:57:29.107Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"6984a16e-e9e0-4803-9f16-1fde6afa1375","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"Origin Demo Experiment","created":"2025-11-06T20:43:45.893Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"3451c6f2-d263-495f-aed6-e9c968f4569f","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"origin-demo","created":"2025-11-06T20:43:44.738Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"a540e436-accf-4d6a-8c06-1f5b9f743825","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"Capitalization Task Demo","created":"2025-11-06T20:08:45.839Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"eea105c9-1945-43cc-8866-acad079c93f4","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"python-sdk-examples","created":"2025-11-06T20:08:44.892Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"808ba8ee-3ed6-4870-bed8-90bfb4ecb6b5","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test-1762452773","created":"2025-11-06T18:12:53.684Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"8312ca6a-07d4-44ad-8059-3c9d7ba4a8e6","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test-1762452723","created":"2025-11-06T18:12:03.404Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"490dbc3a-adae-4109-9120-b3093051007e","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test-1762452715","created":"2025-11-06T18:11:56.035Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"6b3b152d-5852-470a-b6f2-d7f93c83d04e","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test-1762452444","created":"2025-11-06T18:07:24.680Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"f229794d-e900-4cd3-95ce-f31806c65acf","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test-1762452433","created":"2025-11-06T18:07:13.911Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"9ff87394-821d-4a9d-8dce-ac1dfcf9a215","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test-1762452408","created":"2025-11-06T18:06:49.191Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"2b750e40-29fa-49d9-8089-fb3b853e35d9","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test-1762452397","created":"2025-11-06T18:06:37.566Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"895dc247-ec9f-43ff-b1a2-ece9ea1d0059","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test-1762452383","created":"2025-11-06T18:06:23.380Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"58a7c950-fff5-4f64-8750-ba8e3b648d15","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test-1762449110","created":"2025-11-06T17:11:50.488Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"e2b7aa32-c0c7-4346-8fda-afba6dceb988","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test-1762449105","created":"2025-11-06T17:11:45.274Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"494ac2c9-a71e-4792-932d-a5635c24682e","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-test-TestEval_DifferentProject-jqh0w2t0-other-project","created":"2025-11-06T15:38:42.369Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"063b6435-ccdf-4705-91b6-c21b8499961c","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-test-TestEval_DifferentProject-vx08yoqk-other-project","created":"2025-11-06T15:37:09.379Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"f567672b-b774-4746-9f7d-19904fc449e8","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-test-TestEval_DifferentProject-dsono9in-other-project","created":"2025-11-06T15:37:06.115Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"2e6fd95c-705a-49b2-90d4-0dca8506a4f5","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-test-TestEval_DifferentProject-sq9v8sss-other-project","created":"2025-11-06T15:36:52.740Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"c56fd15e-facc-4a05-9aff-25ab6e698bc6","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-test-TestEval_DifferentProject-sje6a6bh-other-project","created":"2025-11-06T15:36:41.834Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"c1c2d841-c0b0-4004-808a-3c35d8923dde","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-test-TestEval_DifferentProject-gt82uk8n-other-project","created":"2025-11-06T15:36:06.436Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"2bcc6194-5bf9-4352-8be8-9e28867ea910","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-test-TestEval_DifferentProject-fhcz1lyv-other-project","created":"2025-11-06T15:31:46.058Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"e77a35b1-cb20-40a5-8224-f7142f814251","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-test-TestEval_DifferentProject-fgnbh1pz-other-project","created":"2025-11-06T15:31:29.756Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"13ef585c-576d-443d-9865-3b2a4d97619c","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-test-TestEval_DifferentProject-za7pdceu-other-project","created":"2025-11-06T15:31:01.959Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"e80bfc2e-4421-4a53-a712-6bdfe1e1a562","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"distributed-tracing-example","created":"2025-11-04T21:57:52.352Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"4a005cdc-56c2-466f-8a0a-7706228fbc95","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"manual-llm-logging","created":"2025-11-04T21:02:56.838Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-tests","created":"2025-11-04T13:38:56.532Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"bde2b212-f176-40f1-ab54-419d8fc299aa","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"dataset-api-example","created":"2025-11-03T22:43:06.228Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"f533c68a-12af-40da-b86c-79b91eed217a","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"dataset-api-test","created":"2025-11-03T22:42:29.856Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"16825f4d-babd-43da-918b-e3bc2d0ab1f8","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"test-project","created":"2025-10-31T20:04:22.911Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"6daebf62-d90e-40ae-bf28-136f4596fec2","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"test-sdk-apps-esm-otel","created":"2025-10-30T18:38:16.014Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"0e748405-dc34-448d-8fba-effd90756d75","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"simple-math-eval","created":"2025-10-29T18:59:55.503Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"837bb1cd-0ef7-427e-8629-1ef33123570d","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"worker thread","created":"2025-10-29T18:24:56.507Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"ddfeddc9-6899-446d-bd9f-1f934e28dfc6","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"test-math-eval","created":"2025-10-29T18:23:04.546Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"f67abc05-7c57-4624-9432-3e81473a0422","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"example-openai-project","created":"2025-10-29T17:09:53.636Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"d61b5c83-4a3a-4367-9371-d2af3ac15feb","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"queue-test","created":"2025-10-29T17:09:29.701Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"be859ba0-1274-4df9-8261-68b52806558c","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"remote-eval-test","created":"2025-10-29T17:00:07.602Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":{"remote_eval_sources":[{"url":"http://localhost:8300","name":"http://localhost:8300","description":null},{"url":"http://localhost:8301","name":"http://localhost:8301","description":null}]}},{"id":"eec80728-d29e-4cca-b504-16c7d5e06771","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"format_test","created":"2025-10-29T15:08:20.920Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"6173a180-c725-4e9f-8241-b5359bf58d14","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"rewrite-test","created":"2025-10-28T18:15:19.997Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"210cd900-38cf-4525-a78d-a26aba441337","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"langchaingo-anthropic-example","created":"2025-10-28T01:55:47.649Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"af608071-f9b8-4e0f-9196-1f101c580171","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"sdk-test-apps","created":"2025-10-26T16:28:24.037Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"4312d734-f707-472a-b6cc-51228b9c1dde","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"test-sdk-apps","created":"2025-10-26T16:23:59.572Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"b7d04702-56d1-4f0c-9099-c9827fe9f348","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"ruby-sdk-internal-examples","created":"2025-10-26T00:51:10.081Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"56c4c6c0-04a1-434d-8c63-f257dc44723c","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"test-app-rb","created":"2025-10-25T21:24:34.691Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"7d0d4446-d8d6-4d18-b34d-890983cd5946","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-unit-tests","created":"2025-10-22T20:10:27.750Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"c532bc50-7094-4bbb-8704-42344c9728b9","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"ruby-sdk-test","created":"2025-10-22T02:53:49.779Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"0d063559-6814-4079-8af9-6a4ea80db3bf","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"ruby-sdk-default-project","created":"2025-10-21T22:18:18.290Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"5e2d9e45-8355-444f-8c8e-50a0ddadb3ca","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"ruby-sdk-examples","created":"2025-10-21T22:07:44.236Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"0696fd49-d956-4b5b-88d6-5a5b12fdfc61","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-metadata-test","created":"2025-10-21T19:23:23.212Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"8e59c9a4-e3e3-4816-90ea-1e335452ea68","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-tags-test","created":"2025-10-21T19:23:22.920Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"fc37650e-758e-4110-a7f7-50ce517df90b","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"dspy-example","created":"2025-10-21T14:38:27.940Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"4a6ec119-ceab-4d14-afdc-7f03079a8672","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"typescript-examples","created":"2025-10-20T14:46:12.004Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"c35de7e8-1056-4aab-b2f0-ec2d954c00a7","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"distributed-tracing-demo","created":"2025-10-17T20:28:46.231Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"2d24286c-5942-44ca-9db9-2826674391ac","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"temporal-example","created":"2025-10-14T21:02:08.817Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":{"remote_eval_sources":[{"url":"http://localhost:8300","name":"http://localhost:8300","description":null}]}},{"id":"754316d9-0427-47e3-ac89-222847476582","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"otel-eval-example","created":"2025-10-14T15:50:39.907Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"4f1670ea-2efb-433e-a8b2-693b2d1f9d1d","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"default-go-project","created":"2025-10-10T19:20:50.209Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"250d22d1-7408-4609-9c52-cc5a53ff4825","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"proj-name","created":"2025-10-10T15:47:17.672Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"30b8c005-9338-412f-8f59-0ccc3de28776","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"test-go-functions","created":"2025-10-10T15:17:22.633Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"440ea8dc-8952-4973-bfc6-41fb852a734f","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-examples","created":"2025-10-10T15:03:55.063Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"cfa47167-561d-4127-83a1-d32856d47323","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"default-otel-project","created":"2025-10-10T14:34:50.959Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"284f64fe-9a40-439a-9293-010c6038f6ab","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"openrouter-example","created":"2025-10-10T14:19:23.174Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"ad4ddb75-606c-4742-a2a2-c0dbcf996ca9","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"otel-eval-demo","created":"2025-10-09T21:01:12.330Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"0b2b2fa1-f612-47e6-a9d4-b7ca101cb913","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-dataset-tests","created":"2025-10-07T03:58:48.640Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"e0fb68fc-8b52-4c01-aa5c-3304c1fdea3a","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-internal-examples","created":"2025-10-07T03:30:20.292Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"a7d2732c-e809-42dc-a9fb-2c5a6b2db367","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"otel-compat-demo","created":"2025-10-06T17:03:39.056Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"0357682a-abe1-4b60-af47-faef03c7a383","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"braintrust-sdk-test","created":"2025-10-02T03:22:25.074Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"28f19602-f4bf-47ea-92e1-63338639bf83","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"bug-reproduction-project","created":"2025-09-29T14:37:12.923Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null}]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:02:47 GMT
+            Etag:
+                - W/"474c-O7PhUOIbkBBWSLq4JBSqb1n9BjI"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 f5527f719bbc0d2932043daaeff80252.cloudfront.net (CloudFront), 1.1 c1685d59e35fdb859ab8a1f97feb5652.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0bLGNCoAMES6w=
+            X-Amz-Cf-Id:
+                - lYW9ULp7XpPRc7HQlibb81fpvaC-GJaV0p4SRuWVQRaICME6iWWelw==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 7f9a531d-59cd-4d0a-9109-5b486237645e
+            X-Amzn-Trace-Id:
+                - Root=1-690e3447-766cacf4384a1986034f8c06;Parent=05a469aabccf7248;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 690e344700000000358e52c93121926a
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 181.767792ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 32
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"go-sdk-lifecycle-test"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"cb18fe2a-27c4-42e8-8da6-4abb8c783470","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test","created":"2025-11-07T18:02:46.722Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:02:47 GMT
+            Etag:
+                - W/"f4-TpkeGaJn6haNyrOme+6QzfUAqqE"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 c4d0da6268789cfda9bb5da1f3f8fc58.cloudfront.net (CloudFront), 1.1 c1685d59e35fdb859ab8a1f97feb5652.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0bPETFoAMEISw=
+            X-Amz-Cf-Id:
+                - 7NneV0nDTLZaipbX7zIULHQPlABhMNHftRRu1-YzuDPW-TG8I-YJEw==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - ba460298-f331-434d-aa48-3256b8f3766c
+            X-Amzn-Trace-Id:
+                - Root=1-690e3447-651a51d33252fb027993aeba;Parent=46cfc09ed5c8f416;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Found-Existing:
+                - "true"
+            X-Bt-Internal-Trace-Id:
+                - 690e3447000000001cfa8467867886af
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 193.361833ms
+    - id: 4
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/project/cb18fe2a-27c4-42e8-8da6-4abb8c783470
+        method: DELETE
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"cb18fe2a-27c4-42e8-8da6-4abb8c783470","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test","created":"2025-11-07T18:02:46.722Z","deleted_at":"2025-11-07T18:02:48.021Z","user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 07 Nov 2025 18:02:48 GMT
+            Etag:
+                - W/"10a-01AbtKTP+gVDWrzMTc/eC8HlOyA"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 cfc46590021b7df312893ffb67317bb2.cloudfront.net (CloudFront), 1.1 c1685d59e35fdb859ab8a1f97feb5652.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Tr0bTGtjoAMEUbw=
+            X-Amz-Cf-Id:
+                - R0my1uPV0iT8prk3sXEcCYc6RsjEOB8XuOPPwkgq6mdP9FXlnLJGLA==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - aafd01f7-5299-4fa8-b5ae-e31d50f9a9cd
+            X-Amzn-Trace-Id:
+                - Root=1-690e3447-30890c7952acb97467c1775a;Parent=20c583168b35e0bd;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 690e3447000000004936528bb992ee75
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 137.876792ms

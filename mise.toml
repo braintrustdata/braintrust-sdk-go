@@ -14,8 +14,8 @@ watchexec = "latest"
 [tasks.test]
 run = "make test"
 
-[tasks.test_quiet]
-run = "make test_quiet"
+[tasks.test-quiet]
+run = "make test-quiet"
 
 [tasks.lint]
 run = "make lint"
