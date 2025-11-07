@@ -32,3 +32,11 @@ jobs:
           version: v2.1.6
       - name: Lint, vet, tests, etc.
         run: make ci
+
+  ci-passed:
+    name: CI Passed
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark CI as passed
+        run: echo "All CI jobs passed successfully"
