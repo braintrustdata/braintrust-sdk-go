@@ -78,14 +78,14 @@ func TestScorerAPI_Get(t *testing.T) {
 		_ = functions.Delete(ctx, function.ID)
 	}()
 
-	// Create ScorerAPI
-	scorerAPI := &ScorerAPI[testDatasetInput, testDatasetOutput]{
+	// Create FunctionsAPI
+	functionsAPI := &FunctionsAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,
 		projectName: integrationTestProject,
 	}
 
-	// Test: Get should return a Scorer
-	scorer, err := scorerAPI.Get(ctx, testSlug)
+	// Test: Scorer should return a Scorer
+	scorer, err := functionsAPI.Scorer(ctx, FunctionOpts{Slug: testSlug})
 	require.NoError(t, err)
 	require.NotNil(t, scorer)
 
@@ -117,13 +117,13 @@ func TestScorerAPI_Get_EmptySlug(t *testing.T) {
 	// Get endpoints and create API client
 	endpoints := session.Endpoints()
 	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	scorerAPI := &ScorerAPI[testDatasetInput, testDatasetOutput]{
+	functionsAPI := &FunctionsAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,
 		projectName: integrationTestProject,
 	}
 
 	// Should error on empty slug
-	_, err := scorerAPI.Get(ctx, "")
+	_, err := functionsAPI.Scorer(ctx, FunctionOpts{Slug: ""})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "required")
 }
@@ -138,13 +138,13 @@ func TestScorerAPI_Get_NotFound(t *testing.T) {
 	// Get endpoints and create API client
 	endpoints := session.Endpoints()
 	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	scorerAPI := &ScorerAPI[testDatasetInput, testDatasetOutput]{
+	functionsAPI := &FunctionsAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,
 		projectName: integrationTestProject,
 	}
 
 	// Should error on non-existent scorer
-	_, err := scorerAPI.Get(ctx, "nonexistent-scorer-slug-12345")
+	_, err := functionsAPI.Scorer(ctx, FunctionOpts{Slug: "nonexistent-scorer-slug-12345"})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "not found")
 }
@@ -160,18 +160,18 @@ func TestScorerAPI_TypeSafety(t *testing.T) {
 	endpoints := session.Endpoints()
 	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	// This should compile
-	scorerAPI := &ScorerAPI[testDatasetInput, testDatasetOutput]{
+	functionsAPI := &FunctionsAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,
 		projectName: integrationTestProject,
 	}
 
 	// The returned Scorer should have the correct type
 	var _ = func() (Scorer[testDatasetInput, testDatasetOutput], error) {
-		return scorerAPI.Get(ctx, "test-slug")
+		return functionsAPI.Scorer(ctx, FunctionOpts{Slug: "test-slug"})
 	}
 
 	// This is a compile-time check - if it compiles, the test passes
-	assert.NotNil(t, scorerAPI)
+	assert.NotNil(t, functionsAPI)
 }
 
 // TestScorerAPI_OutputParsing tests various scorer output formats

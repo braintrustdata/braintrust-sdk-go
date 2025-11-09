@@ -31,6 +31,21 @@ func NewEvaluator[I, R any](session *auth.Session, cfg *config.Config, tp *trace
 	}
 }
 
+// Functions returns an API for loading server-side Braintrust functions (tasks/prompts and scorers).
+// Use Functions().Task() to load tasks/prompts and Functions().Scorer() to load scorers.
+func (e *Evaluator[I, R]) Functions() *FunctionsAPI[I, R] {
+	// Get endpoints from session (prefers logged-in info, falls back to opts)
+	endpoints := e.session.Endpoints()
+
+	// Create api.Client for function operations
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+
+	return &FunctionsAPI[I, R]{
+		api:         apiClient,
+		projectName: e.config.DefaultProjectName,
+	}
+}
+
 // Datasets returns a DatasetAPI for loading datasets with this evaluator's type parameters.
 func (e *Evaluator[I, R]) Datasets() *DatasetAPI[I, R] {
 	// Get endpoints from session (prefers logged-in info, falls back to opts)
@@ -41,34 +56,6 @@ func (e *Evaluator[I, R]) Datasets() *DatasetAPI[I, R] {
 
 	return &DatasetAPI[I, R]{
 		api: apiClient,
-	}
-}
-
-// Tasks returns a TaskAPI for loading tasks/prompts with this evaluator's type parameters.
-func (e *Evaluator[I, R]) Tasks() *TaskAPI[I, R] {
-	// Get endpoints from session (prefers logged-in info, falls back to opts)
-	endpoints := e.session.Endpoints()
-
-	// Create api.API for task operations
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-
-	return &TaskAPI[I, R]{
-		api:         apiClient,
-		projectName: e.config.DefaultProjectName,
-	}
-}
-
-// Scorers returns a ScorerAPI for loading scorers with this evaluator's type parameters.
-func (e *Evaluator[I, R]) Scorers() *ScorerAPI[I, R] {
-	// Get endpoints from session (prefers logged-in info, falls back to opts)
-	endpoints := e.session.Endpoints()
-
-	// Create api.API for scorer operations
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-
-	return &ScorerAPI[I, R]{
-		api:         apiClient,
-		projectName: e.config.DefaultProjectName,
 	}
 }
 

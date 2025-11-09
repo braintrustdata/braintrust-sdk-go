@@ -73,7 +73,7 @@ func main() {
 	}
 
 	// Load the prompt as a task
-	task, err := evaluator.Tasks().Get(ctx, promptSlug)
+	task, err := evaluator.Functions().Task(ctx, eval.FunctionOpts{Slug: promptSlug})
 	if err != nil {
 		log.Fatalf("Failed to load prompt: %v", err)
 	}

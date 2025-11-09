@@ -89,13 +89,13 @@ func TestEval_Integration(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, foundFuncs, 1, "function should be queryable after creation")
 
-	// Create TaskAPI and get the task
-	taskAPI := &TaskAPI[string, string]{
+	// Create FunctionsAPI and get the task
+	functionsAPI := &FunctionsAPI[string, string]{
 		api:         apiClient,
 		projectName: integrationTestProject,
 	}
 
-	task, err := taskAPI.Get(ctx, testSlug)
+	task, err := functionsAPI.Task(ctx, FunctionOpts{Slug: testSlug})
 	require.NoError(t, err)
 	require.NotNil(t, task)
 
@@ -224,13 +224,13 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 		Answer string `json:"answer"`
 	}
 
-	// Create TaskAPI and get the task
-	taskAPI := &TaskAPI[QuestionInput, AnswerOutput]{
+	// Create FunctionsAPI and get the task
+	functionsAPI := &FunctionsAPI[QuestionInput, AnswerOutput]{
 		api:         apiClient,
 		projectName: integrationTestProject,
 	}
 
-	task, err := taskAPI.Get(ctx, testSlug)
+	task, err := functionsAPI.Task(ctx, FunctionOpts{Slug: testSlug})
 	require.NoError(t, err)
 	require.NotNil(t, task)
 

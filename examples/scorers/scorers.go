@@ -90,7 +90,7 @@ func main() {
 	}
 
 	// Try to get online scorer - add if available
-	onlineScorer, err := evaluator.Scorers().Get(context.Background(), "fail-scorer-d879")
+	onlineScorer, err := evaluator.Functions().Scorer(context.Background(), eval.FunctionOpts{Slug: "fail-scorer-d879"})
 	if err != nil {
 		log.Printf("⚠️ Online scorer not available: %v", err)
 		log.Println("📊 Running with local scorers only...")
