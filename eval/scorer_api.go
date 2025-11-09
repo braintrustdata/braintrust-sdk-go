@@ -14,22 +14,6 @@ type ScorerAPI[I, R any] struct {
 	projectName string
 }
 
-// ScorerInfo contains metadata about a scorer.
-type ScorerInfo struct {
-	ID      string
-	Name    string
-	Project string
-}
-
-// ScorerQueryOpts contains options for querying scorers.
-type ScorerQueryOpts struct {
-	// Project filters scorers by project
-	Project string
-
-	// Name filters by specific name
-	Name string
-}
-
 // Get loads a scorer by slug and returns a Scorer.
 func (s *ScorerAPI[I, R]) Get(ctx context.Context, slug string) (Scorer[I, R], error) {
 	if slug == "" {
@@ -97,34 +81,4 @@ func (s *ScorerAPI[I, R]) Get(ctx context.Context, slug string) (Scorer[I, R], e
 	}
 
 	return NewScorer(function.Name, scorerFunc), nil
-}
-
-// Query searches for scorers matching the given options.
-func (s *ScorerAPI[I, R]) Query(ctx context.Context, opts ScorerQueryOpts) ([]ScorerInfo, error) {
-	// Get project name from opts or use default
-	projectName := opts.Project
-	if projectName == "" {
-		projectName = s.projectName
-	}
-
-	// Query for functions
-	functions, err := s.api.Functions().Query(ctx, functionsapi.QueryParams{
-		ProjectName:  projectName,
-		FunctionName: opts.Name,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to query functions: %w", err)
-	}
-
-	// Convert to ScorerInfo
-	result := make([]ScorerInfo, len(functions))
-	for i, fn := range functions {
-		result[i] = ScorerInfo{
-			ID:      fn.ID,
-			Name:    fn.Name,
-			Project: projectName,
-		}
-	}
-
-	return result, nil
 }
