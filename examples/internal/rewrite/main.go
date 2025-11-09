@@ -73,6 +73,13 @@ func exampleNewEvaluator(client *braintrust.Client) {
 
 	// Define a simple task: greeting generator
 	task := eval.T(func(ctx context.Context, input string) (string, error) {
+		tracer := otel.Tracer("rewrite-example")
+		_, span := tracer.Start(ctx, "manual-span")
+		defer span.End()
+		span.SetAttributes(
+			attribute.String("example.type", "manual"),
+			attribute.Int("example.id", 1),
+		)
 		return fmt.Sprintf("Hello, %s!", input), nil
 	})
 

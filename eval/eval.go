@@ -17,6 +17,7 @@ import (
 
 	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
+	bttrace "github.com/braintrustdata/braintrust-sdk-go/trace"
 )
 
 var (
@@ -218,6 +219,7 @@ func (r *Result) String() string {
 type eval[I, R any] struct {
 	config         *config.Config
 	session        *auth.Session
+	parent         bttrace.Parent
 	experimentID   string
 	experimentName string
 	projectID      string
@@ -256,8 +258,8 @@ func newEval[I, R any](
 	quiet bool,
 ) *eval[I, R] {
 	// Build parent span option
-	parentAttr := fmt.Sprintf("experiment_id:%s", experimentID)
-	startSpanOpt := oteltrace.WithAttributes(attribute.String("braintrust.parent", parentAttr))
+	parent := bttrace.NewParent(bttrace.ParentTypeExperimentID, experimentID)
+	startSpanOpt := oteltrace.WithAttributes(parent.Attr())
 
 	// Set parallelism
 	goroutines := parallelism
@@ -268,6 +270,7 @@ func newEval[I, R any](
 	return &eval[I, R]{
 		config:         cfg,
 		session:        session,
+		parent:         parent,
 		experimentID:   experimentID,
 		experimentName: experimentName,
 		projectID:      projectID,
@@ -326,13 +329,13 @@ func newEvalOpts[I, R any](ctx context.Context, cfg *config.Config, session *aut
 	), nil
 }
 
-// run executes the evaluation with parallelism support.
-// This is copied from the old Eval.Run() method.
 func (e *eval[I, R]) run(ctx context.Context) (*Result, error) {
 	start := time.Now()
 	if e.experimentID == "" {
 		return nil, fmt.Errorf("%w: experiment ID is required", errEval)
 	}
+
+	ctx = bttrace.SetParent(ctx, e.parent)
 
 	// Scale buffer size with parallelism to avoid blocking, but cap at 100
 	bufferSize := minInt(e.goroutines*2, 100)
