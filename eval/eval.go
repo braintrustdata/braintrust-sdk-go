@@ -17,6 +17,7 @@ import (
 
 	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
+	bttrace "github.com/braintrustdata/braintrust-sdk-go/trace"
 )
 
 var (
@@ -218,6 +219,7 @@ func (r *Result) String() string {
 type eval[I, R any] struct {
 	config         *config.Config
 	session        *auth.Session
+	parent         bttrace.Parent
 	experimentID   string
 	experimentName string
 	projectID      string
@@ -238,9 +240,55 @@ type nextCase[I, R any] struct {
 	iterErr error
 }
 
-// newEval creates a new eval executor with dependency injection.
+// newEval creates a new eval executor from concrete parameters (low-level constructor).
+// This is the shared code path used by both newEvalOpts (production) and testNewEval (tests).
+func newEval[I, R any](
+	cfg *config.Config,
+	session *auth.Session,
+	tracer oteltrace.Tracer,
+	experimentID string,
+	experimentName string,
+	projectID string,
+	projectName string,
+	datasetID string,
+	dataset Dataset[I, R],
+	task TaskFunc[I, R],
+	scorers []Scorer[I, R],
+	parallelism int,
+	quiet bool,
+) *eval[I, R] {
+	// Build parent span option
+	parent := bttrace.NewParent(bttrace.ParentTypeExperimentID, experimentID)
+	startSpanOpt := oteltrace.WithAttributes(parent.Attr())
+
+	// Set parallelism
+	goroutines := parallelism
+	if goroutines < 1 {
+		goroutines = 1
+	}
+
+	return &eval[I, R]{
+		config:         cfg,
+		session:        session,
+		parent:         parent,
+		experimentID:   experimentID,
+		experimentName: experimentName,
+		projectID:      projectID,
+		projectName:    projectName,
+		dataset:        dataset,
+		datasetID:      datasetID,
+		task:           task,
+		scorers:        scorers,
+		tracer:         tracer,
+		startSpanOpt:   startSpanOpt,
+		goroutines:     goroutines,
+		quiet:          quiet,
+	}
+}
+
+// newEvalOpts creates a new eval executor with dependency injection.
 // This replaces the old New() constructor which used global state.
-func newEval[I, R any](ctx context.Context, cfg *config.Config, session *auth.Session, tp *trace.TracerProvider, opts Opts[I, R]) (*eval[I, R], error) {
+func newEvalOpts[I, R any](ctx context.Context, cfg *config.Config, session *auth.Session, tp *trace.TracerProvider, opts Opts[I, R]) (*eval[I, R], error) {
 	// Determine project name (use opts.ProjectName if specified, otherwise cfg.DefaultProjectName)
 	projectName := opts.ProjectName
 	if projectName == "" {
@@ -263,41 +311,31 @@ func newEval[I, R any](ctx context.Context, cfg *config.Config, session *auth.Se
 	// Create tracer from injected TracerProvider (instead of global)
 	tracer := tp.Tracer("braintrust.eval")
 
-	// Build parent span option
-	parentAttr := fmt.Sprintf("experiment_id:%s", exp.ID)
-	startSpanOpt := oteltrace.WithAttributes(attribute.String("braintrust.parent", parentAttr))
-
-	// Set parallelism
-	goroutines := opts.Parallelism
-	if goroutines < 1 {
-		goroutines = 1
-	}
-
-	return &eval[I, R]{
-		config:         cfg,
-		session:        session,
-		experimentID:   exp.ID,
-		experimentName: exp.Name,
-		projectID:      projectID,
-		projectName:    projectName,
-		dataset:        opts.Dataset,
-		datasetID:      datasetID,
-		task:           opts.Task,
-		scorers:        opts.Scorers,
-		tracer:         tracer,
-		startSpanOpt:   startSpanOpt,
-		goroutines:     goroutines,
-		quiet:          opts.Quiet,
-	}, nil
+	// Call low-level newEval with concrete parameters
+	return newEval(
+		cfg,
+		session,
+		tracer,
+		exp.ID,
+		exp.Name,
+		projectID,
+		projectName,
+		datasetID,
+		opts.Dataset,
+		opts.Task,
+		opts.Scorers,
+		opts.Parallelism,
+		opts.Quiet,
+	), nil
 }
 
-// run executes the evaluation with parallelism support.
-// This is copied from the old Eval.Run() method.
 func (e *eval[I, R]) run(ctx context.Context) (*Result, error) {
 	start := time.Now()
 	if e.experimentID == "" {
 		return nil, fmt.Errorf("%w: experiment ID is required", errEval)
 	}
+
+	ctx = bttrace.SetParent(ctx, e.parent)
 
 	// Scale buffer size with parallelism to avoid blocking, but cap at 100
 	bufferSize := minInt(e.goroutines*2, 100)
@@ -600,7 +638,7 @@ func Run[I, R any](ctx context.Context, opts Opts[I, R], cfg *config.Config, ses
 	}
 
 	// Create eval executor
-	e, err := newEval(ctx, cfg, session, tp, opts)
+	e, err := newEvalOpts(ctx, cfg, session, tp, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -696,30 +734,20 @@ func testNewEval[I, R any](
 	scorers []Scorer[I, R],
 	parallelism int,
 ) *eval[I, R] {
-	// Build parent span option
-	parentAttr := fmt.Sprintf("experiment_id:%s", experimentID)
-	startSpanOpt := oteltrace.WithAttributes(attribute.String("braintrust.parent", parentAttr))
-
-	// Set parallelism
-	goroutines := parallelism
-	if goroutines < 1 {
-		goroutines = 1
-	}
-
-	return &eval[I, R]{
-		config:         cfg,
-		session:        session,
-		experimentID:   experimentID,
-		experimentName: experimentName,
-		projectID:      projectID,
-		projectName:    projectName,
-		dataset:        dataset,
-		datasetID:      dataset.ID(),
-		task:           task,
-		scorers:        scorers,
-		tracer:         tracer,
-		startSpanOpt:   startSpanOpt,
-		goroutines:     goroutines,
-		quiet:          true,
-	}
+	// Call low-level newEval with quiet=true for tests
+	return newEval(
+		cfg,
+		session,
+		tracer,
+		experimentID,
+		experimentName,
+		projectID,
+		projectName,
+		dataset.ID(),
+		dataset,
+		task,
+		scorers,
+		parallelism,
+		true, // quiet=true for tests
+	)
 }

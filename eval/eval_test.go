@@ -14,6 +14,7 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
+	"github.com/braintrustdata/braintrust-sdk-go/trace"
 )
 
 // testInput and testOutput are simple types for testing
@@ -1111,4 +1112,37 @@ func TestEval_NoOriginAttributeForInMemoryCase(t *testing.T) {
 
 	// Verify origin attribute is NOT present
 	assert.False(t, evalSpan.HasAttr("braintrust.origin"), "Origin should not be set for in-memory cases")
+}
+func TestEval_ParentPropagation(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	var taskParent trace.Parent
+	var scorerParent trace.Parent
+	var ok bool
+
+	cases := NewDataset([]Case[int, int]{
+		{Input: 1, Expected: 2},
+	})
+
+	task := T(func(ctx context.Context, input int) (int, error) {
+		ok, taskParent = trace.GetParent(ctx)
+		assert.True(ok)
+		return input + 1, nil
+	})
+
+	scorer := NewScorer("s", func(ctx context.Context, result TaskResult[int, int]) (Scores, error) {
+		ok, scorerParent = trace.GetParent(ctx)
+		assert.True(ok)
+		return S(1.0), nil
+	})
+
+	ute := newUnitTestEval(t, cases, task, []Scorer[int, int]{scorer}, 1)
+	ctx := context.Background()
+	result, err := ute.eval.run(ctx)
+	require.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(taskParent, trace.Parent{Type: trace.ParentTypeExperimentID, ID: result.ID()})
+	assert.Equal(scorerParent, trace.Parent{Type: trace.ParentTypeExperimentID, ID: result.ID()})
+
 }

@@ -265,6 +265,11 @@ func (p Parent) String() string {
 	return fmt.Sprintf("%s:%s", p.Type, p.ID)
 }
 
+// NewParent creates a new parent with the given type and ID.
+func NewParent(t ParentType, id string) Parent {
+	return Parent{Type: t, ID: id}
+}
+
 func parseParent(s string) (Parent, error) {
 	parts := strings.SplitN(s, ":", 2)
 	if len(parts) != 2 {
