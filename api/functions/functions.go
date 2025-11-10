@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"io"
 
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 )
 
@@ -84,6 +87,12 @@ func (a *API) Create(ctx context.Context, params CreateParams) (*Function, error
 
 // Invoke calls a function with the given input and returns the output.
 func (a *API) Invoke(ctx context.Context, functionID string, input any) (any, error) {
+	tracer := otel.Tracer("braintrust-functions")
+	ctx, span := tracer.Start(ctx, "function.invoke")
+	defer span.End()
+
+	span.SetAttributes(attribute.String("function.id", functionID))
+
 	if functionID == "" {
 		return nil, fmt.Errorf("function ID is required")
 	}
