@@ -19,9 +19,9 @@ type TaskHooks struct {
 
 	// Readonly fields. These aren't necessarily recommended to be included in the task function,
 	// but are available for advanced use cases.
-	Expected any // type-assert
-	Metadata Metadata
-	Tags     []string
+	Expected any      // Not usually used in tasks, so this is untyped
+	Metadata Metadata // Case metadata
+	Tags     []string // Case tags
 }
 
 // TaskOutput wraps the output value from a task.
@@ -38,15 +38,12 @@ type TaskResult[I, R any] struct {
 	Metadata Metadata // Case metadata
 }
 
-// T is a simple adapter that converts a basic task function into a TaskFunc. This is
-// useful if your task is only concerned with inputs and outputs. Example:
+// T is a convenience function for writing short task functions ([TaskFunc]) that only
+// use the input and output and don't need Hooks or other advanced features.
 //
 //	task := eval.T(func(ctx context.Context, input string) (string, error) {
 //		return input, nil
 //	})
-//
-//	evaluator := eval.NewEvaluator[string, string](session, cfg, tp)
-//	result, err := evaluator.Run(ctx, eval.Opts[string, string]{Task: task, Dataset: cases})
 func T[I, R any](fn func(ctx context.Context, input I) (R, error)) TaskFunc[I, R] {
 	return func(ctx context.Context, input I, hooks *TaskHooks) (TaskOutput[R], error) {
 		val, err := fn(ctx, input)

@@ -10,8 +10,7 @@ import (
 	functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
 )
 
-// FunctionsAPI provides methods for loading server-side Braintrust functions.
-// This includes tasks/prompts and scorers that execute remotely.
+// FunctionsAPI provides access for executing tasks and scorers hosted at braintrust.dev.
 type FunctionsAPI[I, R any] struct {
 	api         *api.API
 	projectName string

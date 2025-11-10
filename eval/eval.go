@@ -1,4 +1,28 @@
-// Package eval is used to run evals in Braintrust.
+// Package eval provides tools for evaluating AI model outputs.
+// Evaluations help measure AI application performance (accuracy/quality) and create
+// an effective feedback loop for AI development. They help teams understand if
+// updates improve or regress application quality. Evaluations are a key part of
+// the Braintrust platform.
+//
+// An evaluation consists of three main components:
+//   - [Dataset]: A set of test examples with inputs and expected outputs
+//   - [TaskFunc]: The unit of work we are evaluating, usually one or more calls to an LLM
+//   - [Scorer]: A function that scores the result of a task against the expected result
+//
+// # Type Parameters
+//
+// This package uses two generic type parameters throughout its API:
+//   - I: The input type for the task (e.g., string, struct, []byte)
+//   - R: The result/output type from the task (e.g., string, struct, complex types)
+//
+// All of the input and result types must be JSON-encodable.
+//
+// For example:
+//   - [Case][string, string] is a test case with string input and string output
+//   - [TaskFunc][Input, Output] is a task that takes Input and returns Output
+//   - [Dataset][string, bool] is an iterator over Cases with string inputs and boolean outputs
+//
+// See [Evaluator.Run] for running evaluations.
 package eval
 
 import (
@@ -37,50 +61,29 @@ var (
 
 // Opts defines the options for running an evaluation.
 // I is the input type and R is the result/output type.
+//
+// Dataset can be in-memory cases created with [NewDataset] or API-backed datasets
+// loaded with [Evaluator.Datasets].
+//
+// Task can be a [TaskFunc], a function wrapped with [T], or a hosted task function
+// loaded with [Evaluator.Functions().Task].
+//
+// Scorers can be local functions created with [NewScorer] or hosted scorer functions
+// loaded with [Evaluator.Functions().Scorer].
 type Opts[I, R any] struct {
-	// Experiment is the name of the experiment to create or use.
-	// Required.
+	// Required
 	Experiment string
+	Dataset    Dataset[I, R]
+	Task       TaskFunc[I, R]
+	Scorers    []Scorer[I, R]
 
-	// ProjectName is the name of the project to create the experiment in.
-	// Optional. If not specified, uses the default project from config.
-	ProjectName string
-
-	// Dataset is an iterator over the test cases to evaluate.
-	// Can be literal in-memory cases or API-backed dataset.
-	// Required.
-	Dataset Dataset[I, R]
-
-	// Task is the function to evaluate for each case.
-	// It receives the input and should return the output.
-	// Required.
-	Task TaskFunc[I, R]
-
-	// Scorers are the scoring functions to apply to each case result.
-	// Optional. If empty, no scoring is performed.
-	Scorers []Scorer[I, R]
-
-	// Tags are labels to attach to the experiment.
-	// Optional.
-	Tags []string
-
-	// Metadata is additional metadata to attach to the experiment.
-	// Optional.
-	Metadata map[string]interface{}
-
-	// Update controls whether to update an existing experiment or fail if it exists.
-	// Optional. Defaults to false.
-	Update bool
-
-	// Parallelism controls the number of goroutines to use for parallel execution.
-	// Optional. Defaults to 1 (sequential execution).
-	// Set to a value > 1 to enable parallel case evaluation.
-	Parallelism int
-
-	// Quiet controls whether to suppress printing the result summary.
-	// Optional. Defaults to false (summary is printed).
-	// Set to true to suppress output.
-	Quiet bool
+	// Optional
+	ProjectName string   // Project name (uses default from config if not specified)
+	Tags        []string // Tags to apply to the experiment
+	Metadata    Metadata // Metadata to attach to the experiment
+	Update      bool     // If true, append to existing experiment (default: false)
+	Parallelism int      // Number of goroutines (default: 1)
+	Quiet       bool     // Suppress result output (default: false)
 }
 
 // Case represents a single test case in an evaluation.
