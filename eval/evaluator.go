@@ -31,48 +31,31 @@ func NewEvaluator[I, R any](session *auth.Session, cfg *config.Config, tp *trace
 	}
 }
 
-// Datasets returns a DatasetAPI for loading datasets with this evaluator's type parameters.
+// Functions is used to execute hosted Braintrust functions (e.g. hosted tasks and hosted scorers) as part of an eval. As
+// long as I and R are JSON-serializable, FunctionsAPI will automatically convert the input and output to and from JSON.
+func (e *Evaluator[I, R]) Functions() *FunctionsAPI[I, R] {
+	// Get endpoints from session (prefers logged-in info, falls back to opts)
+	endpoints := e.session.Endpoints()
+
+	// Create api.Client for function operations
+	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+
+	return &FunctionsAPI[I, R]{
+		api:         apiClient,
+		projectName: e.config.DefaultProjectName,
+	}
+}
+
+// Datasets is used to access Datasets API for loading datasets with this evaluator's type parameters.
 func (e *Evaluator[I, R]) Datasets() *DatasetAPI[I, R] {
-	// Get endpoints from session (prefers logged-in info, falls back to opts)
 	endpoints := e.session.Endpoints()
-
-	// Create api.Client for dataset operations
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-
+	api := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	return &DatasetAPI[I, R]{
-		api: apiClient,
-	}
-}
-
-// Tasks returns a TaskAPI for loading tasks/prompts with this evaluator's type parameters.
-func (e *Evaluator[I, R]) Tasks() *TaskAPI[I, R] {
-	// Get endpoints from session (prefers logged-in info, falls back to opts)
-	endpoints := e.session.Endpoints()
-
-	// Create api.API for task operations
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-
-	return &TaskAPI[I, R]{
-		api:         apiClient,
-		projectName: e.config.DefaultProjectName,
-	}
-}
-
-// Scorers returns a ScorerAPI for loading scorers with this evaluator's type parameters.
-func (e *Evaluator[I, R]) Scorers() *ScorerAPI[I, R] {
-	// Get endpoints from session (prefers logged-in info, falls back to opts)
-	endpoints := e.session.Endpoints()
-
-	// Create api.API for scorer operations
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-
-	return &ScorerAPI[I, R]{
-		api:         apiClient,
-		projectName: e.config.DefaultProjectName,
+		api: api,
 	}
 }
 
 // Run executes an evaluation using this evaluator's dependencies.
 func (e *Evaluator[I, R]) Run(ctx context.Context, opts Opts[I, R]) (*Result, error) {
-	return Run(ctx, opts, e.config, e.session, e.tracerProvider)
+	return run(ctx, opts, e.config, e.session, e.tracerProvider)
 }

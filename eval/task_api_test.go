@@ -70,14 +70,14 @@ func TestTaskAPI_Get(t *testing.T) {
 		_ = functions.Delete(ctx, function.ID)
 	}()
 
-	// Create TaskAPI
-	taskAPI := &TaskAPI[testDatasetInput, testDatasetOutput]{
+	// Create FunctionsAPI
+	functionsAPI := &FunctionsAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,
 		projectName: integrationTestProject,
 	}
 
-	// Test: Get should return a TaskFunc
-	task, err := taskAPI.Get(ctx, testSlug)
+	// Test: Task should return a TaskFunc
+	task, err := functionsAPI.Task(ctx, FunctionOpts{Slug: testSlug})
 	require.NoError(t, err)
 	require.NotNil(t, task)
 
@@ -98,7 +98,7 @@ func TestTaskAPI_Get(t *testing.T) {
 	require.NoError(t, err)
 
 	// Test: Verify it's deleted - should not be found
-	_, err = taskAPI.Get(ctx, testSlug)
+	_, err = functionsAPI.Task(ctx, FunctionOpts{Slug: testSlug})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "not found")
 }
@@ -113,13 +113,13 @@ func TestTaskAPI_Get_EmptySlug(t *testing.T) {
 	// Get endpoints and create API client
 	endpoints := session.Endpoints()
 	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-	taskAPI := &TaskAPI[testDatasetInput, testDatasetOutput]{
+	functionsAPI := &FunctionsAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,
 		projectName: integrationTestProject,
 	}
 
 	// Should error on empty slug
-	_, err := taskAPI.Get(ctx, "")
+	_, err := functionsAPI.Task(ctx, FunctionOpts{Slug: ""})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "required")
 }
@@ -140,18 +140,18 @@ func TestTaskAPI_TypeSafety(t *testing.T) {
 	endpoints := session.Endpoints()
 	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	// This should compile
-	taskAPI := &TaskAPI[testDatasetInput, testDatasetOutput]{
+	functionsAPI := &FunctionsAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,
 		projectName: integrationTestProject,
 	}
 
 	// The returned TaskFunc should have the correct type
 	var _ = func() (TaskFunc[testDatasetInput, testDatasetOutput], error) {
-		return taskAPI.Get(ctx, "test-slug")
+		return functionsAPI.Task(ctx, FunctionOpts{Slug: "test-slug"})
 	}
 
 	// This is a compile-time check - if it compiles, the test passes
-	assert.NotNil(t, taskAPI)
+	assert.NotNil(t, functionsAPI)
 }
 
 // Helper functions

@@ -89,13 +89,13 @@ func TestEval_Integration(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, foundFuncs, 1, "function should be queryable after creation")
 
-	// Create TaskAPI and get the task
-	taskAPI := &TaskAPI[string, string]{
+	// Create FunctionsAPI and get the task
+	functionsAPI := &FunctionsAPI[string, string]{
 		api:         apiClient,
 		projectName: integrationTestProject,
 	}
 
-	task, err := taskAPI.Get(ctx, testSlug)
+	task, err := functionsAPI.Task(ctx, FunctionOpts{Slug: testSlug})
 	require.NoError(t, err)
 	require.NotNil(t, task)
 
@@ -127,14 +127,15 @@ func TestEval_Integration(t *testing.T) {
 	tp := trace.NewTracerProvider()
 	defer func() { _ = tp.Shutdown(ctx) }()
 
-	// Run the evaluation
-	result, err := Run(ctx, Opts[string, string]{
+	// Create evaluator and run the evaluation
+	evaluator := NewEvaluator[string, string](session, cfg, tp)
+	result, err := evaluator.Run(ctx, Opts[string, string]{
 		Experiment: tests.RandomName(t, "exp"),
 		Dataset:    cases,
 		Task:       task,
 		Scorers:    []Scorer[string, string]{containsScorer},
 		Quiet:      true,
-	}, cfg, session, tp)
+	})
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -224,13 +225,13 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 		Answer string `json:"answer"`
 	}
 
-	// Create TaskAPI and get the task
-	taskAPI := &TaskAPI[QuestionInput, AnswerOutput]{
+	// Create FunctionsAPI and get the task
+	functionsAPI := &FunctionsAPI[QuestionInput, AnswerOutput]{
 		api:         apiClient,
 		projectName: integrationTestProject,
 	}
 
-	task, err := taskAPI.Get(ctx, testSlug)
+	task, err := functionsAPI.Task(ctx, FunctionOpts{Slug: testSlug})
 	require.NoError(t, err)
 	require.NotNil(t, task)
 
@@ -255,13 +256,14 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Run the evaluation - this should handle string-to-struct conversion
-	result, err := Run(ctx, Opts[QuestionInput, AnswerOutput]{
+	evaluator := NewEvaluator[QuestionInput, AnswerOutput](session, cfg, tp)
+	result, err := evaluator.Run(ctx, Opts[QuestionInput, AnswerOutput]{
 		Experiment: tests.RandomName(t, "exp"),
 		Dataset:    cases,
 		Task:       task,
 		Scorers:    []Scorer[QuestionInput, AnswerOutput]{scorer},
 		Quiet:      true,
-	}, cfg, session, tp)
+	})
 
 	require.NoError(t, err, "evaluation should succeed when prompt returns JSON that can be parsed to struct")
 	require.NotNil(t, result)
@@ -312,7 +314,8 @@ func TestEval_Integration_DatasetByID(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Run evaluation
-	result, err := Run(ctx, Opts[int, int]{
+	evaluator := NewEvaluator[int, int](session, cfg, tp)
+	result, err := evaluator.Run(ctx, Opts[int, int]{
 		Experiment: tests.RandomName(t, "exp"),
 		Dataset:    cases,
 		Task: T(func(ctx context.Context, input int) (int, error) {
@@ -327,7 +330,7 @@ func TestEval_Integration_DatasetByID(t *testing.T) {
 			}),
 		},
 		Quiet: true,
-	}, cfg, session, tp)
+	})
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -378,7 +381,8 @@ func TestEval_Integration_DatasetByName(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Run evaluation
-	result, err := Run(ctx, Opts[int, int]{
+	evaluator := NewEvaluator[int, int](session, cfg, tp)
+	result, err := evaluator.Run(ctx, Opts[int, int]{
 		Experiment: tests.RandomName(t, "exp"),
 		Dataset:    cases,
 		Task: T(func(ctx context.Context, input int) (int, error) {
@@ -393,7 +397,7 @@ func TestEval_Integration_DatasetByName(t *testing.T) {
 			}),
 		},
 		Quiet: true,
-	}, cfg, session, tp)
+	})
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -450,7 +454,8 @@ func TestEval_Integration_DatasetWithTagsAndMetadata(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Run evaluation - tags and metadata should be preserved
-	result, err := Run(ctx, Opts[int, int]{
+	evaluator := NewEvaluator[int, int](session, cfg, tp)
+	result, err := evaluator.Run(ctx, Opts[int, int]{
 		Experiment: tests.RandomName(t, "exp"),
 		Dataset:    cases,
 		Task: T(func(ctx context.Context, input int) (int, error) {
@@ -468,7 +473,7 @@ func TestEval_Integration_DatasetWithTagsAndMetadata(t *testing.T) {
 			}),
 		},
 		Quiet: true,
-	}, cfg, session, tp)
+	})
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -492,7 +497,8 @@ func TestEval_Integration_ExperimentTags(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Run eval with experiment-level tags
-	result, err := Run(ctx, Opts[string, string]{
+	evaluator := NewEvaluator[string, string](session, cfg, tp)
+	result, err := evaluator.Run(ctx, Opts[string, string]{
 		Experiment: tests.RandomName(t, "exp"),
 		Dataset:    cases,
 		Task: T(func(ctx context.Context, input string) (string, error) {
@@ -505,7 +511,7 @@ func TestEval_Integration_ExperimentTags(t *testing.T) {
 		},
 		Tags:  []string{"production", "baseline", "v2.0"},
 		Quiet: true,
-	}, cfg, session, tp)
+	})
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -529,7 +535,8 @@ func TestEval_Integration_ExperimentMetadata(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Run eval with experiment-level metadata
-	result, err := Run(ctx, Opts[string, string]{
+	evaluator := NewEvaluator[string, string](session, cfg, tp)
+	result, err := evaluator.Run(ctx, Opts[string, string]{
 		Experiment: tests.RandomName(t, "exp"),
 		Dataset:    cases,
 		Task: T(func(ctx context.Context, input string) (string, error) {
@@ -546,7 +553,7 @@ func TestEval_Integration_ExperimentMetadata(t *testing.T) {
 			"version":     "1.0.0",
 		},
 		Quiet: true,
-	}, cfg, session, tp)
+	})
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -576,8 +583,11 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 		return S(1.0), nil
 	})
 
+	// Create evaluator for all runs
+	evaluator := NewEvaluator[string, string](session, cfg, tp)
+
 	// First run: Create new experiment (Update: false)
-	result1, err := Run(ctx, Opts[string, string]{
+	result1, err := evaluator.Run(ctx, Opts[string, string]{
 		Experiment: experimentName,
 		Dataset:    cases1,
 		Task: T(func(ctx context.Context, input string) (string, error) {
@@ -586,7 +596,7 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 		Scorers: []Scorer[string, string]{scorer},
 		Update:  false, // Create new
 		Quiet:   true,
-	}, cfg, session, tp)
+	})
 	require.NoError(t, err)
 	require.NotNil(t, result1)
 
@@ -597,7 +607,7 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 	})
 
 	// Second run: Append to existing experiment (Update: true)
-	result2, err := Run(ctx, Opts[string, string]{
+	result2, err := evaluator.Run(ctx, Opts[string, string]{
 		Experiment: result1.Name(), // Use exact name from first run
 		Dataset:    cases2,
 		Task: T(func(ctx context.Context, input string) (string, error) {
@@ -606,7 +616,7 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 		Scorers: []Scorer[string, string]{scorer},
 		Update:  true, // Append to existing
 		Quiet:   true,
-	}, cfg, session, tp)
+	})
 	require.NoError(t, err)
 	require.NotNil(t, result2)
 
@@ -616,7 +626,7 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 	assert.Equal(t, firstExpID, secondExpID, "Update: true should reuse the same experiment ID")
 
 	// Third run: Create new experiment (Update: false)
-	result3, err := Run(ctx, Opts[string, string]{
+	result3, err := evaluator.Run(ctx, Opts[string, string]{
 		Experiment: result1.Name(),
 		Dataset:    cases1,
 		Task: T(func(ctx context.Context, input string) (string, error) {
@@ -625,7 +635,7 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 		Scorers: []Scorer[string, string]{scorer},
 		Update:  false, // Create new
 		Quiet:   true,
-	}, cfg, session, tp)
+	})
 	require.NoError(t, err)
 	require.NotNil(t, result3)
 
@@ -674,7 +684,8 @@ func TestEval_ProjectNameFallback(t *testing.T) {
 	})
 
 	// Run eval WITHOUT specifying ProjectName (should use cfg.DefaultProjectName)
-	result, err := Run(ctx, Opts[string, string]{
+	evaluator := NewEvaluator[string, string](session, cfg, tp)
+	result, err := evaluator.Run(ctx, Opts[string, string]{
 		Experiment: tests.RandomName(t, "exp"),
 		// ProjectName not specified - should fall back to cfg.DefaultProjectName
 		Dataset: cases,
@@ -683,7 +694,7 @@ func TestEval_ProjectNameFallback(t *testing.T) {
 		}),
 		Scorers: []Scorer[string, string]{scorer},
 		Quiet:   true,
-	}, cfg, session, tp)
+	})
 	require.NoError(t, err)
 	require.NotNil(t, result)
 
@@ -719,7 +730,8 @@ func TestEval_NoProjectName(t *testing.T) {
 	})
 
 	// Run eval WITHOUT specifying ProjectName and NO config default (should fail)
-	result, err := Run(ctx, Opts[string, string]{
+	evaluator := NewEvaluator[string, string](session, cfg, tp)
+	result, err := evaluator.Run(ctx, Opts[string, string]{
 		Experiment: tests.RandomName(t, "exp"),
 		// ProjectName not specified AND cfg.DefaultProjectName is empty
 		Dataset: cases,
@@ -727,7 +739,7 @@ func TestEval_NoProjectName(t *testing.T) {
 			return input, nil
 		}),
 		Quiet: true,
-	}, cfg, session, tp)
+	})
 
 	// Should error because no project name is available
 	require.Error(t, err)

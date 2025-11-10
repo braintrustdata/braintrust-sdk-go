@@ -57,7 +57,7 @@ func main() {
 	}
 
 	// Get hosted task/prompt
-	task, err := evaluator.Tasks().Get(ctx, "sdk-greeter-prompt-195e")
+	task, err := evaluator.Functions().Task(ctx, eval.FunctionOpts{Slug: "sdk-greeter-prompt-195e"})
 	if err != nil {
 		log.Fatalf("Failed to get task: %v", err)
 	}
