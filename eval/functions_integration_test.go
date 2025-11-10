@@ -521,14 +521,15 @@ func TestFunctionsAPI_EndToEnd_MixedTypes(t *testing.T) {
 	tp := trace.NewTracerProvider()
 	defer func() { _ = tp.Shutdown(ctx) }()
 
-	// Run the full evaluation with Functions API task and scorer
-	result, err := Run(ctx, Opts[QuestionInput, AnswerOutput]{
+	// Create evaluator and run the full evaluation with Functions API task and scorer
+	evaluator := NewEvaluator[QuestionInput, AnswerOutput](session, cfg, tp)
+	result, err := evaluator.Run(ctx, Opts[QuestionInput, AnswerOutput]{
 		Experiment: tests.RandomName(t, "e2e-exp"),
 		Dataset:    cases,
 		Task:       task,
 		Scorers:    []Scorer[QuestionInput, AnswerOutput]{scorer},
 		Quiet:      true,
-	}, cfg, session, tp)
+	})
 
 	require.NoError(t, err)
 	require.NotNil(t, result)

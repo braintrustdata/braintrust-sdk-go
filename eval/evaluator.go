@@ -31,8 +31,8 @@ func NewEvaluator[I, R any](session *auth.Session, cfg *config.Config, tp *trace
 	}
 }
 
-// Functions returns an API for loading server-side Braintrust functions (tasks/prompts and scorers).
-// Use Functions().Task() to load tasks/prompts and Functions().Scorer() to load scorers.
+// Functions is used to execute hosted Braintrust functions (e.g. hosted tasks and hosted scorers) as part of an eval. As
+// long as I and R are JSON-serializable, FunctionsAPI will automatically convert the input and output to and from JSON.
 func (e *Evaluator[I, R]) Functions() *FunctionsAPI[I, R] {
 	// Get endpoints from session (prefers logged-in info, falls back to opts)
 	endpoints := e.session.Endpoints()
@@ -46,20 +46,16 @@ func (e *Evaluator[I, R]) Functions() *FunctionsAPI[I, R] {
 	}
 }
 
-// Datasets returns a DatasetAPI for loading datasets with this evaluator's type parameters.
+// Datasets is used to access Datasets API for loading datasets with this evaluator's type parameters.
 func (e *Evaluator[I, R]) Datasets() *DatasetAPI[I, R] {
-	// Get endpoints from session (prefers logged-in info, falls back to opts)
 	endpoints := e.session.Endpoints()
-
-	// Create api.Client for dataset operations
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-
+	api := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 	return &DatasetAPI[I, R]{
-		api: apiClient,
+		api: api,
 	}
 }
 
 // Run executes an evaluation using this evaluator's dependencies.
 func (e *Evaluator[I, R]) Run(ctx context.Context, opts Opts[I, R]) (*Result, error) {
-	return Run(ctx, opts, e.config, e.session, e.tracerProvider)
+	return run(ctx, opts, e.config, e.session, e.tracerProvider)
 }

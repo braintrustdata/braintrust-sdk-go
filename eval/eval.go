@@ -623,9 +623,9 @@ func (e *eval[I, R]) permalink() string {
 	return ""
 }
 
-// Run executes an evaluation using client resources (config, session, tracerProvider).
-// This is the main entry point for eval execution.
-func Run[I, R any](ctx context.Context, opts Opts[I, R], cfg *config.Config, session *auth.Session, tp *trace.TracerProvider) (*Result, error) {
+// run executes an evaluation using client resources (config, session, tracerProvider).
+// This is an internal function - users should use Evaluator.Run() instead.
+func run[I, R any](ctx context.Context, opts Opts[I, R], cfg *config.Config, session *auth.Session, tp *trace.TracerProvider) (*Result, error) {
 	// Validate required fields
 	if opts.Experiment == "" {
 		return nil, fmt.Errorf("%w: Experiment is required", errEval)

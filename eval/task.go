@@ -45,7 +45,8 @@ type TaskResult[I, R any] struct {
 //		return input, nil
 //	})
 //
-//	eval.Run(ctx, eval.Opts[string, string]{Task: task, Dataset: cases}, cfg, session, tp)
+//	evaluator := eval.NewEvaluator[string, string](session, cfg, tp)
+//	result, err := evaluator.Run(ctx, eval.Opts[string, string]{Task: task, Dataset: cases})
 func T[I, R any](fn func(ctx context.Context, input I) (R, error)) TaskFunc[I, R] {
 	return func(ctx context.Context, input I, hooks *TaskHooks) (TaskOutput[R], error) {
 		val, err := fn(ctx, input)
