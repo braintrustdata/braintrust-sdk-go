@@ -419,13 +419,14 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 		span.SetAttributes(attribute.StringSlice("braintrust.tags", c.Tags))
 	}
 
-	result, err := e.runTask(ctx, span, c)
+	taskResult, err := e.runTask(ctx, span, c)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
+	output := taskResult.Output
 
-	_, err = e.runScorers(ctx, c, result)
+	_, err = e.runScorers(ctx, taskResult)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return err
@@ -434,7 +435,7 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 	meta := map[string]any{
 		"braintrust.span_attributes": evalSpanAttrs,
 		"braintrust.input_json":      c.Input,
-		"braintrust.output_json":     result,
+		"braintrust.output_json":     output,
 		"braintrust.expected":        c.Expected,
 	}
 
@@ -459,8 +460,8 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 }
 
 // runTask executes the task function and creates a task span.
-// Copied from old package.
-func (e *eval[I, R]) runTask(ctx context.Context, evalSpan oteltrace.Span, c Case[I, R]) (R, error) {
+// Returns a TaskResult containing all task execution data.
+func (e *eval[I, R]) runTask(ctx context.Context, evalSpan oteltrace.Span, c Case[I, R]) (TaskResult[I, R], error) {
 	ctx, taskSpan := e.tracer.Start(ctx, "task", e.startSpanOpt)
 	defer taskSpan.End()
 
@@ -492,23 +493,30 @@ func (e *eval[I, R]) runTask(ctx context.Context, evalSpan oteltrace.Span, c Cas
 		// if the task fails, don't worry about the encode errors....
 		taskErr := fmt.Errorf("%w: %w", errTaskRun, err)
 		recordSpanError(taskSpan, taskErr)
-		var zero R
-		return zero, taskErr
+		return TaskResult[I, R]{}, taskErr
 	}
 
-	// Extract value from TaskOutput
+	// Extract value and UserData from TaskOutput
 	result := taskOutput.Value
+	userData := taskOutput.UserData // Not logged - for in-process use only
 
 	if err := setJSONAttr(taskSpan, "braintrust.output_json", result); err != nil {
 		encodeErrs = append(encodeErrs, err)
 	}
 
-	return result, errors.Join(encodeErrs...)
+	taskResult := TaskResult[I, R]{
+		Input:    c.Input,
+		Expected: c.Expected,
+		Output:   result,
+		Metadata: c.Metadata,
+		UserData: userData,
+	}
+
+	return taskResult, errors.Join(encodeErrs...)
 }
 
 // runScorers executes all scorers and creates a score span.
-// Copied from old package.
-func (e *eval[I, R]) runScorers(ctx context.Context, c Case[I, R], result R) ([]Score, error) {
+func (e *eval[I, R]) runScorers(ctx context.Context, taskResult TaskResult[I, R]) ([]Score, error) {
 	ctx, span := e.tracer.Start(ctx, "score", e.startSpanOpt)
 	defer span.End()
 
@@ -517,14 +525,6 @@ func (e *eval[I, R]) runScorers(ctx context.Context, c Case[I, R], result R) ([]
 	}
 
 	var scores []Score
-
-	// Construct TaskResult for scorers
-	taskResult := TaskResult[I, R]{
-		Input:    c.Input,
-		Expected: c.Expected,
-		Output:   result,
-		Metadata: c.Metadata,
-	}
 
 	var errs []error
 	for _, scorer := range e.scorers {

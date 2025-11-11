@@ -1137,3 +1137,68 @@ func TestEval_ParentPropagation(t *testing.T) {
 	assert.Equal(scorerParent, trace.Parent{Type: trace.ParentTypeExperimentID, ID: result.ID()})
 
 }
+
+func TestTaskOutput_UserData(t *testing.T) {
+	t.Parallel()
+
+	// Test that UserData flows from task to scorer and is NOT logged
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "test1"}},
+		{Input: testInput{Value: "test2"}},
+	})
+
+	// Task that passes data via UserData
+	task := func(ctx context.Context, input testInput, hooks *TaskHooks) (TaskOutput[testOutput], error) {
+		result := testOutput{Result: "processed-" + input.Value}
+
+		// Pass user data to scorer via UserData
+		userData := map[string]any{
+			"connection": "fake-db-connection",
+		}
+
+		return TaskOutput[testOutput]{
+			Value:    result,
+			UserData: userData,
+		}, nil
+	}
+
+	// Scorer that verifies it can access UserData
+	scorer := NewScorer("verify_userdata", func(ctx context.Context, result TaskResult[testInput, testOutput]) (Scores, error) {
+		// Verify UserData is passed correctly
+		assert.Equal(t, map[string]any{"connection": "fake-db-connection"}, result.UserData)
+
+		return Scores{{
+			Name:  "verify_userdata",
+			Score: 1.0,
+		}}, nil
+	})
+
+	ute := newUnitTestEval(t, cases, task, []Scorer[testInput, testOutput]{scorer}, 1)
+
+	ctx := context.Background()
+	result, err := ute.eval.run(ctx)
+	require.NoError(t, err)
+	assert.NotNil(t, result)
+
+	// CRITICAL: Verify UserData is NOT logged to spans
+	spans := ute.exporter.Flush()
+	require.Len(t, spans, 6) // 2 cases * (task + score + eval) = 6 spans
+
+	// Check all spans - UserData should NOT appear in any attributes
+	for i, span := range spans {
+		// Iterate over all attributes in the span
+		for _, attr := range span.Stub.Attributes {
+			key := string(attr.Key)
+
+			// UserData should not appear in any attribute key
+			assert.NotContains(t, key, "UserData", "span %d should not contain UserData in attribute keys", i)
+			assert.NotContains(t, key, "user_data", "span %d should not contain user_data in attribute keys", i)
+
+			// Check that UserData value is not in attribute values
+			if attr.Value.Type() == attribute.STRING {
+				valueStr := attr.Value.AsString()
+				assert.NotContains(t, valueStr, "fake-db-connection", "span %d should not contain UserData values", i)
+			}
+		}
+	}
+}
