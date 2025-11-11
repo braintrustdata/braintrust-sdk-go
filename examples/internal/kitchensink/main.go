@@ -232,7 +232,9 @@ func runAttachmentDemos(ctx context.Context, tracer oteltrace.Tracer) {
 			log.Printf("Failed to create test image: %v", err)
 			return
 		}
-		defer os.Remove(tmpFile)
+		defer func() {
+			_ = os.Remove(tmpFile)
+		}()
 
 		att, err := attachment.FromFile(attachment.ImagePNG, tmpFile)
 		if err != nil {
@@ -547,11 +549,13 @@ func createTestImage() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer tmpFile.Close()
+	defer func() {
+		_ = tmpFile.Close()
+	}()
 
 	_, err = tmpFile.Write(getTestImageBytes())
 	if err != nil {
-		os.Remove(tmpFile.Name())
+		_ = os.Remove(tmpFile.Name())
 		return "", err
 	}
 

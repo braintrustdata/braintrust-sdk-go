@@ -27,6 +27,11 @@ type TaskHooks struct {
 // TaskOutput wraps the output value from a task.
 type TaskOutput[R any] struct {
 	Value R
+
+	// UserData allows passing custom application context to scorers.
+	// This field is NOT logged and isn't supported outside the context of the Go SDK.
+	// Use this for in-process data like database connections, file handles, or metrics.
+	UserData any
 }
 
 // TaskResult represents the complete result of executing a task on a case.
@@ -36,6 +41,10 @@ type TaskResult[I, R any] struct {
 	Expected R        // What we expected
 	Output   R        // What the task actually returned
 	Metadata Metadata // Case metadata
+
+	// UserData is custom application context from the task.
+	// This field is NOT logged and isn't supported outside the context of the Go SDK.
+	UserData any
 }
 
 // T is a convenience function for writing short task functions ([TaskFunc]) that only
