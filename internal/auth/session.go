@@ -79,13 +79,8 @@ func (s *Session) Close() {
 // OrgName returns the organization name if available.
 // Returns empty string if login hasn't completed yet.
 func (s *Session) OrgName() string {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	if s.result != nil {
-		return s.result.OrgName
-	}
-	return ""
+	org := s.OrgInfo()
+	return org.Name
 }
 
 // OrgInfo returns the organization ID and name from the server response.
