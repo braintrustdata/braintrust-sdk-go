@@ -44,6 +44,7 @@ func main() {
 	defer tp.Shutdown(context.Background())
 
 	bt, err := braintrust.New(tp,
+		braintrust.WithProject("go-sdk-examples"),
 		braintrust.WithBlockingLogin(true),
 	)
 	if err != nil {
@@ -585,8 +586,7 @@ func metadataExample(parentCtx context.Context, tracer oteltrace.Tracer, llm *op
 
 	resp, err := llm.GenerateContent(ctx, messages, llms.WithMetadata(metadata))
 	if err != nil {
-		log.Printf("Error: %v", err)
-		return
+		log.Fatalf("Error: %v", err)
 	}
 
 	if len(resp.Choices) > 0 {

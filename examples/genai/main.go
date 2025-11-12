@@ -16,8 +16,6 @@ import (
 )
 
 func main() {
-	fmt.Println("Braintrust Google Gemini Basic Example")
-
 	tp := trace.NewTracerProvider()
 	defer tp.Shutdown(context.Background()) //nolint:errcheck
 	otel.SetTracerProvider(tp)

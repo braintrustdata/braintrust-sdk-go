@@ -5,7 +5,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"math/rand"
 
@@ -115,8 +114,6 @@ func main() {
 	if err != nil {
 		log.Printf("⚠️ Eval completed with errors: %v", err)
 	} else {
-		log.Println("✅ Eval completed successfully")
+		log.Println("Eval completed successfully")
 	}
-
-	fmt.Println("Done! Check the Braintrust UI to see results.")
 }

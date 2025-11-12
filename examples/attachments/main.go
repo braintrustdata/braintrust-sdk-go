@@ -67,8 +67,6 @@ func main() {
 	fmt.Println("\nExample 5: Manual span with attachment")
 	exampleManualSpan(ctx, tracer)
 
-	fmt.Println("\n✓ All examples completed successfully!")
-
 	// End the main span
 	span.End()
 
@@ -78,7 +76,7 @@ func main() {
 	}
 
 	// Get a link to the span in Braintrust
-	fmt.Printf("\n🔗 View in Braintrust: %s\n", bt.Permalink(span))
+	fmt.Printf("\nView in Braintrust: %s\n", bt.Permalink(span))
 }
 
 func exampleFromFile(ctx context.Context, tracer oteltrace.Tracer) {
@@ -101,8 +99,6 @@ func exampleFromFile(ctx context.Context, tracer oteltrace.Tracer) {
 		log.Printf("Failed to create attachment from file: %v", err)
 		return
 	}
-
-	fmt.Printf("  Created attachment from file\n")
 
 	// Log as JSON attribute
 	err = logAttachment(span, att)
@@ -138,8 +134,6 @@ func exampleFromReader(ctx context.Context, tracer oteltrace.Tracer) {
 	// Create attachment from reader
 	att := attachment.FromReader(attachment.ImagePNG, file)
 
-	fmt.Printf("  Created attachment from reader\n")
-
 	err = logAttachment(span, att)
 	if err != nil {
 		log.Printf("Failed to log attachment: %v", err)
@@ -155,8 +149,6 @@ func exampleFromBytes(ctx context.Context, tracer oteltrace.Tracer) {
 
 	// Create attachment from bytes
 	att := attachment.FromBytes(attachment.ImagePNG, imageBytes)
-
-	fmt.Printf("  Created attachment from %d bytes\n", len(imageBytes))
 
 	err := logAttachment(span, att)
 	if err != nil {
@@ -178,8 +170,6 @@ func exampleFromURL(ctx context.Context, tracer oteltrace.Tracer) {
 		log.Printf("Failed to fetch URL: %v", err)
 		return
 	}
-
-	fmt.Printf("  Fetched attachment from URL\n")
 
 	err = logAttachment(span, att)
 	if err != nil {
@@ -238,11 +228,6 @@ func exampleManualSpan(ctx context.Context, tracer oteltrace.Tracer) {
 	}
 	metadataJSON, _ := json.Marshal(metadata)
 	span.SetAttributes(attribute.String("braintrust.metadata", string(metadataJSON)))
-
-	fmt.Printf("  Created manual span with attachment\n")
-	fmt.Printf("  Span name: vision.analyze_image\n")
-	fmt.Printf("  Input: text + image attachment\n")
-	fmt.Printf("  Output: assistant response\n")
 }
 
 // Helper function to log attachment to span

@@ -22,7 +22,7 @@ func main() {
 
 	// Create Braintrust client with the TracerProvider
 	client, err := braintrust.New(tp,
-		braintrust.WithProject("rewrite-test"),
+		braintrust.WithProject("go-sdk-examples"),
 		braintrust.WithBlockingLogin(true),
 	)
 	if err != nil {

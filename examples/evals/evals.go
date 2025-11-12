@@ -39,7 +39,6 @@ func main() {
 	)
 
 	getFoodType := func(ctx context.Context, food string) (string, error) {
-		fmt.Println("getFoodType", food)
 		input := fmt.Sprintf("What kind of food is %s?", food)
 		params := responses.ResponseNewParams{
 			Input:        responses.ResponseNewParamsInputUnion{OfString: openai.String(input)},

@@ -236,7 +236,7 @@ func main() {
 	otel.SetTracerProvider(tp)
 
 	bt, err := braintrust.New(tp,
-		braintrust.WithProject("go-sdk-internal-examples"),
+		braintrust.WithProject("go-sdk-examples"),
 		braintrust.WithBlockingLogin(true),
 	)
 	if err != nil {
@@ -251,7 +251,7 @@ func main() {
 	ctx := context.Background()
 
 	// Set the experiment as parent for tracing
-	ctx, rootSpan := tracer.Start(ctx, "anthropic-examples")
+	ctx, rootSpan := tracer.Start(ctx, "examples/internal/anthropic/main.go")
 	defer rootSpan.End()
 
 	// ======================
@@ -264,26 +264,25 @@ func main() {
 	bot := newAnthropicBot(client)
 
 	if err := bot.messages(ctx); err != nil {
-		log.Printf("Error: %v", err)
+		log.Fatalf("Error: %v", err)
 	}
 
 	if err := bot.tools(ctx); err != nil {
-		log.Printf("Error: %v", err)
+		log.Fatalf("Error: %v", err)
 	}
 
 	if err := bot.streaming(ctx); err != nil {
-		log.Printf("Error: %v", err)
+		log.Fatalf("Error: %v", err)
 	}
 
 	if err := bot.extendedThinking(ctx); err != nil {
-		log.Printf("Error: %v", err)
+		log.Fatalf("Error: %v", err)
 	}
 
 	if err := bot.vision(ctx); err != nil {
-		log.Printf("Error: %v", err)
+		log.Fatalf("Error: %v", err)
 	}
 
 	fmt.Println("\n=== Tracing Complete ===")
-	fmt.Println("All examples completed successfully!")
 	fmt.Printf("View trace: %s\n", bt.Permalink(rootSpan))
 }
