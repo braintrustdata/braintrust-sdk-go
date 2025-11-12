@@ -75,7 +75,7 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 	}
 
 	// Get API credentials - always available immediately
-	apiKey, apiURL := session.APIInfo()
+	apiInfo := session.APIInfo()
 
 	var exporter sdktrace.SpanExporter
 	var err error
@@ -85,7 +85,7 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 		exporter = cfg.Exporter
 		log.Debug("using provided exporter")
 	} else {
-		otelOpts, err := getHTTPOtelOpts(apiURL, apiKey)
+		otelOpts, err := getHTTPOtelOpts(apiInfo.APIURL, apiInfo.APIKey)
 		if err != nil {
 			return nil, err
 		}
@@ -97,7 +97,7 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 		if err != nil {
 			return nil, fmt.Errorf("failed to create OTLP exporter: %w", err)
 		}
-		log.Debug("created OTLP HTTP exporter", "endpoint", apiURL)
+		log.Debug("created OTLP HTTP exporter", "endpoint", apiInfo.APIURL)
 	}
 
 	// Wrap in batch processor

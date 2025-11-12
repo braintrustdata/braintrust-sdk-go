@@ -9,6 +9,18 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
+// APIInfo contains API credentials and endpoint information.
+type APIInfo struct {
+	APIKey string
+	APIURL string
+}
+
+// Org contains organization information.
+type Org struct {
+	ID   string
+	Name string
+}
+
 // Session manages authentication and login state.
 type Session struct {
 	mu     sync.RWMutex
@@ -78,27 +90,30 @@ func (s *Session) OrgName() string {
 
 // OrgInfo returns the organization ID and name from the server response.
 // Returns empty strings if login hasn't completed yet.
-func (s *Session) OrgInfo() (orgID, orgName string) {
+func (s *Session) OrgInfo() Org {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	ok, result := s.getLoginResult()
 	if ok {
-		return result.OrgID, result.OrgName
+		return Org{
+			ID:   result.OrgID,
+			Name: result.OrgName,
+		}
 	}
 
-	return "", ""
+	return Org{}
 }
 
 // APIInfo returns the API key and API URL.
 // API key comes from config, API URL comes from server response (or default).
 // Always available - falls back to config/defaults if login not complete.
-func (s *Session) APIInfo() (apiKey, apiURL string) {
+func (s *Session) APIInfo() APIInfo {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	apiKey = s.opts.APIKey
-	apiURL = s.opts.APIURL
+	apiKey := s.opts.APIKey
+	apiURL := s.opts.APIURL
 
 	ok, result := s.getLoginResult()
 	if ok {
@@ -109,7 +124,10 @@ func (s *Session) APIInfo() (apiKey, apiURL string) {
 		apiURL = "https://api.braintrust.dev"
 	}
 
-	return apiKey, apiURL
+	return APIInfo{
+		APIKey: apiKey,
+		APIURL: apiURL,
+	}
 }
 
 func (s *Session) getLoginResult() (bool, *loginResult) {

@@ -147,14 +147,15 @@ func convertSpanFilters(funcs []config.SpanFilterFunc) []bttrace.SpanFilterFunc 
 // String returns a string representation of the client
 func (c *Client) String() string {
 	// Get org name from auth session if available
-	orgID, orgName := c.session.OrgInfo()
+	org := c.session.OrgInfo()
+	orgName := org.Name
 	if orgName == "" {
 		orgName = c.config.OrgName
 	}
 
 	orgInfo := orgName
-	if orgID != "" {
-		orgInfo = fmt.Sprintf("%s (ID: %s)", orgName, orgID)
+	if org.ID != "" {
+		orgInfo = fmt.Sprintf("%s (ID: %s)", orgName, org.ID)
 	} else if orgName == "" {
 		orgInfo = "<not logged in>"
 	}
@@ -234,11 +235,11 @@ func NewEvaluator[I, R any](client *Client) *eval.Evaluator[I, R] {
 //	})
 func (c *Client) API() *api.API {
 	// Get API credentials from session (prefers logged-in info, falls back to config)
-	apiKey, apiURL := c.session.APIInfo()
+	apiInfo := c.session.APIInfo()
 
 	return api.NewClient(
-		apiKey,
-		api.WithAPIURL(apiURL),
+		apiInfo.APIKey,
+		api.WithAPIURL(apiInfo.APIURL),
 		api.WithLogger(c.logger),
 	)
 }

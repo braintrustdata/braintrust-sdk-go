@@ -114,8 +114,8 @@ func TestScorerAPI_Get_EmptySlug(t *testing.T) {
 	session := tests.NewSession(t)
 
 	// Get API credentials and create API client
-	apiKey, apiURL := session.APIInfo()
-	apiClient := api.NewClient(apiKey, api.WithAPIURL(apiURL))
+	apiInfo := session.APIInfo()
+	apiClient := api.NewClient(apiInfo.APIKey, api.WithAPIURL(apiInfo.APIURL))
 	functionsAPI := &FunctionsAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,
 		projectName: integrationTestProject,
@@ -154,8 +154,8 @@ func TestScorerAPI_TypeSafety(t *testing.T) {
 	session := tests.NewSession(t)
 
 	// Get API credentials and create API client
-	apiKey, apiURL := session.APIInfo()
-	apiClient := api.NewClient(apiKey, api.WithAPIURL(apiURL))
+	apiInfo := session.APIInfo()
+	apiClient := api.NewClient(apiInfo.APIKey, api.WithAPIURL(apiInfo.APIURL))
 	// This should compile
 	functionsAPI := &FunctionsAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,
