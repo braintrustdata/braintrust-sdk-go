@@ -59,6 +59,14 @@ func NewClient(apiKey string, opts ...Option) *API {
 	}
 }
 
+// NewWithHTTPSClient creates a new Braintrust API client with the given https.Client.
+// This is useful for tests that want to use a custom or VCR-wrapped client.
+func NewWithHTTPSClient(client *https.Client) *API {
+	return &API{
+		client: client,
+	}
+}
+
 // Projects returns a client for project operations
 func (a *API) Projects() *projects.API {
 	return projects.New(a.client)

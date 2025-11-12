@@ -36,33 +36,33 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 07 Nov 2025 18:02:46 GMT
+                - Wed, 12 Nov 2025 14:55:10 GMT
             Etag:
                 - W/"eb-poL8yUftdUFahhL/Peyi6gN8N/E"
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 fa503ecd9278a874859948f3b586c782.cloudfront.net (CloudFront), 1.1 baec235d174153a8f2e92ea724643824.cloudfront.net (CloudFront)
+                - 1.1 d8e93128b8c3fa45992684bc1f50eeb8.cloudfront.net (CloudFront), 1.1 33aae203c47fd9e0f18a8f3f6d37fbfc.cloudfront.net (CloudFront)
             X-Amz-Apigw-Id:
-                - Tr0bDFaZoAMER-w=
+                - T73oRG_AoAMEONQ=
             X-Amz-Cf-Id:
-                - Cxo4sf4Z9gePMMmMjis5s2IF7gsYLiNjA6Efn_DLZjL3yvVpy5wXKw==
+                - 1rNATopGYOJUrNiZSiXec7CRYDI5voySHgcGs291iWsEMwehoccyuw==
             X-Amz-Cf-Pop:
                 - JFK50-P5
                 - JFK50-P2
             X-Amzn-Requestid:
-                - 7bc36340-be2c-400f-acee-350862155ab4
+                - edaa0cc8-3fee-4137-974a-cf4e3af68eb9
             X-Amzn-Trace-Id:
-                - Root=1-690e3446-1c99a6db20a865d44e05d8cd;Parent=181e9638767acc95;Sampled=0;Lineage=1:24be3d11:0
+                - Root=1-69149fce-72def78d6b9e21fa61b33561;Parent=0b6a331b4dcb3341;Sampled=0;Lineage=1:24be3d11:0
             X-Bt-Found-Existing:
                 - "true"
             X-Bt-Internal-Trace-Id:
-                - 690e3446000000006af99250683f1b19
+                - 69149fce00000000542530440001de06
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 171.327833ms
+        duration: 302.6225ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -89,7 +89,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"e89e09bd-105f-4e5b-a885-e5ff64a66af0","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-experiment-list","description":null,"created":"2025-11-07T18:02:40.888Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null}'
+        body: '{"id":"e846c9c9-704d-45e5-8bc1-94b071d1badc","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-experiment-list-ee1c8d57","description":null,"created":"2025-11-12T14:55:10.473Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -98,31 +98,31 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 07 Nov 2025 18:02:46 GMT
+                - Wed, 12 Nov 2025 14:55:10 GMT
             Etag:
-                - W/"17e-nfw4MFtLMSb6UapleCYtaYnhSEQ"
+                - W/"187-ComOSpqpcIaSq4vOHhp4IBDyQGo"
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 9750f5ee94b45ad0faba87b3fac2aad6.cloudfront.net (CloudFront), 1.1 baec235d174153a8f2e92ea724643824.cloudfront.net (CloudFront)
+                - 1.1 fa503ecd9278a874859948f3b586c782.cloudfront.net (CloudFront), 1.1 33aae203c47fd9e0f18a8f3f6d37fbfc.cloudfront.net (CloudFront)
             X-Amz-Apigw-Id:
-                - Tr0bGGZHIAMEM7A=
+                - T73oTEbyIAMEPBg=
             X-Amz-Cf-Id:
-                - fMYDTP2OWgPoCGc8K5lk7uFePaWHs7JFmoyayyS7rwIEMyCRuZZJzw==
+                - Kn0FwKb9UIXV0xzrBu4Ebib9Ab0rHRgvXDTWveQevhXzrsf0mP4UTA==
             X-Amz-Cf-Pop:
                 - JFK50-P5
                 - JFK50-P2
             X-Amzn-Requestid:
-                - 6a612c0e-bd42-4c84-bace-692813702933
+                - 4c258e22-7e2b-409b-babb-1576f9746f3e
             X-Amzn-Trace-Id:
-                - Root=1-690e3446-3f66abf9707bfd28351170ae;Parent=7e976a25989e5da6;Sampled=0;Lineage=1:24be3d11:0
+                - Root=1-69149fce-02862ba71cac78a248b0a80f;Parent=477cef69e5bde76e;Sampled=0;Lineage=1:24be3d11:0
             X-Bt-Internal-Trace-Id:
-                - 690e3446000000000bcd5f0acd34689b
+                - 69149fce000000004c1b860d82802844
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 192.898875ms
+        duration: 206.545417ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -147,7 +147,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"objects":[{"id":"ad4e00f9-6e3b-4390-8cd3-02cf37b9addd","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"ensure-new-test-14d42f10","description":null,"created":"2025-11-07T18:02:47.023Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"4ccadbc8-f267-4774-a02c-dd516db10eef","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-experiment-register-4a008738","description":null,"created":"2025-11-07T18:02:46.789Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"d1c70c55-c5ef-48e0-9810-1d7105b587ef","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"lifecycle-exp","description":"Test experiment for lifecycle testing","created":"2025-11-07T18:02:46.732Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"stage":"created"},"tags":["lifecycle","test"]},{"id":"fe21ae85-40f2-4fe7-804a-6a222a2aa8f5","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"ensure-new-test-2a83cd25","description":null,"created":"2025-11-07T18:02:25.096Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"6a539c93-7e15-430a-b044-f0a0f1a22733","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-experiment","description":"Test experiment for integration tests","created":"2025-11-07T18:02:24.977Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test","integration"]},{"id":"8526adf8-3af4-4709-8864-206fa329d9cb","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-experiment-register","description":null,"created":"2025-11-07T18:02:24.892Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"2a645444-237a-4f3c-aa76-ad77e7dae0e6","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"ensure-new-test","description":null,"created":"2025-11-07T18:02:24.806Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"d529aa02-41eb-41a4-97f2-54e8c0a1b1d4","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_EnsureNew-up3ie155-ensure-new-test-7d0612cd","description":null,"created":"2025-11-07T17:21:26.504Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"328cd0e9-c36c-4ff4-9e73-f4d5e8e35c59","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_Create_Integration-as70nz1k-test-experiment","description":"Test experiment for integration tests","created":"2025-11-07T17:21:26.235Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test","integration"]},{"id":"f77a0081-b45f-4e05-ad8c-8fb5778889e9","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"go-sdk-test-TestExperiments_EnsureNew-up3ie155-ensure-new-test","description":null,"created":"2025-11-07T17:21:26.220Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null}]}'
+        body: '{"objects":[{"id":"dfa14420-b311-4355-a4f2-a42bab0ec5ec","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"ensure-new-test-e2751ed0","description":null,"created":"2025-11-12T14:55:10.560Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"e846c9c9-704d-45e5-8bc1-94b071d1badc","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-experiment-list-ee1c8d57","description":null,"created":"2025-11-12T14:55:10.473Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"980e886c-826b-4cfc-9dd3-1aad6d791540","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-experiment-register-0316bdb4","description":null,"created":"2025-11-12T14:55:10.472Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"e0f50d94-c7f4-46fa-8bf4-7b72ae8e2002","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-experiment-list","description":null,"created":"2025-11-12T14:55:10.468Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"3d409a0e-054f-4eda-a3f9-3af0b1c5fa59","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"ensure-new-test-449c120b","description":null,"created":"2025-11-12T02:58:27.486Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"e82b519d-1cca-4c42-bdf3-95a4f9c201de","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-experiment-list-4db7a765","description":null,"created":"2025-11-12T02:58:27.366Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"b38e77f5-2f2c-4291-bc22-97d0dac11b50","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-experiment-register-46652166","description":null,"created":"2025-11-12T02:58:27.272Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"5c9ab2ee-9921-49a8-bb60-67be6a855a61","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"lifecycle-exp","description":"Test experiment for lifecycle testing","created":"2025-11-12T02:58:27.251Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":{"stage":"created"},"tags":["lifecycle","test"]},{"id":"84293bc0-d8c9-420d-b3e0-ae9ca9cd412e","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-experiment-update-flag-f2f46864-feb64227","description":null,"created":"2025-11-12T02:55:30.413Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null},{"id":"8cf6d2ff-827f-4cb1-9ff7-bc7d459e1e92","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-e2e-exp-755deeea","description":null,"created":"2025-11-12T02:55:30.201Z","repo_info":{},"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"public":false,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null,"tags":null}]}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -156,28 +156,28 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 07 Nov 2025 18:02:47 GMT
+                - Wed, 12 Nov 2025 14:55:10 GMT
             Etag:
-                - W/"1093-Y+ACxwKd7aNpCv5RX//CsMSq0xs"
+                - W/"fb6-31aPfWlTCEFfPrkMY2gZcP/DmW8"
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 58a45bf3f07dfdca95ebcb7935e84994.cloudfront.net (CloudFront), 1.1 baec235d174153a8f2e92ea724643824.cloudfront.net (CloudFront)
+                - 1.1 fa503ecd9278a874859948f3b586c782.cloudfront.net (CloudFront), 1.1 33aae203c47fd9e0f18a8f3f6d37fbfc.cloudfront.net (CloudFront)
             X-Amz-Apigw-Id:
-                - Tr0bKGYioAMESPg=
+                - T73oVHS8oAMErXA=
             X-Amz-Cf-Id:
-                - MxcffGJ7E_xfIDb8-Alu22kJ5YYLXQI7LsCTouTr6IIaSZ1F4B5KCQ==
+                - Snpcuy3Om1fM1HBM8y5ZOOOCfuOrOx-ZnmCxwO6Zj4II2TjVU5hcRA==
             X-Amz-Cf-Pop:
                 - JFK50-P5
                 - JFK50-P2
             X-Amzn-Requestid:
-                - a6717d2f-269b-4c6e-be16-a06afa2f49fa
+                - 2c534530-4886-4ee6-b6b9-321b5f09575d
             X-Amzn-Trace-Id:
-                - Root=1-690e3447-648fef8e54edc1361b28f624;Parent=0676716100592f6b;Sampled=0;Lineage=1:24be3d11:0
+                - Root=1-69149fce-6966dd453f3e8b20750cbd7c;Parent=7e15622be9a0750d;Sampled=0;Lineage=1:24be3d11:0
             X-Bt-Internal-Trace-Id:
-                - 690e3447000000006b47105b930de9d9
+                - 69149fce000000006ba09ed87574fec8
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 168.340875ms
+        duration: 204.771292ms

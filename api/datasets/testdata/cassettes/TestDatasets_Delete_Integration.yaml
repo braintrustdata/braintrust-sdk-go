@@ -36,33 +36,33 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 07 Nov 2025 18:04:34 GMT
+                - Wed, 12 Nov 2025 14:55:10 GMT
             Etag:
                 - W/"eb-poL8yUftdUFahhL/Peyi6gN8N/E"
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 d8e93128b8c3fa45992684bc1f50eeb8.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+                - 1.1 82139f26335f87e45d45c08d5208817a.cloudfront.net (CloudFront), 1.1 a9a7890bd69fb04b587cd51baf217b1c.cloudfront.net (CloudFront)
             X-Amz-Apigw-Id:
-                - Tr0r6EifIAMEf5Q=
+                - T73oRHtYIAMEGog=
             X-Amz-Cf-Id:
-                - pMmAW1mFuVYTnopgmbF70LTrMCR5hhCJU5Wue6Kii3T5E9jI8RVBqw==
+                - azJ8hbuxwucaK_arSPDBEjtRYOiPGb8oxm8HwKGXBd3AB4MtEAwVpw==
             X-Amz-Cf-Pop:
                 - JFK50-P5
                 - JFK50-P2
             X-Amzn-Requestid:
-                - 430f7f86-8b13-4692-b028-18e7388bf933
+                - 46893ebf-b5e3-4150-b58e-814a24a0841a
             X-Amzn-Trace-Id:
-                - Root=1-690e34b2-76b179f87a5d988b14ec8db8;Parent=04bd6f4dcf2805ae;Sampled=0;Lineage=1:24be3d11:0
+                - Root=1-69149fce-5cb4b4e3107f9b7d0d8ebf76;Parent=467bdfee0cdc0a75;Sampled=0;Lineage=1:24be3d11:0
             X-Bt-Found-Existing:
                 - "true"
             X-Bt-Internal-Trace-Id:
-                - 690e34b2000000000e7e60756d0597af
+                - 69149fce0000000069c6a78e74ddda92
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 211.299667ms
+        duration: 271.778ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -89,7 +89,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"1a6c717a-1877-4e88-b6ab-bcc635486bc1","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-dataset-modify","description":null,"created":"2025-11-07T18:04:34.706Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null}'
+        body: '{"id":"f0492b1f-afdc-45f8-8071-d48ceaf115eb","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-dataset-modify","description":null,"created":"2025-11-12T14:55:10.533Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -98,33 +98,31 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 07 Nov 2025 18:04:34 GMT
+                - Wed, 12 Nov 2025 14:55:10 GMT
             Etag:
-                - W/"109-trA/6jirgQr2PAyDBl1RR/y5PcU"
+                - W/"109-fRgYyZZUwi6DT6piiwl3Fu6GIPs"
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 a1546fc751225809c39b89ba9e8d715c.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+                - 1.1 eb2e4893b47f0d155cd51b82c2a8d596.cloudfront.net (CloudFront), 1.1 a9a7890bd69fb04b587cd51baf217b1c.cloudfront.net (CloudFront)
             X-Amz-Apigw-Id:
-                - Tr0r-EJvoAMEZDw=
+                - T73oUGunIAMEvUw=
             X-Amz-Cf-Id:
-                - bskLtlMjxps9LXnW8ruutqcyG8U1u07ozCVeP6yIx3esF9LjGaoFBQ==
+                - NIDZ6udDv_pMKKVJg5Ru3AcfVNvlYNL4kmYD9YLAxY2ZxrxWw9bGjQ==
             X-Amz-Cf-Pop:
                 - JFK50-P5
                 - JFK50-P2
             X-Amzn-Requestid:
-                - bdd6c5ad-d539-4bda-a9c7-540d41c9c07f
+                - 76e7dc83-a33b-40e1-a2bc-6ae7e5baa367
             X-Amzn-Trace-Id:
-                - Root=1-690e34b2-0fb8580c02c50b6e2b6b6d1f;Parent=4964d6c3c6bf4be5;Sampled=0;Lineage=1:24be3d11:0
-            X-Bt-Found-Existing:
-                - "true"
+                - Root=1-69149fce-020893431757b2fa28182047;Parent=3c219c95ec068b14;Sampled=0;Lineage=1:24be3d11:0
             X-Bt-Internal-Trace-Id:
-                - 690e34b2000000002fc95c0776506ad1
+                - 69149fce000000006ebc49bac65aa258
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 139.255375ms
+        duration: 153.692791ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -139,7 +137,7 @@ interactions:
         body: ""
         form: {}
         headers: {}
-        url: https://api.braintrust.dev/v1/dataset?id=1a6c717a-1877-4e88-b6ab-bcc635486bc1&limit=1
+        url: https://api.braintrust.dev/v1/dataset?id=f0492b1f-afdc-45f8-8071-d48ceaf115eb&limit=1
         method: GET
       response:
         proto: HTTP/2.0
@@ -149,7 +147,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"objects":[{"id":"1a6c717a-1877-4e88-b6ab-bcc635486bc1","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-dataset-modify","description":null,"created":"2025-11-07T18:04:34.706Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null}]}'
+        body: '{"objects":[{"id":"f0492b1f-afdc-45f8-8071-d48ceaf115eb","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-dataset-modify","description":null,"created":"2025-11-12T14:55:10.533Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null}]}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -158,31 +156,31 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 07 Nov 2025 18:04:35 GMT
+                - Wed, 12 Nov 2025 14:55:10 GMT
             Etag:
-                - W/"117-GtV8TGNO53J1Ys/grMFvpwnVVrc"
+                - W/"117-tIC27+eIfR8dsVQ/yoZoYlX/01Y"
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 b5fe18267507cb61755963d8928a60f4.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+                - 1.1 68f2eed06d7ecb02b863cacb0da2fc28.cloudfront.net (CloudFront), 1.1 a9a7890bd69fb04b587cd51baf217b1c.cloudfront.net (CloudFront)
             X-Amz-Apigw-Id:
-                - Tr0sBE1NIAMEuXw=
+                - T73oWGpmoAMEW0A=
             X-Amz-Cf-Id:
-                - x85ENGYL539CQpokaMQOvvrZ9U3mGa3-uNy__2DhmLTLXq74NDcV6g==
+                - VaiOXGLqn_3PAxO892K11VrLauF3KY-RHw_eeNOljG-zjcNjWjdzLA==
             X-Amz-Cf-Pop:
                 - JFK50-P5
                 - JFK50-P2
             X-Amzn-Requestid:
-                - 0add7d79-8351-419e-a643-2bf766305c77
+                - d1b4a3bd-cc0c-494c-8f7f-2c470563f382
             X-Amzn-Trace-Id:
-                - Root=1-690e34b2-110d35be22cd0d0c33b8a2c7;Parent=5a1d7cc3fe876bd3;Sampled=0;Lineage=1:24be3d11:0
+                - Root=1-69149fce-20c52ff32441f46a07a575ab;Parent=5fafd4db12c4bd7f;Sampled=0;Lineage=1:24be3d11:0
             X-Bt-Internal-Trace-Id:
-                - 690e34b2000000007a8843bc700e0ba6
+                - 69149fce000000004eebf659be380dbe
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 130.476208ms
+        duration: 256.864208ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -197,7 +195,7 @@ interactions:
         body: ""
         form: {}
         headers: {}
-        url: https://api.braintrust.dev/v1/dataset/1a6c717a-1877-4e88-b6ab-bcc635486bc1
+        url: https://api.braintrust.dev/v1/dataset/f0492b1f-afdc-45f8-8071-d48ceaf115eb
         method: DELETE
       response:
         proto: HTTP/2.0
@@ -207,7 +205,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"1a6c717a-1877-4e88-b6ab-bcc635486bc1","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-dataset-modify","description":null,"created":"2025-11-07T18:04:34.706Z","deleted_at":"2025-11-07T18:04:35.290Z","user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null}'
+        body: '{"id":"f0492b1f-afdc-45f8-8071-d48ceaf115eb","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-dataset-modify","description":null,"created":"2025-11-12T14:55:10.533Z","deleted_at":"2025-11-12T14:55:10.994Z","user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -216,31 +214,31 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 07 Nov 2025 18:04:35 GMT
+                - Wed, 12 Nov 2025 14:55:11 GMT
             Etag:
-                - W/"11f-xYp287etGugCq0dQ5alxWykh5KM"
+                - W/"11f-liVFHXLXdz+E07dOhX4B9/6Khpg"
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 ad22d4e4410fd07809425488bf6e79be.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+                - 1.1 cfc46590021b7df312893ffb67317bb2.cloudfront.net (CloudFront), 1.1 a9a7890bd69fb04b587cd51baf217b1c.cloudfront.net (CloudFront)
             X-Amz-Apigw-Id:
-                - Tr0sDF4XIAMEj9A=
+                - T73oYEoyIAMElqA=
             X-Amz-Cf-Id:
-                - 5IW5jtrJ-zvrPj3DicjOPs5x-QP8PbUCXlOMG32PoVoZx9QailuktQ==
+                - 0ycZsHZuVQ3YFVDtOXSmxrdbfAccMq6nUNJdTYRED2fBgwxPQNJ4uw==
             X-Amz-Cf-Pop:
                 - JFK50-P5
                 - JFK50-P2
             X-Amzn-Requestid:
-                - 91fa4a7b-0f32-411a-8e98-7d89f0529bc0
+                - 3b98f7d8-75b4-4692-8db3-299460724815
             X-Amzn-Trace-Id:
-                - Root=1-690e34b3-59c9570d5450446f68cba382;Parent=3376c5730c63c4dc;Sampled=0;Lineage=1:24be3d11:0
+                - Root=1-69149fce-153473f55d54293f03e90fee;Parent=4b045d6cb64c95c5;Sampled=0;Lineage=1:24be3d11:0
             X-Bt-Internal-Trace-Id:
-                - 690e34b3000000004153403f5ab74a43
+                - 69149fce000000003af3a640d578e50d
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 152.572833ms
+        duration: 180.414209ms
     - id: 4
       request:
         proto: HTTP/1.1
@@ -255,7 +253,7 @@ interactions:
         body: ""
         form: {}
         headers: {}
-        url: https://api.braintrust.dev/v1/dataset?id=1a6c717a-1877-4e88-b6ab-bcc635486bc1&limit=1
+        url: https://api.braintrust.dev/v1/dataset?id=f0492b1f-afdc-45f8-8071-d48ceaf115eb&limit=1
         method: GET
       response:
         proto: HTTP/2.0
@@ -274,28 +272,28 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 07 Nov 2025 18:04:35 GMT
+                - Wed, 12 Nov 2025 14:55:11 GMT
             Etag:
                 - W/"e-xZKibKAiOxxBbzTm2byfFNRkvtA"
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 bf8d7cb6fca5d51158e1109ca40fe242.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+                - 1.1 48fa2d8b9525abe889eff7ccc8591f7e.cloudfront.net (CloudFront), 1.1 a9a7890bd69fb04b587cd51baf217b1c.cloudfront.net (CloudFront)
             X-Amz-Apigw-Id:
-                - Tr0sGHxaIAMEBUw=
+                - T73oaE1oIAMEZZg=
             X-Amz-Cf-Id:
-                - Pp5N7uAMuavXf76vey6_yiXwKbQshttiQ_pHsqCZ-H38b7txRcE-ig==
+                - mtVydSlAFPVIzKD83UrEXB3r3Ub5uTE8BrCt7OWlYABzi6-_zhsjRw==
             X-Amz-Cf-Pop:
                 - JFK50-P5
                 - JFK50-P2
             X-Amzn-Requestid:
-                - 1c67539a-5bce-4398-b6ec-70570e928378
+                - 4cd80860-450c-45b9-ab95-58e65978c853
             X-Amzn-Trace-Id:
-                - Root=1-690e34b3-73e9980e78ad9249689f3563;Parent=5e67df12daf1187f;Sampled=0;Lineage=1:24be3d11:0
+                - Root=1-69149fcf-227094255d4613ab2c6c45d1;Parent=67f11a6e85f56bb5;Sampled=0;Lineage=1:24be3d11:0
             X-Bt-Internal-Trace-Id:
-                - 690e34b3000000007b4777e5c096fa4f
+                - 69149fcf00000000721ce7d4ef414868
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 177.003459ms
+        duration: 169.666833ms

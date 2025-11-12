@@ -1,23 +1,24 @@
-.PHONY: help ci build clean test test-quiet test-vcr-off test-vcr-record cover cover-path lint fmt mod-verify fix godoc examples
+.PHONY: help ci build clean test test-quiet test-vcr-off test-vcr-record test-vcr-verify cover cover-path lint fmt mod-verify fix godoc examples
 
 help:
 	@echo "Available commands:"
-	@echo "  help            - Show this help message"
-	@echo "  build           - Build all packages"
-	@echo "  test            - Run all tests (VCR replay mode, fast)"
-	@echo "  test-quiet      - Run all tests (quiet - no 'ok' lines)"
-	@echo "  test-vcr-off    - Run all tests without VCR (requires API keys)"
-	@echo "  test-vcr-record - Record/update VCR cassettes (requires API keys)"
-	@echo "  cover           - Run tests with coverage report"
-	@echo "  cover-path      - Run coverage for specific path (e.g., make cover-path PATH=./config)"
-	@echo "  clean           - Clean build artifacts and coverage files"
-	@echo "  fmt             - Format Go code"
-	@echo "  lint            - Run golangci-lint"
-	@echo "  fix             - Run golangci-lint with auto-fix"
-	@echo "  godoc           - Start godoc server"
-	@echo "  examples        - Run all examples"
-	@echo "  ci              - Run CI pipeline (clean, lint, test, build)"
-	@echo "  precommit       - Run fmt then ci"
+	@echo "  help             - Show this help message"
+	@echo "  build            - Build all packages"
+	@echo "  test             - Run all tests (VCR replay mode, fast)"
+	@echo "  test-quiet       - Run all tests (quiet - no 'ok' lines)"
+	@echo "  test-vcr-off     - Run all tests without VCR (requires API keys)"
+	@echo "  test-vcr-record  - Record/update VCR cassettes (requires API keys)"
+	@echo "  test-vcr-verify  - Verify VCR cassettes work without API keys"
+	@echo "  cover            - Run tests with coverage report"
+	@echo "  cover-path       - Run coverage for specific path (e.g., make cover-path PATH=./config)"
+	@echo "  clean            - Clean build artifacts and coverage files"
+	@echo "  fmt              - Format Go code"
+	@echo "  lint             - Run golangci-lint"
+	@echo "  fix              - Run golangci-lint with auto-fix"
+	@echo "  godoc            - Start godoc server"
+	@echo "  examples         - Run all examples"
+	@echo "  ci               - Run CI pipeline (clean, lint, test, build)"
+	@echo "  precommit        - Run fmt then ci"
 
 ci: clean lint mod-verify test build
 
@@ -39,6 +40,11 @@ test-vcr-off:
 
 test-vcr-record:
 	VCR_MODE=record go test ./...
+
+# Verify that VCR cassettes work without API keys
+# This ensures VCR-enabled tests can run in CI/CD without credentials
+test-vcr-verify:
+	env -u BRAINTRUST_API_KEY VCR_MODE=replay go test ./...
 
 cover:
 	go test $$(go list ./... | grep -v /examples/) -coverpkg=./... -coverprofile=coverage.out

@@ -36,33 +36,33 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 07 Nov 2025 18:04:34 GMT
+                - Wed, 12 Nov 2025 14:55:10 GMT
             Etag:
                 - W/"eb-poL8yUftdUFahhL/Peyi6gN8N/E"
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 58a45bf3f07dfdca95ebcb7935e84994.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+                - 1.1 bf8d7cb6fca5d51158e1109ca40fe242.cloudfront.net (CloudFront), 1.1 a9a7890bd69fb04b587cd51baf217b1c.cloudfront.net (CloudFront)
             X-Amz-Apigw-Id:
-                - Tr0r6FzFIAMEj9A=
+                - T73oVHv-IAMEGog=
             X-Amz-Cf-Id:
-                - WjZG_AAc7h-xIRSoEcWnYc8LgRNvOVtwji3P41KEDWg6u1eHd7SuZQ==
+                - 9a0Nkp959nL9KxpQaJn0M-LABJCOF0Q50a9oMjztGydbvIarT1J-Aw==
             X-Amz-Cf-Pop:
                 - JFK50-P5
                 - JFK50-P2
             X-Amzn-Requestid:
-                - ca772de5-6874-40c6-a08b-ca3699e283d0
+                - 34ac39a9-77a8-4d2c-934b-6d6672150d44
             X-Amzn-Trace-Id:
-                - Root=1-690e34b2-46e8125045fccd8a3ff2ddbb;Parent=16d012e2c88b7597;Sampled=0;Lineage=1:24be3d11:0
+                - Root=1-69149fce-2ce613ff59d8d1a25dbea6f8;Parent=53ac1bf7a48bce5c;Sampled=0;Lineage=1:24be3d11:0
             X-Bt-Found-Existing:
                 - "true"
             X-Bt-Internal-Trace-Id:
-                - 690e34b20000000033e80f0df284d1a3
+                - 69149fce000000006a6aa2f707a73c35
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 198.727083ms
+        duration: 125.453917ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -89,7 +89,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"b883bcf1-e436-4c71-8092-b40479019e6b","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-dataset-fields","description":null,"created":"2025-11-07T18:04:34.714Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null}'
+        body: '{"id":"4d376202-4de2-46e9-956a-4939eacf5512","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"test-dataset-fields","description":null,"created":"2025-11-12T02:58:27.326Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -98,31 +98,33 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 07 Nov 2025 18:04:34 GMT
+                - Wed, 12 Nov 2025 14:55:10 GMT
             Etag:
-                - W/"109-QOwUYyxawi2j47wDihDIO/eQUYE"
+                - W/"109-P4jm7oHa6bDYzeqFWJX1MTMnieE"
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 9750f5ee94b45ad0faba87b3fac2aad6.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+                - 1.1 ad22d4e4410fd07809425488bf6e79be.cloudfront.net (CloudFront), 1.1 a9a7890bd69fb04b587cd51baf217b1c.cloudfront.net (CloudFront)
             X-Amz-Apigw-Id:
-                - Tr0r-GxcIAMEWsw=
+                - T73oXGssoAMEXcA=
             X-Amz-Cf-Id:
-                - OjVEbYM9IAocXltIpFasOvy3CM5toshZ_VrZWuUJzO_0Gj3LFaaLhQ==
+                - VBuUFgqsHSI-kLptD-hTlxHAPdNl5YWvkpnh8YcpoLE_zQ6GIdU9YQ==
             X-Amz-Cf-Pop:
                 - JFK50-P5
                 - JFK50-P2
             X-Amzn-Requestid:
-                - d5edfbed-5373-44ed-9839-6fdd6e23bbfb
+                - ebdac565-502d-4ab5-af76-c2ddd79b9540
             X-Amzn-Trace-Id:
-                - Root=1-690e34b2-4518c35e47ccc4a654f773d2;Parent=0c7ed08e6b4c4a2c;Sampled=0;Lineage=1:24be3d11:0
+                - Root=1-69149fce-05d000f27fe205d67caf9b46;Parent=3e0f86ed6b5aa0b7;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Found-Existing:
+                - "true"
             X-Bt-Internal-Trace-Id:
-                - 690e34b2000000007b1166318cd451c2
+                - 69149fce000000006b9849cc025aa1b7
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 163.980041ms
+        duration: 122.145875ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -139,7 +141,7 @@ interactions:
         headers:
             Content-Type:
                 - application/json
-        url: https://api.braintrust.dev/v1/dataset/b883bcf1-e436-4c71-8092-b40479019e6b/insert
+        url: https://api.braintrust.dev/v1/dataset/4d376202-4de2-46e9-956a-4939eacf5512/insert
         method: POST
       response:
         proto: HTTP/2.0
@@ -149,7 +151,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"row_ids":["157d8a27-ce78-4219-a856-9a70bc7c70aa"]}'
+        body: '{"row_ids":["45a7ae87-1f38-4ee7-937d-6f6804d7bbce"]}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -158,31 +160,31 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 07 Nov 2025 18:04:35 GMT
+                - Wed, 12 Nov 2025 14:55:11 GMT
             Etag:
-                - W/"34-Nu5tqPxDRsASLrgwDDyblOftwaw"
+                - W/"34-AKj4dJuPbroTxJMSaBVZ5+93+r8"
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 b5fe18267507cb61755963d8928a60f4.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+                - 1.1 b5fe18267507cb61755963d8928a60f4.cloudfront.net (CloudFront), 1.1 a9a7890bd69fb04b587cd51baf217b1c.cloudfront.net (CloudFront)
             X-Amz-Apigw-Id:
-                - Tr0sBHSXIAMEMaw=
+                - T73oYGGgIAMERDw=
             X-Amz-Cf-Id:
-                - cNxnJSJyD9WvFzuLRTfNBFbBCt7LOJIh3xUghkzxUGNGry9CGdb06A==
+                - LTlL-a4csQ67dDUp9uuCtXD5CXDlXYkoG02Pb_xuz4GxTUOEwA2pRQ==
             X-Amz-Cf-Pop:
                 - JFK50-P5
                 - JFK50-P2
             X-Amzn-Requestid:
-                - 09684762-75d3-495c-98e9-83271ede79f9
+                - bf16e817-8f38-4e2d-ae80-ce60457fe1de
             X-Amzn-Trace-Id:
-                - Root=1-690e34b2-54405137540ad7635ed62012;Parent=5f77a69ce30957c6;Sampled=0;Lineage=1:24be3d11:0
+                - Root=1-69149fce-7342f04235a10d617a266476;Parent=470249a8ee5dfd8b;Sampled=0;Lineage=1:24be3d11:0
             X-Bt-Internal-Trace-Id:
-                - 690e34b20000000058646b9a565e04fb
+                - 69149fce0000000052cdd304ea094304
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 301.498208ms
+        duration: 500.688333ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -199,7 +201,7 @@ interactions:
         headers:
             Content-Type:
                 - application/json
-        url: https://api.braintrust.dev/v1/dataset/b883bcf1-e436-4c71-8092-b40479019e6b/fetch
+        url: https://api.braintrust.dev/v1/dataset/4d376202-4de2-46e9-956a-4939eacf5512/fetch
         method: POST
       response:
         proto: HTTP/2.0
@@ -209,7 +211,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"events":[{"_pagination_key":"p07570045970184142848","_xact_id":"1000196101987613236","created":"2025-11-07T18:04:34.966Z","dataset_id":"b883bcf1-e436-4c71-8092-b40479019e6b","expected":{"answer":"42","confidence":0.95},"id":"157d8a27-ce78-4219-a856-9a70bc7c70aa","input":{"context":"philosophical","question":"What is the meaning of life?"},"is_root":true,"metadata":{"model":"test-model","source":"test"},"origin":null,"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","root_span_id":"1870ffd7-6a3f-40a3-9ba3-5c53bdcb4c87","span_id":"1870ffd7-6a3f-40a3-9ba3-5c53bdcb4c87","tags":["philosophy","test","integration"]}],"cursor":"aQ40s7o0AAA"}'
+        body: '{"events":[{"_pagination_key":"p07571852588647645184","_xact_id":"1000196129554423287","created":"2025-11-12T14:55:10.872Z","dataset_id":"4d376202-4de2-46e9-956a-4939eacf5512","expected":{"answer":"42","confidence":0.95},"id":"45a7ae87-1f38-4ee7-937d-6f6804d7bbce","input":{"context":"philosophical","question":"What is the meaning of life?"},"is_root":true,"metadata":{"model":"test-model","source":"test"},"origin":null,"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","root_span_id":"50934797-1369-4980-81d4-1525c3d6cf3d","span_id":"50934797-1369-4980-81d4-1525c3d6cf3d","tags":["philosophy","test","integration"]},{"_pagination_key":"p07571667888174202880","_xact_id":"1000196126736117723","created":"2025-11-12T02:58:27.385Z","dataset_id":"4d376202-4de2-46e9-956a-4939eacf5512","expected":{"answer":"42","confidence":0.95},"id":"e4269e43-cf91-4168-adf1-cc67f4e4d607","input":{"context":"philosophical","question":"What is the meaning of life?"},"is_root":true,"metadata":{"model":"test-model","source":"test"},"origin":null,"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","root_span_id":"621365aa-6b04-4eb7-9c73-7922ccfb1fc5","span_id":"621365aa-6b04-4eb7-9c73-7922ccfb1fc5","tags":["philosophy","test","integration"]}],"cursor":"aRP30+/bAAA"}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -218,28 +220,28 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 07 Nov 2025 18:04:35 GMT
+                - Wed, 12 Nov 2025 14:55:11 GMT
             Vary:
                 - Origin
             Via:
-                - 1.1 f8b0654d6e6bbf12f54a635de5db7ee4.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+                - 1.1 d8e93128b8c3fa45992684bc1f50eeb8.cloudfront.net (CloudFront), 1.1 a9a7890bd69fb04b587cd51baf217b1c.cloudfront.net (CloudFront)
             X-Amz-Apigw-Id:
-                - Tr0sHEzEIAMESPg=
+                - T73odH2qoAMED5g=
             X-Amz-Cf-Id:
-                - PQhbXHglDASSTbtxG1OvxI4AC0QiZQbYDFTQA323FDs1-xAhz0E35w==
+                - X_4aXo8Os3cdUMgQGDoun0LKwGkUC6MArhFR-ADQRZULJ2uD1cX7XA==
             X-Amz-Cf-Pop:
                 - JFK50-P5
                 - JFK50-P2
             X-Amzn-Requestid:
-                - c8e6878f-f65d-4645-aa33-645b1006b030
+                - 7d5f87b0-2027-4ec4-8ed9-6608735b42d7
             X-Amzn-Trace-Id:
-                - Root=1-690e34b3-62526ada7822faa627ded5e7;Parent=0254adc3e3f78015;Sampled=0;Lineage=1:24be3d11:0
+                - Root=1-69149fcf-3b9373f57655cab55cdd3c35;Parent=7edfddc24fbf896d;Sampled=0;Lineage=1:24be3d11:0
             X-Bt-Cursor:
-                - aQ40s7o0AAA
+                - aRP30+/bAAA
             X-Bt-Internal-Trace-Id:
-                - 690e34b30000000011084f252080d819
+                - 69149fcf000000002b41c22ab34e1d3a
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 127.785542ms
+        duration: 415.040458ms

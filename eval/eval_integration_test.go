@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
 	"github.com/braintrustdata/braintrust-sdk-go/api/experiments"
 	functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
@@ -19,14 +18,10 @@ import (
 
 // TestEval_Integration tests creating a task function and running a full evaluation
 func TestEval_Integration(t *testing.T) {
-	session := createIntegrationTestSession(t)
+	session, apiClient := setupIntegrationTest(t)
 	t.Parallel()
 
 	ctx := context.Background()
-
-	// Get endpoints and create API client
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	// Create config for the evaluation
 	cfg := &config.Config{
@@ -39,7 +34,7 @@ func TestEval_Integration(t *testing.T) {
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
-	testSlug := tests.RandomName(t, "task")
+	testSlug := tests.Name(t, "task")
 
 	// Clean up any existing function from previous test runs
 	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
@@ -127,10 +122,10 @@ func TestEval_Integration(t *testing.T) {
 	tp := trace.NewTracerProvider()
 	defer func() { _ = tp.Shutdown(ctx) }()
 
-	// Create evaluator and run the evaluation
-	evaluator := NewEvaluator[string, string](session, cfg, tp)
+	// Create evaluator with VCR-wrapped API client
+	evaluator := NewEvaluator[string, string](session, cfg, tp, apiClient)
 	result, err := evaluator.Run(ctx, Opts[string, string]{
-		Experiment: tests.RandomName(t, "exp"),
+		Experiment: "test-experiment",
 		Dataset:    cases,
 		Task:       task,
 		Scorers:    []Scorer[string, string]{containsScorer},
@@ -147,14 +142,10 @@ func TestEval_Integration(t *testing.T) {
 // TestEval_Integration_StringToStruct tests that a prompt returning a plain string
 // can be properly converted to a struct type
 func TestEval_Integration_StringToStruct(t *testing.T) {
-	session := createIntegrationTestSession(t)
+	session, apiClient := setupIntegrationTest(t)
 	t.Parallel()
 
 	ctx := context.Background()
-
-	// Get endpoints and create API client
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	// Create config for the evaluation
 	cfg := &config.Config{
@@ -167,7 +158,7 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
-	testSlug := tests.RandomName(t, "struct")
+	testSlug := tests.Name(t, "task")
 
 	// Clean up any existing function from previous test runs
 	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
@@ -256,9 +247,9 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Run the evaluation - this should handle string-to-struct conversion
-	evaluator := NewEvaluator[QuestionInput, AnswerOutput](session, cfg, tp)
+	evaluator := NewEvaluator[QuestionInput, AnswerOutput](session, cfg, tp, apiClient)
 	result, err := evaluator.Run(ctx, Opts[QuestionInput, AnswerOutput]{
-		Experiment: tests.RandomName(t, "exp"),
+		Experiment: "test-experiment",
 		Dataset:    cases,
 		Task:       task,
 		Scorers:    []Scorer[QuestionInput, AnswerOutput]{scorer},
@@ -272,12 +263,10 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 
 // TestEval_Integration_DatasetByID tests loading a dataset by ID
 func TestEval_Integration_DatasetByID(t *testing.T) {
-	session := createIntegrationTestSession(t)
+	session, apiClient := setupIntegrationTest(t)
 	t.Parallel()
 
 	ctx := context.Background()
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	cfg := &config.Config{
 		DefaultProjectName: integrationTestProject,
@@ -291,7 +280,7 @@ func TestEval_Integration_DatasetByID(t *testing.T) {
 	datasetsAPI := apiClient.Datasets()
 	dataset, err := datasetsAPI.Create(ctx, datasets.CreateParams{
 		ProjectID:   project.ID,
-		Name:        tests.RandomName(t, "dataset"),
+		Name:        "test-dataset",
 		Description: "Test dataset for eval integration",
 	})
 	require.NoError(t, err)
@@ -314,9 +303,9 @@ func TestEval_Integration_DatasetByID(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Run evaluation
-	evaluator := NewEvaluator[int, int](session, cfg, tp)
+	evaluator := NewEvaluator[int, int](session, cfg, tp, apiClient)
 	result, err := evaluator.Run(ctx, Opts[int, int]{
-		Experiment: tests.RandomName(t, "exp"),
+		Experiment: "test-experiment",
 		Dataset:    cases,
 		Task: T(func(ctx context.Context, input int) (int, error) {
 			return input * 2, nil
@@ -338,12 +327,10 @@ func TestEval_Integration_DatasetByID(t *testing.T) {
 
 // TestEval_Integration_DatasetByName tests loading a dataset by name
 func TestEval_Integration_DatasetByName(t *testing.T) {
-	session := createIntegrationTestSession(t)
+	session, apiClient := setupIntegrationTest(t)
 	t.Parallel()
 
 	ctx := context.Background()
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	cfg := &config.Config{
 		DefaultProjectName: integrationTestProject,
@@ -354,7 +341,7 @@ func TestEval_Integration_DatasetByName(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create dataset with unique name
-	datasetName := tests.RandomName(t, "dataset")
+	datasetName := "test-dataset-by-name"
 	datasetsAPI := apiClient.Datasets()
 	dataset, err := datasetsAPI.Create(ctx, datasets.CreateParams{
 		ProjectID:   project.ID,
@@ -381,9 +368,9 @@ func TestEval_Integration_DatasetByName(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Run evaluation
-	evaluator := NewEvaluator[int, int](session, cfg, tp)
+	evaluator := NewEvaluator[int, int](session, cfg, tp, apiClient)
 	result, err := evaluator.Run(ctx, Opts[int, int]{
-		Experiment: tests.RandomName(t, "exp"),
+		Experiment: "test-experiment",
 		Dataset:    cases,
 		Task: T(func(ctx context.Context, input int) (int, error) {
 			return input * input, nil
@@ -405,12 +392,10 @@ func TestEval_Integration_DatasetByName(t *testing.T) {
 
 // TestEval_Integration_DatasetWithTagsAndMetadata tests that tags and metadata are preserved from datasets
 func TestEval_Integration_DatasetWithTagsAndMetadata(t *testing.T) {
-	session := createIntegrationTestSession(t)
+	session, apiClient := setupIntegrationTest(t)
 	t.Parallel()
 
 	ctx := context.Background()
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	cfg := &config.Config{
 		DefaultProjectName: integrationTestProject,
@@ -424,7 +409,7 @@ func TestEval_Integration_DatasetWithTagsAndMetadata(t *testing.T) {
 	datasetsAPI := apiClient.Datasets()
 	dataset, err := datasetsAPI.Create(ctx, datasets.CreateParams{
 		ProjectID:   project.ID,
-		Name:        tests.RandomName(t, "dataset"),
+		Name:        "test-dataset",
 		Description: "Test dataset with tags and metadata",
 	})
 	require.NoError(t, err)
@@ -454,9 +439,9 @@ func TestEval_Integration_DatasetWithTagsAndMetadata(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Run evaluation - tags and metadata should be preserved
-	evaluator := NewEvaluator[int, int](session, cfg, tp)
+	evaluator := NewEvaluator[int, int](session, cfg, tp, apiClient)
 	result, err := evaluator.Run(ctx, Opts[int, int]{
-		Experiment: tests.RandomName(t, "exp"),
+		Experiment: "test-experiment",
 		Dataset:    cases,
 		Task: T(func(ctx context.Context, input int) (int, error) {
 			return input * 2, nil
@@ -481,7 +466,7 @@ func TestEval_Integration_DatasetWithTagsAndMetadata(t *testing.T) {
 
 // TestEval_Integration_ExperimentTags tests experiment-level tags
 func TestEval_Integration_ExperimentTags(t *testing.T) {
-	session := createIntegrationTestSession(t)
+	session, apiClient := setupIntegrationTest(t)
 	t.Parallel()
 
 	ctx := context.Background()
@@ -497,9 +482,9 @@ func TestEval_Integration_ExperimentTags(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Run eval with experiment-level tags
-	evaluator := NewEvaluator[string, string](session, cfg, tp)
+	evaluator := NewEvaluator[string, string](session, cfg, tp, apiClient)
 	result, err := evaluator.Run(ctx, Opts[string, string]{
-		Experiment: tests.RandomName(t, "exp"),
+		Experiment: "test-experiment",
 		Dataset:    cases,
 		Task: T(func(ctx context.Context, input string) (string, error) {
 			return input, nil
@@ -519,7 +504,7 @@ func TestEval_Integration_ExperimentTags(t *testing.T) {
 
 // TestEval_Integration_ExperimentMetadata tests experiment-level metadata
 func TestEval_Integration_ExperimentMetadata(t *testing.T) {
-	session := createIntegrationTestSession(t)
+	session, apiClient := setupIntegrationTest(t)
 	t.Parallel()
 
 	ctx := context.Background()
@@ -535,9 +520,9 @@ func TestEval_Integration_ExperimentMetadata(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Run eval with experiment-level metadata
-	evaluator := NewEvaluator[string, string](session, cfg, tp)
+	evaluator := NewEvaluator[string, string](session, cfg, tp, apiClient)
 	result, err := evaluator.Run(ctx, Opts[string, string]{
-		Experiment: tests.RandomName(t, "exp"),
+		Experiment: "test-experiment",
 		Dataset:    cases,
 		Task: T(func(ctx context.Context, input string) (string, error) {
 			return input, nil
@@ -561,7 +546,7 @@ func TestEval_Integration_ExperimentMetadata(t *testing.T) {
 
 // TestEval_Integration_UpdateFlag tests the Update flag for appending to experiments
 func TestEval_Integration_UpdateFlag(t *testing.T) {
-	session := createIntegrationTestSession(t)
+	session, apiClient := setupIntegrationTest(t)
 	t.Parallel()
 
 	ctx := context.Background()
@@ -570,7 +555,7 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 	}
 
 	// Create unique experiment name
-	experimentName := tests.RandomName(t, "update-test")
+	experimentName := "test-experiment-update-flag"
 
 	cases1 := NewDataset([]Case[string, string]{
 		{Input: "hello", Expected: "hello"},
@@ -584,7 +569,7 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 	})
 
 	// Create evaluator for all runs
-	evaluator := NewEvaluator[string, string](session, cfg, tp)
+	evaluator := NewEvaluator[string, string](session, cfg, tp, apiClient)
 
 	// First run: Create new experiment (Update: false)
 	result1, err := evaluator.Run(ctx, Opts[string, string]{
@@ -647,14 +632,10 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 
 // TestEval_ProjectNameFallback tests that the project name fallback logic works correctly
 func TestEval_ProjectNameFallback(t *testing.T) {
-	session := createIntegrationTestSession(t)
+	session, apiClient := setupIntegrationTest(t)
 	t.Parallel()
 
 	ctx := context.Background()
-
-	// Get endpoints and create API client
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
 
 	// Create a project
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
@@ -684,9 +665,9 @@ func TestEval_ProjectNameFallback(t *testing.T) {
 	})
 
 	// Run eval WITHOUT specifying ProjectName (should use cfg.DefaultProjectName)
-	evaluator := NewEvaluator[string, string](session, cfg, tp)
+	evaluator := NewEvaluator[string, string](session, cfg, tp, apiClient)
 	result, err := evaluator.Run(ctx, Opts[string, string]{
-		Experiment: tests.RandomName(t, "exp"),
+		Experiment: "test-experiment",
 		// ProjectName not specified - should fall back to cfg.DefaultProjectName
 		Dataset: cases,
 		Task: T(func(ctx context.Context, input string) (string, error) {
@@ -710,7 +691,7 @@ func TestEval_ProjectNameFallback(t *testing.T) {
 
 // TestEval_NoProjectName tests that eval fails when no project name is provided
 func TestEval_NoProjectName(t *testing.T) {
-	session := createIntegrationTestSession(t)
+	session, apiClient := setupIntegrationTest(t)
 	t.Parallel()
 
 	ctx := context.Background()
@@ -730,9 +711,9 @@ func TestEval_NoProjectName(t *testing.T) {
 	})
 
 	// Run eval WITHOUT specifying ProjectName and NO config default (should fail)
-	evaluator := NewEvaluator[string, string](session, cfg, tp)
+	evaluator := NewEvaluator[string, string](session, cfg, tp, apiClient)
 	result, err := evaluator.Run(ctx, Opts[string, string]{
-		Experiment: tests.RandomName(t, "exp"),
+		Experiment: "test-experiment",
 		// ProjectName not specified AND cfg.DefaultProjectName is empty
 		Dataset: cases,
 		Task: T(func(ctx context.Context, input string) (string, error) {

@@ -15,23 +15,39 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
+// HTTPError represents an HTTP error response with status code.
+type HTTPError struct {
+	StatusCode int
+	Body       string
+	err        error
+}
+
+func (e *HTTPError) Error() string {
+	return e.err.Error()
+}
+
+func (e *HTTPError) Unwrap() error {
+	return e.err
+}
+
 // Client is a unified HTTP client for API requests.
 type Client struct {
 	apiKey     string
-	apiURL     string
+	baseURL    string // Base URL (e.g., apiURL or appURL)
 	httpClient *http.Client
 	logger     logger.Logger
 }
 
-// NewClient creates a new HTTP client with the given credentials.
-func NewClient(apiKey, apiURL string, log logger.Logger) *Client {
+// NewClient creates a new HTTP client with the given credentials and base URL.
+// The baseURL parameter is the base URL (e.g., "https://api.braintrust.dev" or "https://www.braintrust.dev").
+func NewClient(apiKey, baseURL string, log logger.Logger) *Client {
 	if log == nil {
 		log = logger.Discard()
 	}
 
 	return &Client{
-		apiKey: apiKey,
-		apiURL: apiURL,
+		apiKey:  apiKey,
+		baseURL: baseURL,
 		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
@@ -41,22 +57,26 @@ func NewClient(apiKey, apiURL string, log logger.Logger) *Client {
 
 // NewWrappedClient creates a new HTTP client with a custom http.Client.
 // This is useful for tests that need to wrap the HTTP client (e.g., with VCR).
-func NewWrappedClient(apiKey, apiURL string, httpClient *http.Client, log logger.Logger) *Client {
+func NewWrappedClient(apiKey, baseURL string, httpClient *http.Client, log logger.Logger) *Client {
 	if log == nil {
 		log = logger.Discard()
 	}
 
 	return &Client{
 		apiKey:     apiKey,
-		apiURL:     apiURL,
+		baseURL:    baseURL,
 		httpClient: httpClient,
 		logger:     log,
 	}
 }
 
 // GET makes a GET request with query parameters.
+// The path is appended to the base URL (e.g., "/v1/project").
 func (c *Client) GET(ctx context.Context, path string, params map[string]string) (*http.Response, error) {
-	fullURL := c.apiURL + path
+	u, err := url.JoinPath(c.baseURL, path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to join URL: %w", err)
+	}
 
 	// Add query parameters if provided
 	if len(params) > 0 {
@@ -64,10 +84,10 @@ func (c *Client) GET(ctx context.Context, path string, params map[string]string)
 		for k, v := range params {
 			urlValues.Add(k, v)
 		}
-		fullURL = fullURL + "?" + urlValues.Encode()
+		u = u + "?" + urlValues.Encode()
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "GET", fullURL, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", u, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -76,7 +96,13 @@ func (c *Client) GET(ctx context.Context, path string, params map[string]string)
 }
 
 // POST makes a POST request with a JSON body.
+// The path is appended to the base URL (e.g., "/api/apikey/login").
 func (c *Client) POST(ctx context.Context, path string, body interface{}) (*http.Response, error) {
+	u, err := url.JoinPath(c.baseURL, path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to join URL: %w", err)
+	}
+
 	var reqBody io.Reader
 	if body != nil {
 		jsonData, err := json.Marshal(body)
@@ -88,7 +114,7 @@ func (c *Client) POST(ctx context.Context, path string, body interface{}) (*http
 		c.logger.Debug("http request body", "body", string(jsonData))
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", c.apiURL+path, reqBody)
+	req, err := http.NewRequestWithContext(ctx, "POST", u, reqBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -101,13 +127,25 @@ func (c *Client) POST(ctx context.Context, path string, body interface{}) (*http
 }
 
 // DELETE makes a DELETE request.
+// The path is appended to the base URL (e.g., "/v1/function/123").
 func (c *Client) DELETE(ctx context.Context, path string) (*http.Response, error) {
-	req, err := http.NewRequestWithContext(ctx, "DELETE", c.apiURL+path, nil)
+	u, err := url.JoinPath(c.baseURL, path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to join URL: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "DELETE", u, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	return c.doRequest(req)
+}
+
+// Client returns the underlying http.Client.
+// This is useful for extracting the client for auth.Session when using VCR.
+func (c *Client) Client() *http.Client {
+	return c.httpClient
 }
 
 // doRequest executes the HTTP request with auth, error checking, and logging.
@@ -150,7 +188,11 @@ func (c *Client) doRequest(req *http.Request) (*http.Response, error) {
 			"status", resp.StatusCode,
 			"body", string(body))
 
-		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
+		return nil, &HTTPError{
+			StatusCode: resp.StatusCode,
+			Body:       string(body),
+			err:        fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body)),
+		}
 	}
 
 	return resp, nil

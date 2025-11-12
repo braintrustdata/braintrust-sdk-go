@@ -1,0 +1,301 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 23
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"go-sdk-tests"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-tests","created":"2025-11-04T13:38:56.532Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 12 Nov 2025 14:55:28 GMT
+            Etag:
+                - W/"eb-poL8yUftdUFahhL/Peyi6gN8N/E"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 a1546fc751225809c39b89ba9e8d715c.cloudfront.net (CloudFront), 1.1 56e001f87fa53501872a21f09bb07046.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T73qvEtxoAMEr6Q=
+            X-Amz-Cf-Id:
+                - c_aE_b1cm3GA5-Ap7GJ-c5oq0oOzLzowTS3I5GadanIGu6GJNxX0Cg==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 09971e80-3a5b-48d0-b4db-117e1c23ae9b
+            X-Amzn-Trace-Id:
+                - Root=1-69149fdd-7045487c590791c27d2f5650;Parent=10bc8b5eb5d9b534;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Found-Existing:
+                - "true"
+            X-Bt-Internal-Trace-Id:
+                - 69149fde0000000059517e9b83ea6f02
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 2.852261875s
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/function?limit=1&project_name=go-sdk-tests&slug=TestFunctionsAPI_Task_PrimitiveTypes-slug
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"objects":[]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 12 Nov 2025 14:55:28 GMT
+            Etag:
+                - W/"e-xZKibKAiOxxBbzTm2byfFNRkvtA"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 b5fe18267507cb61755963d8928a60f4.cloudfront.net (CloudFront), 1.1 56e001f87fa53501872a21f09bb07046.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T73rMG1foAMEjCA=
+            X-Amz-Cf-Id:
+                - JLVgvloXKlvpKiX4Q3hGOUgCfDStC66A57fqwkA3CLDD_pmQFDKqdQ==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 9c98ebf2-9080-45bd-a99c-d5402ab960a8
+            X-Amzn-Trace-Id:
+                - Root=1-69149fe0-42fab29e58fff86c718fa31a;Parent=7d1be43ac6ac1f24;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 69149fe00000000013a347cf587f7ef5
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 146.728625ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 391
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"Number Doubler","slug":"TestFunctionsAPI_Task_PrimitiveTypes-slug","function_data":{"type":"prompt"},"prompt_data":{"options":{"model":"gpt-4o-mini","params":{"max_tokens":10,"temperature":0}},"prompt":{"messages":[{"content":"Double this number: {{input}}. Return ONLY the number, no other text.","role":"user"}],"type":"chat"}}}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/function
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"log_id":"p","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","slug":"TestFunctionsAPI_Task_PrimitiveTypes-slug","name":"Number Doubler","function_data":{"type":"prompt"},"prompt_data":{"options":{"model":"gpt-4o-mini","params":{"max_tokens":10,"temperature":0}},"prompt":{"messages":[{"content":"Double this number: {{input}}. Return ONLY the number, no other text.","role":"user"}],"type":"chat"}},"id":"67d89949-15ee-41fe-a096-5a7d9f4b9c72","created":"2025-11-12T14:55:29.099Z","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","_xact_id":"1000196129555550330"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 12 Nov 2025 14:55:29 GMT
+            Etag:
+                - W/"236-kvD2Y8Soew0Qftc2ZMDS9qrJMRs"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 98bc8180e0431e8f05afc9802305f1d2.cloudfront.net (CloudFront), 1.1 56e001f87fa53501872a21f09bb07046.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T73rNGD9oAMEqaQ=
+            X-Amz-Cf-Id:
+                - P76z-qSgMTPSjFjC93TwHaLBrLk-nKS7B2-TvgjwE4zRl8Ep2eCajg==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 63212227-9696-4294-a687-43969a1424dd
+            X-Amzn-Trace-Id:
+                - Root=1-69149fe0-200b2be74086decd7b80101e;Parent=2779dcd087c81112;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 69149fe0000000006bc1de9a76b2957a
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 314.579ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/function?limit=1&project_name=go-sdk-tests&slug=TestFunctionsAPI_Task_PrimitiveTypes-slug
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"Code":"TooManyRequestsError","Message":"Too many requests. Source: checkBtqlOrgRateLimit. Rate limit: 20 requests per 60 seconds. Consumed: 25. Retry after 41.807 seconds. Please contact us at support@braintrust.dev to discuss remediation strategies. [user_email=matt@braintrustdata.com] [user_org=matt-test-org] [timestamp=1762959329.403]","InternalTraceId":"69149fe10000000044dde381935004e8","Path":"/v1/function","Service":"api"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 12 Nov 2025 14:55:29 GMT
+            Etag:
+                - W/"1b2-B2eVWZyeHzuXpLu3PFl3yW5GiGU"
+            Retry-After:
+                - "41.807"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 5ba825173b1f7429171e730e7ae12588.cloudfront.net (CloudFront), 1.1 56e001f87fa53501872a21f09bb07046.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T73rQFFNoAMEhvg=
+            X-Amz-Cf-Id:
+                - puoheDSVRBXTgs9J4ZIYWsy4f5PAiOZN5wiQEz9dAu8Gl2TTCvwf4w==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - f245944a-3557-40c7-94d6-822918f12855
+            X-Amzn-Trace-Id:
+                - Root=1-69149fe1-2726f4db662912f63269ccfb;Parent=29550cda6aef4363;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 69149fe10000000044dde381935004e8
+            X-Cache:
+                - Error from cloudfront
+        status: 429 Too Many Requests
+        code: 429
+        duration: 155.357875ms
+    - id: 4
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/function/67d89949-15ee-41fe-a096-5a7d9f4b9c72
+        method: DELETE
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"log_id":"p","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","slug":"TestFunctionsAPI_Task_PrimitiveTypes-slug","id":"67d89949-15ee-41fe-a096-5a7d9f4b9c72","created":"2025-11-12T14:55:29.560Z","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","_object_delete":true,"_xact_id":"1000196129555550599"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 12 Nov 2025 14:55:29 GMT
+            Etag:
+                - W/"12d-EjotPMHShmOrsM9Ev5t/9o0az5g"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 f8debc28b6c73eb3dc7540e2ac2f0e18.cloudfront.net (CloudFront), 1.1 56e001f87fa53501872a21f09bb07046.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T73rSHARIAMEV1w=
+            X-Amz-Cf-Id:
+                - v50bdfSBrOZRE5pm6xhidaTR0twVQw-LovQbqwno8nzYRHZMIbYaTw==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - fa3548b1-e52f-4681-b596-fbd91190b317
+            X-Amzn-Trace-Id:
+                - Root=1-69149fe1-35126d8559e36cac25dbca6f;Parent=020dcceb6064da04;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 69149fe10000000022107aa5783a4dc0
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 322.086042ms

@@ -47,16 +47,16 @@ interactions:
         uncompressed: true
         body: |
             {
-              "id": "chatcmpl-CZKN033i7FRTL4VvpXOGWRkVmaGZe",
+              "id": "chatcmpl-CavJ5EN6Mgrp5rAUKCXmhtfyuEGC3",
               "object": "chat.completion",
-              "created": 1762535818,
+              "created": 1762916131,
               "model": "gpt-4o-mini-2024-07-18",
               "choices": [
                 {
                   "index": 0,
                   "message": {
                     "role": "assistant",
-                    "content": "Ahoy there, matey! I be feelin' as fine as a ship on calm seas! How be ye on this fine day?",
+                    "content": "Ahoy there, matey! I be feelin' shipshape and ready to sail the seas of knowledge with ye! How be ye on this fine day?",
                     "refusal": null,
                     "annotations": []
                   },
@@ -66,8 +66,8 @@ interactions:
               ],
               "usage": {
                 "prompt_tokens": 28,
-                "completion_tokens": 29,
-                "total_tokens": 57,
+                "completion_tokens": 33,
+                "total_tokens": 61,
                 "prompt_tokens_details": {
                   "cached_tokens": 0,
                   "audio_tokens": 0
@@ -90,15 +90,15 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - 99ae7b4069ebd67b-IAD
+                - 99d2c03adec5e55d-EWR
             Content-Type:
                 - application/json
             Date:
-                - Fri, 07 Nov 2025 17:16:59 GMT
+                - Wed, 12 Nov 2025 02:55:32 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "905"
+                - "1440"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -106,14 +106,14 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=wLBrE8qaaZ6DHGy5d0lx1BZq2WRQ99sAn700UnlVpYg-1762535819-1.0.1.1-ecYmWCiJNDnGmfuGeJP.o3.7mx1V8b2M023jeBoythN.rGUQgkylgQ4DA6ENpL6hN.zL1gdB76vBSUbw80uRjlWcveke.Q21ZPpHLg5XhQY; path=/; expires=Fri, 07-Nov-25 17:46:59 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
-                - _cfuvid=.rqwztyFh3eipVZYeBgu8BQHsAQW.qqFxw6xG5MY6ww-1762535819277-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+                - __cf_bm=DLZJo0gC4B_IP6FNHOtcq5iJznlHULBGaNAN7tTaphw-1762916132-1.0.1.1-VIPl7YbMWo8DbtCZnBvZD_D5S7dtxYH1wwTHwxXZF7TzB6zrprpnt804RmfQfiumOCNa4Fhs1YYTBGUOg7tnLPETrbE0qUAR9f..S6Mm9BE; path=/; expires=Wed, 12-Nov-25 03:25:32 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+                - _cfuvid=qgmT4eh0TCIY_Xa00zV03HxlTs5Rf4bthWogknni3m0-1762916132580-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
                 - nosniff
             X-Envoy-Upstream-Service-Time:
-                - "918"
+                - "1465"
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Ratelimit-Limit-Requests:
@@ -129,7 +129,7 @@ interactions:
             X-Ratelimit-Reset-Tokens:
                 - 0s
             X-Request-Id:
-                - req_f3f4be58663542bda1be34153d01c68e
+                - req_f7743abe644f40aab4cdb1f1bf4f4bfa
         status: 200 OK
         code: 200
-        duration: 984.968ms
+        duration: 1.58768225s

@@ -1,0 +1,593 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 23
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"go-sdk-tests"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-tests","created":"2025-11-04T13:38:56.532Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 12 Nov 2025 14:55:10 GMT
+            Etag:
+                - W/"eb-poL8yUftdUFahhL/Peyi6gN8N/E"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 f8debc28b6c73eb3dc7540e2ac2f0e18.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T73oWHGPoAMEo9g=
+            X-Amz-Cf-Id:
+                - rE1llmBWLutcLXXIFJd4uuW6zIYvxZJR0Bhi0-x_LWXdRpkffw33pA==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 56195b83-b7a1-4c45-baed-0977cb6e1e44
+            X-Amzn-Trace-Id:
+                - Root=1-69149fce-096a914b0bf7da8f466aaeb7;Parent=04b77fa919db80ae;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Found-Existing:
+                - "true"
+            X-Bt-Internal-Trace-Id:
+                - 69149fce0000000013d637d1b19e480a
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 161.796083ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/api/apikey/login
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"org_info":[{"id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"matt-test-org","api_url":"https://api.braintrust.dev","git_metadata":null,"is_universal_api":null,"proxy_url":"https://api.braintrust.dev","realtime_url":"wss://realtime.braintrustapi.com"}]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 12 Nov 2025 14:55:10 GMT
+            Etag:
+                - W/"101-EqXzt+vlRFUt5HCzQY7qxp9rZU0"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 3b0649a8bee506c1d7498462d39e6c44.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T73oWHrkoAMEuvw=
+            X-Amz-Cf-Id:
+                - 8cJV5aIOkivs8mYfNYVBPwIm1c1oMW52CbjdAIdKM_1K2UXWSssM0A==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 795f5d71-0b6f-447a-b0f3-8f4148b465e0
+            X-Amzn-Trace-Id:
+                - Root=1-69149fce-193b4ce717816b1951d32b4e;Parent=55779eea501bf023;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 69149fce000000004ce10f17775296aa
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 200.679042ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/function?limit=1&project_name=go-sdk-tests&slug=TestFunctionsAPI_EndToEnd_MixedTypes-task
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"objects":[]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 12 Nov 2025 14:55:10 GMT
+            Etag:
+                - W/"e-xZKibKAiOxxBbzTm2byfFNRkvtA"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 bf8d7cb6fca5d51158e1109ca40fe242.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T73oXFDCoAMEmWw=
+            X-Amz-Cf-Id:
+                - BQVkbYz1edoDcJHlV7cNKOtUNXOfYEWdffRIw00_ACoSih2VQu-0PQ==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 449af7f6-6ef6-489e-91fa-dc66d453b19d
+            X-Amzn-Trace-Id:
+                - Root=1-69149fce-0e3ce1d56389e8d774e3bca8;Parent=2efb9673f11b0df4;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 69149fce000000007c7a536e01e84661
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 185.41825ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 619
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"E2E Task","slug":"TestFunctionsAPI_EndToEnd_MixedTypes-task","function_data":{"type":"prompt"},"prompt_data":{"options":{"model":"gpt-4o-mini","params":{"max_tokens":100,"response_format":{"type":"json_object"},"temperature":0}},"prompt":{"messages":[{"content":"You answer questions with JSON. Return ONLY the JSON object, no markdown, no code blocks, no backticks.","role":"system"},{"content":"Question: {{input.question}}. Return ONLY JSON like {\"answer\": \"your answer\", \"confidence\": 0.9}. No markdown formatting.","role":"user"}],"type":"chat"}}}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/function
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"log_id":"p","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","slug":"TestFunctionsAPI_EndToEnd_MixedTypes-task","name":"E2E Task","function_data":{"type":"prompt"},"prompt_data":{"options":{"model":"gpt-4o-mini","params":{"max_tokens":100,"response_format":{"type":"json_object"},"temperature":0}},"prompt":{"messages":[{"content":"You answer questions with JSON. Return ONLY the JSON object, no markdown, no code blocks, no backticks.","role":"system"},{"content":"Question: {{input.question}}. Return ONLY JSON like {\"answer\": \"your answer\", \"confidence\": 0.9}. No markdown formatting.","role":"user"}],"type":"chat"}},"id":"57437580-50d5-41dd-aea5-7206dfc1695f","created":"2025-11-12T14:55:11.093Z","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","_xact_id":"1000196129554423300"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 12 Nov 2025 14:55:11 GMT
+            Etag:
+                - W/"31a-NvKY6SIyPD2eo7dMrvgb+kxSwko"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 52143757d25f4b31ebf04bc09765f6c0.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T73oZEoUoAMEfkA=
+            X-Amz-Cf-Id:
+                - o-nivAPlhveSonq5cvDTwRK-xeYvGYOgkeIM_zxvlQ629BbDKTl2Nw==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 9fa85cee-539d-405a-9046-f59fbe1abd7f
+            X-Amzn-Trace-Id:
+                - Root=1-69149fce-0787acd81a0aa3566320c134;Parent=59bd9967ead4cc23;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 69149fce0000000049d7094f35b4a36d
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 349.337458ms
+    - id: 4
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/function?limit=1&project_name=go-sdk-tests&slug=TestFunctionsAPI_EndToEnd_MixedTypes-scorer
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"objects":[]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 12 Nov 2025 14:55:11 GMT
+            Etag:
+                - W/"e-xZKibKAiOxxBbzTm2byfFNRkvtA"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 6ea9421ec132e3640100792ef9535494.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T73ocEzuIAMEHjQ=
+            X-Amz-Cf-Id:
+                - _hOtrnHA5J1Kst6PDktdqMCI061q0LlGdum1e-NS4nWnPLuaIId3_Q==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 9fd3033c-b6bc-4c17-b47c-c18e3ed59b59
+            X-Amzn-Trace-Id:
+                - Root=1-69149fcf-3efb4d443f6f3ac65e814ead;Parent=4d0c03eecbb760e8;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 69149fcf00000000637c6b6f8b74e719
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 138.395125ms
+    - id: 5
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 553
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"E2E Scorer","slug":"TestFunctionsAPI_EndToEnd_MixedTypes-scorer","function_type":"scorer","function_data":{"type":"prompt"},"prompt_data":{"options":{"model":"gpt-4o-mini","params":{"temperature":0}},"parser":{"choice_scores":{"correct":1,"incorrect":0},"type":"llm_classifier","use_cot":false},"prompt":{"messages":[{"content":"You are a scorer.","role":"system"},{"content":"Is the output.answer field non-empty? Choose ''correct'' if yes, ''incorrect'' if no.","role":"user"}],"type":"chat"}}}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/function
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"log_id":"p","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","slug":"TestFunctionsAPI_EndToEnd_MixedTypes-scorer","name":"E2E Scorer","function_type":"scorer","function_data":{"type":"prompt"},"prompt_data":{"options":{"model":"gpt-4o-mini","params":{"temperature":0}},"parser":{"choice_scores":{"correct":1,"incorrect":0},"type":"llm_classifier","use_cot":false},"prompt":{"messages":[{"content":"You are a scorer.","role":"system"},{"content":"Is the output.answer field non-empty? Choose ''correct'' if yes, ''incorrect'' if no.","role":"user"}],"type":"chat"}},"id":"9b72d6a8-c05e-49e6-920c-e9fa1c8896c3","created":"2025-11-12T14:55:11.549Z","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","_xact_id":"1000196129554423607"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 12 Nov 2025 14:55:11 GMT
+            Etag:
+                - W/"2d8-+r7ZmyEhHC5mmDw4WFtHALjfSqo"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 f5527f719bbc0d2932043daaeff80252.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T73oeFAzIAMEZdA=
+            X-Amz-Cf-Id:
+                - AG2LVSHHCiorEKw4t-jA93YRc6zZVq0Cu7qfwdGW0tOBli-zSD8GtQ==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 698a4257-d532-47d3-93b2-47f0a465059d
+            X-Amzn-Trace-Id:
+                - Root=1-69149fcf-7b596b2f5c028cb223490c4d;Parent=7d5663437ed230cb;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 69149fcf000000003684f6d53e6dee37
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 316.511958ms
+    - id: 6
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/function?limit=1&project_name=go-sdk-tests&slug=TestFunctionsAPI_EndToEnd_MixedTypes-task
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"objects":[{"id":"57437580-50d5-41dd-aea5-7206dfc1695f","_xact_id":"1000196129554423300","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","log_id":"p","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"E2E Task","slug":"TestFunctionsAPI_EndToEnd_MixedTypes-task","description":null,"created":"2025-11-12T14:55:11.093Z","prompt_data":{"prompt":{"type":"chat","messages":[{"role":"system","content":"You answer questions with JSON. Return ONLY the JSON object, no markdown, no code blocks, no backticks."},{"role":"user","content":"Question: {{input.question}}. Return ONLY JSON like {\"answer\": \"your answer\", \"confidence\": 0.9}. No markdown formatting."}]},"options":{"model":"gpt-4o-mini","params":{"max_tokens":100,"temperature":0,"response_format":{"type":"json_object"}}}},"tags":null,"metadata":null,"function_type":null,"function_data":{"type":"prompt"},"origin":null,"function_schema":null}]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 12 Nov 2025 14:55:12 GMT
+            Etag:
+                - W/"391-748X2yL4AiaCPzHpNgy+c1THMzg"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 cf549a03d4f209dc2ee52d1dd6cb3730.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T73ohEtWoAMEfkA=
+            X-Amz-Cf-Id:
+                - kffnQMghQMLR8OxsiZNf3tEO_Lt6bYHi3eZ1NOMBhqCCqI-GnjsDEQ==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 3c9ea379-63b2-4076-8e91-7410ea8d7948
+            X-Amzn-Trace-Id:
+                - Root=1-69149fcf-5122dc431641a1ca15ec9875;Parent=647e270fa4582711;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 69149fcf000000000636ef1355bc8b73
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 408.493667ms
+    - id: 7
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/function?limit=1&project_name=go-sdk-tests&slug=TestFunctionsAPI_EndToEnd_MixedTypes-scorer
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"Code":"TooManyRequestsError","Message":"Too many requests. Source: checkBtqlOrgRateLimit. Rate limit: 20 requests per 60 seconds. Consumed: 21. Retry after 55.625 seconds. Please contact us at support@braintrust.dev to discuss remediation strategies. [user_email=matt@braintrustdata.com] [user_org=matt-test-org] [timestamp=1762959315.587]","InternalTraceId":"69149fd000000000332eb11b7e4b660b","Path":"/v1/function","Service":"api"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 12 Nov 2025 14:55:15 GMT
+            Etag:
+                - W/"1b2-a/vNU2yRlKzFONisXmgmBcHmdvM"
+            Retry-After:
+                - "55.625"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 cf549a03d4f209dc2ee52d1dd6cb3730.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T73olGHXIAMEkbw=
+            X-Amz-Cf-Id:
+                - rWqgILInPPg44EHpO-OIJ1c6wkFIIa1BO9Lek6W_3aI88xKuvLm90Q==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 46d06c0d-3d52-4844-8582-8f40ad742fb4
+            X-Amzn-Trace-Id:
+                - Root=1-69149fd0-756e1cea3fb56b5f411394b6;Parent=6d90fa33eeff1c88;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 69149fd000000000332eb11b7e4b660b
+            X-Cache:
+                - Error from cloudfront
+        status: 429 Too Many Requests
+        code: 429
+        duration: 3.466937417s
+    - id: 8
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/function/9b72d6a8-c05e-49e6-920c-e9fa1c8896c3
+        method: DELETE
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"log_id":"p","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","slug":"TestFunctionsAPI_EndToEnd_MixedTypes-scorer","id":"9b72d6a8-c05e-49e6-920c-e9fa1c8896c3","created":"2025-11-12T14:55:15.720Z","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","_object_delete":true,"_xact_id":"1000196129554688984"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 12 Nov 2025 14:55:15 GMT
+            Etag:
+                - W/"12f-alhMfk6r1mjC4d5cMlFEazt7zcg"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 ab734ad5d81cc9d470b6176a05dd968e.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T73pIGzvIAMEArw=
+            X-Amz-Cf-Id:
+                - WvJdbGgIago0WCZiIsPuL36gQscu6EOVBz6zTOM-RUkfrmxE_rhzVg==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - e18bdac1-45ca-4540-ab9f-4c6776149c49
+            X-Amzn-Trace-Id:
+                - Root=1-69149fd3-58d429442d0e289327188397;Parent=6503f6d86ec933f6;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 69149fd3000000003d521525b1125a5e
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 310.40025ms
+    - id: 9
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/function/57437580-50d5-41dd-aea5-7206dfc1695f
+        method: DELETE
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"log_id":"p","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","slug":"TestFunctionsAPI_EndToEnd_MixedTypes-task","id":"57437580-50d5-41dd-aea5-7206dfc1695f","created":"2025-11-12T14:55:16.073Z","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","_object_delete":true,"_xact_id":"1000196129554754723"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 12 Nov 2025 14:55:16 GMT
+            Etag:
+                - W/"12d-v2j4AqjqJR2IVuaDALNrmZJx/aU"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 38bc9c97daf30f968ccac44ef89e14e0.cloudfront.net (CloudFront), 1.1 10a23502057a5449ee9e08eab6e9c0d4.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T73pLEx5oAMEGrA=
+            X-Amz-Cf-Id:
+                - o3rVq_EQTugNVdRhHv3Ca19T3kkYTq43eA8sxs8gpMhR6wWI6_PdoQ==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 1fae1aac-4a47-4534-a040-3f82934c8a86
+            X-Amzn-Trace-Id:
+                - Root=1-69149fd3-426e78e435145c443d29cab3;Parent=3c82bcb2ff74111e;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 69149fd3000000004c9755e92026a239
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 323.942ms

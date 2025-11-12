@@ -49,52 +49,52 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"model":"claude-3-haiku-20240307","id":"msg_01Q4z66Gy8kW9HaG9TL8W8f1","type":"message","role":"assistant","content":[{"type":"text","text":"The capital of France is Paris."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":14,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":10,"service_tier":"standard"}}'
+        body: '{"model":"claude-3-haiku-20240307","id":"msg_01L8aCZ48z3kivXJ18GDxAAu","type":"message","role":"assistant","content":[{"type":"text","text":"The capital of France is Paris."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":14,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":10,"service_tier":"standard"}}'
         headers:
             Anthropic-Ratelimit-Input-Tokens-Limit:
                 - "8000000"
             Anthropic-Ratelimit-Input-Tokens-Remaining:
                 - "8000000"
             Anthropic-Ratelimit-Input-Tokens-Reset:
-                - "2025-11-07T17:16:53Z"
+                - "2025-11-12T14:55:11Z"
             Anthropic-Ratelimit-Output-Tokens-Limit:
                 - "1500000"
             Anthropic-Ratelimit-Output-Tokens-Remaining:
                 - "1500000"
             Anthropic-Ratelimit-Output-Tokens-Reset:
-                - "2025-11-07T17:16:53Z"
+                - "2025-11-12T14:55:12Z"
             Anthropic-Ratelimit-Requests-Limit:
                 - "10000"
             Anthropic-Ratelimit-Requests-Remaining:
                 - "9999"
             Anthropic-Ratelimit-Requests-Reset:
-                - "2025-11-07T17:16:53Z"
+                - "2025-11-12T14:55:11Z"
             Anthropic-Ratelimit-Tokens-Limit:
                 - "9500000"
             Anthropic-Ratelimit-Tokens-Remaining:
                 - "9500000"
             Anthropic-Ratelimit-Tokens-Reset:
-                - "2025-11-07T17:16:53Z"
+                - "2025-11-12T14:55:11Z"
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - 99ae7b21fa5ae0ee-EWR
+                - 99d6de6c2cb48c51-EWR
             Content-Type:
                 - application/json
             Date:
-                - Fri, 07 Nov 2025 17:16:53 GMT
+                - Wed, 12 Nov 2025 14:55:12 GMT
             Request-Id:
-                - req_011CUtudoiaAtUfbWBB7y691
+                - req_011CV4BscerHhiGpoeAkvFv4
             Retry-After:
-                - "7"
+                - "50"
             Server:
                 - cloudflare
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Envoy-Upstream-Service-Time:
-                - "306"
+                - "1386"
             X-Robots-Tag:
                 - none
         status: 200 OK
         code: 200
-        duration: 381.958625ms
+        duration: 1.459043875s

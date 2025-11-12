@@ -3,7 +3,6 @@ package eval
 import (
 	"context"
 	"io"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,9 +11,7 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
 	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
-	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
-	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
 type testDatasetInput struct {
@@ -25,53 +22,22 @@ type testDatasetOutput struct {
 	Answer string `json:"answer"`
 }
 
-// requireAPIKey fails the test if BRAINTRUST_API_KEY is not set
-func requireAPIKey(t *testing.T) string {
-	t.Helper()
-	apiKey := os.Getenv("BRAINTRUST_API_KEY")
-	if apiKey == "" {
-		t.Fatal("BRAINTRUST_API_KEY not set, cannot run integration test")
-	}
-	return apiKey
-}
-
-// createTestSession creates a real session for testing
-func createTestSession(t *testing.T, apiKey string) *auth.Session {
-	t.Helper()
-	ctx := context.Background()
-
-	session, err := auth.NewSession(ctx, auth.Options{
-		APIKey: apiKey,
-		AppURL: "https://www.braintrust.dev",
-		Logger: logger.Discard(),
-	})
-	require.NoError(t, err)
-
-	// Wait for login to complete
-	_, err = session.Login(ctx)
-	require.NoError(t, err)
-
-	return session
-}
-
 // TestDatasetAPI_Get_Integration tests loading a dataset by ID with real API calls
 func TestDatasetAPI_Get_Integration(t *testing.T) {
-	apiKey := requireAPIKey(t)
+	t.Parallel()
 
 	ctx := context.Background()
-	session := createTestSession(t, apiKey)
-	defer session.Close()
 
-	// Create API client
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+	// Create API client with VCR support
+	apiClient := createIntegrationTestAPIClient(t)
 	// Create a test dataset
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
+	// Use fixed name for VCR determinism
 	dataset, err := apiClient.Datasets().Create(ctx, datasets.CreateParams{
 		ProjectID:   project.ID,
-		Name:        tests.RandomName(t, "dataset"),
+		Name:        "test-dataset-get",
 		Description: "Test dataset for DatasetAPI.Get",
 	})
 	require.NoError(t, err)
@@ -136,14 +102,12 @@ func TestDatasetAPI_Get_Integration(t *testing.T) {
 
 // TestDatasetAPI_Get_EmptyID tests error handling
 func TestDatasetAPI_Get_EmptyID(t *testing.T) {
-	apiKey := requireAPIKey(t)
+	t.Parallel()
 
 	ctx := context.Background()
-	session := createTestSession(t, apiKey)
-	defer session.Close()
 
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+	// Create API client with VCR support
+	apiClient := createIntegrationTestAPIClient(t)
 	datasetAPI := &DatasetAPI[testDatasetInput, testDatasetOutput]{
 		api: apiClient,
 	}
@@ -156,20 +120,18 @@ func TestDatasetAPI_Get_EmptyID(t *testing.T) {
 
 // TestDatasetAPI_Query_Integration tests querying a dataset with options
 func TestDatasetAPI_Query_Integration(t *testing.T) {
-	apiKey := requireAPIKey(t)
+	t.Parallel()
 
 	ctx := context.Background()
-	session := createTestSession(t, apiKey)
-	defer session.Close()
 
-	// Create API client
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+	// Create API client with VCR support
+	apiClient := createIntegrationTestAPIClient(t)
 	// Create a test dataset
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
-	datasetName := tests.RandomName(t, "dataset")
+	// Use fixed name for VCR determinism
+	datasetName := "test-dataset-query"
 	dataset, err := apiClient.Datasets().Create(ctx, datasets.CreateParams{
 		ProjectID:   project.ID,
 		Name:        datasetName,
@@ -243,17 +205,11 @@ func TestDatasetAPI_TypeSafety(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Create a minimal session (we won't actually use it)
-	session, err := auth.NewSession(ctx, auth.Options{
-		APIKey: "test-key",
-		AppURL: "https://test.braintrust.dev",
-		Logger: logger.Discard(),
-	})
-	require.NoError(t, err)
-	defer session.Close()
-
+	// Create a minimal session for compile-time type checking
+	session := tests.NewSession(t)
 	endpoints := session.Endpoints()
 	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+
 	// This should compile
 	datasetAPI := &DatasetAPI[testDatasetInput, testDatasetOutput]{
 		api: apiClient,
@@ -270,22 +226,20 @@ func TestDatasetAPI_TypeSafety(t *testing.T) {
 
 // TestDatasetAPI_PopulatesDatasetFields tests that dataset iterator populates ID, XactID, and Created
 func TestDatasetAPI_PopulatesDatasetFields(t *testing.T) {
-	apiKey := requireAPIKey(t)
+	t.Parallel()
 
 	ctx := context.Background()
-	session := createTestSession(t, apiKey)
-	defer session.Close()
 
-	// Create API client
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+	// Create API client with VCR support
+	apiClient := createIntegrationTestAPIClient(t)
 	// Create a test dataset
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
+	// Use fixed name for VCR determinism
 	dataset, err := apiClient.Datasets().Create(ctx, datasets.CreateParams{
 		ProjectID:   project.ID,
-		Name:        tests.RandomName(t, "dataset-fields-test"),
+		Name:        "test-dataset-fields",
 		Description: "Test dataset for verifying ID, XactID, Created fields",
 	})
 	require.NoError(t, err)

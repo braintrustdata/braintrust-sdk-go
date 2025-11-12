@@ -170,16 +170,10 @@ func NewHTTPClient(t *testing.T) *http.Client {
 	return WrapHTTPClient(t, baseClient)
 }
 
-// GetHTTPSClient creates an HTTPS client for integration tests with VCR support.
-// It wraps the HTTP client with VCR recording/replay based on VCR_MODE environment variable.
-// The cassette name is automatically derived from t.Name().
-// In replay mode, a dummy API key is used. In record/off modes, BRAINTRUST_API_KEY is required.
-func GetHTTPSClient(t *testing.T) *https.Client {
+// GetAPIKeyForVCR returns an API key for VCR-enabled tests.
+// In replay mode, returns a dummy key. In record/off modes, reads from BRAINTRUST_API_KEY env var.
+func GetAPIKeyForVCR(t *testing.T) string {
 	t.Helper()
-
-	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
-	}
 
 	mode := GetVCRMode()
 
@@ -192,6 +186,22 @@ func GetHTTPSClient(t *testing.T) *https.Client {
 		// Use dummy key for replay mode
 		apiKey = "dummy-api-key-for-replay"
 	}
+
+	return apiKey
+}
+
+// GetHTTPSClient creates an HTTPS client for integration tests with VCR support.
+// It wraps the HTTP client with VCR recording/replay based on VCR_MODE environment variable.
+// The cassette name is automatically derived from t.Name().
+// In replay mode, a dummy API key is used. In record/off modes, BRAINTRUST_API_KEY is required.
+func GetHTTPSClient(t *testing.T) *https.Client {
+	t.Helper()
+
+	if testing.Short() {
+		t.Skip("Skipping integration test in short mode")
+	}
+
+	apiKey := GetAPIKeyForVCR(t)
 
 	apiURL := os.Getenv("BRAINTRUST_API_URL")
 	if apiURL == "" {

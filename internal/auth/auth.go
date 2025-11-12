@@ -7,10 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"net/http"
 	"strings"
 	"time"
 
+	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
@@ -51,6 +51,10 @@ type Options struct {
 	OrgName string
 	// Logger is the logger to use (optional, defaults to noop logger)
 	Logger logger.Logger
+	// Client is the HTTPS client to use for login requests (optional)
+	// If not provided, a default https.Client will be created
+	// This is primarily used for testing with VCR
+	Client *https.Client
 }
 
 // Info holds authentication information
@@ -80,27 +84,30 @@ type loginResponse struct {
 }
 
 // makeLoginRequest makes an HTTP request to the login API and returns the parsed response.
-func makeLoginRequest(ctx context.Context, appURL, apiKey string) (*loginResponse, error) {
-	req, err := http.NewRequestWithContext(ctx, "POST", appURL+"/api/apikey/login", nil)
+func makeLoginRequest(ctx context.Context, client *https.Client) (*loginResponse, error) {
+	// Make POST request using https.Client (gets automatic logging and VCR support)
+	resp, err := client.POST(ctx, "/api/apikey/login", nil)
 	if err != nil {
-		return nil, fmt.Errorf("error creating login request: %w", err)
-	}
-	req.Header.Set("Authorization", "Bearer "+apiKey)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
+		// Check if it's an HTTP error for retry logic
+		var httpErr *https.HTTPError
+		if errors.As(err, &httpErr) {
+			// Only treat 401/403 as authentication errors
+			// Other errors (5xx, network issues) should be retried
+			if httpErr.StatusCode == 401 || httpErr.StatusCode == 403 {
+				return nil, &loginError{
+					err:        fmt.Errorf("invalid API key: [%d]", httpErr.StatusCode),
+					statusCode: httpErr.StatusCode,
+				}
+			}
+			// Wrap other HTTP errors for retry logic
+			return nil, &loginError{
+				err:        fmt.Errorf("login request failed: [%d] %s", httpErr.StatusCode, httpErr.Body),
+				statusCode: httpErr.StatusCode,
+			}
+		}
 		return nil, fmt.Errorf("error making login request: %w", err)
 	}
 	defer func() { _ = resp.Body.Close() }()
-
-	if resp.StatusCode != http.StatusOK {
-		maskedKey := maskAPIKey(apiKey)
-		return nil, &loginError{
-			err:        fmt.Errorf("invalid API key %s: [%d]", maskedKey, resp.StatusCode),
-			statusCode: resp.StatusCode,
-		}
-	}
 
 	var loginResp loginResponse
 	if err := json.NewDecoder(resp.Body).Decode(&loginResp); err != nil {
@@ -113,7 +120,7 @@ func makeLoginRequest(ctx context.Context, appURL, apiKey string) (*loginRespons
 // login authenticates with the Braintrust API and returns login information.
 // It implements the same logic as the Python SDK's login() function.
 // Note: Caching is now handled by auth.Session, not by this function.
-func login(ctx context.Context, apiKey, appURL, appPublicURL, orgName string, log logger.Logger) (*Info, error) {
+func login(ctx context.Context, apiKey, appURL, appPublicURL, orgName string, log logger.Logger, client *https.Client) (*Info, error) {
 	if apiKey == "" {
 		return nil, fmt.Errorf("API key is required")
 	}
@@ -156,8 +163,13 @@ func login(ctx context.Context, apiKey, appURL, appPublicURL, orgName string, lo
 		return result, nil
 	}
 
+	// Create default client if none provided
+	if client == nil {
+		client = https.NewClient(apiKey, appURL, log)
+	}
+
 	// Make API request to login
-	loginResp, err := makeLoginRequest(ctx, appURL, apiKey)
+	loginResp, err := makeLoginRequest(ctx, client)
 	if err != nil {
 		return nil, err
 	}
@@ -251,7 +263,7 @@ func isRetryableError(err error) bool {
 // It retries indefinitely on 5xx errors and network errors, but returns immediately on 4xx errors.
 // Backoff starts at 10ms and doubles each attempt, capped at 10 seconds.
 // Returns early if context is cancelled.
-func loginUntilSuccess(ctx context.Context, apiKey, appURL, appPublicURL, orgName string, log logger.Logger) (*Info, error) {
+func loginUntilSuccess(ctx context.Context, apiKey, appURL, appPublicURL, orgName string, log logger.Logger, client *https.Client) (*Info, error) {
 	// Use discard logger if none provided
 	if log == nil {
 		log = logger.Discard()
@@ -259,7 +271,7 @@ func loginUntilSuccess(ctx context.Context, apiKey, appURL, appPublicURL, orgNam
 
 	attempt := 0
 	for {
-		result, err := login(ctx, apiKey, appURL, appPublicURL, orgName, log)
+		result, err := login(ctx, apiKey, appURL, appPublicURL, orgName, log, client)
 		if err == nil {
 			return result, nil
 		}

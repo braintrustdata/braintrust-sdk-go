@@ -36,39 +36,47 @@ interactions:
         uncompressed: true
         body: |
             {
-              "candidates": [
-                {
-                  "content": {
-                    "parts": [
+              "error": {
+                "code": 429,
+                "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0\nPlease retry in 49.025140071s.",
+                "status": "RESOURCE_EXHAUSTED",
+                "details": [
+                  {
+                    "@type": "type.googleapis.com/google.rpc.Help",
+                    "links": [
                       {
-                        "text": "4\n"
+                        "description": "Learn more about Gemini API quotas",
+                        "url": "https://ai.google.dev/gemini-api/docs/rate-limits"
                       }
-                    ],
-                    "role": "model"
+                    ]
                   },
-                  "finishReason": "STOP",
-                  "avgLogprobs": -2.5708461180329323e-05
-                }
-              ],
-              "usageMetadata": {
-                "promptTokenCount": 13,
-                "candidatesTokenCount": 2,
-                "totalTokenCount": 15,
-                "promptTokensDetails": [
                   {
-                    "modality": "TEXT",
-                    "tokenCount": 13
-                  }
-                ],
-                "candidatesTokensDetails": [
+                    "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+                    "violations": [
+                      {
+                        "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count",
+                        "quotaId": "GenerateContentInputTokensPerModelPerMinute-FreeTier",
+                        "quotaDimensions": {
+                          "location": "global",
+                          "model": "gemini-2.0-flash-exp"
+                        }
+                      },
+                      {
+                        "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+                        "quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier",
+                        "quotaDimensions": {
+                          "model": "gemini-2.0-flash-exp",
+                          "location": "global"
+                        }
+                      }
+                    ]
+                  },
                   {
-                    "modality": "TEXT",
-                    "tokenCount": 2
+                    "@type": "type.googleapis.com/google.rpc.RetryInfo",
+                    "retryDelay": "49s"
                   }
                 ]
-              },
-              "modelVersion": "gemini-2.0-flash-exp",
-              "responseId": "hSkOabSeMo6o_uMPuvGCqAk"
+              }
             }
         headers:
             Alt-Svc:
@@ -76,11 +84,11 @@ interactions:
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Fri, 07 Nov 2025 17:16:54 GMT
+                - Wed, 12 Nov 2025 14:55:10 GMT
             Server:
                 - scaffolding on HTTPServer2
             Server-Timing:
-                - gfet4t7; dur=456
+                - gfet4t7; dur=81
             Vary:
                 - Origin
                 - X-Origin
@@ -91,6 +99,6 @@ interactions:
                 - SAMEORIGIN
             X-Xss-Protection:
                 - "0"
-        status: 200 OK
-        code: 200
-        duration: 523.688792ms
+        status: 429 Too Many Requests
+        code: 429
+        duration: 152.304041ms

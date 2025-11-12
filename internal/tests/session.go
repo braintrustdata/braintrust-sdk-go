@@ -45,6 +45,31 @@ func RandomString(length int) string {
 	return string(b)
 }
 
+// Name generates a test-specific name by combining t.Name() with optional suffixes.
+//
+// Example usage:
+//
+//	tests.Name(t)                    // "TestFoo"
+//	tests.Name(t, "slug")            // "TestFoo-slug"
+//	tests.Name(t, "task", "v2")      // "TestFoo-task-v2"
+func Name(t *testing.T, suffixes ...string) string {
+	t.Helper()
+
+	name := t.Name()
+
+	if len(suffixes) == 0 {
+		return name
+	}
+
+	for _, suffix := range suffixes {
+		if suffix != "" {
+			name = name + "-" + suffix
+		}
+	}
+
+	return name
+}
+
 // RandomName generates a unique name for tests using the test name and a random suffix.
 // This ensures test resources don't collide when running tests in parallel.
 func RandomName(t *testing.T, suffixes ...string) string {

@@ -44,18 +44,18 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - 99aee235e96c2070-IAD
+                - 99d6de83c979d468-IAD
             Content-Length:
                 - "265"
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 07 Nov 2025 18:27:15 GMT
+                - Wed, 12 Nov 2025 14:55:14 GMT
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=7ppXjbxllPGLZr.u4kobdYqOdKM0MczRiVHWJxO.j7Q-1762540035-1.0.1.1-FjK3rH_N_QUNh6FpnA1b60ekZBzWJS_xzemPNVMRbyHdf74Ruta0LyVC.q_UZ6liMXFUJuWwccLFR7Sbykan5SXPFyLz1pAFF7DYmvNhHSM; path=/; expires=Fri, 07-Nov-25 18:57:15 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
-                - _cfuvid=jzhPDZFodEIWzOut1czgfhKuiMeJz4.fENjx9kZJWdU-1762540035578-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+                - __cf_bm=UnLnYx8lMJIPMGccJ4Prs7SF0GMe2T2hjApAqGmuLJ0-1762959314-1.0.1.1-NCkza6yrPTeiH7cxcMNAnx.YAlm5iV8CMtvAiocR0FJMW1wj1MNkDjQnCxGAUfWGYPbPcmaiFZB0_tMO.d20Uog8i9cKUzHm7WH7n8hpNqk; path=/; expires=Wed, 12-Nov-25 15:25:14 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+                - _cfuvid=w1sfjMkqXTDFb.ap8f8IlDNNTWzZ.KE.6Uk452LfWFY-1762959314620-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             Vary:
@@ -67,7 +67,7 @@ interactions:
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Request-Id:
-                - req_26fb90ab2a774d509b3430e489e3e721
+                - req_33713323e0644351992b209b0f342031
         status: 401 Unauthorized
         code: 401
-        duration: 113.903208ms
+        duration: 106.175667ms

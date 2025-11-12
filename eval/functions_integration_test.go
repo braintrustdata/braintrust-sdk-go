@@ -12,24 +12,18 @@ import (
 	functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
 	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/config"
-	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
 )
 
-// setupAPIIntegrationTest sets up common test infrastructure for API integration tests
-func setupAPIIntegrationTest(t *testing.T) (*api.API, *auth.Session) {
+// setupAPIIntegrationTest sets up common test infrastructure for API integration tests with VCR support
+func setupAPIIntegrationTest(t *testing.T) *api.API {
 	t.Helper()
-	session := createIntegrationTestSession(t)
-
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
-
-	return apiClient, session
+	return createIntegrationTestAPIClient(t)
 }
 
 // TestFunctionsAPI_Task_StringInput tests that tasks can accept string input and return string output
 func TestFunctionsAPI_Task_StringInput(t *testing.T) {
-	apiClient, _ := setupAPIIntegrationTest(t)
+	apiClient := setupAPIIntegrationTest(t)
 	t.Parallel()
 
 	ctx := context.Background()
@@ -39,7 +33,8 @@ func TestFunctionsAPI_Task_StringInput(t *testing.T) {
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
-	testSlug := tests.RandomName(t, "task-string")
+	// Use fixed name for VCR determinism
+	testSlug := tests.Name(t, "slug")
 
 	// Clean up any existing function from previous test runs
 	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
@@ -100,7 +95,7 @@ func TestFunctionsAPI_Task_StringInput(t *testing.T) {
 
 // TestFunctionsAPI_Task_StructInput tests that tasks can accept struct input and return struct output
 func TestFunctionsAPI_Task_StructInput(t *testing.T) {
-	apiClient, _ := setupAPIIntegrationTest(t)
+	apiClient := setupAPIIntegrationTest(t)
 	t.Parallel()
 
 	ctx := context.Background()
@@ -109,7 +104,8 @@ func TestFunctionsAPI_Task_StructInput(t *testing.T) {
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
-	testSlug := tests.RandomName(t, "task-struct")
+	// Use fixed name for VCR determinism
+	testSlug := tests.Name(t, "slug")
 
 	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
 		ProjectName: integrationTestProject,
@@ -185,7 +181,7 @@ func TestFunctionsAPI_Task_StructInput(t *testing.T) {
 
 // TestFunctionsAPI_Task_MapInput tests that tasks can accept map input and return map output
 func TestFunctionsAPI_Task_MapInput(t *testing.T) {
-	apiClient, _ := setupAPIIntegrationTest(t)
+	apiClient := setupAPIIntegrationTest(t)
 	t.Parallel()
 
 	ctx := context.Background()
@@ -194,7 +190,8 @@ func TestFunctionsAPI_Task_MapInput(t *testing.T) {
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
-	testSlug := tests.RandomName(t, "task-map")
+	// Use fixed name for VCR determinism
+	testSlug := tests.Name(t, "slug")
 
 	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
 		ProjectName: integrationTestProject,
@@ -265,7 +262,7 @@ func TestFunctionsAPI_Task_MapInput(t *testing.T) {
 
 // TestFunctionsAPI_Scorer_VariousTypes tests that scorers can handle various input and output types
 func TestFunctionsAPI_Scorer_VariousTypes(t *testing.T) {
-	apiClient, _ := setupAPIIntegrationTest(t)
+	apiClient := setupAPIIntegrationTest(t)
 	t.Parallel()
 
 	ctx := context.Background()
@@ -274,7 +271,8 @@ func TestFunctionsAPI_Scorer_VariousTypes(t *testing.T) {
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
-	testSlug := tests.RandomName(t, "scorer-types")
+	// Use fixed name for VCR determinism
+	testSlug := tests.Name(t, "slug")
 
 	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
 		ProjectName: integrationTestProject,
@@ -386,10 +384,11 @@ func TestFunctionsAPI_Scorer_VariousTypes(t *testing.T) {
 
 // TestFunctionsAPI_EndToEnd_MixedTypes tests a complete evaluation flow with mixed input/output types
 func TestFunctionsAPI_EndToEnd_MixedTypes(t *testing.T) {
-	apiClient, session := setupAPIIntegrationTest(t)
+	session, apiClient := setupIntegrationTest(t)
 	t.Parallel()
 
 	ctx := context.Background()
+
 	functions := apiClient.Functions()
 	cfg := &config.Config{
 		DefaultProjectName: integrationTestProject,
@@ -399,8 +398,8 @@ func TestFunctionsAPI_EndToEnd_MixedTypes(t *testing.T) {
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
-	// Create task function
-	taskSlug := tests.RandomName(t, "e2e-task")
+	// Create task function - use fixed name for VCR determinism
+	taskSlug := tests.Name(t, "task")
 	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
 		ProjectName: integrationTestProject,
 		Slug:        taskSlug,
@@ -443,8 +442,8 @@ func TestFunctionsAPI_EndToEnd_MixedTypes(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { _ = functions.Delete(ctx, taskFunc.ID) }()
 
-	// Create scorer function
-	scorerSlug := tests.RandomName(t, "e2e-scorer")
+	// Create scorer function - use fixed name for VCR determinism
+	scorerSlug := tests.Name(t, "scorer")
 	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
 		ProjectName: integrationTestProject,
 		Slug:        scorerSlug,
@@ -521,10 +520,11 @@ func TestFunctionsAPI_EndToEnd_MixedTypes(t *testing.T) {
 	tp := trace.NewTracerProvider()
 	defer func() { _ = tp.Shutdown(ctx) }()
 
-	// Create evaluator and run the full evaluation with Functions API task and scorer
-	evaluator := NewEvaluator[QuestionInput, AnswerOutput](session, cfg, tp)
+	// Create evaluator with VCR-wrapped API client
+	evaluator := NewEvaluator[QuestionInput, AnswerOutput](session, cfg, tp, apiClient)
+	// Use fixed experiment name for VCR determinism
 	result, err := evaluator.Run(ctx, Opts[QuestionInput, AnswerOutput]{
-		Experiment: tests.RandomName(t, "e2e-exp"),
+		Experiment: "test-e2e-exp",
 		Dataset:    cases,
 		Task:       task,
 		Scorers:    []Scorer[QuestionInput, AnswerOutput]{scorer},
@@ -538,7 +538,7 @@ func TestFunctionsAPI_EndToEnd_MixedTypes(t *testing.T) {
 
 // TestFunctionsAPI_Task_PrimitiveTypes tests that tasks can handle primitive types like int, float, bool
 func TestFunctionsAPI_Task_PrimitiveTypes(t *testing.T) {
-	apiClient, _ := setupAPIIntegrationTest(t)
+	apiClient := setupAPIIntegrationTest(t)
 	t.Parallel()
 
 	ctx := context.Background()
@@ -547,7 +547,8 @@ func TestFunctionsAPI_Task_PrimitiveTypes(t *testing.T) {
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
-	testSlug := tests.RandomName(t, "task-int")
+	// Use fixed name for VCR determinism
+	testSlug := tests.Name(t, "slug")
 
 	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
 		ProjectName: integrationTestProject,
