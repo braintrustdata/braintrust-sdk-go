@@ -7,14 +7,18 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/api/experiments"
 	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
-	"github.com/braintrustdata/braintrust-sdk-go/config"
-	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 )
+
+// datasetInfo is a minimal interface for dataset metadata needed by registerExperiment.
+type datasetInfo interface {
+	ID() string
+	Version() string
+}
 
 // registerExperiment creates or gets an experiment for the eval.
 // This is an internal helper that uses the api package.
 // projectName must be already resolved (not empty) by the caller.
-func registerExperiment(ctx context.Context, cfg *config.Config, session *auth.Session, name string, projectName string, tags []string, metadata map[string]interface{}, update bool, datasetID string, datasetVersion string) (*experiments.Experiment, error) {
+func registerExperiment(ctx context.Context, apiClient *api.API, name string, projectName string, tags []string, metadata map[string]interface{}, update bool, dataset datasetInfo) (*experiments.Experiment, error) {
 	if name == "" {
 		return nil, fmt.Errorf("experiment name is required")
 	}
@@ -24,11 +28,12 @@ func registerExperiment(ctx context.Context, cfg *config.Config, session *auth.S
 		return nil, fmt.Errorf("project name is required (set via WithProject option or Opts.ProjectName)")
 	}
 
-	endpoints := session.Endpoints()
-	c := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+	// Extract dataset metadata
+	datasetID := dataset.ID()
+	datasetVersion := dataset.Version()
 
 	// Create the project
-	project, err := c.Projects().Create(ctx, projects.CreateParams{
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{
 		Name: projectName,
 	})
 	if err != nil {
@@ -36,7 +41,7 @@ func registerExperiment(ctx context.Context, cfg *config.Config, session *auth.S
 	}
 
 	// Register the experiment
-	experiment, err := c.Experiments().Register(ctx, name, project.ID, experiments.RegisterOpts{
+	experiment, err := apiClient.Experiments().Register(ctx, name, project.ID, experiments.RegisterOpts{
 		Tags:           tags,
 		Metadata:       metadata,
 		Update:         update,

@@ -36,7 +36,7 @@ interactions:
                   0
                 ]
               }
-            ] [user_email=matt@braintrustdata.com] [user_org=matt-test-org] [timestamp=1762538566.763] [request_id=iad1::kz55r-1762538566661-bfc20c8688d9]
+            ] [user_email=matt@braintrustdata.com] [user_org=matt-test-org] [timestamp=1762959310.665] [request_id=iad1::n8k68-1762959310507-02f419606559]
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -45,28 +45,28 @@ interactions:
             Content-Type:
                 - text/plain; charset=utf-8
             Date:
-                - Fri, 07 Nov 2025 18:02:46 GMT
+                - Wed, 12 Nov 2025 14:55:10 GMT
             Etag:
-                - W/"117-dgedrgYs8yotI8d9HHzxNlg8jv8"
+                - W/"117-k5VBHAZO+vvUvPP6QX4SdcrPV3A"
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 ab734ad5d81cc9d470b6176a05dd968e.cloudfront.net (CloudFront), 1.1 c1685d59e35fdb859ab8a1f97feb5652.cloudfront.net (CloudFront)
+                - 1.1 cfc46590021b7df312893ffb67317bb2.cloudfront.net (CloudFront), 1.1 537c1727cc67e6d2567bb61ae0478182.cloudfront.net (CloudFront)
             X-Amz-Apigw-Id:
-                - Tr0bGEwcIAMEpnQ=
+                - T73oUHhyoAMEV6Q=
             X-Amz-Cf-Id:
-                - _p7rYxaSmYAyNaor7v9GyMEYrlHjL3jQwn5eVLvEk0uHx4FxAUQYPw==
+                - kSMApnObqtkGEGDLyMIoEmok-aUpuka8VTVeP5h32ebRbWsO7GXXMw==
             X-Amz-Cf-Pop:
                 - JFK50-P5
                 - JFK50-P2
             X-Amzn-Requestid:
-                - fdef1f47-10d1-4a83-84f3-7375095c68ff
+                - 1aa35f82-e2ac-464b-aad8-9ff3078ff66d
             X-Amzn-Trace-Id:
-                - Root=1-690e3446-5f325a254365693250f2d973;Parent=0fd39a2ac4b1a075;Sampled=0;Lineage=1:24be3d11:0
+                - Root=1-69149fce-2b24c50e7be6a74d4a42e889;Parent=1cadf7744a71fe1f;Sampled=0;Lineage=1:24be3d11:0
             X-Bt-Internal-Trace-Id:
-                - 690e3446000000007b5195a3689e5454
+                - 69149fce0000000012ac60d530f9d99d
             X-Cache:
                 - Error from cloudfront
         status: 400 Bad Request
         code: 400
-        duration: 210.015583ms
+        duration: 260.474416ms

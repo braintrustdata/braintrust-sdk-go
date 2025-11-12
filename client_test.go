@@ -17,7 +17,6 @@ import (
 func TestNew_WithMinimalConfig(t *testing.T) {
 	t.Parallel()
 
-	// Use real API key if available, otherwise use test key
 	// Create a TracerProvider
 	tp := trace.NewTracerProvider()
 	defer func() { _ = tp.Shutdown(context.Background()) }()
@@ -65,11 +64,9 @@ func TestNew_WithBlockingLogin(t *testing.T) {
 	require.NotNil(t, client)
 
 	// After blocking login, session info should be available
-	ok, info := client.session.Info()
-	assert.True(t, ok)
-	assert.NotNil(t, info)
-	assert.Equal(t, "test-org-id", info.OrgID)
-	assert.Equal(t, "test-org-name", info.OrgName)
+	org := client.session.OrgInfo()
+	assert.Equal(t, "test-org-id", org.ID)
+	assert.Equal(t, "test-org-name", org.Name)
 
 	// String() should show org info
 	str := client.String()

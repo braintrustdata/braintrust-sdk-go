@@ -39,6 +39,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 	oteltrace "go.opentelemetry.io/otel/trace"
 
+	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	bttrace "github.com/braintrustdata/braintrust-sdk-go/trace"
@@ -253,7 +254,6 @@ func newEval[I, R any](
 	experimentName string,
 	projectID string,
 	projectName string,
-	datasetID string,
 	dataset Dataset[I, R],
 	task TaskFunc[I, R],
 	scorers []Scorer[I, R],
@@ -263,6 +263,9 @@ func newEval[I, R any](
 	// Build parent span option
 	parent := bttrace.NewParent(bttrace.ParentTypeExperimentID, experimentID)
 	startSpanOpt := oteltrace.WithAttributes(parent.Attr())
+
+	// Extract dataset ID from dataset
+	datasetID := dataset.ID()
 
 	// Set parallelism
 	goroutines := parallelism
@@ -291,19 +294,15 @@ func newEval[I, R any](
 
 // newEvalOpts creates a new eval executor with dependency injection.
 // This replaces the old New() constructor which used global state.
-func newEvalOpts[I, R any](ctx context.Context, cfg *config.Config, session *auth.Session, tp *trace.TracerProvider, opts Opts[I, R]) (*eval[I, R], error) {
+func newEvalOpts[I, R any](ctx context.Context, cfg *config.Config, session *auth.Session, tp *trace.TracerProvider, apiClient *api.API, opts Opts[I, R]) (*eval[I, R], error) {
 	// Determine project name (use opts.ProjectName if specified, otherwise cfg.DefaultProjectName)
 	projectName := opts.ProjectName
 	if projectName == "" {
 		projectName = cfg.DefaultProjectName
 	}
 
-	// Extract dataset ID and version from Dataset interface
-	datasetID := opts.Dataset.ID()
-	datasetVersion := opts.Dataset.Version()
-
 	// Register/get experiment (registerExperiment will validate that projectName is not empty)
-	exp, err := registerExperiment(ctx, cfg, session, opts.Experiment, projectName, opts.Tags, opts.Metadata, opts.Update, datasetID, datasetVersion)
+	exp, err := registerExperiment(ctx, apiClient, opts.Experiment, projectName, opts.Tags, opts.Metadata, opts.Update, opts.Dataset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to register experiment: %w", err)
 	}
@@ -323,7 +322,6 @@ func newEvalOpts[I, R any](ctx context.Context, cfg *config.Config, session *aut
 		exp.Name,
 		projectID,
 		projectName,
-		datasetID,
 		opts.Dataset,
 		opts.Task,
 		opts.Scorers,
@@ -606,13 +604,11 @@ func (e *eval[I, R]) permalink() string {
 	orgName := e.config.OrgName
 
 	// Try to get from session if login is complete
-	if ok, info := e.session.Info(); ok {
-		if appURL == "" && info.AppPublicURL != "" {
-			appURL = info.AppPublicURL
-		}
-		if orgName == "" && info.OrgName != "" {
-			orgName = info.OrgName
-		}
+	if sessionAppURL := e.session.AppPublicURL(); appURL == "" && sessionAppURL != "" {
+		appURL = sessionAppURL
+	}
+	if sessionOrgName := e.session.OrgName(); orgName == "" && sessionOrgName != "" {
+		orgName = sessionOrgName
 	}
 
 	if appURL == "" {
@@ -628,7 +624,8 @@ func (e *eval[I, R]) permalink() string {
 
 // run executes an evaluation using client resources (config, session, tracerProvider).
 // This is an internal function - users should use Evaluator.Run() instead.
-func run[I, R any](ctx context.Context, opts Opts[I, R], cfg *config.Config, session *auth.Session, tp *trace.TracerProvider) (*Result, error) {
+// apiClient can be nil, in which case one will be created for API calls.
+func run[I, R any](ctx context.Context, opts Opts[I, R], cfg *config.Config, session *auth.Session, tp *trace.TracerProvider, apiClient *api.API) (*Result, error) {
 	// Validate required fields
 	if opts.Experiment == "" {
 		return nil, fmt.Errorf("%w: Experiment is required", errEval)
@@ -641,7 +638,7 @@ func run[I, R any](ctx context.Context, opts Opts[I, R], cfg *config.Config, ses
 	}
 
 	// Create eval executor
-	e, err := newEvalOpts(ctx, cfg, session, tp, opts)
+	e, err := newEvalOpts(ctx, cfg, session, tp, apiClient, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -746,7 +743,6 @@ func testNewEval[I, R any](
 		experimentName,
 		projectID,
 		projectName,
-		dataset.ID(),
 		dataset,
 		task,
 		scorers,

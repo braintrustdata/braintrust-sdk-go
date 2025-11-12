@@ -36,33 +36,33 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 07 Nov 2025 18:02:46 GMT
+                - Wed, 12 Nov 2025 14:55:10 GMT
             Etag:
                 - W/"eb-poL8yUftdUFahhL/Peyi6gN8N/E"
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 38bc9c97daf30f968ccac44ef89e14e0.cloudfront.net (CloudFront), 1.1 c1685d59e35fdb859ab8a1f97feb5652.cloudfront.net (CloudFront)
+                - 1.1 3b0649a8bee506c1d7498462d39e6c44.cloudfront.net (CloudFront), 1.1 537c1727cc67e6d2567bb61ae0478182.cloudfront.net (CloudFront)
             X-Amz-Apigw-Id:
-                - Tr0bGFy2IAMEiKw=
+                - T73oUHyToAMENoQ=
             X-Amz-Cf-Id:
-                - cNfEVb--s_GyOhuU0eLA8ebaRJZAzvR5f-bIXxDEZvPav1CbAnrGUA==
+                - hS3DRXG7WDYzUUenVSr9P238vWXqMcATHn5J-dAhrf5FlgJPHFLP9w==
             X-Amz-Cf-Pop:
                 - JFK50-P5
                 - JFK50-P2
             X-Amzn-Requestid:
-                - 7a8d53a7-970c-4c79-b959-548bf16d25cb
+                - 8a87b8da-e8ed-4f9f-b86e-b6fd30f47b70
             X-Amzn-Trace-Id:
-                - Root=1-690e3446-7fbb977a17c094c7367872cc;Parent=7ff774ed62406887;Sampled=0;Lineage=1:24be3d11:0
+                - Root=1-69149fce-1ebfcda73f4ba9ec21657d69;Parent=38d97fad3df4fbb0;Sampled=0;Lineage=1:24be3d11:0
             X-Bt-Found-Existing:
                 - "true"
             X-Bt-Internal-Trace-Id:
-                - 690e3446000000002a23b09a27bd721b
+                - 69149fce000000006b210db9359dbddd
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 146.189833ms
+        duration: 181.967708ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -87,7 +87,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"objects":[{"id":"cb18fe2a-27c4-42e8-8da6-4abb8c783470","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test","created":"2025-11-07T18:02:46.722Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"7c8460b6-f890-4715-bef5-408092559666","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"Python Working Origin Demo","created":"2025-11-06T21:08:26.281Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"b3a207b4-9a3b-43e9-8448-077efc35c921","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"Python Dataset Origin Demo","created":"2025-11-06T21:06:56.535Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"ee374af4-28f0-4cda-9a29-cc7afe205773","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"Python Origin Demo Eval","created":"2025-11-06T20:58:22.945Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"b1096ac8-ef55-4a62-8de2-3b194551f224","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"python-origin-demo","created":"2025-11-06T20:58:22.177Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"d922b0d4-5551-455a-812c-5ec8bc628fd2","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test-1762462648","created":"2025-11-06T20:57:29.107Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"6984a16e-e9e0-4803-9f16-1fde6afa1375","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"Origin Demo Experiment","created":"2025-11-06T20:43:45.893Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"3451c6f2-d263-495f-aed6-e9c968f4569f","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"origin-demo","created":"2025-11-06T20:43:44.738Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"a540e436-accf-4d6a-8c06-1f5b9f743825","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"Capitalization Task Demo","created":"2025-11-06T20:08:45.839Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"eea105c9-1945-43cc-8866-acad079c93f4","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"python-sdk-examples","created":"2025-11-06T20:08:44.892Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null}]}'
+        body: '{"objects":[{"id":"a192f7d3-e154-4874-ab87-72599c8c02d6","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test","created":"2025-11-12T02:58:27.365Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"7c8460b6-f890-4715-bef5-408092559666","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"Python Working Origin Demo","created":"2025-11-06T21:08:26.281Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"b3a207b4-9a3b-43e9-8448-077efc35c921","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"Python Dataset Origin Demo","created":"2025-11-06T21:06:56.535Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"ee374af4-28f0-4cda-9a29-cc7afe205773","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"Python Origin Demo Eval","created":"2025-11-06T20:58:22.945Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"b1096ac8-ef55-4a62-8de2-3b194551f224","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"python-origin-demo","created":"2025-11-06T20:58:22.177Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"d922b0d4-5551-455a-812c-5ec8bc628fd2","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-lifecycle-test-1762462648","created":"2025-11-06T20:57:29.107Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"6984a16e-e9e0-4803-9f16-1fde6afa1375","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"Origin Demo Experiment","created":"2025-11-06T20:43:45.893Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"3451c6f2-d263-495f-aed6-e9c968f4569f","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"origin-demo","created":"2025-11-06T20:43:44.738Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"a540e436-accf-4d6a-8c06-1f5b9f743825","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"Capitalization Task Demo","created":"2025-11-06T20:08:45.839Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null},{"id":"eea105c9-1945-43cc-8866-acad079c93f4","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"python-sdk-examples","created":"2025-11-06T20:08:44.892Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null}]}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -96,28 +96,28 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 07 Nov 2025 18:02:47 GMT
+                - Wed, 12 Nov 2025 14:55:10 GMT
             Etag:
-                - W/"9ab-aL2PYgF9M1lukk6X3aGAn6nTOAM"
+                - W/"9ab-Bw1JHQHxK3uwz5YH4bHGCseyA94"
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 8a9cdb228e33f8d52a4b42c56ca26590.cloudfront.net (CloudFront), 1.1 c1685d59e35fdb859ab8a1f97feb5652.cloudfront.net (CloudFront)
+                - 1.1 fa503ecd9278a874859948f3b586c782.cloudfront.net (CloudFront), 1.1 537c1727cc67e6d2567bb61ae0478182.cloudfront.net (CloudFront)
             X-Amz-Apigw-Id:
-                - Tr0bIH_lIAMEpUQ=
+                - T73oWFdAIAMEI1Q=
             X-Amz-Cf-Id:
-                - 29whjICLI6VEpm2VVhAT_jzSlbcnagRyi5WTDQ8HPDiCl4lmJ0U4mA==
+                - nquBh2SixaXRTK2Ni1i0F7JfH0StfoKywwJ0B582nNMr_Wsir1Bjgg==
             X-Amz-Cf-Pop:
                 - JFK50-P5
                 - JFK50-P2
             X-Amzn-Requestid:
-                - 1a0c8204-46dc-411f-9917-82b12bc46dec
+                - 27f36e5e-2431-428a-b74d-27431ac0e37f
             X-Amzn-Trace-Id:
-                - Root=1-690e3446-15357a9a5a698c754e61f9b0;Parent=29ffeb8175af040b;Sampled=0;Lineage=1:24be3d11:0
+                - Root=1-69149fce-3df74c9a7484f94c281b04ab;Parent=644fae083efc1bd3;Sampled=0;Lineage=1:24be3d11:0
             X-Bt-Internal-Trace-Id:
-                - 690e34460000000076e04f04670a69c6
+                - 69149fce000000006fe3c2237000fe5f
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 312.366084ms
+        duration: 368.390791ms

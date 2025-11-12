@@ -5,13 +5,26 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
+
+// APIInfo contains API credentials and endpoint information.
+type APIInfo struct {
+	APIKey string
+	APIURL string
+}
+
+// Org contains organization information.
+type Org struct {
+	ID   string
+	Name string
+}
 
 // Session manages authentication and login state.
 type Session struct {
 	mu     sync.RWMutex
-	info   *Info
+	result *loginResult // Server response data
 	err    error
 	done   chan struct{}
 	logger logger.Logger
@@ -20,17 +33,11 @@ type Session struct {
 	opts   Options // Store original options for access before login completes
 }
 
-// Endpoints holds the API credentials and URLs from session options.
-type Endpoints struct {
-	APIKey string
-	APIURL string
-	AppURL string
-}
-
 // NewSession creates a session and starts login with retry in the background.
 // Returns an error if required fields (APIKey, AppURL) are missing.
 // The context is used for the background login goroutine.
 // If opts.Logger is nil, a noop logger is used.
+// If opts.Client is nil, a default client will be created.
 func NewSession(ctx context.Context, opts Options) (*Session, error) {
 	if opts.APIKey == "" {
 		return nil, fmt.Errorf("API key is required")
@@ -43,6 +50,11 @@ func NewSession(ctx context.Context, opts Options) (*Session, error) {
 	log := opts.Logger
 	if log == nil {
 		log = logger.Discard()
+	}
+
+	// Create default client if none provided
+	if opts.Client == nil {
+		opts.Client = https.NewClient(opts.APIKey, opts.AppURL, log)
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
@@ -64,67 +76,80 @@ func (s *Session) Close() {
 	}
 }
 
-// Endpoints returns the API credentials and URLs.
-// If login has completed, returns values from Info (which may be updated by the server).
-// Otherwise, falls back to the original Options.
-// This is always available immediately, no blocking required.
-func (s *Session) Endpoints() Endpoints {
-	// Check if login completed via Info()
-	if ok, info := s.Info(); ok {
-		return Endpoints{
-			APIKey: info.APIKey,
-			APIURL: info.APIURL,
-			AppURL: s.opts.AppURL, // AppURL doesn't come from server
-		}
-	}
-
-	// Fall back to original options
-	apiURL := s.opts.APIURL
-	if apiURL == "" {
-		apiURL = "https://api.braintrust.dev" // Default
-	}
-	return Endpoints{
-		APIKey: s.opts.APIKey,
-		APIURL: apiURL,
-		AppURL: s.opts.AppURL,
-	}
-}
-
 // OrgName returns the organization name if available.
 // Returns empty string if login hasn't completed yet.
 func (s *Session) OrgName() string {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	if s.info != nil {
-		return s.info.OrgName
-	}
-	return ""
+	org := s.OrgInfo()
+	return org.Name
 }
 
-// Info returns current auth info (non-blocking).
-// Returns (ok=true, info) if login succeeded.
-// Returns (ok=false, nil) if login is in progress or failed.
-func (s *Session) Info() (bool, *Info) {
+// OrgInfo returns the organization ID and name from the server response.
+// Returns empty strings if login hasn't completed yet.
+func (s *Session) OrgInfo() Org {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	if s.info != nil && s.info.LoggedIn {
-		return true, s.info
+	ok, result := s.getLoginResult()
+	if ok {
+		return Org{
+			ID:   result.OrgID,
+			Name: result.OrgName,
+		}
 	}
-	return false, nil
+
+	return Org{}
+}
+
+// APIInfo returns the API key and API URL.
+// API key comes from config, API URL comes from server response (or default).
+// Always available - falls back to config/defaults if login not complete.
+func (s *Session) APIInfo() APIInfo {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	apiKey := s.opts.APIKey
+	apiURL := s.opts.APIURL
+
+	ok, result := s.getLoginResult()
+	if ok {
+		apiURL = result.APIURL
+	}
+
+	if apiURL == "" {
+		apiURL = "https://api.braintrust.dev"
+	}
+
+	return APIInfo{
+		APIKey: apiKey,
+		APIURL: apiURL,
+	}
+}
+
+func (s *Session) getLoginResult() (bool, *loginResult) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if s.result == nil {
+		return false, nil
+	}
+	return true, s.result
+}
+
+// AppPublicURL returns the public app URL from config.
+// Always available.
+func (s *Session) AppPublicURL() string {
+	return s.opts.AppPublicURL
 }
 
 // Login blocks until login completes or context is cancelled.
-// Returns info and error if login failed.
-func (s *Session) Login(ctx context.Context) (*Info, error) {
+// Returns error if login failed.
+func (s *Session) Login(ctx context.Context) error {
 	select {
 	case <-s.done:
 		s.mu.RLock()
 		defer s.mu.RUnlock()
-		return s.info, s.err
+		return s.err
 	case <-ctx.Done():
-		return nil, ctx.Err()
+		return ctx.Err()
 	}
 }
 
@@ -134,7 +159,7 @@ func (s *Session) loginWithRetry(opts Options) {
 	s.logger.Debug("starting login with retry")
 
 	// Use loginUntilSuccess which retries on network/5xx errors
-	info, err := loginUntilSuccess(s.ctx, opts.APIKey, opts.AppURL, opts.AppPublicURL, opts.OrgName, opts.Logger)
+	result, err := loginUntilSuccess(s.ctx, opts.Client, opts.OrgName)
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -145,25 +170,33 @@ func (s *Session) loginWithRetry(opts Options) {
 		return
 	}
 
-	s.info = info
+	s.result = result
 	s.logger.Debug("login successful",
-		"org_name", s.info.OrgName,
-		"org_id", s.info.OrgID)
+		"org_name", s.result.OrgName,
+		"org_id", s.result.OrgID)
 }
 
 // NewTestSession creates a static test session with hardcoded data.
 // This is for use in test packages outside of internal/auth to avoid import cycles.
 // This session does not make any network calls or start goroutines.
-func NewTestSession(info *Info, done chan struct{}, log logger.Logger) *Session {
+func NewTestSession(apiKey, orgID, orgName, apiURL, appURL, appPublicURL string, log logger.Logger) *Session {
+	done := make(chan struct{})
+	close(done)
 	return &Session{
-		info:   info,
+		result: &loginResult{
+			OrgID:    orgID,
+			OrgName:  orgName,
+			APIURL:   apiURL,
+			ProxyURL: apiURL, // Use same as APIURL for test
+		},
 		err:    nil,
 		done:   done,
 		logger: log,
 		opts: Options{
-			APIKey: info.APIKey,
-			AppURL: info.AppURL,
-			APIURL: info.APIURL,
+			APIKey:       apiKey,
+			AppURL:       appURL,
+			AppPublicURL: appPublicURL,
+			APIURL:       apiURL,
 		},
 	}
 }

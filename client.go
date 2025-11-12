@@ -101,7 +101,7 @@ func New(tp *trace.TracerProvider, opts ...Option) (*Client, error) {
 	// If blocking login requested, wait for it
 	if cfg.BlockingLogin {
 		log.Debug("waiting for login to complete")
-		_, err := session.Login(context.Background())
+		err := session.Login(context.Background())
 		if err != nil {
 			log.Error("blocking login failed", "error", err)
 			return nil, fmt.Errorf("login failed: %w", err)
@@ -147,16 +147,15 @@ func convertSpanFilters(funcs []config.SpanFilterFunc) []bttrace.SpanFilterFunc 
 // String returns a string representation of the client
 func (c *Client) String() string {
 	// Get org name from auth session if available
-	orgName := c.config.OrgName
-	orgID := ""
-	if ok, info := c.session.Info(); ok {
-		orgName = info.OrgName
-		orgID = info.OrgID
+	org := c.session.OrgInfo()
+	orgName := org.Name
+	if orgName == "" {
+		orgName = c.config.OrgName
 	}
 
 	orgInfo := orgName
-	if orgID != "" {
-		orgInfo = fmt.Sprintf("%s (ID: %s)", orgName, orgID)
+	if org.ID != "" {
+		orgInfo = fmt.Sprintf("%s (ID: %s)", orgName, org.ID)
 	} else if orgName == "" {
 		orgInfo = "<not logged in>"
 	}
@@ -216,7 +215,7 @@ func (c *Client) Tracer(name string, opts ...oteltrace.TracerOption) oteltrace.T
 //	    Scorers:    scorers,
 //	})
 func NewEvaluator[I, R any](client *Client) *eval.Evaluator[I, R] {
-	return eval.NewEvaluator[I, R](client.session, client.config, client.tracerProvider)
+	return eval.NewEvaluator[I, R](client.session, client.config, client.tracerProvider, client.API())
 }
 
 // API returns an API client for making direct calls to the Braintrust API.
@@ -235,12 +234,12 @@ func NewEvaluator[I, R any](client *Client) *eval.Evaluator[I, R] {
 //	    Description: "My test dataset",
 //	})
 func (c *Client) API() *api.API {
-	// Get endpoints from session (prefers logged-in info, falls back to config)
-	endpoints := c.session.Endpoints()
+	// Get API credentials from session (prefers logged-in info, falls back to config)
+	apiInfo := c.session.APIInfo()
 
 	return api.NewClient(
-		endpoints.APIKey,
-		api.WithAPIURL(endpoints.APIURL),
+		apiInfo.APIKey,
+		api.WithAPIURL(apiInfo.APIURL),
 		api.WithLogger(c.logger),
 	)
 }

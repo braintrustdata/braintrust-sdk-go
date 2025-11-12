@@ -36,33 +36,33 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 07 Nov 2025 18:02:46 GMT
+                - Wed, 12 Nov 2025 14:55:10 GMT
             Etag:
                 - W/"eb-poL8yUftdUFahhL/Peyi6gN8N/E"
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 cf549a03d4f209dc2ee52d1dd6cb3730.cloudfront.net (CloudFront), 1.1 f458ab1245bb4f257969c1da8e708f88.cloudfront.net (CloudFront)
+                - 1.1 9750f5ee94b45ad0faba87b3fac2aad6.cloudfront.net (CloudFront), 1.1 babb61789095288ef1d09146c15e7f1e.cloudfront.net (CloudFront)
             X-Amz-Apigw-Id:
-                - Tr0bEG30IAMEPYw=
+                - T73oTFdkoAMEleQ=
             X-Amz-Cf-Id:
-                - Z9BvwIgYH95TJObXB9njLwkpRVhH3IRDN6iCfJuuct4nZ33qHb6MEw==
+                - RWBvDcMmtGF9jl6VmG-NH2JhkIueHoWE2MVa_vrk5sTDNqckdMdpAw==
             X-Amz-Cf-Pop:
                 - JFK50-P5
                 - JFK50-P2
             X-Amzn-Requestid:
-                - 2a94f9b9-6d76-4d0c-b906-b361e644cf60
+                - 4086e6ef-3c09-49b3-9470-1ed82b37ea70
             X-Amzn-Trace-Id:
-                - Root=1-690e3446-30a5ea2a7eed4cbb4bc7512e;Parent=6b22c2d4028d36ab;Sampled=0;Lineage=1:24be3d11:0
+                - Root=1-69149fce-22655e4014407bfc2815864a;Parent=3b565340b23b388f;Sampled=0;Lineage=1:24be3d11:0
             X-Bt-Found-Existing:
                 - "true"
             X-Bt-Internal-Trace-Id:
-                - 690e3446000000004fdf4c3677be47a4
+                - 69149fce000000002b5eb75df102619f
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 171.453125ms
+        duration: 156.495917ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -89,7 +89,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"log_id":"p","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","slug":"test-prompt","name":"test-prompt","function_data":{"type":"prompt"},"prompt_data":{"options":{"model":"gpt-4o-mini","params":{"max_tokens":50,"response_format":{"type":"json_object"},"temperature":0}},"prompt":{"messages":[{"content":"You are a helpful assistant. Respond with valid JSON in the format: {\"answer\": \"your answer here\"}","role":"system"},{"content":"{{input.question}}","role":"user"}],"type":"chat"}},"id":"8a7465a5-45e7-4a36-87cf-7ab49d6c2085","created":"2025-11-07T18:02:46.918Z","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","_xact_id":"1000196101980529120"}'
+        body: '{"log_id":"p","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","slug":"test-prompt","name":"test-prompt","function_data":{"type":"prompt"},"prompt_data":{"options":{"model":"gpt-4o-mini","params":{"max_tokens":50,"response_format":{"type":"json_object"},"temperature":0}},"prompt":{"messages":[{"content":"You are a helpful assistant. Respond with valid JSON in the format: {\"answer\": \"your answer here\"}","role":"system"},{"content":"{{input.question}}","role":"user"}],"type":"chat"}},"id":"8a7465a5-45e7-4a36-87cf-7ab49d6c2085","created":"2025-11-12T14:55:10.663Z","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","_xact_id":"1000196129554357537"}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -98,31 +98,31 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 07 Nov 2025 18:02:47 GMT
+                - Wed, 12 Nov 2025 14:55:11 GMT
             Etag:
-                - W/"290-ZiYRqRkfEV0czoPBqzCW2Zuq7xI"
+                - W/"290-g1fy78zLG+rgHe1IgCVHGBtjoU8"
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 82139f26335f87e45d45c08d5208817a.cloudfront.net (CloudFront), 1.1 f458ab1245bb4f257969c1da8e708f88.cloudfront.net (CloudFront)
+                - 1.1 bf8d7cb6fca5d51158e1109ca40fe242.cloudfront.net (CloudFront), 1.1 babb61789095288ef1d09146c15e7f1e.cloudfront.net (CloudFront)
             X-Amz-Apigw-Id:
-                - Tr0bIF5PIAMEFFQ=
+                - T73oUH7loAMEGQA=
             X-Amz-Cf-Id:
-                - JRH87a2Mscy99u57SttZ0CNA7hb3bn7-Zyg3VGDBpvH9vrjXkNBLZg==
+                - SSF26UbwrZMX1wy_HpxBbrhblPx6VSjjVcvjuhaD6Q75OeRhZ6xFKA==
             X-Amz-Cf-Pop:
                 - JFK50-P5
                 - JFK50-P2
             X-Amzn-Requestid:
-                - ebbdc747-86d7-43dc-872f-b2d67800e4cf
+                - 041fb137-84b8-42b7-b76d-18ba11f0795c
             X-Amzn-Trace-Id:
-                - Root=1-690e3446-789edf7b220e0b0b3d7f25ae;Parent=7282b9606ffb5541;Sampled=0;Lineage=1:24be3d11:0
+                - Root=1-69149fce-3b469cf54aa5388368b4246c;Parent=3a87959c7975bd2e;Sampled=0;Lineage=1:24be3d11:0
             X-Bt-Internal-Trace-Id:
-                - 690e3446000000003fb17800ebb57ae6
+                - 69149fce000000006fe812145334268a
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 340.722709ms
+        duration: 575.133458ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -152,41 +152,41 @@ interactions:
         body: '{"answer":"4"}'
         headers:
             Age:
-                - "9295"
+                - "0"
             Cache-Control:
                 - max-age=604800
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - 99addb6aa99c0811-IAD
+                - 99d6de809bd931bb-IAD
             Content-Type:
                 - application/json
             Date:
-                - Fri, 07 Nov 2025 18:02:48 GMT
+                - Wed, 12 Nov 2025 14:55:14 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "402"
+                - "261"
             Openai-Project:
                 - proj_wMRY6YpEiASXMxPIIcI9nQRi
             Openai-Version:
                 - "2020-10-01"
             Set-Cookie:
-                - _cfuvid=9jfacu42MNjL_L.GZp1daWSnLCgy0ycejOJoYNzMo3s-1762529272171-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+                - _cfuvid=RWaUGxfZhVo2zlQYJWAtR_jbesfCoXRRbjq9gkxWn6E-1762959314598-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             Via:
-                - 1.1 f458ab1245bb4f257969c1da8e708f88.cloudfront.net (CloudFront)
+                - 1.1 babb61789095288ef1d09146c15e7f1e.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - Fw9UXNZHwNUCAs0XjWm1K02Gn44siZFcAAiovbFRUASM6-MEx6L8-g==
+                - nI0IOIV-0k5HAV3HUGv382Sqc8cMfDkfhTweC8SCoKkCdnYHkVuuqA==
             X-Amz-Cf-Pop:
                 - JFK50-P2
             X-Amzn-Requestid:
-                - 2c49b459-cc0c-4fac-9c0d-9b1e361087ea
+                - a426dfc6-7f9d-410a-afe6-424c72763207
             X-Amzn-Trace-Id:
-                - Root=1-690e3447-0485533b1b065ecb0e073171;Parent=24b1f8abf7fea8dc;Sampled=0;Lineage=1:8be8f50d:0
+                - Root=1-69149fcf-36f3b8bb1ff44af337fd208a;Parent=5c11824e8ce4248f;Sampled=0;Lineage=1:8be8f50d:0
             X-Bt-Cached:
-                - HIT
+                - MISS
             X-Bt-Function-Creds-Cached:
                 - MISS
             X-Bt-Function-Meta-Cached:
@@ -198,7 +198,7 @@ interactions:
             X-Content-Type-Options:
                 - nosniff
             X-Envoy-Upstream-Service-Time:
-                - "639"
+                - "501"
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Ratelimit-Limit-Requests:
@@ -214,7 +214,7 @@ interactions:
             X-Ratelimit-Reset-Tokens:
                 - 0s
             X-Request-Id:
-                - req_85783af4709a4e05baa5ddaa1ba3efb1
+                - req_61a18295b4a24094b9b62fd2f3135146
         status: 200 OK
         code: 200
-        duration: 578.981792ms
+        duration: 3.765513917s

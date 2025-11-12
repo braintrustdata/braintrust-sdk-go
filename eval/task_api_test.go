@@ -10,29 +10,27 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/api"
 	functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
 	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
-	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
 // TestTaskAPI_Get tests loading a task/prompt by slug
 func TestTaskAPI_Get(t *testing.T) {
-	session := createIntegrationTestSession(t)
 	t.Parallel()
 
 	ctx := context.Background()
 
-	// Get endpoints and create API client
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+	// Create API client with VCR support
+	apiClient := createIntegrationTestAPIClient(t)
 	functions := apiClient.Functions()
 
 	// Register project
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
-	testSlug := tests.RandomName(t, "task")
+	testSlug := tests.Name(t, "slug")
 
 	// Clean up any existing function with this slug from previous failed test runs
 	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
@@ -110,9 +108,9 @@ func TestTaskAPI_Get_EmptySlug(t *testing.T) {
 	ctx := context.Background()
 	session := tests.NewSession(t)
 
-	// Get endpoints and create API client
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+	// Get API credentials and create API client
+	apiInfo := session.APIInfo()
+	apiClient := api.NewClient(apiInfo.APIKey, api.WithAPIURL(apiInfo.APIURL))
 	functionsAPI := &FunctionsAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,
 		projectName: integrationTestProject,
@@ -136,9 +134,9 @@ func TestTaskAPI_TypeSafety(t *testing.T) {
 	ctx := context.Background()
 	session := tests.NewSession(t)
 
-	// Get endpoints and create API client
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+	// Get API credentials and create API client
+	apiInfo := session.APIInfo()
+	apiClient := api.NewClient(apiInfo.APIKey, api.WithAPIURL(apiInfo.APIURL))
 	// This should compile
 	functionsAPI := &FunctionsAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,
@@ -158,26 +156,42 @@ func TestTaskAPI_TypeSafety(t *testing.T) {
 
 const integrationTestProject = "go-sdk-tests"
 
-// createIntegrationTestSession creates a real session for integration tests.
-// It loads config from environment variables and fails if BRAINTRUST_API_KEY is not set.
-func createIntegrationTestSession(t *testing.T) *auth.Session {
+// createIntegrationTestAPIClient creates an API client for integration tests with VCR support.
+// This enables tests to run without requiring BRAINTRUST_API_KEY by using recorded cassettes.
+func createIntegrationTestAPIClient(t *testing.T) *api.API {
 	t.Helper()
 
-	// Load config from environment
-	cfg := config.FromEnv()
-	if cfg.APIKey == "" {
-		t.Fatal("BRAINTRUST_API_KEY not set, cannot run integration test")
+	// Get HTTPS client with VCR support
+	client := vcr.GetHTTPSClient(t)
+
+	// Create API client with the VCR-wrapped client
+	return api.NewWithHTTPSClient(client)
+}
+
+// setupIntegrationTest creates a session and API client for integration tests.
+// With VCR support, these tests can now run without BRAINTRUST_API_KEY by using recorded cassettes.
+// Returns both the session (for auth) and a VCR-wrapped API client (for all API calls).
+func setupIntegrationTest(t *testing.T) (*auth.Session, *api.API) {
+	t.Helper()
+
+	if testing.Short() {
+		t.Skip("Skipping integration test in short mode")
 	}
+
+	// Get VCR-wrapped HTTPS client
+	httpsClient := vcr.GetHTTPSClient(t)
 
 	ctx := context.Background()
 	session, err := auth.NewSession(ctx, auth.Options{
-		APIKey:  cfg.APIKey,
-		AppURL:  cfg.AppURL,
-		APIURL:  cfg.APIURL,
-		OrgName: cfg.OrgName,
-		Logger:  logger.Discard(),
+		APIKey: vcr.GetAPIKeyForVCR(t),
+		AppURL: "https://www.braintrust.dev",
+		Logger: logger.Discard(),
+		Client: httpsClient,
 	})
 	require.NoError(t, err)
 
-	return session
+	// Create VCR-wrapped API client
+	apiClient := api.NewWithHTTPSClient(httpsClient)
+
+	return session, apiClient
 }

@@ -15,21 +15,20 @@ import (
 
 // TestScorerAPI_Get tests loading a scorer by slug
 func TestScorerAPI_Get(t *testing.T) {
-	session := createIntegrationTestSession(t)
 	t.Parallel()
 
 	ctx := context.Background()
 
-	// Get endpoints and create API client
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+	// Create API client with VCR support
+	apiClient := createIntegrationTestAPIClient(t)
 	functions := apiClient.Functions()
 
 	// Register project
 	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
 	require.NoError(t, err)
 
-	testSlug := tests.RandomName(t, "scorer")
+	// Use fixed name for VCR determinism
+	testSlug := tests.Name(t, "slug")
 
 	// Clean up any existing function with this slug from previous failed test runs
 	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
@@ -114,9 +113,9 @@ func TestScorerAPI_Get_EmptySlug(t *testing.T) {
 	ctx := context.Background()
 	session := tests.NewSession(t)
 
-	// Get endpoints and create API client
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+	// Get API credentials and create API client
+	apiInfo := session.APIInfo()
+	apiClient := api.NewClient(apiInfo.APIKey, api.WithAPIURL(apiInfo.APIURL))
 	functionsAPI := &FunctionsAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,
 		projectName: integrationTestProject,
@@ -130,14 +129,12 @@ func TestScorerAPI_Get_EmptySlug(t *testing.T) {
 
 // TestScorerAPI_Get_NotFound tests not found error
 func TestScorerAPI_Get_NotFound(t *testing.T) {
-	session := createIntegrationTestSession(t)
 	t.Parallel()
 
 	ctx := context.Background()
 
-	// Get endpoints and create API client
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+	// Create API client with VCR support
+	apiClient := createIntegrationTestAPIClient(t)
 	functionsAPI := &FunctionsAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,
 		projectName: integrationTestProject,
@@ -156,9 +153,9 @@ func TestScorerAPI_TypeSafety(t *testing.T) {
 	ctx := context.Background()
 	session := tests.NewSession(t)
 
-	// Get endpoints and create API client
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+	// Get API credentials and create API client
+	apiInfo := session.APIInfo()
+	apiClient := api.NewClient(apiInfo.APIKey, api.WithAPIURL(apiInfo.APIURL))
 	// This should compile
 	functionsAPI := &FunctionsAPI[testDatasetInput, testDatasetOutput]{
 		api:         apiClient,

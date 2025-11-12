@@ -74,8 +74,8 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 		log = logger.NewDefaultLogger()
 	}
 
-	// Get API endpoints - always available immediately
-	endpoints := session.Endpoints()
+	// Get API credentials - always available immediately
+	apiInfo := session.APIInfo()
 
 	var exporter sdktrace.SpanExporter
 	var err error
@@ -85,7 +85,7 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 		exporter = cfg.Exporter
 		log.Debug("using provided exporter")
 	} else {
-		otelOpts, err := getHTTPOtelOpts(endpoints.APIURL, endpoints.APIKey)
+		otelOpts, err := getHTTPOtelOpts(apiInfo.APIURL, apiInfo.APIKey)
 		if err != nil {
 			return nil, err
 		}
@@ -97,7 +97,7 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 		if err != nil {
 			return nil, fmt.Errorf("failed to create OTLP exporter: %w", err)
 		}
-		log.Debug("created OTLP HTTP exporter", "endpoint", endpoints.APIURL)
+		log.Debug("created OTLP HTTP exporter", "endpoint", apiInfo.APIURL)
 	}
 
 	// Wrap in batch processor
@@ -351,11 +351,11 @@ func newSpanProcessor(
 	session *auth.Session,
 	log logger.Logger,
 ) (*spanProcessor, error) {
-	// Get endpoints from session
-	endpoints := session.Endpoints()
+	// Get app URL from session
+	appURL := session.AppPublicURL()
 
 	// Initialize with empty org name - will be looked up dynamically from session
-	attrs := newOtelAttrs(defaultParent, "", endpoints.AppURL)
+	attrs := newOtelAttrs(defaultParent, "", appURL)
 
 	sp := &spanProcessor{
 		wrapped:   proc,
@@ -379,8 +379,8 @@ func (sp *spanProcessor) OnStart(ctx context.Context, span sdktrace.ReadWriteSpa
 	}
 
 	// Update appURL in case it changed
-	endpoints := sp.session.Endpoints()
-	sp.otelAttrs.appURL = endpoints.AppURL
+	appURL := sp.session.AppPublicURL()
+	sp.otelAttrs.appURL = appURL
 
 	defaultParent, attrs := sp.otelAttrs.Get()
 
