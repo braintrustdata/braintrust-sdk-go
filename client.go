@@ -215,7 +215,7 @@ func (c *Client) Tracer(name string, opts ...oteltrace.TracerOption) oteltrace.T
 //	    Scorers:    scorers,
 //	})
 func NewEvaluator[I, R any](client *Client) *eval.Evaluator[I, R] {
-	return eval.NewEvaluator[I, R](client.session, client.config, client.tracerProvider, client.API())
+	return eval.NewEvaluator[I, R](client.session, client.tracerProvider, client.API(), client.config.DefaultProjectName)
 }
 
 // API returns an API client for making direct calls to the Braintrust API.

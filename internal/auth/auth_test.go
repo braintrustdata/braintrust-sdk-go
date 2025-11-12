@@ -383,3 +383,64 @@ func TestSession_OrgName(t *testing.T) {
 		assert.Equal(t, "test-org-name", session.OrgName())
 	})
 }
+
+// TestSession_AppPublicURL tests that AppPublicURL returns the config value
+func TestSession_AppPublicURL(t *testing.T) {
+	t.Parallel()
+
+	session, err := NewSession(context.Background(), Options{
+		AppURL:       "https://app.example.com",
+		AppPublicURL: "https://public.example.com",
+		APIKey:       "test-key",
+		Logger:       logger.Discard(),
+	})
+	require.NoError(t, err)
+	defer session.Close()
+
+	// AppPublicURL should return config value immediately, no login needed
+	assert.Equal(t, "https://public.example.com", session.AppPublicURL())
+}
+
+// TestSession_APIInfo_ServerOverridesConfig tests that server APIURL takes precedence
+func TestSession_APIInfo_ServerOverridesConfig(t *testing.T) {
+	t.Parallel()
+
+	// Create a mock server that returns a different API URL
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{
+			"org_info": [
+				{
+					"id": "org-456",
+					"name": "test-org",
+					"api_url": "https://api-from-server.example.com",
+					"proxy_url": "https://proxy.example.com"
+				}
+			]
+		}`))
+	}))
+	defer server.Close()
+
+	// Create session with config APIURL set
+	session, err := NewSession(context.Background(), Options{
+		AppURL: server.URL,
+		APIKey: "test-api-key",
+		APIURL: "https://api-from-config.example.com", // This should be overridden
+		Logger: intlogger.NewFailTestLogger(t),
+	})
+	require.NoError(t, err)
+	defer session.Close()
+
+	// Before login, should use config APIURL
+	apiInfoBefore := session.APIInfo()
+	assert.Equal(t, "https://api-from-config.example.com", apiInfoBefore.APIURL)
+
+	// Wait for login to complete
+	err = session.Login(context.Background())
+	require.NoError(t, err)
+
+	// After login, should use server APIURL
+	apiInfoAfter := session.APIInfo()
+	assert.Equal(t, "https://api-from-server.example.com", apiInfoAfter.APIURL)
+}
