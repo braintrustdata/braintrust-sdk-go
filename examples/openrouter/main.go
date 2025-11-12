@@ -23,7 +23,7 @@ func main() {
 	otel.SetTracerProvider(tp)
 
 	bt, err := braintrust.New(tp,
-		braintrust.WithProject("openrouter-example"),
+		braintrust.WithProject("go-sdk-examples"),
 		braintrust.WithBlockingLogin(true),
 	)
 	if err != nil {
@@ -49,7 +49,7 @@ func main() {
 	tracer := otel.Tracer("openrouter-example")
 
 	// Create a parent span to wrap the OpenRouter call
-	ctx, span := tracer.Start(context.Background(), "ask-question")
+	ctx, span := tracer.Start(context.Background(), "examples/openrouter/main.go")
 	defer span.End()
 
 	params := openai.ChatCompletionNewParams{

@@ -337,7 +337,7 @@ func main() {
 	defer tp.Shutdown(context.Background())
 
 	bt, err := braintrust.New(tp,
-		braintrust.WithProject("go-sdk-internal-examples"),
+		braintrust.WithProject("go-sdk-examples"),
 		braintrust.WithBlockingLogin(true), // Ensure org name is available for permalinks
 	)
 	if err != nil {
@@ -357,7 +357,7 @@ func main() {
 	ctx := context.Background()
 
 	// Set the experiment as parent for tracing
-	ctx, rootSpan := tracer.Start(ctx, "genai-examples")
+	ctx, rootSpan := tracer.Start(ctx, "examples/internal/genai/main.go")
 	defer rootSpan.End()
 
 	// ======================
@@ -371,45 +371,37 @@ func main() {
 	bot := newGeminiBot(client)
 
 	if err := bot.basicText(ctx); err != nil {
-		log.Printf("Error: %v", err)
+		log.Fatalf("Error: %v", err)
 	}
 
 	if err := bot.withSystemInstruction(ctx); err != nil {
-		log.Printf("Error: %v", err)
+		log.Fatalf("Error: %v", err)
 	}
 
 	if err := bot.multiTurnConversation(ctx); err != nil {
-		log.Printf("Error: %v", err)
+		log.Fatalf("Error: %v", err)
 	}
 
 	if err := bot.streaming(ctx); err != nil {
-		log.Printf("Error: %v", err)
+		log.Fatalf("Error: %v", err)
 	}
 
 	if err := bot.functionCalling(ctx); err != nil {
-		log.Printf("Error: %v", err)
+		log.Fatalf("Error: %v", err)
 	}
 
 	if err := bot.safetySettings(ctx); err != nil {
-		log.Printf("Error: %v", err)
+		log.Fatalf("Error: %v", err)
 	}
 
 	if err := bot.jsonMode(ctx); err != nil {
-		log.Printf("Error: %v", err)
+		log.Fatalf("Error: %v", err)
 	}
 
 	if err := bot.multimodal(ctx); err != nil {
-		log.Printf("Error: %v", err)
+		log.Fatalf("Error: %v", err)
 	}
 
 	fmt.Println("\n=== Tracing Complete ===")
-	fmt.Println("All examples completed successfully!")
-
-	// Print the root span link
-	link := bt.Permalink(rootSpan)
-	if link != "" {
-		fmt.Printf("View trace: %s\n", link)
-	} else {
-		fmt.Println("Check your Braintrust dashboard to view the traces.")
-	}
+	fmt.Printf("View trace: %s\n", bt.Permalink(rootSpan))
 }

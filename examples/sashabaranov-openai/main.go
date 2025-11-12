@@ -16,8 +16,6 @@ import (
 )
 
 func main() {
-	fmt.Println("Braintrust sashabaranov/go-openai Example")
-
 	// Set up OpenTelemetry tracing
 	tp := trace.NewTracerProvider()
 	defer tp.Shutdown(context.Background()) //nolint:errcheck
@@ -54,7 +52,6 @@ func main() {
 	defer span.End()
 
 	// Example 1: Simple chat completion
-	fmt.Println("\n--- Example 1: Simple Chat Completion ---")
 	resp, err := client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
 		Model: openai.GPT4oMini,
 		Messages: []openai.ChatCompletionMessage{
@@ -70,7 +67,6 @@ func main() {
 	fmt.Printf("Response: %s\n", resp.Choices[0].Message.Content)
 
 	// Example 2: Streaming chat completion
-	fmt.Println("\n--- Example 2: Streaming Chat Completion ---")
 	stream, err := client.CreateChatCompletionStream(ctx, openai.ChatCompletionRequest{
 		Model: openai.GPT4oMini,
 		Messages: []openai.ChatCompletionMessage{

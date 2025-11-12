@@ -16,8 +16,6 @@ import (
 )
 
 func main() {
-	fmt.Println("=== Braintrust LangChainGo Simple Example ===\n")
-
 	// Step 1: Initialize Braintrust tracing with blocking login
 	tp := trace.NewTracerProvider()
 	defer tp.Shutdown(context.Background()) //nolint:errcheck
@@ -50,7 +48,6 @@ func main() {
 	ctx, rootSpan := tracer.Start(context.Background(), "examples/langchaingo/main.go")
 
 	// Simple completion
-	fmt.Println("Simple LLM call:")
 	messages := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeHuman, "What is the capital of France?"),
 	}
@@ -63,7 +60,6 @@ func main() {
 	}
 
 	// Multi-turn conversation
-	fmt.Println("Multi-turn conversation:")
 	conversation := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeHuman, "Hi, my name is Alice."),
 	}
@@ -91,8 +87,6 @@ func main() {
 
 	// End the root span
 	rootSpan.End()
-
-	fmt.Println("✓ All calls traced to Braintrust!")
 
 	// Print the permalink to view traces
 	fmt.Printf("\nView traces: %s\n", bt.Permalink(rootSpan))

@@ -30,7 +30,7 @@ func main() {
 	defer tp.Shutdown(context.Background())
 
 	bt, err := braintrust.New(tp,
-		braintrust.WithProject("langchaingo-anthropic-example"),
+		braintrust.WithProject("go-sdk-examples"),
 		braintrust.WithBlockingLogin(true),
 	)
 	if err != nil {
@@ -40,7 +40,7 @@ func main() {
 	ctx := context.Background()
 
 	// Create root span for the entire example
-	ctx, rootSpan := tracer.Start(ctx, "langchaingo-anthropic-openai")
+	ctx, rootSpan := tracer.Start(ctx, "examples/internal/langchaingo-anthropic/main.go")
 	defer rootSpan.End()
 
 	// Create Anthropic LLM with Braintrust tracing
@@ -51,13 +51,13 @@ func main() {
 
 	anthropicHandler := tracelangchaingo.NewHandlerWithOptions(tracelangchaingo.HandlerOptions{
 		TracerProvider: tp,
-		Model:          "claude-3-5-sonnet-20241022",
+		Model:          "claude-3-7-sonnet-latest",
 		Provider:       "anthropic",
 	})
 
 	anthropicLLM, err := anthropic.New(
 		anthropic.WithToken(anthropicAPIKey),
-		anthropic.WithModel("claude-3-5-sonnet-20241022"),
+		anthropic.WithModel("claude-3-7-sonnet-latest"),
 		anthropic.WithCallback(anthropicHandler),
 	)
 	if err != nil {
@@ -103,19 +103,17 @@ func main() {
 		fmt.Println("Anthropic Response:")
 		anthropicResp, err := llms.GenerateFromSinglePrompt(ctx, anthropicLLM, query)
 		if err != nil {
-			log.Printf("Anthropic error: %v", err)
-		} else {
-			fmt.Printf("%s\n\n", anthropicResp)
+			log.Fatalf("Anthropic error: %v", err)
 		}
+		fmt.Printf("%s\n\n", anthropicResp)
 
 		// Query OpenAI
 		fmt.Println("OpenAI Response:")
 		openaiResp, err := llms.GenerateFromSinglePrompt(ctx, openaiLLM, query)
 		if err != nil {
-			log.Printf("OpenAI error: %v", err)
-		} else {
-			fmt.Printf("%s\n\n", openaiResp)
+			log.Fatalf("OpenAI error: %v", err)
 		}
+		fmt.Printf("%s\n\n", openaiResp)
 
 		fmt.Println()
 	}

@@ -26,7 +26,7 @@ func main() {
 	otel.SetTracerProvider(tp)
 
 	bt, err := braintrust.New(tp,
-		braintrust.WithProject("go-sdk-internal-examples"),
+		braintrust.WithProject("go-sdk-examples"),
 		braintrust.WithBlockingLogin(true),
 	)
 	if err != nil {
@@ -37,7 +37,7 @@ func main() {
 
 	// Create a root span to wrap all examples
 	tracer := otel.Tracer("openai-v2-examples")
-	ctx, rootSpan := tracer.Start(context.Background(), "openai-v2-examples")
+	ctx, rootSpan := tracer.Start(context.Background(), "examples/internal/openai-v2/main.go")
 	defer rootSpan.End()
 
 	// Responses API with reasoning (for reasoning models like GPT-5)

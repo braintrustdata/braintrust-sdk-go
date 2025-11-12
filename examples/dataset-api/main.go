@@ -47,23 +47,18 @@ func main() {
 	apiClient := client.API()
 
 	// Step 1: Create a prompt function for answering questions
-	fmt.Println("=== Step 1: Creating prompt ===")
 	promptSlug := "qa-answer-prompt"
 	if err := createPrompt(ctx, apiClient, promptSlug); err != nil {
 		log.Fatalf("Failed to create prompt: %v", err)
 	}
-	fmt.Printf("Created prompt: %s\n\n", promptSlug)
 
 	// Step 2: Create a dataset with some test data
-	fmt.Println("=== Step 2: Creating dataset ===")
 	datasetID, err := createDataset(ctx, apiClient)
 	if err != nil {
 		log.Fatalf("Failed to create dataset: %v", err)
 	}
-	fmt.Printf("Created dataset: %s\n\n", datasetID)
 
 	// Step 3: Run an evaluation using the dataset and prompt
-	fmt.Println("=== Step 3: Running evaluation ===")
 	evaluator := braintrust.NewEvaluator[QuestionInput, AnswerOutput](client)
 
 	// Load dataset using the new DatasetAPI
@@ -97,16 +92,13 @@ func main() {
 		log.Fatalf("Failed to run evaluation: %v", err)
 	}
 
-	fmt.Printf("Evaluation complete! View results at: %s\n\n", result)
+	fmt.Printf("Evaluation complete! View results at: %s\n", result)
 
 	// Step 4: Cleanup - delete the test dataset
-	fmt.Println("=== Step 4: Cleaning up ===")
 	if err := apiClient.Datasets().Delete(ctx, datasetID); err != nil {
 		// Note: Dataset deletion may fail due to permissions or timing
 		// The dataset can be manually deleted from the Braintrust UI if needed
-		fmt.Printf("Note: Dataset cleanup skipped (this is normal): %v\n", err)
-	} else {
-		fmt.Println("Dataset deleted successfully")
+		log.Printf("Note: Dataset cleanup skipped (this is normal): %v\n", err)
 	}
 }
 

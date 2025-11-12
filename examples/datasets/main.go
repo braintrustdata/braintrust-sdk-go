@@ -43,7 +43,6 @@ func initializeDataset(bt *braintrust.Client, projectID string) (string, error) 
 	if err != nil {
 		return "", fmt.Errorf("failed to create dataset: %v", err)
 	}
-	fmt.Printf("📊 Created dataset: %s (ID: %s)\n", datasetInfo.Name, datasetInfo.ID)
 
 	// Insert some sample data into the dataset
 	sampleEvents := []datasets.Event{
@@ -86,7 +85,6 @@ func initializeDataset(bt *braintrust.Client, projectID string) (string, error) 
 	if err != nil {
 		return "", fmt.Errorf("failed to insert events: %v", err)
 	}
-	fmt.Printf("📝 Inserted %d events\n", len(sampleEvents))
 
 	return datasetInfo.ID, nil
 }
@@ -112,7 +110,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create project: %v", err)
 	}
-	fmt.Printf("📁 Created project: %s (ID: %s)\n", project.Name, project.ID)
 
 	// Initialize dataset
 	datasetID, err := initializeDataset(bt, project.ID)
@@ -120,7 +117,6 @@ func main() {
 		log.Fatalf("Failed to initialize dataset: %v", err)
 	}
 
-	fmt.Println("\n🚀 Running evaluation (limiting to 2 of 3 rows)...")
 	evaluator := braintrust.NewEvaluator[QuestionInput, AnswerExpected](bt)
 
 	// Fetch the dataset cases
@@ -134,8 +130,6 @@ func main() {
 		Dataset:    cases, // Use fetched dataset
 		Task: eval.T(func(ctx context.Context, input QuestionInput) (AnswerExpected, error) {
 			// Simple example: capitalize the first letter of each word
-			fmt.Printf("🔄 Processing text: '%s' (context: %s, language: %s)\n",
-				input.Text, input.Context, input.Language)
 
 			// Simple capitalization logic - capitalize first letter of each word
 			words := strings.Fields(input.Text)

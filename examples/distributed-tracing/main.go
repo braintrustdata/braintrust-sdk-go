@@ -55,7 +55,6 @@ func main() {
 	// Encode context to headers (simulates HTTP request)
 	headers := make(map[string]string)
 	otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(headers))
-	fmt.Printf("Parent: Encoded to headers: %v\n\n", headers)
 
 	// Call remote service (simulates crossing service boundary)
 	simulateHTTPRequest(headers)
@@ -65,7 +64,7 @@ func main() {
 		log.Printf("Failed to flush spans: %v", err)
 	}
 
-	fmt.Printf("\n✓ View span: %s\n", bt.Permalink(parentSpan))
+	fmt.Printf("\nView span: %s\n", bt.Permalink(parentSpan))
 }
 
 // simulateHTTPRequest simulates a remote service receiving an HTTP request
@@ -78,6 +77,4 @@ func simulateHTTPRequest(headers map[string]string) {
 	// Create child span - inherits trace context from parent
 	_, span := tracer.Start(ctx, "remote-service.handle-request")
 	defer span.End()
-
-	fmt.Println("Child: Received trace context ✓")
 }
