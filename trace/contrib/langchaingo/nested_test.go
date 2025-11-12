@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms"
 	"go.opentelemetry.io/otel/trace"
 
@@ -102,12 +103,8 @@ func TestNestedCalls(t *testing.T) {
 		}
 	}
 
-	if chainSpan == nil {
-		t.Fatal("Missing chain span")
-	}
-	if llmSpan == nil {
-		t.Fatal("Missing LLM span")
-	}
+	require.NotNil(t, chainSpan, "Missing chain span")
+	require.NotNil(t, llmSpan, "Missing LLM span")
 
 	// Verify parent-child relationships using the Stub's Parent field
 	chainParentID := chainSpan.Stub.Parent.SpanID()
