@@ -14,12 +14,16 @@ import (
 var readme string
 
 func TestReadmeSnippets(t *testing.T) {
-	// Create temp directory for building snippets
-	tmpDir := t.TempDir()
-
 	lines := strings.Split(readme, "\n")
 	var snippet []string
 	snippetCount := 0
+
+	// Collect all snippets first
+	type codeSnippet struct {
+		num  int
+		code string
+	}
+	var snippets []codeSnippet
 
 	for _, line := range lines {
 		if strings.HasPrefix(line, "```go") {
@@ -29,11 +33,7 @@ func TestReadmeSnippets(t *testing.T) {
 		if strings.HasPrefix(line, "```") && snippet != nil {
 			snippetCount++
 			code := strings.Join(snippet, "\n")
-			if err := tryCompile(t, tmpDir, snippetCount, code); err != nil {
-				t.Errorf("README snippet %d failed to compile: %v\n%s", snippetCount, err, code)
-			} else {
-				t.Logf("README snippet %d compiled successfully", snippetCount)
-			}
+			snippets = append(snippets, codeSnippet{num: snippetCount, code: code})
 			snippet = nil
 			continue
 		}
@@ -42,10 +42,21 @@ func TestReadmeSnippets(t *testing.T) {
 		}
 	}
 
-	if snippetCount == 0 {
+	if len(snippets) == 0 {
 		t.Error("No Go code snippets found in README.md")
-	} else {
-		t.Logf("Tested %d Go code snippets from README.md", snippetCount)
+		return
+	}
+
+	// Compile all snippets in parallel using subtests
+	for _, s := range snippets {
+		s := s // capture loop variable
+		t.Run(strconv.Itoa(s.num), func(t *testing.T) {
+			t.Parallel()
+			tmpDir := t.TempDir()
+			if err := tryCompile(t, tmpDir, s.num, s.code); err != nil {
+				t.Errorf("README snippet %d failed to compile: %v\n%s", s.num, err, s.code)
+			}
+		})
 	}
 }
 
