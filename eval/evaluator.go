@@ -6,7 +6,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
-	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 )
 
@@ -15,21 +14,21 @@ import (
 // in sequence with the same type signature, or use hosted prompts, scorers and datasets
 // with automatic type conversion.
 type Evaluator[I, R any] struct {
-	session        *auth.Session
-	config         *config.Config
-	tracerProvider *trace.TracerProvider
-	apiClient      *api.API
+	session            *auth.Session
+	defaultProjectName string
+	tracerProvider     *trace.TracerProvider
+	api                *api.API
 }
 
 // NewEvaluator creates a new evaluator with explicit dependencies.
 // The type parameters I (input) and R (result/output) must be specified explicitly.
-// Most users should use braintrust.NewEvaluator(client).
-func NewEvaluator[I, R any](session *auth.Session, cfg *config.Config, tp *trace.TracerProvider, apiClient *api.API) *Evaluator[I, R] {
+// Users create Evaluators with braintrust.NewEvaluator.
+func NewEvaluator[I, R any](s *auth.Session, tp *trace.TracerProvider, api *api.API, project string) *Evaluator[I, R] {
 	return &Evaluator[I, R]{
-		session:        session,
-		config:         cfg,
-		tracerProvider: tp,
-		apiClient:      apiClient,
+		session:            s,
+		defaultProjectName: project,
+		tracerProvider:     tp,
+		api:                api,
 	}
 }
 
@@ -37,19 +36,19 @@ func NewEvaluator[I, R any](session *auth.Session, cfg *config.Config, tp *trace
 // long as I and R are JSON-serializable, FunctionsAPI will automatically convert the input and output to and from JSON.
 func (e *Evaluator[I, R]) Functions() *FunctionsAPI[I, R] {
 	return &FunctionsAPI[I, R]{
-		api:         e.apiClient,
-		projectName: e.config.DefaultProjectName,
+		api:         e.api,
+		projectName: e.defaultProjectName,
 	}
 }
 
 // Datasets is used to access Datasets API for loading datasets with this evaluator's type parameters.
 func (e *Evaluator[I, R]) Datasets() *DatasetAPI[I, R] {
 	return &DatasetAPI[I, R]{
-		api: e.apiClient,
+		api: e.api,
 	}
 }
 
 // Run executes an evaluation using this evaluator's dependencies.
 func (e *Evaluator[I, R]) Run(ctx context.Context, opts Opts[I, R]) (*Result, error) {
-	return run(ctx, opts, e.config, e.session, e.tracerProvider, e.apiClient)
+	return run(ctx, opts, e.session, e.tracerProvider, e.api, e.defaultProjectName)
 }

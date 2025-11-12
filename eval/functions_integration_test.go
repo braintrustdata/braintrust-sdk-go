@@ -521,7 +521,7 @@ func TestFunctionsAPI_EndToEnd_MixedTypes(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Create evaluator with VCR-wrapped API client
-	evaluator := NewEvaluator[QuestionInput, AnswerOutput](session, cfg, tp, apiClient)
+	evaluator := NewEvaluator[QuestionInput, AnswerOutput](session, tp, apiClient, cfg.DefaultProjectName)
 	// Use fixed experiment name for VCR determinism
 	result, err := evaluator.Run(ctx, Opts[QuestionInput, AnswerOutput]{
 		Experiment: "test-e2e-exp",

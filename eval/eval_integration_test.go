@@ -123,7 +123,7 @@ func TestEval_Integration(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Create evaluator with VCR-wrapped API client
-	evaluator := NewEvaluator[string, string](session, cfg, tp, apiClient)
+	evaluator := NewEvaluator[string, string](session, tp, apiClient, cfg.DefaultProjectName)
 	result, err := evaluator.Run(ctx, Opts[string, string]{
 		Experiment: "test-experiment",
 		Dataset:    cases,
@@ -247,7 +247,7 @@ func TestEval_Integration_StringToStruct(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Run the evaluation - this should handle string-to-struct conversion
-	evaluator := NewEvaluator[QuestionInput, AnswerOutput](session, cfg, tp, apiClient)
+	evaluator := NewEvaluator[QuestionInput, AnswerOutput](session, tp, apiClient, cfg.DefaultProjectName)
 	result, err := evaluator.Run(ctx, Opts[QuestionInput, AnswerOutput]{
 		Experiment: "test-experiment",
 		Dataset:    cases,
@@ -303,7 +303,7 @@ func TestEval_Integration_DatasetByID(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Run evaluation
-	evaluator := NewEvaluator[int, int](session, cfg, tp, apiClient)
+	evaluator := NewEvaluator[int, int](session, tp, apiClient, cfg.DefaultProjectName)
 	result, err := evaluator.Run(ctx, Opts[int, int]{
 		Experiment: "test-experiment",
 		Dataset:    cases,
@@ -368,7 +368,7 @@ func TestEval_Integration_DatasetByName(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Run evaluation
-	evaluator := NewEvaluator[int, int](session, cfg, tp, apiClient)
+	evaluator := NewEvaluator[int, int](session, tp, apiClient, cfg.DefaultProjectName)
 	result, err := evaluator.Run(ctx, Opts[int, int]{
 		Experiment: "test-experiment",
 		Dataset:    cases,
@@ -439,7 +439,7 @@ func TestEval_Integration_DatasetWithTagsAndMetadata(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Run evaluation - tags and metadata should be preserved
-	evaluator := NewEvaluator[int, int](session, cfg, tp, apiClient)
+	evaluator := NewEvaluator[int, int](session, tp, apiClient, cfg.DefaultProjectName)
 	result, err := evaluator.Run(ctx, Opts[int, int]{
 		Experiment: "test-experiment",
 		Dataset:    cases,
@@ -482,7 +482,7 @@ func TestEval_Integration_ExperimentTags(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Run eval with experiment-level tags
-	evaluator := NewEvaluator[string, string](session, cfg, tp, apiClient)
+	evaluator := NewEvaluator[string, string](session, tp, apiClient, cfg.DefaultProjectName)
 	result, err := evaluator.Run(ctx, Opts[string, string]{
 		Experiment: "test-experiment",
 		Dataset:    cases,
@@ -520,7 +520,7 @@ func TestEval_Integration_ExperimentMetadata(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Run eval with experiment-level metadata
-	evaluator := NewEvaluator[string, string](session, cfg, tp, apiClient)
+	evaluator := NewEvaluator[string, string](session, tp, apiClient, cfg.DefaultProjectName)
 	result, err := evaluator.Run(ctx, Opts[string, string]{
 		Experiment: "test-experiment",
 		Dataset:    cases,
@@ -569,7 +569,7 @@ func TestEval_Integration_UpdateFlag(t *testing.T) {
 	})
 
 	// Create evaluator for all runs
-	evaluator := NewEvaluator[string, string](session, cfg, tp, apiClient)
+	evaluator := NewEvaluator[string, string](session, tp, apiClient, cfg.DefaultProjectName)
 
 	// First run: Create new experiment (Update: false)
 	result1, err := evaluator.Run(ctx, Opts[string, string]{
@@ -665,7 +665,7 @@ func TestEval_ProjectNameFallback(t *testing.T) {
 	})
 
 	// Run eval WITHOUT specifying ProjectName (should use cfg.DefaultProjectName)
-	evaluator := NewEvaluator[string, string](session, cfg, tp, apiClient)
+	evaluator := NewEvaluator[string, string](session, tp, apiClient, cfg.DefaultProjectName)
 	result, err := evaluator.Run(ctx, Opts[string, string]{
 		Experiment: "test-experiment",
 		// ProjectName not specified - should fall back to cfg.DefaultProjectName
@@ -711,7 +711,7 @@ func TestEval_NoProjectName(t *testing.T) {
 	})
 
 	// Run eval WITHOUT specifying ProjectName and NO config default (should fail)
-	evaluator := NewEvaluator[string, string](session, cfg, tp, apiClient)
+	evaluator := NewEvaluator[string, string](session, tp, apiClient, cfg.DefaultProjectName)
 	result, err := evaluator.Run(ctx, Opts[string, string]{
 		Experiment: "test-experiment",
 		// ProjectName not specified AND cfg.DefaultProjectName is empty

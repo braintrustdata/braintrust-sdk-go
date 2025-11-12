@@ -40,7 +40,6 @@ import (
 	oteltrace "go.opentelemetry.io/otel/trace"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
-	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	bttrace "github.com/braintrustdata/braintrust-sdk-go/trace"
 )
@@ -221,7 +220,6 @@ func (r *Result) String() string {
 // eval (private) is the execution engine for evaluations.
 // It is created by newEval() and run via Run().
 type eval[I, R any] struct {
-	config         *config.Config
 	session        *auth.Session
 	parent         bttrace.Parent
 	experimentID   string
@@ -247,8 +245,7 @@ type nextCase[I, R any] struct {
 // newEval creates a new eval executor from concrete parameters (low-level constructor).
 // This is the shared code path used by both newEvalOpts (production) and testNewEval (tests).
 func newEval[I, R any](
-	cfg *config.Config,
-	session *auth.Session,
+	s *auth.Session,
 	tracer oteltrace.Tracer,
 	experimentID string,
 	experimentName string,
@@ -274,8 +271,7 @@ func newEval[I, R any](
 	}
 
 	return &eval[I, R]{
-		config:         cfg,
-		session:        session,
+		session:        s,
 		parent:         parent,
 		experimentID:   experimentID,
 		experimentName: experimentName,
@@ -294,11 +290,11 @@ func newEval[I, R any](
 
 // newEvalOpts creates a new eval executor with dependency injection.
 // This replaces the old New() constructor which used global state.
-func newEvalOpts[I, R any](ctx context.Context, cfg *config.Config, session *auth.Session, tp *trace.TracerProvider, apiClient *api.API, opts Opts[I, R]) (*eval[I, R], error) {
-	// Determine project name (use opts.ProjectName if specified, otherwise cfg.DefaultProjectName)
+func newEvalOpts[I, R any](ctx context.Context, s *auth.Session, tp *trace.TracerProvider, apiClient *api.API, opts Opts[I, R], project string) (*eval[I, R], error) {
+	// Determine project name (use opts.ProjectName if specified, otherwise project)
 	projectName := opts.ProjectName
 	if projectName == "" {
-		projectName = cfg.DefaultProjectName
+		projectName = project
 	}
 
 	// Register/get experiment (registerExperiment will validate that projectName is not empty)
@@ -315,8 +311,7 @@ func newEvalOpts[I, R any](ctx context.Context, cfg *config.Config, session *aut
 
 	// Call low-level newEval with concrete parameters
 	return newEval(
-		cfg,
-		session,
+		s,
 		tracer,
 		exp.ID,
 		exp.Name,
@@ -598,18 +593,9 @@ func (e *eval[I, R]) runScorers(ctx context.Context, c Case[I, R], result R) ([]
 }
 
 // permalink generates a URL to view the eval in Braintrust UI.
-// Copied from old package but adapted for injected dependencies.
 func (e *eval[I, R]) permalink() string {
-	appURL := e.config.AppURL
-	orgName := e.config.OrgName
-
-	// Try to get from session if login is complete
-	if sessionAppURL := e.session.AppPublicURL(); appURL == "" && sessionAppURL != "" {
-		appURL = sessionAppURL
-	}
-	if sessionOrgName := e.session.OrgName(); orgName == "" && sessionOrgName != "" {
-		orgName = sessionOrgName
-	}
+	appURL := e.session.AppPublicURL()
+	orgName := e.session.OrgName()
 
 	if appURL == "" {
 		appURL = "https://www.braintrust.dev"
@@ -622,10 +608,10 @@ func (e *eval[I, R]) permalink() string {
 	return ""
 }
 
-// run executes an evaluation using client resources (config, session, tracerProvider).
+// run executes an evaluation using client resources (session, tracerProvider).
 // This is an internal function - users should use Evaluator.Run() instead.
 // apiClient can be nil, in which case one will be created for API calls.
-func run[I, R any](ctx context.Context, opts Opts[I, R], cfg *config.Config, session *auth.Session, tp *trace.TracerProvider, apiClient *api.API) (*Result, error) {
+func run[I, R any](ctx context.Context, opts Opts[I, R], s *auth.Session, tp *trace.TracerProvider, apiClient *api.API, project string) (*Result, error) {
 	// Validate required fields
 	if opts.Experiment == "" {
 		return nil, fmt.Errorf("%w: Experiment is required", errEval)
@@ -638,7 +624,7 @@ func run[I, R any](ctx context.Context, opts Opts[I, R], cfg *config.Config, ses
 	}
 
 	// Create eval executor
-	e, err := newEvalOpts(ctx, cfg, session, tp, apiClient, opts)
+	e, err := newEvalOpts(ctx, s, tp, apiClient, opts, project)
 	if err != nil {
 		return nil, err
 	}
@@ -722,8 +708,7 @@ func minInt(a, b int) int {
 // testNewEval creates an eval for unit testing, bypassing API calls.
 // This allows tests to inject static values for experiment/project IDs.
 func testNewEval[I, R any](
-	cfg *config.Config,
-	session *auth.Session,
+	s *auth.Session,
 	tracer oteltrace.Tracer,
 	experimentID string,
 	experimentName string,
@@ -736,8 +721,7 @@ func testNewEval[I, R any](
 ) *eval[I, R] {
 	// Call low-level newEval with quiet=true for tests
 	return newEval(
-		cfg,
-		session,
+		s,
 		tracer,
 		experimentID,
 		experimentName,

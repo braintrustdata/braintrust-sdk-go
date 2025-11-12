@@ -11,7 +11,6 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 
-	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
 	"github.com/braintrustdata/braintrust-sdk-go/trace"
@@ -43,16 +42,8 @@ func newUnitTestEval[I, R any](t *testing.T, dataset Dataset[I, R], task TaskFun
 	// Create fake session with test data
 	session := tests.NewSession(t)
 
-	// Create test config
-	cfg := &config.Config{
-		AppURL:             "https://test.braintrust.dev",
-		OrgName:            "test-org",
-		DefaultProjectName: "test-project",
-	}
-
 	// Create eval with fake IDs
 	e := testNewEval(
-		cfg,
 		session,
 		tracer,
 		"exp-12345678",    // fake experiment ID
