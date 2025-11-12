@@ -17,7 +17,6 @@ import (
 func TestNew_WithMinimalConfig(t *testing.T) {
 	t.Parallel()
 
-	// Use real API key if available, otherwise use test key
 	// Create a TracerProvider
 	tp := trace.NewTracerProvider()
 	defer func() { _ = tp.Shutdown(context.Background()) }()
