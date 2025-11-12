@@ -101,7 +101,7 @@ func New(tp *trace.TracerProvider, opts ...Option) (*Client, error) {
 	// If blocking login requested, wait for it
 	if cfg.BlockingLogin {
 		log.Debug("waiting for login to complete")
-		_, err := session.Login(context.Background())
+		err := session.Login(context.Background())
 		if err != nil {
 			log.Error("blocking login failed", "error", err)
 			return nil, fmt.Errorf("login failed: %w", err)
@@ -147,11 +147,9 @@ func convertSpanFilters(funcs []config.SpanFilterFunc) []bttrace.SpanFilterFunc 
 // String returns a string representation of the client
 func (c *Client) String() string {
 	// Get org name from auth session if available
-	orgName := c.config.OrgName
-	orgID := ""
-	if ok, info := c.session.Info(); ok {
-		orgName = info.OrgName
-		orgID = info.OrgID
+	orgID, orgName := c.session.OrgInfo()
+	if orgName == "" {
+		orgName = c.config.OrgName
 	}
 
 	orgInfo := orgName
@@ -235,12 +233,12 @@ func NewEvaluator[I, R any](client *Client) *eval.Evaluator[I, R] {
 //	    Description: "My test dataset",
 //	})
 func (c *Client) API() *api.API {
-	// Get endpoints from session (prefers logged-in info, falls back to config)
-	endpoints := c.session.Endpoints()
+	// Get API credentials from session (prefers logged-in info, falls back to config)
+	apiKey, apiURL := c.session.APIInfo()
 
 	return api.NewClient(
-		endpoints.APIKey,
-		api.WithAPIURL(endpoints.APIURL),
+		apiKey,
+		api.WithAPIURL(apiURL),
 		api.WithLogger(c.logger),
 	)
 }

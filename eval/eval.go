@@ -604,13 +604,11 @@ func (e *eval[I, R]) permalink() string {
 	orgName := e.config.OrgName
 
 	// Try to get from session if login is complete
-	if ok, info := e.session.Info(); ok {
-		if appURL == "" && info.AppPublicURL != "" {
-			appURL = info.AppPublicURL
-		}
-		if orgName == "" && info.OrgName != "" {
-			orgName = info.OrgName
-		}
+	if sessionAppURL := e.session.AppPublicURL(); appURL == "" && sessionAppURL != "" {
+		appURL = sessionAppURL
+	}
+	if sessionOrgName := e.session.OrgName(); orgName == "" && sessionOrgName != "" {
+		orgName = sessionOrgName
 	}
 
 	if appURL == "" {

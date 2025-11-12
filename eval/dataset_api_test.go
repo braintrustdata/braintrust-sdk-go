@@ -207,8 +207,8 @@ func TestDatasetAPI_TypeSafety(t *testing.T) {
 
 	// Create a minimal session for compile-time type checking
 	session := tests.NewSession(t)
-	endpoints := session.Endpoints()
-	apiClient := api.NewClient(endpoints.APIKey, api.WithAPIURL(endpoints.APIURL))
+	apiKey, apiURL := session.APIInfo()
+	apiClient := api.NewClient(apiKey, api.WithAPIURL(apiURL))
 
 	// This should compile
 	datasetAPI := &DatasetAPI[testDatasetInput, testDatasetOutput]{

@@ -26,15 +26,18 @@ func TestSession_WithTestAPIKey(t *testing.T) {
 	require.NoError(t, err)
 	defer session.Close()
 
-	result, err := session.Login(ctx)
+	err = session.Login(ctx)
 
 	require.NoError(t, err)
-	assert.Equal(t, TestAPIKey, result.LoginToken)
-	assert.Equal(t, "test-org-id", result.OrgID)
-	assert.Equal(t, "test-org-name", result.OrgName)
-	assert.Equal(t, "https://api.braintrust.ai", result.APIURL)
-	assert.Equal(t, "https://proxy.braintrust.ai", result.ProxyURL)
-	assert.True(t, result.LoggedIn)
+
+	// Verify using new getter methods
+	apiKey, apiURL := session.APIInfo()
+	assert.Equal(t, TestAPIKey, apiKey)
+	assert.Equal(t, "https://api.braintrust.ai", apiURL)
+
+	orgID, orgName := session.OrgInfo()
+	assert.Equal(t, "test-org-id", orgID)
+	assert.Equal(t, "test-org-name", orgName)
 }
 
 // TestSession_WithValidAPIKey tests login with a valid API key
@@ -71,15 +74,18 @@ func TestSession_WithValidAPIKey(t *testing.T) {
 	require.NoError(t, err)
 	defer session.Close()
 
-	result, err := session.Login(context.Background())
+	err = session.Login(context.Background())
 
 	require.NoError(t, err)
-	assert.Equal(t, "test-api-key", result.LoginToken)
-	assert.Equal(t, "org-123", result.OrgID)
-	assert.Equal(t, "test-org", result.OrgName)
-	assert.Equal(t, "https://api.example.com", result.APIURL)
-	assert.Equal(t, "https://proxy.example.com", result.ProxyURL)
-	assert.True(t, result.LoggedIn)
+
+	// Verify using new getter methods
+	apiKey, apiURL := session.APIInfo()
+	assert.Equal(t, "test-api-key", apiKey)
+	assert.Equal(t, "https://api.example.com", apiURL)
+
+	orgID, orgName := session.OrgInfo()
+	assert.Equal(t, "org-123", orgID)
+	assert.Equal(t, "test-org", orgName)
 }
 
 // TestSession_WithInvalidAPIKey tests login with an invalid API key
@@ -101,7 +107,7 @@ func TestSession_WithInvalidAPIKey(t *testing.T) {
 	require.NoError(t, err)
 	defer session.Close()
 
-	_, err = session.Login(context.Background())
+	err = session.Login(context.Background())
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "invalid API key")
@@ -143,12 +149,16 @@ func TestSession_OrgSelection(t *testing.T) {
 	require.NoError(t, err)
 	defer session.Close()
 
-	result, err := session.Login(context.Background())
+	err = session.Login(context.Background())
 
 	require.NoError(t, err)
-	assert.Equal(t, "org-2", result.OrgID)
-	assert.Equal(t, "org-two", result.OrgName)
-	assert.Equal(t, "https://api2.example.com", result.APIURL)
+
+	orgID, orgName := session.OrgInfo()
+	assert.Equal(t, "org-2", orgID)
+	assert.Equal(t, "org-two", orgName)
+
+	_, apiURL := session.APIInfo()
+	assert.Equal(t, "https://api2.example.com", apiURL)
 }
 
 // TestSession_OrgNotFound tests error when specified org doesn't exist
@@ -181,7 +191,7 @@ func TestSession_OrgNotFound(t *testing.T) {
 	require.NoError(t, err)
 	defer session.Close()
 
-	_, err = session.Login(context.Background())
+	err = session.Login(context.Background())
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "organization")
@@ -228,17 +238,19 @@ func TestSession_WithRealAPIKey(t *testing.T) {
 	require.NoError(t, err)
 	defer session.Close()
 
-	result, err := session.Login(context.Background())
+	err = session.Login(context.Background())
 
 	require.NoError(t, err)
-	assert.True(t, result.LoggedIn)
-	assert.NotEmpty(t, result.OrgID)
-	assert.NotEmpty(t, result.OrgName)
-	assert.NotEmpty(t, result.APIURL)
-	assert.NotEmpty(t, result.ProxyURL)
+
+	orgID, orgName := session.OrgInfo()
+	assert.NotEmpty(t, orgID)
+	assert.NotEmpty(t, orgName)
+
+	_, apiURL := session.APIInfo()
+	assert.NotEmpty(t, apiURL)
 }
 
-// TestSession_NonBlockingInfo tests that Info() returns immediately
+// TestSession_NonBlockingInfo tests that OrgInfo() returns immediately
 func TestSession_NonBlockingInfo(t *testing.T) {
 	t.Parallel()
 	session, err := NewSession(context.Background(), Options{
@@ -249,15 +261,16 @@ func TestSession_NonBlockingInfo(t *testing.T) {
 	require.NoError(t, err)
 	defer session.Close()
 
-	// Info() should return immediately even if login not complete
+	// OrgInfo() should return immediately even if login not complete
 	// (In this case with TestAPIKey it will be fast, but still async)
-	ok, info := session.Info()
+	orgID, orgName := session.OrgInfo()
 
-	// Either it's already done (true) or still in progress (false)
+	// Either it's already done (populated) or still in progress (empty)
 	// Both are valid - just verify it returns immediately
-	if ok {
-		assert.NotNil(t, info)
-		assert.Equal(t, "test-org-id", info.OrgID)
+	// With TestAPIKey it should complete quickly
+	if orgName != "" {
+		assert.Equal(t, "test-org-id", orgID)
+		assert.Equal(t, "test-org-name", orgName)
 	}
 }
 
@@ -273,15 +286,16 @@ func TestSession_BlockingLogin(t *testing.T) {
 	defer session.Close()
 
 	// Login() should block until complete
-	result, err := session.Login(context.Background())
+	err = session.Login(context.Background())
 
 	require.NoError(t, err)
-	assert.NotNil(t, result)
-	assert.Equal(t, "test-org-id", result.OrgID)
+
+	orgID, _ := session.OrgInfo()
+	assert.Equal(t, "test-org-id", orgID)
 }
 
-// TestSession_Endpoints tests that Endpoints() returns credentials immediately
-func TestSession_Endpoints(t *testing.T) {
+// TestSession_APIInfo tests that APIInfo() returns credentials immediately
+func TestSession_APIInfo(t *testing.T) {
 	t.Parallel()
 
 	t.Run("with all fields", func(t *testing.T) {
@@ -294,12 +308,11 @@ func TestSession_Endpoints(t *testing.T) {
 		require.NoError(t, err)
 		defer session.Close()
 
-		// Endpoints() should return immediately, no login required
-		endpoints := session.Endpoints()
+		// APIInfo() should return immediately, no login required
+		apiKey, apiURL := session.APIInfo()
 
-		assert.Equal(t, "test-key-123", endpoints.APIKey)
-		assert.Equal(t, "https://api.braintrust.dev", endpoints.APIURL)
-		assert.Equal(t, "https://www.braintrust.dev", endpoints.AppURL)
+		assert.Equal(t, "test-key-123", apiKey)
+		assert.Equal(t, "https://api.braintrust.dev", apiURL)
 	})
 
 	t.Run("with default APIURL", func(t *testing.T) {
@@ -312,11 +325,10 @@ func TestSession_Endpoints(t *testing.T) {
 		require.NoError(t, err)
 		defer session.Close()
 
-		endpoints := session.Endpoints()
+		apiKey, apiURL := session.APIInfo()
 
-		assert.Equal(t, "test-key-456", endpoints.APIKey)
-		assert.Equal(t, "https://api.braintrust.dev", endpoints.APIURL) // Default
-		assert.Equal(t, "https://www.braintrust.dev", endpoints.AppURL)
+		assert.Equal(t, "test-key-456", apiKey)
+		assert.Equal(t, "https://api.braintrust.dev", apiURL) // Default
 	})
 
 	t.Run("available before login completes", func(t *testing.T) {
@@ -329,12 +341,11 @@ func TestSession_Endpoints(t *testing.T) {
 		require.NoError(t, err)
 		defer session.Close()
 
-		// Endpoints() should work immediately even though login hasn't completed
-		endpoints := session.Endpoints()
+		// APIInfo() should work immediately even though login hasn't completed
+		apiKey, apiURL := session.APIInfo()
 
-		assert.Equal(t, "test-key-789", endpoints.APIKey)
-		assert.Equal(t, "https://api.braintrust.dev", endpoints.APIURL)
-		assert.Equal(t, "http://localhost:99999", endpoints.AppURL)
+		assert.Equal(t, "test-key-789", apiKey)
+		assert.Equal(t, "https://api.braintrust.dev", apiURL)
 	})
 }
 
@@ -365,7 +376,7 @@ func TestSession_OrgName(t *testing.T) {
 		defer session.Close()
 
 		// Wait for login to complete
-		_, err = session.Login(context.Background())
+		err = session.Login(context.Background())
 		require.NoError(t, err)
 
 		// Should return org name

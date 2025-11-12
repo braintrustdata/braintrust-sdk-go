@@ -17,15 +17,15 @@ import (
 
 // Test helper: create a session for testing with proper auth info
 func newTestSession() *auth.Session {
-	done := make(chan struct{})
-	close(done) // Mark as already logged in
-	return auth.NewTestSession(&auth.Info{
-		APIKey:   "test-api-key",
-		APIURL:   "https://api.braintrust.dev",
-		AppURL:   "https://www.braintrust.dev",
-		OrgName:  "test-org",
-		LoggedIn: true,
-	}, done, logger.Discard())
+	return auth.NewTestSession(
+		"test-api-key",
+		"test-org-id",
+		"test-org",
+		"https://api.braintrust.dev",
+		"https://www.braintrust.dev",
+		"https://www.braintrust.dev",
+		logger.Discard(),
+	)
 }
 
 func TestSpanFilterFunc_WithAttributes(t *testing.T) {

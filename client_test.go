@@ -64,11 +64,9 @@ func TestNew_WithBlockingLogin(t *testing.T) {
 	require.NotNil(t, client)
 
 	// After blocking login, session info should be available
-	ok, info := client.session.Info()
-	assert.True(t, ok)
-	assert.NotNil(t, info)
-	assert.Equal(t, "test-org-id", info.OrgID)
-	assert.Equal(t, "test-org-name", info.OrgName)
+	orgID, orgName := client.session.OrgInfo()
+	assert.Equal(t, "test-org-id", orgID)
+	assert.Equal(t, "test-org-name", orgName)
 
 	// String() should show org info
 	str := client.String()

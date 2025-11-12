@@ -70,6 +70,11 @@ func NewWrappedClient(apiKey, baseURL string, httpClient *http.Client, log logge
 	}
 }
 
+// APIKey returns the API key used by this client.
+func (c *Client) APIKey() string {
+	return c.apiKey
+}
+
 // GET makes a GET request with query parameters.
 // The path is appended to the base URL (e.g., "/v1/project").
 func (c *Client) GET(ctx context.Context, path string, params map[string]string) (*http.Response, error) {
