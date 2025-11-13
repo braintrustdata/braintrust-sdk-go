@@ -37,7 +37,8 @@ func newUnitTestEval[I, R any](t *testing.T, dataset Dataset[I, R], task TaskFun
 	t.Helper()
 
 	// Create test tracer and exporter using oteltest
-	tracer, exporter := oteltest.Setup(t)
+	tp, exporter := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
 
 	// Create fake session with test data
 	session := tests.NewSession(t)

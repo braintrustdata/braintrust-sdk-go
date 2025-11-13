@@ -12,7 +12,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/otel"
 	attr "go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -21,8 +20,10 @@ import (
 )
 
 // Setup sets up otel tracing for testing (no sampling, sync, stores spans in memory)
-// and returns a Tracer and an Exporter that can be used to flush the spans.
-func Setup(t *testing.T) (oteltrace.Tracer, *Exporter) {
+// and returns a TracerProvider and an Exporter that can be used to flush the spans.
+// The TracerProvider can be passed to middleware to ensure spans are captured in tests.
+// Tests can get a tracer by calling tp.Tracer(name).
+func Setup(t *testing.T) (oteltrace.TracerProvider, *Exporter) {
 	t.Helper()
 
 	// setup otel to be fully synchronous
@@ -32,9 +33,7 @@ func Setup(t *testing.T) (oteltrace.Tracer, *Exporter) {
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSpanProcessor(processor),
 	)
-	original := otel.GetTracerProvider()
-	otel.SetTracerProvider(tp)
-	tracer := otel.GetTracerProvider().Tracer(t.Name())
+	// DO NOT set global tracer provider to avoid cross-test pollution
 
 	t.Cleanup(func() {
 		// Use background context for cleanup
@@ -44,10 +43,9 @@ func Setup(t *testing.T) (oteltrace.Tracer, *Exporter) {
 		if err != nil {
 			t.Errorf("Error shutting down tracer provider: %v", err)
 		}
-		otel.SetTracerProvider(original)
 	})
 
-	return tracer, &Exporter{exporter: exporter, t: t}
+	return tp, &Exporter{exporter: exporter, t: t}
 }
 
 // Exporter is a wrapper around the OTel InMemoryExporter that provides some

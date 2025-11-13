@@ -21,7 +21,7 @@ const testModel = openai.GPT4oMini
 func setUpTest(t *testing.T) (*openai.Client, *oteltest.Exporter) {
 	t.Helper()
 
-	_, exporter := oteltest.Setup(t)
+	tp, exporter := oteltest.Setup(t)
 
 	mode := vcr.GetVCRMode()
 
@@ -38,7 +38,7 @@ func setUpTest(t *testing.T) (*openai.Client, *oteltest.Exporter) {
 	httpClient := vcr.NewHTTPClient(t)
 
 	// Wrap with tracing
-	tracedClient := WrapClient(httpClient)
+	tracedClient := WrapClient(httpClient, WithTracerProvider(tp))
 
 	// Create OpenAI client
 	config := openai.DefaultConfig(apiKey)
@@ -221,11 +221,11 @@ func TestStreamingChatCompletions(t *testing.T) {
 }
 
 func TestErrorHandling(t *testing.T) {
-	_, exporter := oteltest.Setup(t)
+	tp, exporter := oteltest.Setup(t)
 
 	// Create HTTP client with VCR
 	httpClient := vcr.NewHTTPClient(t)
-	tracedClient := WrapClient(httpClient)
+	tracedClient := WrapClient(httpClient, WithTracerProvider(tp))
 
 	// Create OpenAI client with invalid API key to trigger an error
 	config := openai.DefaultConfig("invalid-api-key")

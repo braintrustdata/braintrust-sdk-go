@@ -15,8 +15,8 @@ import (
 	"github.com/openai/openai-go/shared"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
+	oteltrace "go.opentelemetry.io/otel/trace"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
@@ -25,11 +25,11 @@ import (
 const testModel = "gpt-4o-mini"
 
 // setUpTest is a helper function that sets up a new tracer provider and VCR for each test.
-// It returns an openai client configured with VCR and an exporter.
-func setUpTest(t *testing.T) (openai.Client, *oteltest.Exporter) {
+// It returns an openai client configured with VCR, tracer provider, and an exporter.
+func setUpTest(t *testing.T) (openai.Client, oteltrace.TracerProvider, *oteltest.Exporter) {
 	t.Helper()
 
-	_, exporter := oteltest.Setup(t)
+	tp, exporter := oteltest.Setup(t)
 
 	mode := vcr.GetVCRMode()
 
@@ -48,14 +48,14 @@ func setUpTest(t *testing.T) (openai.Client, *oteltest.Exporter) {
 	client := openai.NewClient(
 		option.WithAPIKey(apiKey),
 		option.WithHTTPClient(httpClient),
-		option.WithMiddleware(NewMiddleware()), //nolint:bodyclose // false positive - NewMiddleware returns middleware func
+		option.WithMiddleware(NewMiddleware(WithTracerProvider(tp))), //nolint:bodyclose // false positive - NewMiddleware returns middleware func
 	)
 
-	return client, exporter
+	return client, tp, exporter
 }
 
 func TestError(t *testing.T) {
-	_, exporter := setUpTest(t)
+	_, tp, exporter := setUpTest(t)
 	assert := assert.New(t)
 
 	errorware := func(_ *http.Request, _ NextMiddleware) (*http.Response, error) {
@@ -63,8 +63,8 @@ func TestError(t *testing.T) {
 	}
 
 	client := openai.NewClient(
-		option.WithMaxRetries(0),               // don't retry errors
-		option.WithMiddleware(NewMiddleware()), //nolint:bodyclose // false positive - NewMiddleware returns middleware func
+		option.WithMaxRetries(0),                                     // don't retry errors
+		option.WithMiddleware(NewMiddleware(WithTracerProvider(tp))), //nolint:bodyclose // false positive - NewMiddleware returns middleware func
 		option.WithMiddleware(errorware),
 	)
 
@@ -98,7 +98,7 @@ func TestError(t *testing.T) {
 }
 
 func TestOpenAIResponsesRequiredParams(t *testing.T) {
-	client, exporter := setUpTest(t)
+	client, _, exporter := setUpTest(t)
 	assert := assert.New(t)
 	require := require.New(t)
 
@@ -127,7 +127,7 @@ func TestOpenAIResponsesRequiredParams(t *testing.T) {
 }
 
 func TestOpenAIResponsesKitchenSink(t *testing.T) {
-	client, exporter := setUpTest(t)
+	client, _, exporter := setUpTest(t)
 	assert := assert.New(t)
 	require := require.New(t)
 
@@ -183,7 +183,7 @@ func TestOpenAIResponsesKitchenSink(t *testing.T) {
 }
 
 func TestOpenAIResponsesStreamingClose(t *testing.T) {
-	client, exporter := setUpTest(t)
+	client, _, exporter := setUpTest(t)
 	require := require.New(t)
 	assert := assert.New(t)
 
@@ -207,7 +207,7 @@ func TestOpenAIResponsesStreamingClose(t *testing.T) {
 }
 
 func TestOpenAIResponsesStreaming(t *testing.T) {
-	client, exporter := setUpTest(t)
+	client, _, exporter := setUpTest(t)
 	assert := assert.New(t)
 	require := require.New(t)
 
@@ -246,7 +246,7 @@ func TestOpenAIResponsesStreaming(t *testing.T) {
 }
 
 func TestOpenAIResponsesWithListInput(t *testing.T) {
-	client, exporter := setUpTest(t)
+	client, _, exporter := setUpTest(t)
 	assert := assert.New(t)
 	require := require.New(t)
 
@@ -361,14 +361,14 @@ func assertSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.TimeRa
 }
 
 func TestTestOTelTracer(t *testing.T) {
-	_, exporter := setUpTest(t)
+	_, tp, exporter := setUpTest(t)
 	assert := assert.New(t)
 
 	// crudely check we can create and test spans
 	spans := exporter.Flush()
 	assert.Empty(spans)
 
-	tracer := otel.Tracer("test")
+	tracer := tp.Tracer("test")
 	_, span := tracer.Start(context.Background(), "test")
 	span.End()
 
@@ -453,7 +453,7 @@ func TestTranslateMetricPrefix(t *testing.T) {
 // TestResponsesAPIUsesCorrectAttributes verifies that the Responses API uses
 // braintrust.input_json and braintrust.output_json for proper UI display (issue #33)
 func TestResponsesAPIUsesCorrectAttributes(t *testing.T) {
-	client, exporter := setUpTest(t)
+	client, _, exporter := setUpTest(t)
 	require := require.New(t)
 	assert := assert.New(t)
 
@@ -491,7 +491,7 @@ func TestResponsesAPIUsesCorrectAttributes(t *testing.T) {
 
 // TestResponsesAPIWithStringInput verifies that string inputs also work with _json attributes
 func TestResponsesAPIWithStringInput(t *testing.T) {
-	client, exporter := setUpTest(t)
+	client, _, exporter := setUpTest(t)
 	require := require.New(t)
 	assert := assert.New(t)
 
@@ -520,7 +520,7 @@ func TestResponsesAPIWithStringInput(t *testing.T) {
 
 // TestResponsesAPIWithReasoning verifies that reasoning parameters are captured in metadata
 func TestResponsesAPIWithReasoning(t *testing.T) {
-	client, exporter := setUpTest(t)
+	client, _, exporter := setUpTest(t)
 	require := require.New(t)
 	assert := assert.New(t)
 
