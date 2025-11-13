@@ -14,7 +14,6 @@ import (
 	"github.com/anthropics/anthropic-sdk-go/option"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
@@ -92,7 +91,8 @@ func TestMiddleware(t *testing.T) {
 }
 
 func TestMessagesTracer(t *testing.T) {
-	cfg := &middlewareConfig{tracerProvider: otel.GetTracerProvider()}
+	tp, _ := oteltest.Setup(t)
+	cfg := &middlewareConfig{tracerProvider: tp}
 	tracer := newMessagesTracer(cfg)
 	assert.NotNil(t, tracer)
 	assert.False(t, tracer.streaming)
@@ -129,7 +129,8 @@ func TestMessagesTracer(t *testing.T) {
 }
 
 func TestMessagesTracerStreaming(t *testing.T) {
-	cfg := &middlewareConfig{tracerProvider: otel.GetTracerProvider()}
+	tp, _ := oteltest.Setup(t)
+	cfg := &middlewareConfig{tracerProvider: tp}
 	tracer := newMessagesTracer(cfg)
 
 	// Test streaming request
@@ -362,7 +363,7 @@ func TestMiddlewareIntegrationStreaming(t *testing.T) {
 func setUpTest(t *testing.T) (anthropic.Client, *oteltest.Exporter) {
 	t.Helper()
 
-	_, exporter := oteltest.Setup(t)
+	tp, exporter := oteltest.Setup(t)
 
 	mode := vcr.GetVCRMode()
 
@@ -381,7 +382,7 @@ func setUpTest(t *testing.T) (anthropic.Client, *oteltest.Exporter) {
 	client := anthropic.NewClient(
 		option.WithAPIKey(apiKey),
 		option.WithHTTPClient(httpClient),
-		option.WithMiddleware(NewMiddleware()), //nolint:bodyclose // false positive - NewMiddleware returns middleware func
+		option.WithMiddleware(NewMiddleware(WithTracerProvider(tp))), //nolint:bodyclose // false positive - NewMiddleware returns middleware func
 	)
 
 	return client, exporter

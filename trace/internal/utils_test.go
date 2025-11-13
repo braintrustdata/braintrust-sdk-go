@@ -11,8 +11,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 )
 
 func TestBufferedReader(t *testing.T) {
@@ -42,7 +43,8 @@ func TestBufferedReader(t *testing.T) {
 
 func TestSetJSONAttr(t *testing.T) {
 	// Create a test tracer and span
-	tracer := otel.GetTracerProvider().Tracer("test")
+	tp, _ := oteltest.Setup(t)
+	tracer := tp.Tracer("test")
 	_, span := tracer.Start(context.Background(), "test-span")
 	defer span.End()
 
@@ -61,11 +63,12 @@ func TestSetJSONAttr(t *testing.T) {
 type mockTracer struct {
 	startSpanCalled bool
 	tagSpanCalled   bool
+	tp              trace.TracerProvider
 }
 
 func (m *mockTracer) StartSpan(ctx context.Context, start time.Time, request io.Reader) (context.Context, trace.Span, error) {
 	m.startSpanCalled = true
-	tracer := otel.GetTracerProvider().Tracer("braintrust")
+	tracer := m.tp.Tracer("braintrust")
 	newCtx, span := tracer.Start(ctx, "mock-span", trace.WithTimestamp(start))
 	return newCtx, span, nil
 }
@@ -76,9 +79,12 @@ func (m *mockTracer) TagSpan(span trace.Span, response io.Reader) error {
 }
 
 func TestMiddleware(t *testing.T) {
+	// Create test tracer provider
+	tp, _ := oteltest.Setup(t)
+
 	// Create mock tracers for different paths
-	mockTracer1 := &mockTracer{}
-	mockTracer2 := &mockTracer{}
+	mockTracer1 := &mockTracer{tp: tp}
+	mockTracer2 := &mockTracer{tp: tp}
 
 	// Create router
 	router := func(path string) MiddlewareTracer {

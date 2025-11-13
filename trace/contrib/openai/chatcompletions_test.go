@@ -17,7 +17,7 @@ import (
 )
 
 func TestOpenAIChatCompletions(t *testing.T) {
-	client, exporter := setUpTest(t)
+	client, _, exporter := setUpTest(t)
 	assert := assert.New(t)
 	require := require.New(t)
 
@@ -103,7 +103,7 @@ func TestOpenAIChatCompletions(t *testing.T) {
 }
 
 func TestOpenAIChatCompletionsStreaming(t *testing.T) {
-	client, exporter := setUpTest(t)
+	client, _, exporter := setUpTest(t)
 	assert := assert.New(t)
 	require := require.New(t)
 
@@ -185,7 +185,7 @@ func TestOpenAIChatCompletionsStreaming(t *testing.T) {
 }
 
 func TestOpenAIChatCompletionsWithTools(t *testing.T) {
-	client, exporter := setUpTest(t)
+	client, _, exporter := setUpTest(t)
 	assert := assert.New(t)
 	require := require.New(t)
 
@@ -273,7 +273,7 @@ func TestOpenAIChatCompletionsWithTools(t *testing.T) {
 }
 
 func TestOpenAIChatCompletionsWithSystemMessage(t *testing.T) {
-	client, exporter := setUpTest(t)
+	client, _, exporter := setUpTest(t)
 	assert := assert.New(t)
 	require := require.New(t)
 
@@ -348,7 +348,7 @@ func TestOpenAIChatCompletionsWithSystemMessage(t *testing.T) {
 }
 
 func TestOpenAIChatCompletionsStreamingToolCalls(t *testing.T) {
-	client, exporter := setUpTest(t)
+	client, _, exporter := setUpTest(t)
 	assert := assert.New(t)
 	require := require.New(t)
 
@@ -716,7 +716,7 @@ func TestStreamingToolCallsPostprocessing(t *testing.T) {
 }
 
 func TestChatCompletionsStructuredAssertions(t *testing.T) {
-	client, exporter := setUpTest(t)
+	client, _, exporter := setUpTest(t)
 	require := require.New(t)
 
 	// Test simple chat completion with structured assertions
@@ -783,7 +783,7 @@ func TestChatCompletionsStructuredAssertions(t *testing.T) {
 }
 
 func TestToolCallsStructuredAssertions(t *testing.T) {
-	client, exporter := setUpTest(t)
+	client, _, exporter := setUpTest(t)
 	require := require.New(t)
 
 	// Test streaming tool calls with structured assertions
@@ -1117,7 +1117,7 @@ func assertChatSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.Ti
 
 func TestMultipleMessagesIssue33(t *testing.T) {
 	// This is a test for issue #33: https://github.com/braintrustdata/braintrust-sdk-go/issues/33
-	client, exporter := setUpTest(t)
+	client, _, exporter := setUpTest(t)
 	require := require.New(t)
 	assert := assert.New(t)
 

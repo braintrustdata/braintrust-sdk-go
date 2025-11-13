@@ -13,9 +13,10 @@ import (
 
 // TestContextAnalysis inspects what's in the context during callbacks
 func TestContextAnalysis(t *testing.T) {
-	tracer, _ := oteltest.Setup(t)
+	tp, _ := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
 
-	handler := NewHandler()
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
 
 	// Create a parent span
 	ctx := context.Background()
@@ -55,9 +56,10 @@ func TestContextAnalysis(t *testing.T) {
 
 // TestNestedCalls tests that nested calls (chain → llm) work correctly
 func TestNestedCalls(t *testing.T) {
-	tracer, exporter := oteltest.Setup(t)
+	tp, exporter := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
 
-	handler := NewHandler()
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
 
 	ctx := context.Background()
 	ctx, parentSpan := tracer.Start(ctx, "test-parent")
@@ -137,9 +139,10 @@ func TestNestedCalls(t *testing.T) {
 // TestParallelCalls simulates parallel LLM calls with the same context.
 // The stack approach preserves both spans even though they use the same context.
 func TestParallelCalls(t *testing.T) {
-	tracer, exporter := oteltest.Setup(t)
+	tp, exporter := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
 
-	handler := NewHandler()
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
 
 	ctx := context.Background()
 	ctx, parentSpan := tracer.Start(ctx, "test-parent")

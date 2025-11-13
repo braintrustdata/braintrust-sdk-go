@@ -19,7 +19,7 @@ import (
 func setUpTest(t *testing.T) (*genai.Client, *oteltest.Exporter) {
 	t.Helper()
 
-	_, exporter := oteltest.Setup(t)
+	tp, exporter := oteltest.Setup(t)
 
 	mode := vcr.GetVCRMode()
 
@@ -36,7 +36,7 @@ func setUpTest(t *testing.T) (*genai.Client, *oteltest.Exporter) {
 	httpClient := vcr.NewHTTPClient(t)
 
 	// Wrap with tracing
-	tracedClient := WrapClient(httpClient)
+	tracedClient := WrapClient(httpClient, WithTracerProvider(tp))
 
 	// Create client with tracing and VCR
 	client, err := genai.NewClient(context.Background(), &genai.ClientConfig{

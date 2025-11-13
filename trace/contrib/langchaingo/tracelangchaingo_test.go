@@ -14,9 +14,10 @@ import (
 )
 
 func TestHandleLLMGenerateContentStart(t *testing.T) {
-	tracer, exporter := oteltest.Setup(t)
+	tp, exporter := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
 
-	handler := NewHandler()
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
 
 	// Create a parent span
 	ctx, parentSpan := tracer.Start(context.Background(), "test-parent")
@@ -72,9 +73,10 @@ func TestHandleLLMGenerateContentStart(t *testing.T) {
 }
 
 func TestHandleLLMGenerateContentEnd(t *testing.T) {
-	tracer, exporter := oteltest.Setup(t)
+	tp, exporter := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
 
-	handler := NewHandler()
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
 
 	// Create a parent span
 	ctx, parentSpan := tracer.Start(context.Background(), "test-parent")
@@ -146,9 +148,10 @@ func TestHandleLLMGenerateContentEnd(t *testing.T) {
 }
 
 func TestHandleLLMError(t *testing.T) {
-	tracer, exporter := oteltest.Setup(t)
+	tp, exporter := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
 
-	handler := NewHandler()
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
 
 	// Create a parent span
 	ctx, parentSpan := tracer.Start(context.Background(), "test-parent")
@@ -191,9 +194,10 @@ func TestHandleLLMError(t *testing.T) {
 }
 
 func TestHandleLLMStart(t *testing.T) {
-	tracer, exporter := oteltest.Setup(t)
+	tp, exporter := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
 
-	handler := NewHandler()
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
 
 	// Create a parent span
 	ctx, parentSpan := tracer.Start(context.Background(), "test-parent")
@@ -240,9 +244,10 @@ func TestHandleLLMStart(t *testing.T) {
 }
 
 func TestHandleLLMGenerateContentEndWithoutStart(t *testing.T) {
-	tracer, exporter := oteltest.Setup(t)
+	tp, exporter := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
 
-	handler := NewHandler()
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
 
 	// Create a parent span
 	ctx, parentSpan := tracer.Start(context.Background(), "test-parent")
@@ -265,9 +270,10 @@ func TestHandleLLMGenerateContentEndWithoutStart(t *testing.T) {
 }
 
 func TestHandleLLMErrorWithoutStart(t *testing.T) {
-	tracer, exporter := oteltest.Setup(t)
+	tp, exporter := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
 
-	handler := NewHandler()
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
 
 	// Create a parent span
 	ctx, parentSpan := tracer.Start(context.Background(), "test-parent")
@@ -287,9 +293,10 @@ func TestHandleLLMErrorWithoutStart(t *testing.T) {
 }
 
 func TestHandleLLMGenerateContentWithToolCalls(t *testing.T) {
-	tracer, exporter := oteltest.Setup(t)
+	tp, exporter := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
 
-	handler := NewHandler()
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
 
 	// Create a parent span
 	ctx, parentSpan := tracer.Start(context.Background(), "test-parent")
@@ -358,9 +365,10 @@ func TestHandleLLMGenerateContentWithToolCalls(t *testing.T) {
 }
 
 func TestHandleLLMGenerateContentWithPascalCaseTokens(t *testing.T) {
-	tracer, exporter := oteltest.Setup(t)
+	tp, exporter := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
 
-	handler := NewHandler()
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
 
 	// Create a parent span
 	ctx, parentSpan := tracer.Start(context.Background(), "test-parent")
@@ -417,9 +425,10 @@ func TestHandleLLMGenerateContentWithAnthropicTokens(t *testing.T) {
 	// is not supported in the official langchaingo client yet. Once Anthropic callback
 	// support is merged upstream, this test can be replaced with real data from actual
 	// Anthropic responses.
-	tracer, exporter := oteltest.Setup(t)
+	tp, exporter := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
 
-	handler := NewHandler()
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
 
 	// Create a parent span
 	ctx, parentSpan := tracer.Start(context.Background(), "test-parent")
