@@ -224,6 +224,78 @@ func TestDatasetAPI_TypeSafety(t *testing.T) {
 	assert.NotNil(t, datasetAPI)
 }
 
+// TestDatasetAPI_QueryByProject tests querying a dataset by name with ProjectName and ProjectID
+func TestDatasetAPI_QueryByProject(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+
+	// Create API client with VCR support
+	apiClient := createIntegrationTestAPIClient(t)
+
+	// Create a different project (not the default integration test project)
+	testProjectName := integrationTestProject + "-dataset-query"
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: testProjectName})
+	require.NoError(t, err)
+
+	// Use fixed name for VCR determinism
+	datasetName := "test-dataset-by-project"
+	dataset, err := apiClient.Datasets().Create(ctx, datasets.CreateParams{
+		ProjectID:   project.ID,
+		Name:        datasetName,
+		Description: "Test dataset for querying by name and project",
+	})
+	require.NoError(t, err)
+	defer func() {
+		_ = apiClient.Datasets().Delete(ctx, dataset.ID)
+	}()
+
+	// Insert test data
+	events := []datasets.Event{
+		{
+			Input: map[string]interface{}{
+				"question": "What is Go?",
+			},
+			Expected: map[string]interface{}{
+				"answer": "A programming language",
+			},
+		},
+	}
+
+	err = apiClient.Datasets().InsertEvents(ctx, dataset.ID, events)
+	require.NoError(t, err)
+
+	datasetAPI := &DatasetAPI[testDatasetInput, testDatasetOutput]{
+		api: apiClient,
+	}
+
+	// Test Query with Name and ProjectName
+	casesByName, err := datasetAPI.Query(ctx, DatasetQueryOpts{
+		Name:        datasetName,
+		ProjectName: testProjectName,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, casesByName)
+
+	testCase, err := casesByName.Next()
+	require.NoError(t, err)
+	assert.Equal(t, "What is Go?", testCase.Input.Question)
+	assert.Equal(t, "A programming language", testCase.Expected.Answer)
+
+	// Test Query with Name and ProjectID
+	casesByID, err := datasetAPI.Query(ctx, DatasetQueryOpts{
+		Name:      datasetName,
+		ProjectID: project.ID,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, casesByID)
+
+	testCase2, err := casesByID.Next()
+	require.NoError(t, err)
+	assert.Equal(t, "What is Go?", testCase2.Input.Question)
+	assert.Equal(t, "A programming language", testCase2.Expected.Answer)
+}
+
 // TestDatasetAPI_PopulatesDatasetFields tests that dataset iterator populates ID, XactID, and Created
 func TestDatasetAPI_PopulatesDatasetFields(t *testing.T) {
 	t.Parallel()

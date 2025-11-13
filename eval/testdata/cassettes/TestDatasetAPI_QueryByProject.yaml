@@ -1,0 +1,479 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 37
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"go-sdk-tests-dataset-query"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"7c2aa411-2c8e-48e3-a3cc-33a72b08e222","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-tests-dataset-query","created":"2025-11-13T17:07:41.050Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 13 Nov 2025 17:12:59 GMT
+            Etag:
+                - W/"f9-61Gr5WEpKlmCuIUo15hbXzObHEE"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 6ea9421ec132e3640100792ef9535494.cloudfront.net (CloudFront), 1.1 62c7f4f128c40af6818c2f8f919f1c18.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T_ewVHePIAMElNw=
+            X-Amz-Cf-Id:
+                - xgvnCB-2aeefBwje7sDnOFkz7i5D51jX36-spZVe5v9SDQBvpYY4YQ==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 8d18af33-dfe5-4fd3-8b2c-a31a876a9622
+            X-Amzn-Trace-Id:
+                - Root=1-6916119b-0a3fe8d07c74aab132bb716c;Parent=5afea20220872e8e;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Found-Existing:
+                - "true"
+            X-Bt-Internal-Trace-Id:
+                - 6916119b000000002fb158a61948da05
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 172.144917ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 148
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"project_id":"7c2aa411-2c8e-48e3-a3cc-33a72b08e222","name":"test-dataset-by-project","description":"Test dataset for querying by name and project"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/dataset
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"175812db-c6d6-4cb2-86ea-6b2c985e54bc","project_id":"7c2aa411-2c8e-48e3-a3cc-33a72b08e222","name":"test-dataset-by-project","description":"Test dataset for querying by name and project","created":"2025-11-13T17:12:59.558Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 13 Nov 2025 17:12:59 GMT
+            Etag:
+                - W/"138-2UTzHqve3ckcc4FJqz+b9RNj0PA"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 d8e93128b8c3fa45992684bc1f50eeb8.cloudfront.net (CloudFront), 1.1 62c7f4f128c40af6818c2f8f919f1c18.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T_ewWE5oIAMEApQ=
+            X-Amz-Cf-Id:
+                - MIUsYZFdQkqDvJ_q5YyNLTQBwzpawjqA_3p1LsXEFkF3AZihKdauCg==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 8b2ce207-b6ee-4190-a0f1-c8c7e4b3a3eb
+            X-Amzn-Trace-Id:
+                - Root=1-6916119b-4dddbc8051444bec0b2e5cc5;Parent=329ef38eec4327bf;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 6916119b000000000490cb3e605d5f97
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 164.630667ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 96
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"events":[{"input":{"question":"What is Go?"},"expected":{"answer":"A programming language"}}]}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/dataset/175812db-c6d6-4cb2-86ea-6b2c985e54bc/insert
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"row_ids":["e0270fce-e615-4859-8c76-0b6647a97afe"]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 13 Nov 2025 17:12:59 GMT
+            Etag:
+                - W/"34-q4d+M/a/seiwH1pu7KS1EgiO/9g"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 c50e3f7de0b772d07240015272b1aff6.cloudfront.net (CloudFront), 1.1 62c7f4f128c40af6818c2f8f919f1c18.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T_ewYG53IAMENPA=
+            X-Amz-Cf-Id:
+                - ttBIsA0etW28hUQFN4JoqcleexVKuh-sk05uYSwdTLDSqY9attwCDg==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 2f519124-3c21-426a-aa88-e9c1ccac422a
+            X-Amzn-Trace-Id:
+                - Root=1-6916119b-6171fda31ae3f6681a3042c7;Parent=1798b6a3e0a9b766;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 6916119b00000000436d440ef37fbbd4
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 369.551875ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/dataset?dataset_name=test-dataset-by-project&limit=1&project_name=go-sdk-tests-dataset-query
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"objects":[{"id":"175812db-c6d6-4cb2-86ea-6b2c985e54bc","project_id":"7c2aa411-2c8e-48e3-a3cc-33a72b08e222","name":"test-dataset-by-project","description":"Test dataset for querying by name and project","created":"2025-11-13T17:12:59.558Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null}]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 13 Nov 2025 17:13:00 GMT
+            Etag:
+                - W/"146-SbDaLoEBrFFeWs2z7/gh7yMHMNo"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 53a1f042d35b1ad7e45dd18908041b36.cloudfront.net (CloudFront), 1.1 62c7f4f128c40af6818c2f8f919f1c18.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T_ewbEydIAMEBtQ=
+            X-Amz-Cf-Id:
+                - 1ZogIgPaGXwdu43DiVmUgZ9L2gi-2Njj5hasPP0UOFbbSPe_nQDSaw==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 01527a56-d41e-4bcc-8274-328aee1e48c9
+            X-Amzn-Trace-Id:
+                - Root=1-6916119b-658108972f4d158e1b205bf7;Parent=22bdc35a04fbfff9;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 6916119c00000000003a252a1e5e6020
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 176.028ms
+    - id: 4
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 13
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"limit":100}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/dataset/175812db-c6d6-4cb2-86ea-6b2c985e54bc/fetch
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"events":[{"_pagination_key":"p07572259183944925184","_xact_id":"1000196135758575162","created":"2025-11-13T17:12:59.636Z","dataset_id":"175812db-c6d6-4cb2-86ea-6b2c985e54bc","expected":{"answer":"A programming language"},"id":"e0270fce-e615-4859-8c76-0b6647a97afe","input":{"question":"What is Go?"},"is_root":true,"metadata":null,"origin":null,"project_id":"7c2aa411-2c8e-48e3-a3cc-33a72b08e222","root_span_id":"d8ee61d0-8f9e-4f9d-9088-5ac88e99502b","span_id":"d8ee61d0-8f9e-4f9d-9088-5ac88e99502b","tags":null}],"cursor":"aRYRm7Y6AAA"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json
+            Date:
+                - Thu, 13 Nov 2025 17:13:00 GMT
+            Vary:
+                - Origin
+            Via:
+                - 1.1 241db89625f6ef70a00b0e19e0cfc332.cloudfront.net (CloudFront), 1.1 62c7f4f128c40af6818c2f8f919f1c18.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T_ewdHBhoAMEjEg=
+            X-Amz-Cf-Id:
+                - jG8l3m9Fq-le1CLBcCBIWtzip5E4fP8FEbWIns30Qq3T67TspIggAg==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - b4616ea6-7f98-4714-b412-69ea64300dea
+            X-Amzn-Trace-Id:
+                - Root=1-6916119c-62d37aa8035e1f705222be26;Parent=0dc511f1d5113fd4;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Cursor:
+                - aRYRm7Y6AAA
+            X-Bt-Internal-Trace-Id:
+                - 6916119c0000000071613a04db288ac8
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 345.272208ms
+    - id: 5
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/dataset?dataset_name=test-dataset-by-project&limit=1&project_id=7c2aa411-2c8e-48e3-a3cc-33a72b08e222
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"objects":[{"id":"175812db-c6d6-4cb2-86ea-6b2c985e54bc","project_id":"7c2aa411-2c8e-48e3-a3cc-33a72b08e222","name":"test-dataset-by-project","description":"Test dataset for querying by name and project","created":"2025-11-13T17:12:59.558Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null}]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 13 Nov 2025 17:13:00 GMT
+            Etag:
+                - W/"146-SbDaLoEBrFFeWs2z7/gh7yMHMNo"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 6e202b767e6bdee837ba15ada7e3120e.cloudfront.net (CloudFront), 1.1 62c7f4f128c40af6818c2f8f919f1c18.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T_ewhFB0IAMEooQ=
+            X-Amz-Cf-Id:
+                - DDvPT4UJgNOObzfxsQab968HEE7uaMfsZaCX4MErcKvV29btetJWNw==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 3b87da78-1e9d-4701-abff-f003b2ac9cc4
+            X-Amzn-Trace-Id:
+                - Root=1-6916119c-3265d2044eb57b6818ba53a8;Parent=641bf033b573527e;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 6916119c000000005645956b97ed1d38
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 172.387208ms
+    - id: 6
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 13
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"limit":100}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/dataset/175812db-c6d6-4cb2-86ea-6b2c985e54bc/fetch
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"events":[{"_pagination_key":"p07572259183944925184","_xact_id":"1000196135758575162","created":"2025-11-13T17:12:59.636Z","dataset_id":"175812db-c6d6-4cb2-86ea-6b2c985e54bc","expected":{"answer":"A programming language"},"id":"e0270fce-e615-4859-8c76-0b6647a97afe","input":{"question":"What is Go?"},"is_root":true,"metadata":null,"origin":null,"project_id":"7c2aa411-2c8e-48e3-a3cc-33a72b08e222","root_span_id":"d8ee61d0-8f9e-4f9d-9088-5ac88e99502b","span_id":"d8ee61d0-8f9e-4f9d-9088-5ac88e99502b","tags":null}],"cursor":"aRYRm7Y6AAA"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json
+            Date:
+                - Thu, 13 Nov 2025 17:13:00 GMT
+            Vary:
+                - Origin
+            Via:
+                - 1.1 9750f5ee94b45ad0faba87b3fac2aad6.cloudfront.net (CloudFront), 1.1 62c7f4f128c40af6818c2f8f919f1c18.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T_ewiGyZoAMEW0Q=
+            X-Amz-Cf-Id:
+                - PyOo01v9FvG8LLM7yhlDb_VO49SqmCTaunsyw65vPylzLqqXvz7thA==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - 70d40207-73d9-47ae-b217-7682be8313d4
+            X-Amzn-Trace-Id:
+                - Root=1-6916119c-2ca62b98779c235164eb203a;Parent=27a59d3f8d9aff81;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Cursor:
+                - aRYRm7Y6AAA
+            X-Bt-Internal-Trace-Id:
+                - 6916119c000000004b1cca2edb37a04f
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 139.814ms
+    - id: 7
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/dataset/175812db-c6d6-4cb2-86ea-6b2c985e54bc
+        method: DELETE
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"175812db-c6d6-4cb2-86ea-6b2c985e54bc","project_id":"7c2aa411-2c8e-48e3-a3cc-33a72b08e222","name":"test-dataset-by-project","description":"Test dataset for querying by name and project","created":"2025-11-13T17:12:59.558Z","deleted_at":"2025-11-13T17:13:00.920Z","user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","metadata":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 13 Nov 2025 17:13:00 GMT
+            Etag:
+                - W/"14e-NdRM8fdkisYt5/FKJlzhLoaOCV0"
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 ad22d4e4410fd07809425488bf6e79be.cloudfront.net (CloudFront), 1.1 62c7f4f128c40af6818c2f8f919f1c18.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - T_ewkEL-IAMELpQ=
+            X-Amz-Cf-Id:
+                - trhgBxOppGHeddHk_m4sBqAXJyojWp4IssOGzMu64EaYbSuVdHmhmg==
+            X-Amz-Cf-Pop:
+                - JFK50-P5
+                - JFK50-P2
+            X-Amzn-Requestid:
+                - fd39b31a-ed05-4dbf-a1d6-156c7e27f785
+            X-Amzn-Trace-Id:
+                - Root=1-6916119c-67c98c585262efdf65f49716;Parent=764a289d2f54dc98;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 6916119c000000007b3aec5189a67bc9
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 152.116667ms
