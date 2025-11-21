@@ -334,6 +334,7 @@ func assertSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.TimeRa
 		"prompt_tokens":                         gtz,
 		"completion_tokens":                     gtz,
 		"tokens":                                gtz,
+		"time_to_first_token":                   gtez,
 		"prompt_cached_tokens":                  gtez,
 		"completion_cached_tokens":              gtez,
 		"completion_reasoning_tokens":           gtez,

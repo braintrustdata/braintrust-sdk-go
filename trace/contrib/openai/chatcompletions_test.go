@@ -64,7 +64,7 @@ func TestOpenAIChatCompletions(t *testing.T) {
 	assertChatSpanValid(t, ts, timeRange)
 
 	// Check that the span name is correct
-	assert.Equal("openai.chat.completions.create", ts.Name())
+	assert.Equal("Chat Completion", ts.Name())
 
 	// Check input field
 	inputRaw := ts.Input()
@@ -167,7 +167,7 @@ func TestOpenAIChatCompletionsStreaming(t *testing.T) {
 	assertChatSpanValid(t, ts, timeRange)
 
 	// Check that the span name is correct
-	assert.Equal("openai.chat.completions.create", ts.Name())
+	assert.Equal("Chat Completion", ts.Name())
 
 	// Check input field
 	inputRaw := ts.Input()
@@ -404,7 +404,7 @@ func TestOpenAIChatCompletionsStreamingToolCalls(t *testing.T) {
 	assertChatSpanValid(t, ts, timeRange)
 
 	// Check that the span name is correct
-	assert.Equal("openai.chat.completions.create", ts.Name())
+	assert.Equal("Chat Completion", ts.Name())
 
 	// Check output field - should be properly structured
 	output := ts.Output()
@@ -751,7 +751,7 @@ func TestChatCompletionsStructuredAssertions(t *testing.T) {
 	// Assert the entire structure at once
 	AssertMatchesObject(t, spanData, map[string]interface{}{
 		"span_attributes": map[string]interface{}{
-			"name": "openai.chat.completions.create",
+			"name": "Chat Completion",
 			"type": "llm",
 		},
 		"input": []interface{}{
@@ -840,7 +840,7 @@ func TestToolCallsStructuredAssertions(t *testing.T) {
 	// Assert the entire tool calls structure at once
 	AssertMatchesObject(t, spanData, map[string]interface{}{
 		"span_attributes": map[string]interface{}{
-			"name": "openai.chat.completions.create",
+			"name": "Chat Completion",
 			"type": "llm",
 		},
 		"input": []interface{}{
@@ -1072,7 +1072,7 @@ func assertChatSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.Ti
 	assert := assert.New(t)
 
 	span.AssertInTimeRange(timeRange)
-	span.AssertNameIs("openai.chat.completions.create")
+	span.AssertNameIs("Chat Completion")
 	assert.Equal(codes.Unset, span.Status().Code)
 
 	metadata := span.Metadata()
@@ -1089,6 +1089,7 @@ func assertChatSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.Ti
 		"prompt_tokens":                         gtz,
 		"completion_tokens":                     gtz,
 		"tokens":                                gtz,
+		"time_to_first_token":                   gtez,
 		"prompt_cached_tokens":                  gtez,
 		"completion_cached_tokens":              gtez,
 		"completion_reasoning_tokens":           gtez,

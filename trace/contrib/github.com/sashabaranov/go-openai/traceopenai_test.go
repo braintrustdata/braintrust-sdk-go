@@ -77,7 +77,7 @@ func TestChatCompletions(t *testing.T) {
 
 	// Validate span basics
 	ts.AssertInTimeRange(timeRange)
-	ts.AssertNameIs("openai.chat.completions.create")
+	ts.AssertNameIs("Chat Completion")
 
 	// Check metadata contains expected fields
 	metadata := ts.Metadata()
@@ -127,7 +127,7 @@ func TestWrapClient(t *testing.T) {
 
 	// Validate span
 	ts.AssertInTimeRange(timeRange)
-	ts.AssertNameIs("openai.chat.completions.create")
+	ts.AssertNameIs("Chat Completion")
 
 	// Check metadata
 	metadata := ts.Metadata()
@@ -194,7 +194,7 @@ func TestStreamingChatCompletions(t *testing.T) {
 
 	// Validate span
 	ts.AssertInTimeRange(timeRange)
-	ts.AssertNameIs("openai.chat.completions.create")
+	ts.AssertNameIs("Chat Completion")
 
 	// Check metadata indicates streaming
 	metadata := ts.Metadata()
@@ -256,7 +256,7 @@ func TestErrorHandling(t *testing.T) {
 
 	// Validate span
 	ts.AssertInTimeRange(timeRange)
-	ts.AssertNameIs("openai.chat.completions.create")
+	ts.AssertNameIs("Chat Completion")
 
 	// Check metadata
 	metadata := ts.Metadata()

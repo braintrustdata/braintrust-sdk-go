@@ -39,7 +39,7 @@ func (ct *chatCompletionsTracer) StartSpan(ctx context.Context, t time.Time, req
 	ct.startTime = t
 	ctx, span := ct.cfg.tracer().Start(
 		ctx,
-		"openai.chat.completions.create",
+		"Chat Completion",
 		trace.WithTimestamp(t),
 	)
 
@@ -109,8 +109,7 @@ func (ct *chatCompletionsTracer) TagSpan(span trace.Span, body io.Reader) error 
 func (ct *chatCompletionsTracer) parseStreamingResponse(span trace.Span, body io.Reader) error {
 	scanner := bufio.NewScanner(body)
 	var allResults []map[string]any
-	var timeToFirstToken float64
-	firstChunk := true
+	var timeToFirstToken time.Duration
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -124,9 +123,8 @@ func (ct *chatCompletionsTracer) parseStreamingResponse(span trace.Span, body io
 			break // End of stream
 		}
 
-		if firstChunk {
-			timeToFirstToken = time.Since(ct.startTime).Seconds()
-			firstChunk = false
+		if timeToFirstToken == 0 {
+			timeToFirstToken = time.Since(ct.startTime)
 		}
 
 		var chunk map[string]any
@@ -159,7 +157,7 @@ func (ct *chatCompletionsTracer) parseStreamingResponse(span trace.Span, body io
 			metrics[k] = v
 		}
 	}
-	metrics["time_to_first_token"] = timeToFirstToken
+	metrics["time_to_first_token"] = timeToFirstToken.Seconds()
 	if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
 		return err
 	}
@@ -276,7 +274,7 @@ func (ct *chatCompletionsTracer) postprocessStreamingResults(allResults []map[st
 
 func (ct *chatCompletionsTracer) parseResponse(span trace.Span, body io.Reader) error {
 	// Capture time to first token for non-streaming requests
-	timeToFirstToken := time.Since(ct.startTime).Seconds()
+	timeToFirstToken := time.Since(ct.startTime)
 
 	var raw map[string]interface{}
 	err := json.NewDecoder(body).Decode(&raw)
@@ -287,7 +285,7 @@ func (ct *chatCompletionsTracer) parseResponse(span trace.Span, body io.Reader) 
 	return ct.handleChatCompletionResponse(span, raw, timeToFirstToken)
 }
 
-func (ct *chatCompletionsTracer) handleChatCompletionResponse(span trace.Span, rawMsg map[string]any, timeToFirstToken float64) error {
+func (ct *chatCompletionsTracer) handleChatCompletionResponse(span trace.Span, rawMsg map[string]any, timeToFirstToken time.Duration) error {
 	metadataFields := []string{
 		"id",
 		"object",
@@ -313,7 +311,7 @@ func (ct *chatCompletionsTracer) handleChatCompletionResponse(span trace.Span, r
 			metrics[k] = v
 		}
 	}
-	metrics["time_to_first_token"] = timeToFirstToken
+	metrics["time_to_first_token"] = timeToFirstToken.Seconds()
 	if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
 		return err
 	}
