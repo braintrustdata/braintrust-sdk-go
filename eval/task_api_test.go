@@ -183,7 +183,7 @@ func setupIntegrationTest(t *testing.T) (*auth.Session, *api.API) {
 
 	ctx := context.Background()
 	session, err := auth.NewSession(ctx, auth.Options{
-		APIKey: vcr.GetAPIKeyForVCR(t),
+		APIKey: httpsClient.APIKey(),
 		AppURL: "https://www.braintrust.dev",
 		Logger: logger.Discard(),
 		Client: httpsClient,
