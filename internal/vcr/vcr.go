@@ -170,15 +170,15 @@ func NewHTTPClient(t *testing.T) *http.Client {
 	return WrapHTTPClient(t, baseClient)
 }
 
-// GetAPIKeyForVCR returns an API key for VCR-enabled tests.
-// In replay mode, returns a dummy key. In record/off modes, reads from BRAINTRUST_API_KEY env var.
-func GetAPIKeyForVCR(t *testing.T) string {
+// getAPIValuesForVCR returns an API key and API URL for VCR-enabled tests.
+// In replay mode, returns dummy values. In record/off modes, reads from env vars.
+func getAPIValuesForVCR(t *testing.T) (apiKey string, apiURL string) {
 	t.Helper()
 
 	mode := GetVCRMode()
 
-	// In replay mode, we don't need API keys
-	apiKey := os.Getenv("BRAINTRUST_API_KEY")
+	// Get API key
+	apiKey = os.Getenv("BRAINTRUST_API_KEY")
 	if mode != ModeReplay && apiKey == "" {
 		t.Fatal("BRAINTRUST_API_KEY not set (required in record/off mode)")
 	}
@@ -187,7 +187,16 @@ func GetAPIKeyForVCR(t *testing.T) string {
 		apiKey = "dummy-api-key-for-replay"
 	}
 
-	return apiKey
+	// Get API URL
+	apiURL = os.Getenv("BRAINTRUST_API_URL")
+	if mode == ModeReplay {
+		// use prod in replay mode (prod is not called, this is just a key for VCR)
+		apiURL = "https://api.braintrust.dev"
+	} else if apiURL == "" {
+		apiURL = "https://api.braintrust.dev"
+	}
+
+	return apiKey, apiURL
 }
 
 // GetHTTPSClient creates an HTTPS client for integration tests with VCR support.
@@ -201,12 +210,7 @@ func GetHTTPSClient(t *testing.T) *https.Client {
 		t.Skip("Skipping integration test in short mode")
 	}
 
-	apiKey := GetAPIKeyForVCR(t)
-
-	apiURL := os.Getenv("BRAINTRUST_API_URL")
-	if apiURL == "" {
-		apiURL = "https://api.braintrust.dev"
-	}
+	apiKey, apiURL := getAPIValuesForVCR(t)
 
 	log := intlogger.NewFailTestLogger(t)
 
