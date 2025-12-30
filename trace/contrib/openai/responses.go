@@ -22,6 +22,7 @@ type responsesTracer struct {
 	cfg       *middlewareConfig
 	streaming bool
 	metadata  map[string]any
+	startTime time.Time
 }
 
 func newResponsesTracer(cfg *middlewareConfig) *responsesTracer {
@@ -36,6 +37,7 @@ func newResponsesTracer(cfg *middlewareConfig) *responsesTracer {
 }
 
 func (rt *responsesTracer) StartSpan(ctx context.Context, t time.Time, request io.Reader) (context.Context, trace.Span, error) {
+	rt.startTime = t
 	ctx, span := rt.cfg.tracer().Start(
 		ctx,
 		"openai.responses.create",
@@ -105,6 +107,9 @@ func (rt *responsesTracer) TagSpan(span trace.Span, body io.Reader) error {
 
 func (rt *responsesTracer) parseStreamingResponse(span trace.Span, body io.Reader) error {
 	scanner := bufio.NewScanner(body)
+	var timeToFirstToken time.Duration
+	var completedMsg map[string]any
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		if !strings.HasPrefix(line, "data: ") {
@@ -116,6 +121,11 @@ func (rt *responsesTracer) parseStreamingResponse(span trace.Span, body io.Reade
 		err := json.Unmarshal([]byte(line), &envelope)
 		if err != nil {
 			return err
+		}
+
+		// Track time to first token on first data chunk
+		if timeToFirstToken == 0 {
+			timeToFirstToken = time.Since(rt.startTime)
 		}
 
 		if msgType, ok := envelope["type"].(string); ok {
@@ -130,29 +140,40 @@ func (rt *responsesTracer) parseStreamingResponse(span trace.Span, body io.Reade
 							msg[field] = val
 						}
 					}
-
-					if err := rt.handleResponseCompletedMessage(span, msg); err != nil {
-						return err
-					}
+					completedMsg = msg
 				}
 			}
 		}
 	}
 
-	return scanner.Err()
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+
+	// Process completed message and add time_to_first_token metric
+	if completedMsg != nil {
+		if err := rt.handleResponseCompletedMessage(span, completedMsg, timeToFirstToken); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (rt *responsesTracer) parseResponse(span trace.Span, body io.Reader) error {
+	// Capture time to first token for non-streaming requests
+	timeToFirstToken := time.Since(rt.startTime)
+
 	var raw map[string]interface{}
 	err := json.NewDecoder(body).Decode(&raw)
 	if err != nil {
 		return err
 	}
 
-	return rt.handleResponseCompletedMessage(span, raw)
+	return rt.handleResponseCompletedMessage(span, raw, timeToFirstToken)
 }
 
-func (rt *responsesTracer) handleResponseCompletedMessage(span trace.Span, rawMsg map[string]any) error {
+func (rt *responsesTracer) handleResponseCompletedMessage(span trace.Span, rawMsg map[string]any, timeToFirstToken time.Duration) error {
 
 	attrs := []attribute.KeyValue{}
 
@@ -182,11 +203,16 @@ func (rt *responsesTracer) handleResponseCompletedMessage(span trace.Span, rawMs
 		return err
 	}
 
+	metrics := make(map[string]any)
 	if usage, ok := rawMsg["usage"].(map[string]any); ok {
-		metrics := parseUsageTokens(usage)
-		if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
-			return err
+		tokenMetrics := parseUsageTokens(usage)
+		for k, v := range tokenMetrics {
+			metrics[k] = v
 		}
+	}
+	metrics["time_to_first_token"] = timeToFirstToken.Seconds()
+	if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
+		return err
 	}
 
 	if output, ok := rawMsg["output"]; ok {

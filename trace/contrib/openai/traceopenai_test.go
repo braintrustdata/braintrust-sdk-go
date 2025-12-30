@@ -243,6 +243,13 @@ func TestOpenAIResponsesStreaming(t *testing.T) {
 		assert.Contains(completeText, i)
 		assert.Contains(output, i)
 	}
+
+	// Verify time_to_first_token metric is captured for streaming responses (issue #23)
+	metrics := ts.Metrics()
+	require.NotNil(metrics, "metrics should not be nil")
+	ttft, ok := metrics["time_to_first_token"]
+	require.True(ok, "time_to_first_token should be present in metrics")
+	assert.GreaterOrEqual(ttft, 0.0, "time_to_first_token should be >= 0")
 }
 
 func TestOpenAIResponsesWithListInput(t *testing.T) {
