@@ -79,36 +79,5 @@ jobs:
             - Comment on the issue explaining what you tried and why it didn't work
             - Do NOT create a PR with a non-working fix
 
-          # Allow all necessary development tools
-          allowed_tools: |
-            Bash(grep:*)
-            Bash(rg:*)
-            Bash(find:*)
-            Bash(ls:*)
-            Bash(cat:*)
-            Bash(head:*)
-            Bash(tail:*)
-            Bash(go test:*)
-            Bash(go build:*)
-            Bash(go run:*)
-            Bash(go get:*)
-            Bash(go mod:*)
-            Bash(make:*)
-            Bash(git status:*)
-            Bash(git diff:*)
-            Bash(git branch:*)
-            Bash(git checkout:*)
-            Bash(git add:*)
-            Bash(git commit:*)
-            Bash(git push:*)
-            Bash(git log:*)
-            Bash(gh issue view:*)
-            Bash(gh issue comment:*)
-            Bash(gh pr create:*)
-            Bash(gh pr view:*)
-            Bash(gh pr list:*)
-            Edit
-            Read
-            Write
-            Glob
-            Grep
+          # Allow all necessary development tools via claude_args
+          claude_args: '--allowedTools "Bash(grep:*),Bash(rg:*),Bash(find:*),Bash(ls:*),Bash(cat:*),Bash(head:*),Bash(tail:*),Bash(go test:*),Bash(go build:*),Bash(go run:*),Bash(go get:*),Bash(go mod:*),Bash(make:*),Bash(git status:*),Bash(git diff:*),Bash(git branch:*),Bash(git checkout:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git log:*),Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh pr create:*),Bash(gh pr view:*),Bash(gh pr list:*),Edit,Read,Write,Glob,Grep"'
