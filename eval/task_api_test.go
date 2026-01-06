@@ -124,7 +124,65 @@ func TestTaskAPI_Get_EmptySlug(t *testing.T) {
 
 // TestTaskAPI_Get_ReturnsCallableTask tests that returned TaskFunc is executable
 func TestTaskAPI_Get_ReturnsCallableTask(t *testing.T) {
-	t.Skip("TODO: Implement with real function")
+	t.Parallel()
+
+	ctx := context.Background()
+
+	// Create API client with VCR support
+	apiClient := createIntegrationTestAPIClient(t)
+	functions := apiClient.Functions()
+
+	// Register project
+	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
+	require.NoError(t, err)
+
+	testSlug := tests.Name(t, "callable")
+
+	// Clean up any existing function with this slug from previous failed test runs
+	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
+		ProjectName: integrationTestProject,
+		Slug:        testSlug,
+		Limit:       1,
+	}); len(existing) > 0 {
+		_ = functions.Delete(ctx, existing[0].ID)
+	}
+
+	// Create a test function that echoes back the input question
+	function, err := functions.Create(ctx, functionsapi.CreateParams{
+		ProjectID:    project.ID,
+		Name:         "Echo Task",
+		Slug:         testSlug,
+		FunctionType: "llm",
+		FunctionData: map[string]any{
+			"type": "llm",
+		},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, function)
+
+	// Defer cleanup
+	defer func() {
+		_ = functions.Delete(ctx, function.ID)
+	}()
+
+	// Create FunctionsAPI and get the task
+	functionsAPI := &FunctionsAPI[testDatasetInput, testDatasetOutput]{
+		api:         apiClient,
+		projectName: integrationTestProject,
+	}
+
+	task, err := functionsAPI.Task(ctx, FunctionOpts{Slug: testSlug})
+	require.NoError(t, err)
+	require.NotNil(t, task)
+
+	// Test: Call the task function
+	input := testDatasetInput{Question: "What is 2+2?"}
+	output, err := task(ctx, input, &TaskHooks{})
+	require.NoError(t, err)
+
+	// Verify we got a response (the actual content will depend on the function)
+	// We just verify that the task can be called without error
+	assert.NotNil(t, output)
 }
 
 // TestTaskAPI_TypeSafety verifies compile-time type safety
