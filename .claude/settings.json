@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go:*)",
+      "Bash(make:*)",
+      "Bash(VCR_MODE=record go test:*)",
+      "Bash(VCR_MODE=replay go test:*)",
+      "Bash(VCR_MODE=off go test:*)",
+      "Bash(golangci-lint:*)",
+      "Bash(git:*)",
+      "Bash(gh:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(tree:*)",
+      "Bash(pwd:*)",
+      "Bash(which:*)",
+      "Bash(diff:*)",
+      "Bash(jq:*)"
+    ]
+  }
+}

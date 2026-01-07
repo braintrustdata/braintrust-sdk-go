@@ -1,17 +1,20 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Commands
+- `make ci`: Lint, test, and build (run before committing)
+- `make test`: Run tests with VCR replay
+- `make lint`: Run golangci-lint
+- `make fmt`: Format code
 
-## Build/Test Commands
+## Testing
+- Follow TDD: write failing test first, then implement
+- Single test: `go test -v -run=TestName ./path/to/package`
+- Record single cassette: `VCR_MODE=record go test -v -run=TestName ./path/to/package`
+- VCR modes:
+  - `VCR_MODE=replay` (default): Use recorded responses
+  - `VCR_MODE=record`: Record new cassettes (needs API keys)
+  - `VCR_MODE=off`: Hit live APIs (needs API keys)
 
-- Build: `go build ./...`
-- Run tests: `go test ./...`
-- Run a single test: `go test -v -run=TestName ./path/to/package`
-- Run tests with race detector: `go test -race ./...`
-- Run all tests with `make test`
-- Always run `make ci` to verify your changes (tests, lint, fmt, etc)
-
-## Development process
-
-- Follow test driven development. Write failing tests before implementing
-  features.
+## Examples
+- New features should be covered in `examples/internal/` for validation
+- Run all examples: `make examples`
