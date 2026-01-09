@@ -91,11 +91,12 @@ func TestBasicGenerateContent(t *testing.T) {
 	output := ts.Output()
 	require.NotNil(output)
 
-	// Verify metrics (token counts)
+	// Verify metrics (token counts and time to first token)
 	metrics := ts.Metrics()
 	assert.Greater(metrics["prompt_tokens"], float64(0))
 	assert.Greater(metrics["completion_tokens"], float64(0))
 	assert.Greater(metrics["tokens"], float64(0))
+	assert.GreaterOrEqual(metrics["time_to_first_token"], float64(0))
 }
 
 func TestParseUsageTokens(t *testing.T) {

@@ -20,6 +20,7 @@ type generateContentTracer struct {
 	streaming bool
 	metadata  map[string]any
 	model     string
+	startTime time.Time
 }
 
 func newGenerateContentTracer(cfg *config, model string) *generateContentTracer {
@@ -34,6 +35,7 @@ func newGenerateContentTracer(cfg *config, model string) *generateContentTracer 
 }
 
 func (gt *generateContentTracer) StartSpan(ctx context.Context, t time.Time, request io.Reader) (context.Context, trace.Span, error) {
+	gt.startTime = t
 	ctx, span := gt.cfg.tracer().Start(
 		ctx,
 		"generate_content",
@@ -128,16 +130,19 @@ func (gt *generateContentTracer) TagSpan(span trace.Span, body io.Reader) error 
 }
 
 func (gt *generateContentTracer) parseResponse(span trace.Span, body io.Reader) error {
+	// Capture time to first token for non-streaming requests
+	timeToFirstToken := time.Since(gt.startTime)
+
 	var raw map[string]interface{}
 	err := json.NewDecoder(body).Decode(&raw)
 	if err != nil {
 		return err
 	}
 
-	return gt.handleResponse(span, raw)
+	return gt.handleResponse(span, raw, timeToFirstToken)
 }
 
-func (gt *generateContentTracer) handleResponse(span trace.Span, raw map[string]any) error {
+func (gt *generateContentTracer) handleResponse(span trace.Span, raw map[string]any, timeToFirstToken time.Duration) error {
 	// Extract model version if present
 	if modelVersion, ok := raw["modelVersion"].(string); ok {
 		gt.metadata["model"] = modelVersion
@@ -153,12 +158,17 @@ func (gt *generateContentTracer) handleResponse(span trace.Span, raw map[string]
 		return err
 	}
 
-	// Parse usage metadata (token counts)
+	// Parse usage metadata (token counts) and add time to first token
+	metrics := make(map[string]any)
 	if usageMetadata, ok := raw["usageMetadata"].(map[string]any); ok {
-		metrics := parseUsageTokens(usageMetadata)
-		if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
-			return err
+		tokenMetrics := parseUsageTokens(usageMetadata)
+		for k, v := range tokenMetrics {
+			metrics[k] = v
 		}
+	}
+	metrics["time_to_first_token"] = timeToFirstToken.Seconds()
+	if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
+		return err
 	}
 
 	return nil
