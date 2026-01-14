@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://datadoghq.dev/orchestrion/schema.json
+meta:
+  name: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai
+  description: Auto-instrumentation for Google GenAI Go SDK with Braintrust tracing
+
+aspects:
+  # Intercept genai.NewClient and wrap the HTTPClient in the config
+  - id: genai-newclient-wrap
+    join-point:
+      function-call: google.golang.org/genai.NewClient
+    advice:
+      - wrap-expression:
+          imports:
+            tracegenai: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai
+            genai: google.golang.org/genai
+          template: |-
+            func() (*genai.Client, error) {
+              {{- $ctx := index .AST.Args 0 }}
+              {{- $config := index .AST.Args 1 }}
+              __config := {{ $config }}
+              if __config != nil {
+                __config.HTTPClient = tracegenai.WrapClient(__config.HTTPClient)
+              }
+              return genai.NewClient({{ $ctx }}, __config)
+            }()

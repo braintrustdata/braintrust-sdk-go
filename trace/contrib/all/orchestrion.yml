@@ -1,0 +1,77 @@
+# yaml-language-server: $schema=https://datadoghq.dev/orchestrion/schema.json
+#
+# AUTO-GENERATED FILE - DO NOT EDIT
+#
+# This file is generated from individual orchestrion.yml files in trace/contrib/.
+# To update, modify the source files and run: make generate
+#
+meta:
+  name: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/all
+  description: All Braintrust tracing integrations for LLM providers
+aspects:
+  - id: anthropic-newclient-middleware
+    join-point:
+      function-call: github.com/anthropics/anthropic-sdk-go.NewClient
+    advice:
+      - append-args:
+          type: github.com/anthropics/anthropic-sdk-go/option.RequestOption
+          values:
+            - imports:
+                bt: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic
+                option: github.com/anthropics/anthropic-sdk-go/option
+              template: option.WithMiddleware(bt.NewMiddleware())
+  - id: genai-newclient-wrap
+    join-point:
+      function-call: google.golang.org/genai.NewClient
+    advice:
+      - wrap-expression:
+          imports:
+            tracegenai: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai
+            genai: google.golang.org/genai
+          template: |-
+            func() (*genai.Client, error) {
+              {{- $ctx := index .AST.Args 0 }}
+              {{- $config := index .AST.Args 1 }}
+              __config := {{ $config }}
+              if __config != nil {
+                __config.HTTPClient = tracegenai.WrapClient(__config.HTTPClient)
+              }
+              return genai.NewClient({{ $ctx }}, __config)
+            }()
+  - id: sashabaranov-newclientwithconfig-wrap
+    join-point:
+      function-call: github.com/sashabaranov/go-openai.NewClientWithConfig
+    advice:
+      - wrap-expression:
+          imports:
+            traceopenai: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai
+            openai: github.com/sashabaranov/go-openai
+          template: |-
+            func() *openai.Client {
+              {{- $config := index .AST.Args 0 }}
+              __config := {{ $config }}
+              __config.HTTPClient = traceopenai.WrapHTTPDoer(__config.HTTPClient)
+              return openai.NewClientWithConfig(__config)
+            }()
+  - id: openai-newclient-middleware
+    join-point:
+      function-call: github.com/openai/openai-go.NewClient
+    advice:
+      - append-args:
+          type: github.com/openai/openai-go/option.RequestOption
+          values:
+            - imports:
+                bt: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai
+                option: github.com/openai/openai-go/option
+              template: option.WithMiddleware(bt.NewMiddleware())
+  - id: openai-v2-newclient-middleware
+    join-point:
+      function-call: github.com/openai/openai-go/v2.NewClient
+    advice:
+      - append-args:
+          type: github.com/openai/openai-go/v2/option.RequestOption
+          values:
+            - imports:
+                bt: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai
+                option: github.com/openai/openai-go/v2/option
+              template: option.WithMiddleware(bt.NewMiddleware())

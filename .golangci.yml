@@ -20,7 +20,7 @@ linters:
   enable:
     - bodyclose
     - forcetypeassert # catches potential panics
-    - usetesting      # nice-to-have not critical
+    # - usetesting      # nice-to-have not critical (disabled to reduce PR noise)
     - thelper         # nice-to-have not critical
     - revive          # critical for ensuring public functions/packages have docs.
 

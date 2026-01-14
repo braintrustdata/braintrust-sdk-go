@@ -56,6 +56,10 @@
       "Bash(jq:*)",
       "Bash(sort:*)",
       "Bash(uniq:*)",
+      "Bash(orchestrion:*)",
+      "Bash(orchestrion)",
+      "Bash(mise:*)",
+      "Bash(mise)",
       "Bash(cut:*)"
     ]
   }

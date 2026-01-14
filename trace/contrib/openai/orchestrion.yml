@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://datadoghq.dev/orchestrion/schema.json
+meta:
+  name: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai
+  description: Auto-instrumentation for OpenAI Go SDK with Braintrust tracing
+
+aspects:
+  # openai-go v1 (github.com/openai/openai-go)
+  - id: openai-newclient-middleware
+    join-point:
+      function-call: github.com/openai/openai-go.NewClient
+    advice:
+      - append-args:
+          type: github.com/openai/openai-go/option.RequestOption
+          values:
+            - imports:
+                bt: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai
+                option: github.com/openai/openai-go/option
+              template: option.WithMiddleware(bt.NewMiddleware())
+
+  # openai-go v2 (github.com/openai/openai-go/v2)
+  - id: openai-v2-newclient-middleware
+    join-point:
+      function-call: github.com/openai/openai-go/v2.NewClient
+    advice:
+      - append-args:
+          type: github.com/openai/openai-go/v2/option.RequestOption
+          values:
+            - imports:
+                bt: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai
+                option: github.com/openai/openai-go/v2/option
+              template: option.WithMiddleware(bt.NewMiddleware())

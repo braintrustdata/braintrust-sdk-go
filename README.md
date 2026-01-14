@@ -116,7 +116,50 @@ func main() {
 
 ### Tracing LLM Calls
 
-Automatically trace LLM calls by adding middleware to your client:
+Trace LLM calls with **automatic** or **manual** instrumentation.
+
+#### Automatic Instrumentation (Recommended)
+
+Use [Orchestrion](https://github.com/DataDog/orchestrion) to automatically inject tracing at compile time—no code changes required.
+
+**1. Install orchestrion:**
+```bash
+go install github.com/DataDog/orchestrion@latest
+```
+
+**2. Create `orchestrion.tool.go` in your project root:**
+```go
+//go:build tools
+
+package main
+
+import (
+    _ "github.com/DataDog/orchestrion"
+    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/all" // All LLM providers
+)
+```
+
+Or import only the integrations you need:
+```go
+import (
+    _ "github.com/DataDog/orchestrion"
+    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"    // OpenAI (openai-go)
+    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic" // Anthropic
+    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"     // Google GenAI
+    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai" // sashabaranov/go-openai
+)
+```
+
+**3. Build with orchestrion:**
+```bash
+orchestrion go build ./...
+```
+
+That's it! Your LLM client calls are now automatically traced. No middleware or wrapper code needed in your application.
+
+#### Manual Instrumentation
+
+Alternatively, add tracing middleware explicitly to your clients:
 
 **OpenAI:**
 ```go

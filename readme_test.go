@@ -63,11 +63,25 @@ func TestReadmeSnippets(t *testing.T) {
 func tryCompile(t *testing.T, tmpDir string, snippetNum int, code string) error {
 	t.Helper()
 
+	trimmed := strings.TrimSpace(code)
+
+	// Skip build-constrained files (e.g., //go:build tools) - they can't be compiled standalone
+	if strings.HasPrefix(trimmed, "//go:build") {
+		t.Skip("skipping build-constrained snippet")
+		return nil
+	}
+
+	// Skip import-only snippets (no package declaration, just imports)
+	if strings.HasPrefix(trimmed, "import (") {
+		t.Skip("skipping import-only snippet")
+		return nil
+	}
+
 	// Create snippet file in temp directory
 	snippetPath := filepath.Join(tmpDir, "snippet"+strconv.Itoa(snippetNum)+".go")
 
 	// Don't add "package main" if it's already there
-	if !strings.HasPrefix(strings.TrimSpace(code), "package main") {
+	if !strings.HasPrefix(trimmed, "package main") {
 		code = "package main\n\n" + code
 	}
 

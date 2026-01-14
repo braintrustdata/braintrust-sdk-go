@@ -36,10 +36,9 @@ func Setup(t *testing.T) (oteltrace.TracerProvider, *Exporter) {
 	// DO NOT set global tracer provider to avoid cross-test pollution
 
 	t.Cleanup(func() {
-		// Use background context for cleanup
-		ctx := context.Background()
-
-		err := tp.Shutdown(ctx)
+		// Must use context.Background() here, not t.Context(), because t.Context()
+		// is already canceled when cleanup runs after the test completes.
+		err := tp.Shutdown(context.Background()) //nolint:usetesting // cleanup runs after test ends
 		if err != nil {
 			t.Errorf("Error shutting down tracer provider: %v", err)
 		}

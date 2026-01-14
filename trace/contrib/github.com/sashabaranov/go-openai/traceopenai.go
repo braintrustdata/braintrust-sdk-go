@@ -114,6 +114,63 @@ func WrapClient(client *http.Client, opts ...Option) *http.Client {
 	return client
 }
 
+// HTTPDoer is the interface used by sashabaranov/go-openai for HTTP clients.
+// This matches the interface defined in that package.
+type HTTPDoer interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
+// WrapHTTPDoer wraps an HTTPDoer with tracing. This is used by orchestrion
+// auto-instrumentation to wrap the HTTPClient field in ClientConfig.
+// If doer is nil, returns a new traced http.Client.
+// If doer is already an *http.Client, it wraps the transport.
+// Otherwise, it wraps the Do method directly.
+func WrapHTTPDoer(doer HTTPDoer, opts ...Option) HTTPDoer {
+	if doer == nil {
+		return Client(opts...)
+	}
+
+	// If it's an *http.Client, use WrapClient for full transport wrapping
+	if client, ok := doer.(*http.Client); ok {
+		return WrapClient(client, opts...)
+	}
+
+	// For other HTTPDoer implementations, wrap the Do method
+	cfg := &config{}
+	for _, opt := range opts {
+		opt(cfg)
+	}
+	return &httpDoerWrapper{doer: doer, cfg: cfg}
+}
+
+// httpDoerWrapper wraps an HTTPDoer that isn't an *http.Client
+type httpDoerWrapper struct {
+	doer HTTPDoer
+	cfg  *config
+}
+
+// Do implements HTTPDoer by wrapping the request with tracing
+func (w *httpDoerWrapper) Do(req *http.Request) (*http.Response, error) {
+	// Convert our config options to openai middleware options
+	var middlewareOpts []openai.MiddlewareOption
+	if w.cfg.tracerProvider != nil {
+		middlewareOpts = append(middlewareOpts, openai.WithTracerProvider(w.cfg.tracerProvider))
+	}
+	if w.cfg.logger != nil {
+		middlewareOpts = append(middlewareOpts, openai.WithLogger(w.cfg.logger))
+	}
+
+	// Use the existing openai middleware
+	middleware := openai.NewMiddleware(middlewareOpts...)
+
+	// Create a NextMiddleware function that calls the wrapped doer
+	next := func(r *http.Request) (*http.Response, error) {
+		return w.doer.Do(r)
+	}
+
+	return middleware(req, next)
+}
+
 // roundTripper wraps an http.RoundTripper with OpenTelemetry tracing.
 type roundTripper struct {
 	base http.RoundTripper

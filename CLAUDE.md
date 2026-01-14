@@ -17,4 +17,5 @@
 
 ## Examples
 - New features should be covered in `examples/internal/` for validation
+- Run a single example: `go run examples/internal/<name>/main.go`
 - Run all examples: `make examples`

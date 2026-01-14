@@ -1,0 +1,266 @@
+package main
+
+import (
+	"context"
+	"testing"
+
+	"github.com/anthropics/anthropic-sdk-go"
+	anthropicoption "github.com/anthropics/anthropic-sdk-go/option"
+	"github.com/openai/openai-go"
+	openaioption "github.com/openai/openai-go/option"
+	openaiv2 "github.com/openai/openai-go/v2"
+	openaiv2option "github.com/openai/openai-go/v2/option"
+	sashabaranovopenai "github.com/sashabaranov/go-openai"
+	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel"
+	"google.golang.org/genai"
+
+	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
+)
+
+// TestOpenAI verifies that orchestrion auto-injects the Braintrust middleware
+// for the official OpenAI Go SDK. This test creates an OpenAI client WITHOUT
+// manually adding middleware. If orchestrion is working, it will inject
+// the middleware at compile time, and spans will be created.
+func TestOpenAI(t *testing.T) {
+	exporter := setupOtel(t)
+
+	httpClient := vcr.NewHTTPClient(t)
+
+	// Create OpenAI client WITHOUT middleware - orchestrion should inject it
+	client := openai.NewClient(
+		openaioption.WithAPIKey("dummy-key-for-vcr"),
+		openaioption.WithHTTPClient(httpClient),
+		// NOTE: No WithMiddleware here! Orchestrion should inject it.
+	)
+
+	// Make a chat completion request
+	_, err := client.Chat.Completions.New(context.Background(), openai.ChatCompletionNewParams{
+		Model: "gpt-4o-mini",
+		Messages: []openai.ChatCompletionMessageParamUnion{
+			openai.UserMessage("Say hello"),
+		},
+	})
+	require.NoError(t, err)
+
+	// Verify spans were created - this proves middleware was injected
+	spans := exporter.Flush()
+	require.NotEmpty(t, spans, "No spans created - orchestrion did not inject middleware for OpenAI")
+
+	t.Logf("SUCCESS: %d span(s) created for OpenAI", len(spans))
+	for _, span := range spans {
+		t.Logf("  - %s", span.Name())
+	}
+
+	// Verify the span is from OpenAI middleware
+	found := false
+	for _, span := range spans {
+		if span.Name() == "Chat Completion" {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "Expected Chat Completion span")
+}
+
+// TestOpenAIV2 verifies that orchestrion auto-injects the Braintrust middleware
+// for the official OpenAI Go SDK v2. This test creates an OpenAI v2 client WITHOUT
+// manually adding middleware. If orchestrion is working, it will inject
+// the middleware at compile time, and spans will be created.
+func TestOpenAIV2(t *testing.T) {
+	exporter := setupOtel(t)
+
+	httpClient := vcr.NewHTTPClient(t)
+
+	// Create OpenAI v2 client WITHOUT middleware - orchestrion should inject it
+	client := openaiv2.NewClient(
+		openaiv2option.WithAPIKey("dummy-key-for-vcr"),
+		openaiv2option.WithHTTPClient(httpClient),
+		// NOTE: No WithMiddleware here! Orchestrion should inject it.
+	)
+
+	// Make a chat completion request
+	_, err := client.Chat.Completions.New(context.Background(), openaiv2.ChatCompletionNewParams{
+		Model: "gpt-4o-mini",
+		Messages: []openaiv2.ChatCompletionMessageParamUnion{
+			openaiv2.UserMessage("Say hello"),
+		},
+	})
+	require.NoError(t, err)
+
+	// Verify spans were created - this proves middleware was injected
+	spans := exporter.Flush()
+	require.NotEmpty(t, spans, "No spans created - orchestrion did not inject middleware for OpenAI v2")
+
+	t.Logf("SUCCESS: %d span(s) created for OpenAI v2", len(spans))
+	for _, span := range spans {
+		t.Logf("  - %s", span.Name())
+	}
+
+	// Verify the span is from OpenAI middleware
+	found := false
+	for _, span := range spans {
+		if span.Name() == "Chat Completion" {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "Expected Chat Completion span")
+}
+
+// TestAnthropic verifies that orchestrion auto-injects the Braintrust middleware
+// for the Anthropic Go SDK. This test creates an Anthropic client WITHOUT
+// manually adding middleware. If orchestrion is working, it will inject
+// the middleware at compile time, and spans will be created.
+func TestAnthropic(t *testing.T) {
+	exporter := setupOtel(t)
+
+	httpClient := vcr.NewHTTPClient(t)
+
+	// Create Anthropic client WITHOUT middleware - orchestrion should inject it
+	client := anthropic.NewClient(
+		anthropicoption.WithAPIKey("dummy-key-for-vcr"),
+		anthropicoption.WithHTTPClient(httpClient),
+		// NOTE: No WithMiddleware here! Orchestrion should inject it.
+	)
+
+	// Make a messages request
+	_, err := client.Messages.New(context.Background(), anthropic.MessageNewParams{
+		Model:     "claude-3-haiku-20240307",
+		MaxTokens: 1024,
+		Messages: []anthropic.MessageParam{
+			anthropic.NewUserMessage(anthropic.NewTextBlock("Say hello")),
+		},
+	})
+	require.NoError(t, err)
+
+	// Verify spans were created - this proves middleware was injected
+	spans := exporter.Flush()
+	require.NotEmpty(t, spans, "No spans created - orchestrion did not inject middleware for Anthropic")
+
+	t.Logf("SUCCESS: %d span(s) created for Anthropic", len(spans))
+	for _, span := range spans {
+		t.Logf("  - %s", span.Name())
+	}
+
+	// Verify the span is from Anthropic middleware
+	found := false
+	for _, span := range spans {
+		if span.Name() == "anthropic.messages.create" {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "Expected anthropic.messages.create span")
+}
+
+// TestSashabaranovOpenAI verifies that orchestrion auto-injects the Braintrust
+// tracing for the sashabaranov/go-openai library. This test creates a client
+// config WITHOUT manually wrapping the HTTPClient. If orchestrion is working,
+// it will wrap the HTTPClient at compile time, and spans will be created.
+func TestSashabaranovOpenAI(t *testing.T) {
+	exporter := setupOtel(t)
+
+	httpClient := vcr.NewHTTPClient(t)
+
+	// Create config with VCR HTTPClient - orchestrion should wrap it
+	config := sashabaranovopenai.DefaultConfig("dummy-key-for-vcr")
+	config.HTTPClient = httpClient
+	// NOTE: No traceopenai.WrapClient here! Orchestrion should inject it.
+
+	client := sashabaranovopenai.NewClientWithConfig(config)
+
+	// Make a chat completion request
+	_, err := client.CreateChatCompletion(context.Background(), sashabaranovopenai.ChatCompletionRequest{
+		Model: sashabaranovopenai.GPT4oMini,
+		Messages: []sashabaranovopenai.ChatCompletionMessage{
+			{
+				Role:    sashabaranovopenai.ChatMessageRoleUser,
+				Content: "Say hello",
+			},
+		},
+	})
+	require.NoError(t, err)
+
+	// Verify spans were created - this proves HTTPClient was wrapped
+	spans := exporter.Flush()
+	require.NotEmpty(t, spans, "No spans created - orchestrion did not wrap HTTPClient for sashabaranov/go-openai")
+
+	t.Logf("SUCCESS: %d span(s) created for sashabaranov/go-openai", len(spans))
+	for _, span := range spans {
+		t.Logf("  - %s", span.Name())
+	}
+
+	// Verify the span is from our tracing
+	found := false
+	for _, span := range spans {
+		if span.Name() == "Chat Completion" {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "Expected Chat Completion span")
+}
+
+// TestGenAI verifies that orchestrion auto-injects the Braintrust
+// tracing for the Google GenAI library. This test creates a client
+// config WITHOUT manually wrapping the HTTPClient. If orchestrion is working,
+// it will wrap the HTTPClient at compile time, and spans will be created.
+func TestGenAI(t *testing.T) {
+	exporter := setupOtel(t)
+
+	httpClient := vcr.NewHTTPClient(t)
+
+	// Create GenAI client with VCR HTTPClient - orchestrion should wrap it
+	// NOTE: No tracegenai.WrapClient here! Orchestrion should inject it.
+	client, err := genai.NewClient(context.Background(), &genai.ClientConfig{
+		HTTPClient: httpClient,
+		APIKey:     "dummy-key-for-vcr",
+		Backend:    genai.BackendGeminiAPI,
+	})
+	require.NoError(t, err)
+
+	// Make a generateContent request
+	resp, err := client.Models.GenerateContent(
+		context.Background(),
+		"gemini-2.0-flash-exp",
+		genai.Text("Say hello"),
+		nil,
+	)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	// Verify spans were created - this proves HTTPClient was wrapped
+	spans := exporter.Flush()
+	require.NotEmpty(t, spans, "No spans created - orchestrion did not wrap HTTPClient for GenAI")
+
+	t.Logf("SUCCESS: %d span(s) created for GenAI", len(spans))
+	for _, span := range spans {
+		t.Logf("  - %s", span.Name())
+	}
+
+	// Verify the span is from our tracing
+	found := false
+	for _, span := range spans {
+		if span.Name() == "generate_content" {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "Expected generate_content span")
+}
+
+// setupOtel sets up OpenTelemetry with an in-memory exporter for testing
+func setupOtel(t *testing.T) *oteltest.Exporter {
+	t.Helper()
+
+	tp, exporter := oteltest.Setup(t)
+	originalTP := otel.GetTracerProvider()
+	otel.SetTracerProvider(tp)
+	t.Cleanup(func() {
+		otel.SetTracerProvider(originalTP)
+	})
+
+	return exporter
+}

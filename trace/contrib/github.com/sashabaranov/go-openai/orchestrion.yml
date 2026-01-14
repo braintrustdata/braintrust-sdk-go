@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://datadoghq.dev/orchestrion/schema.json
+meta:
+  name: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai
+  description: Auto-instrumentation for sashabaranov/go-openai with Braintrust tracing
+
+aspects:
+  # Intercept NewClientWithConfig and wrap the HTTPClient in the config
+  - id: sashabaranov-newclientwithconfig-wrap
+    join-point:
+      function-call: github.com/sashabaranov/go-openai.NewClientWithConfig
+    advice:
+      - wrap-expression:
+          imports:
+            traceopenai: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai
+            openai: github.com/sashabaranov/go-openai
+          template: |-
+            func() *openai.Client {
+              {{- $config := index .AST.Args 0 }}
+              __config := {{ $config }}
+              __config.HTTPClient = traceopenai.WrapHTTPDoer(__config.HTTPClient)
+              return openai.NewClientWithConfig(__config)
+            }()

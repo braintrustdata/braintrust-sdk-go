@@ -1,4 +1,4 @@
-.PHONY: help ci build clean test test-quiet test-vcr-off test-vcr-record test-vcr-verify cover cover-path lint fmt mod-verify fix godoc examples release
+.PHONY: help ci build clean test test-quiet test-vcr-off test-vcr-record test-vcr-verify cover cover-path lint fmt mod-verify fix godoc examples release generate
 
 help:
 	@echo "Available commands:"
@@ -17,6 +17,7 @@ help:
 	@echo "  fix              - Run golangci-lint with auto-fix"
 	@echo "  godoc            - Start godoc server"
 	@echo "  examples         - Run all examples"
+	@echo "  generate         - Generate combined orchestrion.yml"
 	@echo "  ci               - Run CI pipeline (clean, lint, test, build)"
 	@echo "  precommit        - Run fmt then ci"
 	@echo "  release          - Publish release with goreleaser"
@@ -80,3 +81,6 @@ precommit: fmt ci
 
 release: ci
 	./scripts/publish.sh
+
+generate:
+	go run ./internal/genorchestrion/cmd

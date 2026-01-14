@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://datadoghq.dev/orchestrion/schema.json
+meta:
+  name: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic
+  description: Auto-instrumentation for Anthropic Go SDK with Braintrust tracing
+
+aspects:
+  - id: anthropic-newclient-middleware
+    join-point:
+      function-call: github.com/anthropics/anthropic-sdk-go.NewClient
+    advice:
+      - append-args:
+          type: github.com/anthropics/anthropic-sdk-go/option.RequestOption
+          values:
+            - imports:
+                bt: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic
+                option: github.com/anthropics/anthropic-sdk-go/option
+              template: option.WithMiddleware(bt.NewMiddleware())

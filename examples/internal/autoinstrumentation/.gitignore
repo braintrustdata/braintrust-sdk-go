@@ -1,0 +1,6 @@
+# Binary output
+autoinstrumentation
+autoinstrumentation-example
+
+# Go build artifacts
+*.exe
