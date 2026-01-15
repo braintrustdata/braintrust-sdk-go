@@ -21,39 +21,54 @@ go get github.com/braintrustdata/braintrust-sdk-go
 export BRAINTRUST_API_KEY="your-api-key"  # Get from https://www.braintrust.dev/app/settings
 ```
 
-## Quick Start
+## Instrumentation
 
-Braintrust uses [OpenTelemetry](https://opentelemetry.io/) for distributed tracing. Set up a TracerProvider and initialize the client:
+Trace LLM calls with **automatic** or **manual** instrumentation.
 
+### Automatic Instrumentation (Recommended)
+
+Use [Orchestrion](https://github.com/DataDog/orchestrion) to automatically inject tracing at compile time—no code changes required.
+
+**1. Install orchestrion:**
+```bash
+go install github.com/DataDog/orchestrion@latest
+```
+
+**2. Create `orchestrion.tool.go` in your project root:**
 ```go
+//go:build tools
+
 package main
 
 import (
-    "context"
-    "log"
-
-    "go.opentelemetry.io/otel"
-    "go.opentelemetry.io/otel/sdk/trace"
-
-    "github.com/braintrustdata/braintrust-sdk-go"
+    _ "github.com/DataDog/orchestrion"
+    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/all" // All LLM providers
 )
-
-func main() {
-    tp := trace.NewTracerProvider()
-    defer tp.Shutdown(context.Background())
-    otel.SetTracerProvider(tp)
-
-    client, err := braintrust.New(tp, braintrust.WithProject("my-project"))
-    if err != nil {
-        log.Fatal(err)
-    }
-    _ = client // Your client is ready to use
-}
 ```
 
-## Usage
+Or import only the integrations you need:
+```go
+import (
+    _ "github.com/DataDog/orchestrion"
+    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"    // OpenAI (openai-go)
+    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic" // Anthropic
+    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"     // Google GenAI
+    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai" // sashabaranov/go-openai
+)
+```
 
-### Evaluations
+**3. Build with orchestrion:**
+```bash
+orchestrion go build ./...
+```
+
+That's it! Your LLM client calls are now automatically traced. No middleware or wrapper code needed in your application.
+
+### Manual Instrumentation
+
+If you prefer explicit control, you can add tracing middleware manually to your LLM clients. See the [Manual Instrumentation Guide](./trace/contrib/README.md) for detailed examples with OpenAI, Anthropic, Google Gemini, and other providers.
+
+## Evaluations
 
 Run systematic evaluations with custom test cases and scoring functions:
 
@@ -114,151 +129,7 @@ func main() {
 }
 ```
 
-### Tracing LLM Calls
-
-Trace LLM calls with **automatic** or **manual** instrumentation.
-
-#### Automatic Instrumentation (Recommended)
-
-Use [Orchestrion](https://github.com/DataDog/orchestrion) to automatically inject tracing at compile time—no code changes required.
-
-**1. Install orchestrion:**
-```bash
-go install github.com/DataDog/orchestrion@latest
-```
-
-**2. Create `orchestrion.tool.go` in your project root:**
-```go
-//go:build tools
-
-package main
-
-import (
-    _ "github.com/DataDog/orchestrion"
-    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/all" // All LLM providers
-)
-```
-
-Or import only the integrations you need:
-```go
-import (
-    _ "github.com/DataDog/orchestrion"
-    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"    // OpenAI (openai-go)
-    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic" // Anthropic
-    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"     // Google GenAI
-    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai" // sashabaranov/go-openai
-)
-```
-
-**3. Build with orchestrion:**
-```bash
-orchestrion go build ./...
-```
-
-That's it! Your LLM client calls are now automatically traced. No middleware or wrapper code needed in your application.
-
-#### Manual Instrumentation
-
-Alternatively, add tracing middleware explicitly to your clients:
-
-**OpenAI:**
-```go
-package main
-
-import (
-    "context"
-    "log"
-
-    "github.com/openai/openai-go"
-    "github.com/openai/openai-go/option"
-    "go.opentelemetry.io/otel"
-    "go.opentelemetry.io/otel/sdk/trace"
-
-    "github.com/braintrustdata/braintrust-sdk-go"
-    traceopenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"
-)
-
-func main() {
-    // Set up OpenTelemetry tracer
-    tp := trace.NewTracerProvider()
-    defer tp.Shutdown(context.Background())
-    otel.SetTracerProvider(tp)
-
-    // Initialize Braintrust
-    _, err := braintrust.New(tp)
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    // Create OpenAI client with tracing middleware
-    client := openai.NewClient(
-        option.WithMiddleware(traceopenai.NewMiddleware()),
-    )
-
-    // Make API calls - they'll be automatically traced and logged to Braintrust
-    _, err = client.Chat.Completions.New(context.Background(), openai.ChatCompletionNewParams{
-        Messages: []openai.ChatCompletionMessageParamUnion{
-            openai.UserMessage("Hello!"),
-        },
-        Model: openai.ChatModelGPT4oMini,
-    })
-    if err != nil {
-        log.Fatal(err)
-    }
-}
-```
-
-**Anthropic:**
-```go
-package main
-
-import (
-    "context"
-    "log"
-
-    "github.com/anthropics/anthropic-sdk-go"
-    "github.com/anthropics/anthropic-sdk-go/option"
-    "go.opentelemetry.io/otel"
-    "go.opentelemetry.io/otel/sdk/trace"
-
-    "github.com/braintrustdata/braintrust-sdk-go"
-    traceanthropic "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic"
-)
-
-func main() {
-    // Set up OpenTelemetry tracer
-    tp := trace.NewTracerProvider()
-    defer tp.Shutdown(context.Background())
-    otel.SetTracerProvider(tp)
-
-    // Initialize Braintrust
-    _, err := braintrust.New(tp,
-        braintrust.WithProject("my-project"),
-    )
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    // Create Anthropic client with tracing middleware
-    client := anthropic.NewClient(
-        option.WithMiddleware(traceanthropic.NewMiddleware()),
-    )
-
-    // Make API calls - they'll be automatically traced and logged to Braintrust
-    _, err = client.Messages.New(context.Background(), anthropic.MessageNewParams{
-        Model: anthropic.ModelClaude3_7SonnetLatest,
-        Messages: []anthropic.MessageParam{
-            anthropic.NewUserMessage(anthropic.NewTextBlock("Hello!")),
-        },
-        MaxTokens: 1024,
-    })
-    if err != nil {
-        log.Fatal(err)
-    }
-}
-```
-
-### API Client
+## API Client
 
 Manage Braintrust resources programmatically:
 
@@ -326,62 +197,6 @@ func main() {
     _ = prompt // Prompt is ready to use
 }
 ```
-
-**Google Gemini:**
-```go
-package main
-
-import (
-    "context"
-    "log"
-    "os"
-
-    "go.opentelemetry.io/otel"
-    "go.opentelemetry.io/otel/sdk/trace"
-    "google.golang.org/genai"
-
-    "github.com/braintrustdata/braintrust-sdk-go"
-    tracegenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"
-)
-
-func main() {
-    // Set up OpenTelemetry tracer
-    tp := trace.NewTracerProvider()
-    defer tp.Shutdown(context.Background())
-    otel.SetTracerProvider(tp)
-
-    // Initialize Braintrust
-    _, err := braintrust.New(tp,
-        braintrust.WithProject("my-project"),
-    )
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    // Create Gemini client with tracing
-    client, err := genai.NewClient(context.Background(), &genai.ClientConfig{
-        HTTPClient: tracegenai.Client(),
-        APIKey:     os.Getenv("GOOGLE_API_KEY"),
-        Backend:    genai.BackendGeminiAPI,
-    })
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    // Make API calls - they'll be automatically traced and logged to Braintrust
-    _, err = client.Models.GenerateContent(context.Background(),
-        "gemini-1.5-flash",
-        genai.Text("Hello!"),
-        nil,
-    )
-    if err != nil {
-        log.Fatal(err)
-    }
-}
-```
-
-**LangChainGo:**
-The SDK provides comprehensive tracing for [LangChainGo](https://github.com/tmc/langchaingo) applications. See [`examples/langchaingo`](./examples/langchaingo/main.go) for examples.
 
 ## Examples
 
