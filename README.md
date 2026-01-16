@@ -75,7 +75,7 @@ If you prefer explicit control, you can add tracing middleware manually to your 
 
 ## Evaluations
 
-Run systematic evaluations with custom test cases and scoring functions:
+Run [evals](https://www.braintrust.dev/docs/guides/evals) with custom test cases and scoring functions:
 
 ```go
 package main
