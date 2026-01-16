@@ -1,6 +1,6 @@
 # Manual Instrumentation
 
-This guide shows how to manually add tracing middleware to your LLM clients. For zero-code instrumentation, see [Automatic Instrumentation](../../README.md#automatic-instrumentation-recommended) in the main README.
+This guide shows how to manually add tracing middleware to your LLM clients. For zero-code instrumentation, see [Automatic Instrumentation](../../README.md#automatic-instrumentation) in the main README.
 
 ## Prerequisites
 
