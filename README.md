@@ -25,7 +25,7 @@ export BRAINTRUST_API_KEY="your-api-key"  # Get from https://www.braintrust.dev/
 
 Trace LLM calls with **automatic** or **manual** instrumentation.
 
-### Automatic Instrumentation (Recommended)
+### Automatic Instrumentation
 
 Use [Orchestrion](https://github.com/DataDog/orchestrion) to automatically inject tracing at compile time—no code changes required.
 
