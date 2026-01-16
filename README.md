@@ -59,7 +59,12 @@ import (
 
 **3. Build with orchestrion:**
 ```bash
+# Build with orchestrion
 orchestrion go build ./...
+
+# Or configure GOFLAGS to use orchestrion automatically
+export GOFLAGS="-toolexec='orchestrion toolexec'"
+go build ./...
 ```
 
 That's it! Your LLM client calls are now automatically traced. No middleware or wrapper code needed in your application.
