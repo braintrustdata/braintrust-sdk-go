@@ -37,6 +37,9 @@ jobs:
         with:
           version: v2.1.6
 
+      - name: Install orchestrion
+        run: go install github.com/DataDog/orchestrion@latest
+
       - name: Install goreleaser
         run: |
           cd /tmp
