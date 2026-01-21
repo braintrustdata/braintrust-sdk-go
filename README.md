@@ -68,6 +68,35 @@ export GOFLAGS="-toolexec='orchestrion toolexec'"
 go build ./...
 ```
 
+**4. Initialize OpenTelemetry and Braintrust in your application:**
+```go
+import (
+    "context"
+    "log"
+
+    "go.opentelemetry.io/otel"
+    "go.opentelemetry.io/otel/sdk/trace"
+    "github.com/braintrustdata/braintrust-sdk-go"
+)
+
+func main() {
+    ctx := context.Background()
+
+    // Set up OpenTelemetry tracer
+    tp := trace.NewTracerProvider()
+    defer tp.Shutdown(ctx)
+    otel.SetTracerProvider(tp)
+
+    // Initialize Braintrust (registers the exporter)
+    _, err := braintrust.New(tp, braintrust.WithProject("my-project"))
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Your LLM calls are now automatically traced
+}
+```
+
 That's it! Your LLM client calls are now automatically traced. No middleware or wrapper code needed in your application.
 
 ### Manual Instrumentation
