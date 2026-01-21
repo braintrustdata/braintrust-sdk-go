@@ -53,6 +53,7 @@ import (
     _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"    // OpenAI (openai-go)
     _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic" // Anthropic
     _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"     // Google GenAI
+    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo" // LangChainGo OpenAI
     _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai" // sashabaranov/go-openai
 )
 ```

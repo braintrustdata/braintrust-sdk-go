@@ -4,8 +4,9 @@
 //   - OpenAI (openai-go official SDK)
 //   - Anthropic
 //   - sashabaranov/go-openai
+//   - LangChainGo (OpenAI provider)
 //
-// Note: NO manual middleware is added to any client.
+// Note: NO manual middleware or callbacks are added to any client.
 // When built with `orchestrion go build`, tracing middleware is injected at compile time.
 //
 // To run:
@@ -25,6 +26,8 @@ import (
 	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/openai/openai-go"
 	sashabaranov "github.com/sashabaranov/go-openai"
+	"github.com/tmc/langchaingo/llms"
+	langchainopenai "github.com/tmc/langchaingo/llms/openai"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/trace"
 
@@ -70,6 +73,10 @@ func main() {
 	// 3. sashabaranov/go-openai - NO HTTPClient wrapping
 	fmt.Println("3. sashabaranov/go-openai...")
 	runSashabaranov(ctx)
+
+	// 4. LangChainGo - NO callback added
+	fmt.Println("4. LangChainGo (OpenAI)...")
+	runLangChainGo(ctx)
 
 	fmt.Println("\n=== All providers tested ===")
 	fmt.Println("If tracing worked, you should see LLM spans for each provider in Braintrust.")
@@ -127,4 +134,22 @@ func runSashabaranov(ctx context.Context) {
 		return
 	}
 	fmt.Printf("   Response: %s\n", resp.Choices[0].Message.Content)
+}
+
+func runLangChainGo(ctx context.Context) {
+	// NO callback - Orchestrion injects it
+	llm, err := langchainopenai.New()
+	if err != nil {
+		log.Printf("   LangChainGo error: %v", err)
+		return
+	}
+
+	resp, err := llm.GenerateContent(ctx, []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeHuman, "Say 'Hello from LangChainGo' in exactly those words."),
+	})
+	if err != nil {
+		log.Printf("   LangChainGo error: %v", err)
+		return
+	}
+	fmt.Printf("   Response: %s\n", resp.Choices[0].Content)
 }

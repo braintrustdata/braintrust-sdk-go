@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://datadoghq.dev/orchestrion/schema.json
+meta:
+  name: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo
+  description: Auto-instrumentation for LangChainGo OpenAI provider with Braintrust tracing
+
+aspects:
+  - id: langchaingo-openai-newllm-callback
+    join-point:
+      function-call: github.com/tmc/langchaingo/llms/openai.New
+    advice:
+      - append-args:
+          type: github.com/tmc/langchaingo/llms/openai.Option
+          values:
+            - imports:
+                tracelangchaingo: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo
+                openai: github.com/tmc/langchaingo/llms/openai
+              template: openai.WithCallback(tracelangchaingo.NewOpenAIHandler())

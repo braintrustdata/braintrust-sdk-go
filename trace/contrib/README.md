@@ -8,6 +8,9 @@ Set up OpenTelemetry and initialize Braintrust:
 
 ```go
 import (
+    "context"
+    "log"
+
     "go.opentelemetry.io/otel"
     "go.opentelemetry.io/otel/sdk/trace"
     "github.com/braintrustdata/braintrust-sdk-go"
@@ -30,86 +33,129 @@ func main() {
 
 ```go
 import (
+    "context"
+
     "github.com/openai/openai-go"
     "github.com/openai/openai-go/option"
     traceopenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"
 )
 
-client := openai.NewClient(
-    option.WithMiddleware(traceopenai.NewMiddleware()),
-)
+func main() {
+    ctx := context.Background()
+    client := openai.NewClient(
+        option.WithMiddleware(traceopenai.NewMiddleware()),
+    )
 
-_, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
-    Messages: []openai.ChatCompletionMessageParamUnion{
-        openai.UserMessage("Hello!"),
-    },
-    Model: openai.ChatModelGPT4oMini,
-})
+    _, _ = client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
+        Messages: []openai.ChatCompletionMessageParamUnion{
+            openai.UserMessage("Hello!"),
+        },
+        Model: openai.ChatModelGPT4oMini,
+    })
+}
 ```
 
 ## Anthropic
 
 ```go
 import (
+    "context"
+
     "github.com/anthropics/anthropic-sdk-go"
     "github.com/anthropics/anthropic-sdk-go/option"
     traceanthropic "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic"
 )
 
-client := anthropic.NewClient(
-    option.WithMiddleware(traceanthropic.NewMiddleware()),
-)
+func main() {
+    ctx := context.Background()
+    client := anthropic.NewClient(
+        option.WithMiddleware(traceanthropic.NewMiddleware()),
+    )
 
-_, err := client.Messages.New(ctx, anthropic.MessageNewParams{
-    Model: anthropic.ModelClaude3_7SonnetLatest,
-    Messages: []anthropic.MessageParam{
-        anthropic.NewUserMessage(anthropic.NewTextBlock("Hello!")),
-    },
-    MaxTokens: 1024,
-})
+    _, _ = client.Messages.New(ctx, anthropic.MessageNewParams{
+        Model: anthropic.ModelClaude3_7SonnetLatest,
+        Messages: []anthropic.MessageParam{
+            anthropic.NewUserMessage(anthropic.NewTextBlock("Hello!")),
+        },
+        MaxTokens: 1024,
+    })
+}
 ```
 
 ## Google Gemini
 
 ```go
 import (
+    "context"
+    "os"
+
     "google.golang.org/genai"
     tracegenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"
 )
 
-client, err := genai.NewClient(ctx, &genai.ClientConfig{
-    HTTPClient: tracegenai.Client(),
-    APIKey:     os.Getenv("GOOGLE_API_KEY"),
-    Backend:    genai.BackendGeminiAPI,
-})
+func main() {
+    ctx := context.Background()
+    client, _ := genai.NewClient(ctx, &genai.ClientConfig{
+        HTTPClient: tracegenai.Client(),
+        APIKey:     os.Getenv("GOOGLE_API_KEY"),
+        Backend:    genai.BackendGeminiAPI,
+    })
 
-_, err = client.Models.GenerateContent(ctx,
-    "gemini-1.5-flash",
-    genai.Text("Hello!"),
-    nil,
-)
+    _, _ = client.Models.GenerateContent(ctx,
+        "gemini-1.5-flash",
+        genai.Text("Hello!"),
+        nil,
+    )
+}
 ```
 
 ## sashabaranov/go-openai
 
 ```go
 import (
+    "context"
+    "os"
+
     "github.com/sashabaranov/go-openai"
     traceopenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai"
 )
 
-config := openai.DefaultConfig(os.Getenv("OPENAI_API_KEY"))
-config.HTTPClient = traceopenai.Client()
-client := openai.NewClientWithConfig(config)
+func main() {
+    ctx := context.Background()
+    config := openai.DefaultConfig(os.Getenv("OPENAI_API_KEY"))
+    config.HTTPClient = traceopenai.Client()
+    client := openai.NewClientWithConfig(config)
 
-_, err := client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
-    Model: openai.GPT4oMini,
-    Messages: []openai.ChatCompletionMessage{
-        {Role: openai.ChatMessageRoleUser, Content: "Hello!"},
-    },
-})
+    _, _ = client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
+        Model: openai.GPT4oMini,
+        Messages: []openai.ChatCompletionMessage{
+            {Role: openai.ChatMessageRoleUser, Content: "Hello!"},
+        },
+    })
+}
 ```
 
 ## LangChainGo
 
-See [`examples/langchaingo`](../../examples/langchaingo/main.go) for LangChainGo integration with callback-based tracing.
+```go
+import (
+    "context"
+
+    "github.com/tmc/langchaingo/llms"
+    "github.com/tmc/langchaingo/llms/openai"
+    tracelangchaingo "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo"
+)
+
+func main() {
+    ctx := context.Background()
+    handler := tracelangchaingo.NewHandler()
+    llm, _ := openai.New(openai.WithCallback(handler))
+
+    _, _ = llm.GenerateContent(ctx, []llms.MessageContent{
+        llms.TextParts(llms.ChatMessageTypeHuman, "Hello!"),
+    })
+}
+```
+
+For richer traces, use `NewHandlerWithOptions` with `TracerProvider`, `Model`, and `Provider` options.
+See [`examples/langchaingo`](../../examples/langchaingo/main.go) for complete examples.

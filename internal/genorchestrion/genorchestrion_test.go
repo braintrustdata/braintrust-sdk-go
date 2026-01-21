@@ -41,6 +41,7 @@ func TestGenerate(t *testing.T) {
 		"anthropic-newclient-middleware",
 		"sashabaranov-newclientwithconfig-wrap",
 		"genai-newclient-wrap",
+		"langchaingo-openai-newllm-callback",
 	}
 
 	for _, expected := range expectedAspects {
@@ -74,10 +75,10 @@ func TestGenerateExcludesAllDirectory(t *testing.T) {
 		t.Fatalf("Failed to parse generated YAML: %v", err)
 	}
 
-	// Count aspects - should be exactly 5 (one per provider, plus openai-v2)
+	// Count aspects - should be exactly 6 (one per provider, plus openai-v2)
 	// If it's more, we might be including duplicates from all/
-	if len(result.Aspects) != 5 {
-		t.Errorf("expected 5 aspects, got %d", len(result.Aspects))
+	if len(result.Aspects) != 6 {
+		t.Errorf("expected 6 aspects, got %d", len(result.Aspects))
 	}
 }
 

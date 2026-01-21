@@ -109,6 +109,18 @@ func NewHandler() *Handler {
 	}
 }
 
+// NewOpenAIHandler creates a new Handler pre-configured for the LangChainGo OpenAI provider.
+// This is used by auto-instrumentation to provide correct provider metadata.
+func NewOpenAIHandler() *Handler {
+	return &Handler{
+		spans:         make(map[context.Context][]spanEntry),
+		streamBuffers: make(map[string]*strings.Builder),
+		opts: HandlerOptions{
+			Provider: "openai",
+		},
+	}
+}
+
 // NewHandlerWithOptions creates a new Handler with custom options.
 func NewHandlerWithOptions(opts HandlerOptions) *Handler {
 	return &Handler{

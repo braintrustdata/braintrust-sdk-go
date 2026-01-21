@@ -53,6 +53,17 @@ aspects:
               __config.HTTPClient = traceopenai.WrapHTTPDoer(__config.HTTPClient)
               return openai.NewClientWithConfig(__config)
             }()
+  - id: langchaingo-openai-newllm-callback
+    join-point:
+      function-call: github.com/tmc/langchaingo/llms/openai.New
+    advice:
+      - append-args:
+          type: github.com/tmc/langchaingo/llms/openai.Option
+          values:
+            - imports:
+                tracelangchaingo: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo
+                openai: github.com/tmc/langchaingo/llms/openai
+              template: openai.WithCallback(tracelangchaingo.NewOpenAIHandler())
   - id: openai-newclient-middleware
     join-point:
       function-call: github.com/openai/openai-go.NewClient
