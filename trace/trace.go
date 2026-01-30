@@ -50,8 +50,9 @@ type Config struct {
 	DefaultProjectName string
 
 	// Span filtering
-	FilterAISpans   bool
-	SpanFilterFuncs []SpanFilterFunc
+	FilterAISpans        bool
+	AllowNativeAdkTraces bool // if false (default), drop spans from Google ADK (gcp.vertex.agent) to avoid duplicates
+	SpanFilterFuncs      []SpanFilterFunc
 
 	// Debug
 	EnableConsoleLog bool
@@ -110,6 +111,10 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 	// Build filter list
 	var filters []SpanFilterFunc
 	filters = append(filters, cfg.SpanFilterFuncs...)
+	if !cfg.AllowNativeAdkTraces {
+		filters = append(filters, adkSpanFilterFunc)
+		log.Debug("ADK native span filtering enabled (dropping gcp.vertex.agent spans)")
+	}
 	if cfg.FilterAISpans {
 		filters = append(filters, aiSpanFilterFunc)
 		log.Debug("AI span filtering enabled")
@@ -511,6 +516,22 @@ func hasParent(span sdktrace.ReadWriteSpan) bool {
 		}
 	}
 	return false
+}
+
+// adkTracerScopeName is the instrumentation scope name used by Google ADK (adk-go).
+// Spans from this scope are dropped when AllowNativeAdkTraces is false to avoid duplicates
+// with Braintrust or custom instrumentation.
+// https://github.com/google/adk-go/blob/af06c01fa1423847f6fc6c1d927e19a7a33c7ce7/internal/telemetry/telemetry.go#L57
+const adkTracerScopeName = "gcp.vertex.agent"
+
+// adkSpanFilterFunc is a SpanFilterFunc that drops spans from Google ADK's built-in
+// telemetry (instrumentation scope "gcp.vertex.agent"). Use AllowNativeAdkTraces=false
+// (default) when tracing ADK agents to avoid duplicate call_llm / execute_tool spans.
+func adkSpanFilterFunc(span sdktrace.ReadOnlySpan) int {
+	if span.InstrumentationScope().Name == adkTracerScopeName {
+		return -1 // Drop ADK native spans
+	}
+	return 0
 }
 
 var aiOtelPrefixes = []string{

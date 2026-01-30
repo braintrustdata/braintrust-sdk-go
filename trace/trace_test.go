@@ -353,6 +353,78 @@ func TestWithFilterAISpans_Option(t *testing.T) {
 	assert.NotContains(spanNames, "http.request")
 }
 
+func TestAllowNativeAdkTraces_FiltersADKSpans(t *testing.T) {
+	assert := assert.New(t)
+
+	tp := sdktrace.NewTracerProvider()
+	exporter := tracetest.NewInMemoryExporter()
+
+	session := newTestSession()
+	cfg := Config{
+		DefaultProjectID:     "adk-filter-test",
+		AllowNativeAdkTraces: false, // default: drop gcp.vertex.agent spans
+		Exporter:             exporter,
+		Logger:               logger.Discard(),
+	}
+
+	err := AddSpanProcessor(tp, session, cfg)
+	assert.NoError(err)
+
+	// Span from Google ADK's tracer (gcp.vertex.agent) - should be dropped
+	adkTracer := tp.Tracer("gcp.vertex.agent")
+	_, adkSpan := adkTracer.Start(context.Background(), "call_llm")
+	adkSpan.End()
+
+	// Span from our/Braintrust tracer - should be kept
+	btTracer := tp.Tracer("braintrust")
+	_, btSpan := btTracer.Start(context.Background(), "agent_run")
+	btSpan.End()
+
+	_ = tp.ForceFlush(context.Background())
+	spans := exporter.GetSpans()
+
+	assert.Len(spans, 1)
+	assert.Equal("agent_run", spans[0].Name)
+	assert.Equal("braintrust", spans[0].InstrumentationScope.Name)
+}
+
+func TestAllowNativeAdkTraces_AllowsWhenTrue(t *testing.T) {
+	assert := assert.New(t)
+
+	tp := sdktrace.NewTracerProvider()
+	exporter := tracetest.NewInMemoryExporter()
+
+	session := newTestSession()
+	cfg := Config{
+		DefaultProjectID:     "adk-allow-test",
+		AllowNativeAdkTraces: true,
+		Exporter:             exporter,
+		Logger:               logger.Discard(),
+	}
+
+	err := AddSpanProcessor(tp, session, cfg)
+	assert.NoError(err)
+
+	adkTracer := tp.Tracer("gcp.vertex.agent")
+	_, adkSpan := adkTracer.Start(context.Background(), "call_llm")
+	adkSpan.End()
+
+	btTracer := tp.Tracer("braintrust")
+	_, btSpan := btTracer.Start(context.Background(), "agent_run")
+	btSpan.End()
+
+	_ = tp.ForceFlush(context.Background())
+	spans := exporter.GetSpans()
+
+	assert.Len(spans, 2)
+	scopeNames := make([]string, len(spans))
+	for i, s := range spans {
+		scopeNames[i] = s.InstrumentationScope.Name
+	}
+	assert.Contains(scopeNames, "gcp.vertex.agent")
+	assert.Contains(scopeNames, "braintrust")
+}
+
 func TestWithFilterAISpans_CombinedWithCustomFilters(t *testing.T) {
 	assert := assert.New(t)
 

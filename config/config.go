@@ -22,9 +22,10 @@ type Config struct {
 	BlockingLogin      bool
 
 	// Tracing configuration
-	FilterAISpans   bool
-	SpanFilterFuncs []SpanFilterFunc
-	Exporter        trace.SpanExporter
+	FilterAISpans        bool
+	AllowNativeAdkTraces bool // if false (default), drop Google ADK native spans to avoid duplicates
+	SpanFilterFuncs      []SpanFilterFunc
+	Exporter             trace.SpanExporter
 
 	// Logger
 	Logger logger.Logger
@@ -45,16 +46,18 @@ type SpanFilterFunc func(span trace.ReadOnlySpan) int
 //   - BRAINTRUST_DEFAULT_PROJECT: Default project name (default: "default-go-project")
 //   - BRAINTRUST_BLOCKING_LOGIN: Enable blocking login (default: false)
 //   - BRAINTRUST_OTEL_FILTER_AI_SPANS: Filter to keep only AI-related spans (default: false)
+//   - BRAINTRUST_OTEL_ALLOW_NATIVE_ADK_TRACES: Allow Google ADK native spans (default: false)
 func FromEnv() *Config {
 	return &Config{
-		APIKey:             getEnvString("BRAINTRUST_API_KEY", ""),
-		APIURL:             getEnvString("BRAINTRUST_API_URL", "https://api.braintrust.dev"),
-		AppURL:             getEnvString("BRAINTRUST_APP_URL", "https://www.braintrust.dev"),
-		OrgName:            getEnvString("BRAINTRUST_ORG_NAME", ""),
-		DefaultProjectID:   getEnvString("BRAINTRUST_DEFAULT_PROJECT_ID", ""),
-		DefaultProjectName: getEnvString("BRAINTRUST_DEFAULT_PROJECT", "default-go-project"),
-		BlockingLogin:      getEnvBool("BRAINTRUST_BLOCKING_LOGIN", false),
-		FilterAISpans:      getEnvBool("BRAINTRUST_OTEL_FILTER_AI_SPANS", false),
+		APIKey:               getEnvString("BRAINTRUST_API_KEY", ""),
+		APIURL:               getEnvString("BRAINTRUST_API_URL", "https://api.braintrust.dev"),
+		AppURL:               getEnvString("BRAINTRUST_APP_URL", "https://www.braintrust.dev"),
+		OrgName:              getEnvString("BRAINTRUST_ORG_NAME", ""),
+		DefaultProjectID:     getEnvString("BRAINTRUST_DEFAULT_PROJECT_ID", ""),
+		DefaultProjectName:   getEnvString("BRAINTRUST_DEFAULT_PROJECT", "default-go-project"),
+		BlockingLogin:        getEnvBool("BRAINTRUST_BLOCKING_LOGIN", false),
+		FilterAISpans:        getEnvBool("BRAINTRUST_OTEL_FILTER_AI_SPANS", false),
+		AllowNativeAdkTraces: getEnvBool("BRAINTRUST_OTEL_ALLOW_NATIVE_ADK_TRACES", false),
 	}
 }
 

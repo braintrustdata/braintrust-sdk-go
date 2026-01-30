@@ -48,7 +48,7 @@ func main() {
 	// Make a simple generateContent request
 	resp, err := client.Models.GenerateContent(
 		ctx,
-		"gemini-2.0-flash-exp",
+		"gemini-2.5-flash",
 		genai.Text("What is the capital of France?"),
 		nil,
 	)

@@ -88,6 +88,16 @@ func WithFilterAISpans(enabled bool) Option {
 	}
 }
 
+// WithAllowNativeAdkTraces controls whether spans from Google ADK's built-in
+// telemetry (gcp.vertex.agent) are exported. When false (default), those spans
+// are dropped to avoid duplicates when using traceadk.TracedConfig or custom
+// instrumentation. Set to true to export both ADK native and your spans.
+func WithAllowNativeAdkTraces(allow bool) Option {
+	return func(c *config.Config) {
+		c.AllowNativeAdkTraces = allow
+	}
+}
+
 // WithSpanFilterFuncs adds custom span filter functions
 // Filters are evaluated in order. Return >0 to keep, <0 to drop, 0 to continue
 func WithSpanFilterFuncs(filterFuncs ...config.SpanFilterFunc) Option {
