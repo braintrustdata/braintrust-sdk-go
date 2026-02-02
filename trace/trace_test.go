@@ -370,15 +370,17 @@ func TestAllowNativeAdkTraces_FiltersADKSpans(t *testing.T) {
 	err := AddSpanProcessor(tp, session, cfg)
 	assert.NoError(err)
 
-	// Span from Google ADK's tracer (gcp.vertex.agent) - should be dropped
+	// Create a root span first to serve as parent
+	btTracer := tp.Tracer("braintrust")
+	ctx, rootSpan := btTracer.Start(context.Background(), "agent_run")
+
+	// Span from Google ADK's tracer (gcp.vertex.agent) as a child - should be dropped
 	adkTracer := tp.Tracer("gcp.vertex.agent")
-	_, adkSpan := adkTracer.Start(context.Background(), "call_llm")
+	_, adkSpan := adkTracer.Start(ctx, "call_llm")
 	adkSpan.End()
 
-	// Span from our/Braintrust tracer - should be kept
-	btTracer := tp.Tracer("braintrust")
-	_, btSpan := btTracer.Start(context.Background(), "agent_run")
-	btSpan.End()
+	// End root span
+	rootSpan.End()
 
 	_ = tp.ForceFlush(context.Background())
 	spans := exporter.GetSpans()

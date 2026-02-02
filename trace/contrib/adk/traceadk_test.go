@@ -163,11 +163,12 @@ func TestTracingCallbacks(t *testing.T) {
 	for i := range spans {
 		s := &spans[i]
 		name := s.Name()
-		if name == "agent_run [test_app]" {
+		switch name {
+		case "agent_run [test_app]":
 			agentSpan = s
-		} else if name == "call_llm" {
+		case "call_llm":
 			modelSpan = s
-		} else if name == "tool [calculator]" {
+		case "tool [calculator]":
 			toolSpan = s
 		}
 	}

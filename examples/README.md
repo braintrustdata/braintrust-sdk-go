@@ -26,6 +26,7 @@ Examples for other AI providers and client libraries:
 - **[sashabaranov-openai/](sashabaranov-openai/)** - OpenAI tracing with sashabaranov/go-openai library
 - **[openrouter/](openrouter/)** - Trace OpenRouter requests
 - **[langchaingo/](langchaingo/)** - Trace LangChainGo multi-turn conversations
+- **[adk-go/](adk/)** - Trace agents built with the ADK framework
 
 ## Advanced Features (30 minutes)
 

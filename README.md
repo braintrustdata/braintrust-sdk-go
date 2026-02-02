@@ -243,6 +243,7 @@ Complete working examples are available in [`examples/`](./examples/):
 - **[genai](./examples/genai/main.go)** - Google Gemini tracing
 - **[langchaingo](./examples/langchaingo/main.go)** - LangChainGo integration
 - **[datasets](./examples/datasets/main.go)** - Using Braintrust datasets
+- **[adk-go](./examples/adk/main.go)** - ADK integration
 
 ## Features
 
