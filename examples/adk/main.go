@@ -74,7 +74,8 @@ func setupAgent(ctx context.Context, bt *braintrust.Client) agent.Agent {
 	}
 
 	// Create LLMAgent with MCP tool set, time tool, and tracing callbacks
-	a, err := llmagent.New(traceadk.TracedConfig(llmagent.Config{
+	btCallbacks := traceadk.NewCallbacks()
+	a, err := llmagent.New(btCallbacks.LLMAgentConfig(llmagent.Config{
 		Name:        "helper_agent",
 		Model:       model,
 		Description: "Helper agent.",
@@ -90,7 +91,7 @@ func setupAgent(ctx context.Context, bt *braintrust.Client) agent.Agent {
 
 func main() {
 	tp := trace.NewTracerProvider()
-	// defer tp.Shutdown(context.Background()) //nolint:errcheck
+	defer tp.Shutdown(context.Background()) //nolint:errcheck
 	otel.SetTracerProvider(tp)
 
 	bt, err := braintrust.New(tp,
@@ -104,10 +105,8 @@ func main() {
 	// Set up top-level tracer
 	tracer := otel.Tracer("main")
 	ctx, span := tracer.Start(context.Background(), "adk-example")
-	// defer span.End()
 
 	fmt.Println("Use Ctrl+C to cleanly exit")
-
 	go func() {
 		interruptCh := make(chan os.Signal, 1)
 		signal.Notify(interruptCh, os.Interrupt)
@@ -119,8 +118,6 @@ func main() {
 		log.Printf("Tracing link: %s", bt.Permalink(span))
 		os.Exit(0)
 	}()
-	// ctx, stop := signal.NotifyContext(ctx, os.Interrupt)
-	// defer stop()
 
 	a := setupAgent(ctx, bt)
 

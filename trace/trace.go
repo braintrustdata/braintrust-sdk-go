@@ -109,11 +109,12 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 	log.Debug("using default parent", "parent", parent.String())
 
 	// Build filter list
-	var filters []SpanFilterFunc
+	var filters, rootFilters []SpanFilterFunc
 	filters = append(filters, cfg.SpanFilterFuncs...)
 	if !cfg.AllowNativeAdkTraces {
 		filters = append(filters, adkSpanFilterFunc)
-		log.Debug("ADK native span filtering enabled (dropping gcp.vertex.agent spans)")
+		rootFilters = append(rootFilters, adkSpanFilterFunc)
+		log.Debug("ADK span filtering enabled")
 	}
 	if cfg.FilterAISpans {
 		filters = append(filters, aiSpanFilterFunc)
@@ -126,6 +127,7 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 		batchProcessor,
 		parent,
 		filters,
+		rootFilters,
 		session,
 		log,
 	)
@@ -341,11 +343,12 @@ func (o *otelAttrs) makeAttrs() {
 }
 
 type spanProcessor struct {
-	wrapped   sdktrace.SpanProcessor
-	filters   []SpanFilterFunc
-	otelAttrs *otelAttrs
-	session   *auth.Session // Session provides endpoints and org name
-	logger    logger.Logger
+	wrapped     sdktrace.SpanProcessor
+	filters     []SpanFilterFunc
+	rootFilters []SpanFilterFunc
+	otelAttrs   *otelAttrs
+	session     *auth.Session // Session provides endpoints and org name
+	logger      logger.Logger
 }
 
 // newSpanProcessor creates a new span processor that wraps another processor and adds parent labeling.
@@ -353,6 +356,7 @@ func newSpanProcessor(
 	proc sdktrace.SpanProcessor,
 	defaultParent Parent,
 	filters []SpanFilterFunc,
+	rootFilters []SpanFilterFunc,
 	session *auth.Session,
 	log logger.Logger,
 ) (*spanProcessor, error) {
@@ -363,11 +367,12 @@ func newSpanProcessor(
 	attrs := newOtelAttrs(defaultParent, "", appURL)
 
 	sp := &spanProcessor{
-		wrapped:   proc,
-		filters:   filters,
-		otelAttrs: attrs,
-		session:   session,
-		logger:    log,
+		wrapped:     proc,
+		filters:     filters,
+		rootFilters: rootFilters,
+		otelAttrs:   attrs,
+		session:     session,
+		logger:      log,
 	}
 
 	return sp, nil
@@ -420,20 +425,20 @@ func (sp *spanProcessor) OnEnd(span sdktrace.ReadOnlySpan) {
 }
 
 // shouldForwardSpan applies filter functions to determine if a span should be forwarded.
-// Root spans are always kept. Filter functions are applied in order, with the first filters having priority.
+// Only rootFilters are applied to root spans. Filter functions are applied in
+// order, with the first filters having priority.
 func (sp *spanProcessor) shouldForwardSpan(span sdktrace.ReadOnlySpan) bool {
 	// Always keep root spans (spans with no parent)
+	filters := sp.filters
 	if !span.Parent().IsValid() {
-		return true
+		filters = sp.rootFilters
 	}
 
 	// If no filters, keep everything
-	if len(sp.filters) == 0 {
+	if len(filters) == 0 {
 		return true
 	}
-
-	// Apply filter functions in order - first filter wins
-	for _, filter := range sp.filters {
+	for _, filter := range filters {
 		result := filter(span)
 		switch {
 		case result > 0:
@@ -441,12 +446,9 @@ func (sp *spanProcessor) shouldForwardSpan(span sdktrace.ReadOnlySpan) bool {
 		case result < 0:
 			return false
 		case result == 0:
-			// No influence, continue to next filter
 			continue
 		}
 	}
-
-	// All filters returned 0 (no influence), default to keep
 	return true
 }
 
@@ -521,15 +523,14 @@ func hasParent(span sdktrace.ReadWriteSpan) bool {
 // adkTracerScopeName is the instrumentation scope name used by Google ADK (adk-go).
 // Spans from this scope are dropped when AllowNativeAdkTraces is false to avoid duplicates
 // with Braintrust or custom instrumentation.
-// https://github.com/google/adk-go/blob/af06c01fa1423847f6fc6c1d927e19a7a33c7ce7/internal/telemetry/telemetry.go#L57
+// https://github.com/google/adk-go/blob/main/internal/telemetry/telemetry.go
 const adkTracerScopeName = "gcp.vertex.agent"
 
 // adkSpanFilterFunc is a SpanFilterFunc that drops spans from Google ADK's built-in
-// telemetry (instrumentation scope "gcp.vertex.agent"). Use AllowNativeAdkTraces=false
-// (default) when tracing ADK agents to avoid duplicate call_llm / execute_tool spans.
+// telemetry (instrumentation scope "gcp.vertex.agent")
 func adkSpanFilterFunc(span sdktrace.ReadOnlySpan) int {
 	if span.InstrumentationScope().Name == adkTracerScopeName {
-		return -1 // Drop ADK native spans
+		return -1 // Drop ADK native spans by scope
 	}
 	return 0
 }
@@ -543,8 +544,11 @@ var aiOtelPrefixes = []string{
 }
 
 // aiSpanFilterFunc is a SpanFilterFunc that keeps AI spans, drops non-AI spans.
-// Root spans are always kept by the core filtering logic.
+// Root spans get no opinion (0) so they are kept when all filters return 0.
 func aiSpanFilterFunc(span sdktrace.ReadOnlySpan) int {
+	if !span.Parent().IsValid() {
+		return 0 // No opinion for root spans; they are kept by default
+	}
 	// Check span name for AI prefixes
 	spanName := span.Name()
 	for _, prefix := range aiOtelPrefixes {

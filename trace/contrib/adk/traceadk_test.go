@@ -73,7 +73,9 @@ func TestTracingCallbacks(t *testing.T) {
 	tp, exporter := oteltest.Setup(t)
 	otel.SetTracerProvider(tp)
 
-	callbacks := NewCallbacks(WithTracerProvider(tp))
+	cb := NewCallbacks(WithTracerProvider(tp))
+	callbacks, ok := cb.(*callbacksImpl)
+	require.True(t, ok, "expected *callbacksImpl")
 
 	// Create mock contexts
 	sessionID := "test-session-123"
@@ -164,7 +166,7 @@ func TestTracingCallbacks(t *testing.T) {
 		s := &spans[i]
 		name := s.Name()
 		switch name {
-		case "agent_run [test_app]":
+		case "agent_run [test_agent]":
 			agentSpan = s
 		case "call_llm":
 			modelSpan = s
@@ -181,9 +183,10 @@ func TestTracingCallbacks(t *testing.T) {
 	// Verify agent span
 	assert.Equal(t, codes.Ok, agentSpan.Status().Code)
 	assert.Equal(t, trace.SpanKindInternal, agentSpan.Stub.SpanKind)
-	agentSpan.AssertAttrEquals("agent.name", "test_agent")
-	agentSpan.AssertAttrEquals("agent.invocation_id", "agent-inv-1")
-	agentSpan.AssertAttrEquals("agent.session_id", sessionID)
+	agentSpan.AssertAttrEquals("adk.agent.name", "test_agent")
+	agentSpan.AssertAttrEquals("adk.agent.invocation_id", "agent-inv-1")
+	agentSpan.AssertAttrEquals("adk.agent.session_id", sessionID)
+	agentSpan.AssertAttrEquals("adk.agent.branch", "")
 
 	// Verify model span
 	assert.Equal(t, codes.Ok, modelSpan.Status().Code)

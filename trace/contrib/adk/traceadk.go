@@ -15,7 +15,9 @@
 //
 // Then create your llmagent with tracing callbacks:
 //
-//	agent, err := llmagent.New(traceadk.TracedConfig(llmagent.Config{
+//	btCallbacks := traceadk.NewCallbacks()
+//
+//	agent, err := llmagent.New(btCallbacks.LLMAgentConfig(llmagent.Config{
 //		Name:        "my-agent",
 //		Model:       model,
 //		Description: "My agent",
@@ -27,6 +29,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+	"sync"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -63,7 +67,11 @@ func WithTracerProvider(tp trace.TracerProvider) Option {
 // If not provided, logging is disabled.
 func WithLogger(log logger.Logger) Option {
 	return func(c *config) {
-		c.logger = log
+		if log == nil {
+			c.logger = logger.Discard()
+		} else {
+			c.logger = log
+		}
 	}
 }
 
@@ -77,14 +85,23 @@ func (c *config) tracer() trace.Tracer {
 }
 
 // Callbacks provides OpenTelemetry tracing callbacks for ADK agents.
-type Callbacks struct {
+// It offers helper methods to wrap agent configurations with tracing.
+type Callbacks interface {
+	// Helpers to wrap different kinds of configs
+	AgentConfig(agent.Config) agent.Config
+	LLMAgentConfig(llmagent.Config) llmagent.Config
+}
+
+// Callbacks provides OpenTelemetry tracing callbacks for ADK agents.
+type callbacksImpl struct {
 	cfg    *config
 	tracer trace.Tracer
 
 	// spans stores active spans keyed by session ID and span type
 	// Note: We use SessionID instead of InvocationID because ADK uses different
 	// invocation IDs for agent vs model callbacks
-	spans map[string]map[string]trace.Span
+	spans     map[string]map[string]trace.Span
+	spansLock sync.Mutex
 }
 
 // NewCallbacks creates a new set of tracing callbacks for ADK agents.
@@ -93,89 +110,133 @@ type Callbacks struct {
 // Example:
 //
 //	callbacks := adk.NewCallbacks()
-func NewCallbacks(opts ...Option) *Callbacks {
-	cfg := &config{}
+func NewCallbacks(opts ...Option) Callbacks {
+	cfg := &config{
+		logger: logger.Discard(),
+	}
 	for _, opt := range opts {
 		opt(cfg)
 	}
 
-	return &Callbacks{
+	return &callbacksImpl{
 		cfg:    cfg,
 		tracer: cfg.tracer(),
 		spans:  make(map[string]map[string]trace.Span),
 	}
 }
 
-func (c *Callbacks) storeSpan(sessionID string, spanType string, span trace.Span) {
+func setSpanAttributes(span trace.Span, ctx agent.CallbackContext) {
+	span.SetAttributes(attribute.String("adk.agent.name", ctx.AgentName()))
+	span.SetAttributes(attribute.String("adk.agent.invocation_id", ctx.InvocationID()))
+	span.SetAttributes(attribute.String("adk.agent.session_id", ctx.SessionID()))
+	span.SetAttributes(attribute.String("adk.agent.branch", ctx.Branch()))
+}
+
+const rootSpanKey = "root"
+
+func getAgentSpanKey(invocationID string) string {
+	return fmt.Sprintf("agent:%s", invocationID)
+}
+
+func getModelSpanKey(ctx agent.CallbackContext) string {
+	return fmt.Sprintf("model:%s", ctx.InvocationID())
+}
+
+func getToolSpanKey(ctx tool.Context) string {
+	return fmt.Sprintf("tool:%s", ctx.FunctionCallID())
+}
+
+func (c *callbacksImpl) storeSpan(sessionID string, spanKey string, span trace.Span) {
+	c.spansLock.Lock()
+	defer c.spansLock.Unlock()
+
 	sessionSpans, ok := c.spans[sessionID]
 	if !ok {
 		sessionSpans = make(map[string]trace.Span)
 		c.spans[sessionID] = sessionSpans
+		if strings.HasPrefix(spanKey, "agent:") {
+			// Mark the first agent span as the root, as a fallback
+			sessionSpans[rootSpanKey] = span
+		}
 	}
-	sessionSpans[spanType] = span
+	sessionSpans[spanKey] = span
 }
 
 // retrieveContext retrieves (but does not delete) a stored context
-func (c *Callbacks) retrieveSpan(sessionID string, spanType string) (trace.Span, bool) {
+func (c *callbacksImpl) retrieveSpan(sessionID string, spanKey string) (trace.Span, bool) {
+	c.spansLock.Lock()
+	defer c.spansLock.Unlock()
+
 	spans, ok := c.spans[sessionID]
 	if ok {
-		span, ok := spans[spanType]
+		span, ok := spans[spanKey]
 		return span, ok
 	}
 	return nil, false
 }
 
-// deleteContext removes a stored context
-func (c *Callbacks) deleteSpan(sessionID string, spanType string) {
-	spans, ok := c.spans[sessionID]
-	if ok {
-		delete(spans, spanType)
-	}
+func (c *callbacksImpl) retrieveRootSpan(sessionID string) (trace.Span, bool) {
+	return c.retrieveSpan(sessionID, rootSpanKey)
 }
 
-func (c *Callbacks) deleteAllSessionSpans(sessionID string) {
-	delete(c.spans, sessionID)
+// deleteContext removes a stored context
+func (c *callbacksImpl) deleteSpan(sessionID string, spanKey string) {
+	c.spansLock.Lock()
+	defer c.spansLock.Unlock()
+
+	spans, ok := c.spans[sessionID]
+	if ok {
+		delete(spans, spanKey)
+
+		// To make sure we eventually clean up sessions and that the map doesn't
+		// grow indefinitely, clean up the session if there are no more agent
+		// spans
+		for spanKey := range spans {
+			if strings.HasPrefix(spanKey, "agent:") {
+				return
+			}
+		}
+		delete(c.spans, sessionID)
+	}
 }
 
 // BeforeAgent is called before the agent starts its run.
-// It creates a span that covers the agent run.
-func (c *Callbacks) BeforeAgent(ctx agent.CallbackContext) (*genai.Content, error) {
-	if c.cfg.logger != nil {
-		c.cfg.logger.Info("BeforeAgent callback", "sessionID", ctx.SessionID())
+// It creates a span that covers the agent run, linking to parent agent if one exists.
+func (c *callbacksImpl) BeforeAgent(ctx agent.CallbackContext) (*genai.Content, error) {
+	c.cfg.logger.Debug("BeforeAgent callback", "sessionID", ctx.SessionID(), "invocationID", ctx.InvocationID(), "agent", ctx.AgentName(), "branch", ctx.Branch())
+
+	// Fall back to the root span as a parent, if there is one.
+	// TODO: Unfortunately, ADK doesn't provide a great way to trace
+	// parent/child agent relationships. We could parse branch, but that only
+	// works if agent names are unique.
+	var spanCtx context.Context = ctx
+	parentSpan, hasParent := c.retrieveRootSpan(ctx.SessionID())
+	if hasParent {
+		spanCtx = trace.ContextWithSpan(ctx, parentSpan)
 	}
 
-	// Create a span for the agent run
-	_, span := c.tracer.Start(ctx, fmt.Sprintf("agent_run [%s]", ctx.AppName()),
-		trace.WithSpanKind(trace.SpanKindInternal),
-	)
+	// Create agent span (root or child based on parent)
+	_, span := c.tracer.Start(spanCtx, fmt.Sprintf("agent_run [%s]", ctx.AgentName()),
+		trace.WithSpanKind(trace.SpanKindInternal))
+	setSpanAttributes(span, ctx)
 
-	// Set span attributes
-	span.SetAttributes(attribute.String("agent.name", ctx.AgentName()))
-	span.SetAttributes(attribute.String("agent.invocation_id", ctx.InvocationID()))
-	span.SetAttributes(attribute.String("agent.session_id", ctx.SessionID()))
+	c.storeSpan(ctx.SessionID(), getAgentSpanKey(ctx.InvocationID()), span)
 
-	c.storeSpan(ctx.SessionID(), "agent", span)
-
-	// Don't intercept the agent run, let it proceed normally
 	return nil, nil
 }
 
 // AfterAgent is called after the agent completes its run.
 // It completes the span created by BeforeAgent and cleans up all contexts.
-func (c *Callbacks) AfterAgent(ctx agent.CallbackContext) (*genai.Content, error) {
-	if c.cfg.logger != nil {
-		c.cfg.logger.Info("AfterAgent callback", "sessionID", ctx.SessionID())
-	}
+func (c *callbacksImpl) AfterAgent(ctx agent.CallbackContext) (*genai.Content, error) {
+	c.cfg.logger.Debug("AfterAgent callback", "sessionID", ctx.SessionID(), "invocationID", ctx.InvocationID(), "agentName", ctx.AgentName())
 
-	// Retrieve and end the agent span (using session ID)
-	span, ok := c.retrieveSpan(ctx.SessionID(), "agent")
-	if ok && span.IsRecording() {
+	// Retrieve and end the agent span using agent name
+	span, ok := c.retrieveSpan(ctx.SessionID(), getAgentSpanKey(ctx.InvocationID()))
+	if ok {
 		defer span.End()
-		span.SetStatus(codes.Ok, "")
+		// Delete this agent's span
+		c.deleteSpan(ctx.SessionID(), getAgentSpanKey(ctx.InvocationID()))
 	}
-
-	// Delete all spans from this session
-	c.deleteAllSessionSpans(ctx.SessionID())
 
 	// Don't modify the response
 	return nil, nil
@@ -183,21 +244,23 @@ func (c *Callbacks) AfterAgent(ctx agent.CallbackContext) (*genai.Content, error
 
 // BeforeModel is called before sending a request to the LLM model.
 // It creates a span to trace the model invocation as a child of the agent span.
-func (c *Callbacks) BeforeModel(ctx agent.CallbackContext, req *model.LLMRequest) (*model.LLMResponse, error) {
-	if c.cfg.logger != nil {
-		c.cfg.logger.Info("BeforeModel callback", "request", req)
-	}
+func (c *callbacksImpl) BeforeModel(ctx agent.CallbackContext, req *model.LLMRequest) (*model.LLMResponse, error) {
+	c.cfg.logger.Debug("BeforeModel callback", "sessionID", ctx.SessionID(), "invocationID", ctx.InvocationID(), "agentName", ctx.AgentName(), "request", req)
 
 	// Create a span for the model call, using the agent span context as parent
 	var spanCtx context.Context = ctx
-	parentSpan, hasParent := c.retrieveSpan(ctx.SessionID(), "agent")
+	parentSpan, hasParent := c.retrieveSpan(ctx.SessionID(), getAgentSpanKey(ctx.InvocationID()))
+	if !hasParent {
+		// Fallback: look up root span
+		parentSpan, hasParent = c.retrieveRootSpan(ctx.SessionID())
+	}
 	if hasParent {
 		spanCtx = trace.ContextWithSpan(ctx, parentSpan)
 	}
 
 	_, span := c.tracer.Start(spanCtx, "call_llm",
-		trace.WithSpanKind(trace.SpanKindClient),
-	)
+		trace.WithSpanKind(trace.SpanKindClient))
+	setSpanAttributes(span, ctx)
 
 	// Set span attributes
 	if req.Model != "" {
@@ -213,24 +276,19 @@ func (c *Callbacks) BeforeModel(ctx agent.CallbackContext, req *model.LLMRequest
 		}
 	}
 
-	// Store the span and its context for later retrieval
-	// The context is used by tool calls to establish parent-child relationships
-	c.storeSpan(ctx.SessionID(), "model", span)
+	c.storeSpan(ctx.SessionID(), getModelSpanKey(ctx), span)
 
-	// Don't intercept the model call, let it proceed normally
 	return nil, nil
 }
 
 // AfterModel is called after receiving a response from the LLM model.
 // It completes the span created by BeforeModel and records the response.
-func (c *Callbacks) AfterModel(ctx agent.CallbackContext, resp *model.LLMResponse, err error) (*model.LLMResponse, error) {
-	if c.cfg.logger != nil {
-		c.cfg.logger.Info("AfterModel callback", "response", resp, "error", err)
-	}
+func (c *callbacksImpl) AfterModel(ctx agent.CallbackContext, resp *model.LLMResponse, err error) (*model.LLMResponse, error) {
+	c.cfg.logger.Debug("AfterModel callback", "sessionID", ctx.SessionID(), "invocationID", ctx.InvocationID(), "agentName", ctx.AgentName(), "response", resp, "error", err)
 
 	// Retrieve the span (but don't remove it yet)
-	span, ok := c.retrieveSpan(ctx.SessionID(), "model")
-	if !ok || !span.IsRecording() {
+	span, ok := c.retrieveSpan(ctx.SessionID(), getModelSpanKey(ctx))
+	if !ok {
 		// No span found, maybe BeforeModel wasn't called
 		return nil, nil
 	}
@@ -271,30 +329,28 @@ func (c *Callbacks) AfterModel(ctx agent.CallbackContext, resp *model.LLMRespons
 		}
 	}
 
-	span.SetStatus(codes.Ok, "")
-
-	// Don't modify the response
 	return nil, nil
 }
 
 // BeforeTool is called before executing a tool.
 // It creates a span to trace the tool execution as a child of the LLM span.
-func (c *Callbacks) BeforeTool(ctx tool.Context, t tool.Tool, args map[string]any) (map[string]any, error) {
-	if c.cfg.logger != nil {
-		c.cfg.logger.Info("BeforeTool callback", "tool", t.Name(), "args", args)
-	}
+func (c *callbacksImpl) BeforeTool(ctx tool.Context, t tool.Tool, args map[string]any) (map[string]any, error) {
+	c.cfg.logger.Debug("BeforeTool callback", "sessionID", ctx.SessionID(), "invocationID", ctx.InvocationID(), "agentName", ctx.AgentName(), "tool", t.Name(), "args", args)
 
 	// Try to get the LLM span context to establish parent-child relationship
 	var spanCtx context.Context = ctx
-	parentSpan, hasParent := c.retrieveSpan(ctx.SessionID(), "model")
+	parentSpan, hasParent := c.retrieveSpan(ctx.SessionID(), getModelSpanKey(ctx))
+	if !hasParent {
+		// Fallback: look up root span
+		parentSpan, hasParent = c.retrieveRootSpan(ctx.SessionID())
+	}
 	if hasParent {
 		spanCtx = trace.ContextWithSpan(ctx, parentSpan)
 	}
 
-	// Create a span for the tool call, using the LLM span context as parent
 	_, span := c.tracer.Start(spanCtx, fmt.Sprintf("tool [%s]", t.Name()),
-		trace.WithSpanKind(trace.SpanKindInternal),
-	)
+		trace.WithSpanKind(trace.SpanKindInternal))
+	setSpanAttributes(span, ctx)
 
 	// Set span attributes
 	span.SetAttributes(attribute.String("tool.name", t.Name()))
@@ -322,28 +378,24 @@ func (c *Callbacks) BeforeTool(ctx tool.Context, t tool.Tool, args map[string]an
 		}
 	}
 
-	// Store the span using a composite key of session ID and function call ID
-	c.storeSpan(ctx.SessionID(), ctx.FunctionCallID(), span)
+	c.storeSpan(ctx.SessionID(), getToolSpanKey(ctx), span)
 
-	// Don't modify args, let the tool execute normally
 	return nil, nil
 }
 
 // AfterTool is called after a tool execution completes.
 // It completes the span created by BeforeTool and records the result.
-func (c *Callbacks) AfterTool(ctx tool.Context, t tool.Tool, args, result map[string]any, err error) (map[string]any, error) {
-	if c.cfg.logger != nil {
-		c.cfg.logger.Info("AfterTool callback", "tool", t.Name(), "result", result, "error", err)
-	}
+func (c *callbacksImpl) AfterTool(ctx tool.Context, t tool.Tool, args, result map[string]any, err error) (map[string]any, error) {
+	c.cfg.logger.Debug("AfterTool callback", "sessionID", ctx.SessionID(), "invocationID", ctx.InvocationID(), "agentName", ctx.AgentName(), "tool", t.Name(), "result", result, "error", err)
 
 	// Retrieve the span using composite key
-	span, ok := c.retrieveSpan(ctx.SessionID(), ctx.FunctionCallID())
-	if !ok || !span.IsRecording() {
+	span, ok := c.retrieveSpan(ctx.SessionID(), getToolSpanKey(ctx))
+	if !ok {
 		// No span found, maybe BeforeTool wasn't called
 		return nil, nil
 	}
 	defer span.End()
-	c.deleteSpan(ctx.SessionID(), ctx.FunctionCallID())
+	c.deleteSpan(ctx.SessionID(), getToolSpanKey(ctx))
 
 	if err != nil {
 		span.RecordError(err)
@@ -364,8 +416,6 @@ func (c *Callbacks) AfterTool(ctx tool.Context, t tool.Tool, args, result map[st
 		}
 	}
 
-	span.SetStatus(codes.Ok, "")
-
 	// Don't try to clean up model span here - let AfterAgent handle all cleanup
 	// This ensures all tools in a sequence can use the same parent context
 
@@ -384,13 +434,18 @@ func (c *Callbacks) AfterTool(ctx tool.Context, t tool.Tool, args, result map[st
 //		Description: "My agent",
 //		Tools:       tools,
 //	}))
-func TracedConfig(config llmagent.Config) llmagent.Config {
-	callbacks := NewCallbacks()
-	config.BeforeAgentCallbacks = append(config.BeforeAgentCallbacks, callbacks.BeforeAgent)
-	config.AfterAgentCallbacks = append(config.AfterAgentCallbacks, callbacks.AfterAgent)
-	config.BeforeModelCallbacks = append(config.BeforeModelCallbacks, callbacks.BeforeModel)
-	config.AfterModelCallbacks = append(config.AfterModelCallbacks, callbacks.AfterModel)
-	config.BeforeToolCallbacks = append(config.BeforeToolCallbacks, callbacks.BeforeTool)
-	config.AfterToolCallbacks = append(config.AfterToolCallbacks, callbacks.AfterTool)
+func (c *callbacksImpl) LLMAgentConfig(config llmagent.Config) llmagent.Config {
+	config.BeforeAgentCallbacks = append(config.BeforeAgentCallbacks, c.BeforeAgent)
+	config.AfterAgentCallbacks = append(config.AfterAgentCallbacks, c.AfterAgent)
+	config.BeforeModelCallbacks = append(config.BeforeModelCallbacks, c.BeforeModel)
+	config.AfterModelCallbacks = append(config.AfterModelCallbacks, c.AfterModel)
+	config.BeforeToolCallbacks = append(config.BeforeToolCallbacks, c.BeforeTool)
+	config.AfterToolCallbacks = append(config.AfterToolCallbacks, c.AfterTool)
+	return config
+}
+
+func (c *callbacksImpl) AgentConfig(config agent.Config) agent.Config {
+	config.BeforeAgentCallbacks = append(config.BeforeAgentCallbacks, c.BeforeAgent)
+	config.AfterAgentCallbacks = append(config.AfterAgentCallbacks, c.AfterAgent)
 	return config
 }
