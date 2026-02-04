@@ -80,7 +80,7 @@ func setupGoldenTest(t *testing.T, spanName string) (ctx context.Context, cleanu
 }
 
 // newAgentAndRunner creates Braintrust callbacks, an LLM agent, in-memory session, and runner.
-func newAgentAndRunner(t *testing.T, ctx context.Context, sessionID string, cfg llmagent.Config) *runner.Runner {
+func newAgentAndRunner(ctx context.Context, t *testing.T, sessionID string, cfg llmagent.Config) *runner.Runner {
 	t.Helper()
 
 	llm, err := gemini.NewModel(ctx, "gemini-2.5-flash", &genai.ClientConfig{APIKey: os.Getenv("GOOGLE_API_KEY")})
@@ -109,7 +109,7 @@ func newAgentAndRunner(t *testing.T, ctx context.Context, sessionID string, cfg 
 }
 
 // runAndCollectFinal runs the agent with the given message and returns all final response events.
-func runAndCollectFinal(t *testing.T, r *runner.Runner, ctx context.Context, sessionID string, msg *genai.Content, runCfg agent.RunConfig) []*session.Event {
+func runAndCollectFinal(ctx context.Context, t *testing.T, r *runner.Runner, sessionID string, msg *genai.Content, runCfg agent.RunConfig) []*session.Event {
 	t.Helper()
 	var responses []*session.Event
 	for ev, err := range r.Run(ctx, userID, sessionID, msg, runCfg) { //nolint:revive // range over Seq2
@@ -124,7 +124,7 @@ func runAndCollectFinal(t *testing.T, r *runner.Runner, ctx context.Context, ses
 }
 
 // runAndCollectStreamedText runs the agent and concatenates all content parts (for streaming tests).
-func runAndCollectStreamedText(t *testing.T, r *runner.Runner, ctx context.Context, sessionID string, msg *genai.Content, runCfg agent.RunConfig) string {
+func runAndCollectStreamedText(ctx context.Context, t *testing.T, r *runner.Runner, sessionID string, msg *genai.Content, runCfg agent.RunConfig) string {
 	t.Helper()
 	var fullText strings.Builder
 	for ev, err := range r.Run(ctx, userID, sessionID, msg, runCfg) {
@@ -143,7 +143,7 @@ func runAndCollectStreamedText(t *testing.T, r *runner.Runner, ctx context.Conte
 }
 
 // runAndCollectAll runs the agent and returns all events.
-func runAndCollectAll(t *testing.T, r *runner.Runner, ctx context.Context, sessionID string, msg *genai.Content, runCfg agent.RunConfig) []*session.Event {
+func runAndCollectAll(ctx context.Context, t *testing.T, r *runner.Runner, sessionID string, msg *genai.Content, runCfg agent.RunConfig) []*session.Event {
 	t.Helper()
 	var events []*session.Event
 	for ev, err := range r.Run(ctx, userID, sessionID, msg, runCfg) {
@@ -177,7 +177,7 @@ func TestBasicCompletion(t *testing.T) {
 	ctx, cleanup := setupGoldenTest(t, "test_basic_completion")
 	defer cleanup()
 
-	r := newAgentAndRunner(t, ctx, sessionIDBasic, llmagent.Config{
+	r := newAgentAndRunner(ctx, t, sessionIDBasic, llmagent.Config{
 		Name:        "basic_agent",
 		Instruction: "You are a helpful assistant.",
 		GenerateContentConfig: &genai.GenerateContentConfig{
@@ -186,7 +186,7 @@ func TestBasicCompletion(t *testing.T) {
 	})
 
 	userMsg := genai.NewContentFromText("What is the capital of France?", genai.RoleUser)
-	responses := runAndCollectFinal(t, r, ctx, sessionIDBasic, userMsg, agent.RunConfig{})
+	responses := runAndCollectFinal(ctx, t, r, sessionIDBasic, userMsg, agent.RunConfig{})
 	text := assertFinalResponse(t, responses)
 	t.Logf("Response: %s", text)
 }
@@ -197,7 +197,7 @@ func TestMultiTurn(t *testing.T) {
 	defer cleanup()
 
 	sid := "session-multi-turn"
-	r := newAgentAndRunner(t, ctx, sid, llmagent.Config{
+	r := newAgentAndRunner(ctx, t, sid, llmagent.Config{
 		Name:                  "conversation_agent",
 		Instruction:           "You are a helpful assistant with good memory.",
 		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 200},
@@ -205,13 +205,13 @@ func TestMultiTurn(t *testing.T) {
 
 	// First message
 	msg1 := genai.NewContentFromText("Hi, my name is Alice.", genai.RoleUser)
-	responses := runAndCollectFinal(t, r, ctx, sid, msg1, agent.RunConfig{})
+	responses := runAndCollectFinal(ctx, t, r, sid, msg1, agent.RunConfig{})
 	text := assertFinalResponse(t, responses)
 	t.Logf("Response 1: %s", text)
 
 	// Second message
 	msg2 := genai.NewContentFromText("What did I just tell you my name was?", genai.RoleUser)
-	responses = runAndCollectFinal(t, r, ctx, sid, msg2, agent.RunConfig{})
+	responses = runAndCollectFinal(ctx, t, r, sid, msg2, agent.RunConfig{})
 	text = assertFinalResponse(t, responses)
 	t.Logf("Response 2: %s", text)
 }
@@ -222,14 +222,14 @@ func TestSystemPrompt(t *testing.T) {
 	defer cleanup()
 
 	sid := "session-pirate"
-	r := newAgentAndRunner(t, ctx, sid, llmagent.Config{
+	r := newAgentAndRunner(ctx, t, sid, llmagent.Config{
 		Name:                  "pirate_agent",
 		Instruction:           "You are a pirate. Always respond in pirate speak.",
 		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 150},
 	})
 
 	msg := genai.NewContentFromText("Tell me about the weather.", genai.RoleUser)
-	responses := runAndCollectFinal(t, r, ctx, sid, msg, agent.RunConfig{})
+	responses := runAndCollectFinal(ctx, t, r, sid, msg, agent.RunConfig{})
 	text := assertFinalResponse(t, responses)
 	t.Logf("Response: %s", text)
 }
@@ -240,7 +240,7 @@ func TestStreaming(t *testing.T) {
 	defer cleanup()
 
 	sid := "session-streaming"
-	r := newAgentAndRunner(t, ctx, sid, llmagent.Config{
+	r := newAgentAndRunner(ctx, t, sid, llmagent.Config{
 		Name:                  "counting_agent",
 		Instruction:           "You are a helpful assistant.",
 		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 200},
@@ -248,7 +248,7 @@ func TestStreaming(t *testing.T) {
 
 	msg := genai.NewContentFromText("Count from 1 to 10 slowly.", genai.RoleUser)
 	runCfg := agent.RunConfig{StreamingMode: agent.StreamingMode("streaming")}
-	fullText := runAndCollectStreamedText(t, r, ctx, sid, msg, runCfg)
+	fullText := runAndCollectStreamedText(ctx, t, r, sid, msg, runCfg)
 	t.Logf("Streamed: %s", fullText)
 	if fullText == "" {
 		t.Fatal("expected some streamed text")
@@ -270,7 +270,7 @@ func TestImageInput(t *testing.T) {
 	defer cleanup()
 
 	sid := "session-vision"
-	r := newAgentAndRunner(t, ctx, sid, llmagent.Config{
+	r := newAgentAndRunner(ctx, t, sid, llmagent.Config{
 		Name:                  "vision_agent",
 		Instruction:           "You are a helpful vision assistant that can analyze images.",
 		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 150},
@@ -280,7 +280,7 @@ func TestImageInput(t *testing.T) {
 		{InlineData: &genai.Blob{Data: data, MIMEType: "image/png"}},
 		{Text: "What color is this image?"},
 	}, genai.RoleUser)
-	responses := runAndCollectFinal(t, r, ctx, sid, userMsg, agent.RunConfig{})
+	responses := runAndCollectFinal(ctx, t, r, sid, userMsg, agent.RunConfig{})
 	text := assertFinalResponse(t, responses)
 	t.Logf("Response: %s", text)
 }
@@ -300,7 +300,7 @@ func TestDocumentInput(t *testing.T) {
 	defer cleanup()
 
 	sid := "session-document"
-	r := newAgentAndRunner(t, ctx, sid, llmagent.Config{
+	r := newAgentAndRunner(ctx, t, sid, llmagent.Config{
 		Name:                  "doc_agent",
 		Instruction:           "You are a document analysis assistant.",
 		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 150},
@@ -310,7 +310,7 @@ func TestDocumentInput(t *testing.T) {
 		{InlineData: &genai.Blob{Data: data, MIMEType: "application/pdf"}},
 		{Text: "What is in this document?"},
 	}, genai.RoleUser)
-	responses := runAndCollectFinal(t, r, ctx, sid, userMsg, agent.RunConfig{})
+	responses := runAndCollectFinal(ctx, t, r, sid, userMsg, agent.RunConfig{})
 	text := assertFinalResponse(t, responses)
 	t.Logf("Response: %s", text)
 }
@@ -330,13 +330,14 @@ func TestTemperatureVariations(t *testing.T) {
 	}
 	for i, cfg := range configs {
 		name := fmt.Sprintf("agent_temp_%v", cfg.temp)
-		if cfg.temp == 0.0 {
+		switch cfg.temp {
+		case 0.0:
 			name = "agent_temp_0_0"
-		} else if cfg.temp == 1.0 {
+		case 1.0:
 			name = "agent_temp_1_0"
 		}
 		sid := fmt.Sprintf("session-temp-%v-%d", cfg.temp, i)
-		r := newAgentAndRunner(t, ctx, sid, llmagent.Config{
+		r := newAgentAndRunner(ctx, t, sid, llmagent.Config{
 			Name:        name,
 			Instruction: "You are a creative storyteller.",
 			GenerateContentConfig: &genai.GenerateContentConfig{
@@ -347,7 +348,7 @@ func TestTemperatureVariations(t *testing.T) {
 		})
 
 		msg := genai.NewContentFromText("Say something creative.", genai.RoleUser)
-		fullText := runAndCollectStreamedText(t, r, ctx, sid, msg, agent.RunConfig{})
+		fullText := runAndCollectStreamedText(ctx, t, r, sid, msg, agent.RunConfig{})
 		t.Logf("Config temp=%v top_p=%v: %s", cfg.temp, cfg.topP, fullText)
 	}
 }
@@ -358,7 +359,7 @@ func TestStopSequences(t *testing.T) {
 	defer cleanup()
 
 	sid := "session-stop"
-	r := newAgentAndRunner(t, ctx, sid, llmagent.Config{
+	r := newAgentAndRunner(ctx, t, sid, llmagent.Config{
 		Name:        "story_agent",
 		Instruction: "You are a creative writer.",
 		GenerateContentConfig: &genai.GenerateContentConfig{
@@ -368,7 +369,7 @@ func TestStopSequences(t *testing.T) {
 	})
 
 	msg := genai.NewContentFromText("Write a short story about a robot.", genai.RoleUser)
-	responses := runAndCollectFinal(t, r, ctx, sid, msg, agent.RunConfig{})
+	responses := runAndCollectFinal(ctx, t, r, sid, msg, agent.RunConfig{})
 	text := assertFinalResponse(t, responses)
 	t.Logf("Response: %s", text)
 }
@@ -381,7 +382,7 @@ func TestMetadata(t *testing.T) {
 	defer cleanup()
 
 	sid := "session-metadata"
-	r := newAgentAndRunner(t, ctx, sid, llmagent.Config{
+	r := newAgentAndRunner(ctx, t, sid, llmagent.Config{
 		Name:        "basic_agent",
 		Instruction: "You are a helpful assistant.",
 		GenerateContentConfig: &genai.GenerateContentConfig{
@@ -391,7 +392,7 @@ func TestMetadata(t *testing.T) {
 	})
 
 	msg := genai.NewContentFromText("Hello!", genai.RoleUser)
-	responses := runAndCollectFinal(t, r, ctx, sid, msg, agent.RunConfig{})
+	responses := runAndCollectFinal(ctx, t, r, sid, msg, agent.RunConfig{})
 	text := assertFinalResponse(t, responses)
 	t.Logf("Response: %s", text)
 }
@@ -402,7 +403,7 @@ func TestLongContext(t *testing.T) {
 	defer cleanup()
 
 	sid := "session-long"
-	r := newAgentAndRunner(t, ctx, sid, llmagent.Config{
+	r := newAgentAndRunner(ctx, t, sid, llmagent.Config{
 		Name:                  "analysis_agent",
 		Instruction:           "You are a text analysis assistant.",
 		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 100},
@@ -410,7 +411,7 @@ func TestLongContext(t *testing.T) {
 
 	longText := strings.Repeat("The quick brown fox jumps over the lazy dog. ", 100)
 	msg := genai.NewContentFromText(fmt.Sprintf("Here is a long text:\n\n%s\n\nHow many times does the word 'fox' appear?", longText), genai.RoleUser)
-	responses := runAndCollectFinal(t, r, ctx, sid, msg, agent.RunConfig{})
+	responses := runAndCollectFinal(ctx, t, r, sid, msg, agent.RunConfig{})
 	text := assertFinalResponse(t, responses)
 	t.Logf("Response: %s", text)
 }
@@ -430,7 +431,7 @@ func TestMixedContent(t *testing.T) {
 	defer cleanup()
 
 	sid := "session-mixed"
-	r := newAgentAndRunner(t, ctx, sid, llmagent.Config{
+	r := newAgentAndRunner(ctx, t, sid, llmagent.Config{
 		Name:                  "vision_agent",
 		Instruction:           "You are a helpful vision assistant.",
 		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 200},
@@ -441,7 +442,7 @@ func TestMixedContent(t *testing.T) {
 		{InlineData: &genai.Blob{Data: data, MIMEType: "image/png"}},
 		{Text: "Now describe what you see and explain why it matters."},
 	}, genai.RoleUser)
-	responses := runAndCollectFinal(t, r, ctx, sid, userMsg, agent.RunConfig{})
+	responses := runAndCollectFinal(ctx, t, r, sid, userMsg, agent.RunConfig{})
 	text := assertFinalResponse(t, responses)
 	t.Logf("Response: %s", text)
 }
@@ -452,19 +453,19 @@ func TestPrefill(t *testing.T) {
 	defer cleanup()
 
 	sid := "session-prefill"
-	r := newAgentAndRunner(t, ctx, sid, llmagent.Config{
+	r := newAgentAndRunner(ctx, t, sid, llmagent.Config{
 		Name:                  "haiku_agent",
 		Instruction:           "You are a helpful assistant.",
 		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 200},
 	})
 
 	msg1 := genai.NewContentFromText("Write a haiku about coding.", genai.RoleUser)
-	responses := runAndCollectFinal(t, r, ctx, sid, msg1, agent.RunConfig{})
+	responses := runAndCollectFinal(ctx, t, r, sid, msg1, agent.RunConfig{})
 	text := assertFinalResponse(t, responses)
 	t.Logf("Response 1: %s", text)
 
 	msg2 := genai.NewContentFromText("Here is a haiku:", genai.RoleUser)
-	responses = runAndCollectFinal(t, r, ctx, sid, msg2, agent.RunConfig{})
+	responses = runAndCollectFinal(ctx, t, r, sid, msg2, agent.RunConfig{})
 	text = assertFinalResponse(t, responses)
 	t.Logf("Response 2: %s", text)
 }
@@ -475,14 +476,14 @@ func TestShortMaxTokens(t *testing.T) {
 	defer cleanup()
 
 	sid := "session-brief"
-	r := newAgentAndRunner(t, ctx, sid, llmagent.Config{
+	r := newAgentAndRunner(ctx, t, sid, llmagent.Config{
 		Name:                  "brief_agent",
 		Instruction:           "You are a helpful assistant.",
 		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 5},
 	})
 
 	msg := genai.NewContentFromText("What is AI?", genai.RoleUser)
-	responses := runAndCollectFinal(t, r, ctx, sid, msg, agent.RunConfig{})
+	responses := runAndCollectFinal(ctx, t, r, sid, msg, agent.RunConfig{})
 	text := assertFinalResponse(t, responses)
 	t.Logf("Response: %s", text)
 }
@@ -518,7 +519,7 @@ func TestToolUse(t *testing.T) {
 	}
 
 	sid := "session-weather"
-	r := newAgentAndRunner(t, ctx, sid, llmagent.Config{
+	r := newAgentAndRunner(ctx, t, sid, llmagent.Config{
 		Name:                  "weather_agent",
 		Instruction:           "You are a helpful weather assistant. Use the get_weather tool to answer questions.",
 		Tools:                 []tool.Tool{weatherTool},
@@ -530,7 +531,7 @@ func TestToolUse(t *testing.T) {
 	// Collect ALL events to see function calls (they appear in non-final events)
 	var hasFunctionCall bool
 	var finalText string
-	for _, ev := range runAndCollectAll(t, r, ctx, sid, msg, agent.RunConfig{}) {
+	for _, ev := range runAndCollectAll(ctx, t, r, sid, msg, agent.RunConfig{}) {
 		if ev.Content != nil {
 			for i, p := range ev.Content.Parts {
 				if p.FunctionCall != nil {
@@ -594,7 +595,7 @@ func TestToolUseWithResult(t *testing.T) {
 	}
 
 	sid := "session-calculator"
-	r := newAgentAndRunner(t, ctx, sid, llmagent.Config{
+	r := newAgentAndRunner(ctx, t, sid, llmagent.Config{
 		Name:                  "math_agent",
 		Instruction:           "You are a helpful math assistant. Use the calculate tool to perform calculations.",
 		Tools:                 []tool.Tool{calcTool},
@@ -603,7 +604,7 @@ func TestToolUseWithResult(t *testing.T) {
 
 	msg := genai.NewContentFromText("What is 127 multiplied by 49?", genai.RoleUser)
 	t.Log("First response:")
-	for _, ev := range runAndCollectAll(t, r, ctx, sid, msg, agent.RunConfig{}) {
+	for _, ev := range runAndCollectAll(ctx, t, r, sid, msg, agent.RunConfig{}) {
 		if ev.IsFinalResponse() && ev.Content != nil {
 			for _, p := range ev.Content.Parts {
 				if p.FunctionCall != nil {
@@ -622,7 +623,7 @@ func TestReasoning(t *testing.T) {
 
 	thinkingBudget := int32(1024)
 	sid := "session-reasoning"
-	r := newAgentAndRunner(t, ctx, sid, llmagent.Config{
+	r := newAgentAndRunner(ctx, t, sid, llmagent.Config{
 		Name:        "reasoning_agent",
 		Instruction: "You are a mathematical reasoning assistant.",
 		GenerateContentConfig: &genai.GenerateContentConfig{
@@ -632,12 +633,12 @@ func TestReasoning(t *testing.T) {
 	})
 
 	msg1 := genai.NewContentFromText("Look at this sequence: 2, 6, 12, 20, 30. What is the pattern and what would be the formula for the nth term?", genai.RoleUser)
-	responses := runAndCollectFinal(t, r, ctx, sid, msg1, agent.RunConfig{})
+	responses := runAndCollectFinal(ctx, t, r, sid, msg1, agent.RunConfig{})
 	text := assertFinalResponse(t, responses)
 	t.Logf("First response: %s", text)
 
 	msg2 := genai.NewContentFromText("Using the pattern you discovered, what would be the 10th term? And can you find the sum of the first 10 terms?", genai.RoleUser)
-	responses = runAndCollectFinal(t, r, ctx, sid, msg2, agent.RunConfig{})
+	responses = runAndCollectFinal(ctx, t, r, sid, msg2, agent.RunConfig{})
 	text = assertFinalResponse(t, responses)
 	t.Logf("Follow-up response: %s", text)
 }

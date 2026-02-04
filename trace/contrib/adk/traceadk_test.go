@@ -18,6 +18,7 @@ import (
 	"google.golang.org/genai"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
+	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
 // mockCallbackContext implements the minimal agent.CallbackContext interface needed for testing
@@ -299,7 +300,7 @@ func TestCleanupJSON(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := cleanupJSON(tt.input)
+			result := cleanupJSON(logger.Discard(), tt.input)
 			assert.Equal(t, tt.expected, result)
 		})
 	}
