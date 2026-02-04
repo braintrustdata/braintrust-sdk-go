@@ -27,6 +27,7 @@ package adk
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"sync"
@@ -44,6 +45,64 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 	"github.com/braintrustdata/braintrust-sdk-go/trace/internal"
 )
+
+// cleanupJSON recursively removes keys with empty values from JSON structures.
+// Empty values include: nil, empty strings, empty slices, and empty maps.
+// We do this because the ADK types do not always have omitempty annotations.
+func cleanupJSON(log logger.Logger, value interface{}) interface{} {
+	jsonStr, err := json.Marshal(value)
+	if err != nil {
+		log.Debug("Failed to marshal value to JSON", "error", err)
+		return value
+	}
+	var generic interface{}
+	if err := json.Unmarshal(jsonStr, &generic); err != nil {
+		log.Debug("Failed to unmarshal value to generic structure", "error", err)
+		return value
+	}
+
+	switch val := generic.(type) {
+	case map[string]interface{}:
+		result := make(map[string]interface{})
+		for k, v := range val {
+			cleaned := cleanupJSON(log, v)
+			// Only include non-empty values
+			if !isEmpty(cleaned) {
+				result[k] = cleaned
+			}
+		}
+		if len(result) == 0 {
+			return nil
+		}
+		return result
+	case []interface{}:
+		result := make([]interface{}, 0, len(val))
+		for _, item := range val {
+			// include all items
+			result = append(result, cleanupJSON(log, item))
+		}
+		return result
+	default:
+		return val
+	}
+}
+
+// isEmpty checks if a value is considered empty (nil, empty string, empty slice, empty map).
+func isEmpty(v interface{}) bool {
+	if v == nil {
+		return true
+	}
+	switch val := v.(type) {
+	case string:
+		return val == ""
+	case []interface{}:
+		return len(val) == 0
+	case map[string]interface{}:
+		return len(val) == 0
+	default:
+		return false
+	}
+}
 
 // config holds configuration for the ADK tracing callbacks
 type config struct {
@@ -261,18 +320,22 @@ func (c *callbacksImpl) BeforeModel(ctx agent.CallbackContext, req *model.LLMReq
 		trace.WithSpanKind(trace.SpanKindClient))
 	setSpanAttributes(span, ctx)
 
-	// Set span attributes
+	spanAttrs := map[string]string{
+		"type": "llm",
+	}
+	if err := internal.SetJSONAttr(span, "braintrust.span_attributes", spanAttrs); err != nil {
+		c.cfg.logger.Debug("Failed to set braintrust.span_attributes", "error", err)
+	}
+
 	if req.Model != "" {
 		span.SetAttributes(attribute.String("gen_ai.request.model", req.Model))
 	}
-
-	// Add input/prompt information
 	if len(req.Contents) > 0 {
 		err := internal.SetJSONAttr(span, "gen_ai.prompt", req.Contents)
 		if err != nil {
 			c.cfg.logger.Debug("Failed to set gen_ai.prompt", "error", err)
 		}
-		err = internal.SetJSONAttr(span, "braintrust.input_json", convertLLMRequest(req))
+		err = internal.SetJSONAttr(span, "braintrust.input_json", cleanupJSON(c.cfg.logger, req))
 		if err != nil {
 			c.cfg.logger.Debug("Failed to set braintrust.input_json", "error", err)
 		}
@@ -304,8 +367,7 @@ func (c *callbacksImpl) AfterModel(ctx agent.CallbackContext, resp *model.LLMRes
 	}
 
 	if resp != nil {
-		// Record response content
-		err = internal.SetJSONAttr(span, "braintrust.output_json", convertLLMResponse(resp))
+		err = internal.SetJSONAttr(span, "braintrust.output_json", cleanupJSON(c.cfg.logger, resp))
 		if err != nil {
 			c.cfg.logger.Debug("Failed to set braintrust.output_json", "error", err)
 		}
@@ -352,20 +414,17 @@ func (c *callbacksImpl) BeforeTool(ctx tool.Context, t tool.Tool, args map[strin
 		trace.WithSpanKind(trace.SpanKindInternal))
 	setSpanAttributes(span, ctx)
 
-	// Set span attributes
-	span.SetAttributes(attribute.String("tool.name", t.Name()))
-	if desc := t.Description(); desc != "" {
-		span.SetAttributes(attribute.String("tool.description", desc))
-	}
-
 	spanAttrs := map[string]string{
 		"type": "tool",
 	}
 	if err := internal.SetJSONAttr(span, "braintrust.span_attributes", spanAttrs); err != nil {
-		span.RecordError(err)
+		c.cfg.logger.Debug("Failed to set braintrust.span_attributes", "error", err)
 	}
 
-	// Add tool arguments
+	span.SetAttributes(attribute.String("tool.name", t.Name()))
+	if desc := t.Description(); desc != "" {
+		span.SetAttributes(attribute.String("tool.description", desc))
+	}
 	if len(args) > 0 {
 		err := internal.SetJSONAttr(span, "tool.input", args)
 		if err != nil {
@@ -413,10 +472,6 @@ func (c *callbacksImpl) AfterTool(ctx tool.Context, t tool.Tool, args, result ma
 		}
 	}
 
-	// Don't try to clean up model span here - let AfterAgent handle all cleanup
-	// This ensures all tools in a sequence can use the same parent context
-
-	// Don't modify the result
 	return nil, nil
 }
 

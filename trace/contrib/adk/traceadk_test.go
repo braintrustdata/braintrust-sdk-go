@@ -242,3 +242,65 @@ func TestTracingCallbacks(t *testing.T) {
 	assert.True(t, toolParentID == modelSpan.Stub.SpanContext.SpanID() || toolParentID == agentSpan.Stub.SpanContext.SpanID(),
 		"tool span should be child of model or agent span, got parent %v", toolParentID)
 }
+
+func TestCleanupJSON(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    interface{}
+		expected interface{}
+	}{
+		{
+			name: "map with empty values",
+			input: map[string]interface{}{
+				"name":        "test",
+				"empty_bool":  false,
+				"empty_int":   0,
+				"empty_str":   "",
+				"empty_map":   map[string]interface{}{},
+				"empty_slice": []interface{}{},
+				"nil_value":   nil,
+			},
+			expected: map[string]interface{}{
+				"name":       "test",
+				"empty_bool": false,
+				"empty_int":  0,
+			},
+		},
+		{
+			name: "nested map with empty values",
+			input: map[string]interface{}{
+				"user": map[string]interface{}{
+					"name":  "Alice",
+					"email": "",
+					"metadata": map[string]interface{}{
+						"tags": []interface{}{},
+					},
+				},
+				"count": 5,
+			},
+			expected: map[string]interface{}{
+				"user": map[string]interface{}{
+					"name": "Alice",
+				},
+				"count": 5,
+			},
+		},
+		{
+			name: "all empty values result in nil",
+			input: map[string]interface{}{
+				"empty1": "",
+				"empty2": nil,
+				"empty3": map[string]interface{}{},
+				"empty4": []interface{}{},
+			},
+			expected: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := cleanupJSON(tt.input)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}

@@ -4,6 +4,7 @@ package golden
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -558,7 +559,7 @@ type calculateArgs struct {
 	B         float64 `json:"b" jsonschema:"Second number"`
 }
 
-func calculate(_ tool.Context, args calculateArgs) (interface{}, error) {
+func calculate(_ tool.Context, args calculateArgs) (float64, error) {
 	switch args.Operation {
 	case "add":
 		return args.A + args.B, nil
@@ -568,11 +569,11 @@ func calculate(_ tool.Context, args calculateArgs) (interface{}, error) {
 		return args.A * args.B, nil
 	case "divide":
 		if args.B == 0 {
-			return "Error: Division by zero", nil
+			return 0, errors.New("division by zero")
 		}
 		return args.A / args.B, nil
 	default:
-		return "Invalid operation", nil
+		return 0, errors.New("invalid operation")
 	}
 }
 
