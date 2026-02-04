@@ -27,7 +27,6 @@ package adk
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"sync"
@@ -269,10 +268,13 @@ func (c *callbacksImpl) BeforeModel(ctx agent.CallbackContext, req *model.LLMReq
 
 	// Add input/prompt information
 	if len(req.Contents) > 0 {
-		// Serialize contents to JSON for the span
-		contentsJSON, err := json.Marshal(req.Contents)
-		if err == nil {
-			span.SetAttributes(attribute.String("gen_ai.prompt", string(contentsJSON)))
+		err := internal.SetJSONAttr(span, "gen_ai.prompt", req.Contents)
+		if err != nil {
+			c.cfg.logger.Debug("Failed to set gen_ai.prompt", "error", err)
+		}
+		err = internal.SetJSONAttr(span, "braintrust.input_json", convertLLMRequest(req))
+		if err != nil {
+			c.cfg.logger.Debug("Failed to set braintrust.input_json", "error", err)
 		}
 	}
 
@@ -303,11 +305,9 @@ func (c *callbacksImpl) AfterModel(ctx agent.CallbackContext, resp *model.LLMRes
 
 	if resp != nil {
 		// Record response content
-		if resp.Content != nil {
-			contentJSON, marshalErr := json.Marshal(resp.Content)
-			if marshalErr == nil {
-				span.SetAttributes(attribute.String("gen_ai.completion", string(contentJSON)))
-			}
+		err = internal.SetJSONAttr(span, "braintrust.output_json", convertLLMResponse(resp))
+		if err != nil {
+			c.cfg.logger.Debug("Failed to set braintrust.output_json", "error", err)
 		}
 
 		// Record token usage if available
@@ -358,7 +358,6 @@ func (c *callbacksImpl) BeforeTool(ctx tool.Context, t tool.Tool, args map[strin
 		span.SetAttributes(attribute.String("tool.description", desc))
 	}
 
-	// Mark this span as a tool span for Braintrust UI
 	spanAttrs := map[string]string{
 		"type": "tool",
 	}
@@ -368,13 +367,13 @@ func (c *callbacksImpl) BeforeTool(ctx tool.Context, t tool.Tool, args map[strin
 
 	// Add tool arguments
 	if len(args) > 0 {
-		argsJSON, err := json.Marshal(args)
-		if err == nil {
-			span.SetAttributes(attribute.String("tool.input", string(argsJSON)))
-			// Also set as braintrust.input_json for consistency with other integrations
-			if err := internal.SetJSONAttr(span, "braintrust.input_json", args); err != nil {
-				span.RecordError(err)
-			}
+		err := internal.SetJSONAttr(span, "tool.input", args)
+		if err != nil {
+			c.cfg.logger.Debug("Failed to set tool.input", "error", err)
+		}
+		err = internal.SetJSONAttr(span, "braintrust.input_json", args)
+		if err != nil {
+			c.cfg.logger.Debug("Failed to set braintrust.input_json", "error", err)
 		}
 	}
 
@@ -404,15 +403,13 @@ func (c *callbacksImpl) AfterTool(ctx tool.Context, t tool.Tool, args, result ma
 	}
 
 	if result != nil {
-		// Record tool result
-		resultJSON, marshalErr := json.Marshal(result)
-		if marshalErr == nil {
-			// Keep tool.output for backward compatibility
-			span.SetAttributes(attribute.String("tool.output", string(resultJSON)))
-			// Also set as braintrust.output_json for consistency with other integrations
-			if err := internal.SetJSONAttr(span, "braintrust.output_json", result); err != nil {
-				span.RecordError(err)
-			}
+		err := internal.SetJSONAttr(span, "tool.output", result)
+		if err != nil {
+			c.cfg.logger.Debug("Failed to set tool.output", "error", err)
+		}
+		err = internal.SetJSONAttr(span, "braintrust.output_json", result)
+		if err != nil {
+			c.cfg.logger.Debug("Failed to set braintrust.output_json", "error", err)
 		}
 	}
 
