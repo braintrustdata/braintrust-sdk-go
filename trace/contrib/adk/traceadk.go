@@ -331,11 +331,7 @@ func (c *callbacksImpl) BeforeModel(ctx agent.CallbackContext, req *model.LLMReq
 		span.SetAttributes(attribute.String("gen_ai.request.model", req.Model))
 	}
 	if len(req.Contents) > 0 {
-		err := internal.SetJSONAttr(span, "gen_ai.prompt", req.Contents)
-		if err != nil {
-			c.logger.Debug("Failed to set gen_ai.prompt", "error", err)
-		}
-		err = internal.SetJSONAttr(span, "braintrust.input_json", cleanupJSON(c.logger, req))
+		err := internal.SetJSONAttr(span, "braintrust.input_json", cleanupJSON(c.logger, req))
 		if err != nil {
 			c.logger.Debug("Failed to set braintrust.input_json", "error", err)
 		}
