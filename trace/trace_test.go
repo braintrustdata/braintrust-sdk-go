@@ -353,7 +353,7 @@ func TestWithFilterAISpans_Option(t *testing.T) {
 	assert.NotContains(spanNames, "http.request")
 }
 
-func TestAllowNativeAdkTraces_FiltersADKSpans(t *testing.T) {
+func TestDropAdkTraces_True(t *testing.T) {
 	assert := assert.New(t)
 
 	tp := sdktrace.NewTracerProvider()
@@ -361,10 +361,10 @@ func TestAllowNativeAdkTraces_FiltersADKSpans(t *testing.T) {
 
 	session := newTestSession()
 	cfg := Config{
-		DefaultProjectID:     "adk-filter-test",
-		AllowNativeAdkTraces: false, // default: drop gcp.vertex.agent spans
-		Exporter:             exporter,
-		Logger:               logger.Discard(),
+		DefaultProjectID: "adk-filter-test",
+		DropAdkTraces:    true, // default: drop gcp.vertex.agent spans
+		Exporter:         exporter,
+		Logger:           logger.Discard(),
 	}
 
 	err := AddSpanProcessor(tp, session, cfg)
@@ -388,9 +388,24 @@ func TestAllowNativeAdkTraces_FiltersADKSpans(t *testing.T) {
 	assert.Len(spans, 1)
 	assert.Equal("agent_run", spans[0].Name)
 	assert.Equal("braintrust", spans[0].InstrumentationScope.Name)
+
+	// Root spans are also filtered
+	_, adkSpan = adkTracer.Start(context.Background(), "execute_tool (merged)", trace.WithAttributes(
+		attribute.String("gen_ai.operation.name", "execute_tool"),
+		attribute.String("gen_ai.tool.name", "(merged tools)"),
+	))
+	adkSpan.End()
+
+	// No new spans
+	_ = tp.ForceFlush(context.Background())
+	spans = exporter.GetSpans()
+
+	assert.Len(spans, 1)
+	assert.Equal("agent_run", spans[0].Name)
+	assert.Equal("braintrust", spans[0].InstrumentationScope.Name)
 }
 
-func TestAllowNativeAdkTraces_AllowsWhenTrue(t *testing.T) {
+func TestDropAdkTraces_False(t *testing.T) {
 	assert := assert.New(t)
 
 	tp := sdktrace.NewTracerProvider()
@@ -398,10 +413,10 @@ func TestAllowNativeAdkTraces_AllowsWhenTrue(t *testing.T) {
 
 	session := newTestSession()
 	cfg := Config{
-		DefaultProjectID:     "adk-allow-test",
-		AllowNativeAdkTraces: true,
-		Exporter:             exporter,
-		Logger:               logger.Discard(),
+		DefaultProjectID: "adk-allow-test",
+		DropAdkTraces:    false,
+		Exporter:         exporter,
+		Logger:           logger.Discard(),
 	}
 
 	err := AddSpanProcessor(tp, session, cfg)
@@ -425,41 +440,6 @@ func TestAllowNativeAdkTraces_AllowsWhenTrue(t *testing.T) {
 	}
 	assert.Contains(scopeNames, "gcp.vertex.agent")
 	assert.Contains(scopeNames, "braintrust")
-}
-
-func TestAdkSpanFilterFunc_DropsRootSpans(t *testing.T) {
-	assert := assert.New(t)
-
-	tp := sdktrace.NewTracerProvider()
-	exporter := tracetest.NewInMemoryExporter()
-
-	session := newTestSession()
-	cfg := Config{
-		DefaultProjectID:     "adk-merged-test",
-		AllowNativeAdkTraces: false,
-		Exporter:             exporter,
-		Logger:               logger.Discard(),
-	}
-
-	err := AddSpanProcessor(tp, session, cfg)
-	assert.NoError(err)
-
-	// ADK's TraceMergedToolCalls creates spans with these attributes (any scope).
-	// They should be dropped so "execute_tool (merged)" does not appear in Braintrust.
-	tracer := tp.Tracer("gcp.vertex.agent")
-	_, mergedSpan := tracer.Start(context.Background(), "execute_tool (merged)", trace.WithAttributes(
-		attribute.String("gen_ai.operation.name", "execute_tool"),
-		attribute.String("gen_ai.tool.name", "(merged tools)"),
-	))
-	mergedSpan.End()
-
-	_, keepSpan := tracer.Start(context.Background(), "agent_run")
-	keepSpan.End()
-
-	_ = tp.ForceFlush(context.Background())
-	spans := exporter.GetSpans()
-
-	assert.Len(spans, 0, "execute_tool (merged) span should be dropped")
 }
 
 func TestWithFilterAISpans_CombinedWithCustomFilters(t *testing.T) {

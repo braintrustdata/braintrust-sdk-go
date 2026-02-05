@@ -5,6 +5,7 @@
 //   - Anthropic
 //   - sashabaranov/go-openai
 //   - LangChainGo (OpenAI provider)
+//   - ADK (with Gemini model)
 //
 // Note: NO manual middleware or callbacks are added to any client.
 // When built with `orchestrion go build`, tracing middleware is injected at compile time.
@@ -14,6 +15,7 @@
 //	export BRAINTRUST_API_KEY="your-api-key"
 //	export OPENAI_API_KEY="your-openai-key"
 //	export ANTHROPIC_API_KEY="your-anthropic-key"
+//	export GOOGLE_API_KEY="your-google-key"
 //	orchestrion go run .
 package main
 
@@ -30,13 +32,19 @@ import (
 	langchainopenai "github.com/tmc/langchaingo/llms/openai"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/trace"
+	"google.golang.org/adk/agent"
+	"google.golang.org/adk/agent/llmagent"
+	"google.golang.org/adk/model/gemini"
+	"google.golang.org/adk/runner"
+	"google.golang.org/adk/session"
+	"google.golang.org/genai"
 
 	"github.com/braintrustdata/braintrust-sdk-go"
 )
 
 func main() {
 	// Validate environment
-	for _, key := range []string{"BRAINTRUST_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY"} {
+	for _, key := range []string{"BRAINTRUST_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GOOGLE_API_KEY"} {
 		if os.Getenv(key) == "" {
 			log.Fatalf("Missing required environment variable: %s", key)
 		}
@@ -77,6 +85,10 @@ func main() {
 	// 4. LangChainGo - NO callback added
 	fmt.Println("4. LangChainGo (OpenAI)...")
 	runLangChainGo(ctx)
+
+	// 5. ADK - NO callbacks added
+	fmt.Println("5. ADK (with Gemini model)...")
+	runADK(ctx)
 
 	fmt.Println("\n=== All providers tested ===")
 	fmt.Println("If tracing worked, you should see LLM spans for each provider in Braintrust.")
@@ -152,4 +164,62 @@ func runLangChainGo(ctx context.Context) {
 		return
 	}
 	fmt.Printf("   Response: %s\n", resp.Choices[0].Content)
+}
+
+func runADK(ctx context.Context) {
+	// NO callbacks - Orchestrion injects them
+	model, err := gemini.NewModel(ctx, "gemini-2.5-flash", &genai.ClientConfig{
+		APIKey: os.Getenv("GOOGLE_API_KEY"),
+	})
+	if err != nil {
+		log.Printf("   ADK error: %v", err)
+		return
+	}
+
+	assistant, err := llmagent.New(llmagent.Config{
+		Name:        "adk_agent",
+		Model:       model,
+		Instruction: "You are a helpful assistant.",
+	})
+	if err != nil {
+		log.Printf("   ADK error: %v", err)
+		return
+	}
+
+	// Create session service and initialize the session
+	svc := session.InMemoryService()
+	_, err = svc.Create(ctx, &session.CreateRequest{
+		AppName:   "adk-example",
+		UserID:    "user",
+		SessionID: "session",
+	})
+	if err != nil {
+		log.Printf("   ADK error: %v", err)
+		return
+	}
+
+	runner, err := runner.New(runner.Config{
+		AppName:        "adk-example",
+		Agent:          assistant,
+		SessionService: svc,
+	})
+	if err != nil {
+		log.Printf("   ADK error: %v", err)
+		return
+	}
+
+	msg := genai.NewContentFromText("Say 'Hello from ADK' in exactly those words.", genai.RoleUser)
+	for ev, err := range runner.Run(ctx, "user", "session", msg, agent.RunConfig{}) {
+		if err != nil {
+			log.Printf("   ADK error: %v", err)
+			return
+		}
+		if ev.Content != nil {
+			for _, p := range ev.Content.Parts {
+				if p.Text != "" {
+					fmt.Printf("   Response: %s\n", p.Text)
+				}
+			}
+		}
+	}
 }

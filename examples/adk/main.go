@@ -75,13 +75,15 @@ func setupAgent(ctx context.Context, bt *braintrust.Client) agent.Agent {
 
 	// Create LLMAgent with MCP tool set, time tool, and tracing callbacks
 	btCallbacks := traceadk.NewCallbacks()
-	a, err := llmagent.New(btCallbacks.LLMAgentConfig(llmagent.Config{
+	cfg := llmagent.Config{
 		Name:        "helper_agent",
 		Model:       model,
 		Description: "Helper agent.",
 		Instruction: "You are a helpful assistant that helps users with various tasks. You can tell the current time in any timezone using the get_time tool.",
 		Tools:       []tool.Tool{timeTool},
-	}))
+	}
+	traceadk.AddLLMAgentCallbacks(&cfg, btCallbacks)
+	a, err := llmagent.New(cfg)
 	if err != nil {
 		log.Fatalf("Failed to create agent: %v", err)
 	}

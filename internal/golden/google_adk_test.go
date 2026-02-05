@@ -90,7 +90,8 @@ func newAgentAndRunner(ctx context.Context, t *testing.T, sessionID string, cfg 
 	cfg.Model = llm
 
 	cb := traceadk.NewCallbacks()
-	a, err := llmagent.New(cb.LLMAgentConfig(cfg))
+	traceadk.AddLLMAgentCallbacks(&cfg, cb)
+	a, err := llmagent.New(cfg)
 	if err != nil {
 		t.Fatalf("llmagent.New: %v", err)
 	}

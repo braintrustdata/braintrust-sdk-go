@@ -9,6 +9,66 @@ meta:
   name: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/all
   description: All Braintrust tracing integrations for LLM providers
 aspects:
+  - id: adk-llmagent-config-struct
+    join-point:
+      struct-literal:
+        type: google.golang.org/adk/agent/llmagent.Config
+        match: value-only
+    advice:
+      - wrap-expression:
+          imports:
+            traceadk: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk
+            llmagent: google.golang.org/adk/agent/llmagent
+          template: |-
+            func(cfg llmagent.Config) llmagent.Config {
+              traceadk.AddLLMAgentCallbacks(&cfg)
+              return cfg
+            }({{ .AST }})
+  - id: adk-llmagent-config-pointer
+    join-point:
+      struct-literal:
+        type: google.golang.org/adk/agent/llmagent.Config
+        match: pointer-only
+    advice:
+      - wrap-expression:
+          imports:
+            traceadk: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk
+            llmagent: google.golang.org/adk/agent/llmagent
+          template: |-
+            func(cfg *llmagent.Config) *llmagent.Config {
+              traceadk.AddLLMAgentCallbacks(cfg)
+              return cfg
+            }({{ .AST }})
+  - id: adk-agent-config-struct
+    join-point:
+      struct-literal:
+        type: google.golang.org/adk/agent/agent.Config
+        match: value-only
+    advice:
+      - wrap-expression:
+          imports:
+            traceadk: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk
+            agent: google.golang.org/adk/agent
+          template: |-
+            func(cfg agent.Config) agent.Config {
+              traceadk.AddAgentCallbacks(&cfg)
+              return cfg
+            }({{ .AST }})
+  - id: adk-agent-config-pointer
+    join-point:
+      struct-literal:
+        type: google.golang.org/adk/agent/agent.Config
+        match: pointer-only
+    advice:
+      - wrap-expression:
+          imports:
+            traceadk: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk
+            agent: google.golang.org/adk/agent
+          template: |-
+            func(cfg *agent.Config) *agent.Config {
+              traceadk.AddAgentCallbacks(cfg)
+              return cfg
+            }({{ .AST }})
   - id: anthropic-newclient-middleware
     join-point:
       function-call: github.com/anthropics/anthropic-sdk-go.NewClient

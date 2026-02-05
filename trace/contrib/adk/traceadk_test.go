@@ -2,247 +2,26 @@ package adk
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/adk/agent"
-	"google.golang.org/adk/memory"
-	"google.golang.org/adk/model"
+	"google.golang.org/adk/agent/llmagent"
+	"google.golang.org/adk/model/gemini"
+	"google.golang.org/adk/runner"
 	"google.golang.org/adk/session"
 	"google.golang.org/adk/tool"
-	"google.golang.org/adk/tool/toolconfirmation"
+	"google.golang.org/adk/tool/functiontool"
 	"google.golang.org/genai"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
-
-// mockCallbackContext implements the minimal agent.CallbackContext interface needed for testing
-type mockCallbackContext struct {
-	context.Context
-	agentName    string
-	appName      string
-	invocationID string
-	sessionID    string
-}
-
-func (m *mockCallbackContext) AgentName() string                    { return m.agentName }
-func (m *mockCallbackContext) AppName() string                      { return m.appName }
-func (m *mockCallbackContext) InvocationID() string                 { return m.invocationID }
-func (m *mockCallbackContext) SessionID() string                    { return m.sessionID }
-func (m *mockCallbackContext) Agent() agent.Agent                   { return nil }
-func (m *mockCallbackContext) Artifacts() agent.Artifacts           { return nil }
-func (m *mockCallbackContext) Memory() agent.Memory                 { return nil }
-func (m *mockCallbackContext) Session() session.Session             { return nil }
-func (m *mockCallbackContext) Branch() string                       { return "" }
-func (m *mockCallbackContext) UserContent() *genai.Content          { return nil }
-func (m *mockCallbackContext) UserID() string                       { return "test-user" }
-func (m *mockCallbackContext) ReadonlyState() session.ReadonlyState { return nil }
-func (m *mockCallbackContext) State() session.State                 { return nil }
-
-// mockToolContext implements the minimal tool.Context interface needed for testing
-type mockToolContext struct {
-	*mockCallbackContext
-	funcCallID string
-}
-
-func (m *mockToolContext) FunctionCallID() string         { return m.funcCallID }
-func (m *mockToolContext) Actions() *session.EventActions { return nil }
-func (m *mockToolContext) SearchMemory(context.Context, string) (*memory.SearchResponse, error) {
-	return nil, nil
-}
-func (m *mockToolContext) ToolConfirmation() *toolconfirmation.ToolConfirmation { return nil }
-func (m *mockToolContext) RequestConfirmation(string, any) error                { return nil }
-
-// mockTool implements the minimal tool.Tool interface needed for testing
-type mockTool struct {
-	name        string
-	description string
-}
-
-func (m *mockTool) Name() string        { return m.name }
-func (m *mockTool) Description() string { return m.description }
-func (m *mockTool) IsLongRunning() bool { return false }
-
-// TestTracingCallbacks tests the ADK tracing callbacks to verify they create
-// the expected spans with correct attributes and parent-child relationships.
-func TestTracingCallbacks(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	otel.SetTracerProvider(tp)
-
-	cb := NewCallbacks(WithTracerProvider(tp))
-	callbacks, ok := cb.(*callbacksImpl)
-	require.True(t, ok, "expected *callbacksImpl")
-
-	// Create mock contexts
-	sessionID := "test-session-123"
-	agentCtx := &mockCallbackContext{
-		Context:      context.Background(),
-		agentName:    "test_agent",
-		appName:      "test_app",
-		invocationID: "agent-inv-1",
-		sessionID:    sessionID,
-	}
-	toolCtx := &mockToolContext{
-		mockCallbackContext: &mockCallbackContext{
-			Context:      context.Background(),
-			agentName:    "test_agent",
-			appName:      "test_app",
-			invocationID: "tool-inv-1",
-			sessionID:    sessionID,
-		},
-		funcCallID: "func-call-123",
-	}
-
-	// Simulate an agent run with model and tool calls
-
-	// 1. BeforeAgent - creates agent span
-	_, err := callbacks.BeforeAgent(agentCtx)
-	require.NoError(t, err)
-
-	// 2. BeforeModel - creates model span as child of agent span
-	modelReq := &model.LLMRequest{
-		Model: "gemini-2.0-flash",
-		Contents: []*genai.Content{
-			{Parts: []*genai.Part{genai.NewPartFromText("Calculate 5 + 3")}},
-		},
-	}
-	_, err = callbacks.BeforeModel(agentCtx, modelReq)
-	require.NoError(t, err)
-
-	// 3. BeforeTool - creates tool span as child of model span
-	testTool := &mockTool{
-		name:        "calculator",
-		description: "Performs calculations",
-	}
-	// Ensure tool package is recognized as used
-	var _ tool.Tool = testTool
-	var _ tool.Context = toolCtx
-
-	toolArgs := map[string]any{
-		"operation": "add",
-		"a":         float64(5),
-		"b":         float64(3),
-	}
-	_, err = callbacks.BeforeTool(toolCtx, testTool, toolArgs)
-	require.NoError(t, err)
-
-	// 4. AfterTool - completes tool span
-	toolResult := map[string]any{
-		"result": float64(8),
-	}
-	_, err = callbacks.AfterTool(toolCtx, testTool, toolArgs, toolResult, nil)
-	require.NoError(t, err)
-
-	// 5. AfterModel - completes model span
-	modelResp := &model.LLMResponse{
-		Content: &genai.Content{
-			Parts: []*genai.Part{genai.NewPartFromText("The result is 8")},
-		},
-		UsageMetadata: &genai.GenerateContentResponseUsageMetadata{
-			PromptTokenCount:     10,
-			CandidatesTokenCount: 5,
-			TotalTokenCount:      15,
-		},
-		FinishReason: "STOP",
-	}
-	_, err = callbacks.AfterModel(agentCtx, modelResp, nil)
-	require.NoError(t, err)
-
-	// 6. AfterAgent - completes agent span and cleans up
-	_, err = callbacks.AfterAgent(agentCtx)
-	require.NoError(t, err)
-
-	// Verify spans were created correctly
-	spans := exporter.Flush()
-	require.Len(t, spans, 3, "Expected 3 spans: agent_run, call_llm, and tool")
-
-	// Find each span type
-	var agentSpan, modelSpan, toolSpan *oteltest.Span
-	for i := range spans {
-		s := &spans[i]
-		name := s.Name()
-		switch name {
-		case "agent_run [test_agent]":
-			agentSpan = s
-		case "call_llm":
-			modelSpan = s
-		case "tool [calculator]":
-			toolSpan = s
-		}
-	}
-
-	// Verify all spans were found
-	require.NotNil(t, agentSpan, "agent_run span not found")
-	require.NotNil(t, modelSpan, "call_llm span not found")
-	require.NotNil(t, toolSpan, "tool span not found")
-
-	// Verify agent span (status may be Ok or Unset when not explicitly set)
-	assert.True(t, agentSpan.Status().Code == codes.Ok || agentSpan.Status().Code == codes.Unset)
-	// InMemoryExporter may record SpanKind as Unspecified in some SDK versions
-	assert.True(t, agentSpan.Stub.SpanKind == trace.SpanKindInternal || agentSpan.Stub.SpanKind == trace.SpanKindUnspecified,
-		"agent span kind should be Internal or Unspecified, got %v", agentSpan.Stub.SpanKind)
-	agentSpan.AssertAttrEquals("adk.agent.name", "test_agent")
-	agentSpan.AssertAttrEquals("adk.agent.invocation_id", "agent-inv-1")
-	agentSpan.AssertAttrEquals("adk.agent.session_id", sessionID)
-	agentSpan.AssertAttrEquals("adk.agent.branch", "")
-
-	// Verify model span (status may be Ok or Unset when not explicitly set)
-	assert.True(t, modelSpan.Status().Code == codes.Ok || modelSpan.Status().Code == codes.Unset)
-	// InMemoryExporter may record SpanKind as Unspecified in some SDK versions
-	assert.True(t, modelSpan.Stub.SpanKind == trace.SpanKindClient || modelSpan.Stub.SpanKind == trace.SpanKindUnspecified,
-		"model span kind should be Client or Unspecified, got %v", modelSpan.Stub.SpanKind)
-	modelSpan.AssertAttrEquals("gen_ai.request.model", "gemini-2.0-flash")
-	assert.True(t, modelSpan.HasAttr("gen_ai.prompt"))
-	modelSpan.AssertAttrEquals("gen_ai.usage.prompt_tokens", int64(10))
-	modelSpan.AssertAttrEquals("gen_ai.usage.completion_tokens", int64(5))
-	modelSpan.AssertAttrEquals("gen_ai.usage.total_tokens", int64(15))
-	modelSpan.AssertAttrEquals("gen_ai.finish_reason", "STOP")
-
-	// Verify tool span (status may be Ok or Unset when not explicitly set)
-	assert.True(t, toolSpan.Status().Code == codes.Ok || toolSpan.Status().Code == codes.Unset)
-	// InMemoryExporter may record SpanKind as Unspecified in some SDK versions
-	assert.True(t, toolSpan.Stub.SpanKind == trace.SpanKindInternal || toolSpan.Stub.SpanKind == trace.SpanKindUnspecified,
-		"tool span kind should be Internal or Unspecified, got %v", toolSpan.Stub.SpanKind)
-	toolSpan.AssertAttrEquals("tool.name", "calculator")
-	toolSpan.AssertAttrEquals("tool.description", "Performs calculations")
-	assert.True(t, toolSpan.HasAttr("tool.input"))
-	assert.True(t, toolSpan.HasAttr("tool.output"))
-
-	// Verify braintrust-specific attributes on tool span
-	assert.True(t, toolSpan.HasAttr("braintrust.span_attributes"))
-	assert.True(t, toolSpan.HasAttr("braintrust.input_json"))
-	assert.True(t, toolSpan.HasAttr("braintrust.output_json"))
-
-	// Verify input/output values
-	input := toolSpan.Input()
-	require.NotNil(t, input)
-	inputMap, ok := input.(map[string]any)
-	require.True(t, ok)
-	assert.Equal(t, "add", inputMap["operation"])
-	assert.Equal(t, float64(5), inputMap["a"])
-	assert.Equal(t, float64(3), inputMap["b"])
-
-	output := toolSpan.Output()
-	require.NotNil(t, output)
-	outputMap, ok := output.(map[string]any)
-	require.True(t, ok)
-	assert.Equal(t, float64(8), outputMap["result"])
-
-	// Verify span parent-child relationships
-	// Model span should be a child of agent span
-	assert.Equal(t, agentSpan.Stub.SpanContext.SpanID(), modelSpan.Stub.Parent.SpanID(),
-		"model span should be child of agent span")
-
-	// Tool span should be a child of model span (or agent span if model lookup fails in test env)
-	toolParentID := toolSpan.Stub.Parent.SpanID()
-	assert.True(t, toolParentID == modelSpan.Stub.SpanContext.SpanID() || toolParentID == agentSpan.Stub.SpanContext.SpanID(),
-		"tool span should be child of model or agent span, got parent %v", toolParentID)
-}
 
 func TestCleanupJSON(t *testing.T) {
 	tests := []struct {
@@ -255,7 +34,7 @@ func TestCleanupJSON(t *testing.T) {
 			input: map[string]interface{}{
 				"name":        "test",
 				"empty_bool":  false,
-				"empty_int":   0,
+				"empty_int":   float64(0),
 				"empty_str":   "",
 				"empty_map":   map[string]interface{}{},
 				"empty_slice": []interface{}{},
@@ -264,7 +43,7 @@ func TestCleanupJSON(t *testing.T) {
 			expected: map[string]interface{}{
 				"name":       "test",
 				"empty_bool": false,
-				"empty_int":  0,
+				"empty_int":  float64(0),
 			},
 		},
 		{
@@ -277,13 +56,13 @@ func TestCleanupJSON(t *testing.T) {
 						"tags": []interface{}{},
 					},
 				},
-				"count": 5,
+				"count": float64(5),
 			},
 			expected: map[string]interface{}{
 				"user": map[string]interface{}{
 					"name": "Alice",
 				},
-				"count": 5,
+				"count": float64(5),
 			},
 		},
 		{
@@ -304,4 +83,194 @@ func TestCleanupJSON(t *testing.T) {
 			assert.Equal(t, tt.expected, result)
 		})
 	}
+}
+
+// calculatorArgs defines the input arguments for the calculator tool
+type calculatorArgs struct {
+	Operation string  `json:"operation" jsonschema:"The operation to perform: add, subtract, multiply, or divide"`
+	A         float64 `json:"a" jsonschema:"The first number"`
+	B         float64 `json:"b" jsonschema:"The second number"`
+}
+
+// calculator is a simple calculator function for testing
+func calculator(ctx tool.Context, args calculatorArgs) (float64, error) {
+	switch args.Operation {
+	case "add":
+		return args.A + args.B, nil
+	case "subtract":
+		return args.A - args.B, nil
+	case "multiply":
+		return args.A * args.B, nil
+	case "divide":
+		if args.B == 0 {
+			return 0, assert.AnError
+		}
+		return args.A / args.B, nil
+	default:
+		return 0, assert.AnError
+	}
+}
+
+// TestAgentIntegration tests the ADK tracing with a real agent using VCR
+func TestAgentIntegration(t *testing.T) {
+	ctx := context.Background()
+
+	// Set up test tracer and VCR
+	tp, exporter := oteltest.Setup(t)
+	otel.SetTracerProvider(tp)
+
+	mode := vcr.GetVCRMode()
+
+	// Get API key or use dummy for replay mode
+	apiKey := os.Getenv("GOOGLE_API_KEY")
+	if mode != vcr.ModeReplay && apiKey == "" {
+		t.Fatal("GOOGLE_API_KEY not set (required in record/off mode)")
+	}
+	if apiKey == "" {
+		apiKey = "dummy-google-key-for-replay"
+	}
+
+	// Create HTTP client with VCR
+	httpClient := vcr.NewHTTPClient(t)
+
+	// Create Gemini model with VCR
+	// Note: Tracing is handled by ADK callbacks, not by wrapping the HTTP client
+	model, err := gemini.NewModel(ctx, "gemini-2.0-flash-exp", &genai.ClientConfig{
+		HTTPClient: httpClient,
+		APIKey:     apiKey,
+		Backend:    genai.BackendGeminiAPI,
+	})
+	require.NoError(t, err)
+
+	// Create calculator tool
+	calcTool, err := functiontool.New(
+		functiontool.Config{
+			Name:        "calculator",
+			Description: "Performs basic arithmetic operations (add, subtract, multiply, divide)",
+		},
+		calculator,
+	)
+	require.NoError(t, err)
+
+	// Create callbacks with tracing
+	callbacks := NewCallbacks(WithTracerProvider(tp))
+
+	// Create LLM agent with tool
+	a, err := llmagent.New(callbacks.LLMAgentConfig(llmagent.Config{
+		Name:        "math_agent",
+		Model:       model,
+		Description: "A helpful math assistant",
+		Instruction: "You are a helpful math assistant. Use the calculator tool to perform calculations.",
+		Tools:       []tool.Tool{calcTool},
+		GenerateContentConfig: &genai.GenerateContentConfig{
+			MaxOutputTokens: 500,
+		},
+	}))
+	require.NoError(t, err)
+
+	// Create in-memory session service
+	sessionService := session.InMemoryService()
+	sessionID := "test-session-integration"
+	userID := "test-user"
+	appName := "test-app"
+
+	_, err = sessionService.Create(ctx, &session.CreateRequest{
+		AppName:   appName,
+		UserID:    userID,
+		SessionID: sessionID,
+	})
+	require.NoError(t, err)
+
+	// Create runner
+	r, err := runner.New(runner.Config{
+		AppName:        appName,
+		Agent:          a,
+		SessionService: sessionService,
+	})
+	require.NoError(t, err)
+
+	// Run the agent with a calculation request
+	userMsg := genai.NewContentFromText("What is 127 multiplied by 49?", genai.RoleUser)
+
+	var finalResponse *session.Event
+	for ev, runErr := range r.Run(ctx, userID, sessionID, userMsg, agent.RunConfig{}) {
+		require.NoError(t, runErr)
+		if ev.IsFinalResponse() {
+			finalResponse = ev
+		}
+	}
+
+	// Verify we got a response
+	require.NotNil(t, finalResponse)
+	require.NotNil(t, finalResponse.Content)
+
+	// Verify spans were created
+	spans := exporter.Flush()
+	require.NotEmpty(t, spans, "Expected spans to be created")
+
+	// Find agent, model, and tool spans
+	// Note: There may be multiple call_llm spans, we want the one that's a child of the agent
+	var agentSpan, modelSpan, toolSpan *oteltest.Span
+	for i := range spans {
+		s := &spans[i]
+		name := s.Name()
+		if name == "agent_run [math_agent]" {
+			agentSpan = s
+		} else if name == "call_llm" {
+			// capture only the first one, which makes the tool call
+			if modelSpan == nil {
+				modelSpan = s
+			}
+		} else if name == "tool [calculator]" {
+			toolSpan = s
+		}
+	}
+
+	// Verify agent span exists
+	require.NotNil(t, agentSpan, "agent_run span not found")
+	assert.True(t, agentSpan.Status().Code == codes.Ok || agentSpan.Status().Code == codes.Unset)
+	agentSpan.AssertAttrEquals("adk.agent.name", "math_agent")
+
+	// Verify model span exists
+	require.NotNil(t, modelSpan, "call_llm span not found")
+	assert.True(t, modelSpan.Status().Code == codes.Ok || modelSpan.Status().Code == codes.Unset)
+	modelSpan.AssertAttrEquals("gen_ai.request.model", "gemini-2.0-flash-exp")
+
+	// Verify tool span exists
+	require.NotNil(t, toolSpan, "tool span not found")
+	assert.True(t, toolSpan.Status().Code == codes.Ok || toolSpan.Status().Code == codes.Unset)
+	toolSpan.AssertAttrEquals("tool.name", "calculator")
+	assert.True(t, toolSpan.HasAttr("tool.input"))
+	assert.True(t, toolSpan.HasAttr("tool.output"))
+
+	// Verify the tool was called with correct operation
+	input := toolSpan.Input()
+	require.NotNil(t, input)
+	inputMap, ok := input.(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "multiply", inputMap["operation"])
+	assert.Equal(t, float64(127), inputMap["a"])
+	assert.Equal(t, float64(49), inputMap["b"])
+
+	// Verify the tool output - it could be either the raw value or wrapped in a map
+	output := toolSpan.Output()
+	require.NotNil(t, output)
+	// The output could be float64 directly or wrapped in a map
+	switch v := output.(type) {
+	case float64:
+		assert.Equal(t, float64(6223), v)
+	case map[string]any:
+		assert.Equal(t, float64(6223), v["result"])
+	default:
+		t.Fatalf("unexpected output type: %T", output)
+	}
+
+	// Verify parent-child relationships
+	// Model span should be a child of agent span
+	assert.Equal(t, agentSpan.Stub.SpanContext.SpanID(), modelSpan.Stub.Parent.SpanID(),
+		"model span should be child of agent span")
+
+	// Tool span should be a child of model span
+	assert.Equal(t, modelSpan.Stub.SpanContext.SpanID(), toolSpan.Stub.Parent.SpanID(),
+		"tool span should be child of model span")
 }

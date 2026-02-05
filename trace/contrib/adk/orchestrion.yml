@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://datadoghq.dev/orchestrion/schema.json
+meta:
+  name: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk
+  description: Auto-instrumentation for Go ADK library with Braintrust tracing
+
+aspects:
+  - id: adk-llmagent-config-struct
+    join-point:
+      struct-literal:
+        type: google.golang.org/adk/agent/llmagent.Config
+        match: value-only
+    advice:
+      - wrap-expression:
+          imports:
+            traceadk: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk
+            llmagent: google.golang.org/adk/agent/llmagent
+          template: |-
+            func(cfg llmagent.Config) llmagent.Config {
+              traceadk.AddLLMAgentCallbacks(&cfg)
+              return cfg
+            }({{ .AST }})
+  - id: adk-llmagent-config-pointer
+    join-point:
+      struct-literal:
+        type: google.golang.org/adk/agent/llmagent.Config
+        match: pointer-only
+    advice:
+      - wrap-expression:
+          imports:
+            traceadk: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk
+            llmagent: google.golang.org/adk/agent/llmagent
+          template: |-
+            func(cfg *llmagent.Config) *llmagent.Config {
+              traceadk.AddLLMAgentCallbacks(cfg)
+              return cfg
+            }({{ .AST }})
+  - id: adk-agent-config-struct
+    join-point:
+      struct-literal:
+        type: google.golang.org/adk/agent/agent.Config
+        match: value-only
+    advice:
+      - wrap-expression:
+          imports:
+            traceadk: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk
+            agent: google.golang.org/adk/agent
+          template: |-
+            func(cfg agent.Config) agent.Config {
+              traceadk.AddAgentCallbacks(&cfg)
+              return cfg
+            }({{ .AST }})
+  - id: adk-agent-config-pointer
+    join-point:
+      struct-literal:
+        type: google.golang.org/adk/agent/agent.Config
+        match: pointer-only
+    advice:
+      - wrap-expression:
+          imports:
+            traceadk: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk
+            agent: google.golang.org/adk/agent
+          template: |-
+            func(cfg *agent.Config) *agent.Config {
+              traceadk.AddAgentCallbacks(cfg)
+              return cfg
+            }({{ .AST }})

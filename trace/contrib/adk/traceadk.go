@@ -46,6 +46,8 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/trace/internal"
 )
 
+var globalCallbacks Callbacks = NewCallbacks()
+
 // cleanupJSON recursively removes keys with empty values from JSON structures.
 // Empty values include: nil, empty strings, empty slices, and empty maps.
 // We do this because the ADK types do not always have omitempty annotations.
@@ -104,62 +106,47 @@ func isEmpty(v interface{}) bool {
 	}
 }
 
-// config holds configuration for the ADK tracing callbacks
-type config struct {
-	tracerProvider trace.TracerProvider
-	logger         logger.Logger
-}
-
 // Option configures the ADK tracing callbacks
-type Option func(*config)
+type Option func(*callbacksImpl)
 
 // WithTracerProvider sets a custom TracerProvider for the callbacks.
 // If not provided, the global otel.GetTracerProvider() is used.
 func WithTracerProvider(tp trace.TracerProvider) Option {
-	return func(c *config) {
-		c.tracerProvider = tp
+	return func(callbacks *callbacksImpl) {
+		callbacks.tracer = tp.Tracer("braintrust")
 	}
 }
 
 // WithLogger sets a custom logger for the callbacks.
 // If not provided, logging is disabled.
 func WithLogger(log logger.Logger) Option {
-	return func(c *config) {
-		if log == nil {
-			c.logger = logger.Discard()
-		} else {
-			c.logger = log
+	return func(callbacks *callbacksImpl) {
+		if log != nil {
+			callbacks.logger = log
 		}
 	}
 }
 
-// tracer returns the configured tracer
-func (c *config) tracer() trace.Tracer {
-	tp := c.tracerProvider
-	if tp == nil {
-		tp = otel.GetTracerProvider()
-	}
-	return tp.Tracer("braintrust")
-}
-
 // Callbacks provides OpenTelemetry tracing callbacks for ADK agents.
-// It offers helper methods to wrap agent configurations with tracing.
 type Callbacks interface {
-	// Helpers to wrap different kinds of configs
-	AgentConfig(agent.Config) agent.Config
-	LLMAgentConfig(llmagent.Config) llmagent.Config
+	BeforeAgent(ctx agent.CallbackContext) (*genai.Content, error)
+	AfterAgent(ctx agent.CallbackContext) (*genai.Content, error)
+	BeforeModel(ctx agent.CallbackContext, req *model.LLMRequest) (*model.LLMResponse, error)
+	AfterModel(ctx agent.CallbackContext, resp *model.LLMResponse, err error) (*model.LLMResponse, error)
+	BeforeTool(ctx tool.Context, t tool.Tool, args map[string]any) (map[string]any, error)
+	AfterTool(ctx tool.Context, t tool.Tool, args, result map[string]any, err error) (map[string]any, error)
 }
 
 // Callbacks provides OpenTelemetry tracing callbacks for ADK agents.
 type callbacksImpl struct {
-	cfg    *config
+	logger logger.Logger
 	tracer trace.Tracer
 
 	// spans stores active spans keyed by session ID and span type
 	// Note: We use SessionID instead of InvocationID because ADK uses different
 	// invocation IDs for agent vs model callbacks
-	spans     map[string]map[string]trace.Span
-	spansLock sync.Mutex
+	spans map[string]map[string]trace.Span
+	lock  sync.Mutex
 }
 
 // NewCallbacks creates a new set of tracing callbacks for ADK agents.
@@ -169,18 +156,15 @@ type callbacksImpl struct {
 //
 //	callbacks := adk.NewCallbacks()
 func NewCallbacks(opts ...Option) Callbacks {
-	cfg := &config{
+	cb := &callbacksImpl{
 		logger: logger.Discard(),
-	}
-	for _, opt := range opts {
-		opt(cfg)
-	}
-
-	return &callbacksImpl{
-		cfg:    cfg,
-		tracer: cfg.tracer(),
+		tracer: otel.GetTracerProvider().Tracer("braintrust"),
 		spans:  make(map[string]map[string]trace.Span),
 	}
+	for _, opt := range opts {
+		opt(cb)
+	}
+	return cb
 }
 
 func setSpanAttributes(span trace.Span, ctx agent.CallbackContext) {
@@ -205,8 +189,8 @@ func getToolSpanKey(ctx tool.Context) string {
 }
 
 func (c *callbacksImpl) storeSpan(sessionID string, spanKey string, span trace.Span) {
-	c.spansLock.Lock()
-	defer c.spansLock.Unlock()
+	c.lock.Lock()
+	defer c.lock.Unlock()
 
 	sessionSpans, ok := c.spans[sessionID]
 	if !ok {
@@ -220,10 +204,9 @@ func (c *callbacksImpl) storeSpan(sessionID string, spanKey string, span trace.S
 	sessionSpans[spanKey] = span
 }
 
-// retrieveContext retrieves (but does not delete) a stored context
 func (c *callbacksImpl) retrieveSpan(sessionID string, spanKey string) (trace.Span, bool) {
-	c.spansLock.Lock()
-	defer c.spansLock.Unlock()
+	c.lock.Lock()
+	defer c.lock.Unlock()
 
 	spans, ok := c.spans[sessionID]
 	if ok {
@@ -237,10 +220,9 @@ func (c *callbacksImpl) retrieveRootSpan(sessionID string) (trace.Span, bool) {
 	return c.retrieveSpan(sessionID, rootSpanKey)
 }
 
-// deleteContext removes a stored context
 func (c *callbacksImpl) deleteSpan(sessionID string, spanKey string) {
-	c.spansLock.Lock()
-	defer c.spansLock.Unlock()
+	c.lock.Lock()
+	defer c.lock.Unlock()
 
 	spans, ok := c.spans[sessionID]
 	if ok {
@@ -261,7 +243,13 @@ func (c *callbacksImpl) deleteSpan(sessionID string, spanKey string) {
 // BeforeAgent is called before the agent starts its run.
 // It creates a span that covers the agent run, linking to parent agent if one exists.
 func (c *callbacksImpl) BeforeAgent(ctx agent.CallbackContext) (*genai.Content, error) {
-	c.cfg.logger.Debug("BeforeAgent callback", "sessionID", ctx.SessionID(), "invocationID", ctx.InvocationID(), "agent", ctx.AgentName(), "branch", ctx.Branch())
+	c.logger.Debug(
+		"BeforeAgent callback",
+		"sessionID", ctx.SessionID(),
+		"invocationID", ctx.InvocationID(),
+		"agent", ctx.AgentName(),
+		"branch", ctx.Branch(),
+	)
 
 	// Fall back to the root span as a parent, if there is one.
 	// TODO: Unfortunately, ADK doesn't provide a great way to trace
@@ -286,7 +274,12 @@ func (c *callbacksImpl) BeforeAgent(ctx agent.CallbackContext) (*genai.Content, 
 // AfterAgent is called after the agent completes its run.
 // It completes the span created by BeforeAgent and cleans up all contexts.
 func (c *callbacksImpl) AfterAgent(ctx agent.CallbackContext) (*genai.Content, error) {
-	c.cfg.logger.Debug("AfterAgent callback", "sessionID", ctx.SessionID(), "invocationID", ctx.InvocationID(), "agentName", ctx.AgentName())
+	c.logger.Debug(
+		"AfterAgent callback",
+		"sessionID", ctx.SessionID(),
+		"invocationID", ctx.InvocationID(),
+		"agentName", ctx.AgentName(),
+	)
 
 	// Retrieve and end the agent span using agent name
 	span, ok := c.retrieveSpan(ctx.SessionID(), getAgentSpanKey(ctx.InvocationID()))
@@ -303,7 +296,13 @@ func (c *callbacksImpl) AfterAgent(ctx agent.CallbackContext) (*genai.Content, e
 // BeforeModel is called before sending a request to the LLM model.
 // It creates a span to trace the model invocation as a child of the agent span.
 func (c *callbacksImpl) BeforeModel(ctx agent.CallbackContext, req *model.LLMRequest) (*model.LLMResponse, error) {
-	c.cfg.logger.Debug("BeforeModel callback", "sessionID", ctx.SessionID(), "invocationID", ctx.InvocationID(), "agentName", ctx.AgentName(), "request", req)
+	c.logger.Debug(
+		"BeforeModel callback",
+		"sessionID", ctx.SessionID(),
+		"invocationID", ctx.InvocationID(),
+		"agentName", ctx.AgentName(),
+		"request", req,
+	)
 
 	// Create a span for the model call, using the agent span context as parent
 	var spanCtx context.Context = ctx
@@ -324,7 +323,7 @@ func (c *callbacksImpl) BeforeModel(ctx agent.CallbackContext, req *model.LLMReq
 		"type": "llm",
 	}
 	if err := internal.SetJSONAttr(span, "braintrust.span_attributes", spanAttrs); err != nil {
-		c.cfg.logger.Debug("Failed to set braintrust.span_attributes", "error", err)
+		c.logger.Debug("Failed to set braintrust.span_attributes", "error", err)
 	}
 
 	if req.Model != "" {
@@ -333,11 +332,11 @@ func (c *callbacksImpl) BeforeModel(ctx agent.CallbackContext, req *model.LLMReq
 	if len(req.Contents) > 0 {
 		err := internal.SetJSONAttr(span, "gen_ai.prompt", req.Contents)
 		if err != nil {
-			c.cfg.logger.Debug("Failed to set gen_ai.prompt", "error", err)
+			c.logger.Debug("Failed to set gen_ai.prompt", "error", err)
 		}
-		err = internal.SetJSONAttr(span, "braintrust.input_json", cleanupJSON(c.cfg.logger, req))
+		err = internal.SetJSONAttr(span, "braintrust.input_json", cleanupJSON(c.logger, req))
 		if err != nil {
-			c.cfg.logger.Debug("Failed to set braintrust.input_json", "error", err)
+			c.logger.Debug("Failed to set braintrust.input_json", "error", err)
 		}
 	}
 
@@ -349,7 +348,14 @@ func (c *callbacksImpl) BeforeModel(ctx agent.CallbackContext, req *model.LLMReq
 // AfterModel is called after receiving a response from the LLM model.
 // It completes the span created by BeforeModel and records the response.
 func (c *callbacksImpl) AfterModel(ctx agent.CallbackContext, resp *model.LLMResponse, err error) (*model.LLMResponse, error) {
-	c.cfg.logger.Debug("AfterModel callback", "sessionID", ctx.SessionID(), "invocationID", ctx.InvocationID(), "agentName", ctx.AgentName(), "response", resp, "error", err)
+	c.logger.Debug(
+		"AfterModel callback",
+		"sessionID", ctx.SessionID(),
+		"invocationID", ctx.InvocationID(),
+		"agentName", ctx.AgentName(),
+		"response", resp,
+		"error", err,
+	)
 
 	// Retrieve the span (but don't remove it yet)
 	span, ok := c.retrieveSpan(ctx.SessionID(), getModelSpanKey(ctx))
@@ -367,9 +373,9 @@ func (c *callbacksImpl) AfterModel(ctx agent.CallbackContext, resp *model.LLMRes
 	}
 
 	if resp != nil {
-		err = internal.SetJSONAttr(span, "braintrust.output_json", cleanupJSON(c.cfg.logger, resp))
+		err = internal.SetJSONAttr(span, "braintrust.output_json", cleanupJSON(c.logger, resp))
 		if err != nil {
-			c.cfg.logger.Debug("Failed to set braintrust.output_json", "error", err)
+			c.logger.Debug("Failed to set braintrust.output_json", "error", err)
 		}
 
 		// Record token usage if available
@@ -397,7 +403,14 @@ func (c *callbacksImpl) AfterModel(ctx agent.CallbackContext, resp *model.LLMRes
 // BeforeTool is called before executing a tool.
 // It creates a span to trace the tool execution as a child of the LLM span.
 func (c *callbacksImpl) BeforeTool(ctx tool.Context, t tool.Tool, args map[string]any) (map[string]any, error) {
-	c.cfg.logger.Debug("BeforeTool callback", "sessionID", ctx.SessionID(), "invocationID", ctx.InvocationID(), "agentName", ctx.AgentName(), "tool", t.Name(), "args", args)
+	c.logger.Debug(
+		"BeforeTool callback",
+		"sessionID", ctx.SessionID(),
+		"invocationID", ctx.InvocationID(),
+		"agentName", ctx.AgentName(),
+		"tool", t.Name(),
+		"args", args,
+	)
 
 	// Try to get the LLM span context to establish parent-child relationship
 	var spanCtx context.Context = ctx
@@ -418,7 +431,7 @@ func (c *callbacksImpl) BeforeTool(ctx tool.Context, t tool.Tool, args map[strin
 		"type": "tool",
 	}
 	if err := internal.SetJSONAttr(span, "braintrust.span_attributes", spanAttrs); err != nil {
-		c.cfg.logger.Debug("Failed to set braintrust.span_attributes", "error", err)
+		c.logger.Debug("Failed to set braintrust.span_attributes", "error", err)
 	}
 
 	span.SetAttributes(attribute.String("tool.name", t.Name()))
@@ -428,11 +441,11 @@ func (c *callbacksImpl) BeforeTool(ctx tool.Context, t tool.Tool, args map[strin
 	if len(args) > 0 {
 		err := internal.SetJSONAttr(span, "tool.input", args)
 		if err != nil {
-			c.cfg.logger.Debug("Failed to set tool.input", "error", err)
+			c.logger.Debug("Failed to set tool.input", "error", err)
 		}
 		err = internal.SetJSONAttr(span, "braintrust.input_json", args)
 		if err != nil {
-			c.cfg.logger.Debug("Failed to set braintrust.input_json", "error", err)
+			c.logger.Debug("Failed to set braintrust.input_json", "error", err)
 		}
 	}
 
@@ -444,7 +457,15 @@ func (c *callbacksImpl) BeforeTool(ctx tool.Context, t tool.Tool, args map[strin
 // AfterTool is called after a tool execution completes.
 // It completes the span created by BeforeTool and records the result.
 func (c *callbacksImpl) AfterTool(ctx tool.Context, t tool.Tool, args, result map[string]any, err error) (map[string]any, error) {
-	c.cfg.logger.Debug("AfterTool callback", "sessionID", ctx.SessionID(), "invocationID", ctx.InvocationID(), "agentName", ctx.AgentName(), "tool", t.Name(), "result", result, "error", err)
+	c.logger.Debug(
+		"AfterTool callback",
+		"sessionID", ctx.SessionID(),
+		"invocationID", ctx.InvocationID(),
+		"agentName", ctx.AgentName(),
+		"tool", t.Name(),
+		"result", result,
+		"error", err,
+	)
 
 	// Retrieve the span using composite key
 	span, ok := c.retrieveSpan(ctx.SessionID(), getToolSpanKey(ctx))
@@ -464,40 +485,63 @@ func (c *callbacksImpl) AfterTool(ctx tool.Context, t tool.Tool, args, result ma
 	if result != nil {
 		err := internal.SetJSONAttr(span, "tool.output", result)
 		if err != nil {
-			c.cfg.logger.Debug("Failed to set tool.output", "error", err)
+			c.logger.Debug("Failed to set tool.output", "error", err)
 		}
 		err = internal.SetJSONAttr(span, "braintrust.output_json", result)
 		if err != nil {
-			c.cfg.logger.Debug("Failed to set braintrust.output_json", "error", err)
+			c.logger.Debug("Failed to set braintrust.output_json", "error", err)
 		}
 	}
 
 	return nil, nil
 }
 
-// TracedConfig is a convenience function that wraps a llmagent.Config with Braintrust tracing callbacks.
+// This is a convenience function that modifies a llmagent.Config with Braintrust tracing callbacks.
 // It automatically adds all tracing callbacks (BeforeAgent, AfterAgent, BeforeModel, AfterModel, BeforeTool, AfterTool).
+// If an input callbacks object is passed in, that is used, otherwise we fallback to the global instance.
 //
 // Example:
 //
-//	agent, err := llmagent.New(adk.TracedConfig(llmagent.Config{
-//		Name:        "my-agent",
-//		Model:       model,
-//		Description: "My agent",
-//		Tools:       tools,
-//	}))
-func (c *callbacksImpl) LLMAgentConfig(config llmagent.Config) llmagent.Config {
-	config.BeforeAgentCallbacks = append(config.BeforeAgentCallbacks, c.BeforeAgent)
-	config.AfterAgentCallbacks = append(config.AfterAgentCallbacks, c.AfterAgent)
-	config.BeforeModelCallbacks = append(config.BeforeModelCallbacks, c.BeforeModel)
-	config.AfterModelCallbacks = append(config.AfterModelCallbacks, c.AfterModel)
-	config.BeforeToolCallbacks = append(config.BeforeToolCallbacks, c.BeforeTool)
-	config.AfterToolCallbacks = append(config.AfterToolCallbacks, c.AfterTool)
-	return config
+//	 cfg := llmagent.Config{
+//			Name:        "my-agent",
+//			Model:       model,
+//			Description: "My agent",
+//			Tools:       tools,
+//		}
+//	 adk.AddLLMAgentCallbacks(cfg)
+//		agent, err := llmagent.New(cfg)
+func AddLLMAgentCallbacks(config *llmagent.Config, callbacks ...Callbacks) {
+	if len(callbacks) == 0 {
+		callbacks = []Callbacks{globalCallbacks}
+	}
+	for _, c := range callbacks {
+		config.BeforeAgentCallbacks = append(config.BeforeAgentCallbacks, c.BeforeAgent)
+		config.AfterAgentCallbacks = append(config.AfterAgentCallbacks, c.AfterAgent)
+		config.BeforeModelCallbacks = append(config.BeforeModelCallbacks, c.BeforeModel)
+		config.AfterModelCallbacks = append(config.AfterModelCallbacks, c.AfterModel)
+		config.BeforeToolCallbacks = append(config.BeforeToolCallbacks, c.BeforeTool)
+		config.AfterToolCallbacks = append(config.AfterToolCallbacks, c.AfterTool)
+	}
 }
 
-func (c *callbacksImpl) AgentConfig(config agent.Config) agent.Config {
-	config.BeforeAgentCallbacks = append(config.BeforeAgentCallbacks, c.BeforeAgent)
-	config.AfterAgentCallbacks = append(config.AfterAgentCallbacks, c.AfterAgent)
-	return config
+// This is a convenience function that modifies an agent.Config with Braintrust tracing callbacks.
+// It automatically adds all tracing callbacks (BeforeAgent, AfterAgent).
+// If an input callbacks object is passed in, that is used, otherwise we fallback to the global instance.
+//
+// Example:
+//
+//	 cfg := agent.Config{
+//			Name:        "my-agent",
+//			SubAgents:   []agent.Agent{subAgent},
+//		}
+//	 adk.AddAgentCallbacks(cfg)
+//		agent, err := loopagent.New(cfg)
+func AddAgentCallbacks(config *agent.Config, callbacks ...Callbacks) {
+	if len(callbacks) == 0 {
+		callbacks = []Callbacks{globalCallbacks}
+	}
+	for _, c := range callbacks {
+		config.BeforeAgentCallbacks = append(config.BeforeAgentCallbacks, c.BeforeAgent)
+		config.AfterAgentCallbacks = append(config.AfterAgentCallbacks, c.AfterAgent)
+	}
 }

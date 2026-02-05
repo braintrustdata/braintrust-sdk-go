@@ -1,0 +1,141 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 456
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"What is 127 multiplied by 49?"}],"role":"user"}],"generationConfig":{"maxOutputTokens":500},"systemInstruction":{"parts":[{"text":"You are a helpful math assistant. Use the calculator tool to perform calculations."}]},"tools":[{"functionDeclarations":[{"name":"calculator","description":"Performs basic arithmetic operations (add, subtract, multiply, divide)","parameters":{"type":"object","properties":{"a":{"type":"number","description":"The first number"},"b":{"type":"number","description":"The second number"},"operation":{"type":"string","description":"The operation to perform: add, subtract, multiply, or divide"}},"required":["a","b","operation"]}}]}]}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-genai-sdk/1.23.0 gl-go/go1.23.12
+            X-Goog-Api-Client:
+                - google-genai-sdk/1.23.0 gl-go/go1.23.12
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "functionCall": {
+                          "name": "calculator",
+                          "args": {
+                            "operation": "multiply",
+                            "a": 127,
+                            "b": 49
+                          }
+                        }
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "STOP"
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 85,
+                "candidatesTokenCount": 15,
+                "totalTokenCount": 100
+              },
+              "modelVersion": "gemini-2.0-flash-exp"
+            }
+        headers:
+            Content-Type:
+                - application/json; charset=UTF-8
+            Date:
+                - Wed, 05 Feb 2026 12:00:00 GMT
+            Server:
+                - scaffolding on HTTPServer2
+        status: 200 OK
+        code: 200
+        duration: 500ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 678
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"What is 127 multiplied by 49?"}],"role":"user"},{"parts":[{"functionCall":{"name":"calculator","args":{"a":127,"b":49,"operation":"multiply"}}}],"role":"model"},{"parts":[{"functionResponse":{"name":"calculator","response":{"result":6223}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":500},"systemInstruction":{"parts":[{"text":"You are a helpful math assistant. Use the calculator tool to perform calculations."}]},"tools":[{"functionDeclarations":[{"name":"calculator","description":"Performs basic arithmetic operations (add, subtract, multiply, divide)","parameters":{"type":"object","properties":{"a":{"type":"number","description":"The first number"},"b":{"type":"number","description":"The second number"},"operation":{"type":"string","description":"The operation to perform: add, subtract, multiply, or divide"}},"required":["a","b","operation"]}}]}]}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-genai-sdk/1.23.0 gl-go/go1.23.12
+            X-Goog-Api-Client:
+                - google-genai-sdk/1.23.0 gl-go/go1.23.12
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "127 multiplied by 49 is 6223."
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "STOP"
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 120,
+                "candidatesTokenCount": 12,
+                "totalTokenCount": 132
+              },
+              "modelVersion": "gemini-2.0-flash-exp"
+            }
+        headers:
+            Content-Type:
+                - application/json; charset=UTF-8
+            Date:
+                - Wed, 05 Feb 2026 12:00:01 GMT
+            Server:
+                - scaffolding on HTTPServer2
+        status: 200 OK
+        code: 200
+        duration: 450ms
+
