@@ -156,7 +156,7 @@ func TestAgentIntegration(t *testing.T) {
 	callbacks := NewCallbacks(WithTracerProvider(tp))
 
 	// Create LLM agent with tool
-	a, err := llmagent.New(callbacks.LLMAgentConfig(llmagent.Config{
+	cfg := llmagent.Config{
 		Name:        "math_agent",
 		Model:       model,
 		Description: "A helpful math assistant",
@@ -165,7 +165,9 @@ func TestAgentIntegration(t *testing.T) {
 		GenerateContentConfig: &genai.GenerateContentConfig{
 			MaxOutputTokens: 500,
 		},
-	}))
+	}
+	AddLLMAgentCallbacks(&cfg, callbacks)
+	a, err := llmagent.New(cfg)
 	require.NoError(t, err)
 
 	// Create in-memory session service
@@ -214,14 +216,15 @@ func TestAgentIntegration(t *testing.T) {
 	for i := range spans {
 		s := &spans[i]
 		name := s.Name()
-		if name == "agent_run [math_agent]" {
+		switch name {
+		case "agent_run [math_agent]":
 			agentSpan = s
-		} else if name == "call_llm" {
+		case "call_llm":
 			// capture only the first one, which makes the tool call
 			if modelSpan == nil {
 				modelSpan = s
 			}
-		} else if name == "tool [calculator]" {
+		case "tool [calculator]":
 			toolSpan = s
 		}
 	}

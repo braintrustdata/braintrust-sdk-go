@@ -16,13 +16,14 @@
 // Then create your llmagent with tracing callbacks:
 //
 //	btCallbacks := traceadk.NewCallbacks()
-//
-//	agent, err := llmagent.New(btCallbacks.LLMAgentConfig(llmagent.Config{
-//		Name:        "my-agent",
-//		Model:       model,
-//		Description: "My agent",
-//		Tools:       tools,
-//	}))
+//	cfg := llmagent.Config{
+//	   Name:        "my-agent",
+//	   Model:       model,
+//	   Description: "My agent",
+//	   Tools:       tools,
+//	}
+//	traceadk.AddLLMAgentCallbacks(&cfg, btCallbacks)
+//	agent, err := llmagent.New(cfg)
 package adk
 
 import (
@@ -46,7 +47,7 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/trace/internal"
 )
 
-var globalCallbacks Callbacks = NewCallbacks()
+var globalCallbacks = NewCallbacks()
 
 // cleanupJSON recursively removes keys with empty values from JSON structures.
 // Empty values include: nil, empty strings, empty slices, and empty maps.
@@ -496,20 +497,20 @@ func (c *callbacksImpl) AfterTool(ctx tool.Context, t tool.Tool, args, result ma
 	return nil, nil
 }
 
-// This is a convenience function that modifies a llmagent.Config with Braintrust tracing callbacks.
+// AddLLMAgentCallbacks modifies a llmagent.Config with Braintrust tracing callbacks.
 // It automatically adds all tracing callbacks (BeforeAgent, AfterAgent, BeforeModel, AfterModel, BeforeTool, AfterTool).
 // If an input callbacks object is passed in, that is used, otherwise we fallback to the global instance.
 //
 // Example:
 //
-//	 cfg := llmagent.Config{
-//			Name:        "my-agent",
-//			Model:       model,
-//			Description: "My agent",
-//			Tools:       tools,
-//		}
-//	 adk.AddLLMAgentCallbacks(cfg)
-//		agent, err := llmagent.New(cfg)
+//	cfg := llmagent.Config{
+//	  Name:        "my-agent",
+//	  Model:       model,
+//	  Description: "My agent",
+//	  Tools:       tools,
+//	}
+//	adk.AddLLMAgentCallbacks(&cfg)
+//	agent, err := llmagent.New(cfg)
 func AddLLMAgentCallbacks(config *llmagent.Config, callbacks ...Callbacks) {
 	if len(callbacks) == 0 {
 		callbacks = []Callbacks{globalCallbacks}
@@ -524,18 +525,18 @@ func AddLLMAgentCallbacks(config *llmagent.Config, callbacks ...Callbacks) {
 	}
 }
 
-// This is a convenience function that modifies an agent.Config with Braintrust tracing callbacks.
+// AddAgentCallbacks modifies an agent.Config with Braintrust tracing callbacks.
 // It automatically adds all tracing callbacks (BeforeAgent, AfterAgent).
 // If an input callbacks object is passed in, that is used, otherwise we fallback to the global instance.
 //
 // Example:
 //
-//	 cfg := agent.Config{
-//			Name:        "my-agent",
-//			SubAgents:   []agent.Agent{subAgent},
-//		}
-//	 adk.AddAgentCallbacks(cfg)
-//		agent, err := loopagent.New(cfg)
+//	cfg := agent.Config{
+//	  Name:        "my-agent",
+//	  SubAgents:   []agent.Agent{subAgent},
+//	}
+//	adk.AddAgentCallbacks(&cfg)
+//	agent, err := loopagent.New(cfg)
 func AddAgentCallbacks(config *agent.Config, callbacks ...Callbacks) {
 	if len(callbacks) == 0 {
 		callbacks = []Callbacks{globalCallbacks}
