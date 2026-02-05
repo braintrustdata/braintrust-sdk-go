@@ -66,13 +66,14 @@ func setupGoldenTest(t *testing.T, spanName string) (ctx context.Context, cleanu
 	ctx = context.Background()
 	tp := trace.NewTracerProvider()
 	otel.SetTracerProvider(tp)
-	_, err := braintrust.New(tp, braintrust.WithProject("golden-go-adk"), braintrust.WithBlockingLogin(true))
+	bt, err := braintrust.New(tp, braintrust.WithProject("golden-go-adk"), braintrust.WithBlockingLogin(true))
 	if err != nil {
 		t.Fatalf("braintrust.New: %v", err)
 	}
 	tracer := otel.Tracer("golden")
 	ctx, span := tracer.Start(ctx, spanName)
 	cleanup = func() {
+		t.Logf("View logs: %s", bt.Permalink(span))
 		span.End()
 		_ = tp.Shutdown(context.Background())
 	}
@@ -90,7 +91,7 @@ func newAgentAndRunner(ctx context.Context, t *testing.T, sessionID string, cfg 
 	cfg.Model = llm
 
 	cb := traceadk.NewCallbacks()
-	traceadk.AddLLMAgentCallbacks(&cfg, cb)
+	traceadk.AddLLMAgentCallbacks(&cfg, traceadk.WithCallback(cb))
 	a, err := llmagent.New(cfg)
 	if err != nil {
 		t.Fatalf("llmagent.New: %v", err)

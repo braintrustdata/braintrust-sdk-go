@@ -228,9 +228,13 @@ func TestSession_NoAppURL(t *testing.T) {
 func TestSession_WithRealAPIKey(t *testing.T) {
 	t.Parallel()
 	apiKey := os.Getenv("BRAINTRUST_API_KEY")
+	appURL := os.Getenv("BRAINTRUST_APP_URL")
+	if appURL == "" {
+		appURL = DefaultAppURL
+	}
 
 	session, err := NewSession(context.Background(), Options{
-		AppURL: "https://www.braintrust.dev",
+		AppURL: appURL,
 		APIKey: apiKey,
 
 		Logger: intlogger.NewFailTestLogger(t),

@@ -8,16 +8,15 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/signal"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/adk/agent"
 	"google.golang.org/adk/agent/llmagent"
 	"google.golang.org/adk/agent/workflowagents/parallelagent"
-	"google.golang.org/adk/cmd/launcher"
-	"google.golang.org/adk/cmd/launcher/full"
 	"google.golang.org/adk/model/gemini"
+	"google.golang.org/adk/runner"
+	"google.golang.org/adk/session"
 	"google.golang.org/genai"
 
 	"github.com/braintrustdata/braintrust-sdk-go"
@@ -39,10 +38,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Create shared callbacks for tracing
-	callbacks := traceadk.NewCallbacks()
-
-	ctx := context.Background()
+	tracer := otel.Tracer("adk-parallel-example")
+	ctx, span := tracer.Start(context.Background(), "examples/internal/adk-parallel/main.go")
+	defer span.End()
 
 	flashModel, err := gemini.NewModel(ctx, "gemini-2.5-flash", &genai.ClientConfig{
 		APIKey: os.Getenv("GOOGLE_API_KEY"),
@@ -58,7 +56,7 @@ func main() {
 		Description: "An agent that writes jokes about given topics.",
 		Instruction: "You are a comedian. When given a topic, write a short, funny joke about it. Keep it clean and clever.",
 	}
-	traceadk.AddLLMAgentCallbacks(&jokeCfg, callbacks)
+	traceadk.AddLLMAgentCallbacks(&jokeCfg)
 	jokeAgent, err := llmagent.New(jokeCfg)
 	if err != nil {
 		log.Fatalf("Failed to create joke agent: %v", err)
@@ -71,7 +69,7 @@ func main() {
 		Description: "An agent that writes philosophical quotes about given topics.",
 		Instruction: "You are a philosopher. When given a topic, write a thoughtful, profound philosophical quote or reflection about it. Be deep and contemplative.",
 	}
-	traceadk.AddLLMAgentCallbacks(&philosopherCfg, callbacks)
+	traceadk.AddLLMAgentCallbacks(&philosopherCfg)
 	philosopherAgent, err := llmagent.New(philosopherCfg)
 	if err != nil {
 		log.Fatalf("Failed to create philosopher agent: %v", err)
@@ -85,7 +83,7 @@ func main() {
 			SubAgents:   []agent.Agent{jokeAgent, philosopherAgent},
 		},
 	}
-	traceadk.AddAgentCallbacks(&parallelCfg.AgentConfig, callbacks)
+	traceadk.AddAgentCallbacks(&parallelCfg.AgentConfig)
 	parallelAgent, err := parallelagent.New(parallelCfg)
 	if err != nil {
 		log.Fatalf("Failed to create parallel agent: %v", err)
@@ -99,35 +97,43 @@ func main() {
 		Instruction: "You are a coordinator. When the user gives you a topic, ask your sub-agents to provide responses on the topic.",
 		SubAgents:   []agent.Agent{parallelAgent},
 	}
-	traceadk.AddLLMAgentCallbacks(&coordinatorCfg, callbacks)
+	traceadk.AddLLMAgentCallbacks(&coordinatorCfg)
 	coordinatorAgent, err := llmagent.New(coordinatorCfg)
 	if err != nil {
 		log.Fatalf("Failed to create coordinator agent: %v", err)
 	}
 
-	tracer := otel.Tracer("main")
-	ctx, span := tracer.Start(context.Background(), "adk-example-parallel")
-	fmt.Println("Use Ctrl+C to cleanly exit")
-	go func() {
-		interruptCh := make(chan os.Signal, 1)
-		signal.Notify(interruptCh, os.Interrupt)
-		<-interruptCh
-		span.End()
-		tp.Shutdown(context.Background())
-		fmt.Println("Received interrupt, exiting.")
-		fmt.Println()
-		log.Printf("Tracing link: %s", bt.Permalink(span))
-		os.Exit(0)
-	}()
-
-	config := &launcher.Config{
-		AgentLoader: agent.NewSingleLoader(coordinatorAgent),
+	sessionSvc := session.InMemoryService()
+	_, err = sessionSvc.Create(ctx, &session.CreateRequest{
+		AppName:   "adk-example",
+		UserID:    "user",
+		SessionID: "session",
+	})
+	if err != nil {
+		log.Fatalf("Failed to create session: %v", err)
+	}
+	runner, err := runner.New(runner.Config{
+		AppName:        "adk-example",
+		Agent:          coordinatorAgent,
+		SessionService: sessionSvc,
+	})
+	if err != nil {
+		log.Fatalf("Failed to create runner: %v", err)
+	}
+	msg := genai.NewContentFromText("what's the secret to life", genai.RoleUser)
+	for ev, err := range runner.Run(ctx, "user", "session", msg, agent.RunConfig{}) {
+		if err != nil {
+			log.Printf("   ADK error: %v", err)
+			return
+		}
+		if ev.Content != nil {
+			for _, p := range ev.Content.Parts {
+				if p.Text != "" {
+					fmt.Printf("   Response: %s\n", p.Text)
+				}
+			}
+		}
 	}
 
-	l := full.NewLauncher()
-	if err = l.Execute(ctx, config, os.Args[1:]); err != nil {
-		log.Fatalf("Run failed: %v\n\n%s", err, l.CommandLineSyntax())
-	}
-
-	log.Printf("\nTracing link: %s", bt.Permalink(nil))
+	fmt.Printf("View trace: %s\n", bt.Permalink(span))
 }

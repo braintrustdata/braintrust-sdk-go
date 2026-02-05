@@ -88,12 +88,12 @@ func WithFilterAISpans(enabled bool) Option {
 	}
 }
 
-// ExportNativeAdkTraces can be used to export spans from Google ADK's built-in
-// telemetry (gcp.vertex.agent), which are not exported to Braintrust by
-// default.
-func ExportNativeAdkTraces(allow bool) Option {
+// EnableBuiltinAdkTraces can be used to enable exporting spans from Google
+// ADK's built-in telemetry (gcp.vertex.agent), which are not exported to
+// Braintrust by default.
+func EnableBuiltinAdkTraces() Option {
 	return func(c *config.Config) {
-		c.DropAdkTraces = false
+		c.EnableBuiltinAdkTraces = true
 	}
 }
 

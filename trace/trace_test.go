@@ -353,7 +353,7 @@ func TestWithFilterAISpans_Option(t *testing.T) {
 	assert.NotContains(spanNames, "http.request")
 }
 
-func TestDropAdkTraces_True(t *testing.T) {
+func TestEnableBuiltinAdkTraces_False(t *testing.T) {
 	assert := assert.New(t)
 
 	tp := sdktrace.NewTracerProvider()
@@ -361,10 +361,10 @@ func TestDropAdkTraces_True(t *testing.T) {
 
 	session := newTestSession()
 	cfg := Config{
-		DefaultProjectID: "adk-filter-test",
-		DropAdkTraces:    true, // default: drop gcp.vertex.agent spans
-		Exporter:         exporter,
-		Logger:           logger.Discard(),
+		DefaultProjectID:       "adk-filter-test",
+		EnableBuiltinAdkTraces: false, // default: drop gcp.vertex.agent spans
+		Exporter:               exporter,
+		Logger:                 logger.Discard(),
 	}
 
 	err := AddSpanProcessor(tp, session, cfg)
@@ -405,7 +405,7 @@ func TestDropAdkTraces_True(t *testing.T) {
 	assert.Equal("braintrust", spans[0].InstrumentationScope.Name)
 }
 
-func TestDropAdkTraces_False(t *testing.T) {
+func TestEnableBuiltinAdkTraces_True(t *testing.T) {
 	assert := assert.New(t)
 
 	tp := sdktrace.NewTracerProvider()
@@ -413,10 +413,10 @@ func TestDropAdkTraces_False(t *testing.T) {
 
 	session := newTestSession()
 	cfg := Config{
-		DefaultProjectID: "adk-allow-test",
-		DropAdkTraces:    false,
-		Exporter:         exporter,
-		Logger:           logger.Discard(),
+		DefaultProjectID:       "adk-allow-test",
+		EnableBuiltinAdkTraces: true,
+		Exporter:               exporter,
+		Logger:                 logger.Discard(),
 	}
 
 	err := AddSpanProcessor(tp, session, cfg)

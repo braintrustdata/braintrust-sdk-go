@@ -107,12 +107,12 @@ func isEmpty(v interface{}) bool {
 	}
 }
 
-// Option configures the ADK tracing callbacks
-type Option func(*callbacksImpl)
+// CallbacksOption configures the ADK tracing callbacks
+type CallbacksOption func(*callbacksImpl)
 
 // WithTracerProvider sets a custom TracerProvider for the callbacks.
 // If not provided, the global otel.GetTracerProvider() is used.
-func WithTracerProvider(tp trace.TracerProvider) Option {
+func WithTracerProvider(tp trace.TracerProvider) CallbacksOption {
 	return func(callbacks *callbacksImpl) {
 		callbacks.tracer = tp.Tracer("braintrust")
 	}
@@ -120,7 +120,7 @@ func WithTracerProvider(tp trace.TracerProvider) Option {
 
 // WithLogger sets a custom logger for the callbacks.
 // If not provided, logging is disabled.
-func WithLogger(log logger.Logger) Option {
+func WithLogger(log logger.Logger) CallbacksOption {
 	return func(callbacks *callbacksImpl) {
 		if log != nil {
 			callbacks.logger = log
@@ -156,7 +156,7 @@ type callbacksImpl struct {
 // Example:
 //
 //	callbacks := adk.NewCallbacks()
-func NewCallbacks(opts ...Option) Callbacks {
+func NewCallbacks(opts ...CallbacksOption) Callbacks {
 	cb := &callbacksImpl{
 		logger: logger.Discard(),
 		tracer: otel.GetTracerProvider().Tracer("braintrust"),
@@ -493,6 +493,16 @@ func (c *callbacksImpl) AfterTool(ctx tool.Context, t tool.Tool, args, result ma
 	return nil, nil
 }
 
+// Option is a functional option for configuring callback instances.
+type Option func() Callbacks
+
+// WithCallback wraps a Callbacks instance as an Option.
+func WithCallback(c Callbacks) Option {
+	return func() Callbacks {
+		return c
+	}
+}
+
 // AddLLMAgentCallbacks modifies a llmagent.Config with Braintrust tracing callbacks.
 // It automatically adds all tracing callbacks (BeforeAgent, AfterAgent, BeforeModel, AfterModel, BeforeTool, AfterTool).
 // If an input callbacks object is passed in, that is used, otherwise we fallback to the global instance.
@@ -507,18 +517,17 @@ func (c *callbacksImpl) AfterTool(ctx tool.Context, t tool.Tool, args, result ma
 //	}
 //	adk.AddLLMAgentCallbacks(&cfg)
 //	agent, err := llmagent.New(cfg)
-func AddLLMAgentCallbacks(config *llmagent.Config, callbacks ...Callbacks) {
-	if len(callbacks) == 0 {
-		callbacks = []Callbacks{globalCallbacks}
+func AddLLMAgentCallbacks(config *llmagent.Config, opts ...Option) {
+	cb := globalCallbacks
+	for _, opt := range opts {
+		cb = opt()
 	}
-	for _, c := range callbacks {
-		config.BeforeAgentCallbacks = append(config.BeforeAgentCallbacks, c.BeforeAgent)
-		config.AfterAgentCallbacks = append(config.AfterAgentCallbacks, c.AfterAgent)
-		config.BeforeModelCallbacks = append(config.BeforeModelCallbacks, c.BeforeModel)
-		config.AfterModelCallbacks = append(config.AfterModelCallbacks, c.AfterModel)
-		config.BeforeToolCallbacks = append(config.BeforeToolCallbacks, c.BeforeTool)
-		config.AfterToolCallbacks = append(config.AfterToolCallbacks, c.AfterTool)
-	}
+	config.BeforeAgentCallbacks = append(config.BeforeAgentCallbacks, cb.BeforeAgent)
+	config.AfterAgentCallbacks = append(config.AfterAgentCallbacks, cb.AfterAgent)
+	config.BeforeModelCallbacks = append(config.BeforeModelCallbacks, cb.BeforeModel)
+	config.AfterModelCallbacks = append(config.AfterModelCallbacks, cb.AfterModel)
+	config.BeforeToolCallbacks = append(config.BeforeToolCallbacks, cb.BeforeTool)
+	config.AfterToolCallbacks = append(config.AfterToolCallbacks, cb.AfterTool)
 }
 
 // AddAgentCallbacks modifies an agent.Config with Braintrust tracing callbacks.
@@ -533,12 +542,11 @@ func AddLLMAgentCallbacks(config *llmagent.Config, callbacks ...Callbacks) {
 //	}
 //	adk.AddAgentCallbacks(&cfg)
 //	agent, err := loopagent.New(cfg)
-func AddAgentCallbacks(config *agent.Config, callbacks ...Callbacks) {
-	if len(callbacks) == 0 {
-		callbacks = []Callbacks{globalCallbacks}
+func AddAgentCallbacks(config *agent.Config, opts ...Option) {
+	cb := globalCallbacks
+	for _, opt := range opts {
+		cb = opt()
 	}
-	for _, c := range callbacks {
-		config.BeforeAgentCallbacks = append(config.BeforeAgentCallbacks, c.BeforeAgent)
-		config.AfterAgentCallbacks = append(config.AfterAgentCallbacks, c.AfterAgent)
-	}
+	config.BeforeAgentCallbacks = append(config.BeforeAgentCallbacks, cb.BeforeAgent)
+	config.AfterAgentCallbacks = append(config.AfterAgentCallbacks, cb.AfterAgent)
 }

@@ -166,7 +166,7 @@ func TestAgentIntegration(t *testing.T) {
 			MaxOutputTokens: 500,
 		},
 	}
-	AddLLMAgentCallbacks(&cfg, callbacks)
+	AddLLMAgentCallbacks(&cfg, WithCallback(callbacks))
 	a, err := llmagent.New(cfg)
 	require.NoError(t, err)
 
