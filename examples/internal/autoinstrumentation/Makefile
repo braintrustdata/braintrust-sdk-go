@@ -4,7 +4,7 @@ help:
 	@echo "Auto-Instrumentation Example (using Orchestrion)"
 	@echo ""
 	@echo "Prerequisites:"
-	@echo "  go install github.com/DataDog/orchestrion@latest"
+	@echo "  go install github.com/DataDog/orchestrion@v1.6.1"
 	@echo ""
 	@echo "Environment variables:"
 	@echo "  BRAINTRUST_API_KEY  - Braintrust API key"
