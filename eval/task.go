@@ -41,6 +41,7 @@ type TaskResult[I, R any] struct {
 	Expected R        // What we expected
 	Output   R        // What the task actually returned
 	Metadata Metadata // Case metadata
+	Trace    Trace    // Eval trace context for scorers
 
 	// UserData is custom application context from the task.
 	// This field is NOT logged and isn't supported outside the context of the Go SDK.

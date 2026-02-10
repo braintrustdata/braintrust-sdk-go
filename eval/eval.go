@@ -232,6 +232,7 @@ type eval[I, R any] struct {
 	scorers        []Scorer[I, R]
 	tracer         oteltrace.Tracer
 	startSpanOpt   oteltrace.SpanStartOption
+	ensureFlush    func() error
 	goroutines     int
 	quiet          bool
 }
@@ -254,6 +255,7 @@ func newEval[I, R any](
 	dataset Dataset[I, R],
 	task TaskFunc[I, R],
 	scorers []Scorer[I, R],
+	ensureFlush func() error,
 	parallelism int,
 	quiet bool,
 ) *eval[I, R] {
@@ -283,6 +285,7 @@ func newEval[I, R any](
 		scorers:        scorers,
 		tracer:         tracer,
 		startSpanOpt:   startSpanOpt,
+		ensureFlush:    ensureFlush,
 		goroutines:     goroutines,
 		quiet:          quiet,
 	}
@@ -320,6 +323,11 @@ func newEvalOpts[I, R any](ctx context.Context, s *auth.Session, tp *trace.Trace
 		opts.Dataset,
 		opts.Task,
 		opts.Scorers,
+		func() error {
+			flushCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			return tp.ForceFlush(flushCtx)
+		},
 		opts.Parallelism,
 		opts.Quiet,
 	), nil
@@ -425,6 +433,13 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 		return err
 	}
 	output := taskResult.Output
+	taskResult.Trace = newEvalTrace(
+		e.session,
+		"experiment",
+		e.experimentID,
+		span.SpanContext().SpanID().String(),
+		e.ensureFlush,
+	)
 
 	_, err = e.runScorers(ctx, taskResult)
 	if err != nil {
@@ -522,6 +537,9 @@ func (e *eval[I, R]) runScorers(ctx context.Context, taskResult TaskResult[I, R]
 
 	if err := setJSONAttr(span, "braintrust.span_attributes", scoreSpanAttrs); err != nil {
 		return nil, err
+	}
+	if taskResult.Trace == nil {
+		taskResult.Trace = newTrace()
 	}
 
 	var scores []Score
@@ -730,6 +748,7 @@ func testNewEval[I, R any](
 		dataset,
 		task,
 		scorers,
+		nil,
 		parallelism,
 		true, // quiet=true for tests
 	)

@@ -115,11 +115,20 @@ func (f *FunctionsAPI[I, R]) Scorer(ctx context.Context, opts FunctionOpts) (Sco
 
 	// Create a scorer that invokes the function
 	scorerFunc := func(ctx context.Context, result TaskResult[I, R]) (Scores, error) {
+		trace := result.Trace
+		if trace == nil {
+			trace = newTrace()
+		}
+
 		// Build scorer input
 		scorerInput := map[string]any{
 			"input":    result.Input,
 			"output":   result.Output,
 			"expected": result.Expected,
+			"trace": map[string]any{
+				"spans":  trace.GetSpans(nil),
+				"thread": trace.GetThread(),
+			},
 		}
 
 		// Invoke the scorer function
