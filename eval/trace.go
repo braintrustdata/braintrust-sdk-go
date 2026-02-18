@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"sync"
 	"time"
 
@@ -169,6 +170,7 @@ func (t *traceImpl) fetchSpans(spanTypes []string) ([]JSONObject, error) {
 }
 
 func (t *traceImpl) fetchThread() ([]JSONObject, error) {
+	fmt.Printf("\n=== fetchThread start ===\n")
 	loginCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	_ = t.session.Login(loginCtx)
@@ -188,15 +190,9 @@ func (t *traceImpl) fetchThread() ([]JSONObject, error) {
 			},
 		},
 	}
-
-	resp, err := client.POST(context.Background(), "/v1/function/invoke", reqBody)
-	if err != nil {
-		return nil, err
-	}
-
-	var payload any
-	err = json.NewDecoder(resp.Body).Decode(&payload)
-	_ = resp.Body.Close()
+	reqJSON, _ := json.MarshalIndent(reqBody, "", "  ")
+	fmt.Printf("request body:\n%s\n", string(reqJSON))
+	payload, err := t.invokeThreadEndpoint(client, "/function/invoke", reqBody)
 	if err != nil {
 		return nil, err
 	}
@@ -205,21 +201,93 @@ func (t *traceImpl) fetchThread() ([]JSONObject, error) {
 	if outputWrapper, ok := payload.(map[string]any); ok {
 		if output, hasOutput := outputWrapper["output"]; hasOutput {
 			payload = output
+			fmt.Printf("payload.output:\n")
+			fmt.Printf("  type: %T\n", payload)
+			fmt.Printf("  value: %#v\n", payload)
+		} else {
+			fmt.Printf("payload object missing output key:\n")
+			fmt.Printf("  keys: %v\n", keys(outputWrapper))
 		}
 	}
 
 	values, ok := payload.([]any)
 	if !ok {
+		fmt.Printf("payload is not array:\n")
+		fmt.Printf("  type: %T\n", payload)
+		fmt.Printf("  value: %#v\n", payload)
 		return []JSONObject{}, nil
 	}
 
 	thread := make([]JSONObject, 0, len(values))
-	for _, value := range values {
+	for i, value := range values {
 		if item, ok := value.(map[string]any); ok {
 			thread = append(thread, item)
+		} else {
+			fmt.Printf("skipping non-object thread item:\n")
+			fmt.Printf("  index: %d\n", i)
+			fmt.Printf("  type: %T\n", value)
+			fmt.Printf("  value: %#v\n", value)
 		}
 	}
+	fmt.Printf("thread result:\n")
+	fmt.Printf("  thread_len: %d\n", len(thread))
+	fmt.Printf("  raw_array_len: %d\n", len(values))
+	fmt.Printf("=== fetchThread end ===\n")
 	return thread, nil
+}
+
+func (t *traceImpl) invokeThreadEndpoint(client *https.Client, path string, reqBody map[string]any) (any, error) {
+	fmt.Printf("request path: %s\n", path)
+	resp, err := client.POST(context.Background(), path, reqBody)
+	if err != nil {
+		fmt.Printf("invoke failed:\n")
+		fmt.Printf("  path: %s\n", path)
+		fmt.Printf("  object_type: %s\n", t.objectType)
+		fmt.Printf("  object_id: %s\n", t.objectID)
+		fmt.Printf("  root_span_id: %s\n", t.rootSpanID)
+		fmt.Printf("  error: %v\n", err)
+		return nil, err
+	}
+
+	fmt.Printf("response status (%s): %d\n", path, resp.StatusCode)
+	fmt.Printf("response headers (%s):\n%v\n", path, resp.Header)
+	bodyBytes, readErr := io.ReadAll(resp.Body)
+	_ = resp.Body.Close()
+	if readErr != nil {
+		fmt.Printf("read body failed:\n")
+		fmt.Printf("  path: %s\n", path)
+		fmt.Printf("  object_type: %s\n", t.objectType)
+		fmt.Printf("  object_id: %s\n", t.objectID)
+		fmt.Printf("  root_span_id: %s\n", t.rootSpanID)
+		fmt.Printf("  error: %v\n", readErr)
+		return nil, readErr
+	}
+	fmt.Printf("response body (%s):\n%s\n", path, string(bodyBytes))
+
+	var payload any
+	err = json.Unmarshal(bodyBytes, &payload)
+	if err != nil {
+		fmt.Printf("decode failed:\n")
+		fmt.Printf("  path: %s\n", path)
+		fmt.Printf("  object_type: %s\n", t.objectType)
+		fmt.Printf("  object_id: %s\n", t.objectID)
+		fmt.Printf("  root_span_id: %s\n", t.rootSpanID)
+		fmt.Printf("  error: %v\n", err)
+		fmt.Printf("  raw: %s\n", string(bodyBytes))
+		return nil, err
+	}
+	fmt.Printf("parsed payload (%s):\n", path)
+	fmt.Printf("  type: %T\n", payload)
+	fmt.Printf("  value: %#v\n", payload)
+	return payload, nil
+}
+
+func keys(m map[string]any) []string {
+	out := make([]string, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	return out
 }
 
 func buildSpanFilter(rootSpanID string, spanTypeFilter []string) JSONObject {

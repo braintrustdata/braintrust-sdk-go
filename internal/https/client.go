@@ -157,6 +157,9 @@ func (c *Client) Client() *http.Client {
 func (c *Client) doRequest(req *http.Request) (*http.Response, error) {
 	// Add auth header
 	req.Header.Set("Authorization", "Bearer "+c.apiKey)
+	if req.Header.Get("Accept") == "" {
+		req.Header.Set("Accept", "application/json")
+	}
 
 	// Log request
 	start := time.Now()

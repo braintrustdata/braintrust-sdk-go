@@ -18,7 +18,8 @@ func TestTrace_GetThread_ReturnsThreadFromPreprocessorInvoke(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		require.Equal(t, http.MethodPost, r.Method)
-		require.Equal(t, "/v1/function/invoke", r.URL.Path)
+		require.Equal(t, "/function/invoke", r.URL.Path)
+		assert.Equal(t, "application/json", r.Header.Get("Accept"))
 
 		var body map[string]any
 		require.NoError(t, json.NewDecoder(r.Body).Decode(&body))
