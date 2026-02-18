@@ -82,8 +82,19 @@ func (t *traceImpl) GetSpans(spanTypes []string) []JSONObject {
 }
 
 func (t *traceImpl) GetThread() []JSONObject {
-	// TODO: Add preprocessor-based thread extraction for trace_ref.
-	return []JSONObject{}
+	if t.objectType == "" || t.objectID == "" || t.rootSpanID == "" || t.session == nil {
+		return []JSONObject{}
+	}
+
+	if err := t.ensureSpansReady(); err != nil {
+		return []JSONObject{}
+	}
+
+	thread, err := t.fetchThread()
+	if err != nil {
+		return []JSONObject{}
+	}
+	return thread
 }
 
 func (t *traceImpl) ensureSpansReady() error {
@@ -155,6 +166,60 @@ func (t *traceImpl) fetchSpans(spanTypes []string) ([]JSONObject, error) {
 	}
 
 	return all, nil
+}
+
+func (t *traceImpl) fetchThread() ([]JSONObject, error) {
+	loginCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	_ = t.session.Login(loginCtx)
+
+	apiInfo := t.session.APIInfo()
+	client := https.NewClient(apiInfo.APIKey, apiInfo.APIURL, logger.Discard())
+
+	reqBody := map[string]any{
+		"global_function": "project_default",
+		"function_type":   "preprocessor",
+		"mode":            "json",
+		"input": map[string]any{
+			"trace_ref": map[string]any{
+				"object_type":  t.objectType,
+				"object_id":    t.objectID,
+				"root_span_id": t.rootSpanID,
+			},
+		},
+	}
+
+	resp, err := client.POST(context.Background(), "/v1/function/invoke", reqBody)
+	if err != nil {
+		return nil, err
+	}
+
+	var payload any
+	err = json.NewDecoder(resp.Body).Decode(&payload)
+	_ = resp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	// The invoke response may be either {"output": ...} or a raw JSON value.
+	if outputWrapper, ok := payload.(map[string]any); ok {
+		if output, hasOutput := outputWrapper["output"]; hasOutput {
+			payload = output
+		}
+	}
+
+	values, ok := payload.([]any)
+	if !ok {
+		return []JSONObject{}, nil
+	}
+
+	thread := make([]JSONObject, 0, len(values))
+	for _, value := range values {
+		if item, ok := value.(map[string]any); ok {
+			thread = append(thread, item)
+		}
+	}
+	return thread, nil
 }
 
 func buildSpanFilter(rootSpanID string, spanTypeFilter []string) JSONObject {
