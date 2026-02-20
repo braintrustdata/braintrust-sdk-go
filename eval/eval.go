@@ -230,6 +230,7 @@ type eval[I, R any] struct {
 	datasetID      string // For origin.object_id
 	task           TaskFunc[I, R]
 	scorers        []Scorer[I, R]
+	apiClient      *api.API
 	tracer         oteltrace.Tracer
 	startSpanOpt   oteltrace.SpanStartOption
 	ensureFlush    func() error
@@ -259,6 +260,11 @@ func newEval[I, R any](
 	parallelism int,
 	quiet bool,
 ) *eval[I, R] {
+	var traceAPI *api.API
+	if s != nil {
+		traceAPI = s.API()
+	}
+
 	// Build parent span option
 	parent := bttrace.NewParent(bttrace.ParentTypeExperimentID, experimentID)
 	startSpanOpt := oteltrace.WithAttributes(parent.Attr())
@@ -283,6 +289,7 @@ func newEval[I, R any](
 		datasetID:      datasetID,
 		task:           task,
 		scorers:        scorers,
+		apiClient:      traceAPI,
 		tracer:         tracer,
 		startSpanOpt:   startSpanOpt,
 		ensureFlush:    ensureFlush,
@@ -434,10 +441,10 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 	}
 	output := taskResult.Output
 	taskResult.Trace = newEvalTrace(
-		e.session,
+		e.apiClient,
 		"experiment",
 		e.experimentID,
-		span.SpanContext().SpanID().String(),
+		rootSpanIDFromSpan(span),
 		e.ensureFlush,
 	)
 
@@ -472,6 +479,14 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 	}
 
 	return setJSONAttrs(span, meta)
+}
+
+func rootSpanIDFromSpan(span oteltrace.Span) string {
+	sc := span.SpanContext()
+	if sc.TraceID().IsValid() {
+		return sc.TraceID().String()
+	}
+	return sc.SpanID().String()
 }
 
 // runTask executes the task function and creates a task span.

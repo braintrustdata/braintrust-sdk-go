@@ -5,6 +5,7 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
 	"github.com/braintrustdata/braintrust-sdk-go/api/experiments"
 	"github.com/braintrustdata/braintrust-sdk-go/api/functions"
+	"github.com/braintrustdata/braintrust-sdk-go/api/objects"
 	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
@@ -85,4 +86,9 @@ func (a *API) Datasets() *datasets.API {
 // Functions is used to access the Functions API
 func (a *API) Functions() *functions.API {
 	return functions.New(a.client)
+}
+
+// Objects is used to access generic object APIs (e.g. /v1/{object_type}/{id}/fetch).
+func (a *API) Objects() *objects.API {
+	return objects.New(a.client)
 }

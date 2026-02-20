@@ -26,6 +26,7 @@ Comprehensive examples testing all features for each AI provider:
 
 - **[langchaingo-anthropic/](langchaingo-anthropic/)** - LangChainGo with Anthropic provider (uses forked langchaingo)
 - **[functions/](functions/)** - Functions API usage (loading tasks/scorers with FunctionOpts)
+- **[trace-scorer/](trace-scorer/)** - Accessing per-case trace spans/thread in scorer logic
 - **[rewrite/](rewrite/)** - Manual tracing and evaluator API testing
 - **[email-evals/](email-evals/)** - Realistic eval example with complex scoring
 - **[eval-updates/](eval-updates/)** - Testing Update option for appending to experiments

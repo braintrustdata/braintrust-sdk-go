@@ -55,8 +55,9 @@ func TestTrace_GetThread_ReturnsThreadFromPreprocessorInvoke(t *testing.T) {
 		server.URL,
 		logger.Discard(),
 	)
+	apiClient := session.API()
 
-	trace := newEvalTrace(session, "experiment", "obj-123", "root-456", func() error { return nil })
+	trace := newEvalTrace(apiClient, "experiment", "obj-123", "root-456", func() error { return nil })
 
 	thread := trace.GetThread()
 	require.Len(t, thread, 2)
@@ -83,8 +84,33 @@ func TestTrace_GetThread_ReturnsEmptyForNonArrayOutput(t *testing.T) {
 		server.URL,
 		logger.Discard(),
 	)
+	apiClient := session.API()
 
-	trace := newEvalTrace(session, "experiment", "obj-123", "root-456", func() error { return nil })
+	trace := newEvalTrace(apiClient, "experiment", "obj-123", "root-456", func() error { return nil })
 
+	assert.Empty(t, trace.GetThread())
+}
+
+func TestTrace_GetThread_ReturnsEmptyForNullOutput(t *testing.T) {
+	t.Parallel()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, err := w.Write([]byte("null"))
+		require.NoError(t, err)
+	}))
+	defer server.Close()
+
+	session := auth.NewTestSession(
+		"test-key",
+		"org-id",
+		"org-name",
+		server.URL,
+		server.URL,
+		server.URL,
+		logger.Discard(),
+	)
+	apiClient := session.API()
+
+	trace := newEvalTrace(apiClient, "experiment", "obj-123", "root-456", func() error { return nil })
 	assert.Empty(t, trace.GetThread())
 }

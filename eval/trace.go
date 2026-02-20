@@ -2,15 +2,11 @@ package eval
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"io"
 	"sync"
-	"time"
 
-	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
-	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
-	"github.com/braintrustdata/braintrust-sdk-go/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/api"
+	functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
+	"github.com/braintrustdata/braintrust-sdk-go/api/objects"
 )
 
 // JSONObject represents a JSON object for trace payloads.
@@ -43,7 +39,7 @@ type traceImpl struct {
 	objectID   string
 	rootSpanID string
 
-	session            *auth.Session
+	apiClient          *api.API
 	ensureSpansFlushed func() error
 
 	flushOnce sync.Once
@@ -51,7 +47,7 @@ type traceImpl struct {
 }
 
 func newEvalTrace(
-	session *auth.Session,
+	apiClient *api.API,
 	objectType string,
 	objectID string,
 	rootSpanID string,
@@ -61,13 +57,13 @@ func newEvalTrace(
 		objectType:         objectType,
 		objectID:           objectID,
 		rootSpanID:         rootSpanID,
-		session:            session,
+		apiClient:          apiClient,
 		ensureSpansFlushed: ensureSpansFlushed,
 	}
 }
 
 func (t *traceImpl) GetSpans(spanTypes []string) []JSONObject {
-	if t.objectType == "" || t.objectID == "" || t.rootSpanID == "" || t.session == nil {
+	if t.objectType == "" || t.objectID == "" || t.rootSpanID == "" || t.apiClient == nil {
 		return []JSONObject{}
 	}
 
@@ -83,7 +79,7 @@ func (t *traceImpl) GetSpans(spanTypes []string) []JSONObject {
 }
 
 func (t *traceImpl) GetThread() []JSONObject {
-	if t.objectType == "" || t.objectID == "" || t.rootSpanID == "" || t.session == nil {
+	if t.objectType == "" || t.objectID == "" || t.rootSpanID == "" || t.apiClient == nil {
 		return []JSONObject{}
 	}
 
@@ -109,38 +105,19 @@ func (t *traceImpl) ensureSpansReady() error {
 }
 
 func (t *traceImpl) fetchSpans(spanTypes []string) ([]JSONObject, error) {
-	loginCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	_ = t.session.Login(loginCtx)
-
-	apiInfo := t.session.APIInfo()
-	client := https.NewClient(apiInfo.APIKey, apiInfo.APIURL, logger.Discard())
-
 	var all []JSONObject
 	cursor := ""
 
 	for {
-		reqBody := map[string]any{
-			"limit":  1000,
-			"filter": buildSpanFilter(t.rootSpanID, spanTypes),
+		req := objects.FetchParams{
+			Limit:  1000,
+			Filter: buildSpanFilter(t.rootSpanID, spanTypes),
 		}
 		if cursor != "" {
-			reqBody["cursor"] = cursor
+			req.Cursor = cursor
 		}
 
-		resp, err := client.POST(context.Background(), fmt.Sprintf("/v1/%s/%s/fetch", t.objectType, t.objectID), reqBody)
-		if err != nil {
-			return nil, err
-		}
-
-		var payload struct {
-			Events  []JSONObject `json:"events"`
-			Rows    []JSONObject `json:"rows"`
-			Objects []JSONObject `json:"objects"`
-			Cursor  string       `json:"cursor"`
-		}
-		err = json.NewDecoder(resp.Body).Decode(&payload)
-		_ = resp.Body.Close()
+		payload, err := t.apiClient.Objects().Fetch(context.Background(), t.objectType, t.objectID, req)
 		if err != nil {
 			return nil, err
 		}
@@ -170,124 +147,34 @@ func (t *traceImpl) fetchSpans(spanTypes []string) ([]JSONObject, error) {
 }
 
 func (t *traceImpl) fetchThread() ([]JSONObject, error) {
-	fmt.Printf("\n=== fetchThread start ===\n")
-	loginCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	_ = t.session.Login(loginCtx)
-
-	apiInfo := t.session.APIInfo()
-	client := https.NewClient(apiInfo.APIKey, apiInfo.APIURL, logger.Discard())
-
-	reqBody := map[string]any{
-		"global_function": "project_default",
-		"function_type":   "preprocessor",
-		"mode":            "json",
-		"input": map[string]any{
+	payload, err := t.apiClient.Functions().InvokeGlobal(context.Background(), functionsapi.InvokeGlobalParams{
+		GlobalFunction: "project_default",
+		FunctionType:   "preprocessor",
+		Mode:           "json",
+		Input: map[string]any{
 			"trace_ref": map[string]any{
 				"object_type":  t.objectType,
 				"object_id":    t.objectID,
 				"root_span_id": t.rootSpanID,
 			},
 		},
-	}
-	reqJSON, _ := json.MarshalIndent(reqBody, "", "  ")
-	fmt.Printf("request body:\n%s\n", string(reqJSON))
-	payload, err := t.invokeThreadEndpoint(client, "/function/invoke", reqBody)
+	})
 	if err != nil {
 		return nil, err
-	}
-
-	// The invoke response may be either {"output": ...} or a raw JSON value.
-	if outputWrapper, ok := payload.(map[string]any); ok {
-		if output, hasOutput := outputWrapper["output"]; hasOutput {
-			payload = output
-			fmt.Printf("payload.output:\n")
-			fmt.Printf("  type: %T\n", payload)
-			fmt.Printf("  value: %#v\n", payload)
-		} else {
-			fmt.Printf("payload object missing output key:\n")
-			fmt.Printf("  keys: %v\n", keys(outputWrapper))
-		}
 	}
 
 	values, ok := payload.([]any)
 	if !ok {
-		fmt.Printf("payload is not array:\n")
-		fmt.Printf("  type: %T\n", payload)
-		fmt.Printf("  value: %#v\n", payload)
 		return []JSONObject{}, nil
 	}
 
 	thread := make([]JSONObject, 0, len(values))
-	for i, value := range values {
+	for _, value := range values {
 		if item, ok := value.(map[string]any); ok {
 			thread = append(thread, item)
-		} else {
-			fmt.Printf("skipping non-object thread item:\n")
-			fmt.Printf("  index: %d\n", i)
-			fmt.Printf("  type: %T\n", value)
-			fmt.Printf("  value: %#v\n", value)
 		}
 	}
-	fmt.Printf("thread result:\n")
-	fmt.Printf("  thread_len: %d\n", len(thread))
-	fmt.Printf("  raw_array_len: %d\n", len(values))
-	fmt.Printf("=== fetchThread end ===\n")
 	return thread, nil
-}
-
-func (t *traceImpl) invokeThreadEndpoint(client *https.Client, path string, reqBody map[string]any) (any, error) {
-	fmt.Printf("request path: %s\n", path)
-	resp, err := client.POST(context.Background(), path, reqBody)
-	if err != nil {
-		fmt.Printf("invoke failed:\n")
-		fmt.Printf("  path: %s\n", path)
-		fmt.Printf("  object_type: %s\n", t.objectType)
-		fmt.Printf("  object_id: %s\n", t.objectID)
-		fmt.Printf("  root_span_id: %s\n", t.rootSpanID)
-		fmt.Printf("  error: %v\n", err)
-		return nil, err
-	}
-
-	fmt.Printf("response status (%s): %d\n", path, resp.StatusCode)
-	fmt.Printf("response headers (%s):\n%v\n", path, resp.Header)
-	bodyBytes, readErr := io.ReadAll(resp.Body)
-	_ = resp.Body.Close()
-	if readErr != nil {
-		fmt.Printf("read body failed:\n")
-		fmt.Printf("  path: %s\n", path)
-		fmt.Printf("  object_type: %s\n", t.objectType)
-		fmt.Printf("  object_id: %s\n", t.objectID)
-		fmt.Printf("  root_span_id: %s\n", t.rootSpanID)
-		fmt.Printf("  error: %v\n", readErr)
-		return nil, readErr
-	}
-	fmt.Printf("response body (%s):\n%s\n", path, string(bodyBytes))
-
-	var payload any
-	err = json.Unmarshal(bodyBytes, &payload)
-	if err != nil {
-		fmt.Printf("decode failed:\n")
-		fmt.Printf("  path: %s\n", path)
-		fmt.Printf("  object_type: %s\n", t.objectType)
-		fmt.Printf("  object_id: %s\n", t.objectID)
-		fmt.Printf("  root_span_id: %s\n", t.rootSpanID)
-		fmt.Printf("  error: %v\n", err)
-		fmt.Printf("  raw: %s\n", string(bodyBytes))
-		return nil, err
-	}
-	fmt.Printf("parsed payload (%s):\n", path)
-	fmt.Printf("  type: %T\n", payload)
-	fmt.Printf("  value: %#v\n", payload)
-	return payload, nil
-}
-
-func keys(m map[string]any) []string {
-	out := make([]string, 0, len(m))
-	for k := range m {
-		out = append(out, k)
-	}
-	return out
 }
 
 func buildSpanFilter(rootSpanID string, spanTypeFilter []string) JSONObject {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
@@ -123,6 +124,18 @@ func (s *Session) APIInfo() APIInfo {
 		APIKey: apiKey,
 		APIURL: apiURL,
 	}
+}
+
+// API returns an API client configured from the current session.
+// It uses APIInfo() so it works before login completes and automatically
+// picks up server-provided APIURL once available.
+func (s *Session) API() *api.API {
+	apiInfo := s.APIInfo()
+	return api.NewClient(
+		apiInfo.APIKey,
+		api.WithAPIURL(apiInfo.APIURL),
+		api.WithLogger(s.logger),
+	)
 }
 
 func (s *Session) getLoginResult() (bool, *loginResult) {
