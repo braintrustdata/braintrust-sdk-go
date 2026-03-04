@@ -1,6 +1,7 @@
 package eval
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -13,7 +14,7 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
-func TestTrace_GetThread_ReturnsThreadFromPreprocessorInvoke(t *testing.T) {
+func TestSpanFetcher_Thread_ReturnsThreadFromPreprocessorInvoke(t *testing.T) {
 	t.Parallel()
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -57,15 +58,17 @@ func TestTrace_GetThread_ReturnsThreadFromPreprocessorInvoke(t *testing.T) {
 	)
 	apiClient := session.API()
 
-	trace := newEvalTrace(apiClient, "experiment", "obj-123", "root-456", func() error { return nil })
+	fetcher := newSpanFetcher(apiClient, "experiment", "obj-123", "root-456", func() error { return nil })
 
-	thread := trace.GetThread()
+	ctx := context.Background()
+	thread, err := fetcher.Thread(ctx)
+	require.NoError(t, err)
 	require.Len(t, thread, 2)
 	assert.Equal(t, "system", thread[0]["role"])
 	assert.Equal(t, "user", thread[1]["role"])
 }
 
-func TestTrace_GetThread_ReturnsEmptyForNonArrayOutput(t *testing.T) {
+func TestSpanFetcher_Thread_ReturnsNilForNonArrayOutput(t *testing.T) {
 	t.Parallel()
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -86,12 +89,15 @@ func TestTrace_GetThread_ReturnsEmptyForNonArrayOutput(t *testing.T) {
 	)
 	apiClient := session.API()
 
-	trace := newEvalTrace(apiClient, "experiment", "obj-123", "root-456", func() error { return nil })
+	fetcher := newSpanFetcher(apiClient, "experiment", "obj-123", "root-456", func() error { return nil })
 
-	assert.Empty(t, trace.GetThread())
+	ctx := context.Background()
+	thread, err := fetcher.Thread(ctx)
+	require.NoError(t, err)
+	assert.Nil(t, thread)
 }
 
-func TestTrace_GetThread_ReturnsEmptyForNullOutput(t *testing.T) {
+func TestSpanFetcher_Thread_ReturnsNilForNullOutput(t *testing.T) {
 	t.Parallel()
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -111,6 +117,10 @@ func TestTrace_GetThread_ReturnsEmptyForNullOutput(t *testing.T) {
 	)
 	apiClient := session.API()
 
-	trace := newEvalTrace(apiClient, "experiment", "obj-123", "root-456", func() error { return nil })
-	assert.Empty(t, trace.GetThread())
+	fetcher := newSpanFetcher(apiClient, "experiment", "obj-123", "root-456", func() error { return nil })
+
+	ctx := context.Background()
+	thread, err := fetcher.Thread(ctx)
+	require.NoError(t, err)
+	assert.Nil(t, thread)
 }

@@ -41,19 +41,18 @@ func main() {
 	})
 
 	traceAwareScorer := eval.NewScorer("trace_aware", func(ctx context.Context, tr eval.TaskResult[string, string]) (eval.Scores, error) {
-		if tr.Trace == nil {
-			return eval.Scores{{
-				Name:  "trace_aware",
-				Score: 0,
-				Metadata: map[string]any{
-					"error": "trace is nil",
-				},
-			}}, nil
+		allSpans, err := tr.Spans(ctx)
+		if err != nil {
+			return nil, err
 		}
-
-		allSpans := tr.Trace.GetSpans(nil)
-		customSpans := tr.Trace.GetSpans([]string{"custom"})
-		thread := tr.Trace.GetThread()
+		customSpans, err := tr.Spans(ctx, eval.WithSpanTypes("custom"))
+		if err != nil {
+			return nil, err
+		}
+		thread, err := tr.Thread(ctx)
+		if err != nil {
+			return nil, err
+		}
 
 		log.Printf("trace info: spans=%d custom_spans=%d thread=%d", len(allSpans), len(customSpans), len(thread))
 

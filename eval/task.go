@@ -41,11 +41,49 @@ type TaskResult[I, R any] struct {
 	Expected R        // What we expected
 	Output   R        // What the task actually returned
 	Metadata Metadata // Case metadata
-	Trace    Trace    // Eval trace context for scorers
 
 	// UserData is custom application context from the task.
 	// This field is NOT logged and isn't supported outside the context of the Go SDK.
 	UserData any
+
+	fetcher *spanFetcher // unexported, pointer for nil-check + safe copy
+}
+
+// SpanQueryOpt is a functional option for configuring a Spans query.
+type SpanQueryOpt func(*spansQuery)
+
+type spansQuery struct {
+	types []string
+}
+
+// WithSpanTypes filters spans by span_attributes.type (e.g. "llm", "function", "custom").
+// Multiple types are OR'd together. Omit to get all spans.
+func WithSpanTypes(types ...string) SpanQueryOpt {
+	return func(q *spansQuery) {
+		q.types = types
+	}
+}
+
+// Spans returns spans from the trace.
+// Returns nil, nil if no trace data is available (e.g. no API client configured).
+func (r TaskResult[I, R]) Spans(ctx context.Context, opts ...SpanQueryOpt) ([]Span, error) {
+	if r.fetcher == nil {
+		return nil, nil
+	}
+	var q spansQuery
+	for _, opt := range opts {
+		opt(&q)
+	}
+	return r.fetcher.Spans(ctx, q.types)
+}
+
+// Thread returns thread entries associated with this case's trace.
+// Returns nil, nil if no trace data is available (e.g. no API client configured).
+func (r TaskResult[I, R]) Thread(ctx context.Context) ([]map[string]any, error) {
+	if r.fetcher == nil {
+		return nil, nil
+	}
+	return r.fetcher.Thread(ctx)
 }
 
 // T is a convenience function for writing short task functions ([TaskFunc]) that only

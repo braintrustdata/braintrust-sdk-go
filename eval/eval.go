@@ -440,7 +440,7 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 		return err
 	}
 	output := taskResult.Output
-	taskResult.Trace = newEvalTrace(
+	taskResult.fetcher = newSpanFetcher(
 		e.apiClient,
 		"experiment",
 		e.experimentID,
@@ -553,10 +553,6 @@ func (e *eval[I, R]) runScorers(ctx context.Context, taskResult TaskResult[I, R]
 	if err := setJSONAttr(span, "braintrust.span_attributes", scoreSpanAttrs); err != nil {
 		return nil, err
 	}
-	if taskResult.Trace == nil {
-		taskResult.Trace = newTrace()
-	}
-
 	var scores []Score
 
 	var errs []error

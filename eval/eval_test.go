@@ -307,7 +307,7 @@ func TestEval_Run_TraceRefUsesRootTraceID(t *testing.T) {
 		return testOutput{Result: "output-" + input.Value}, nil
 	})
 	scorer := NewScorer("thread", func(ctx context.Context, result TaskResult[testInput, testOutput]) (Scores, error) {
-		_ = result.Trace.GetThread()
+		_, _ = result.Thread(ctx)
 		return S(1), nil
 	})
 

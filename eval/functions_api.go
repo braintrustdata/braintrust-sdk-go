@@ -115,9 +115,13 @@ func (f *FunctionsAPI[I, R]) Scorer(ctx context.Context, opts FunctionOpts) (Sco
 
 	// Create a scorer that invokes the function
 	scorerFunc := func(ctx context.Context, result TaskResult[I, R]) (Scores, error) {
-		trace := result.Trace
-		if trace == nil {
-			trace = newTrace()
+		spans, err := result.Spans(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get spans: %w", err)
+		}
+		thread, err := result.Thread(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get thread: %w", err)
 		}
 
 		// Build scorer input
@@ -126,8 +130,8 @@ func (f *FunctionsAPI[I, R]) Scorer(ctx context.Context, opts FunctionOpts) (Sco
 			"output":   result.Output,
 			"expected": result.Expected,
 			"trace": map[string]any{
-				"spans":  trace.GetSpans(nil),
-				"thread": trace.GetThread(),
+				"spans":  spans,
+				"thread": thread,
 			},
 		}
 
