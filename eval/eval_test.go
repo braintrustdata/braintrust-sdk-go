@@ -14,6 +14,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 
+	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
@@ -52,6 +53,7 @@ func newUnitTestEval[I, R any](t *testing.T, dataset Dataset[I, R], task TaskFun
 	e := testNewEval(
 		session,
 		tracer,
+		nil,               // no apiClient for unit tests
 		"exp-12345678",    // fake experiment ID
 		"test-experiment", // fake experiment name
 		"proj-87654321",   // fake project ID
@@ -311,9 +313,12 @@ func TestEval_Run_TraceRefUsesRootTraceID(t *testing.T) {
 		return S(1), nil
 	})
 
+	apiClient := api.NewClient("test-key", api.WithAPIURL(server.URL))
+
 	e := testNewEval(
 		session,
 		tracer,
+		apiClient,
 		"exp-123",
 		"test-exp",
 		"proj-123",
