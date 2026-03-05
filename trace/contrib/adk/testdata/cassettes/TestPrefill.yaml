@@ -1,0 +1,183 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 209
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"Write a haiku about coding."}],"role":"user"}],"generationConfig":{"maxOutputTokens":200},"systemInstruction":{"parts":[{"text":"You are a helpful assistant."}],"role":"user"}}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-adk/0.3.0 gl-go/1.24.11
+                - google-genai-sdk/1.40.0 gl-go/go1.24.11
+            X-Goog-Api-Client:
+                - google-adk/0.3.0 gl-go/1.24.11
+                - google-genai-sdk/1.40.0 gl-go/go1.24.11
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "Fingers tap the keys,\n"
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "MAX_TOKENS",
+                  "index": 0
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 15,
+                "candidatesTokenCount": 7,
+                "totalTokenCount": 210,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 15
+                  }
+                ],
+                "thoughtsTokenCount": 188
+              },
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "6NCoaanLI9mLqtsP9b2uwAc"
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Type:
+                - application/json; charset=UTF-8
+            Date:
+                - Thu, 05 Mar 2026 00:40:10 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=1631
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Xss-Protection:
+                - "0"
+        status: 200 OK
+        code: 200
+        duration: 1.649086333s
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 325
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"Write a haiku about coding."}],"role":"user"},{"parts":[{"text":"Fingers tap the keys,\n"}],"role":"model"},{"parts":[{"text":"Here is a haiku:"}],"role":"user"}],"generationConfig":{"maxOutputTokens":200},"systemInstruction":{"parts":[{"text":"You are a helpful assistant."}],"role":"user"}}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-adk/0.3.0 gl-go/1.24.11
+                - google-genai-sdk/1.40.0 gl-go/go1.24.11
+            X-Goog-Api-Client:
+                - google-adk/0.3.0 gl-go/1.24.11
+                - google-genai-sdk/1.40.0 gl-go/go1.24.11
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "That's a nice haiku! Is there anything you'd like me to do with it, or another one you'd like to share or create?"
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "STOP",
+                  "index": 0
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 31,
+                "candidatesTokenCount": 33,
+                "totalTokenCount": 77,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 31
+                  }
+                ],
+                "thoughtsTokenCount": 13
+              },
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "6tCoaffeDcWrqtsPnqyEsQc"
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Type:
+                - application/json; charset=UTF-8
+            Date:
+                - Thu, 05 Mar 2026 00:40:10 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=696
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Xss-Protection:
+                - "0"
+        status: 200 OK
+        code: 200
+        duration: 711.6535ms

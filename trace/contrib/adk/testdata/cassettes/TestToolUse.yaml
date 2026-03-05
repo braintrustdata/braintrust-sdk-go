@@ -1,0 +1,190 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 836
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"What is the weather like in Paris, France?"}],"role":"user"}],"generationConfig":{"maxOutputTokens":500},"systemInstruction":{"parts":[{"text":"You are a helpful weather assistant. Use the get_weather tool to answer questions."}],"role":"user"},"tools":[{"functionDeclarations":[{"description":"Get the current weather for a location. Args: city_and_state (e.g. San Francisco, CA), unit (celsius or fahrenheit).","name":"get_weather","parametersJsonSchema":{"additionalProperties":false,"properties":{"city_and_state":{"description":"The city and state, e.g. San Francisco, CA","type":"string"},"unit":{"description":"The unit of temperature (celsius or fahrenheit). Default to celsius.","type":"string"}},"required":["city_and_state","unit"],"type":"object"},"responseJsonSchema":{"type":"string"}}]}]}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-adk/0.3.0 gl-go/1.24.11
+                - google-genai-sdk/1.40.0 gl-go/go1.24.11
+            X-Goog-Api-Client:
+                - google-adk/0.3.0 gl-go/1.24.11
+                - google-genai-sdk/1.40.0 gl-go/go1.24.11
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "functionCall": {
+                          "name": "get_weather",
+                          "args": {
+                            "city_and_state": "Paris, France",
+                            "unit": "celsius"
+                          }
+                        },
+                        "thoughtSignature": "CqUCAb4+9vuCnKRlYL2wxk8b8/AZPQxzV6Nnw/9FuzRXYMUhCWMjzzCzLcCMXgbnShX7AWqJa7N+5cB2taMi0PeZjX+VsdDAjVXlJGVjolGhHHTaZhRWmmZWbGHEMlimnJskeE93cbowoR5KuHN0C/CDgiTozbXdDcS3AUcu+GGRkGgdbYtVMUKy3tSqcNgt7akwWF2Fq0VMfa839eq+ilgQsJj3dpoeYKuvGgElYiGSUpmTmidEUOnX2FRxUEGbr2BFb/zrPM29GsyL1tfN/IbsglqFEp/09IVkZYsO1trE00SeW86r5f6musFHJkqM6I9M8GZZVGYSts6F02cLjgzTCxerVLwS8cSMoINPxjEFc0y838rtvu3ohw4/x/xhd36UTmtyrsM="
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "STOP",
+                  "index": 0,
+                  "finishMessage": "Model generated function call(s)."
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 139,
+                "candidatesTokenCount": 27,
+                "totalTokenCount": 240,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 139
+                  }
+                ],
+                "thoughtsTokenCount": 74
+              },
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "79Coab7lJ8KmmtkP28n8sAc"
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Type:
+                - application/json; charset=UTF-8
+            Date:
+                - Thu, 05 Mar 2026 00:40:16 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=848
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Xss-Protection:
+                - "0"
+        status: 200 OK
+        code: 200
+        duration: 864.308375ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 1520
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"What is the weather like in Paris, France?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"city_and_state":"Paris, France","unit":"celsius"},"name":"get_weather"},"thoughtSignature":"CqUCAb4+9vuCnKRlYL2wxk8b8/AZPQxzV6Nnw/9FuzRXYMUhCWMjzzCzLcCMXgbnShX7AWqJa7N+5cB2taMi0PeZjX+VsdDAjVXlJGVjolGhHHTaZhRWmmZWbGHEMlimnJskeE93cbowoR5KuHN0C/CDgiTozbXdDcS3AUcu+GGRkGgdbYtVMUKy3tSqcNgt7akwWF2Fq0VMfa839eq+ilgQsJj3dpoeYKuvGgElYiGSUpmTmidEUOnX2FRxUEGbr2BFb/zrPM29GsyL1tfN/IbsglqFEp/09IVkZYsO1trE00SeW86r5f6musFHJkqM6I9M8GZZVGYSts6F02cLjgzTCxerVLwS8cSMoINPxjEFc0y838rtvu3ohw4/x/xhd36UTmtyrsM="}],"role":"model"},{"parts":[{"functionResponse":{"name":"get_weather","response":{"result":"22 degrees celsius and sunny in Paris, France"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":500},"systemInstruction":{"parts":[{"text":"You are a helpful weather assistant. Use the get_weather tool to answer questions."}],"role":"user"},"tools":[{"functionDeclarations":[{"description":"Get the current weather for a location. Args: city_and_state (e.g. San Francisco, CA), unit (celsius or fahrenheit).","name":"get_weather","parametersJsonSchema":{"additionalProperties":false,"properties":{"city_and_state":{"description":"The city and state, e.g. San Francisco, CA","type":"string"},"unit":{"description":"The unit of temperature (celsius or fahrenheit). Default to celsius.","type":"string"}},"required":["city_and_state","unit"],"type":"object"},"responseJsonSchema":{"type":"string"}}]}]}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-adk/0.3.0 gl-go/1.24.11
+                - google-genai-sdk/1.40.0 gl-go/go1.24.11
+            X-Goog-Api-Client:
+                - google-adk/0.3.0 gl-go/1.24.11
+                - google-genai-sdk/1.40.0 gl-go/go1.24.11
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "The weather in Paris, France is 22 degrees celsius and sunny."
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "STOP",
+                  "index": 0
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 190,
+                "candidatesTokenCount": 15,
+                "totalTokenCount": 205,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 190
+                  }
+                ]
+              },
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "8NCoaZGgH-iymtkP_sOLqAc"
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Type:
+                - application/json; charset=UTF-8
+            Date:
+                - Thu, 05 Mar 2026 00:40:16 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=404
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Xss-Protection:
+                - "0"
+        status: 200 OK
+        code: 200
+        duration: 459.443083ms
