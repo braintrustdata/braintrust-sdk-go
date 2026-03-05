@@ -480,11 +480,10 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 }
 
 func rootSpanIDFromSpan(span oteltrace.Span) string {
-	sc := span.SpanContext()
-	if sc.TraceID().IsValid() {
-		return sc.TraceID().String()
+	if span == nil {
+		return ""
 	}
-	return sc.SpanID().String()
+	return span.SpanContext().TraceID().String()
 }
 
 // runTask executes the task function and creates a task span.

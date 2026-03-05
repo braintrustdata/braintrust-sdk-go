@@ -114,22 +114,6 @@ func (a *API) InvokeGlobal(ctx context.Context, req InvokeGlobalParams) (any, er
 	return a.invokePath(ctx, "/function/invoke", req)
 }
 
-// Delete deletes a function by ID.
-func (a *API) Delete(ctx context.Context, functionID string) error {
-	if functionID == "" {
-		return fmt.Errorf("function ID is required")
-	}
-
-	path := fmt.Sprintf("/v1/function/%s", functionID)
-	resp, err := a.client.DELETE(ctx, path)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	return nil
-}
-
 func (a *API) invokePath(ctx context.Context, path string, req any) (any, error) {
 	resp, err := a.client.POST(ctx, path, req)
 	if err != nil {
@@ -159,4 +143,20 @@ func decodeInvokeResponse(body []byte) (any, error) {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 	return output, nil
+}
+
+// Delete deletes a function by ID.
+func (a *API) Delete(ctx context.Context, functionID string) error {
+	if functionID == "" {
+		return fmt.Errorf("function ID is required")
+	}
+
+	path := fmt.Sprintf("/v1/function/%s", functionID)
+	resp, err := a.client.DELETE(ctx, path)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	return nil
 }

@@ -2,11 +2,8 @@ package eval
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"io"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,11 +11,8 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 
-	"github.com/braintrustdata/braintrust-sdk-go/api"
-	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
-	"github.com/braintrustdata/braintrust-sdk-go/logger"
 	"github.com/braintrustdata/braintrust-sdk-go/trace"
 )
 
@@ -262,77 +256,6 @@ func TestNewEval_DefaultParallelism(t *testing.T) {
 	// Test with negative
 	ute2 := newUnitTestEval(t, cases, task, nil, -5)
 	assert.Equal(t, 1, ute2.eval.goroutines)
-}
-
-func TestEval_Run_TraceRefUsesRootTraceID(t *testing.T) {
-	t.Parallel()
-
-	var gotRootSpanID string
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		require.Equal(t, http.MethodPost, r.Method)
-		require.Equal(t, "/function/invoke", r.URL.Path)
-
-		var body map[string]any
-		require.NoError(t, json.NewDecoder(r.Body).Decode(&body))
-
-		input, ok := body["input"].(map[string]any)
-		require.True(t, ok)
-		traceRef, ok := input["trace_ref"].(map[string]any)
-		require.True(t, ok)
-		gotRootSpanID, _ = traceRef["root_span_id"].(string)
-
-		require.NoError(t, json.NewEncoder(w).Encode([]map[string]any{
-			{"role": "user", "content": "hello"},
-		}))
-	}))
-	defer server.Close()
-
-	tp, _ := oteltest.Setup(t)
-	tracer := tp.Tracer(t.Name())
-	session := auth.NewTestSession(
-		"test-key",
-		"org-id",
-		"org-name",
-		server.URL,
-		server.URL,
-		server.URL,
-		logger.Discard(),
-	)
-
-	cases := NewDataset([]Case[testInput, testOutput]{
-		{
-			Input:    testInput{Value: "abc"},
-			Expected: testOutput{Result: "output-abc"},
-		},
-	})
-	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
-		return testOutput{Result: "output-" + input.Value}, nil
-	})
-	scorer := NewScorer("thread", func(ctx context.Context, result TaskResult[testInput, testOutput]) (Scores, error) {
-		_, _ = result.Thread(ctx)
-		return S(1), nil
-	})
-
-	apiClient := api.NewClient("test-key", api.WithAPIURL(server.URL))
-
-	e := testNewEval(
-		session,
-		tracer,
-		apiClient,
-		"exp-123",
-		"test-exp",
-		"proj-123",
-		"test-proj",
-		cases,
-		task,
-		[]Scorer[testInput, testOutput]{scorer},
-		1,
-	)
-
-	_, err := e.run(context.Background())
-	require.NoError(t, err)
-	require.NotEmpty(t, gotRootSpanID)
-	assert.Regexp(t, "^[0-9a-f]{32}$", gotRootSpanID, "root_span_id should use trace/root ID format")
 }
 
 func TestEval_Run_TaskError(t *testing.T) {

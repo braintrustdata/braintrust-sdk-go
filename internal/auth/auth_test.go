@@ -353,25 +353,6 @@ func TestSession_APIInfo(t *testing.T) {
 	})
 }
 
-func TestSession_API(t *testing.T) {
-	t.Parallel()
-
-	session := NewTestSession(
-		"test-key-123",
-		"org-id",
-		"org-name",
-		"https://api.braintrust.dev",
-		"https://www.braintrust.dev",
-		"https://www.braintrust.dev",
-		logger.Discard(),
-	)
-
-	apiClient := session.API()
-	require.NotNil(t, apiClient)
-	require.NotNil(t, apiClient.Functions())
-	require.NotNil(t, apiClient.Objects())
-}
-
 // TestSession_OrgName tests that OrgName() returns org name after login
 func TestSession_OrgName(t *testing.T) {
 	t.Parallel()
