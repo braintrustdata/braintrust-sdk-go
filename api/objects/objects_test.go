@@ -2,52 +2,64 @@ package objects
 
 import (
 	"context"
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
+	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
-func TestObjects_Fetch_PostsExpectedRequest(t *testing.T) {
+const integrationTestProject = "go-sdk-tests"
+
+func TestObjects_Fetch_Integration(t *testing.T) {
 	t.Parallel()
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		require.Equal(t, http.MethodPost, r.Method)
-		require.Equal(t, "/v1/experiment/exp-123/fetch", r.URL.Path)
+	ctx := context.Background()
+	client := vcr.GetHTTPSClient(t)
+	api := New(client)
 
-		var body map[string]any
-		require.NoError(t, json.NewDecoder(r.Body).Decode(&body))
-		assert.Equal(t, float64(1000), body["limit"])
+	// Create a project and dataset with events
+	projectsAPI := projects.New(client)
+	project, err := projectsAPI.Create(ctx, projects.CreateParams{Name: integrationTestProject})
+	require.NoError(t, err)
 
-		filter, ok := body["filter"].(map[string]any)
-		require.True(t, ok)
-		assert.Equal(t, "and", filter["op"])
-
-		require.NoError(t, json.NewEncoder(w).Encode(FetchResponse{
-			Events: []map[string]any{{"id": "row-1"}},
-			Cursor: "next",
-		}))
-	}))
-	defer server.Close()
-
-	api := New(https.NewClient("test-key", server.URL, logger.Discard()))
-	resp, err := api.Fetch(context.Background(), "experiment", "exp-123", FetchParams{
-		Limit: 1000,
-		Filter: map[string]any{
-			"op": "and",
-		},
+	datasetsAPI := datasets.New(client)
+	dataset, err := datasetsAPI.Create(ctx, datasets.CreateParams{
+		ProjectID: project.ID,
+		Name:      "test-objects-fetch",
 	})
 	require.NoError(t, err)
-	require.NotNil(t, resp)
-	require.Len(t, resp.Events, 1)
-	assert.Equal(t, "row-1", resp.Events[0]["id"])
-	assert.Equal(t, "next", resp.Cursor)
+	defer func() { _ = datasetsAPI.Delete(ctx, dataset.ID) }()
+
+	err = datasetsAPI.InsertEvents(ctx, dataset.ID, []datasets.Event{
+		{Input: map[string]any{"q": "1"}, Expected: map[string]any{"a": "1"}},
+		{Input: map[string]any{"q": "2"}, Expected: map[string]any{"a": "2"}},
+	})
+	require.NoError(t, err)
+
+	// Fetch via the generic objects API (retry for eventual consistency)
+	var rows []map[string]any
+	for i := 0; i < 3; i++ {
+		resp, err := api.Fetch(ctx, "dataset", dataset.ID, FetchParams{Limit: 10})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+
+		rows = resp.Events
+		if len(rows) == 0 {
+			rows = resp.Rows
+		}
+		if len(rows) >= 2 {
+			break
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+	assert.GreaterOrEqual(t, len(rows), 2)
 }
 
 func TestObjects_Fetch_Validation(t *testing.T) {

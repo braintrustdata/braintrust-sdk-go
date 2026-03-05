@@ -3,7 +3,6 @@ package functions
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 
@@ -112,16 +111,7 @@ func (a *API) InvokeGlobal(ctx context.Context, req InvokeGlobalParams) (any, er
 		return nil, fmt.Errorf("global function is required")
 	}
 
-	out, err := a.invokePath(ctx, "/function/invoke", req)
-	if err == nil {
-		return out, nil
-	}
-
-	var httpErr *https.HTTPError
-	if errors.As(err, &httpErr) && httpErr.StatusCode == 404 {
-		return a.invokePath(ctx, "/v1/function/invoke", req)
-	}
-	return nil, err
+	return a.invokePath(ctx, "/function/invoke", req)
 }
 
 // Delete deletes a function by ID.

@@ -2,9 +2,6 @@ package functions
 
 import (
 	"context"
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -321,87 +318,6 @@ func TestFunctions_Invoke_Validation(t *testing.T) {
 	_, err := api.Invoke(ctx, "", map[string]any{"input": "test"})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "required")
-}
-
-func TestFunctions_InvokeGlobal_PostsExpectedPayload(t *testing.T) {
-	t.Parallel()
-
-	ctx := context.Background()
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		require.Equal(t, http.MethodPost, r.Method)
-		require.Equal(t, "/function/invoke", r.URL.Path)
-		assert.Equal(t, "application/json", r.Header.Get("Accept"))
-
-		var body map[string]any
-		require.NoError(t, json.NewDecoder(r.Body).Decode(&body))
-		assert.Equal(t, "project_default", body["global_function"])
-		assert.Equal(t, "preprocessor", body["function_type"])
-		assert.Equal(t, "json", body["mode"])
-
-		input, ok := body["input"].(map[string]any)
-		require.True(t, ok)
-		assert.Equal(t, "abc", input["x"])
-
-		require.NoError(t, json.NewEncoder(w).Encode(map[string]any{
-			"output": []map[string]any{
-				{"role": "system", "content": "hello"},
-			},
-		}))
-	}))
-	defer server.Close()
-
-	client := New(https.NewClient("test-key", server.URL, logger.Discard()))
-
-	output, err := client.InvokeGlobal(ctx, InvokeGlobalParams{
-		GlobalFunction: "project_default",
-		FunctionType:   "preprocessor",
-		Mode:           "json",
-		Input:          map[string]any{"x": "abc"},
-	})
-	require.NoError(t, err)
-
-	values, ok := output.([]any)
-	require.True(t, ok)
-	require.Len(t, values, 1)
-
-	first, ok := values[0].(map[string]any)
-	require.True(t, ok)
-	assert.Equal(t, "system", first["role"])
-}
-
-func TestFunctions_InvokeGlobal_FallbackToV1On404(t *testing.T) {
-	t.Parallel()
-
-	ctx := context.Background()
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch r.URL.Path {
-		case "/function/invoke":
-			http.NotFound(w, r)
-		case "/v1/function/invoke":
-			require.NoError(t, json.NewEncoder(w).Encode(map[string]any{
-				"output": []map[string]any{
-					{"role": "user", "content": "fallback"},
-				},
-			}))
-		default:
-			t.Fatalf("unexpected path: %s", r.URL.Path)
-		}
-	}))
-	defer server.Close()
-
-	client := New(https.NewClient("test-key", server.URL, logger.Discard()))
-
-	output, err := client.InvokeGlobal(ctx, InvokeGlobalParams{
-		GlobalFunction: "project_default",
-		FunctionType:   "preprocessor",
-		Mode:           "json",
-		Input:          map[string]any{"x": "abc"},
-	})
-	require.NoError(t, err)
-
-	values, ok := output.([]any)
-	require.True(t, ok)
-	require.Len(t, values, 1)
 }
 
 func TestFunctions_InvokeGlobal_Validation(t *testing.T) {
