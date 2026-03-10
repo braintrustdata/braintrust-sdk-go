@@ -660,3 +660,88 @@ func getSpanURLData(span oteltrace.Span) (url, org string, parent Parent, err er
 	org = attrs[orgAttrKey]
 	return
 }
+
+// parentToSpanObjectType maps a Parent to the SpanComponents V4 object type.
+func parentToSpanObjectType(p Parent) SpanObjectTypeV3 {
+	switch p.Type {
+	case ParentTypeExperimentID:
+		return SpanObjectTypeExperiment
+	case ParentTypeProjectName, ParentTypeProjectID:
+		return SpanObjectTypeProjectLogs
+	default:
+		return SpanObjectTypeProjectLogs
+	}
+}
+
+// Export serializes the span into a string that can be passed to another process
+// and used with ContextWithExportedSpan to create child spans there. The format
+// is compatible with the Braintrust JS/Python span.export() output.
+//
+// Use this for distributed tracing: export the span in process A, pass the string
+// to process B, then in B call ctx = trace.ContextWithExportedSpan(ctx, exported)
+// and start spans with that context so they appear as children of the exported span.
+//
+// Export uses the span's Braintrust parent (project/experiment) and OTel trace/span
+// IDs. The span must be recording and have Braintrust attributes (braintrust.parent, etc.)
+// set by the Braintrust span processor.
+func Export(span oteltrace.Span) (string, error) {
+	_, _, parent, err := getSpanURLData(span)
+	if err != nil {
+		return "", fmt.Errorf("get span data: %w", err)
+	}
+	spanContext := span.SpanContext()
+	if !spanContext.TraceID().IsValid() || !spanContext.SpanID().IsValid() {
+		return "", fmt.Errorf("span has invalid trace or span id")
+	}
+	traceID := spanContext.TraceID().String()
+	spanID := spanContext.SpanID().String()
+
+	c := SpanComponents{
+		ObjectType: parentToSpanObjectType(parent),
+		ObjectID:   parent.ID,
+		RowID:      spanID,
+		SpanID:     spanID,
+		RootSpanID: traceID,
+	}
+	return EncodeV4(c)
+}
+
+// ContextWithExportedSpan returns a context that carries the exported span as the
+// remote parent. Spans started with this context (e.g. tracer.Start(ctx, "name"))
+// will be children of that span and will be sent to the same Braintrust project/experiment.
+//
+// The exported string should be the result of Export(span) from this SDK or
+// span.export() from the JS/Python SDK.
+func ContextWithExportedSpan(ctx context.Context, exported string) (context.Context, error) {
+	components, err := DecodeV4(exported)
+	if err != nil {
+		return ctx, fmt.Errorf("decode exported span: %w", err)
+	}
+	if components.SpanID == "" || components.RootSpanID == "" {
+		return ctx, fmt.Errorf("exported span must contain span_id and root_span_id for use as parent")
+	}
+
+	traceID, err := oteltrace.TraceIDFromHex(components.RootSpanID)
+	if err != nil {
+		return ctx, fmt.Errorf("invalid root_span_id (trace id): %w", err)
+	}
+	spanID, err := oteltrace.SpanIDFromHex(components.SpanID)
+	if err != nil {
+		return ctx, fmt.Errorf("invalid span_id: %w", err)
+	}
+
+	remoteCtx := oteltrace.NewSpanContext(oteltrace.SpanContextConfig{
+		TraceID:    traceID,
+		SpanID:     spanID,
+		TraceFlags: oteltrace.FlagsSampled,
+	})
+	ctx = oteltrace.ContextWithRemoteSpanContext(ctx, remoteCtx)
+
+	parent, err := ParentFromComponents(components)
+	if err != nil {
+		return ctx, err
+	}
+	ctx = SetParent(ctx, parent)
+
+	return ctx, nil
+}

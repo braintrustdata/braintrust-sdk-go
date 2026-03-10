@@ -266,3 +266,31 @@ func (c *Client) Permalink(span oteltrace.Span) string {
 	}
 	return link
 }
+
+// Export serializes the span into a string that can be passed to another process
+// and used with ContextWithExportedSpan to create child spans there. The format
+// is compatible with the Braintrust JS/Python span.export() output.
+//
+// Returns an empty string and logs a warning on error.
+func (c *Client) Export(span oteltrace.Span) string {
+	s, err := bttrace.Export(span)
+	if err != nil {
+		c.logger.Warn("could not export span", "error", err)
+		return ""
+	}
+	return s
+}
+
+// ContextWithExportedSpan returns a context that carries the exported span as the
+// remote parent. Spans started with this context will be children of that span.
+// The exported string should be from Export(span) or span.export() (JS/Python).
+//
+// Returns the original context and logs a warning on error.
+func (c *Client) ContextWithExportedSpan(ctx context.Context, exported string) context.Context {
+	out, err := bttrace.ContextWithExportedSpan(ctx, exported)
+	if err != nil {
+		c.logger.Warn("could not set context from exported span", "error", err)
+		return ctx
+	}
+	return out
+}
