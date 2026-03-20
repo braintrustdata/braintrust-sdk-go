@@ -1,0 +1,79 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 165
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"messages":[{"content":[{"text":"What is the capital of France?","type":"text"}],"role":"user"}],"model":"gpt-4o-mini","max_completion_tokens":32,"temperature":0.2}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+            User-Agent:
+                - OpenAI/Go 1.12.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 1.12.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.26.1
+        url: http://127.0.0.1:38087/v1/chat/completions
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 371
+        uncompressed: false
+        body: |-
+            {
+              "id": "chatcmpl_test_123",
+              "object": "chat.completion",
+              "created": 1742428800,
+              "model": "gpt-4o-mini",
+              "choices": [
+                {
+                  "index": 0,
+                  "message": {
+                    "role": "assistant",
+                    "content": "Paris"
+                  },
+                  "finish_reason": "stop"
+                }
+              ],
+              "usage": {
+                "prompt_tokens": 11,
+                "completion_tokens": 3,
+                "total_tokens": 14
+              }
+            }
+        headers:
+            Content-Length:
+                - "371"
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 20 Mar 2026 13:47:30 GMT
+        status: 200 OK
+        code: 200
+        duration: 646.834µs

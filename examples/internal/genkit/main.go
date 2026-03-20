@@ -4,12 +4,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"github.com/firebase/genkit/go/ai"
 	"github.com/firebase/genkit/go/genkit"
 	"github.com/firebase/genkit/go/plugins/googlegenai"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/trace"
+	"log"
 
 	"github.com/braintrustdata/braintrust-sdk-go"
 	tracegenkit "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit"

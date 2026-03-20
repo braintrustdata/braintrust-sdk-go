@@ -3,15 +3,22 @@ package genkit
 import (
 	"context"
 	"errors"
+	"net"
+	"net/http"
 	"testing"
 
 	"github.com/firebase/genkit/go/ai"
+	"github.com/firebase/genkit/go/genkit"
+	compatopenai "github.com/firebase/genkit/go/plugins/compat_oai/openai"
+	openaigo "github.com/openai/openai-go"
+	"github.com/openai/openai-go/option"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/codes"
 	oteltrace "go.opentelemetry.io/otel/trace"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 )
 
 // mockModelFunc creates a ModelFunc that returns the given response.
@@ -55,35 +62,28 @@ func TestUnitMiddleware(t *testing.T) {
 
 	span := exporter.FlushOne()
 
-	// Verify span name and kind
 	span.AssertNameIs("genkit.generate")
 	assert.Equal(t, oteltrace.SpanKindClient, span.Stub.SpanKind)
-
-	// Verify braintrust attributes
 	assert.True(t, span.HasAttr("braintrust.span_attributes"))
 	assert.True(t, span.HasAttr("braintrust.input_json"))
 	assert.True(t, span.HasAttr("braintrust.output_json"))
 	assert.True(t, span.HasAttr("braintrust.metrics"))
 	assert.True(t, span.HasAttr("braintrust.metadata"))
 
-	// Verify span_attributes
 	span.AssertJSONAttrEquals("braintrust.span_attributes", map[string]any{"type": "llm"})
 
-	// Verify metrics
 	metrics := span.Metrics()
 	assert.Equal(t, float64(10), metrics["prompt_tokens"])
 	assert.Equal(t, float64(1), metrics["completion_tokens"])
 	assert.Equal(t, float64(11), metrics["tokens"])
 
-	// Verify metadata
 	metadata := span.Metadata()
 	assert.Equal(t, "genkit", metadata["provider"])
 	assert.Equal(t, 0.7, metadata["temperature"])
-	assert.Equal(t, float64(100), metadata["maxOutputTokens"])
-	assert.Equal(t, 0.9, metadata["topP"])
-	assert.Equal(t, float64(40), metadata["topK"])
+	assert.Equal(t, float64(100), metadata["max_output_tokens"])
+	assert.Equal(t, 0.9, metadata["top_p"])
+	assert.Equal(t, float64(40), metadata["top_k"])
 
-	// Verify input contains messages
 	input := span.Input()
 	inputMap, ok := input.(map[string]any)
 	require.True(t, ok)
@@ -91,12 +91,81 @@ func TestUnitMiddleware(t *testing.T) {
 	require.True(t, ok)
 	assert.Len(t, messages, 1)
 
-	// Verify output has message
 	output := span.Output()
 	outputMap, ok := output.(map[string]any)
 	require.True(t, ok)
 	assert.Contains(t, outputMap, "message")
 	assert.Equal(t, "stop", outputMap["finishReason"])
+}
+
+func TestMetadataExtraction(t *testing.T) {
+	tp, exporter := oteltest.Setup(t)
+
+	mw := NewMiddleware(WithTracerProvider(tp))
+
+	req := &ai.ModelRequest{
+		Config: &openaigo.ChatCompletionNewParams{
+			Model:               "gpt-4o-mini",
+			Temperature:         openaigo.Float(0.2),
+			TopP:                openaigo.Float(0.8),
+			MaxCompletionTokens: openaigo.Int(32),
+		},
+		Messages: []*ai.Message{
+			ai.NewSystemTextMessage("You are concise."),
+			ai.NewUserTextMessage("Return JSON"),
+		},
+		Output: &ai.ModelOutputConfig{
+			Format:      "json",
+			ContentType: "application/json",
+			Constrained: true,
+			Schema: map[string]any{
+				"type": "object",
+			},
+		},
+		ToolChoice: ai.ToolChoiceRequired,
+		Tools: []*ai.ToolDefinition{
+			{
+				Name:        "lookup_weather",
+				Description: "Looks up weather",
+				InputSchema: map[string]any{
+					"type": "object",
+				},
+			},
+		},
+	}
+
+	resp := &ai.ModelResponse{
+		Message: ai.NewModelTextMessage(`{"city":"Paris"}`),
+		Custom: map[string]any{
+			"model":             "gpt-4o-mini",
+			"id":                "resp_123",
+			"systemFingerprint": "fp_123",
+		},
+	}
+
+	wrapped := mw(mockModelFunc(resp, nil))
+	_, err := wrapped(context.Background(), req, nil)
+	require.NoError(t, err)
+
+	span := exporter.FlushOne()
+	metadata := span.Metadata()
+	assert.Equal(t, "openai", metadata["provider"])
+	assert.Equal(t, "gpt-4o-mini", metadata["model"])
+	assert.Equal(t, "You are concise.", metadata["system"])
+	assert.Equal(t, "json", metadata["response_format"])
+	assert.Equal(t, "application/json", metadata["content_type"])
+	assert.Equal(t, true, metadata["output_constrained"])
+	assert.Equal(t, "required", metadata["tool_choice"])
+	assert.Equal(t, 0.2, metadata["temperature"])
+	assert.Equal(t, 0.8, metadata["top_p"])
+	assert.Equal(t, float64(32), metadata["max_output_tokens"])
+	assert.Equal(t, "resp_123", metadata["id"])
+	assert.Equal(t, "fp_123", metadata["system_fingerprint"])
+
+	input := span.Input().(map[string]any)
+	assert.Contains(t, input, "config")
+	assert.Contains(t, input, "tools")
+	assert.Contains(t, input, "output")
 }
 
 func TestErrorHandling(t *testing.T) {
@@ -116,6 +185,7 @@ func TestErrorHandling(t *testing.T) {
 	span.AssertNameIs("genkit.generate")
 	assert.Equal(t, codes.Error, span.Status().Code)
 	assert.Equal(t, "model failed", span.Status().Description)
+	assert.True(t, span.HasAttr("braintrust.metadata"))
 }
 
 func TestStreaming(t *testing.T) {
@@ -135,7 +205,6 @@ func TestStreaming(t *testing.T) {
 
 	streamingModel := func(_ context.Context, _ *ai.ModelRequest, cb ai.ModelStreamCallback) (*ai.ModelResponse, error) {
 		if cb != nil {
-			// Simulate streaming chunks
 			_ = cb(context.Background(), &ai.ModelResponseChunk{
 				Content: []*ai.Part{ai.NewTextPart("Hello ")},
 			})
@@ -207,21 +276,21 @@ func TestToolUse(t *testing.T) {
 	require.NotNil(t, result)
 
 	span := exporter.FlushOne()
-
-	// Verify input has tools
 	input := span.Input()
 	inputMap := input.(map[string]any)
 	tools, ok := inputMap["tools"].([]any)
 	require.True(t, ok)
 	assert.Len(t, tools, 1)
 
-	// Verify output has tool request
 	output := span.Output()
 	outputMap := output.(map[string]any)
 	assert.Contains(t, outputMap, "message")
+
+	metadata := span.Metadata()
+	assert.Equal(t, "auto", metadata["tool_choice"])
 }
 
-func TestParseUsageTokens(t *testing.T) {
+func TestExtractMetrics(t *testing.T) {
 	tests := []struct {
 		name     string
 		usage    *ai.GenerationUsage
@@ -235,12 +304,16 @@ func TestParseUsageTokens(t *testing.T) {
 				TotalTokens:         30,
 				CachedContentTokens: 5,
 				ThoughtsTokens:      8,
+				Custom: map[string]float64{
+					"acceptedPredictionTokens": 4,
+				},
 			},
 			expected: map[string]float64{
-				"prompt_tokens":              10,
-				"completion_tokens":          20,
-				"tokens":                     30,
-				"prompt_cached_tokens":       5,
+				"accepted_prediction_tokens":  4,
+				"prompt_tokens":               10,
+				"completion_tokens":           20,
+				"tokens":                      30,
+				"prompt_cached_tokens":        5,
 				"completion_reasoning_tokens": 8,
 			},
 		},
@@ -253,6 +326,7 @@ func TestParseUsageTokens(t *testing.T) {
 			expected: map[string]float64{
 				"prompt_tokens":     10,
 				"completion_tokens": 20,
+				"tokens":            30,
 			},
 		},
 		{
@@ -303,7 +377,6 @@ func TestNilResponse(t *testing.T) {
 
 	mw := NewMiddleware(WithTracerProvider(tp))
 
-	// A model that returns nil response with no error (unusual but possible)
 	wrapped := mw(mockModelFunc(nil, nil))
 	result, err := wrapped(context.Background(), &ai.ModelRequest{
 		Messages: []*ai.Message{ai.NewUserTextMessage("test")},
@@ -313,8 +386,9 @@ func TestNilResponse(t *testing.T) {
 
 	span := exporter.FlushOne()
 	span.AssertNameIs("genkit.generate")
-	// Should still have input set
 	assert.True(t, span.HasAttr("braintrust.input_json"))
+	assert.True(t, span.HasAttr("braintrust.metadata"))
+	assert.False(t, span.HasAttr("braintrust.output_json"))
 }
 
 func TestCleanupJSON(t *testing.T) {
@@ -363,6 +437,15 @@ func TestCleanupJSON(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "drops empty list values",
+			input: map[string]any{
+				"values": []any{"kept", ""},
+			},
+			expected: map[string]any{
+				"values": []any{"kept"},
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -409,7 +492,6 @@ func TestStreamingCallbackError(t *testing.T) {
 
 	cbErr := errors.New("callback failed")
 
-	// Model that calls streaming callback then returns an error from it
 	streamingModel := func(_ context.Context, _ *ai.ModelRequest, cb ai.ModelStreamCallback) (*ai.ModelResponse, error) {
 		if cb != nil {
 			if err := cb(context.Background(), &ai.ModelResponseChunk{
@@ -421,7 +503,6 @@ func TestStreamingCallbackError(t *testing.T) {
 		return nil, nil
 	}
 
-	// Callback that returns an error
 	failingCB := func(_ context.Context, _ *ai.ModelResponseChunk) error {
 		return cbErr
 	}
@@ -436,4 +517,137 @@ func TestStreamingCallbackError(t *testing.T) {
 
 	span := exporter.FlushOne()
 	assert.Equal(t, codes.Error, span.Status().Code)
+}
+
+func TestDuplicateSpanGuard(t *testing.T) {
+	tp, exporter := oteltest.Setup(t)
+
+	mw := NewMiddleware(WithTracerProvider(tp))
+
+	req := &ai.ModelRequest{
+		Messages: []*ai.Message{ai.NewUserTextMessage("nested")},
+	}
+	resp := &ai.ModelResponse{
+		Message: ai.NewModelTextMessage("done"),
+	}
+
+	inner := mw(mockModelFunc(resp, nil))
+	outer := mw(func(ctx context.Context, req *ai.ModelRequest, cb ai.ModelStreamCallback) (*ai.ModelResponse, error) {
+		return inner(ctx, req, cb)
+	})
+
+	result, err := outer(context.Background(), req, nil)
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	spans := exporter.Flush()
+	require.Len(t, spans, 1)
+	spans[0].AssertNameIs("genkit.generate")
+}
+
+func TestMiddlewareIntegration(t *testing.T) {
+	tp, exporter := oteltest.Setup(t)
+
+	mode := vcr.GetVCRMode()
+	if mode != vcr.ModeReplay {
+		server := startFixedOpenAIServer(t)
+		t.Cleanup(func() {
+			_ = server.Close()
+		})
+	}
+
+	ctx := context.Background()
+	httpClient := vcr.NewHTTPClient(t)
+	plugin := &compatopenai.OpenAI{
+		APIKey: "dummy-openai-key",
+		Opts: []option.RequestOption{
+			option.WithBaseURL("http://127.0.0.1:38087/v1"),
+			option.WithHTTPClient(httpClient),
+		},
+	}
+
+	g := genkit.Init(ctx,
+		genkit.WithPlugins(plugin),
+		genkit.WithDefaultModel("openai/gpt-4o-mini"),
+	)
+
+	resp, err := genkit.Generate(ctx, g,
+		ai.WithPrompt("What is the capital of France?"),
+		ai.WithConfig(&openaigo.ChatCompletionNewParams{
+			Model:               "gpt-4o-mini",
+			Temperature:         openaigo.Float(0.2),
+			MaxCompletionTokens: openaigo.Int(32),
+		}),
+		ai.WithMiddleware(NewMiddleware(WithTracerProvider(tp))),
+	)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	assert.Equal(t, "Paris", resp.Text())
+
+	span := exporter.FlushOne()
+	span.AssertNameIs("genkit.generate")
+
+	input := span.Input().(map[string]any)
+	messages := input["messages"].([]any)
+	firstMessage := messages[0].(map[string]any)
+	content := firstMessage["content"].([]any)
+	assert.Equal(t, "What is the capital of France?", content[0].(map[string]any)["text"])
+
+	output := span.Output().(map[string]any)
+	message := output["message"].(map[string]any)
+	outContent := message["content"].([]any)
+	assert.Equal(t, "Paris", outContent[0].(map[string]any)["text"])
+
+	metadata := span.Metadata()
+	assert.Equal(t, "openai", metadata["provider"])
+	assert.Equal(t, "gpt-4o-mini", metadata["model"])
+	assert.Equal(t, 0.2, metadata["temperature"])
+	assert.Equal(t, float64(32), metadata["max_output_tokens"])
+
+	metrics := span.Metrics()
+	assert.Equal(t, 11.0, metrics["prompt_tokens"])
+	assert.Equal(t, 3.0, metrics["completion_tokens"])
+	assert.Equal(t, 14.0, metrics["tokens"])
+}
+
+func startFixedOpenAIServer(t *testing.T) *http.Server {
+	t.Helper()
+
+	listener, err := net.Listen("tcp", "127.0.0.1:38087")
+	require.NoError(t, err)
+
+	server := &http.Server{
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/v1/chat/completions", r.URL.Path)
+			assert.Equal(t, "POST", r.Method)
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{
+  "id": "chatcmpl_test_123",
+  "object": "chat.completion",
+  "created": 1742428800,
+  "model": "gpt-4o-mini",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Paris"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 11,
+    "completion_tokens": 3,
+    "total_tokens": 14
+  }
+}`))
+		}),
+	}
+
+	go func() {
+		_ = server.Serve(listener)
+	}()
+
+	return server
 }
