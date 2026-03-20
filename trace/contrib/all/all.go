@@ -34,4 +34,7 @@ import (
 
 	// ADK (google.golang.org/adk)
 	_ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk"
+
+	// Genkit (github.com/firebase/genkit/go)
+	_ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit"
 )

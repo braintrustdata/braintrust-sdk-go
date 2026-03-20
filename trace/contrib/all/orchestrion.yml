@@ -98,6 +98,39 @@ aspects:
               }
               return genai.NewClient({{ $ctx }}, __config)
             }()
+  - id: genkit-generate-middleware
+    join-point:
+      function-call: github.com/firebase/genkit/go/genkit.Generate
+    advice:
+      - append-args:
+          type: github.com/firebase/genkit/go/ai.GenerateOption
+          values:
+            - imports:
+                tracegenkit: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
+                ai: github.com/firebase/genkit/go/ai
+              template: ai.WithMiddleware(tracegenkit.NewMiddleware())
+  - id: genkit-generatetext-middleware
+    join-point:
+      function-call: github.com/firebase/genkit/go/genkit.GenerateText
+    advice:
+      - append-args:
+          type: github.com/firebase/genkit/go/ai.GenerateOption
+          values:
+            - imports:
+                tracegenkit: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
+                ai: github.com/firebase/genkit/go/ai
+              template: ai.WithMiddleware(tracegenkit.NewMiddleware())
+  - id: genkit-generatestream-middleware
+    join-point:
+      function-call: github.com/firebase/genkit/go/genkit.GenerateStream
+    advice:
+      - append-args:
+          type: github.com/firebase/genkit/go/ai.GenerateOption
+          values:
+            - imports:
+                tracegenkit: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
+                ai: github.com/firebase/genkit/go/ai
+              template: ai.WithMiddleware(tracegenkit.NewMiddleware())
   - id: sashabaranov-newclientwithconfig-wrap
     join-point:
       function-call: github.com/sashabaranov/go-openai.NewClientWithConfig
