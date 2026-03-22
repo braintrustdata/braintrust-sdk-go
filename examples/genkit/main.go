@@ -42,9 +42,8 @@ func main() {
 	ctx, span := tracer.Start(ctx, "examples/genkit/main.go")
 	defer span.End()
 
-	resp, err := genkit.Generate(ctx, g,
+	resp, err := tracegenkit.Generate(ctx, g,
 		ai.WithPrompt("What is the capital of France?"),
-		ai.WithMiddleware(tracegenkit.NewMiddleware()),
 	)
 	if err != nil {
 		log.Fatal(err)

@@ -41,14 +41,10 @@ func main() {
 		genkit.WithDefaultModel("googleai/gemini-2.0-flash"),
 	)
 
-	// Create the Braintrust tracing middleware
-	mw := tracegenkit.NewMiddleware(tracegenkit.WithTracerProvider(tp))
-
 	// Example 1: Basic text generation
 	fmt.Println("\n=== Example 1: Basic Text Generation ===")
-	resp, err := genkit.Generate(ctx, g,
+	resp, err := tracegenkit.Generate(ctx, g,
 		ai.WithPrompt("What is the capital of France? Answer in one sentence."),
-		ai.WithMiddleware(mw),
 	)
 	if err != nil {
 		log.Fatalf("Generate error: %v", err)
@@ -57,13 +53,12 @@ func main() {
 
 	// Example 2: Generation with config
 	fmt.Println("\n=== Example 2: With Config ===")
-	resp, err = genkit.Generate(ctx, g,
+	resp, err = tracegenkit.Generate(ctx, g,
 		ai.WithPrompt("Explain quantum computing in two sentences."),
 		ai.WithConfig(&ai.GenerationCommonConfig{
 			Temperature:     0.7,
 			MaxOutputTokens: 200,
 		}),
-		ai.WithMiddleware(mw),
 	)
 	if err != nil {
 		log.Fatalf("Generate error: %v", err)
@@ -73,9 +68,8 @@ func main() {
 	// Example 3: Streaming
 	fmt.Println("\n=== Example 3: Streaming ===")
 	fmt.Print("  ")
-	for sv, err := range genkit.GenerateStream(ctx, g,
+	for sv, err := range tracegenkit.GenerateStream(ctx, g,
 		ai.WithPrompt("Count from 1 to 5, one per line."),
-		ai.WithMiddleware(mw),
 	) {
 		if err != nil {
 			log.Fatalf("Stream error: %v", err)

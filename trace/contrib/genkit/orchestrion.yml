@@ -2,43 +2,50 @@
 meta:
   name: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
   description: Auto-instrumentation for Firebase Genkit with Braintrust tracing
-# NOTE: Genkit's WithMiddleware is single-assignment — if user code already passes
-# ai.WithMiddleware(...), the appended option will cause a runtime error
-# ("cannot set middleware more than once"). Auto-instrumentation targets the
-# common case where no custom middleware is used. Users with custom middleware
-# should use manual integration instead.
-
 aspects:
   - id: genkit-generate-middleware
     join-point:
       function-call: github.com/firebase/genkit/go/genkit.Generate
     advice:
-      - append-args:
-          type: github.com/firebase/genkit/go/ai.GenerateOption
-          values:
-            - imports:
-                tracegenkit: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
-                ai: github.com/firebase/genkit/go/ai
-              template: ai.WithMiddleware(tracegenkit.NewMiddleware())
+      - wrap-expression:
+          imports:
+            tracegenkit: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
+            ai: github.com/firebase/genkit/go/ai
+          template: |-
+            func() (*ai.ModelResponse, error) {
+              {{- $ctx := index .AST.Args 0 }}
+              {{- $g := index .AST.Args 1 }}
+              {{- $opts := slice .AST.Args 2 }}
+              return tracegenkit.Generate({{ $ctx }}, {{ $g }}, {{ $opts }}...)
+            }()
   - id: genkit-generatetext-middleware
     join-point:
       function-call: github.com/firebase/genkit/go/genkit.GenerateText
     advice:
-      - append-args:
-          type: github.com/firebase/genkit/go/ai.GenerateOption
-          values:
-            - imports:
-                tracegenkit: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
-                ai: github.com/firebase/genkit/go/ai
-              template: ai.WithMiddleware(tracegenkit.NewMiddleware())
+      - wrap-expression:
+          imports:
+            tracegenkit: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
+            ai: github.com/firebase/genkit/go/ai
+          template: |-
+            func() (string, error) {
+              {{- $ctx := index .AST.Args 0 }}
+              {{- $g := index .AST.Args 1 }}
+              {{- $opts := slice .AST.Args 2 }}
+              return tracegenkit.GenerateText({{ $ctx }}, {{ $g }}, {{ $opts }}...)
+            }()
   - id: genkit-generatestream-middleware
     join-point:
       function-call: github.com/firebase/genkit/go/genkit.GenerateStream
     advice:
-      - append-args:
-          type: github.com/firebase/genkit/go/ai.GenerateOption
-          values:
-            - imports:
-                tracegenkit: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
-                ai: github.com/firebase/genkit/go/ai
-              template: ai.WithMiddleware(tracegenkit.NewMiddleware())
+      - wrap-expression:
+          imports:
+            tracegenkit: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
+            ai: github.com/firebase/genkit/go/ai
+            iter: iter
+          template: |-
+            func() iter.Seq2[*ai.ModelStreamValue, error] {
+              {{- $ctx := index .AST.Args 0 }}
+              {{- $g := index .AST.Args 1 }}
+              {{- $opts := slice .AST.Args 2 }}
+              return tracegenkit.GenerateStream({{ $ctx }}, {{ $g }}, {{ $opts }}...)
+            }()

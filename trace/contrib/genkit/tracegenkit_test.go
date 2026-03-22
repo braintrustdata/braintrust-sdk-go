@@ -14,6 +14,7 @@ import (
 	"github.com/openai/openai-go/option"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	oteltrace "go.opentelemetry.io/otel/trace"
 
@@ -26,6 +27,20 @@ func mockModelFunc(resp *ai.ModelResponse, err error) ai.ModelFunc {
 	return func(_ context.Context, _ *ai.ModelRequest, _ ai.ModelStreamCallback) (*ai.ModelResponse, error) {
 		return resp, err
 	}
+}
+
+func requireSpanNamed(t *testing.T, spans []oteltest.Span, name string) oteltest.Span {
+	t.Helper()
+
+	var matches []oteltest.Span
+	for _, span := range spans {
+		if span.Name() == name {
+			matches = append(matches, span)
+		}
+	}
+
+	require.Len(t, matches, 1)
+	return matches[0]
 }
 
 func TestUnitMiddleware(t *testing.T) {
@@ -78,7 +93,7 @@ func TestUnitMiddleware(t *testing.T) {
 	assert.Equal(t, float64(11), metrics["tokens"])
 
 	metadata := span.Metadata()
-	assert.Equal(t, "genkit", metadata["provider"])
+	assert.NotContains(t, metadata, "provider")
 	assert.Equal(t, 0.7, metadata["temperature"])
 	assert.Equal(t, float64(100), metadata["max_output_tokens"])
 	assert.Equal(t, 0.9, metadata["top_p"])
@@ -545,8 +560,123 @@ func TestDuplicateSpanGuard(t *testing.T) {
 	spans[0].AssertNameIs("genkit.generate")
 }
 
+func TestSequentialToolTurnsAreTraced(t *testing.T) {
+	tp, exporter := oteltest.Setup(t)
+
+	mw := NewMiddleware(WithTracerProvider(tp))
+
+	var nextCtx context.Context
+	callCount := 0
+	wrapped := mw(func(ctx context.Context, req *ai.ModelRequest, cb ai.ModelStreamCallback) (*ai.ModelResponse, error) {
+		callCount++
+		nextCtx = ctx
+		return &ai.ModelResponse{
+			Message: ai.NewModelTextMessage("turn complete"),
+			Usage: &ai.GenerationUsage{
+				InputTokens:  1,
+				OutputTokens: 1,
+				TotalTokens:  2,
+			},
+		}, nil
+	})
+
+	_, err := wrapped(context.Background(), &ai.ModelRequest{
+		Messages: []*ai.Message{ai.NewUserTextMessage("first turn")},
+	}, nil)
+	require.NoError(t, err)
+	require.NotNil(t, nextCtx)
+
+	_, err = wrapped(nextCtx, &ai.ModelRequest{
+		Messages: []*ai.Message{ai.NewUserTextMessage("second turn")},
+	}, nil)
+	require.NoError(t, err)
+
+	spans := exporter.Flush()
+	require.Len(t, spans, 2)
+	assert.Equal(t, 2, callCount)
+}
+
+func TestGeneratePropagatesDefaultModelMetadata(t *testing.T) {
+	tp, exporter := oteltest.Setup(t)
+	prev := otel.GetTracerProvider()
+	otel.SetTracerProvider(tp)
+	t.Cleanup(func() {
+		otel.SetTracerProvider(prev)
+	})
+
+	ctx := context.Background()
+	g := genkit.Init(ctx, genkit.WithDefaultModel("googleai/gemini-2.0-flash"))
+	genkit.DefineModel(g, "googleai/gemini-2.0-flash", nil,
+		func(_ context.Context, _ *ai.ModelRequest, _ ai.ModelStreamCallback) (*ai.ModelResponse, error) {
+			return &ai.ModelResponse{
+				Message: ai.NewModelTextMessage("hi"),
+			}, nil
+		},
+	)
+
+	resp, err := Generate(ctx, g,
+		ai.WithPrompt("hello"),
+		ai.WithConfig(&struct {
+			Temperature float64 `json:"temperature"`
+		}{
+			Temperature: 0.3,
+		}),
+		ai.WithMiddleware(func(next ai.ModelFunc) ai.ModelFunc {
+			return func(ctx context.Context, req *ai.ModelRequest, cb ai.ModelStreamCallback) (*ai.ModelResponse, error) {
+				return next(ctx, req, cb)
+			}
+		}),
+	)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	assert.Equal(t, "hi", resp.Text())
+
+	span := requireSpanNamed(t, exporter.Flush(), "genkit.generate")
+	metadata := span.Metadata()
+	assert.Equal(t, "gemini", metadata["provider"])
+	assert.Equal(t, "gemini-2.0-flash", metadata["model"])
+	assert.Equal(t, 0.3, metadata["temperature"])
+}
+
+func TestGeneratePropagatesWithModelNameMetadata(t *testing.T) {
+	tp, exporter := oteltest.Setup(t)
+	prev := otel.GetTracerProvider()
+	otel.SetTracerProvider(tp)
+	t.Cleanup(func() {
+		otel.SetTracerProvider(prev)
+	})
+
+	ctx := context.Background()
+	g := genkit.Init(ctx)
+	genkit.DefineModel(g, "anthropic/claude-3-5-sonnet", nil,
+		func(_ context.Context, _ *ai.ModelRequest, _ ai.ModelStreamCallback) (*ai.ModelResponse, error) {
+			return &ai.ModelResponse{
+				Message: ai.NewModelTextMessage("ok"),
+			}, nil
+		},
+	)
+
+	resp, err := Generate(ctx, g,
+		ai.WithPrompt("hello"),
+		ai.WithModelName("anthropic/claude-3-5-sonnet"),
+	)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	assert.Equal(t, "ok", resp.Text())
+
+	span := requireSpanNamed(t, exporter.Flush(), "genkit.generate")
+	metadata := span.Metadata()
+	assert.Equal(t, "anthropic", metadata["provider"])
+	assert.Equal(t, "claude-3-5-sonnet", metadata["model"])
+}
+
 func TestMiddlewareIntegration(t *testing.T) {
 	tp, exporter := oteltest.Setup(t)
+	prev := otel.GetTracerProvider()
+	otel.SetTracerProvider(tp)
+	t.Cleanup(func() {
+		otel.SetTracerProvider(prev)
+	})
 
 	mode := vcr.GetVCRMode()
 	if mode != vcr.ModeReplay {
@@ -571,20 +701,19 @@ func TestMiddlewareIntegration(t *testing.T) {
 		genkit.WithDefaultModel("openai/gpt-4o-mini"),
 	)
 
-	resp, err := genkit.Generate(ctx, g,
+	resp, err := Generate(ctx, g,
 		ai.WithPrompt("What is the capital of France?"),
 		ai.WithConfig(&openaigo.ChatCompletionNewParams{
 			Model:               "gpt-4o-mini",
 			Temperature:         openaigo.Float(0.2),
 			MaxCompletionTokens: openaigo.Int(32),
 		}),
-		ai.WithMiddleware(NewMiddleware(WithTracerProvider(tp))),
 	)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 	assert.Equal(t, "Paris", resp.Text())
 
-	span := exporter.FlushOne()
+	span := requireSpanNamed(t, exporter.Flush(), "genkit.generate")
 	span.AssertNameIs("genkit.generate")
 
 	input := span.Input().(map[string]any)

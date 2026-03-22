@@ -131,16 +131,16 @@ func main() {
         genkit.WithDefaultModel("googleai/gemini-2.5-flash"),
     )
 
-    _, _ = genkit.Generate(ctx, g,
+    _, _ = tracegenkit.Generate(ctx, g,
         ai.WithPrompt("Hello!"),
-        ai.WithMiddleware(tracegenkit.NewMiddleware()),
     )
 }
 ```
 
 Use `trace/contrib/genkit` as the top-level tracing layer for Genkit requests. Avoid combining it with lower-level provider integrations such as `trace/contrib/openai`, `trace/contrib/anthropic`, or `trace/contrib/genai` on the same request path, or you may emit nested LLM spans.
+Use `tracegenkit.Generate`, `tracegenkit.GenerateText`, or `tracegenkit.GenerateStream` when you want manual instrumentation. Those wrappers preserve selected Genkit model metadata for `genkit.WithDefaultModel(...)` and `ai.WithModelName(...)` flows and will append Braintrust tracing even if you already pass other `ai.WithMiddleware(...)` options.
 
-Genkit's `ai.WithMiddleware(...)` option is single-assignment. The current auto-instrumentation path appends `ai.WithMiddleware(tracegenkit.NewMiddleware())`, so code that already passes `ai.WithMiddleware(...)` should use manual integration instead of auto-instrumentation.
+`tracegenkit.NewMiddleware()` remains available for lower-level manual control, but it only sees the final `ai.ModelRequest`. When model selection happens higher in the Genkit stack, prefer the wrapper entrypoints above.
 
 ## sashabaranov/go-openai
 

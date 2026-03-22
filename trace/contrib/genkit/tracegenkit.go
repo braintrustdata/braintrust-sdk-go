@@ -13,28 +13,29 @@
 //		log.Fatal(err)
 //	}
 //
-// Then use the middleware with genkit.Generate():
+// Then wrap Genkit entrypoints with this package:
 //
-//	resp, err := genkit.Generate(ctx, g,
+//	resp, err := tracegenkit.Generate(ctx, g,
 //		ai.WithPrompt("Hello!"),
-//		ai.WithMiddleware(tracegenkit.NewMiddleware()),
 //	)
 //
-// Note: Genkit's ai.WithMiddleware(...) is single-assignment. If your code already
-// passes ai.WithMiddleware(...), the current auto-instrumentation path will conflict
-// and manual integration should be used instead.
+// NewMiddleware is still available when you need lower-level manual control.
 package genkit
 
 import (
 	"context"
 	"encoding/json"
+	"iter"
 	"reflect"
 	"strings"
 	"sync"
 	"time"
 	"unicode"
+	"unsafe"
 
 	"github.com/firebase/genkit/go/ai"
+	"github.com/firebase/genkit/go/core/api"
+	genkitpkg "github.com/firebase/genkit/go/genkit"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
@@ -45,7 +46,20 @@ import (
 
 type contextKey string
 
-const activeLLMSpanKey contextKey = "braintrust.genkit.active_llm_span"
+const (
+	llmSpanStateKey     contextKey = "braintrust.genkit.llm_span_state"
+	generateMetadataKey contextKey = "braintrust.genkit.generate_metadata"
+)
+
+type llmSpanState struct {
+	mu    sync.Mutex
+	depth int
+}
+
+type generateMetadata struct {
+	model    string
+	provider string
+}
 
 // Option configures the Genkit tracing middleware.
 type Option func(*middlewareConfig)
@@ -91,21 +105,41 @@ func NewMiddleware(opts ...Option) ai.ModelMiddleware {
 	}
 }
 
+// Generate wraps genkit.Generate with Braintrust tracing.
+func Generate(ctx context.Context, g *genkitpkg.Genkit, opts ...ai.GenerateOption) (*ai.ModelResponse, error) {
+	ctx = withGenerateMetadata(ctx, g, opts)
+	return genkitpkg.Generate(ctx, g, tracedGenerateOptions(opts)...)
+}
+
+// GenerateText wraps genkit.GenerateText with Braintrust tracing.
+func GenerateText(ctx context.Context, g *genkitpkg.Genkit, opts ...ai.GenerateOption) (string, error) {
+	ctx = withGenerateMetadata(ctx, g, opts)
+	return genkitpkg.GenerateText(ctx, g, tracedGenerateOptions(opts)...)
+}
+
+// GenerateStream wraps genkit.GenerateStream with Braintrust tracing.
+func GenerateStream(ctx context.Context, g *genkitpkg.Genkit, opts ...ai.GenerateOption) iter.Seq2[*ai.ModelStreamValue, error] {
+	ctx = withGenerateMetadata(ctx, g, opts)
+	return genkitpkg.GenerateStream(ctx, g, tracedGenerateOptions(opts)...)
+}
+
 func traceGenerate(ctx context.Context, cfg *middlewareConfig, next ai.ModelFunc, req *ai.ModelRequest, cb ai.ModelStreamCallback) (*ai.ModelResponse, error) {
-	if ctx.Value(activeLLMSpanKey) != nil {
+	ctx, state := withLLMSpanState(ctx)
+	if !state.enter() {
+		defer state.leave()
 		return next(ctx, req, cb)
 	}
+	defer state.leave()
 
 	ctx, span := cfg.tracer.Start(ctx, "genkit.generate", trace.WithSpanKind(trace.SpanKindClient))
 	defer span.End()
-	ctx = context.WithValue(ctx, activeLLMSpanKey, true)
 
 	setJSONAttr(cfg, span, "braintrust.span_attributes", map[string]string{"type": "llm"})
 	if input := cleanupForInput(req); input != nil {
 		setJSONAttr(cfg, span, "braintrust.input_json", input)
 	}
 
-	metadata := requestMetadata(req)
+	metadata := requestMetadata(ctx, req)
 
 	var ttft time.Duration
 	wrappedCB := cb
@@ -122,7 +156,6 @@ func traceGenerate(ctx context.Context, cfg *middlewareConfig, next ai.ModelFunc
 
 	resp, err := next(ctx, req, wrappedCB)
 	if err != nil {
-		ensureDefaultProvider(metadata)
 		setJSONAttr(cfg, span, "braintrust.metadata", metadata)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
@@ -140,7 +173,6 @@ func traceGenerate(ctx context.Context, cfg *middlewareConfig, next ai.ModelFunc
 	for key, value := range responseMetadata(resp) {
 		metadata[key] = value
 	}
-	ensureDefaultProvider(metadata)
 	setJSONAttr(cfg, span, "braintrust.metadata", metadata)
 
 	return resp, nil
@@ -261,10 +293,8 @@ func extractMetrics(resp *ai.ModelResponse, ttft time.Duration) map[string]float
 	return metrics
 }
 
-func requestMetadata(req *ai.ModelRequest) map[string]any {
-	metadata := map[string]any{
-		"provider": "genkit",
-	}
+func requestMetadata(ctx context.Context, req *ai.ModelRequest) map[string]any {
+	metadata := metadataFromContext(ctx)
 	if req == nil {
 		return metadata
 	}
@@ -336,6 +366,153 @@ func responseMetadata(resp *ai.ModelResponse) map[string]any {
 	}
 
 	return metadata
+}
+
+func tracedGenerateOptions(opts []ai.GenerateOption) []ai.GenerateOption {
+	middleware := NewMiddleware()
+	cloned := append([]ai.GenerateOption(nil), opts...)
+	for i, opt := range cloned {
+		if merged, ok := appendMiddleware(opt, middleware); ok {
+			cloned[i] = merged
+			return cloned
+		}
+	}
+	return append(cloned, ai.WithMiddleware(middleware))
+}
+
+func appendMiddleware(opt ai.GenerateOption, middleware ai.ModelMiddleware) (ai.GenerateOption, bool) {
+	cloned := cloneOption(opt)
+	field := findField(cloned, "Middleware")
+	if !field.IsValid() || field.Kind() != reflect.Slice {
+		return nil, false
+	}
+
+	current, ok := field.Interface().([]ai.ModelMiddleware)
+	if !ok {
+		return nil, false
+	}
+
+	field.Set(reflect.ValueOf(append(current, middleware)))
+	updated, ok := cloned.Interface().(ai.GenerateOption)
+	return updated, ok
+}
+
+func withGenerateMetadata(ctx context.Context, g *genkitpkg.Genkit, opts []ai.GenerateOption) context.Context {
+	metadata := resolveGenerateMetadata(g, opts)
+	if metadata.model == "" && metadata.provider == "" {
+		return ctx
+	}
+	return context.WithValue(ctx, generateMetadataKey, metadata)
+}
+
+func resolveGenerateMetadata(g *genkitpkg.Genkit, opts []ai.GenerateOption) generateMetadata {
+	model := modelNameFromOptions(opts)
+	if model == "" {
+		model = defaultModelName(g)
+	}
+	if model == "" {
+		return generateMetadata{}
+	}
+
+	provider, normalizedModel := normalizeModelRef(model)
+	metadata := generateMetadata{model: normalizedModel}
+	if provider != "" {
+		metadata.provider = provider
+	}
+	return metadata
+}
+
+func modelNameFromOptions(opts []ai.GenerateOption) string {
+	for _, opt := range opts {
+		field := findField(reflect.ValueOf(opt), "Model")
+		if !field.IsValid() || field.IsZero() {
+			continue
+		}
+		model, ok := field.Interface().(ai.ModelArg)
+		if ok && model != nil && model.Name() != "" {
+			return model.Name()
+		}
+	}
+	return ""
+}
+
+func defaultModelName(g *genkitpkg.Genkit) string {
+	if g == nil {
+		return ""
+	}
+
+	registry := findField(reflect.ValueOf(g), "reg")
+	if !registry.IsValid() || registry.IsNil() {
+		return ""
+	}
+
+	lookup := registry.MethodByName("LookupValue")
+	if !lookup.IsValid() {
+		return ""
+	}
+
+	results := lookup.Call([]reflect.Value{reflect.ValueOf(api.DefaultModelKey)})
+	if len(results) != 1 {
+		return ""
+	}
+
+	model, _ := results[0].Interface().(string)
+	return model
+}
+
+func normalizeModelRef(model string) (string, string) {
+	provider, rest, found := strings.Cut(model, "/")
+	if !found || provider == "" || rest == "" {
+		if normalizedProvider, ok := providerFromModel(model); ok {
+			return normalizedProvider, model
+		}
+		return "", model
+	}
+
+	switch provider {
+	case "google", "googleai", "gemini":
+		provider = "gemini"
+	}
+	return provider, rest
+}
+
+func metadataFromContext(ctx context.Context) map[string]any {
+	metadata, _ := ctx.Value(generateMetadataKey).(generateMetadata)
+	result := map[string]any{}
+	if metadata.provider != "" {
+		result["provider"] = metadata.provider
+	}
+	if metadata.model != "" {
+		result["model"] = metadata.model
+	}
+	return result
+}
+
+func withLLMSpanState(ctx context.Context) (context.Context, *llmSpanState) {
+	if state, ok := ctx.Value(llmSpanStateKey).(*llmSpanState); ok && state != nil {
+		return ctx, state
+	}
+
+	state := &llmSpanState{}
+	return context.WithValue(ctx, llmSpanStateKey, state), state
+}
+
+func (s *llmSpanState) enter() bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	shouldTrace := s.depth == 0
+	s.depth++
+	return shouldTrace
+}
+
+func (s *llmSpanState) leave() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.depth > 0 {
+		s.depth--
+	}
 }
 
 func configMetadata(config any) map[string]any {
@@ -468,15 +645,6 @@ func providerFromModel(model string) (string, bool) {
 		return "gemini", true
 	default:
 		return prefix, true
-	}
-}
-
-func ensureDefaultProvider(metadata map[string]any) {
-	if metadata == nil {
-		return
-	}
-	if _, ok := metadata["provider"]; !ok {
-		metadata["provider"] = "genkit"
 	}
 }
 
@@ -615,4 +783,66 @@ func snakeCase(value string) string {
 		lastLowerOrDigit = unicode.IsLower(r) || unicode.IsDigit(r)
 	}
 	return b.String()
+}
+
+func findField(value reflect.Value, name string) reflect.Value {
+	value = exposeValue(value)
+	if !value.IsValid() {
+		return reflect.Value{}
+	}
+
+	for value.Kind() == reflect.Ptr {
+		if value.IsNil() {
+			return reflect.Value{}
+		}
+		value = exposeValue(value.Elem())
+	}
+
+	if value.Kind() != reflect.Struct {
+		return reflect.Value{}
+	}
+
+	if field := value.FieldByName(name); field.IsValid() {
+		return exposeValue(field)
+	}
+
+	for i := 0; i < value.NumField(); i++ {
+		field := exposeValue(value.Field(i))
+		switch field.Kind() {
+		case reflect.Struct, reflect.Ptr:
+			if nested := findField(field, name); nested.IsValid() {
+				return nested
+			}
+		}
+	}
+
+	return reflect.Value{}
+}
+
+func exposeValue(value reflect.Value) reflect.Value {
+	if !value.IsValid() {
+		return value
+	}
+	if value.CanInterface() || !value.CanAddr() {
+		return value
+	}
+	return reflect.NewAt(value.Type(), unsafe.Pointer(value.UnsafeAddr())).Elem()
+}
+
+func cloneOption(opt ai.GenerateOption) reflect.Value {
+	value := exposeValue(reflect.ValueOf(opt))
+	if !value.IsValid() {
+		return reflect.Value{}
+	}
+	if value.Kind() == reflect.Ptr {
+		if value.IsNil() {
+			return reflect.Zero(value.Type())
+		}
+		cloned := reflect.New(value.Elem().Type())
+		cloned.Elem().Set(exposeValue(value.Elem()))
+		return cloned
+	}
+	cloned := reflect.New(value.Type()).Elem()
+	cloned.Set(value)
+	return cloned
 }
