@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://datadoghq.dev/orchestrion/schema.json
+meta:
+  name: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino
+  description: Auto-instrumentation for CloudWeGo Eino with Braintrust tracing
+
+aspects:
+  - id: cloudwego-eino-append-global-handler
+    join-point:
+      function-call: github.com/cloudwego/eino/callbacks.AppendGlobalHandlers
+    advice:
+      - append-args:
+          type: github.com/cloudwego/eino/callbacks.Handler
+          values:
+            - imports:
+                traceeino: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino
+              template: traceeino.DefaultHandler()

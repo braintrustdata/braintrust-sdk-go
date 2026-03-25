@@ -77,13 +77,26 @@ For streaming responses, aggregate chunks and capture final usage:
 3. Early stream termination (close without reading)
 4. Error handling (network errors, API errors)
 5. **All critical features**:
-   - Tool/function calling (if supported)
+   - Tool/function calling (if supported) — verify `span_attributes.type = "tool"`, input args, output result
+   - Agentic spans — if the SDK has a callback/handler system, implement span capture for tool calls and subagent invocations in addition to LLM calls
    - Images/vision (if supported)
    - System messages (if supported)
    - Multiple messages/chat history
    - Any provider-specific features (reasoning, caching, etc.)
 6. Token usage edge cases (cached tokens, reasoning tokens)
 7. Multiple APIs (if provider has multiple endpoints)
+
+## Agentic Spans
+
+Many LLM frameworks support multi-step agents with tool calling, subagent delegation, or graph-based orchestration. When the SDK has an event/callback system, capture all of these as spans:
+
+- **Tool calls**: `span_attributes.type = "tool"`. Set `input` to the tool arguments, `output` to the result, and `metadata.name` to the tool name.
+- **Subagents / nested agents**: If the framework emits a callback when one agent calls another, capture it as a child span. Use a descriptive span type (`"function"` or `"task"`) and include the subagent name.
+- **Graph nodes / chains**: If the SDK wraps components (retrievers, embedders, rerankers) in a graph and fires per-node callbacks, capture them too using the appropriate span type.
+
+**Key pattern**: Dispatch on the SDK's callback input/output type to determine what kind of span to create. Ignore types that don't map to a recognizable span type. Check with `tool.ConvCallbackInput`, `model.ConvCallbackInput`, etc. and fall through to `return ctx` for unknown types.
+
+**Internal example must cover**: at minimum one full agentic turn — model call → tool execution → model incorporating result — to verify the full span chain appears correctly in Braintrust.
 
 ## VCR Testing
 
@@ -136,10 +149,16 @@ Orchestrion provides compile-time tracing injection with zero code changes.
 **Customer example** (`examples/yourprovider/main.go`):
 - Concise, shows basic usage with manual middleware
 - Creates root span, makes API call, prints permalink
+- **MUST use real model SDK** — no mocks, stubs, or fake responses
 
 **Internal example** (`examples/internal/yourprovider/main.go`):
 - Comprehensive feature coverage for CI validation
-- Tests all supported API endpoints and features
+- **Must cover**: non-streaming, streaming, tool calling (agentic turn), and multiple providers where available
+- Skip sections gracefully when optional API keys are not set (e.g. `if key := os.Getenv("ANTHROPIC_API_KEY"); key != ""`)
+- **MUST use real model SDK** — no mocks, stubs, or fake responses
+- Read API keys from environment variables
+
+> **Rule**: Examples must always use real provider SDKs with real API keys. Never use mock models, stub implementations, or hardcoded fake responses. For callback-based integrations, use the real model implementation from the provider's extension library rather than a hand-rolled callback invoker.
 
 ## TDD Workflow
 

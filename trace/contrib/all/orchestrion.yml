@@ -80,6 +80,16 @@ aspects:
                 bt: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic
                 option: github.com/anthropics/anthropic-sdk-go/option
               template: option.WithMiddleware(bt.NewMiddleware())
+  - id: cloudwego-eino-append-global-handler
+    join-point:
+      function-call: github.com/cloudwego/eino/callbacks.AppendGlobalHandlers
+    advice:
+      - append-args:
+          type: github.com/cloudwego/eino/callbacks.Handler
+          values:
+            - imports:
+                traceeino: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino
+              template: traceeino.DefaultHandler()
   - id: genai-newclient-wrap
     join-point:
       function-call: google.golang.org/genai.NewClient

@@ -37,4 +37,7 @@ import (
 
 	// Genkit (github.com/firebase/genkit/go)
 	_ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit"
+
+	// CloudWeGo Eino (github.com/cloudwego/eino)
+	_ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino"
 )
