@@ -91,6 +91,19 @@ type Opts[I, R any] struct {
 	Parallelism int      // Number of goroutines (default: 1)
 	TrialCount  int      // Number of times to run each case (default: 1)
 	Quiet       bool     // Suppress result output (default: false)
+
+	// OnCaseComplete is called after each case completes (task + scorers).
+	// It is called from worker goroutines and must be safe for concurrent use.
+	// Optional — nil means no callback.
+	OnCaseComplete func(CaseProgress)
+}
+
+// CaseProgress contains the result of a single completed evaluation case.
+// It is passed to the [Opts.OnCaseComplete] callback.
+type CaseProgress struct {
+	Output any
+	Scores map[string]float64
+	Error  error
 }
 
 // Case represents a single test case in an evaluation.
@@ -247,6 +260,7 @@ type eval[I, R any] struct {
 	goroutines     int
 	trialCount     int
 	quiet          bool
+	onCaseComplete func(CaseProgress)
 }
 
 // nextCase is a wrapper for sending cases through a channel.
@@ -272,6 +286,7 @@ func newEval[I, R any](
 	parallelism int,
 	trialCount int,
 	quiet bool,
+	onCaseComplete func(CaseProgress),
 ) *eval[I, R] {
 	// Build parent span option
 	parent := bttrace.NewParent(bttrace.ParentTypeExperimentID, experimentID)
@@ -307,6 +322,7 @@ func newEval[I, R any](
 		goroutines:     goroutines,
 		trialCount:     trialCount,
 		quiet:          quiet,
+		onCaseComplete: onCaseComplete,
 	}
 }
 
@@ -346,6 +362,7 @@ func newEvalOpts[I, R any](ctx context.Context, s *auth.Session, tp *trace.Trace
 		opts.Parallelism,
 		opts.TrialCount,
 		opts.Quiet,
+		opts.OnCaseComplete,
 	), nil
 }
 
@@ -475,6 +492,9 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 
 	taskResult, err := e.runTask(ctx, span, c, trialIndex)
 	if err != nil {
+		if e.onCaseComplete != nil {
+			e.onCaseComplete(CaseProgress{Error: err})
+		}
 		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
@@ -487,6 +507,7 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 	// a failing scorer must not block classifiers (and vice versa), and
 	// per-pass errors are aggregated rather than fatal.
 	var (
+		scores        []Score
 		scorerErr     error
 		classifierErr error
 		wg            sync.WaitGroup
@@ -495,7 +516,7 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			_, scorerErr = e.runScorers(ctx, taskResult)
+			scores, scorerErr = e.runScorers(ctx, taskResult)
 		}()
 	}
 	if len(e.classifiers) > 0 {
@@ -507,7 +528,21 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 	}
 	wg.Wait()
 
-	if joined := errors.Join(scorerErr, classifierErr); joined != nil {
+	joined := errors.Join(scorerErr, classifierErr)
+
+	if e.onCaseComplete != nil {
+		scoreMap := make(map[string]float64, len(scores))
+		for _, s := range scores {
+			scoreMap[s.Name] = s.Score
+		}
+		e.onCaseComplete(CaseProgress{
+			Output: taskResult.Output,
+			Scores: scoreMap,
+			Error:  joined,
+		})
+	}
+
+	if joined != nil {
 		span.SetStatus(codes.Error, joined.Error())
 		return joined
 	}
@@ -969,5 +1004,6 @@ func testNewEval[I, R any](
 		parallelism,
 		1,    // trialCount=1 for tests
 		true, // quiet=true for tests
+		nil,  // no callback for tests
 	)
 }

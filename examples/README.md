@@ -29,6 +29,12 @@ Examples for other AI providers and client libraries:
 - **[langchaingo/](langchaingo/)** - Trace LangChainGo multi-turn conversations
 - **[adk-go/](adk/)** - Trace agents built with the ADK framework
 
+## Remote Evals
+
+Run evaluations triggered from the Braintrust UI against your own infrastructure:
+
+- **[eval-server](internal/eval-server/)** - Remote eval server exposing evaluators over HTTP
+
 ## Advanced Features (30 minutes)
 
 More specialized use cases and integrations:

@@ -3,6 +3,7 @@ package eval
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"sync"
 	"sync/atomic"
@@ -1258,6 +1259,185 @@ func TestEval_ParentPropagation(t *testing.T) {
 	assert.NotNil(t, result)
 	assert.Equal(taskParent, trace.Parent{Type: trace.ParentTypeExperimentID, ID: result.ID()})
 	assert.Equal(scorerParent, trace.Parent{Type: trace.ParentTypeExperimentID, ID: result.ID()})
+}
+
+func TestOnCaseComplete_Callback(t *testing.T) {
+	t.Parallel()
+
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "test1"}, Expected: testOutput{Result: "expected1"}},
+		{Input: testInput{Value: "test2"}, Expected: testOutput{Result: "expected2"}},
+	})
+
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: "output-" + input.Value}, nil
+	})
+
+	scorer := NewScorer("accuracy", func(ctx context.Context, result TaskResult[testInput, testOutput]) (Scores, error) {
+		return S(0.75), nil
+	})
+
+	// Track callback invocations
+	var mu sync.Mutex
+	var progresses []CaseProgress
+	callback := func(cp CaseProgress) {
+		mu.Lock()
+		progresses = append(progresses, cp)
+		mu.Unlock()
+	}
+
+	// Create eval manually with the callback
+	tp, _ := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-callback", "callback-experiment",
+		"proj-callback", "callback-project",
+		cases, task,
+		[]Scorer[testInput, testOutput]{scorer},
+		1, true, callback,
+	)
+
+	result, err := e.run(context.Background())
+	require.NoError(t, err)
+	assert.NotNil(t, result)
+
+	mu.Lock()
+	defer mu.Unlock()
+	require.Len(t, progresses, 2)
+
+	// Both should have scores and no errors
+	for _, p := range progresses {
+		assert.NoError(t, p.Error)
+		assert.NotNil(t, p.Scores)
+		assert.Equal(t, 0.75, p.Scores["accuracy"])
+		assert.NotNil(t, p.Output)
+	}
+}
+
+func TestOnCaseComplete_CallbackOnError(t *testing.T) {
+	t.Parallel()
+
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "will-fail"}},
+	})
+
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{}, errors.New("task failed")
+	})
+
+	var called bool
+	var capturedProgress CaseProgress
+	callback := func(cp CaseProgress) {
+		called = true
+		capturedProgress = cp
+	}
+
+	tp, _ := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-err", "err-experiment",
+		"proj-err", "err-project",
+		cases, task,
+		nil, 1, true, callback,
+	)
+
+	_, _ = e.run(context.Background())
+
+	assert.True(t, called)
+	assert.Error(t, capturedProgress.Error)
+	assert.Contains(t, capturedProgress.Error.Error(), "task failed")
+}
+
+func TestOnCaseComplete_NilCallback(t *testing.T) {
+	t.Parallel()
+
+	// Ensure nil callback doesn't panic
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "test"}},
+	})
+
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: "ok"}, nil
+	})
+
+	tp, _ := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-nil", "nil-experiment",
+		"proj-nil", "nil-project",
+		cases, task,
+		nil, 1, true, nil,
+	)
+
+	result, err := e.run(context.Background())
+	require.NoError(t, err)
+	assert.NotNil(t, result)
+}
+
+func TestOnCaseComplete_Parallel(t *testing.T) {
+	t.Parallel()
+
+	// 20 cases with parallelism=4 to exercise concurrent callback invocation
+	var inputCases []Case[testInput, testOutput]
+	for i := 0; i < 20; i++ {
+		inputCases = append(inputCases, Case[testInput, testOutput]{
+			Input:    testInput{Value: fmt.Sprintf("test%d", i)},
+			Expected: testOutput{Result: fmt.Sprintf("output-test%d", i)},
+		})
+	}
+	cases := NewDataset(inputCases)
+
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: "output-" + input.Value}, nil
+	})
+
+	scorer := NewScorer("score", func(ctx context.Context, result TaskResult[testInput, testOutput]) (Scores, error) {
+		return S(1.0), nil
+	})
+
+	var mu sync.Mutex
+	var progresses []CaseProgress
+	callback := func(cp CaseProgress) {
+		mu.Lock()
+		progresses = append(progresses, cp)
+		mu.Unlock()
+	}
+
+	tp, _ := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-parallel", "parallel-experiment",
+		"proj-parallel", "parallel-project",
+		cases, task,
+		[]Scorer[testInput, testOutput]{scorer},
+		4, true, callback,
+	)
+
+	result, err := e.run(context.Background())
+	require.NoError(t, err)
+	assert.NotNil(t, result)
+
+	mu.Lock()
+	defer mu.Unlock()
+	require.Len(t, progresses, 20, "callback should fire for all 20 cases")
+
+	for _, p := range progresses {
+		assert.NoError(t, p.Error)
+		assert.Equal(t, 1.0, p.Scores["score"])
+		assert.NotNil(t, p.Output)
+	}
 }
 
 func TestTaskOutput_UserData(t *testing.T) {

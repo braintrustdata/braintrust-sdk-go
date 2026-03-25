@@ -188,6 +188,46 @@ func main() {
 }
 ```
 
+### Remote Eval Server
+
+Run evaluations from the [Braintrust playground](https://www.braintrust.dev/docs/evaluate/remote-evals) against code on your own infrastructure:
+
+```go
+package main
+
+import (
+    "context"
+    "log"
+    "strings"
+
+    "github.com/braintrustdata/braintrust-sdk-go/eval"
+    "github.com/braintrustdata/braintrust-sdk-go/server"
+)
+
+func main() {
+    srv := server.New(
+        server.WithAddress("localhost:8300"),
+        server.WithNoAuth(), // Remove for production
+    )
+
+    server.Register(srv, "classify",
+        eval.T(func(ctx context.Context, input string) (string, error) {
+            return strings.ToUpper(input), nil
+        }),
+        []eval.Scorer[string, string]{
+            eval.NewScorer("exact_match", func(ctx context.Context, r eval.TaskResult[string, string]) (eval.Scores, error) {
+                if r.Output == r.Expected { return eval.S(1.0), nil }
+                return eval.S(0.0), nil
+            }),
+        },
+    )
+
+    log.Fatal(srv.Start())
+}
+```
+
+Then configure `http://localhost:8300` in your Braintrust project settings under **Remote evals**.
+
 ## API Client
 
 Manage Braintrust resources programmatically:
@@ -286,10 +326,12 @@ Complete working examples are available in [`examples/`](./examples/):
 - **[prompts](./examples/prompts/main.go)** - Use Braintrust hosted prompts
 - **[distributed-tracing](./examples/distributed-tracing/main.go)** - W3C baggage propagation across services
 - **[otel](./examples/otel/main.go)** - Add Braintrust to existing OpenTelemetry setup
+- **[eval-server](./examples/internal/eval-server/main.go)** - Remote eval server
 
 ## Features
 
 - **Evaluations** - Systematic testing with custom scoring functions
+- **Remote Eval Server** - Run evals from the Braintrust UI against your own code
 - **Tracing** - Automatic instrumentation for major LLM providers
 - **Datasets** - Manage and version evaluation datasets
 - **Experiments** - Track versions and configurations
