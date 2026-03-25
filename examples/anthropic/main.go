@@ -41,7 +41,7 @@ func main() {
 
 	// Make a simple message request
 	message, err := client.Messages.New(ctx, anthropic.MessageNewParams{
-		Model: anthropic.ModelClaude3_7SonnetLatest,
+		Model: anthropic.ModelClaudeHaiku4_5,
 		Messages: []anthropic.MessageParam{
 			anthropic.NewUserMessage(anthropic.NewTextBlock("What is the capital of France?")),
 		},

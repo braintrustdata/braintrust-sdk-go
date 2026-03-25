@@ -36,7 +36,7 @@ func (a *AnthropicBot) messages(ctx context.Context) error {
 	fmt.Println("\n=== Example 1: Messages ===")
 
 	msg, err := a.client.Messages.New(ctx, anthropic.MessageNewParams{
-		Model:     anthropic.ModelClaude3_7SonnetLatest,
+		Model:     anthropic.ModelClaudeHaiku4_5,
 		MaxTokens: 1024,
 		System: []anthropic.TextBlockParam{
 			{Text: "You are a helpful assistant."},
@@ -62,7 +62,7 @@ func (a *AnthropicBot) tools(ctx context.Context) error {
 	fmt.Println("\n=== Example 2: Tools ===")
 
 	msg, err := a.client.Messages.New(ctx, anthropic.MessageNewParams{
-		Model:     anthropic.ModelClaude3_7SonnetLatest,
+		Model:     anthropic.ModelClaudeHaiku4_5,
 		MaxTokens: 1024,
 		System: []anthropic.TextBlockParam{
 			{Text: "You are a helpful weather assistant."},
@@ -114,7 +114,7 @@ func (a *AnthropicBot) streaming(ctx context.Context) error {
 	fmt.Println("\n=== Example 3: Streaming ===")
 
 	stream := a.client.Messages.NewStreaming(ctx, anthropic.MessageNewParams{
-		Model: anthropic.ModelClaude3_7SonnetLatest,
+		Model: anthropic.ModelClaudeHaiku4_5,
 		System: []anthropic.TextBlockParam{
 			{Text: "You are a helpful assistant."},
 		},
@@ -172,7 +172,7 @@ func (a *AnthropicBot) extendedThinking(ctx context.Context) error {
 	fmt.Println("\n=== Example 4: Extended Thinking ===")
 
 	msg, err := a.client.Messages.New(ctx, anthropic.MessageNewParams{
-		Model:     anthropic.ModelClaude3_7SonnetLatest,
+		Model:     anthropic.ModelClaudeHaiku4_5,
 		MaxTokens: 16000,
 		Messages: []anthropic.MessageParam{
 			anthropic.NewUserMessage(anthropic.NewTextBlock("What is the capital of France and why is it historically significant?")),
@@ -210,7 +210,7 @@ func (a *AnthropicBot) vision(ctx context.Context) error {
 	redSquare := "iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAIAAAD/gAIDAAABFUlEQVR4nO3OUQkAIABEsetfWiv4Nx4IC7Cd7XvkByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIReeLesrH9s1agAAAABJRU5ErkJggg=="
 
 	msg, err := a.client.Messages.New(ctx, anthropic.MessageNewParams{
-		Model:     anthropic.ModelClaude3_7SonnetLatest,
+		Model:     anthropic.ModelClaudeHaiku4_5,
 		MaxTokens: 1024,
 		Messages: []anthropic.MessageParam{
 			anthropic.NewUserMessage(

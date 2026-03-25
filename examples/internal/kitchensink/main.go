@@ -176,7 +176,7 @@ func runAnthropicDemo(ctx context.Context, tracer oteltrace.Tracer) {
 	)
 
 	message, err := client.Messages.New(ctx, anthropic.MessageNewParams{
-		Model: anthropic.ModelClaude3_7SonnetLatest,
+		Model: anthropic.ModelClaudeHaiku4_5,
 		Messages: []anthropic.MessageParam{
 			anthropic.NewUserMessage(anthropic.NewTextBlock("Say 'Hello from Anthropic!' in exactly those words.")),
 		},

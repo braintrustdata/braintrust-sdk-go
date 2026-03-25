@@ -9,6 +9,7 @@ Start here to learn basic tracing with popular AI providers:
 - **[openai/](openai/)** - Trace OpenAI chat completions
 - **[anthropic/](anthropic/)** - Trace Anthropic Claude messages
 - **[genai/](genai/)** - Trace Google Gemini requests
+- **[genkit/](genkit/)** - Trace Genkit model generation with middleware
 
 ## Evaluations (15 minutes)
 

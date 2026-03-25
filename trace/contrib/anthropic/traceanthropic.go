@@ -26,7 +26,7 @@
 //
 //	// Your Anthropic calls will now be automatically traced
 //	resp, err := client.Messages.New(ctx, anthropic.MessageNewParams{
-//		Model: anthropic.ModelClaude3_7SonnetLatest,
+//		Model: anthropic.ModelClaudeHaiku4_5,
 //		Messages: []anthropic.MessageParam{
 //			anthropic.NewUserMessage(anthropic.NewTextBlock("Hello!")),
 //		},

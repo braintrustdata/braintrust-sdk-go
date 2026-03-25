@@ -1,0 +1,84 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 107
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"messages":[{"content":[{"text":"hello","type":"text"}],"role":"user"}],"model":"nonexistent-model-12345"}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+            User-Agent:
+                - OpenAI/Go 1.12.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 1.12.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.24.11
+        url: https://api.openai.com/v1/chat/completions
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+                "error": {
+                    "message": "The model `nonexistent-model-12345` does not exist or you do not have access to it.",
+                    "type": "invalid_request_error",
+                    "param": null,
+                    "code": "model_not_found"
+                }
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=86400
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - 9e1eebe149493d64-EWR
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 25 Mar 2026 15:24:15 GMT
+            Server:
+                - cloudflare
+            Set-Cookie:
+                - __cf_bm=4e3cB_1lQJ2V_Cai3Qutb5rIdCJ38qd6SXlh8vDFmc0-1774452254.926443-1.0.1.1-4RbuzSeDjcfmY9.WBL_3RmAEje1uTXu7W6O.2ls1oyYyP9mnOqzmi_UbQ8Vg7FI39JKcOWn4KHWkgnox2rVpUvWX7v6Pfu3xOomK2eAbUUtC4KS0mfcvd9H8Iiy4P5JM; HttpOnly; Secure; Path=/; Domain=api.openai.com; Expires=Wed, 25 Mar 2026 15:54:15 GMT
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            Vary:
+                - Origin
+            X-Content-Type-Options:
+                - nosniff
+            X-Openai-Proxy-Wasm:
+                - v0.1
+            X-Request-Id:
+                - req_24ce6fa707b448c1976331ca6c15db40
+        status: 404 Not Found
+        code: 404
+        duration: 760.259167ms
