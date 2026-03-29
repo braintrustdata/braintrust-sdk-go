@@ -58,8 +58,8 @@ func Register[I, R any](s *Server, name string, task eval.TaskFunc[I, R], scorer
 		opts:    opts,
 	}
 
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.evalsMu.Lock()
+	defer s.evalsMu.Unlock()
 	s.evaluators[name] = impl
 }
 

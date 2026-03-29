@@ -49,10 +49,12 @@ const (
 
 // Server is an HTTP server that exposes registered evaluators to the Braintrust UI.
 type Server struct {
-	evaluators  map[string]registeredEval
-	mu          sync.RWMutex
-	serverMu    sync.Mutex // protects httpServer
-	httpServer  *http.Server
+	evalsMu    sync.RWMutex
+	evaluators map[string]registeredEval
+
+	serverMu   sync.Mutex
+	httpServer *http.Server
+
 	logger      logger.Logger
 	addr        string
 	appURL      string
@@ -207,8 +209,8 @@ func (s *Server) handleHealth(w http.ResponseWriter, _ *http.Request) {
 
 // handleList responds to GET/POST /list with registered evaluators.
 func (s *Server) handleList(w http.ResponseWriter, _ *http.Request) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
+	s.evalsMu.RLock()
+	defer s.evalsMu.RUnlock()
 
 	resp := make(listResponse, len(s.evaluators))
 	for name, e := range s.evaluators {
@@ -251,9 +253,9 @@ func (s *Server) handleEval(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.mu.RLock()
+	s.evalsMu.RLock()
 	evaluator, ok := s.evaluators[req.Name]
-	s.mu.RUnlock()
+	s.evalsMu.RUnlock()
 
 	if !ok {
 		http.Error(w, fmt.Sprintf(`{"error":"evaluator %q not found"}`, req.Name), http.StatusNotFound)
