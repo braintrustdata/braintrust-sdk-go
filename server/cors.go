@@ -3,14 +3,28 @@ package server
 import (
 	"net/http"
 	"regexp"
+	"strings"
 )
 
 // allowedOriginPattern matches braintrust.dev and braintrustdata.dev origins
 // including subdomains and preview deployments.
 var allowedOriginPattern = regexp.MustCompile(`^https?://([\w-]+\.)*(braintrust|braintrustdata)\.dev$`)
 
+var corsAllowHeaders = strings.Join([]string{
+	"Content-Type",
+	"Authorization",
+	"X-Api-Key",
+	"X-Bt-Auth-Token",
+	"X-Bt-Parent",
+	"X-Bt-Org-Name",
+	"X-Bt-Project-Id",
+	"X-Bt-Cursor",
+	"X-Bt-Found-Existing-Experiment",
+	"X-Bt-Span-Id",
+	"X-Bt-Span-Export",
+}, ", ")
+
 const (
-	corsAllowHeaders = "Content-Type, Authorization, X-Api-Key, X-Bt-Auth-Token, X-Bt-Parent, X-Bt-Org-Name, X-Bt-Project-Id, X-Bt-Cursor, X-Bt-Found-Existing-Experiment, X-Bt-Span-Id, X-Bt-Span-Export"
 	corsAllowMethods = "GET, POST, OPTIONS"
 	corsMaxAge       = "86400"
 )
