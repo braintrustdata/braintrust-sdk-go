@@ -220,6 +220,7 @@ func main() {
                 return eval.S(0.0), nil
             }),
         },
+        server.RegisterOpts{},
     )
 
     log.Fatal(srv.Start())
