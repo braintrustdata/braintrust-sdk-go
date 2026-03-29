@@ -48,18 +48,14 @@ type RegisterOpts struct {
 //	server.Register(srv, "classify",
 //	    eval.T(classifyTask),
 //	    []eval.Scorer[string, string]{scorer},
+//	    server.RegisterOpts{ProjectName: "my-project"},
 //	)
-func Register[I, R any](s *Server, name string, task eval.TaskFunc[I, R], scorers []eval.Scorer[I, R], opts ...RegisterOpts) {
-	var opt RegisterOpts
-	if len(opts) > 0 {
-		opt = opts[0]
-	}
-
+func Register[I, R any](s *Server, name string, task eval.TaskFunc[I, R], scorers []eval.Scorer[I, R], opts RegisterOpts) {
 	impl := &registeredEvalImpl[I, R]{
 		name:    name,
 		task:    task,
 		scorers: scorers,
-		opts:    opt,
+		opts:    opts,
 	}
 
 	s.mu.Lock()

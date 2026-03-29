@@ -11,6 +11,7 @@
 //	server.Register(srv, "classify",
 //	    eval.T(classifyTask),
 //	    []eval.Scorer[string, string]{scorer},
+//	    server.RegisterOpts{ProjectName: "my-project"},
 //	)
 //
 //	log.Fatal(srv.Start())
