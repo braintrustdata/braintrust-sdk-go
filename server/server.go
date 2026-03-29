@@ -286,6 +286,12 @@ func (s *Server) handleEval(w http.ResponseWriter, r *http.Request) {
 	// Run the evaluation
 	if err := evaluator.run(r.Context(), cfg); err != nil {
 		s.logger.Error("eval failed", "evaluator", req.Name, "error", err)
+		// Evict cached session on auth errors so the next request gets a fresh login
+		if isAuthError(err) && !s.noAuth {
+			token := extractToken(r)
+			orgName := extractOrgName(r)
+			s.authCache.evict(token, orgName)
+		}
 		_ = sse.writeError(err)
 	}
 

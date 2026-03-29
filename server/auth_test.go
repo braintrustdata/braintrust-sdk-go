@@ -1,11 +1,15 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 )
 
 func TestExtractToken(t *testing.T) {
@@ -106,4 +110,46 @@ func TestAuthCacheKey_NoCollision(t *testing.T) {
 	key1 := cacheKey("a:b", "c")
 	key2 := cacheKey("a", "b:c")
 	assert.NotEqual(t, key1, key2)
+}
+
+func TestAuthCache_Evict(t *testing.T) {
+	cache := newAuthCache("https://app.test", 64, nil)
+	token := "test-token"
+	orgName := "test-org"
+
+	// Manually insert a fake entry
+	key := cacheKey(token, orgName)
+	session := auth.NewTestSession("key", "org-id", orgName, "https://api.test", "https://app.test", "https://app.test", nil)
+	cache.entries[key] = &authResult{session: session, api: nil}
+	cache.order = append(cache.order, key)
+
+	// Verify it's there
+	assert.Len(t, cache.entries, 1)
+	assert.Len(t, cache.order, 1)
+
+	// Evict it
+	cache.evict(token, orgName)
+
+	// Verify it's gone
+	assert.Len(t, cache.entries, 0)
+	assert.Len(t, cache.order, 0)
+}
+
+func TestAuthCache_EvictNonExistent(t *testing.T) {
+	cache := newAuthCache("https://app.test", 64, nil)
+
+	// Evicting a key that doesn't exist should be a no-op
+	cache.evict("no-such-token", "no-such-org")
+
+	assert.Len(t, cache.entries, 0)
+	assert.Len(t, cache.order, 0)
+}
+
+func TestIsAuthError(t *testing.T) {
+	assert.True(t, isAuthError(&https.HTTPError{StatusCode: 401}))
+	assert.True(t, isAuthError(&https.HTTPError{StatusCode: 403}))
+	assert.True(t, isAuthError(fmt.Errorf("wrapped: %w", &https.HTTPError{StatusCode: 401})))
+	assert.False(t, isAuthError(&https.HTTPError{StatusCode: 500}))
+	assert.False(t, isAuthError(fmt.Errorf("some other error")))
+	assert.False(t, isAuthError(nil))
 }

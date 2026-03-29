@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -119,6 +120,25 @@ func (c *authCache) createSession(ctx context.Context, token, orgName string) (*
 	return &authResult{session: session, api: apiClient}, nil
 }
 
+// evict removes a cache entry by token and org name, closing its session.
+// Called when a cached session produces auth errors during eval execution.
+func (c *authCache) evict(token, orgName string) {
+	key := cacheKey(token, orgName)
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if entry, ok := c.entries[key]; ok {
+		entry.session.Close()
+		delete(c.entries, key)
+		for i, k := range c.order {
+			if k == key {
+				c.order = append(c.order[:i], c.order[i+1:]...)
+				break
+			}
+		}
+	}
+}
+
 // moveToEnd moves a key to the end of the LRU order.
 // Must be called with c.mu held.
 func (c *authCache) moveToEnd(key string) {
@@ -129,6 +149,15 @@ func (c *authCache) moveToEnd(key string) {
 			return
 		}
 	}
+}
+
+// isAuthError returns true if the error chain contains an HTTP 401 or 403.
+func isAuthError(err error) bool {
+	var httpErr *https.HTTPError
+	if errors.As(err, &httpErr) {
+		return httpErr.StatusCode == 401 || httpErr.StatusCode == 403
+	}
+	return false
 }
 
 // extractToken extracts the auth token from request headers.
