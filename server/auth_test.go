@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -97,6 +98,12 @@ func TestAuthMiddleware_MissingToken(t *testing.T) {
 func TestAuthFromContext_Nil(t *testing.T) {
 	r := httptest.NewRequest(http.MethodGet, "/", nil)
 	result := authFromContext(r.Context())
+	assert.Nil(t, result)
+}
+
+func TestAuthFromContext_WrongType(t *testing.T) {
+	ctx := context.WithValue(context.Background(), authContextKey, "not-an-authResult")
+	result := authFromContext(ctx)
 	assert.Nil(t, result)
 }
 
