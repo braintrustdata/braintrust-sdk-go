@@ -47,6 +47,7 @@ func newUnitTestEval[I, R any](t *testing.T, dataset Dataset[I, R], task TaskFun
 	e := testNewEval(
 		session,
 		tracer,
+		nil,               // no apiClient for unit tests
 		"exp-12345678",    // fake experiment ID
 		"test-experiment", // fake experiment name
 		"proj-87654321",   // fake project ID

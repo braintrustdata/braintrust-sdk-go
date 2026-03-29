@@ -10,6 +10,7 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
+	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
 const integrationTestProject = "go-sdk-tests"
@@ -315,6 +316,17 @@ func TestFunctions_Invoke_Validation(t *testing.T) {
 
 	// Test empty function ID
 	_, err := api.Invoke(ctx, "", map[string]any{"input": "test"})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "required")
+}
+
+func TestFunctions_InvokeGlobal_Validation(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	client := New(https.NewClient("test-key", "https://example.com", logger.Discard()))
+
+	_, err := client.InvokeGlobal(ctx, InvokeGlobalParams{})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "required")
 }

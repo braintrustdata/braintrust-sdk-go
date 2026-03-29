@@ -230,8 +230,10 @@ type eval[I, R any] struct {
 	datasetID      string // For origin.object_id
 	task           TaskFunc[I, R]
 	scorers        []Scorer[I, R]
+	apiClient      *api.API
 	tracer         oteltrace.Tracer
 	startSpanOpt   oteltrace.SpanStartOption
+	ensureFlush    func() error
 	goroutines     int
 	quiet          bool
 }
@@ -244,9 +246,11 @@ type nextCase[I, R any] struct {
 
 // newEval creates a new eval executor from concrete parameters (low-level constructor).
 // This is the shared code path used by both newEvalOpts (production) and testNewEval (tests).
+// FIXME: we shouldn't pass session and API() — collapse into a single dependency.
 func newEval[I, R any](
 	s *auth.Session,
 	tracer oteltrace.Tracer,
+	apiClient *api.API,
 	experimentID string,
 	experimentName string,
 	projectID string,
@@ -254,6 +258,7 @@ func newEval[I, R any](
 	dataset Dataset[I, R],
 	task TaskFunc[I, R],
 	scorers []Scorer[I, R],
+	ensureFlush func() error,
 	parallelism int,
 	quiet bool,
 ) *eval[I, R] {
@@ -281,8 +286,10 @@ func newEval[I, R any](
 		datasetID:      datasetID,
 		task:           task,
 		scorers:        scorers,
+		apiClient:      apiClient,
 		tracer:         tracer,
 		startSpanOpt:   startSpanOpt,
+		ensureFlush:    ensureFlush,
 		goroutines:     goroutines,
 		quiet:          quiet,
 	}
@@ -313,6 +320,7 @@ func newEvalOpts[I, R any](ctx context.Context, s *auth.Session, tp *trace.Trace
 	return newEval(
 		s,
 		tracer,
+		apiClient,
 		exp.ID,
 		exp.Name,
 		projectID,
@@ -320,6 +328,11 @@ func newEvalOpts[I, R any](ctx context.Context, s *auth.Session, tp *trace.Trace
 		opts.Dataset,
 		opts.Task,
 		opts.Scorers,
+		func() error {
+			flushCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			return tp.ForceFlush(flushCtx)
+		},
 		opts.Parallelism,
 		opts.Quiet,
 	), nil
@@ -425,6 +438,13 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 		return err
 	}
 	output := taskResult.Output
+	taskResult.fetcher = newSpanFetcher(
+		e.apiClient,
+		"experiment",
+		e.experimentID,
+		rootSpanIDFromSpan(span),
+		e.ensureFlush,
+	)
 
 	_, err = e.runScorers(ctx, taskResult)
 	if err != nil {
@@ -457,6 +477,13 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 	}
 
 	return setJSONAttrs(span, meta)
+}
+
+func rootSpanIDFromSpan(span oteltrace.Span) string {
+	if span == nil {
+		return ""
+	}
+	return span.SpanContext().TraceID().String()
 }
 
 // runTask executes the task function and creates a task span.
@@ -523,7 +550,6 @@ func (e *eval[I, R]) runScorers(ctx context.Context, taskResult TaskResult[I, R]
 	if err := setJSONAttr(span, "braintrust.span_attributes", scoreSpanAttrs); err != nil {
 		return nil, err
 	}
-
 	var scores []Score
 
 	var errs []error
@@ -710,6 +736,7 @@ func minInt(a, b int) int {
 func testNewEval[I, R any](
 	s *auth.Session,
 	tracer oteltrace.Tracer,
+	apiClient *api.API,
 	experimentID string,
 	experimentName string,
 	projectID string,
@@ -723,6 +750,7 @@ func testNewEval[I, R any](
 	return newEval(
 		s,
 		tracer,
+		apiClient,
 		experimentID,
 		experimentName,
 		projectID,
@@ -730,6 +758,7 @@ func testNewEval[I, R any](
 		dataset,
 		task,
 		scorers,
+		nil,
 		parallelism,
 		true, // quiet=true for tests
 	)

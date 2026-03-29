@@ -52,6 +52,14 @@ type InvokeParams struct {
 	Input any `json:"input"`
 }
 
+// InvokeGlobalParams represents the request payload for invoking a global function.
+type InvokeGlobalParams struct {
+	GlobalFunction string `json:"global_function"`
+	FunctionType   string `json:"function_type,omitempty"`
+	Mode           string `json:"mode,omitempty"`
+	Input          any    `json:"input,omitempty"`
+}
+
 // QueryResponse represents the response from querying functions.
 type QueryResponse struct {
 	Objects []Function `json:"objects"`

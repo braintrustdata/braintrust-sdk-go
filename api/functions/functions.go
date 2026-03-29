@@ -102,35 +102,46 @@ func (a *API) Invoke(ctx context.Context, functionID string, input any) (any, er
 	}
 
 	path := fmt.Sprintf("/v1/function/%s/invoke", functionID)
+	return a.invokePath(ctx, path, req)
+}
+
+// InvokeGlobal calls a global function by slug/type and returns the output.
+func (a *API) InvokeGlobal(ctx context.Context, req InvokeGlobalParams) (any, error) {
+	if req.GlobalFunction == "" {
+		return nil, fmt.Errorf("global function is required")
+	}
+
+	return a.invokePath(ctx, "/function/invoke", req)
+}
+
+func (a *API) invokePath(ctx context.Context, path string, req any) (any, error) {
 	resp, err := a.client.POST(ctx, path, req)
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = resp.Body.Close() }()
 
-	// Read the entire response body so we can parse it multiple ways
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	// Parse response - try as object first, then as raw value
+	return decodeInvokeResponse(body)
+}
+
+func decodeInvokeResponse(body []byte) (any, error) {
 	var response map[string]any
 	if err := json.Unmarshal(body, &response); err == nil {
-		// Response is an object, extract output field if present
 		if output, ok := response["output"]; ok {
 			return output, nil
 		}
-		// If no output field, return the whole object
 		return response, nil
 	}
 
-	// Response is not an object, try parsing as raw JSON value (string, number, etc.)
 	var output any
 	if err := json.Unmarshal(body, &output); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
-
 	return output, nil
 }
 
