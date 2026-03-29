@@ -18,9 +18,6 @@ type EvalRequest struct {
 
 	// Parent specifies the parent span for tracing (optional).
 	Parent *ParentInfo `json:"parent,omitempty"`
-
-	// Scores lists remote scorer function references (optional).
-	Scores []RemoteScore `json:"scores,omitempty"`
 }
 
 // EvalData specifies where evaluation data comes from.
@@ -44,12 +41,6 @@ type ParentInfo struct {
 	ObjectType      string          `json:"object_type,omitempty"`
 	ObjectID        string          `json:"object_id,omitempty"`
 	PropagatedEvent json.RawMessage `json:"propagated_event,omitempty"`
-}
-
-// RemoteScore references a Braintrust-hosted scorer function.
-type RemoteScore struct {
-	FunctionID string `json:"function_id"`
-	Version    string `json:"version,omitempty"`
 }
 
 // Parameters defines the parameter schema for an evaluator, displayed in the Braintrust UI.
