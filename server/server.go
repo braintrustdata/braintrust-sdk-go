@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/config"
@@ -34,6 +35,15 @@ const (
 	defaultAddr         = "localhost:8300"
 	defaultAppURL       = "https://www.braintrust.dev"
 	defaultAuthCacheMax = 64
+
+	// defaultReadHeaderTimeout limits how long the server waits for request
+	// headers after accepting a connection. Protects against slowloris attacks.
+	// Does not affect eval duration — only the initial request setup.
+	defaultReadHeaderTimeout = 10 * time.Second
+
+	// defaultIdleTimeout limits how long idle keep-alive connections stay open
+	// between requests. Does not affect active SSE streams.
+	defaultIdleTimeout = 120 * time.Second
 )
 
 // Server is an HTTP server that exposes registered evaluators to the Braintrust UI.
@@ -162,8 +172,10 @@ func (s *Server) Handler() http.Handler {
 // Start starts the HTTP server and blocks until it is shut down.
 func (s *Server) Start() error {
 	srv := &http.Server{
-		Addr:    s.addr,
-		Handler: s.Handler(),
+		Addr:              s.addr,
+		Handler:           s.Handler(),
+		ReadHeaderTimeout: defaultReadHeaderTimeout,
+		IdleTimeout:       defaultIdleTimeout,
 	}
 
 	s.serverMu.Lock()
