@@ -1297,7 +1297,7 @@ func TestOnCaseComplete_Callback(t *testing.T) {
 		"proj-callback", "callback-project",
 		cases, task,
 		[]Scorer[testInput, testOutput]{scorer},
-		1, true, callback,
+		1, true, callback, "", nil,
 	)
 
 	result, err := e.run(context.Background())
@@ -1344,7 +1344,7 @@ func TestOnCaseComplete_CallbackOnError(t *testing.T) {
 		"exp-err", "err-experiment",
 		"proj-err", "err-project",
 		cases, task,
-		nil, 1, true, callback,
+		nil, 1, true, callback, "", nil,
 	)
 
 	_, _ = e.run(context.Background())
@@ -1375,7 +1375,7 @@ func TestOnCaseComplete_NilCallback(t *testing.T) {
 		"exp-nil", "nil-experiment",
 		"proj-nil", "nil-project",
 		cases, task,
-		nil, 1, true, nil,
+		nil, 1, true, nil, "", nil,
 	)
 
 	result, err := e.run(context.Background())
@@ -1422,7 +1422,7 @@ func TestOnCaseComplete_Parallel(t *testing.T) {
 		"proj-parallel", "parallel-project",
 		cases, task,
 		[]Scorer[testInput, testOutput]{scorer},
-		4, true, callback,
+		4, true, callback, "", nil,
 	)
 
 	result, err := e.run(context.Background())
@@ -1591,5 +1591,97 @@ func TestEval_EvalSpanAttrsOnTaskFailure(t *testing.T) {
 		}
 	}
 	assert.Equal(t, []string{"tag1"}, foundTags)
+}
 
+func TestSpanParentOverride(t *testing.T) {
+	t.Parallel()
+
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "x"}, Expected: testOutput{Result: "y"}},
+	})
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: input.Value}, nil
+	})
+	scorer := NewScorer[testInput, testOutput]("s", func(_ context.Context, _ TaskResult[testInput, testOutput]) (Scores, error) {
+		return S(1.0), nil
+	})
+
+	tp, exporter := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-id", "exp-name",
+		"proj-id", "proj-name",
+		cases, task,
+		[]Scorer[testInput, testOutput]{scorer},
+		1, true, nil,
+		"playground_id:pg-999", // SpanParent override
+		42,                     // Generation
+	)
+
+	result, err := e.run(context.Background())
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	spans := exporter.Flush()
+	require.NotEmpty(t, spans)
+
+	// Every span should have the overridden parent attribute
+	for _, span := range spans {
+		parentVal := span.Attr("braintrust.parent").Value.AsString()
+		assert.Equal(t, "experiment_id:playground_id:pg-999", parentVal,
+			"span %q should have overridden parent", span.Name())
+	}
+
+	// Eval span should have generation in span_attributes
+	evalSpan := spans[len(spans)-1]
+	evalSpan.AssertNameIs("eval")
+	spanAttrsJSON := evalSpan.Attr("braintrust.span_attributes").Value.AsString()
+	assert.Contains(t, spanAttrsJSON, `"generation"`)
+	assert.Contains(t, spanAttrsJSON, `42`)
+}
+
+func TestSpanParentDefault(t *testing.T) {
+	t.Parallel()
+
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "x"}, Expected: testOutput{Result: "y"}},
+	})
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: input.Value}, nil
+	})
+
+	tp, exporter := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-id", "exp-name",
+		"proj-id", "proj-name",
+		cases, task, nil,
+		1, true, nil,
+		"", nil, // no override, no generation
+	)
+
+	result, err := e.run(context.Background())
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	spans := exporter.Flush()
+	require.NotEmpty(t, spans)
+
+	// Every span should have the default experiment_id parent
+	for _, span := range spans {
+		parentVal := span.Attr("braintrust.parent").Value.AsString()
+		assert.Equal(t, "experiment_id:exp-id", parentVal,
+			"span %q should have default experiment parent", span.Name())
+	}
+
+	// Eval span should NOT have generation in span_attributes
+	evalSpan := spans[len(spans)-1]
+	spanAttrsJSON := evalSpan.Attr("braintrust.span_attributes").Value.AsString()
+	assert.NotContains(t, spanAttrsJSON, `"generation"`)
 }

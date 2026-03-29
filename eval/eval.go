@@ -54,12 +54,6 @@ var (
 	errCaseIterator = errors.New("case iterator error")
 )
 
-var (
-	// braintrust "span_attributes" for each type of eval span.
-	evalSpanAttrs = map[string]any{"type": "eval"}
-	taskSpanAttrs = map[string]any{"type": "task"}
-)
-
 // Opts defines the options for running an evaluation.
 // I is the input type and R is the result/output type.
 //
@@ -96,6 +90,15 @@ type Opts[I, R any] struct {
 	// It is called from worker goroutines and must be safe for concurrent use.
 	// Optional — nil means no callback.
 	OnCaseComplete func(CaseProgress)
+
+	// SpanParent overrides the parent attribute set on eval spans.
+	// When empty, the default "experiment_id:<id>" parent is used.
+	// The remote eval server sets this to link spans to a playground context.
+	SpanParent string
+
+	// Generation is injected into braintrust.span_attributes on every span
+	// when set. Used by the remote eval server to link spans in a trace hierarchy.
+	Generation any
 }
 
 // CaseProgress contains the result of a single completed evaluation case.
@@ -261,6 +264,7 @@ type eval[I, R any] struct {
 	trialCount     int
 	quiet          bool
 	onCaseComplete func(CaseProgress)
+	generation     any
 }
 
 // nextCase is a wrapper for sending cases through a channel.
@@ -287,9 +291,18 @@ func newEval[I, R any](
 	trialCount int,
 	quiet bool,
 	onCaseComplete func(CaseProgress),
+	spanParent string,
+	generation any,
 ) *eval[I, R] {
-	// Build parent span option
-	parent := bttrace.NewParent(bttrace.ParentTypeExperimentID, experimentID)
+	// Build parent span option. Use explicit override if provided (e.g. from
+	// the remote eval server linking spans to a playground), otherwise default
+	// to the experiment ID.
+	var parent bttrace.Parent
+	if spanParent != "" {
+		parent = bttrace.NewParent(bttrace.ParentTypeExperimentID, spanParent)
+	} else {
+		parent = bttrace.NewParent(bttrace.ParentTypeExperimentID, experimentID)
+	}
 	startSpanOpt := oteltrace.WithAttributes(parent.Attr())
 
 	// Extract dataset ID from dataset
@@ -323,6 +336,7 @@ func newEval[I, R any](
 		trialCount:     trialCount,
 		quiet:          quiet,
 		onCaseComplete: onCaseComplete,
+		generation:     generation,
 	}
 }
 
@@ -363,7 +377,19 @@ func newEvalOpts[I, R any](ctx context.Context, s *auth.Session, tp *trace.Trace
 		opts.TrialCount,
 		opts.Quiet,
 		opts.OnCaseComplete,
+		opts.SpanParent,
+		opts.Generation,
 	), nil
+}
+
+// spanAttrs builds span_attributes for the given span type, injecting
+// generation when set (used by the remote eval server).
+func (e *eval[I, R]) spanAttrs(spanType string) map[string]any {
+	attrs := map[string]any{"type": spanType}
+	if e.generation != nil {
+		attrs["generation"] = e.generation
+	}
+	return attrs
 }
 
 func (e *eval[I, R]) run(ctx context.Context) (*Result, error) {
@@ -467,7 +493,7 @@ func (e *eval[I, R]) runNextCase(ctx context.Context, nextCase nextCase[I, R]) e
 func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I, R], trialIndex int) error {
 	// Set all non-output attributes upfront so they're captured even if the task fails.
 	attrs := map[string]any{
-		"braintrust.span_attributes": evalSpanAttrs,
+		"braintrust.span_attributes": e.spanAttrs("eval"),
 		"braintrust.input_json":      c.Input,
 		"braintrust.expected":        c.Expected,
 	}
@@ -558,7 +584,7 @@ func (e *eval[I, R]) runTask(ctx context.Context, evalSpan oteltrace.Span, c Cas
 	attrs := map[string]any{
 		"braintrust.input_json":      c.Input,
 		"braintrust.expected":        c.Expected,
-		"braintrust.span_attributes": taskSpanAttrs,
+		"braintrust.span_attributes": e.spanAttrs("task"),
 	}
 
 	var encodeErrs []error
@@ -627,12 +653,10 @@ func (e *eval[I, R]) runScorer(ctx context.Context, scorer Scorer[I, R], taskRes
 	ctx, span := e.tracer.Start(ctx, scorer.Name(), e.startSpanOpt)
 	defer span.End()
 
-	spanAttrs := map[string]any{
-		"type":    "score",
-		"name":    scorer.Name(),
-		"purpose": "scorer",
-	}
-	if err := setJSONAttr(span, "braintrust.span_attributes", spanAttrs); err != nil {
+	scorerAttrs := e.spanAttrs("score")
+	scorerAttrs["name"] = scorer.Name()
+	scorerAttrs["purpose"] = "scorer"
+	if err := setJSONAttr(span, "braintrust.span_attributes", scorerAttrs); err != nil {
 		return nil, err
 	}
 
@@ -1005,5 +1029,7 @@ func testNewEval[I, R any](
 		1,    // trialCount=1 for tests
 		true, // quiet=true for tests
 		nil,  // no callback for tests
+		"",   // no parent override
+		nil,  // no generation
 	)
 }

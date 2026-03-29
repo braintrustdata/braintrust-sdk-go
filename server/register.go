@@ -162,6 +162,28 @@ func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) 
 		}
 	}
 
+	// Resolve parent span context from the request (links traces to the playground)
+	var spanParent string
+	var generation any
+	if req.Parent != nil && req.Parent.ObjectID != "" {
+		objectType := req.Parent.ObjectType
+		if objectType == "" {
+			objectType = "playground_id"
+		}
+		spanParent = objectType + ":" + req.Parent.ObjectID
+		// Extract generation from propagated_event.span_attributes.generation
+		if len(req.Parent.PropagatedEvent) > 0 {
+			var pe struct {
+				SpanAttributes struct {
+					Generation any `json:"generation"`
+				} `json:"span_attributes"`
+			}
+			if json.Unmarshal(req.Parent.PropagatedEvent, &pe) == nil {
+				generation = pe.SpanAttributes.Generation
+			}
+		}
+	}
+
 	// Create evaluator and run
 	evaluator := eval.NewEvaluator[I, R](session, tp, apiClient, r.projectName())
 	result, evalErr := evaluator.Run(evalCtx, eval.Opts[I, R]{
@@ -173,6 +195,8 @@ func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) 
 		Update:         true,
 		Quiet:          true,
 		OnCaseComplete: onComplete,
+		SpanParent:     spanParent,
+		Generation:     generation,
 	})
 
 	// Flush traces before sending summary
