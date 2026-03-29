@@ -25,6 +25,8 @@ import (
 	"sync"
 	"time"
 
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+
 	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
@@ -55,12 +57,13 @@ type Server struct {
 	serverMu   sync.Mutex
 	httpServer *http.Server
 
-	logger      logger.Logger
-	addr        string
-	appURL      string
-	noAuth      bool
-	authCache   *authCache
-	defaultAuth *authResult // used in no-auth mode, built from env config
+	logger         logger.Logger
+	tracerProvider *sdktrace.TracerProvider // optional, user-provided
+	addr           string
+	appURL         string
+	noAuth         bool
+	authCache      *authCache
+	defaultAuth    *authResult // used in no-auth mode, built from env config
 }
 
 // Option configures the server.
@@ -84,6 +87,16 @@ func WithLogger(l logger.Logger) Option {
 func WithAppURL(url string) Option {
 	return func(s *Server) {
 		s.appURL = url
+	}
+}
+
+// WithTracerProvider sets a custom OpenTelemetry TracerProvider for the server.
+// When provided, all eval spans flow through this provider, so user-instrumented
+// code (LLM clients, custom spans, etc.) appears in the same trace as eval spans.
+// When nil (the default), a per-request TracerProvider is created internally.
+func WithTracerProvider(tp *sdktrace.TracerProvider) Option {
+	return func(s *Server) {
+		s.tracerProvider = tp
 	}
 }
 
@@ -280,10 +293,11 @@ func (s *Server) handleEval(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cfg := &evalRunConfig{
-		req:    &req,
-		auth:   ar,
-		sse:    sse,
-		noAuth: s.noAuth,
+		req:            &req,
+		auth:           ar,
+		sse:            sse,
+		noAuth:         s.noAuth,
+		tracerProvider: s.tracerProvider,
 	}
 
 	// Run the evaluation

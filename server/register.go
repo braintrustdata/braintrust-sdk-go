@@ -24,10 +24,11 @@ type registeredEval interface {
 
 // evalRunConfig holds the per-request configuration for running an evaluation.
 type evalRunConfig struct {
-	req    *EvalRequest
-	auth   *authResult
-	sse    *sseWriter
-	noAuth bool
+	req            *EvalRequest
+	auth           *authResult
+	sse            *sseWriter
+	noAuth         bool
+	tracerProvider *sdktrace.TracerProvider // nil means create per-request
 }
 
 // RegisterOpts configures a registered evaluator.
@@ -102,24 +103,28 @@ func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) 
 		experimentName = r.name
 	}
 
-	// Build per-request tracing with a dedicated shutdown timeout
-	tp := sdktrace.NewTracerProvider()
-	defer func() {
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		_ = tp.Shutdown(shutdownCtx)
-	}()
+	// Use the shared TracerProvider if one was provided, otherwise create a
+	// per-request provider. A shared provider allows user-instrumented code
+	// (LLM clients, custom spans) to appear in the same trace as eval spans.
+	tp := cfg.tracerProvider
+	if tp == nil {
+		tp = sdktrace.NewTracerProvider()
+		defer func() {
+			shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			_ = tp.Shutdown(shutdownCtx)
+		}()
 
-	session := cfg.auth.session
+		// Per-request provider needs its own Braintrust span processor
+		traceCfg := bttrace.Config{
+			DefaultProjectName: r.projectName(),
+		}
+		if err := bttrace.AddSpanProcessor(tp, cfg.auth.session, traceCfg); err != nil {
+			return fmt.Errorf("failed to setup tracing: %w", err)
+		}
+	}
+
 	apiClient := cfg.auth.api
-
-	// Add Braintrust span processor for this request
-	traceCfg := bttrace.Config{
-		DefaultProjectName: r.projectName(),
-	}
-	if err := bttrace.AddSpanProcessor(tp, session, traceCfg); err != nil {
-		return fmt.Errorf("failed to setup tracing: %w", err)
-	}
 
 	// Cancel eval if the client disconnects (SSE write fails)
 	evalCtx, cancelEval := context.WithCancel(ctx)
@@ -181,7 +186,7 @@ func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) 
 	}
 
 	// Create evaluator and run
-	evaluator := eval.NewEvaluator[I, R](session, tp, apiClient, r.projectName())
+	evaluator := eval.NewEvaluator[I, R](cfg.auth.session, tp, apiClient, r.projectName())
 	result, evalErr := evaluator.Run(evalCtx, eval.Opts[I, R]{
 		Experiment:     experimentName,
 		Dataset:        dataset,

@@ -22,6 +22,8 @@ import (
 func main() {
 	// Create the eval server.
 	// Use WithNoAuth() for local development; remove for production.
+	// Use WithTracerProvider(tp) to include user-instrumented spans (LLM clients,
+	// custom spans) in eval traces.
 	srv := server.New(
 		server.WithAddress("localhost:8300"),
 		server.WithNoAuth(),
