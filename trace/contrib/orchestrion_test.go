@@ -32,9 +32,25 @@ func TestOrchestrionInjection(t *testing.T) {
 		t.Fatalf("testdata directory not found: %s", testdataDir)
 	}
 
-	// Run the inner tests with orchestrion - this compiles with middleware injection
+	// Run the inner tests with orchestrion - this compiles with middleware injection.
+	//
+	// Important: force standalone module mode with GOWORK=off.
+	//
+	// This test fixture is meant to simulate an external consumer module under
+	// trace/contrib/testdata/orchestrion, and orchestrion's pinning/setup flow
+	// edits that module (for example via go list/go get/go mod tidy behavior that
+	// assumes standalone module semantics). After this repo introduced a top-level
+	// go.work, running this fixture in workspace mode started failing with:
+	//
+	//   go: -mod may only be set to readonly or vendor when in workspace mode,
+	//   but it is set to "mod"
+	//
+	// So we explicitly disable workspace mode here to keep the fixture isolated
+	// and to match how a real downstream user would run orchestrion in their own
+	// module.
 	cmd := exec.Command("orchestrion", "go", "test", "-v", "./...")
 	cmd.Dir = testdataDir
+	cmd.Env = append(os.Environ(), "GOWORK=off")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

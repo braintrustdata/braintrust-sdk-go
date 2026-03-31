@@ -1,0 +1,17 @@
+go 1.24.4
+
+toolchain go1.24.11
+
+use (
+	.
+	./examples
+	./trace/contrib/adk
+	./trace/contrib/all
+	./trace/contrib/anthropic
+	./trace/contrib/cloudwego/eino
+	./trace/contrib/genai
+	./trace/contrib/genkit
+	./trace/contrib/github.com/sashabaranov/go-openai
+	./trace/contrib/langchaingo
+	./trace/contrib/openai
+)

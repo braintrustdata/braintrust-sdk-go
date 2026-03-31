@@ -1,0 +1,6 @@
+# comment
+
+trace/contrib/openai
+
+trace/contrib/github.com/sashabaranov/go-openai
+trace/contrib/all

@@ -1,5 +1,8 @@
 // Package all imports all available Braintrust tracing integrations for use with Orchestrion.
 //
+// This package lives in its own module so users can opt into "all integrations"
+// without making the root Braintrust SDK module be the "import everything" entrypoint.
+//
 // Import this package in your orchestrion.tool.go to enable automatic instrumentation
 // for all supported LLM providers:
 //
@@ -17,6 +20,9 @@
 //   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic (Anthropic SDK)
 //   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai (Google GenAI)
 //   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai (sashabaranov/go-openai)
+//   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk (Google ADK)
+//   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit (Firebase Genkit)
+//   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino (CloudWeGo Eino)
 package all
 
 import (

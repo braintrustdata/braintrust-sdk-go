@@ -42,6 +42,13 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk v0.0.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.0.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino v0.0.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.0.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.0.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.0.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.0.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.15.0 // indirect
@@ -178,4 +185,17 @@ require (
 	rsc.io/ordered v1.1.1 // indirect
 )
 
-replace github.com/braintrustdata/braintrust-sdk-go => ../../../..
+require github.com/braintrustdata/braintrust-sdk-go/trace/contrib/all v0.0.0
+
+replace (
+	github.com/braintrustdata/braintrust-sdk-go => ../../../..
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk => ../../adk
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/all => ../../all
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic => ../../anthropic
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino => ../../cloudwego/eino
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai => ../../genai
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit => ../../genkit
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai => ../../github.com/sashabaranov/go-openai
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo => ../../langchaingo
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai => ../../openai
+)

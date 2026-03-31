@@ -57,18 +57,73 @@ For streaming responses, aggregate chunks and capture final usage:
 
 ## Required Components
 
-**Do in this order:**
+Each integration lives in its own Go module under `trace/contrib/`. **Do in this order:**
 
+- [ ] **Go module**: `trace/contrib/yourprovider/go.mod` (see [Module Setup](#module-setup) below)
+- [ ] **Register module**: Add to `scripts/nested_modules.txt` and `go.work`
 - [ ] **Core tracer**: `trace/contrib/yourprovider/traceyourprovider.go`
 - [ ] **Endpoint parsers**: `trace/contrib/yourprovider/messages.go` (etc.)
 - [ ] **Tests**: `trace/contrib/yourprovider/traceyourprovider_test.go`
 - [ ] **VCR cassettes**: `trace/contrib/yourprovider/testdata/cassettes/`
 - [ ] **Orchestrion config**: `trace/contrib/yourprovider/orchestrion.yml`
 - [ ] **Orchestrion deps**: `trace/contrib/yourprovider/orchestrion.go`
-- [ ] **Update all package**: Add import to `trace/contrib/all/all.go`
+- [ ] **Update all package**: Add import to `trace/contrib/all/all.go` + add `require`/`replace` in `trace/contrib/all/go.mod`
 - [ ] **Run generate**: `make generate` to update combined orchestrion.yml
+- [ ] **Tidy all modules**: `make mod-verify` to ensure all go.mod/go.sum are consistent
 - [ ] **Customer example**: `examples/yourprovider/main.go`
 - [ ] **Internal example**: `examples/internal/yourprovider/main.go`
+
+## Module Setup
+
+Every integration is its own Go module. This keeps the root SDK dependency-free of provider SDKs — users only pull in what they need.
+
+**Reference**: `trace/contrib/anthropic/go.mod`, `trace/contrib/openai/go.mod`
+
+### 1. Create `go.mod`
+
+```
+module github.com/braintrustdata/braintrust-sdk-go/trace/contrib/yourprovider
+
+go 1.24.4
+
+require (
+    github.com/braintrustdata/braintrust-sdk-go v0.0.0
+    github.com/yourprovider/sdk-go vX.Y.Z
+    // ... other deps
+)
+
+// Required: point to repo root so local development works in go.work mode.
+// The release pipeline replaces v0.0.0 with the real version before publishing.
+replace github.com/braintrustdata/braintrust-sdk-go => ../../..
+```
+
+The `replace` directive depth depends on nesting: `../../..` for `trace/contrib/yourprovider/`, `../../../..` for `trace/contrib/cloudwego/eino/`, etc.
+
+### 2. Register the module
+
+Add the repo-relative path to **both**:
+
+- `scripts/nested_modules.txt` — one path per line (this drives the release pipeline)
+- `go.work` — add a `use` entry so the workspace resolves the module locally
+
+### 3. Update `trace/contrib/all`
+
+Add a blank import in `trace/contrib/all/all.go` and update `trace/contrib/all/go.mod`:
+
+```go
+// In all.go
+_ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/yourprovider"
+```
+
+```
+// In all/go.mod — add require + replace
+require github.com/braintrustdata/braintrust-sdk-go/trace/contrib/yourprovider v0.0.0
+replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/yourprovider => ../yourprovider
+```
+
+### 4. Run `make mod-verify`
+
+This tidies all modules (with `GOWORK=off` for nested ones) and runs `scripts/check_nested_modules.sh` to verify the manifest matches actual `go.mod` files.
 
 ## Test Coverage
 
@@ -166,11 +221,14 @@ Orchestrion provides compile-time tracing injection with zero code changes.
 
 1. **Write one failing test**
 2. **Implement minimal code** to pass
-3. **Run tests**: `make test` (uses VCR replay mode)
-4. **Record cassettes** (when needed): `VCR_MODE=record go test -v -run=TestName ./path`
-5. **Lint**: `make lint` (fix issues before committing)
-6. **Run CI**: `make ci` before committing
-7. **Repeat cycle** for: basic -> streaming -> errors -> tools -> tokens
+3. **Run tests for your module**: `VCR_MODE=replay go test -C trace/contrib/yourprovider ./...`
+4. **Record cassettes** (when needed): `VCR_MODE=record go test -C trace/contrib/yourprovider -v -run=TestName ./...`
+5. **Run all tests**: `make test` (runs root + all nested modules)
+6. **Lint**: `make lint` (fix issues before committing)
+7. **Run CI**: `make ci` before committing
+8. **Repeat cycle** for: basic -> streaming -> errors -> tools -> tokens
+
+> **Note**: Integration modules are separate Go modules, so use `-C <module-dir>` to run tests in the correct module context. `make test` handles this automatically for all modules.
 
 ## Defensive Coding
 
@@ -213,17 +271,29 @@ Set these standard Braintrust attributes:
 ## Linting & CI
 
 ```bash
-make lint     # Run golangci-lint
-make fmt      # Format code
-make test     # Run tests (VCR replay)
-make ci       # Full CI: lint + test + build
+make lint         # Run golangci-lint
+make fmt          # Format code
+make test         # Run tests for root + all nested modules (VCR replay)
+make mod-verify   # Tidy all go.mod files and verify manifest
+make ci           # Full CI: lint + mod-verify + test + build
+
+# Test a single nested module:
+VCR_MODE=replay go test -C trace/contrib/yourprovider ./...
+
+# Record cassettes for a single nested module:
+VCR_MODE=record go test -C trace/contrib/yourprovider -v -run=TestName ./...
 ```
 
 ## Reference Files
 
-- Integrations: `trace/contrib/{openai,anthropic,genai,langchaingo}/`
+- Integrations: `trace/contrib/{openai,anthropic,genai,langchaingo,adk,genkit,cloudwego/eino}/`
+- Module manifests: `trace/contrib/*/go.mod`
 - Tests: `trace/contrib/*/trace*_test.go`
 - Test helpers: `internal/oteltest/oteltest.go`, `internal/vcr/vcr.go`
 - Examples: `examples/{openai,anthropic,genai}/main.go`
 - Internal examples: `examples/internal/*/main.go`
 - Orchestrion: `trace/contrib/*/orchestrion.yml`
+- All-integrations meta-module: `trace/contrib/all/all.go`, `trace/contrib/all/go.mod`
+- Workspace: `go.work`
+- Nested module registry: `scripts/nested_modules.txt`
+- Release docs: `docs/PUBLISHING.md`

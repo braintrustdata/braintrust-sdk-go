@@ -2,6 +2,11 @@
 
 set -euo pipefail
 
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+NESTED_MODULES=()
+while IFS= read -r module; do
+    NESTED_MODULES+=("$module")
+done < <("$SCRIPT_DIR/list_nested_modules.sh" --dependency-order)
 
 # Usage function
 usage() {
@@ -53,17 +58,35 @@ if ! git diff-index --quiet HEAD --; then
     exit 1
 fi
 
-if git tag --list | grep -q "^$VERSION$"; then
+LOCAL_TAGS=$(git tag --list)
+if echo "$LOCAL_TAGS" | grep -q "^$VERSION$"; then
     echo "Error: Version '$VERSION' already exists locally" >&2
     exit 1
 fi
 
+for module in "${NESTED_MODULES[@]}"; do
+    module_tag="${module}/${VERSION}"
+    if echo "$LOCAL_TAGS" | grep -q "^${module_tag}$"; then
+        echo "Error: Module version '$module_tag' already exists locally" >&2
+        exit 1
+    fi
+done
+
 # Check remote tags
 git fetch --tags > /dev/null 2>&1 || true
-if git ls-remote --tags origin | grep -q "refs/tags/$VERSION$"; then
+REMOTE_TAGS=$(git ls-remote --tags origin)
+if echo "$REMOTE_TAGS" | grep -q "refs/tags/$VERSION$"; then
     echo "Error: Version '$VERSION' already exists on remote" >&2
     exit 1
 fi
+
+for module in "${NESTED_MODULES[@]}"; do
+    module_tag="${module}/${VERSION}"
+    if echo "$REMOTE_TAGS" | grep -q "refs/tags/${module_tag}$"; then
+        echo "Error: Module version '$module_tag' already exists on remote" >&2
+        exit 1
+    fi
+done
 
 # Show release information
 COMMIT=$(git rev-parse HEAD)
@@ -82,26 +105,35 @@ if [[ -n "$LAST_TAG" ]]; then
 else
     printf "%-13s %s\n" "changeset:" "$REPO_URL/commits/$COMMIT"
 fi
+for module in "${NESTED_MODULES[@]}"; do
+    printf "%-13s %s\n" "module tag:" "${module}/${VERSION}"
+done
 echo ""
 
-# Confirmation prompt (skip in dry-run)
+# Confirmation prompt — skipped in dry-run and in GitHub Actions (non-interactive)
 if [[ "$DRY_RUN" == true ]]; then
     exit 0
 fi
 
-read -p "Are you ready to release version $VERSION? Type 'YOLO' to continue: " -r
-echo ""
-if [[ "$REPLY" != "YOLO" ]]; then
-    exit 0
+if [[ "${GITHUB_ACTIONS:-}" != "true" ]]; then
+    read -p "Are you ready to release version $VERSION? Type 'YOLO' to continue: " -r
+    echo ""
+    if [[ "$REPLY" != "YOLO" ]]; then
+        exit 0
+    fi
 fi
 
-if ! make ci; then
-    echo "Error: make ci failed" >&2
-    exit 1
-fi
-
+TAGS_TO_PUSH=("$VERSION")
 git tag -a "$VERSION" -m "Release $VERSION"
-git push origin "$VERSION"
+for module in "${NESTED_MODULES[@]}"; do
+    module_tag="${module}/${VERSION}"
+    git tag -a "$module_tag" -m "Release $module_tag"
+    TAGS_TO_PUSH+=("$module_tag")
+done
+
+# Push all release tags atomically so the root-tag publish workflow only starts
+# after every nested module tag exists on the remote.
+git push --atomic origin "${TAGS_TO_PUSH[@]}"
 
 echo "================================================"
 echo " Tag Pushed: $VERSION"
@@ -118,6 +150,10 @@ echo "Once complete, check:"
 echo "- Release: $REPO_URL/releases/tag/$VERSION"
 echo "- Docs:    https://pkg.go.dev/github.com/braintrustdata/braintrust-sdk-go@$VERSION/braintrust"
 echo "- Index:   https://proxy.golang.org/github.com/braintrustdata/braintrust-sdk-go/@v/$VERSION.info"
+for module in "${NESTED_MODULES[@]}"; do
+    echo "- Docs:    https://pkg.go.dev/github.com/braintrustdata/braintrust-sdk-go/${module}@${VERSION}"
+    echo "- Index:   https://proxy.golang.org/github.com/braintrustdata/braintrust-sdk-go/${module}/@v/${VERSION}.info"
+done
 echo
 echo "Note: Docs should be updated within the next hour. Request manually at the URL above"
 echo "if they don't show up"

@@ -23,8 +23,7 @@ coverage.html
 # Temporary cassette files during recording
 *.cassette.tmp
 
-# Go workspace file
-go.work
+# Go workspace checksum file
 go.work.sum
 
 .env

@@ -9,7 +9,7 @@ This library provides tools for **evaluating** and **tracing** AI applications i
 
 - **Evaluate** your AI models with custom test cases and scoring functions
 - **Trace** LLM calls and monitor AI application performance with OpenTelemetry
-- **Integrate** seamlessly with OpenAI, Anthropic, Google Gemini, LangChainGo, and other LLM providers
+- **Integrate** seamlessly with OpenAI, Anthropic, Google Gemini, Genkit, ADK, CloudWeGo Eino, LangChainGo, and other LLM providers
 
 This SDK is currently in BETA status and APIs may change.
 
@@ -19,6 +19,25 @@ This SDK is currently in BETA status and APIs may change.
 go get github.com/braintrustdata/braintrust-sdk-go
 
 export BRAINTRUST_API_KEY="your-api-key"  # Get from https://www.braintrust.dev/app/settings
+```
+
+Each tracing integration is published as its own Go module. Install only the ones you need:
+
+```bash
+go get github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai       # OpenAI (openai-go)
+go get github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic     # Anthropic
+go get github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai         # Google GenAI
+go get github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit        # Firebase Genkit
+go get github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk           # Google ADK
+go get github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino # CloudWeGo Eino
+go get github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo   # LangChainGo
+go get github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai # sashabaranov/go-openai
+```
+
+Or install all integrations at once with the meta-module:
+
+```bash
+go get github.com/braintrustdata/braintrust-sdk-go/trace/contrib/all
 ```
 
 ## Instrumentation
@@ -42,7 +61,7 @@ package main
 
 import (
     _ "github.com/DataDog/orchestrion"
-    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/all" // All LLM providers
+    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/all" // Dedicated meta-module for all Braintrust LLM integrations
 )
 ```
 
@@ -53,7 +72,10 @@ import (
     _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"    // OpenAI (openai-go)
     _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic" // Anthropic
     _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"     // Google GenAI
-    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo" // LangChainGo OpenAI
+    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit"    // Firebase Genkit
+    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk"       // Google ADK
+    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino" // CloudWeGo Eino
+    _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo" // LangChainGo
     _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai" // sashabaranov/go-openai
 )
 ```
@@ -237,13 +259,31 @@ func main() {
 
 Complete working examples are available in [`examples/`](./examples/):
 
-- **[evals](./examples/evals/evals.go)** - Evaluations with custom scorers
+**Getting Started:**
 - **[openai](./examples/openai/main.go)** - OpenAI tracing
 - **[anthropic](./examples/anthropic/main.go)** - Anthropic tracing
 - **[genai](./examples/genai/main.go)** - Google Gemini tracing
+- **[genkit](./examples/genkit/main.go)** - Firebase Genkit middleware tracing
+
+**Evaluations:**
+- **[evals](./examples/evals/evals.go)** - Evaluations with custom scorers
+- **[datasets](./examples/datasets/main.go)** - Run evals against downloaded datasets
+- **[dataset-api](./examples/dataset-api/main.go)** - Create datasets, use prompts, run evals
+- **[scorers](./examples/scorers/scorers.go)** - Custom scoring with online and code-based scorers
+
+**Alternative Providers & Libraries:**
+- **[sashabaranov-openai](./examples/sashabaranov-openai/main.go)** - sashabaranov/go-openai tracing
+- **[openrouter](./examples/openrouter/main.go)** - OpenRouter tracing
 - **[langchaingo](./examples/langchaingo/main.go)** - LangChainGo integration
-- **[datasets](./examples/datasets/main.go)** - Using Braintrust datasets
-- **[adk-go](./examples/adk/main.go)** - ADK integration
+- **[adk](./examples/adk/main.go)** - Google ADK agent tracing
+- **[cloudwego/eino](./examples/cloudwego/eino/main.go)** - CloudWeGo Eino integration
+
+**Advanced:**
+- **[manual-llm-logging](./examples/manual-llm-logging/main.go)** - Manually log LLM calls
+- **[attachments](./examples/attachments/main.go)** - Include images and files in traces
+- **[prompts](./examples/prompts/main.go)** - Use Braintrust hosted prompts
+- **[distributed-tracing](./examples/distributed-tracing/main.go)** - W3C baggage propagation across services
+- **[otel](./examples/otel/main.go)** - Add Braintrust to existing OpenTelemetry setup
 
 ## Features
 

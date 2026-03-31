@@ -34,6 +34,17 @@ alias = "wtc"
 silent=true
 run = "golangci-lint fmt -d || (golangci-lint fmt && exit 1)"
 
+[tasks.check-nested-modules]
+quiet = true
+run = "./scripts/check_nested_modules.sh"
+
+[tasks.pre-commit]
+quiet = true
+run = """
+mise run verify-fmt
+mise run check-nested-modules
+"""
+
 [tasks.cover]
 description = "Generate HTML coverage report for a specific path"
 run = """
@@ -61,4 +72,4 @@ open "$OUTPUT"
 """
 
 [hooks]
-postinstall = "mise generate git-pre-commit --write --task=verify-fmt"
+postinstall = "mise generate git-pre-commit --write"

@@ -2,6 +2,12 @@
 
 set -euo pipefail
 
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+NESTED_MODULES=()
+while IFS= read -r module; do
+    NESTED_MODULES+=("$module")
+done < <("$SCRIPT_DIR/list_nested_modules.sh")
+
 # Check if working directory is clean
 if ! git diff-index --quiet HEAD --; then
     echo "Error: Working directory is not clean." >&2
@@ -9,14 +15,40 @@ if ! git diff-index --quiet HEAD --; then
     exit 1
 fi
 
-# Check if we're on a tagged commit
-VERSION=$(git describe --tags --exact-match 2>/dev/null || echo "")
+# Check if we're on the intended release tag. When multiple tags point at the
+# same commit, prefer the explicit root tag passed by CI.
+VERSION="${RELEASE_TAG:-}"
+if [ -z "$VERSION" ]; then
+    VERSION=$(git describe --tags --exact-match 2>/dev/null || echo "")
+fi
 if [ -z "$VERSION" ]; then
     echo "Error: Not on a tagged commit. Please create and push a tag first." >&2
     exit 1
 fi
 
 echo "Releasing version $VERSION..."
+
+index_url() {
+    local label="$1"
+    local url="$2"
+    local attempts=10
+    local delay=3
+
+    for ((i = 1; i <= attempts; i++)); do
+        if curl -fsS "$url" > /dev/null; then
+            echo "Indexed ${label}"
+            return 0
+        fi
+
+        if (( i < attempts )); then
+            echo "Retrying ${label} (${i}/${attempts})..."
+            sleep "$delay"
+        fi
+    done
+
+    echo "Error: failed to index ${label}: ${url}" >&2
+    return 1
+}
 
 # Run goreleaser
 goreleaser release --clean
@@ -25,7 +57,15 @@ goreleaser release --clean
 echo ""
 echo "Indexing package with Go proxy..."
 echo "Indexing version: $VERSION"
-curl -f "https://proxy.golang.org/github.com/braintrustdata/braintrust-sdk-go/@v/$VERSION.info" || true
+index_url \
+    "github.com/braintrustdata/braintrust-sdk-go@${VERSION}" \
+    "https://proxy.golang.org/github.com/braintrustdata/braintrust-sdk-go/@v/$VERSION.info"
+for module in "${NESTED_MODULES[@]}"; do
+    echo "Indexing module: github.com/braintrustdata/braintrust-sdk-go/${module}@${VERSION}"
+    index_url \
+        "github.com/braintrustdata/braintrust-sdk-go/${module}@${VERSION}" \
+        "https://proxy.golang.org/github.com/braintrustdata/braintrust-sdk-go/${module}/@v/$VERSION.info"
+done
 echo ""
 echo "Package indexed successfully!"
 
@@ -40,3 +80,7 @@ echo "if they don't show up"
 echo "- Release: $REPO_URL/releases/tag/$VERSION"
 echo "- Docs:    https://pkg.go.dev/github.com/braintrustdata/braintrust-sdk-go@$VERSION"
 echo "- Index:   https://proxy.golang.org/github.com/braintrustdata/braintrust-sdk-go/@v/$VERSION.info"
+for module in "${NESTED_MODULES[@]}"; do
+    echo "- Docs:    https://pkg.go.dev/github.com/braintrustdata/braintrust-sdk-go/${module}@${VERSION}"
+    echo "- Index:   https://proxy.golang.org/github.com/braintrustdata/braintrust-sdk-go/${module}/@v/$VERSION.info"
+done
