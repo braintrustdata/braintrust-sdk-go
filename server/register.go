@@ -164,14 +164,14 @@ func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) 
 	}
 
 	// Resolve parent span context from the request (links traces to the playground)
-	var spanParent string
+	var spanParent bttrace.Parent
 	var generation any
 	if req.Parent != nil && req.Parent.ObjectID != "" {
 		objectType := req.Parent.ObjectType
 		if objectType == "" {
 			objectType = "playground_id"
 		}
-		spanParent = objectType + ":" + req.Parent.ObjectID
+		spanParent = bttrace.NewParent(bttrace.ParentType(objectType), req.Parent.ObjectID)
 		// Extract generation from propagated_event.span_attributes.generation
 		if len(req.Parent.PropagatedEvent) > 0 {
 			var pe struct {

@@ -1,5 +1,7 @@
 package eval
 
+import bttrace "github.com/braintrustdata/braintrust-sdk-go/trace"
+
 // Eval is a reusable evaluation definition: the task, scorers, and project
 // that together define what this eval does. An Eval can be run directly via
 // [Evaluator.RunEval] or registered with a remote eval server.
@@ -67,12 +69,13 @@ type RunOpts[I, R any] struct {
 	OnCaseComplete func(CaseProgress)
 
 	// SpanParent overrides the parent attribute set on eval spans.
-	// When empty, the default "experiment_id:<id>" parent is used.
+	// When zero, the default "experiment_id:<id>" parent is used.
 	// The remote eval server sets this to link spans to a playground context.
-	SpanParent string
+	SpanParent bttrace.Parent
 
-	// Generation is injected into braintrust.span_attributes on every span
-	// when set. Used by the remote eval server to link spans in a trace hierarchy.
+	// Generation is propagated from the parent context (e.g. a Braintrust playground
+	// invocation) and injected into braintrust.span_attributes on every span.
+	// The Braintrust backend uses it to link eval spans back to the triggering context.
 	Generation any
 }
 

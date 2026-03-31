@@ -6,6 +6,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	bttrace "github.com/braintrustdata/braintrust-sdk-go/trace"
 )
 
 func TestMergeOpts_ExperimentDefaultsToEvalName(t *testing.T) {
@@ -68,7 +70,7 @@ func TestMergeOpts_FieldResolution(t *testing.T) {
 		Parallelism:    4,
 		Quiet:          true,
 		OnCaseComplete: callback,
-		SpanParent:     "playground_id:pg-1",
+		SpanParent:     bttrace.NewParent(bttrace.ParentTypePlaygroundID, "pg-1"),
 		Generation:     42,
 	}
 
@@ -88,7 +90,7 @@ func TestMergeOpts_FieldResolution(t *testing.T) {
 	assert.Equal(t, 4, opts.Parallelism)
 	assert.True(t, opts.Quiet)
 	assert.NotNil(t, opts.OnCaseComplete)
-	assert.Equal(t, "playground_id:pg-1", opts.SpanParent)
+	assert.Equal(t, bttrace.NewParent(bttrace.ParentTypePlaygroundID, "pg-1"), opts.SpanParent)
 	assert.Equal(t, 42, opts.Generation)
 }
 

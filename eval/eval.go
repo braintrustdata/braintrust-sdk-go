@@ -92,12 +92,13 @@ type Opts[I, R any] struct {
 	OnCaseComplete func(CaseProgress)
 
 	// SpanParent overrides the parent attribute set on eval spans.
-	// When empty, the default "experiment_id:<id>" parent is used.
+	// When zero, the default "experiment_id:<id>" parent is used.
 	// The remote eval server sets this to link spans to a playground context.
-	SpanParent string
+	SpanParent bttrace.Parent
 
-	// Generation is injected into braintrust.span_attributes on every span
-	// when set. Used by the remote eval server to link spans in a trace hierarchy.
+	// Generation is propagated from the parent context (e.g. a Braintrust playground
+	// invocation) and injected into braintrust.span_attributes on every span.
+	// The Braintrust backend uses it to link eval spans back to the triggering context.
 	Generation any
 }
 
@@ -291,17 +292,15 @@ func newEval[I, R any](
 	trialCount int,
 	quiet bool,
 	onCaseComplete func(CaseProgress),
-	spanParent string,
+	spanParent bttrace.Parent,
 	generation any,
 ) *eval[I, R] {
 	// Build parent span option. Use explicit override if provided (e.g. from
 	// the remote eval server linking spans to a playground), otherwise default
 	// to the experiment ID.
-	var parent bttrace.Parent
-	if spanParent != "" {
-		parent = bttrace.NewParent(bttrace.ParentTypeExperimentID, spanParent)
-	} else {
-		parent = bttrace.NewParent(bttrace.ParentTypeExperimentID, experimentID)
+	parent := bttrace.NewParent(bttrace.ParentTypeExperimentID, experimentID)
+	if spanParent != (bttrace.Parent{}) {
+		parent = spanParent
 	}
 	startSpanOpt := oteltrace.WithAttributes(parent.Attr())
 
@@ -1026,10 +1025,10 @@ func testNewEval[I, R any](
 		scorers,
 		classifiers,
 		parallelism,
-		1,    // trialCount=1 for tests
-		true, // quiet=true for tests
-		nil,  // no callback for tests
-		"",   // no parent override
-		nil,  // no generation
+		1,                // trialCount=1 for tests
+		true,             // quiet=true for tests
+		nil,              // no callback for tests
+		bttrace.Parent{}, // no parent override
+		nil,              // no generation
 	)
 }

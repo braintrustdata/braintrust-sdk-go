@@ -27,10 +27,7 @@ import (
 
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/config"
-	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
-	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
@@ -145,29 +142,12 @@ func (s *Server) initDefaultAuth() error {
 		appURL = s.appURL
 	}
 
-	httpClient := https.NewClient(cfg.APIKey, appURL, s.logger)
-	session, err := auth.NewSession(context.Background(), auth.Options{
-		APIKey:       cfg.APIKey,
-		AppURL:       appURL,
-		AppPublicURL: appURL,
-		APIURL:       cfg.APIURL,
-		OrgName:      cfg.OrgName,
-		Logger:       s.logger,
-		Client:       httpClient,
-	})
+	result, err := newAuthResult(context.Background(), cfg.APIKey, appURL, cfg.APIURL, cfg.OrgName, s.logger)
 	if err != nil {
-		return fmt.Errorf("failed to create session: %w", err)
+		return err
 	}
 
-	// Block until login completes
-	if err := session.Login(context.Background()); err != nil {
-		return fmt.Errorf("login failed: %w", err)
-	}
-
-	apiInfo := session.APIInfo()
-	apiClient := api.NewClient(apiInfo.APIKey, api.WithAPIURL(apiInfo.APIURL), api.WithLogger(s.logger))
-
-	s.defaultAuth = &authResult{session: session, api: apiClient}
+	s.defaultAuth = result
 	return nil
 }
 
@@ -207,6 +187,10 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	s.serverMu.Lock()
 	srv := s.httpServer
 	s.serverMu.Unlock()
+
+	if s.defaultAuth != nil {
+		s.defaultAuth.session.Close()
+	}
 
 	if srv == nil {
 		return nil

@@ -1297,7 +1297,7 @@ func TestOnCaseComplete_Callback(t *testing.T) {
 		"proj-callback", "callback-project",
 		cases, task,
 		[]Scorer[testInput, testOutput]{scorer},
-		1, true, callback, "", nil,
+		1, true, callback, trace.Parent{}, nil,
 	)
 
 	result, err := e.run(context.Background())
@@ -1344,7 +1344,7 @@ func TestOnCaseComplete_CallbackOnError(t *testing.T) {
 		"exp-err", "err-experiment",
 		"proj-err", "err-project",
 		cases, task,
-		nil, 1, true, callback, "", nil,
+		nil, 1, true, callback, trace.Parent{}, nil,
 	)
 
 	_, _ = e.run(context.Background())
@@ -1375,7 +1375,7 @@ func TestOnCaseComplete_NilCallback(t *testing.T) {
 		"exp-nil", "nil-experiment",
 		"proj-nil", "nil-project",
 		cases, task,
-		nil, 1, true, nil, "", nil,
+		nil, 1, true, nil, trace.Parent{}, nil,
 	)
 
 	result, err := e.run(context.Background())
@@ -1422,7 +1422,7 @@ func TestOnCaseComplete_Parallel(t *testing.T) {
 		"proj-parallel", "parallel-project",
 		cases, task,
 		[]Scorer[testInput, testOutput]{scorer},
-		4, true, callback, "", nil,
+		4, true, callback, trace.Parent{}, nil,
 	)
 
 	result, err := e.run(context.Background())
@@ -1617,8 +1617,8 @@ func TestSpanParentOverride(t *testing.T) {
 		cases, task,
 		[]Scorer[testInput, testOutput]{scorer},
 		1, true, nil,
-		"playground_id:pg-999", // SpanParent override
-		42,                     // Generation
+		trace.NewParent(trace.ParentTypePlaygroundID, "pg-999"), // SpanParent override
+		42, // Generation
 	)
 
 	result, err := e.run(context.Background())
@@ -1631,7 +1631,7 @@ func TestSpanParentOverride(t *testing.T) {
 	// Every span should have the overridden parent attribute
 	for _, span := range spans {
 		parentVal := span.Attr("braintrust.parent").Value.AsString()
-		assert.Equal(t, "experiment_id:playground_id:pg-999", parentVal,
+		assert.Equal(t, "playground_id:pg-999", parentVal,
 			"span %q should have overridden parent", span.Name())
 	}
 
@@ -1663,7 +1663,7 @@ func TestSpanParentDefault(t *testing.T) {
 		"proj-id", "proj-name",
 		cases, task, nil,
 		1, true, nil,
-		"", nil, // no override, no generation
+		trace.Parent{}, nil, // no override, no generation
 	)
 
 	result, err := e.run(context.Background())

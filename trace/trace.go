@@ -377,11 +377,13 @@ const (
 	ParentTypeProjectID ParentType = "project_id"
 	// ParentTypeExperimentID is the type of parent that represents an experiment by ID.
 	ParentTypeExperimentID ParentType = "experiment_id"
+	// ParentTypePlaygroundID is the type of parent for spans triggered from the Braintrust playground.
+	ParentTypePlaygroundID ParentType = "playground_id"
 )
 
 // IsValid returns true if the ParentType is a valid type.
 func (p ParentType) IsValid() bool {
-	return p == ParentTypeProjectName || p == ParentTypeProjectID || p == ParentTypeExperimentID
+	return p == ParentTypeProjectName || p == ParentTypeProjectID || p == ParentTypeExperimentID || p == ParentTypePlaygroundID
 }
 
 // Parent represents where data goes in Braintrust - a project, an experiment, etc.

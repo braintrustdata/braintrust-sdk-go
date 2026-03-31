@@ -24,6 +24,34 @@ type authResult struct {
 	api     *api.API
 }
 
+// newAuthResult creates a session, logs in, and builds an API client.
+// This is the shared auth flow used by both per-request auth and no-auth mode.
+func newAuthResult(ctx context.Context, apiKey, appURL, apiURL, orgName string, log logger.Logger) (*authResult, error) {
+	httpClient := https.NewClient(apiKey, appURL, log)
+	session, err := auth.NewSession(ctx, auth.Options{
+		APIKey:       apiKey,
+		AppURL:       appURL,
+		AppPublicURL: appURL,
+		APIURL:       apiURL,
+		OrgName:      orgName,
+		Logger:       log,
+		Client:       httpClient,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create session: %w", err)
+	}
+
+	if err := session.Login(ctx); err != nil {
+		session.Close()
+		return nil, fmt.Errorf("authentication failed: %w", err)
+	}
+
+	apiInfo := session.APIInfo()
+	apiClient := api.NewClient(apiInfo.APIKey, api.WithAPIURL(apiInfo.APIURL), api.WithLogger(log))
+
+	return &authResult{session: session, api: apiClient}, nil
+}
+
 // authCache is an LRU cache of authenticated sessions.
 type authCache struct {
 	mu      sync.Mutex
@@ -94,30 +122,7 @@ func (c *authCache) getOrCreate(ctx context.Context, token, orgName string) (*au
 
 // createSession creates and validates a new auth session.
 func (c *authCache) createSession(ctx context.Context, token, orgName string) (*authResult, error) {
-	httpClient := https.NewClient(token, c.appURL, c.log)
-	session, err := auth.NewSession(ctx, auth.Options{
-		APIKey:       token,
-		AppURL:       c.appURL,
-		AppPublicURL: c.appURL,
-		APIURL:       "", // Set by login response
-		OrgName:      orgName,
-		Logger:       c.log,
-		Client:       httpClient,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to create session: %w", err)
-	}
-
-	// Block until login completes to validate the token
-	if err := session.Login(ctx); err != nil {
-		session.Close()
-		return nil, fmt.Errorf("authentication failed: %w", err)
-	}
-
-	apiInfo := session.APIInfo()
-	apiClient := api.NewClient(apiInfo.APIKey, api.WithAPIURL(apiInfo.APIURL), api.WithLogger(c.log))
-
-	return &authResult{session: session, api: apiClient}, nil
+	return newAuthResult(ctx, token, c.appURL, "", orgName, c.log)
 }
 
 // evict removes a cache entry by token and org name, closing its session.
