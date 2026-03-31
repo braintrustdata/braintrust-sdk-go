@@ -732,3 +732,47 @@ func TestEval_NoProjectName(t *testing.T) {
 	assert.Nil(t, result)
 	assert.Contains(t, err.Error(), "project name is required")
 }
+
+// TestRunEval_Integration tests RunEval with a reusable Eval definition.
+func TestRunEval_Integration(t *testing.T) {
+	session, apiClient := setupIntegrationTest(t)
+	t.Parallel()
+
+	ctx := context.Background()
+	cfg := &config.Config{
+		DefaultProjectName: integrationTestProject,
+	}
+
+	// Define a reusable eval
+	classify := &Eval[string, string]{
+		Name: "classify",
+		Task: T(func(ctx context.Context, input string) (string, error) {
+			return "category-" + input, nil
+		}),
+		Scorers: []Scorer[string, string]{
+			NewScorer("exact_match", func(ctx context.Context, r TaskResult[string, string]) (Scores, error) {
+				if r.Output == r.Expected {
+					return S(1.0), nil
+				}
+				return S(0.0), nil
+			}),
+		},
+	}
+
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(ctx) }()
+
+	evaluator := NewEvaluator[string, string](session, tp, apiClient, cfg.DefaultProjectName)
+	result, err := evaluator.RunEval(ctx, classify, RunOpts[string, string]{
+		Dataset: NewDataset([]Case[string, string]{
+			{Input: "apple", Expected: "category-apple"},
+			{Input: "banana", Expected: "category-banana"},
+		}),
+		Quiet: true,
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	assert.Equal(t, "classify", result.Name())
+	assert.NotEmpty(t, result.ID())
+}

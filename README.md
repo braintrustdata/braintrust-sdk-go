@@ -129,7 +129,11 @@ If you prefer explicit control, you can add tracing middleware manually to your 
 
 ## Evaluations
 
-Run [evals](https://www.braintrust.dev/docs/guides/evals) with custom test cases and scoring functions:
+Run [evals](https://www.braintrust.dev/docs/guides/evals) with custom test cases and scoring functions.
+
+### Define and run
+
+Define an eval once with its task and scorers, then run it against any dataset:
 
 ```go
 package main
@@ -159,16 +163,9 @@ func main() {
         log.Fatal(err)
     }
 
-    // Create an evaluator with your task's input and output types
-    evaluator := braintrust.NewEvaluator[string, string](client)
-
-    // Run an evaluation
-    _, err = evaluator.Run(ctx, eval.Opts[string, string]{
-        Experiment: "greeting-experiment",
-        Dataset: eval.NewDataset([]eval.Case[string, string]{
-            {Input: "World", Expected: "Hello World"},
-            {Input: "Alice", Expected: "Hello Alice"},
-        }),
+    // Define a reusable eval (task + scorers)
+    greetingEval := &eval.Eval[string, string]{
+        Name: "greeting-experiment",
         Task: eval.T(func(ctx context.Context, input string) (string, error) {
             return "Hello " + input, nil
         }),
@@ -181,6 +178,15 @@ func main() {
                 return eval.S(score), nil
             }),
         },
+    }
+
+    // Run against a dataset
+    evaluator := braintrust.NewEvaluator[string, string](client)
+    _, err = evaluator.RunEval(ctx, greetingEval, eval.RunOpts[string, string]{
+        Dataset: eval.NewDataset([]eval.Case[string, string]{
+            {Input: "World", Expected: "Hello World"},
+            {Input: "Alice", Expected: "Hello Alice"},
+        }),
     })
     if err != nil {
         log.Fatal(err)
@@ -190,7 +196,7 @@ func main() {
 
 ### Remote Eval Server
 
-Run evaluations from the [Braintrust playground](https://www.braintrust.dev/docs/evaluate/remote-evals) against code on your own infrastructure:
+The same eval definition can be registered with a [remote eval server](https://www.braintrust.dev/docs/evaluate/remote-evals), letting you run evals from the Braintrust playground against code on your own infrastructure:
 
 ```go
 package main
@@ -205,23 +211,26 @@ import (
 )
 
 func main() {
-    srv := server.New(
-        server.WithAddress("localhost:8300"),
-        server.WithNoAuth(), // Remove for production
-    )
-
-    server.Register(srv, "classify",
-        eval.T(func(ctx context.Context, input string) (string, error) {
+    // Define the eval once
+    classify := &eval.Eval[string, string]{
+        Name: "classify",
+        Task: eval.T(func(ctx context.Context, input string) (string, error) {
             return strings.ToUpper(input), nil
         }),
-        []eval.Scorer[string, string]{
+        Scorers: []eval.Scorer[string, string]{
             eval.NewScorer("exact_match", func(ctx context.Context, r eval.TaskResult[string, string]) (eval.Scores, error) {
                 if r.Output == r.Expected { return eval.S(1.0), nil }
                 return eval.S(0.0), nil
             }),
         },
-        server.RegisterOpts{},
+    }
+
+    // Register with server for remote execution
+    srv := server.New(
+        server.WithAddress("localhost:8300"),
+        server.WithNoAuth(), // Remove for production
     )
+    server.Register(srv, classify, server.RegisterOpts{})
 
     log.Fatal(srv.Start())
 }

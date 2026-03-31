@@ -52,22 +52,26 @@ func main() {
 		},
 	)
 
-	// Register the evaluator on the server.
-	server.Register(srv, "food-classifier",
-		classifyTask,
-		[]eval.Scorer[string, string]{exactMatch},
-		server.RegisterOpts{
-			ProjectName: "go-sdk-examples",
-			Parameters: &server.Parameters{
-				Schema: map[string]server.ParameterDef{
-					"model": {
-						Type:        "string",
-						Default:     "rule-based",
-						Description: "Classification model to use",
-					},
+	// Define the eval.
+	foodClassifier := &eval.Eval[string, string]{
+		Name:        "food-classifier",
+		Task:        classifyTask,
+		Scorers:     []eval.Scorer[string, string]{exactMatch},
+		ProjectName: "go-sdk-examples",
+	}
+
+	// Register with the server.
+	server.Register(srv, foodClassifier, server.RegisterOpts{
+		Parameters: &server.Parameters{
+			Schema: map[string]server.ParameterDef{
+				"model": {
+					Type:        "string",
+					Default:     "rule-based",
+					Description: "Classification model to use",
 				},
 			},
 		},
+	},
 	)
 
 	log.Printf("Eval server starting on localhost:8300")

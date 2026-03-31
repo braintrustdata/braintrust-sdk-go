@@ -52,3 +52,8 @@ func (e *Evaluator[I, R]) Datasets() *DatasetAPI[I, R] {
 func (e *Evaluator[I, R]) Run(ctx context.Context, opts Opts[I, R]) (*Result, error) {
 	return run(ctx, opts, e.session, e.tracerProvider, e.api, e.defaultProjectName)
 }
+
+// RunEval executes an evaluation from a reusable [Eval] definition.
+func (e *Evaluator[I, R]) RunEval(ctx context.Context, ev *Eval[I, R], opts RunOpts[I, R]) (*Result, error) {
+	return run(ctx, mergeOpts(ev, opts), e.session, e.tracerProvider, e.api, e.defaultProjectName)
+}

@@ -40,41 +40,38 @@ type RegisterOpts struct {
 	ProjectName string
 }
 
-// Register adds an evaluator to the server. The type parameters I and R are
-// the input and result types of the evaluation. Go does not allow generic
+// Register adds an eval definition to the server. The type parameters I and R
+// are the input and result types of the evaluation. Go does not allow generic
 // methods on non-generic types, so this is a package-level function.
 //
 // Example:
 //
-//	server.Register(srv, "classify",
-//	    eval.T(classifyTask),
-//	    []eval.Scorer[string, string]{scorer},
-//	    server.RegisterOpts{ProjectName: "my-project"},
-//	)
-func Register[I, R any](s *Server, name string, task eval.TaskFunc[I, R], scorers []eval.Scorer[I, R], opts RegisterOpts) {
+//	classify := &eval.Eval[string, string]{
+//	    Name:    "classify",
+//	    Task:    eval.T(classifyTask),
+//	    Scorers: []eval.Scorer[string, string]{scorer},
+//	}
+//	server.Register(srv, classify, server.RegisterOpts{})
+func Register[I, R any](s *Server, ev *eval.Eval[I, R], opts RegisterOpts) {
 	impl := &registeredEvalImpl[I, R]{
-		name:    name,
-		task:    task,
-		scorers: scorers,
-		opts:    opts,
+		def:  ev,
+		opts: opts,
 	}
 
 	s.evalsMu.Lock()
 	defer s.evalsMu.Unlock()
-	s.evaluators[name] = impl
+	s.evaluators[ev.Name] = impl
 }
 
-// registeredEvalImpl implements registeredEval by wrapping generic eval types.
+// registeredEvalImpl implements registeredEval by wrapping an [eval.Eval] definition.
 type registeredEvalImpl[I, R any] struct {
-	name    string
-	task    eval.TaskFunc[I, R]
-	scorers []eval.Scorer[I, R]
-	opts    RegisterOpts
+	def  *eval.Eval[I, R]
+	opts RegisterOpts
 }
 
 func (r *registeredEvalImpl[I, R]) scorerNames() []string {
-	names := make([]string, len(r.scorers))
-	for i, s := range r.scorers {
+	names := make([]string, len(r.def.Scorers))
+	for i, s := range r.def.Scorers {
 		names[i] = s.Name()
 	}
 	return names
@@ -85,7 +82,10 @@ func (r *registeredEvalImpl[I, R]) parameters() *Parameters {
 }
 
 func (r *registeredEvalImpl[I, R]) projectName() string {
-	return r.opts.ProjectName
+	if r.opts.ProjectName != "" {
+		return r.opts.ProjectName
+	}
+	return r.def.ProjectName
 }
 
 func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) error {
@@ -100,7 +100,7 @@ func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) 
 	// Determine experiment name
 	experimentName := req.ExperimentName
 	if experimentName == "" {
-		experimentName = r.name
+		experimentName = r.def.Name
 	}
 
 	// Use the shared TracerProvider if one was provided, otherwise create a
@@ -153,7 +153,7 @@ func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) 
 		// Stream progress event; cancel eval if write fails (client disconnected)
 		if err := cfg.sse.writeProgress(progressEvent{
 			ObjectType: "task",
-			Name:       r.name,
+			Name:       r.def.Name,
 			Format:     "code",
 			OutputType: "completion",
 			Event:      "json_delta",
@@ -185,13 +185,11 @@ func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) 
 		}
 	}
 
-	// Create evaluator and run
+	// Create evaluator and run using the eval definition
 	evaluator := eval.NewEvaluator[I, R](cfg.auth.session, tp, apiClient, r.projectName())
-	result, evalErr := evaluator.Run(evalCtx, eval.Opts[I, R]{
+	result, evalErr := evaluator.RunEval(evalCtx, r.def, eval.RunOpts[I, R]{
 		Experiment:     experimentName,
 		Dataset:        dataset,
-		Task:           r.task,
-		Scorers:        r.scorers,
 		ProjectName:    r.projectName(),
 		Update:         true,
 		Quiet:          true,
