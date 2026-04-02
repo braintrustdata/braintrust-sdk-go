@@ -150,28 +150,50 @@ func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) 
 		}
 		scoresMu.Unlock()
 
+		// JSON-encode just the output, matching Ruby's protocol.
+		// Scores are delivered via OTLP spans, not SSE progress events.
+		outputJSON, _ := json.Marshal(cp.Output)
+
 		// Stream progress event; cancel eval if write fails (client disconnected)
 		if err := cfg.sse.writeProgress(progressEvent{
+			ID:         cp.ID,
 			ObjectType: "task",
 			Name:       r.def.Name,
 			Format:     "code",
 			OutputType: "completion",
 			Event:      "json_delta",
-			Data:       cp.Output,
+			Data:       string(outputJSON),
+			Origin:     cp.Origin,
 		}); err != nil {
 			cancelEval()
+			return
 		}
+
+		// Signal per-cell completion so the UI marks the task as done.
+		if err := cfg.sse.writeProgress(progressEvent{
+			ID:         cp.ID,
+			ObjectType: "task",
+			Name:       r.def.Name,
+			Format:     "code",
+			OutputType: "completion",
+			Event:      "done",
+			Data:       "",
+			Origin:     cp.Origin,
+		}); err != nil {
+			cancelEval()
+			return
+		}
+
 	}
 
 	// Resolve parent span context from the request (links traces to the playground)
 	var spanParent bttrace.Parent
 	var generation any
 	if req.Parent != nil && req.Parent.ObjectID != "" {
-		objectType := req.Parent.ObjectType
-		if objectType == "" {
-			objectType = "playground_id"
-		}
-		spanParent = bttrace.NewParent(bttrace.ParentType(objectType), req.Parent.ObjectID)
+		// Always use "playground_id" as the parent type, matching Ruby/Java behavior.
+		// The request sends object_type "playground_logs" but the span parent must
+		// be "playground_id" for the UI to find the spans.
+		spanParent = bttrace.NewParent("playground_id", req.Parent.ObjectID)
 		// Extract generation from propagated_event.span_attributes.generation
 		if len(req.Parent.PropagatedEvent) > 0 {
 			var pe struct {
@@ -185,7 +207,6 @@ func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) 
 		}
 	}
 
-	// Create evaluator and run using the eval definition
 	evaluator := eval.NewEvaluator[I, R](cfg.auth.session, tp, apiClient, r.projectName())
 	result, evalErr := evaluator.RunEval(evalCtx, r.def, eval.RunOpts[I, R]{
 		Experiment:     experimentName,
@@ -198,8 +219,10 @@ func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) 
 		Generation:     generation,
 	})
 
-	// Flush traces before sending summary
-	_ = tp.ForceFlush(ctx)
+	// Flush traces before sending summary so the UI can poll for scores immediately.
+	flushCtx, flushCancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer flushCancel()
+	_ = tp.ForceFlush(flushCtx)
 
 	// Build average scores for summary
 	avgScores := make(map[string]float64, len(scoreSums))
@@ -218,6 +241,8 @@ func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) 
 	if result != nil {
 		summary.ExperimentID = result.ID()
 		summary.ExperimentName = result.Name()
+		summary.ProjectName = result.ProjectName()
+		summary.ProjectID = result.ProjectID()
 		if permalink, err := result.Permalink(); err == nil && permalink != "" {
 			summary.ExperimentURL = permalink
 		}

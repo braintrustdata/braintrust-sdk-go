@@ -41,17 +41,25 @@ func TestSSEWriter_WriteProgress(t *testing.T) {
 	require.NoError(t, err)
 
 	err = sse.writeProgress(progressEvent{
+		ID:         "abc123def456",
 		ObjectType: "task",
 		Name:       "test-eval",
 		Event:      "json_delta",
 		Data:       "hello",
+		Origin: map[string]any{
+			"object_type": "dataset",
+			"object_id":   "ds-123",
+			"id":          "row-456",
+		},
 	})
 	require.NoError(t, err)
 
 	body := w.Body.String()
 	assert.Contains(t, body, "event: progress\n")
+	assert.Contains(t, body, `"id":"abc123def456"`)
 	assert.Contains(t, body, `"object_type":"task"`)
 	assert.Contains(t, body, `"name":"test-eval"`)
+	assert.Contains(t, body, `"object_id":"ds-123"`)
 }
 
 func TestSSEWriter_WriteSummary(t *testing.T) {
@@ -60,7 +68,10 @@ func TestSSEWriter_WriteSummary(t *testing.T) {
 	require.NoError(t, err)
 
 	err = sse.writeSummary(summaryEvent{
+		ExperimentID:   "exp-id-1",
 		ExperimentName: "exp-1",
+		ProjectName:    "my-project",
+		ProjectID:      "proj-456",
 		Scores:         map[string]float64{"accuracy": 0.95},
 	})
 	require.NoError(t, err)
@@ -68,6 +79,8 @@ func TestSSEWriter_WriteSummary(t *testing.T) {
 	body := w.Body.String()
 	assert.Contains(t, body, "event: summary\n")
 	assert.Contains(t, body, `"experiment_name":"exp-1"`)
+	assert.Contains(t, body, `"project_name":"my-project"`)
+	assert.Contains(t, body, `"project_id":"proj-456"`)
 	assert.Contains(t, body, `"accuracy":0.95`)
 }
 

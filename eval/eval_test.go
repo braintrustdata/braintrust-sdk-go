@@ -1440,6 +1440,148 @@ func TestOnCaseComplete_Parallel(t *testing.T) {
 	}
 }
 
+func TestCaseProgress_IDIsSpanID(t *testing.T) {
+	t.Parallel()
+
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "test"}},
+	})
+
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: "ok"}, nil
+	})
+
+	var capturedProgress CaseProgress
+	callback := func(cp CaseProgress) {
+		capturedProgress = cp
+	}
+
+	tp, _ := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-id", "id-experiment",
+		"proj-id", "id-project",
+		cases, task,
+		nil, 1, true, callback, trace.Parent{}, nil,
+	)
+
+	_, err := e.run(context.Background())
+	require.NoError(t, err)
+
+	// ID should be a 16-character hex span ID
+	assert.NotEmpty(t, capturedProgress.ID)
+	assert.Regexp(t, `^[0-9a-f]{16}$`, capturedProgress.ID)
+}
+
+func TestCaseProgress_OriginFromDataset(t *testing.T) {
+	t.Parallel()
+
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{
+			Input:   testInput{Value: "test"},
+			ID:      "case-123",
+			XactID:  "xact-456",
+			Created: "2024-01-15T10:30:00Z",
+		},
+	})
+
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: "ok"}, nil
+	})
+
+	var capturedProgress CaseProgress
+	callback := func(cp CaseProgress) {
+		capturedProgress = cp
+	}
+
+	tp, _ := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-origin", "origin-experiment",
+		"proj-origin", "origin-project",
+		cases, task,
+		nil, 1, true, callback, trace.Parent{}, nil,
+	)
+
+	_, err := e.run(context.Background())
+	require.NoError(t, err)
+
+	require.NotNil(t, capturedProgress.Origin)
+	assert.Equal(t, "dataset", capturedProgress.Origin["object_type"])
+	assert.Equal(t, "case-123", capturedProgress.Origin["id"])
+	assert.Equal(t, "xact-456", capturedProgress.Origin["_xact_id"])
+}
+
+func TestCaseProgress_OriginNilWithoutDatasetID(t *testing.T) {
+	t.Parallel()
+
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "test"}},
+	})
+
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: "ok"}, nil
+	})
+
+	var capturedProgress CaseProgress
+	callback := func(cp CaseProgress) {
+		capturedProgress = cp
+	}
+
+	tp, _ := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-no-origin", "no-origin-experiment",
+		"proj-no-origin", "no-origin-project",
+		cases, task,
+		nil, 1, true, callback, trace.Parent{}, nil,
+	)
+
+	_, err := e.run(context.Background())
+	require.NoError(t, err)
+
+	assert.Nil(t, capturedProgress.Origin)
+}
+
+func TestResult_ProjectIDAndProjectName(t *testing.T) {
+	t.Parallel()
+
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "test"}},
+	})
+
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: "ok"}, nil
+	})
+
+	tp, _ := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-proj", "project-experiment",
+		"proj-abc123", "test-project-name",
+		cases, task,
+		nil, 1, true, nil, trace.Parent{}, nil,
+	)
+
+	result, err := e.run(context.Background())
+	require.NoError(t, err)
+
+	assert.Equal(t, "proj-abc123", result.ProjectID())
+	assert.Equal(t, "test-project-name", result.ProjectName())
+}
+
 func TestTaskOutput_UserData(t *testing.T) {
 	t.Parallel()
 

@@ -71,20 +71,36 @@ type scoreInfo struct {
 
 // parametersMeta wraps parameters with the protocol-required metadata.
 type parametersMeta struct {
-	Type   string                  `json:"type"`
-	Schema map[string]ParameterDef `json:"schema"`
-	Source *string                 `json:"source"`
+	Type   string                      `json:"type"`
+	Schema map[string]wireParameterDef `json:"schema"`
+	Source *string                     `json:"source"`
+}
+
+// wireParameterDef is the wire format for a parameter in the dev server protocol.
+// Each parameter is wrapped with type "data" and a nested schema object.
+type wireParameterDef struct {
+	Type        string      `json:"type"`
+	Schema      schemaField `json:"schema"`
+	Default     any         `json:"default,omitempty"`
+	Description string      `json:"description,omitempty"`
+}
+
+// schemaField is the inner schema for a wire parameter definition.
+type schemaField struct {
+	Type string `json:"type"`
 }
 
 // progressEvent is an SSE progress event sent per evaluation case.
+// The id field is required by the Braintrust UI (SSEProgressEventData schema).
 type progressEvent struct {
-	ObjectType string `json:"object_type"`
-	Name       string `json:"name"`
-	Format     string `json:"format"`
-	OutputType string `json:"output_type"`
-	Event      string `json:"event"`
-	Data       any    `json:"data,omitempty"`
-	SpanID     string `json:"span_id,omitempty"`
+	ID         string         `json:"id"`
+	ObjectType string         `json:"object_type"`
+	Name       string         `json:"name"`
+	Format     string         `json:"format"`
+	OutputType string         `json:"output_type"`
+	Event      string         `json:"event"`
+	Data       any            `json:"data,omitempty"`
+	Origin     map[string]any `json:"origin,omitempty"`
 }
 
 // summaryEvent is the final SSE event with aggregated results.

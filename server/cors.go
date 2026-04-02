@@ -23,6 +23,7 @@ var corsAllowHeaders = strings.Join([]string{
 	"X-Bt-Found-Existing-Experiment",
 	"X-Bt-Span-Id",
 	"X-Bt-Span-Export",
+	"X-Bt-Use-Gateway",
 }, ", ")
 
 const (

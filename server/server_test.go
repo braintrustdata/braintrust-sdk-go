@@ -127,6 +127,13 @@ func TestListEndpoint_WithParameters(t *testing.T) {
 	require.NotNil(t, info.Parameters)
 	assert.Equal(t, "braintrust.staticParameters", info.Parameters.Type)
 	assert.Contains(t, info.Parameters.Schema, "model")
+
+	// Verify wire format: each parameter must have type "data" and nested schema.
+	modelParam := info.Parameters.Schema["model"]
+	assert.Equal(t, "data", modelParam.Type)
+	assert.Equal(t, "string", modelParam.Schema.Type)
+	assert.Equal(t, "gpt-4", modelParam.Default)
+	assert.Equal(t, "Model to use", modelParam.Description)
 }
 
 func TestEvalEndpoint_MissingName(t *testing.T) {

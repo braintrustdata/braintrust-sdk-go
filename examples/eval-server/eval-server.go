@@ -4,7 +4,7 @@
 //
 // Start the server:
 //
-//	go run examples/internal/eval-server/main.go
+//	go run examples/eval-server/eval-server.go
 //
 // Then configure the endpoint (http://localhost:8300) in your Braintrust
 // project settings under Remote evals.
@@ -22,8 +22,9 @@ import (
 func main() {
 	// Create the eval server.
 	// Use WithNoAuth() for local development; remove for production.
-	// Use WithTracerProvider(tp) to include user-instrumented spans (LLM clients,
-	// custom spans) in eval traces.
+	// Use WithTracerProvider(tp) to share an OpenTelemetry TracerProvider so
+	// user-instrumented spans (LLM clients, custom spans) appear in the same
+	// trace as eval spans.
 	srv := server.New(
 		server.WithAddress("localhost:8300"),
 		server.WithNoAuth(),
@@ -42,7 +43,8 @@ func main() {
 		}
 	})
 
-	// Define a scorer: exact match.
+	// Define scorers. Scorers run server-side as part of the evaluation and
+	// their results are exported to Braintrust via OTLP spans.
 	exactMatch := eval.NewScorer("exact_match",
 		func(ctx context.Context, r eval.TaskResult[string, string]) (eval.Scores, error) {
 			if r.Output == r.Expected {
@@ -52,28 +54,13 @@ func main() {
 		},
 	)
 
-	// Define a scorer: checks output is a valid food category.
-	validCategory := eval.NewScorer("valid_category",
-		func(ctx context.Context, r eval.TaskResult[string, string]) (eval.Scores, error) {
-			switch r.Output {
-			case "fruit", "vegetable", "grain", "protein", "dairy", "unknown":
-				return eval.S(1.0), nil
-			default:
-				return eval.S(0.0), nil
-			}
-		},
-	)
-
-	// Define the eval.
-	foodClassifier := &eval.Eval[string, string]{
+	// Register the evaluator with the server.
+	server.Register(srv, &eval.Eval[string, string]{
 		Name:        "food-classifier",
 		Task:        classifyTask,
-		Scorers:     []eval.Scorer[string, string]{exactMatch, validCategory},
+		Scorers:     []eval.Scorer[string, string]{exactMatch},
 		ProjectName: "go-sdk-examples",
-	}
-
-	// Register with the server.
-	server.Register(srv, foodClassifier, server.RegisterOpts{
+	}, server.RegisterOpts{
 		Parameters: &server.Parameters{
 			Schema: map[string]server.ParameterDef{
 				"model": {
@@ -83,8 +70,7 @@ func main() {
 				},
 			},
 		},
-	},
-	)
+	})
 
 	log.Printf("Eval server starting on localhost:8300")
 	log.Printf("Registered evaluators: food-classifier")

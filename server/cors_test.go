@@ -61,6 +61,7 @@ func TestCORS_Preflight(t *testing.T) {
 	assert.Equal(t, http.StatusNoContent, w.Code)
 	assert.Equal(t, "https://www.braintrust.dev", w.Header().Get("Access-Control-Allow-Origin"))
 	assert.Contains(t, w.Header().Get("Access-Control-Allow-Headers"), "X-Bt-Auth-Token")
+	assert.Contains(t, w.Header().Get("Access-Control-Allow-Headers"), "X-Bt-Use-Gateway")
 	assert.Equal(t, "86400", w.Header().Get("Access-Control-Max-Age"))
 }
 

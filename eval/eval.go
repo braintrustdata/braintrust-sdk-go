@@ -108,6 +108,10 @@ type CaseProgress struct {
 	Output any
 	Scores map[string]float64
 	Error  error
+	// ID is the eval span ID, used to correlate SSE progress events with OTLP span data.
+	ID string
+	// Origin contains dataset provenance when the case came from a dataset.
+	Origin map[string]any
 }
 
 // Eval defines an evaluation: the task to run and the scorers to apply.
@@ -292,6 +296,16 @@ func (r *Result) Name() string {
 // ID returns the experiment ID.
 func (r *Result) ID() string {
 	return r.key.experimentID
+}
+
+// ProjectID returns the project ID.
+func (r *Result) ProjectID() string {
+	return r.key.projectID
+}
+
+// ProjectName returns the project name.
+func (r *Result) ProjectName() string {
+	return r.key.projectName
 }
 
 // String returns a string representaton of the result for printing on the console.
@@ -611,9 +625,25 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 		span.SetAttributes(attribute.StringSlice("braintrust.tags", c.Tags))
 	}
 
+	// Use the eval span ID as the progress event ID, matching Ruby's protocol.
+	// The UI correlates SSE progress events with OTLP span data using this ID.
+	spanID := span.SpanContext().SpanID().String()
+
+	// Build origin for progress tracking when case came from a dataset.
+	var origin map[string]any
+	if c.ID != "" && c.XactID != "" {
+		origin = map[string]any{
+			"object_type": "dataset",
+			"object_id":   e.datasetID,
+			"id":          c.ID,
+			"created":     c.Created,
+			"_xact_id":    c.XactID,
+		}
+	}
+
 	taskResult, err := e.runTask(ctx, span, c, trialIndex)
 	if err != nil {
-		e.onCaseComplete(CaseProgress{Error: err})
+		e.onCaseComplete(CaseProgress{Error: err, ID: spanID, Origin: origin})
 		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
@@ -657,6 +687,8 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 		Output: taskResult.Output,
 		Scores: scoreMap,
 		Error:  joined,
+		ID:     spanID,
+		Origin: origin,
 	})
 
 	if joined != nil {
