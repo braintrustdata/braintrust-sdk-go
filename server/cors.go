@@ -7,7 +7,8 @@ import (
 )
 
 // allowedOriginPattern matches braintrust.dev and braintrustdata.dev origins
-// including subdomains and preview deployments.
+// including subdomains and preview deployments. HTTP is allowed alongside HTTPS
+// to support local development proxies.
 var allowedOriginPattern = regexp.MustCompile(`^https?://([\w-]+\.)*(braintrust|braintrustdata)\.dev$`)
 
 var corsAllowHeaders = strings.Join([]string{
@@ -40,6 +41,7 @@ func corsMiddleware(next http.Handler) http.Handler {
 			w.Header().Set("Access-Control-Expose-Headers", corsAllowHeaders)
 			w.Header().Set("Access-Control-Allow-Credentials", "true")
 			w.Header().Set("Access-Control-Max-Age", corsMaxAge)
+			w.Header().Set("Vary", "Origin")
 			// Support Chrome Private Network Access
 			w.Header().Set("Access-Control-Allow-Private-Network", "true")
 		}

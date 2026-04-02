@@ -145,6 +145,7 @@ func (c *authCache) evict(token, orgName string) {
 }
 
 // moveToEnd moves a key to the end of the LRU order.
+// O(n) scan over the order slice; fine for defaultAuthCacheMax (64).
 // Must be called with c.mu held.
 func (c *authCache) moveToEnd(key string) {
 	for i, k := range c.order {

@@ -6,14 +6,14 @@
 //
 // Example:
 //
+//	classify := &eval.Eval[string, string]{
+//	    Name:    "classify",
+//	    Task:    eval.T(classifyTask),
+//	    Scorers: []eval.Scorer[string, string]{scorer},
+//	}
+//
 //	srv := server.New(server.WithAddress(":8300"))
-//
-//	server.Register(srv, "classify",
-//	    eval.T(classifyTask),
-//	    []eval.Scorer[string, string]{scorer},
-//	    server.RegisterOpts{ProjectName: "my-project"},
-//	)
-//
+//	server.Register(srv, classify, server.RegisterOpts{})
 //	log.Fatal(srv.Start())
 package server
 
@@ -188,14 +188,18 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	srv := s.httpServer
 	s.serverMu.Unlock()
 
+	// Drain active requests before closing the default session,
+	// so in-flight evals using it can complete.
+	var err error
+	if srv != nil {
+		err = srv.Shutdown(ctx)
+	}
+
 	if s.defaultAuth != nil {
 		s.defaultAuth.session.Close()
 	}
 
-	if srv == nil {
-		return nil
-	}
-	return srv.Shutdown(ctx)
+	return err
 }
 
 // handleHealth responds to GET / with a health check.

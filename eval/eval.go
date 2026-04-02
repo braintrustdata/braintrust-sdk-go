@@ -110,6 +110,97 @@ type CaseProgress struct {
 	Error  error
 }
 
+// Eval defines an evaluation: the task to run and the scorers to apply.
+// Run it via [Evaluator.RunEval] or register it with a remote eval server.
+type Eval[I, R any] struct {
+	// Name is the eval name. Used as the default experiment name and as
+	// the registration key when registered with a remote eval server.
+	Name string
+
+	// Task is the function under evaluation.
+	Task TaskFunc[I, R]
+
+	// Scorers are the scoring functions applied to each task result.
+	Scorers []Scorer[I, R]
+
+	// ProjectName is the Braintrust project for this eval.
+	// Optional; falls back to the Evaluator's default project.
+	ProjectName string
+}
+
+// RunOpts configures a single evaluation run. These vary per invocation;
+// the [Eval] definition stays the same.
+type RunOpts[I, R any] struct {
+	// Experiment overrides the experiment name. Defaults to [Eval.Name].
+	Experiment string
+
+	// ProjectName overrides the project name. Defaults to [Eval.ProjectName].
+	ProjectName string
+
+	// Dataset is the test cases to evaluate against. Required.
+	Dataset Dataset[I, R]
+
+	// Tags to apply to the experiment.
+	Tags []string
+
+	// Metadata to attach to the experiment.
+	Metadata Metadata
+
+	// Update appends to an existing experiment when true (default: false).
+	Update bool
+
+	// Parallelism is the number of goroutines (default: 1).
+	Parallelism int
+
+	// Quiet suppresses result output (default: false).
+	Quiet bool
+
+	// OnCaseComplete is called after each case completes (task + scorers).
+	// It is called from worker goroutines and must be safe for concurrent use.
+	// Optional — nil means no callback.
+	OnCaseComplete func(CaseProgress)
+
+	// SpanParent overrides the parent attribute set on eval spans.
+	// When zero, the default "experiment_id:<id>" parent is used.
+	// The remote eval server sets this to link spans to a playground context.
+	SpanParent bttrace.Parent
+
+	// Generation is propagated from the parent context (e.g. a Braintrust playground
+	// invocation) and injected into braintrust.span_attributes on every span.
+	// The Braintrust backend uses it to link eval spans back to the triggering context.
+	Generation any
+}
+
+// mergeOpts combines an Eval definition with RunOpts into an Opts for
+// backward-compatible delegation to the existing run() function.
+func mergeOpts[I, R any](ev *Eval[I, R], ro RunOpts[I, R]) Opts[I, R] {
+	experiment := ro.Experiment
+	if experiment == "" {
+		experiment = ev.Name
+	}
+
+	projectName := ro.ProjectName
+	if projectName == "" {
+		projectName = ev.ProjectName
+	}
+
+	return Opts[I, R]{
+		Experiment:     experiment,
+		Dataset:        ro.Dataset,
+		Task:           ev.Task,
+		Scorers:        ev.Scorers,
+		ProjectName:    projectName,
+		Tags:           ro.Tags,
+		Metadata:       ro.Metadata,
+		Update:         ro.Update,
+		Parallelism:    ro.Parallelism,
+		Quiet:          ro.Quiet,
+		OnCaseComplete: ro.OnCaseComplete,
+		SpanParent:     ro.SpanParent,
+		Generation:     ro.Generation,
+	}
+}
+
 // Case represents a single test case in an evaluation.
 type Case[I, R any] struct {
 	// Input is the input to the task function.
@@ -299,7 +390,7 @@ func newEval[I, R any](
 	// the remote eval server linking spans to a playground), otherwise default
 	// to the experiment ID.
 	parent := bttrace.NewParent(bttrace.ParentTypeExperimentID, experimentID)
-	if spanParent != (bttrace.Parent{}) {
+	if !spanParent.IsZero() {
 		parent = spanParent
 	}
 	startSpanOpt := oteltrace.WithAttributes(parent.Attr())
@@ -315,6 +406,11 @@ func newEval[I, R any](
 
 	if trialCount < 1 {
 		trialCount = 1
+	}
+
+	// Default to noop so callers don't need nil checks
+	if onCaseComplete == nil {
+		onCaseComplete = func(CaseProgress) {}
 	}
 
 	return &eval[I, R]{
@@ -517,9 +613,7 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 
 	taskResult, err := e.runTask(ctx, span, c, trialIndex)
 	if err != nil {
-		if e.onCaseComplete != nil {
-			e.onCaseComplete(CaseProgress{Error: err})
-		}
+		e.onCaseComplete(CaseProgress{Error: err})
 		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
@@ -555,17 +649,15 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 
 	joined := errors.Join(scorerErr, classifierErr)
 
-	if e.onCaseComplete != nil {
-		scoreMap := make(map[string]float64, len(scores))
-		for _, s := range scores {
-			scoreMap[s.Name] = s.Score
-		}
-		e.onCaseComplete(CaseProgress{
-			Output: taskResult.Output,
-			Scores: scoreMap,
-			Error:  joined,
-		})
+	scoreMap := make(map[string]float64, len(scores))
+	for _, s := range scores {
+		scoreMap[s.Name] = s.Score
 	}
+	e.onCaseComplete(CaseProgress{
+		Output: taskResult.Output,
+		Scores: scoreMap,
+		Error:  joined,
+	})
 
 	if joined != nil {
 		span.SetStatus(codes.Error, joined.Error())

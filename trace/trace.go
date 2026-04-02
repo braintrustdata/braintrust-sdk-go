@@ -392,6 +392,11 @@ type Parent struct {
 	ID   string
 }
 
+// IsZero returns true if the Parent is the zero value.
+func (p Parent) IsZero() bool {
+	return p.Type == "" && p.ID == ""
+}
+
 // Attr returns the OTel attribute for this parent.
 func (p Parent) Attr() attribute.KeyValue {
 	return attribute.String(ParentOtelAttrKey, p.String())
