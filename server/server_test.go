@@ -59,11 +59,11 @@ func TestListEndpoint_WithEvaluators(t *testing.T) {
 		return eval.S(0.0), nil
 	})
 
-	Register(srv, &eval.Eval[string, string]{
+	RegisterEval(srv, &eval.Eval[string, string]{
 		Name:    "my-eval",
 		Task:    task,
 		Scorers: []eval.Scorer[string, string]{scorer},
-	}, RegisterOpts{})
+	}, RegisterEvalOpts{})
 
 	ts := httptest.NewServer(srv.Handler())
 	defer ts.Close()
@@ -94,11 +94,11 @@ func TestListEndpoint_WithParameters(t *testing.T) {
 		return eval.S(1.0), nil
 	})
 
-	Register(srv, &eval.Eval[string, string]{
+	RegisterEval(srv, &eval.Eval[string, string]{
 		Name:    "param-eval",
 		Task:    task,
 		Scorers: []eval.Scorer[string, string]{scorer},
-	}, RegisterOpts{
+	}, RegisterEvalOpts{
 		Parameters: &Parameters{
 			Schema: map[string]ParameterDef{
 				"model": {

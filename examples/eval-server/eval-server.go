@@ -55,12 +55,12 @@ func main() {
 	)
 
 	// Register the evaluator with the server.
-	server.Register(srv, &eval.Eval[string, string]{
+	server.RegisterEval(srv, &eval.Eval[string, string]{
 		Name:        "food-classifier",
 		Task:        classifyTask,
 		Scorers:     []eval.Scorer[string, string]{exactMatch},
 		ProjectName: "go-sdk-examples",
-	}, server.RegisterOpts{
+	}, server.RegisterEvalOpts{
 		Parameters: &server.Parameters{
 			Schema: map[string]server.ParameterDef{
 				"model": {

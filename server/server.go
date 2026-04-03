@@ -13,7 +13,7 @@
 //	}
 //
 //	srv := server.New(server.WithAddress(":8300"))
-//	server.Register(srv, classify, server.RegisterOpts{})
+//	server.RegisterEval(srv, classify, server.RegisterEvalOpts{})
 //	log.Fatal(srv.Start())
 package server
 

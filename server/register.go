@@ -31,8 +31,8 @@ type evalRunConfig struct {
 	tracerProvider *sdktrace.TracerProvider // nil means create per-request
 }
 
-// RegisterOpts configures a registered evaluator.
-type RegisterOpts struct {
+// RegisterEvalOpts configures a registered evaluator.
+type RegisterEvalOpts struct {
 	// Parameters defines the parameter schema shown in the Braintrust UI.
 	Parameters *Parameters
 
@@ -40,7 +40,7 @@ type RegisterOpts struct {
 	ProjectName string
 }
 
-// Register adds an eval definition to the server. The type parameters I and R
+// RegisterEval adds an eval definition to the server. The type parameters I and R
 // are the input and result types of the evaluation. Go does not allow generic
 // methods on non-generic types, so this is a package-level function.
 //
@@ -51,8 +51,8 @@ type RegisterOpts struct {
 //	    Task:    eval.T(classifyTask),
 //	    Scorers: []eval.Scorer[string, string]{scorer},
 //	}
-//	server.Register(srv, classify, server.RegisterOpts{})
-func Register[I, R any](s *Server, ev *eval.Eval[I, R], opts RegisterOpts) {
+//	server.RegisterEval(srv, classify, server.RegisterEvalOpts{})
+func RegisterEval[I, R any](s *Server, ev *eval.Eval[I, R], opts RegisterEvalOpts) {
 	impl := &registeredEvalImpl[I, R]{
 		def:  ev,
 		opts: opts,
@@ -66,7 +66,7 @@ func Register[I, R any](s *Server, ev *eval.Eval[I, R], opts RegisterOpts) {
 // registeredEvalImpl implements registeredEval by wrapping an [eval.Eval] definition.
 type registeredEvalImpl[I, R any] struct {
 	def  *eval.Eval[I, R]
-	opts RegisterOpts
+	opts RegisterEvalOpts
 }
 
 func (r *registeredEvalImpl[I, R]) scorerNames() []string {

@@ -230,7 +230,7 @@ func main() {
         server.WithAddress("localhost:8300"),
         server.WithNoAuth(), // Remove for production
     )
-    server.Register(srv, classify, server.RegisterOpts{})
+    server.RegisterEval(srv, classify, server.RegisterEvalOpts{})
 
     log.Fatal(srv.Start())
 }

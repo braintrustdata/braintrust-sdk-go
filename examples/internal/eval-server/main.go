@@ -73,7 +73,7 @@ func main() {
 	}
 
 	// Register with the server.
-	server.Register(srv, foodClassifier, server.RegisterOpts{
+	server.RegisterEval(srv, foodClassifier, server.RegisterEvalOpts{
 		Parameters: &server.Parameters{
 			Schema: map[string]server.ParameterDef{
 				"model": {
