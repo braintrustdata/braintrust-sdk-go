@@ -70,8 +70,8 @@ func (a *AnthropicBot) tools(ctx context.Context) error {
 		Messages: []anthropic.MessageParam{
 			anthropic.NewUserMessage(anthropic.NewTextBlock("What's the weather in SF?")),
 		},
-		Temperature:   anthropic.Float(0.7),
-		TopP:          anthropic.Float(0.9),
+		Temperature: anthropic.Float(0.7),
+		// TopP:          anthropic.Float(0.9),
 		TopK:          anthropic.Int(50),
 		StopSequences: []string{"END"},
 		Tools: []anthropic.ToolUnionParam{
@@ -123,7 +123,6 @@ func (a *AnthropicBot) streaming(ctx context.Context) error {
 		},
 		MaxTokens:   1024,
 		Temperature: anthropic.Float(0.8),
-		TopP:        anthropic.Float(0.95),
 		Tools: []anthropic.ToolUnionParam{
 			anthropic.ToolUnionParamOfTool(
 				anthropic.ToolInputSchemaParam{
@@ -195,6 +194,49 @@ func (a *AnthropicBot) extendedThinking(ctx context.Context) error {
 			fmt.Printf("  Response: %s\n", content.Text)
 		}
 	}
+
+	return nil
+}
+
+// streamingExtendedThinking demonstrates streaming with extended thinking
+func (a *AnthropicBot) streamingExtendedThinking(ctx context.Context) error {
+	ctx, span := tracer.Start(ctx, "streaming-extended-thinking")
+	defer span.End()
+
+	fmt.Println("\n=== Example 4b: Streaming Extended Thinking ===")
+
+	stream := a.client.Messages.NewStreaming(ctx, anthropic.MessageNewParams{
+		Model:     anthropic.ModelClaudeHaiku4_5,
+		MaxTokens: 16000,
+		Messages: []anthropic.MessageParam{
+			anthropic.NewUserMessage(anthropic.NewTextBlock("What is 27 * 453?")),
+		},
+		Thinking: anthropic.ThinkingConfigParamOfEnabled(10000),
+	})
+
+	var thinkingText, responseText string
+	for stream.Next() {
+		event := stream.Current()
+		switch eventVariant := event.AsAny().(type) {
+		case anthropic.ContentBlockDeltaEvent:
+			switch deltaVariant := eventVariant.Delta.AsAny().(type) {
+			case anthropic.ThinkingDelta:
+				thinkingText += deltaVariant.Thinking
+			case anthropic.TextDelta:
+				responseText += deltaVariant.Text
+			}
+		}
+	}
+
+	if err := stream.Err(); err != nil {
+		return fmt.Errorf("streaming extended thinking error: %v", err)
+	}
+
+	if len(thinkingText) > 100 {
+		thinkingText = thinkingText[:100] + "..."
+	}
+	fmt.Printf("  Thinking: %s\n", thinkingText)
+	fmt.Printf("  Response: %s\n", responseText)
 
 	return nil
 }
@@ -276,6 +318,10 @@ func main() {
 	}
 
 	if err := bot.extendedThinking(ctx); err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+
+	if err := bot.streamingExtendedThinking(ctx); err != nil {
 		log.Fatalf("Error: %v", err)
 	}
 
