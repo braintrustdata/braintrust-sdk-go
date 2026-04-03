@@ -115,7 +115,8 @@ type CaseProgress struct {
 }
 
 // Eval defines an evaluation: the task to run and the scorers to apply.
-// Run it via [Evaluator.RunEval] or register it with a remote eval server.
+// Create one with [braintrust.NewEval], then call [Eval.Run] to execute it
+// or pass it to a remote eval server.
 type Eval[I, R any] struct {
 	// Name is the eval name. Used as the default experiment name and as
 	// the registration key when registered with a remote eval server.
@@ -128,8 +129,24 @@ type Eval[I, R any] struct {
 	Scorers []Scorer[I, R]
 
 	// ProjectName is the Braintrust project for this eval.
-	// Optional; falls back to the Evaluator's default project.
+	// Optional; falls back to the default project from the client.
 	ProjectName string
+
+	// evaluator holds the infrastructure (session, tracer, API client)
+	// needed to run the eval. Set by NewEval / braintrust.NewEval.
+	evaluator *Evaluator[I, R]
+}
+
+// NewEval creates a runnable Eval by attaching an [Evaluator] as the default
+// runner. Users should call braintrust.NewEval rather than this directly.
+func NewEval[I, R any](evaluator *Evaluator[I, R], e *Eval[I, R]) *Eval[I, R] {
+	e.evaluator = evaluator
+	return e
+}
+
+// Run executes the evaluation using the default [Evaluator].
+func (e *Eval[I, R]) Run(ctx context.Context, opts RunOpts[I, R]) (*Result, error) {
+	return e.evaluator.Run(ctx, mergeOpts(e, opts))
 }
 
 // RunOpts configures a single evaluation run. These vary per invocation;

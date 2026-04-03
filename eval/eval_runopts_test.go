@@ -159,10 +159,10 @@ func TestMergeOpts_EvalReuse(t *testing.T) {
 	assert.Equal(t, "base-project", ev.ProjectName)
 }
 
-// TestRunEval_Success verifies that RunEval produces the same span structure as
-// the equivalent Run call. It uses the same testNewEval path as other unit tests
-// to avoid needing a real API client for experiment registration.
-func TestRunEval_Success(t *testing.T) {
+// TestEvalRun_Success verifies that Eval.Run produces the same span structure as
+// the equivalent Evaluator.Run call. It uses the same testNewEval path as other
+// unit tests to avoid needing a real API client for experiment registration.
+func TestEvalRun_Success(t *testing.T) {
 	t.Parallel()
 
 	task := T(func(_ context.Context, in testInput) (testOutput, error) {

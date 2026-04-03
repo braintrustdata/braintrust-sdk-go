@@ -733,8 +733,8 @@ func TestEval_NoProjectName(t *testing.T) {
 	assert.Contains(t, err.Error(), "project name is required")
 }
 
-// TestRunEval_Integration tests RunEval with a reusable Eval definition.
-func TestRunEval_Integration(t *testing.T) {
+// TestEvalRun_Integration tests Eval.Run with a reusable Eval definition.
+func TestEvalRun_Integration(t *testing.T) {
 	session, apiClient := setupIntegrationTest(t)
 	t.Parallel()
 
@@ -763,7 +763,8 @@ func TestRunEval_Integration(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	evaluator := NewEvaluator[string, string](session, tp, apiClient, cfg.DefaultProjectName)
-	result, err := evaluator.RunEval(ctx, classify, RunOpts[string, string]{
+	e := NewEval(evaluator, classify)
+	result, err := e.Run(ctx, RunOpts[string, string]{
 		Dataset: NewDataset([]Case[string, string]{
 			{Input: "apple", Expected: "category-apple"},
 			{Input: "banana", Expected: "category-banana"},

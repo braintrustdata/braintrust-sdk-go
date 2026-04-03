@@ -199,23 +199,24 @@ func (c *Client) Tracer(name string, opts ...oteltrace.TracerOption) oteltrace.T
 	return c.tracerProvider.Tracer(name, opts...)
 }
 
-// NewEvaluator creates a new evaluator for running evaluations with the same
-// input and output types.
+// NewEval creates a runnable [eval.Eval] by combining a client with an eval definition.
 //
 // Example:
 //
 //	client, _ := braintrust.New(tp)
-//	evaluator := braintrust.NewEvaluator[string, string](client)
-//
-//	// Define a reusable eval, then run it with different datasets
-//	myEval := &eval.Eval[string, string]{
-//	    Name:    "my-eval",
+//	e := braintrust.NewEval(client, &eval.Eval[string, string]{
+//	    Name:    "classify",
 //	    Task:    task,
 //	    Scorers: scorers,
-//	}
-//	result, _ := evaluator.RunEval(ctx, myEval, eval.RunOpts[string, string]{
-//	    Dataset: dataset,
 //	})
+//	result, _ := e.Run(ctx, eval.RunOpts[string, string]{Dataset: dataset})
+func NewEval[I, R any](client *Client, e *eval.Eval[I, R]) *eval.Eval[I, R] {
+	evaluator := eval.NewEvaluator[I, R](client.session, client.tracerProvider, client.API(), client.config.DefaultProjectName)
+	return eval.NewEval(evaluator, e)
+}
+
+// NewEvaluator creates a new evaluator for running evaluations with the same
+// input and output types.
 func NewEvaluator[I, R any](client *Client) *eval.Evaluator[I, R] {
 	return eval.NewEvaluator[I, R](client.session, client.tracerProvider, client.API(), client.config.DefaultProjectName)
 }

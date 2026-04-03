@@ -207,8 +207,12 @@ func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) 
 		}
 	}
 
+	// Create a per-request evaluator with the caller's session, not the
+	// default evaluator on the Eval, so traces are attributed to the user
+	// who triggered the request.
 	evaluator := eval.NewEvaluator[I, R](cfg.auth.session, tp, apiClient, r.projectName())
-	result, evalErr := evaluator.RunEval(evalCtx, r.def, eval.RunOpts[I, R]{
+	e := eval.NewEval(evaluator, r.def)
+	result, evalErr := e.Run(evalCtx, eval.RunOpts[I, R]{
 		Experiment:     experimentName,
 		Dataset:        dataset,
 		ProjectName:    r.projectName(),

@@ -163,8 +163,8 @@ func main() {
         log.Fatal(err)
     }
 
-    // Define a reusable eval (task + scorers)
-    greetingEval := &eval.Eval[string, string]{
+    // Create an eval
+    e := braintrust.NewEval(client, &eval.Eval[string, string]{
         Name: "greeting-experiment",
         Task: eval.T(func(ctx context.Context, input string) (string, error) {
             return "Hello " + input, nil
@@ -178,11 +178,10 @@ func main() {
                 return eval.S(score), nil
             }),
         },
-    }
+    })
 
     // Run against a dataset
-    evaluator := braintrust.NewEvaluator[string, string](client)
-    _, err = evaluator.RunEval(ctx, greetingEval, eval.RunOpts[string, string]{
+    _, err = e.Run(ctx, eval.RunOpts[string, string]{
         Dataset: eval.NewDataset([]eval.Case[string, string]{
             {Input: "World", Expected: "Hello World"},
             {Input: "Alice", Expected: "Hello Alice"},

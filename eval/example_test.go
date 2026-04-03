@@ -77,8 +77,8 @@ func Example_evalDefinition() {
 		log.Fatal(err)
 	}
 
-	// Define a reusable eval (task + scorers + project)
-	classify := &eval.Eval[string, string]{
+	// Create a runnable eval
+	e := braintrust.NewEval(client, &eval.Eval[string, string]{
 		Name: "classify",
 		Task: eval.T(func(ctx context.Context, input string) (string, error) {
 			return input + "!", nil
@@ -92,11 +92,10 @@ func Example_evalDefinition() {
 			}),
 		},
 		ProjectName: "test-project",
-	}
+	})
 
-	// Run the eval with a specific dataset
-	evaluator := braintrust.NewEvaluator[string, string](client)
-	result, err := evaluator.RunEval(ctx, classify, eval.RunOpts[string, string]{
+	// Run it
+	result, err := e.Run(ctx, eval.RunOpts[string, string]{
 		Dataset: eval.NewDataset([]eval.Case[string, string]{
 			{Input: "hello", Expected: "hello!"},
 		}),
