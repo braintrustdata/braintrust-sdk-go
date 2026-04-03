@@ -11,6 +11,7 @@ require (
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.0.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.0.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.0.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.0.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.0.0
 )
 
@@ -27,6 +28,7 @@ require (
 	github.com/bytedance/sonic/loader v0.5.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/cloudwego/eino v0.8.4 // indirect
+	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/eino-contrib/jsonschema v1.0.3 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -54,6 +56,7 @@ require (
 	github.com/openai/openai-go v1.12.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.9 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
 	github.com/sashabaranov/go-openai v1.41.2 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/slongfield/pyfmt v0.0.0-20220222012616-ea85ff4c361f // indirect
@@ -61,6 +64,7 @@ require (
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
+	github.com/tmc/langchaingo v0.1.13 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
@@ -98,5 +102,6 @@ replace (
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai => ../genai
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit => ../genkit
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai => ../github.com/sashabaranov/go-openai
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo => ../langchaingo
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai => ../openai
 )

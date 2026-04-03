@@ -23,6 +23,7 @@
 //   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk (Google ADK)
 //   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit (Firebase Genkit)
 //   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino (CloudWeGo Eino)
+//   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo (LangChainGo)
 package all
 
 import (
@@ -46,4 +47,7 @@ import (
 
 	// CloudWeGo Eino (github.com/cloudwego/eino)
 	_ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino"
+
+	// LangChainGo (github.com/tmc/langchaingo)
+	_ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo"
 )
