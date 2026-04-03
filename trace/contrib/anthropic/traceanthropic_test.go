@@ -438,6 +438,96 @@ func assertSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.TimeRa
 	assert.NotNil(span.Output())
 }
 
+func TestPostprocessStreamingThinkingDelta(t *testing.T) {
+	tp, _ := oteltest.Setup(t)
+	cfg := &middlewareConfig{tracerProvider: tp}
+	tracer := newMessagesTracer(cfg)
+
+	// Simulate streaming events with a thinking block followed by a text block.
+	// This mirrors what the Anthropic API sends when extended thinking is enabled.
+	allResults := []map[string]any{
+		// thinking block start
+		{
+			"type":  "content_block_start",
+			"index": float64(0),
+			"content_block": map[string]any{
+				"type":     "thinking",
+				"thinking": "",
+			},
+		},
+		// thinking deltas
+		{
+			"type":  "content_block_delta",
+			"index": float64(0),
+			"delta": map[string]any{
+				"type":     "thinking_delta",
+				"thinking": "Let me think about ",
+			},
+		},
+		{
+			"type":  "content_block_delta",
+			"index": float64(0),
+			"delta": map[string]any{
+				"type":     "thinking_delta",
+				"thinking": "this carefully.",
+			},
+		},
+		// signature delta
+		{
+			"type":  "content_block_delta",
+			"index": float64(0),
+			"delta": map[string]any{
+				"type":      "signature_delta",
+				"signature": "abc123sig",
+			},
+		},
+		// text block start
+		{
+			"type":  "content_block_start",
+			"index": float64(1),
+			"content_block": map[string]any{
+				"type": "text",
+				"text": "",
+			},
+		},
+		// text delta
+		{
+			"type":  "content_block_delta",
+			"index": float64(1),
+			"delta": map[string]any{
+				"type": "text_delta",
+				"text": "The answer is 42.",
+			},
+		},
+		// message delta with stop reason
+		{
+			"type": "message_delta",
+			"delta": map[string]any{
+				"stop_reason": "end_turn",
+			},
+		},
+	}
+
+	output := tracer.postprocessStreamingResults(allResults)
+	require.Len(t, output, 1, "should produce one assistant message")
+	assert.Equal(t, "assistant", output[0]["role"])
+
+	content, ok := output[0]["content"].([]map[string]any)
+	require.True(t, ok)
+	require.Len(t, content, 2, "should have thinking block and text block")
+
+	// Verify thinking block
+	thinkingBlock := content[0]
+	assert.Equal(t, "thinking", thinkingBlock["type"])
+	assert.Equal(t, "Let me think about this carefully.", thinkingBlock["thinking"])
+	assert.Equal(t, "abc123sig", thinkingBlock["signature"])
+
+	// Verify text block
+	textBlock := content[1]
+	assert.Equal(t, "text", textBlock["type"])
+	assert.Equal(t, "The answer is 42.", textBlock["text"])
+}
+
 // TestMultipleMessages tests tracing with multiple messages (conversation history)
 func TestMultipleMessages(t *testing.T) {
 	client, exporter := setUpTest(t)

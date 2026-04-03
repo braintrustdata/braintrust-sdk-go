@@ -259,6 +259,20 @@ func (mt *messagesTracer) postprocessStreamingResults(allResults []map[string]an
 						builders[idx].WriteString(partialJSON)
 						contentBlocks[idx]["type"] = "tool_use"
 					}
+				case "thinking_delta":
+					// Accumulate thinking text for extended thinking blocks
+					if thinking, ok := delta["thinking"].(string); ok {
+						if builders[idx] == nil {
+							builders[idx] = &strings.Builder{}
+						}
+						builders[idx].WriteString(thinking)
+						contentBlocks[idx]["type"] = "thinking"
+					}
+				case "signature_delta":
+					// Store signature for extended thinking blocks
+					if sig, ok := delta["signature"].(string); ok {
+						contentBlocks[idx]["signature"] = sig
+					}
 				}
 			}
 
@@ -282,6 +296,8 @@ func (mt *messagesTracer) postprocessStreamingResults(allResults []map[string]an
 					block["text"] = msg
 				case "tool_use":
 					block["input"] = msg
+				case "thinking":
+					block["thinking"] = msg
 				}
 			}
 		}
