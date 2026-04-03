@@ -1,0 +1,51 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 109
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"Count from 1 to 3. Output only the numbers."}],"role":"user"}]}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-genai-sdk/1.23.0 gl-go/go1.23.12
+            X-Goog-Api-Client:
+                - google-genai-sdk/1.23.0 gl-go/go1.23.12
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:streamGenerateContent?alt=sse
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: "data: {\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"1\"}],\"role\":\"model\"},\"index\":0}],\"modelVersion\":\"gemini-2.0-flash-exp\"}\r\n\r\ndata: {\"candidates\":[{\"content\":{\"parts\":[{\"text\":\" 2\"}],\"role\":\"model\"},\"index\":0}],\"modelVersion\":\"gemini-2.0-flash-exp\"}\r\n\r\ndata: {\"candidates\":[{\"content\":{\"parts\":[{\"text\":\" 3\\n\"}],\"role\":\"model\"},\"index\":0,\"finishReason\":\"STOP\"}],\"usageMetadata\":{\"promptTokenCount\":12,\"candidatesTokenCount\":8,\"totalTokenCount\":20},\"modelVersion\":\"gemini-2.0-flash-exp\"}\r\n\r\n"
+        headers:
+            Content-Type:
+                - text/event-stream
+            Date:
+                - Fri, 07 Nov 2025 17:16:55 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+        status: 200 OK
+        code: 200
+        duration: 623.688792ms
