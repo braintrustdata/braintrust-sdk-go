@@ -21,6 +21,7 @@ type messagesTracer struct {
 	cfg       *middlewareConfig
 	streaming bool
 	metadata  map[string]any
+	startTime time.Time
 }
 
 func newMessagesTracer(cfg *middlewareConfig) *messagesTracer {
@@ -35,6 +36,7 @@ func newMessagesTracer(cfg *middlewareConfig) *messagesTracer {
 }
 
 func (mt *messagesTracer) StartSpan(ctx context.Context, t time.Time, request io.Reader) (context.Context, trace.Span, error) {
+	mt.startTime = t
 	ctx, span := mt.cfg.tracer().Start(
 		ctx,
 		"anthropic.messages.create",
@@ -115,6 +117,7 @@ func (mt *messagesTracer) TagSpan(span trace.Span, body io.Reader) error {
 func (mt *messagesTracer) parseStreamingResponse(span trace.Span, body io.Reader) error {
 	scanner := bufio.NewScanner(body)
 	var allResults []map[string]any
+	var timeToFirstToken time.Duration
 	usage := make(map[string]any)
 
 	for scanner.Scan() {
@@ -127,6 +130,10 @@ func (mt *messagesTracer) parseStreamingResponse(span trace.Span, body io.Reader
 		line = strings.TrimPrefix(line, "data: ")
 		if line == "[DONE]" {
 			break // End of stream
+		}
+
+		if timeToFirstToken == 0 {
+			timeToFirstToken = time.Since(mt.startTime)
 		}
 
 		var chunk map[string]any
@@ -178,11 +185,15 @@ func (mt *messagesTracer) parseStreamingResponse(span trace.Span, body io.Reader
 	}
 
 	// Handle usage metrics
+	metrics := make(map[string]any)
 	if len(usage) > 0 {
-		metrics := parseUsageTokens(usage)
-		if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
-			return err
+		for k, v := range parseUsageTokens(usage) {
+			metrics[k] = v
 		}
+	}
+	metrics["time_to_first_token"] = timeToFirstToken.Seconds()
+	if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
+		return err
 	}
 
 	return scanner.Err()
@@ -312,16 +323,18 @@ func (mt *messagesTracer) postprocessStreamingResults(allResults []map[string]an
 }
 
 func (mt *messagesTracer) parseResponse(span trace.Span, body io.Reader) error {
-	var raw map[string]interface{}
+	timeToFirstToken := time.Since(mt.startTime)
+
+	var raw map[string]any
 	err := json.NewDecoder(body).Decode(&raw)
 	if err != nil {
 		return err
 	}
 
-	return mt.handleMessageResponse(span, raw)
+	return mt.handleMessageResponse(span, raw, timeToFirstToken)
 }
 
-func (mt *messagesTracer) handleMessageResponse(span trace.Span, rawMsg map[string]any) error {
+func (mt *messagesTracer) handleMessageResponse(span trace.Span, rawMsg map[string]any, timeToFirstToken time.Duration) error {
 	// Only add response-level metadata that's relevant
 	// (stop_reason, stop_sequence, model if not already set)
 	responseMetadataFields := []string{
@@ -344,11 +357,15 @@ func (mt *messagesTracer) handleMessageResponse(span trace.Span, rawMsg map[stri
 		return err
 	}
 
+	metrics := make(map[string]any)
 	if usage, ok := rawMsg["usage"].(map[string]any); ok {
-		metrics := parseUsageTokens(usage)
-		if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
-			return err
+		for k, v := range parseUsageTokens(usage) {
+			metrics[k] = v
 		}
+	}
+	metrics["time_to_first_token"] = timeToFirstToken.Seconds()
+	if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
+		return err
 	}
 
 	// Format output as array of messages (same format as input)

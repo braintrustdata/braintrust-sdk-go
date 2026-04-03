@@ -413,6 +413,7 @@ func assertSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.TimeRa
 		"tokens":                       gtz,  // Should always be > 0
 		"prompt_cached_tokens":         gtez, // Should always be ≥ 0 (even if 0)
 		"prompt_cache_creation_tokens": gtez, // Should always be ≥ 0 (even if 0)
+		"time_to_first_token":          gtz,  // Should always be > 0
 	}
 
 	// First, ensure all required metrics are present
