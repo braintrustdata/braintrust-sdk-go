@@ -438,94 +438,65 @@ func assertSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.TimeRa
 	assert.NotNil(span.Output())
 }
 
-func TestPostprocessStreamingThinkingDelta(t *testing.T) {
-	tp, _ := oteltest.Setup(t)
-	cfg := &middlewareConfig{tracerProvider: tp}
-	tracer := newMessagesTracer(cfg)
+// TestStreamingWithThinking tests tracing with streaming and extended thinking enabled
+func TestStreamingWithThinking(t *testing.T) {
+	client, exporter := setUpTest(t)
 
-	// Simulate streaming events with a thinking block followed by a text block.
-	// This mirrors what the Anthropic API sends when extended thinking is enabled.
-	allResults := []map[string]any{
-		// thinking block start
-		{
-			"type":  "content_block_start",
-			"index": float64(0),
-			"content_block": map[string]any{
-				"type":     "thinking",
-				"thinking": "",
-			},
+	timer := oteltest.NewTimer()
+	ctx := context.Background()
+	stream := client.Messages.NewStreaming(ctx, anthropic.MessageNewParams{
+		Model:     anthropic.ModelClaudeHaiku4_5,
+		MaxTokens: 16000,
+		Messages: []anthropic.MessageParam{
+			anthropic.NewUserMessage(anthropic.NewTextBlock("What is 27 * 453?")),
 		},
-		// thinking deltas
-		{
-			"type":  "content_block_delta",
-			"index": float64(0),
-			"delta": map[string]any{
-				"type":     "thinking_delta",
-				"thinking": "Let me think about ",
-			},
-		},
-		{
-			"type":  "content_block_delta",
-			"index": float64(0),
-			"delta": map[string]any{
-				"type":     "thinking_delta",
-				"thinking": "this carefully.",
-			},
-		},
-		// signature delta
-		{
-			"type":  "content_block_delta",
-			"index": float64(0),
-			"delta": map[string]any{
-				"type":      "signature_delta",
-				"signature": "abc123sig",
-			},
-		},
-		// text block start
-		{
-			"type":  "content_block_start",
-			"index": float64(1),
-			"content_block": map[string]any{
-				"type": "text",
-				"text": "",
-			},
-		},
-		// text delta
-		{
-			"type":  "content_block_delta",
-			"index": float64(1),
-			"delta": map[string]any{
-				"type": "text_delta",
-				"text": "The answer is 42.",
-			},
-		},
-		// message delta with stop reason
-		{
-			"type": "message_delta",
-			"delta": map[string]any{
-				"stop_reason": "end_turn",
-			},
-		},
+		Thinking: anthropic.ThinkingConfigParamOfEnabled(10000),
+	})
+
+	var thinkingText, responseText string
+
+	for stream.Next() {
+		event := stream.Current()
+		switch eventVariant := event.AsAny().(type) {
+		case anthropic.ContentBlockDeltaEvent:
+			switch deltaVariant := eventVariant.Delta.AsAny().(type) {
+			case anthropic.ThinkingDelta:
+				thinkingText += deltaVariant.Thinking
+			case anthropic.TextDelta:
+				responseText += deltaVariant.Text
+			}
+		}
 	}
+	require.NoError(t, stream.Err())
+	timeRange := timer.Tick()
 
-	output := tracer.postprocessStreamingResults(allResults)
-	require.Len(t, output, 1, "should produce one assistant message")
-	assert.Equal(t, "assistant", output[0]["role"])
+	// Verify we got thinking and response content from the stream
+	assert.NotEmpty(t, thinkingText, "should have received thinking text")
+	assert.NotEmpty(t, responseText, "should have received response text")
 
-	content, ok := output[0]["content"].([]map[string]any)
-	require.True(t, ok)
-	require.Len(t, content, 2, "should have thinking block and text block")
+	// Validate span
+	span := exporter.FlushOne()
+	assertSpanValid(t, span, timeRange)
 
-	// Verify thinking block
-	thinkingBlock := content[0]
-	assert.Equal(t, "thinking", thinkingBlock["type"])
-	assert.Equal(t, "Let me think about this carefully.", thinkingBlock["thinking"])
-	assert.Equal(t, "abc123sig", thinkingBlock["signature"])
+	// Verify the span output contains both thinking and text blocks
+	outputStr := span.Attr("braintrust.output_json").String()
+	assert.Contains(t, outputStr, `"type":"thinking"`)
+	assert.Contains(t, outputStr, `"type":"text"`)
 
-	// Verify text block
-	textBlock := content[1]
-	assert.Equal(t, "text", textBlock["type"])
-	assert.Equal(t, "The answer is 42.", textBlock["text"])
+	// Verify thinking content was captured (not empty)
+	assert.Contains(t, outputStr, `"thinking":`)
+	assert.NotContains(t, outputStr, `"thinking":""`, "thinking content should not be empty")
+
+	// Verify signature was captured
+	assert.Contains(t, outputStr, `"signature":`)
+
+	// Verify the streamed text matches what's in the span
+	assert.Contains(t, outputStr, responseText[:10])
+
+	// Verify metadata
+	metadata := span.Metadata()
+	assert.Equal(t, true, metadata["stream"])
+	assert.NotNil(t, metadata["thinking"])
 }
 
 // TestMultipleMessages tests tracing with multiple messages (conversation history)

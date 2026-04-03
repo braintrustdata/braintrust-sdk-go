@@ -8,6 +8,7 @@
 
 ## Testing
 - Follow TDD: write failing test first, then implement
+- Integration tests should use real API requests recorded via VCR, not synthetic/mock data
 - Single test: `go test -v -run=TestName ./path/to/package`
 - Record single cassette: `VCR_MODE=record go test -v -run=TestName ./path/to/package`
 - VCR modes:
