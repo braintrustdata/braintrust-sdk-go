@@ -5,7 +5,7 @@ go 1.24.4
 toolchain go1.24.11
 
 require (
-	github.com/braintrustdata/braintrust-sdk-go v0.0.0
+	github.com/braintrustdata/braintrust-sdk-go v0.4.0
 	github.com/openai/openai-go v1.12.0
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/otel v1.38.0

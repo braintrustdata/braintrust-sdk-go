@@ -5,7 +5,7 @@ go 1.24.4
 toolchain go1.24.11
 
 require (
-	github.com/braintrustdata/braintrust-sdk-go v0.0.0
+	github.com/braintrustdata/braintrust-sdk-go v0.4.0
 	github.com/cloudwego/eino v0.8.4
 	github.com/cloudwego/eino-ext/components/model/openai v0.1.10
 	github.com/stretchr/testify v1.11.1
