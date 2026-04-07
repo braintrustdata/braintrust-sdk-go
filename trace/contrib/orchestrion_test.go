@@ -99,6 +99,7 @@ func prepareOrchestrionFixture(t *testing.T, repoRoot string, imports []string) 
 	copyDir(t, srcDir, dstDir)
 	writeOrchestrionToolFile(t, filepath.Join(dstDir, "orchestrion.tool.go"), imports)
 	rewriteFixtureReplaceDirectives(t, dstDir, repoRoot)
+	tidyFixtureModule(t, dstDir)
 
 	return dstDir
 }
@@ -180,5 +181,16 @@ func rewriteFixtureReplaceDirectives(t *testing.T, fixtureDir, repoRoot string) 
 		if output, err := cmd.CombinedOutput(); err != nil {
 			t.Fatalf("rewrite replace directive for %s: %v\n%s", modulePath, err, output)
 		}
+	}
+}
+
+func tidyFixtureModule(t *testing.T, fixtureDir string) {
+	t.Helper()
+
+	cmd := exec.Command("go", "mod", "tidy")
+	cmd.Dir = fixtureDir
+	cmd.Env = append(os.Environ(), "GOWORK=off")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("tidy fixture module: %v\n%s", err, output)
 	}
 }
