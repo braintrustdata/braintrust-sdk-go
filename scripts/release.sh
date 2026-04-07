@@ -7,10 +7,54 @@ NESTED_MODULES=()
 while IFS= read -r module; do
     NESTED_MODULES+=("$module")
 done < <("$SCRIPT_DIR/list_nested_modules.sh" --dependency-order)
+MAX_PUSH_REFS=5
 
 # Usage function
 usage() {
     echo "Usage: ./scripts/release.sh <version> [--dry-run]"
+}
+
+local_tag_target_commit() {
+    local tag="$1"
+    git rev-parse -q --verify "refs/tags/${tag}^{}" 2>/dev/null || true
+}
+
+remote_tag_target_commit() {
+    local tag="$1"
+    git ls-remote --tags origin "refs/tags/${tag}^{}" | awk 'NR==1 {print $1}'
+}
+
+ensure_local_tag_at_head() {
+    local tag="$1"
+    local existing_commit
+
+    existing_commit=$(local_tag_target_commit "$tag")
+    if [[ -n "$existing_commit" ]]; then
+        if [[ "$existing_commit" != "$COMMIT" ]]; then
+            echo "Error: Local tag '$tag' already exists at $existing_commit (expected $COMMIT)" >&2
+            exit 1
+        fi
+        return
+    fi
+
+    git tag -a "$tag" -m "Release $tag"
+}
+
+push_tags_in_batches() {
+    local label="$1"
+    shift
+    local tags=("$@")
+    local total=${#tags[@]}
+    local index=0
+    local batch_number=1
+
+    while (( index < total )); do
+        local batch=("${tags[@]:index:MAX_PUSH_REFS}")
+        echo "Pushing ${label} batch ${batch_number}: ${batch[*]}"
+        git push origin "${batch[@]}"
+        index=$((index + ${#batch[@]}))
+        batch_number=$((batch_number + 1))
+    done
 }
 
 # Parse arguments
@@ -58,41 +102,51 @@ if ! git diff-index --quiet HEAD --; then
     exit 1
 fi
 
-LOCAL_TAGS=$(git tag --list)
-if echo "$LOCAL_TAGS" | grep -q "^$VERSION$"; then
-    echo "Error: Version '$VERSION' already exists locally" >&2
-    exit 1
-fi
-
-for module in "${NESTED_MODULES[@]}"; do
-    module_tag="${module}/${VERSION}"
-    if echo "$LOCAL_TAGS" | grep -q "^${module_tag}$"; then
-        echo "Error: Module version '$module_tag' already exists locally" >&2
-        exit 1
-    fi
-done
-
 # Check remote tags
 git fetch --tags > /dev/null 2>&1 || true
-REMOTE_TAGS=$(git ls-remote --tags origin)
-if echo "$REMOTE_TAGS" | grep -q "refs/tags/$VERSION$"; then
-    echo "Error: Version '$VERSION' already exists on remote" >&2
-    exit 1
-fi
-
-for module in "${NESTED_MODULES[@]}"; do
-    module_tag="${module}/${VERSION}"
-    if echo "$REMOTE_TAGS" | grep -q "refs/tags/${module_tag}$"; then
-        echo "Error: Module version '$module_tag' already exists on remote" >&2
-        exit 1
-    fi
-done
 
 # Show release information
 COMMIT=$(git rev-parse HEAD)
 SHORT_COMMIT=$(git rev-parse --short HEAD)
 REPO_URL=$(git config --get remote.origin.url | sed 's/git@github.com:/https:\/\/github.com\//' | sed 's/\.git$//')
 LAST_TAG=$(git tag --sort=-version:refname | grep -v -- '-rc' | head -n 1 2>/dev/null || echo "")
+
+PENDING_NESTED_TAGS=()
+for module in "${NESTED_MODULES[@]}"; do
+    module_tag="${module}/${VERSION}"
+
+    local_commit=$(local_tag_target_commit "$module_tag")
+    if [[ -n "$local_commit" && "$local_commit" != "$COMMIT" ]]; then
+        echo "Error: Local tag '$module_tag' already exists at $local_commit (expected $COMMIT)" >&2
+        exit 1
+    fi
+
+    remote_commit=$(remote_tag_target_commit "$module_tag")
+    if [[ -n "$remote_commit" ]]; then
+        if [[ "$remote_commit" != "$COMMIT" ]]; then
+            echo "Error: Remote tag '$module_tag' already exists at $remote_commit (expected $COMMIT)" >&2
+            exit 1
+        fi
+    else
+        PENDING_NESTED_TAGS+=("$module_tag")
+    fi
+done
+
+ROOT_TAG_PENDING=true
+local_root_commit=$(local_tag_target_commit "$VERSION")
+if [[ -n "$local_root_commit" && "$local_root_commit" != "$COMMIT" ]]; then
+    echo "Error: Local tag '$VERSION' already exists at $local_root_commit (expected $COMMIT)" >&2
+    exit 1
+fi
+
+remote_root_commit=$(remote_tag_target_commit "$VERSION")
+if [[ -n "$remote_root_commit" ]]; then
+    if [[ "$remote_root_commit" != "$COMMIT" ]]; then
+        echo "Error: Remote tag '$VERSION' already exists at $remote_root_commit (expected $COMMIT)" >&2
+        exit 1
+    fi
+    ROOT_TAG_PENDING=false
+fi
 
 echo "================================================"
 echo " Go SDK Release"
@@ -110,6 +164,18 @@ for module in "${NESTED_MODULES[@]}"; do
 done
 echo ""
 
+if (( ${#PENDING_NESTED_TAGS[@]} == 0 )) && [[ "$ROOT_TAG_PENDING" != "true" ]]; then
+    echo "All release tags already exist on origin for $VERSION."
+    exit 0
+fi
+
+if [[ "$ROOT_TAG_PENDING" != "true" && ${#PENDING_NESTED_TAGS[@]} -gt 0 ]]; then
+    echo "Warning: Root tag '$VERSION' already exists on origin."
+    echo "Nested tags will be pushed without delaying the Release workflow."
+    echo "If publish already ran before the nested tags existed, rerun the Release workflow manually afterward."
+    echo ""
+fi
+
 # Confirmation prompt — skipped in dry-run and in GitHub Actions (non-interactive)
 if [[ "$DRY_RUN" == true ]]; then
     exit 0
@@ -123,17 +189,22 @@ if [[ "${GITHUB_ACTIONS:-}" != "true" ]]; then
     fi
 fi
 
-TAGS_TO_PUSH=("$VERSION")
-git tag -a "$VERSION" -m "Release $VERSION"
+ensure_local_tag_at_head "$VERSION"
 for module in "${NESTED_MODULES[@]}"; do
-    module_tag="${module}/${VERSION}"
-    git tag -a "$module_tag" -m "Release $module_tag"
-    TAGS_TO_PUSH+=("$module_tag")
+    ensure_local_tag_at_head "${module}/${VERSION}"
 done
 
-# Push all release tags atomically so the root-tag publish workflow only starts
-# after every nested module tag exists on the remote.
-git push --atomic origin "${TAGS_TO_PUSH[@]}"
+# Push nested module tags first in batches small enough to satisfy repository
+# rules. Push the root tag last so the Release workflow only starts after every
+# nested module tag already exists on the remote.
+if (( ${#PENDING_NESTED_TAGS[@]} > 0 )); then
+    push_tags_in_batches "nested tags" "${PENDING_NESTED_TAGS[@]}"
+fi
+
+if [[ "$ROOT_TAG_PENDING" == "true" ]]; then
+    echo "Pushing root tag: $VERSION"
+    git push origin "$VERSION"
+fi
 
 echo "================================================"
 echo " Tag Pushed: $VERSION"

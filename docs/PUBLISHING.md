@@ -38,7 +38,7 @@ Merging the PR triggers two sequential workflows:
 **Tag Release** — runs `make ci` on the merge commit as a final check, then creates and pushes:
 - `vX.Y.Z` — the root module tag
 - one nested tag for every module in [`scripts/nested_modules.txt`](../scripts/nested_modules.txt), for example `trace/contrib/all/vX.Y.Z`
-  Tags are created in dependency order so nested modules are processed after any other nested modules they require.
+  Nested tags are created and pushed in dependency order so nested modules are processed after any other nested modules they require. The root tag is pushed last so the publish workflow starts only after every nested module tag already exists on the remote.
 
 **Release** — triggered by the `vX.Y.Z` tag push, runs:
 - `goreleaser` to create the GitHub release with a changelog
@@ -62,3 +62,5 @@ If the **Release** workflow fails after tags are already pushed, re-run it manua
 Go to **Actions → Release → Run workflow** and enter the tag (e.g. `v1.2.3`).
 
 This re-runs only `publish.sh` (goreleaser + proxy indexing) without re-tagging.
+
+If tag creation fails before the root tag is pushed, fix the issue and re-run `./scripts/release.sh <version>`. The script is resumable: it reuses any local or remote release tags that already point at the intended release commit and pushes only the missing ones.
