@@ -39,7 +39,9 @@ jobs:
           version: v2.11.4
 
       - name: Install orchestrion
-        run: go install github.com/DataDog/orchestrion@v1.6.1
+        run: |
+          GOTOOLCHAIN=$(awk '/^go /{print "go"$2; exit}' go.mod) \
+            go install github.com/DataDog/orchestrion@v1.6.1
 
       - name: Run CI
         run: make ci
