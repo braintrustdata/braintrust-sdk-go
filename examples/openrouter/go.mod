@@ -1,6 +1,6 @@
 module openrouter-example
 
-go 1.23.12
+go 1.26.1
 
 require (
 	github.com/braintrustdata/braintrust-sdk-go v0.0.5

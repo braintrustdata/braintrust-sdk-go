@@ -1,8 +1,6 @@
 module github.com/braintrustdata/braintrust-sdk-go
 
-go 1.24.4
-
-toolchain go1.24.11
+go 1.26.1
 
 require (
 	github.com/stretchr/testify v1.11.1

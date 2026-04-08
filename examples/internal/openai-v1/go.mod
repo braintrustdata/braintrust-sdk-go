@@ -1,6 +1,6 @@
 module github.com/braintrustdata/braintrust-sdk-go/examples/internal/openai-v1
 
-go 1.23.12
+go 1.26.1
 
 replace github.com/braintrustdata/braintrust-sdk-go => ../../..
 

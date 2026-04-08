@@ -1,6 +1,6 @@
 module example.com/genai
 
-go 1.24.8
+go 1.26.1
 
 replace github.com/braintrustdata/braintrust-sdk-go => ../../..
 

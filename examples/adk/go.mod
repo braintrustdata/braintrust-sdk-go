@@ -1,6 +1,6 @@
 module main.go
 
-go 1.24.11
+go 1.26.1
 
 require (
 	github.com/braintrustdata/braintrust-sdk-go v0.2.0

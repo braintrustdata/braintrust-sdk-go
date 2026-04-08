@@ -7,7 +7,7 @@ _.file = ".env"
 [tools]
 temporal = "latest"
 overmind = "latest"
-go = "1.23"
+go = "1.26"
 
 [tasks.server]
 description = "Run temporal server and worker"

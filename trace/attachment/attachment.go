@@ -110,7 +110,7 @@ func (a *Attachment) Base64URL() (string, error) {
 
 	// Stream encode the data
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("data:%s;base64,", a.contentType))
+	fmt.Fprintf(&buf, "data:%s;base64,", a.contentType)
 
 	encoder := base64.NewEncoder(base64.StdEncoding, &buf)
 	_, err := io.Copy(encoder, a.reader)
