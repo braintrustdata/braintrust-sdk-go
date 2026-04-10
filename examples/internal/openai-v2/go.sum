@@ -1,5 +1,3 @@
-github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.4.0 h1:OreKOdVd/IV/voEYT5h86JSDSUBQg7DzKnH4b6Qfyx0=
-github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.4.0/go.mod h1:C1M+VXyi4bn6XqQZqzYp4ua8/gbMWQrZJBJYBk16Y20=
 github.com/cenkalti/backoff/v4 v4.3.0 h1:MyRJ/UdXutAwSAT+s3wNd7MfTIcy71VQueUuFK343L8=
 github.com/cenkalti/backoff/v4 v4.3.0/go.mod h1:Y3VNntkOUPxTVeUxJ/G5vcM//AlwfmyYozVcomhLiZE=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=

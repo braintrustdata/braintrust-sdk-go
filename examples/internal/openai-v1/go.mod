@@ -4,6 +4,8 @@ go 1.26.1
 
 replace github.com/braintrustdata/braintrust-sdk-go => ../../..
 
+replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai => ../../../trace/contrib/openai
+
 require (
 	github.com/braintrustdata/braintrust-sdk-go v0.4.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.4.0

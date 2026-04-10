@@ -17,6 +17,8 @@ import (
 	traceopenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"
 )
 
+var tracer = otel.Tracer("openai-v1-examples")
+
 func main() {
 	tp := trace.NewTracerProvider()
 	defer tp.Shutdown(context.Background()) //nolint:errcheck
@@ -32,14 +34,37 @@ func main() {
 
 	client := openai.NewClient(option.WithMiddleware(traceopenai.NewMiddleware()))
 
-	// Create a root span to wrap all examples
-	tracer := otel.Tracer("openai-v1-examples")
 	ctx, rootSpan := tracer.Start(context.Background(), "examples/internal/openai-v1/main.go")
 	defer rootSpan.End()
 
-	// 1. Chat completion with reasoning model params (max_completion_tokens, reasoning_effort)
-	fmt.Println("1. Chat completion with reasoning params...")
-	reasonResp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
+	for _, example := range []struct {
+		name string
+		fn   func(context.Context, openai.Client) error
+	}{
+		{"chat-reasoning", chatReasoning},
+		{"chat-completion", chatCompletion},
+		{"chat-multi-turn", chatMultiTurn},
+		{"chat-streaming", chatStreaming},
+		{"chat-tools", chatTools},
+		{"chat-streaming-tools", chatStreamingTools},
+		{"chat-system-temperature", chatSystemTemperature},
+		{"chat-vision", chatVision},
+	} {
+		fmt.Printf("%s...\n", example.name)
+		exampleCtx, span := tracer.Start(ctx, example.name)
+		if err := example.fn(exampleCtx, client); err != nil {
+			span.End()
+			log.Fatal(err)
+		}
+		span.End()
+	}
+
+	fmt.Println("\nAll OpenAI v1 features tested!")
+	fmt.Printf("View trace: %s\n", bt.Permalink(rootSpan))
+}
+
+func chatReasoning(ctx context.Context, client openai.Client) error {
+	resp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage("What is the capital of France?"),
 		},
@@ -48,16 +73,17 @@ func main() {
 		ReasoningEffort:     shared.ReasoningEffortLow,
 	})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	rcOutput := reasonResp.Choices[0].Message.Content
-	if len(rcOutput) > 40 {
-		rcOutput = rcOutput[:40] + "..."
+	output := resp.Choices[0].Message.Content
+	if len(output) > 40 {
+		output = output[:40] + "..."
 	}
-	fmt.Printf("✓ %s (reasoning_effort + max_completion_tokens)\n", rcOutput)
+	fmt.Printf("  %s\n", output)
+	return nil
+}
 
-	// 2. Simple chat completion
-	fmt.Println("2. Simple chat completion...")
+func chatCompletion(ctx context.Context, client openai.Client) error {
 	resp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage("Say hello"),
@@ -65,13 +91,14 @@ func main() {
 		Model: openai.ChatModelGPT4oMini,
 	})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	fmt.Printf("✓ %s\n", resp.Choices[0].Message.Content)
+	fmt.Printf("  %s\n", resp.Choices[0].Message.Content)
+	return nil
+}
 
-	// 3. Multiple messages (conversation history)
-	fmt.Println("3. Multiple messages...")
-	multiResp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
+func chatMultiTurn(ctx context.Context, client openai.Client) error {
+	resp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.SystemMessage("You are a helpful assistant."),
 			openai.UserMessage("What is the capital of France?"),
@@ -81,33 +108,32 @@ func main() {
 		Model: openai.ChatModelGPT4oMini,
 	})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	fmt.Printf("✓ %s\n", multiResp.Choices[0].Message.Content)
+	fmt.Printf("  %s\n", resp.Choices[0].Message.Content)
+	return nil
+}
 
-	// 4. Streaming chat completion
-	fmt.Println("4. Streaming...")
+func chatStreaming(ctx context.Context, client openai.Client) error {
 	stream := client.Chat.Completions.NewStreaming(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage("Count 1 to 3"),
 		},
 		Model: openai.ChatModelGPT4oMini,
 	})
-	fmt.Print("✓ ")
+	fmt.Print("  ")
 	for stream.Next() {
 		chunk := stream.Current()
 		if len(chunk.Choices) > 0 && chunk.Choices[0].Delta.Content != "" {
 			fmt.Print(chunk.Choices[0].Delta.Content)
 		}
 	}
-	if err := stream.Err(); err != nil {
-		log.Fatal(err)
-	}
 	fmt.Println()
+	return stream.Err()
+}
 
-	// 5. Chat with tools
-	fmt.Println("5. Chat with tools...")
-	toolResp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
+func chatTools(ctx context.Context, client openai.Client) error {
+	resp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage("What's the weather in San Francisco?"),
 		},
@@ -133,18 +159,19 @@ func main() {
 		},
 	})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	if len(toolResp.Choices) > 0 && len(toolResp.Choices[0].Message.ToolCalls) > 0 {
-		toolCall := toolResp.Choices[0].Message.ToolCalls[0]
-		fmt.Printf("✓ Tool call: %s(%s)\n", toolCall.Function.Name, toolCall.Function.Arguments)
+	if len(resp.Choices) > 0 && len(resp.Choices[0].Message.ToolCalls) > 0 {
+		tc := resp.Choices[0].Message.ToolCalls[0]
+		fmt.Printf("  Tool call: %s(%s)\n", tc.Function.Name, tc.Function.Arguments)
 	} else {
-		fmt.Printf("✓ Response: %s\n", toolResp.Choices[0].Message.Content)
+		fmt.Printf("  %s\n", resp.Choices[0].Message.Content)
 	}
+	return nil
+}
 
-	// 6. Streaming with tools
-	fmt.Println("6. Streaming with tools...")
-	toolStream := client.Chat.Completions.NewStreaming(ctx, openai.ChatCompletionNewParams{
+func chatStreamingTools(ctx context.Context, client openai.Client) error {
+	stream := client.Chat.Completions.NewStreaming(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage("What's the weather in Tokyo?"),
 		},
@@ -169,30 +196,30 @@ func main() {
 			},
 		},
 	})
-	var toolCallName string
-	var toolCallArgs string
-	for toolStream.Next() {
-		chunk := toolStream.Current()
+	var name, args string
+	for stream.Next() {
+		chunk := stream.Current()
 		if len(chunk.Choices) > 0 && len(chunk.Choices[0].Delta.ToolCalls) > 0 {
 			tc := chunk.Choices[0].Delta.ToolCalls[0]
 			if tc.Function.Name != "" {
-				toolCallName = tc.Function.Name
+				name = tc.Function.Name
 			}
 			if tc.Function.Arguments != "" {
-				toolCallArgs += tc.Function.Arguments
+				args += tc.Function.Arguments
 			}
 		}
 	}
-	if err := toolStream.Err(); err != nil {
-		log.Fatal(err)
+	if err := stream.Err(); err != nil {
+		return err
 	}
-	if toolCallName != "" {
-		fmt.Printf("✓ Streamed tool call: %s(%s)\n", toolCallName, toolCallArgs)
+	if name != "" {
+		fmt.Printf("  Streamed tool call: %s(%s)\n", name, args)
 	}
+	return nil
+}
 
-	// 7. System message with temperature
-	fmt.Println("7. System message with temperature...")
-	sysResp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
+func chatSystemTemperature(ctx context.Context, client openai.Client) error {
+	resp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.SystemMessage("You are a pirate. Respond in pirate speak."),
 			openai.UserMessage("Hello!"),
@@ -201,15 +228,16 @@ func main() {
 		Temperature: openai.Float(0.9),
 	})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	fmt.Printf("✓ %s\n", sysResp.Choices[0].Message.Content)
+	fmt.Printf("  %s\n", resp.Choices[0].Message.Content)
+	return nil
+}
 
-	// 8. Vision - image with text
-	fmt.Println("8. Vision with image...")
+func chatVision(ctx context.Context, client openai.Client) error {
 	// 100x100 red square PNG (base64 encoded)
 	redSquare := "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAIAAAD/gAIDAAABFUlEQVR4nO3OUQkAIABEsetfWiv4Nx4IC7Cd7XvkByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIReeLesrH9s1agAAAABJRU5ErkJggg=="
-	visionResp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
+	resp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage([]openai.ChatCompletionContentPartUnionParam{
 				openai.TextContentPart("What color is this image?"),
@@ -221,10 +249,8 @@ func main() {
 		Model: openai.ChatModelGPT4o,
 	})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	fmt.Printf("✓ %s\n", visionResp.Choices[0].Message.Content)
-
-	fmt.Println("\n✅ All OpenAI v1 features tested!")
-	fmt.Printf("View trace: %s\n", bt.Permalink(rootSpan))
+	fmt.Printf("  %s\n", resp.Choices[0].Message.Content)
+	return nil
 }

@@ -11,6 +11,8 @@ require github.com/openai/openai-go v1.12.0 // indirect
 
 replace github.com/braintrustdata/braintrust-sdk-go => ../../..
 
+replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai => ../../../trace/contrib/openai
+
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
