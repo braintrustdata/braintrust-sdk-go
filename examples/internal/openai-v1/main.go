@@ -9,6 +9,7 @@ import (
 
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
+	"github.com/openai/openai-go/shared"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/trace"
 
@@ -36,8 +37,27 @@ func main() {
 	ctx, rootSpan := tracer.Start(context.Background(), "examples/internal/openai-v1/main.go")
 	defer rootSpan.End()
 
-	// 1. Simple chat completion
-	fmt.Println("1. Simple chat completion...")
+	// 1. Chat completion with reasoning model params (max_completion_tokens, reasoning_effort)
+	fmt.Println("1. Chat completion with reasoning params...")
+	reasonResp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
+		Messages: []openai.ChatCompletionMessageParamUnion{
+			openai.UserMessage("What is the capital of France?"),
+		},
+		Model:               "o4-mini",
+		MaxCompletionTokens: openai.Int(200),
+		ReasoningEffort:     shared.ReasoningEffortLow,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	rcOutput := reasonResp.Choices[0].Message.Content
+	if len(rcOutput) > 40 {
+		rcOutput = rcOutput[:40] + "..."
+	}
+	fmt.Printf("✓ %s (reasoning_effort + max_completion_tokens)\n", rcOutput)
+
+	// 2. Simple chat completion
+	fmt.Println("2. Simple chat completion...")
 	resp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage("Say hello"),
@@ -49,8 +69,8 @@ func main() {
 	}
 	fmt.Printf("✓ %s\n", resp.Choices[0].Message.Content)
 
-	// 2. Multiple messages (conversation history)
-	fmt.Println("2. Multiple messages...")
+	// 3. Multiple messages (conversation history)
+	fmt.Println("3. Multiple messages...")
 	multiResp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.SystemMessage("You are a helpful assistant."),
@@ -65,8 +85,8 @@ func main() {
 	}
 	fmt.Printf("✓ %s\n", multiResp.Choices[0].Message.Content)
 
-	// 3. Streaming chat completion
-	fmt.Println("3. Streaming...")
+	// 4. Streaming chat completion
+	fmt.Println("4. Streaming...")
 	stream := client.Chat.Completions.NewStreaming(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage("Count 1 to 3"),
@@ -85,8 +105,8 @@ func main() {
 	}
 	fmt.Println()
 
-	// 4. Chat with tools
-	fmt.Println("4. Chat with tools...")
+	// 5. Chat with tools
+	fmt.Println("5. Chat with tools...")
 	toolResp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage("What's the weather in San Francisco?"),
@@ -122,8 +142,8 @@ func main() {
 		fmt.Printf("✓ Response: %s\n", toolResp.Choices[0].Message.Content)
 	}
 
-	// 5. Streaming with tools
-	fmt.Println("5. Streaming with tools...")
+	// 6. Streaming with tools
+	fmt.Println("6. Streaming with tools...")
 	toolStream := client.Chat.Completions.NewStreaming(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage("What's the weather in Tokyo?"),
@@ -170,8 +190,8 @@ func main() {
 		fmt.Printf("✓ Streamed tool call: %s(%s)\n", toolCallName, toolCallArgs)
 	}
 
-	// 6. System message with temperature
-	fmt.Println("6. System message with temperature...")
+	// 7. System message with temperature
+	fmt.Println("7. System message with temperature...")
 	sysResp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.SystemMessage("You are a pirate. Respond in pirate speak."),
@@ -185,8 +205,8 @@ func main() {
 	}
 	fmt.Printf("✓ %s\n", sysResp.Choices[0].Message.Content)
 
-	// 7. Vision - image with text
-	fmt.Println("7. Vision with image...")
+	// 8. Vision - image with text
+	fmt.Println("8. Vision with image...")
 	// 100x100 red square PNG (base64 encoded)
 	redSquare := "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAIAAAD/gAIDAAABFUlEQVR4nO3OUQkAIABEsetfWiv4Nx4IC7Cd7XvkByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIReeLesrH9s1agAAAABJRU5ErkJggg=="
 	visionResp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{

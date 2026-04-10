@@ -59,6 +59,25 @@ func main() {
 	}
 	fmt.Printf("✓ %s (reasoning params sent)\n", output)
 
+	// Chat completion with reasoning model params (max_completion_tokens, reasoning_effort)
+	fmt.Println("Chat completion with reasoning params...")
+	reasonChatResp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
+		Messages: []openai.ChatCompletionMessageParamUnion{
+			openai.UserMessage("What is the capital of France?"),
+		},
+		Model:               "o4-mini",
+		MaxCompletionTokens: openai.Int(200),
+		ReasoningEffort:     shared.ReasoningEffortLow,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	rcOutput := reasonChatResp.Choices[0].Message.Content
+	if len(rcOutput) > 40 {
+		rcOutput = rcOutput[:40] + "..."
+	}
+	fmt.Printf("✓ %s (reasoning_effort + max_completion_tokens)\n", rcOutput)
+
 	// Chat completion
 	fmt.Println("Chat completion...")
 	resp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
