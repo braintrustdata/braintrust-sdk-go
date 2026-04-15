@@ -180,6 +180,16 @@ func TestOpenAIResponsesKitchenSink(t *testing.T) {
 	assert.Equal(false, metadata["store"])
 	assert.Equal("auto", metadata["truncation"])
 	assert.Equal(100.0, metadata["max_output_tokens"])
+
+	// text config should be captured in metadata (issue #70)
+	textConfig, ok := metadata["text"]
+	assert.True(ok, "text should be present in metadata")
+	assert.NotNil(textConfig, "text should not be nil")
+	textMap, ok := textConfig.(map[string]any)
+	require.True(ok, "text should be a map")
+	formatMap, ok := textMap["format"].(map[string]any)
+	require.True(ok, "text.format should be a map")
+	assert.Equal("text", formatMap["type"], "default text format type should be 'text'")
 }
 
 func TestOpenAIResponsesStreamingClose(t *testing.T) {

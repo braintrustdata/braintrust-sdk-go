@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "make fix"
+            "command": "make -C $(git rev-parse --show-toplevel) fix"
           }
         ]
       }

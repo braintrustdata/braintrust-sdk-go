@@ -52,6 +52,7 @@ func main() {
 		{"chat-tools", chatTools},
 		{"chat-streaming-tools", chatStreamingTools},
 		{"responses", responsesAPI},
+		{"responses-structured-output", responsesStructuredOutput},
 		{"responses-streaming", responsesStreaming},
 		{"conversations", conversationsAPI},
 		{"models-list", modelsList},
@@ -250,6 +251,34 @@ func responsesAPI(ctx context.Context, client openai.Client) error {
 	output := resp.OutputText()
 	if len(output) > 50 {
 		output = output[:50] + "..."
+	}
+	fmt.Printf("  %s\n", output)
+	return nil
+}
+
+func responsesStructuredOutput(ctx context.Context, client openai.Client) error {
+	resp, err := client.Responses.New(ctx, responses.ResponseNewParams{
+		Input: responses.ResponseNewParamsInputUnion{OfString: openai.String("What is the capital of France? Return as JSON with fields: city, country, population.")},
+		Model: openai.ChatModelGPT4oMini,
+		Text: responses.ResponseTextConfigParam{
+			Format: responses.ResponseFormatTextConfigParamOfJSONSchema("capital_info", map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"city":       map[string]any{"type": "string"},
+					"country":    map[string]any{"type": "string"},
+					"population": map[string]any{"type": "number"},
+				},
+				"required":             []string{"city", "country", "population"},
+				"additionalProperties": false,
+			}),
+		},
+	})
+	if err != nil {
+		return err
+	}
+	output := resp.OutputText()
+	if len(output) > 80 {
+		output = output[:80] + "..."
 	}
 	fmt.Printf("  %s\n", output)
 	return nil

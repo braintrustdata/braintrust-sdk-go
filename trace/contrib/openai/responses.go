@@ -1,6 +1,6 @@
 package openai
 
-//  this file parses the responses API.
+// this file parses the responses API.
 
 import (
 	"bufio"
@@ -66,6 +66,7 @@ func (rt *responsesTracer) StartSpan(ctx context.Context, t time.Time, request i
 		"tool_choice",
 		"seed",
 		"reasoning",
+		"text",
 	}
 
 	// handle simple fields here.
@@ -191,6 +192,7 @@ func (rt *responsesTracer) handleResponseCompletedMessage(span trace.Span, rawMs
 		"choices",
 		"content_filter_results",
 		"reasoning",
+		"text",
 	}
 
 	for _, field := range metadataFields {
