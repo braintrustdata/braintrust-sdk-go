@@ -40,8 +40,3 @@ for module in "${NESTED_MODULES[@]}"; do
     GOWORK=off go mod tidy -C "${module}"
 done
 
-# Stage only the known nested module go.mod/go.sum files (avoid matching test fixtures).
-for module in "${NESTED_MODULES[@]}"; do
-    git add -- "${module}/go.mod" "${module}/go.sum"
-done
-git commit -m "chore: release ${VERSION}"

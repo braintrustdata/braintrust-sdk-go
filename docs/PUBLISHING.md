@@ -21,9 +21,8 @@ Releases are fully automated via GitHub Actions. The process has three stages:
 Go to **Actions → Prepare Release → Run workflow** and enter the version (e.g. `v1.2.3`).
 
 The workflow:
-- Creates a `release/vX.Y.Z` branch
 - Pins the root module version and any nested-module interdependencies in each nested module's `go.mod` using `go mod edit` + `GOWORK=off go mod tidy`
-- Opens a pull request titled `chore: release vX.Y.Z`
+- Opens a pull request titled `chore: release vX.Y.Z` on a `release/vX.Y.Z` branch
 
 > **Why pin the version?** During development, `go mod tidy` runs in Go workspace mode and uses `v0.0.0` as a placeholder version for workspace-local modules. The published `go.mod` must reference a real version so downstream users can resolve the dependency from the Go module proxy.
 
