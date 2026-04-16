@@ -136,11 +136,15 @@ func runTracingDemos(ctx context.Context, tracer oteltrace.Tracer, tp *trace.Tra
 	fmt.Println("  → OpenAI chat completion")
 	runOpenAIDemo(ctx, tracer)
 
-	// 2. Anthropic integration
+	// 2. OpenAI embeddings
+	fmt.Println("  → OpenAI embeddings")
+	runOpenAIEmbeddingsDemo(ctx, tracer)
+
+	// 3. Anthropic integration
 	fmt.Println("  → Anthropic message creation")
 	runAnthropicDemo(ctx, tracer)
 
-	// 3. Manual spans with attachments
+	// 4. Manual spans with attachments
 	fmt.Println("  → Manual spans with attachments")
 	runAttachmentDemos(ctx, tracer)
 }
@@ -165,6 +169,28 @@ func runOpenAIDemo(ctx context.Context, tracer oteltrace.Tracer) {
 	}
 
 	fmt.Printf("     OpenAI: %s\n", resp.Choices[0].Message.Content)
+}
+
+func runOpenAIEmbeddingsDemo(ctx context.Context, tracer oteltrace.Tracer) {
+	_, span := tracer.Start(ctx, "llm.embeddings.openai")
+	defer span.End()
+
+	client := openai.NewClient(
+		option.WithMiddleware(traceopenai.NewMiddleware()),
+	)
+
+	resp, err := client.Embeddings.New(ctx, openai.EmbeddingNewParams{
+		Input: openai.EmbeddingNewParamsInputUnion{
+			OfString: openai.String("The quick brown fox jumps over the lazy dog"),
+		},
+		Model: openai.EmbeddingModelTextEmbedding3Small,
+	})
+	if err != nil {
+		log.Printf("OpenAI embeddings error: %v", err)
+		return
+	}
+
+	fmt.Printf("     OpenAI embedding: %d dims, %d prompt tokens\n", len(resp.Data[0].Embedding), resp.Usage.PromptTokens)
 }
 
 func runAnthropicDemo(ctx context.Context, tracer oteltrace.Tracer) {

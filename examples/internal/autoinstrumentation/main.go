@@ -90,6 +90,18 @@ func main() {
 	fmt.Println("5. ADK (with Gemini model)...")
 	runADK(ctx)
 
+	// 6. OpenAI embeddings - NO middleware added
+	fmt.Println("6. OpenAI embeddings...")
+	runOpenAIEmbeddings(ctx)
+
+	// 7. sashabaranov embeddings - NO HTTPClient wrapping
+	fmt.Println("7. sashabaranov embeddings...")
+	runSashabaranovEmbeddings(ctx)
+
+	// 8. Gemini embeddings - NO HTTPClient wrapping
+	fmt.Println("8. Gemini embeddings...")
+	runGeminiEmbeddings(ctx)
+
 	fmt.Println("\n=== All providers tested ===")
 	fmt.Println("If tracing worked, you should see LLM spans for each provider in Braintrust.")
 	fmt.Printf("View trace: %s\n", bt.Permalink(rootSpan))
@@ -222,4 +234,60 @@ func runADK(ctx context.Context) {
 			}
 		}
 	}
+}
+
+func runOpenAIEmbeddings(ctx context.Context) {
+	// NO middleware - Orchestrion injects it
+	client := openai.NewClient()
+
+	resp, err := client.Embeddings.New(ctx, openai.EmbeddingNewParams{
+		Input: openai.EmbeddingNewParamsInputUnion{
+			OfString: openai.String("The quick brown fox jumps over the lazy dog"),
+		},
+		Model: openai.EmbeddingModelTextEmbedding3Small,
+	})
+	if err != nil {
+		log.Printf("   OpenAI embeddings error: %v", err)
+		return
+	}
+	fmt.Printf("   Response: %d-dim embedding\n", len(resp.Data[0].Embedding))
+}
+
+func runSashabaranovEmbeddings(ctx context.Context) {
+	// NO HTTPClient wrapping - Orchestrion injects it
+	config := sashabaranov.DefaultConfig(os.Getenv("OPENAI_API_KEY"))
+	client := sashabaranov.NewClientWithConfig(config)
+
+	resp, err := client.CreateEmbeddings(ctx, sashabaranov.EmbeddingRequest{
+		Model: sashabaranov.SmallEmbedding3,
+		Input: "The quick brown fox jumps over the lazy dog",
+	})
+	if err != nil {
+		log.Printf("   sashabaranov embeddings error: %v", err)
+		return
+	}
+	fmt.Printf("   Response: %d-dim embedding\n", len(resp.Data[0].Embedding))
+}
+
+func runGeminiEmbeddings(ctx context.Context) {
+	// NO HTTPClient wrapping - Orchestrion injects it via genai.NewClient wrap.
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{
+		APIKey:  os.Getenv("GOOGLE_API_KEY"),
+		Backend: genai.BackendGeminiAPI,
+	})
+	if err != nil {
+		log.Printf("   Gemini embeddings error: %v", err)
+		return
+	}
+	resp, err := client.Models.EmbedContent(
+		ctx,
+		"gemini-embedding-001",
+		genai.Text("The quick brown fox jumps over the lazy dog"),
+		nil,
+	)
+	if err != nil {
+		log.Printf("   Gemini embeddings error: %v", err)
+		return
+	}
+	fmt.Printf("   Response: %d-dim embedding\n", len(resp.Embeddings[0].Values))
 }

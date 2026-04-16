@@ -49,6 +49,8 @@ func main() {
 		{"chat-streaming-tools", chatStreamingTools},
 		{"chat-system-temperature", chatSystemTemperature},
 		{"chat-vision", chatVision},
+		{"embeddings", embeddingsExample},
+		{"embeddings-batch", embeddingsBatchExample},
 	} {
 		fmt.Printf("%s...\n", example.name)
 		exampleCtx, span := tracer.Start(ctx, example.name)
@@ -252,5 +254,33 @@ func chatVision(ctx context.Context, client openai.Client) error {
 		return err
 	}
 	fmt.Printf("  %s\n", resp.Choices[0].Message.Content)
+	return nil
+}
+
+func embeddingsExample(ctx context.Context, client openai.Client) error {
+	resp, err := client.Embeddings.New(ctx, openai.EmbeddingNewParams{
+		Input: openai.EmbeddingNewParamsInputUnion{
+			OfString: openai.String("The quick brown fox jumps over the lazy dog"),
+		},
+		Model: openai.EmbeddingModelTextEmbedding3Small,
+	})
+	if err != nil {
+		return err
+	}
+	fmt.Printf("  single embedding: %d dims, %d prompt tokens\n", len(resp.Data[0].Embedding), resp.Usage.PromptTokens)
+	return nil
+}
+
+func embeddingsBatchExample(ctx context.Context, client openai.Client) error {
+	resp, err := client.Embeddings.New(ctx, openai.EmbeddingNewParams{
+		Input: openai.EmbeddingNewParamsInputUnion{
+			OfArrayOfStrings: []string{"hello world", "goodbye world", "braintrust tracing"},
+		},
+		Model: openai.EmbeddingModelTextEmbedding3Small,
+	})
+	if err != nil {
+		return err
+	}
+	fmt.Printf("  batch: %d embeddings, %d dims each\n", len(resp.Data), len(resp.Data[0].Embedding))
 	return nil
 }
