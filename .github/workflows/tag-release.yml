@@ -39,14 +39,15 @@ jobs:
           version: v2.11.4
 
       - name: Install orchestrion
-        run: |
-          GOTOOLCHAIN=$(awk '/^go /{print "go"$2; exit}' go.mod) \
-            go install github.com/DataDog/orchestrion@v1.6.1
+        env:
+          GOTOOLCHAIN: local
+        run: go install github.com/DataDog/orchestrion@v1.6.1
 
       - name: Run CI
         run: make ci
         env:
           CGO_ENABLED: 0
+          GOTOOLCHAIN: local
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           BRAINTRUST_API_KEY: ${{ secrets.BRAINTRUST_API_KEY }}
