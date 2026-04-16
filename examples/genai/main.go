@@ -15,6 +15,13 @@ import (
 	tracegenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"
 )
 
+func geminiAPIKey() string {
+	if apiKey := os.Getenv("GOOGLE_API_KEY"); apiKey != "" {
+		return apiKey
+	}
+	return os.Getenv("GEMINI_API_KEY")
+}
+
 func main() {
 	tp := trace.NewTracerProvider()
 	defer tp.Shutdown(context.Background()) //nolint:errcheck
@@ -31,7 +38,7 @@ func main() {
 	// Create Gemini client with Braintrust tracing
 	client, err := genai.NewClient(context.Background(), &genai.ClientConfig{
 		HTTPClient: tracegenai.Client(), // Add tracing via custom HTTP client
-		APIKey:     os.Getenv("GOOGLE_API_KEY"),
+		APIKey:     geminiAPIKey(),
 		Backend:    genai.BackendGeminiAPI,
 	})
 	if err != nil {
@@ -45,12 +52,19 @@ func main() {
 	ctx, span := tracer.Start(context.Background(), "examples/genai/main.go")
 	defer span.End()
 
-	// Make a simple generateContent request
+	// Make a simple generateContent request with Gemini thinking enabled.
+	thinkingBudget := int32(256)
 	resp, err := client.Models.GenerateContent(
 		ctx,
 		"gemini-2.5-flash",
-		genai.Text("What is the capital of France?"),
-		nil,
+		genai.Text("Look at this sequence: 2, 6, 12, 20, 30. What is the next number? Answer briefly."),
+		&genai.GenerateContentConfig{
+			ThinkingConfig: &genai.ThinkingConfig{
+				IncludeThoughts: true,
+				ThinkingBudget:  &thinkingBudget,
+				ThinkingLevel:   genai.ThinkingLevelMedium,
+			},
+		},
 	)
 	if err != nil {
 		log.Fatal(err)

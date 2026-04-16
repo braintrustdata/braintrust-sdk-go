@@ -75,6 +75,7 @@ func (gt *generateContentTracer) StartSpan(ctx context.Context, t time.Time, req
 			"stopSequences",
 			"responseMimeType",
 			"responseSchema",
+			"thinkingConfig",
 		}
 		for _, field := range configFields {
 			if value, exists := genConfig[field]; exists {
@@ -356,6 +357,8 @@ func parseUsageTokens(usage map[string]interface{}) map[string]int64 {
 				metrics["tokens"] = i
 			case "cachedContentTokenCount":
 				metrics["prompt_cached_tokens"] = i
+			case "thoughtsTokenCount":
+				metrics["completion_reasoning_tokens"] = i
 			default:
 				// Keep other fields as-is for future-proofing
 				// Convert camelCase to snake_case for consistency

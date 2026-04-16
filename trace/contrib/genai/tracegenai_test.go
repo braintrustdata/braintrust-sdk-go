@@ -25,8 +25,11 @@ func setUpTest(t *testing.T) (*genai.Client, *oteltest.Exporter) {
 
 	// Get API key or use dummy for replay mode
 	apiKey := os.Getenv("GOOGLE_API_KEY")
+	if apiKey == "" {
+		apiKey = os.Getenv("GEMINI_API_KEY")
+	}
 	if mode != vcr.ModeReplay && apiKey == "" {
-		t.Fatal("GOOGLE_API_KEY not set (required in record/off mode)")
+		t.Fatal("GOOGLE_API_KEY or GEMINI_API_KEY not set (required in record/off mode)")
 	}
 	if apiKey == "" {
 		apiKey = "dummy-google-key-for-replay"
@@ -150,6 +153,57 @@ func TestStreamingGenerateContent(t *testing.T) {
 	assert.Greater(metrics["completion_tokens"], float64(0))
 	assert.Greater(metrics["tokens"], float64(0))
 	assert.Greater(metrics["time_to_first_token"], float64(0))
+}
+
+func TestGenerateContentWithThinking(t *testing.T) {
+	client, exporter := setUpTest(t)
+
+	assert := assert.New(t)
+	require := require.New(t)
+
+	thinkingBudget := int32(1024)
+	timer := oteltest.NewTimer()
+	resp, err := client.Models.GenerateContent(
+		context.Background(),
+		"gemini-2.5-flash",
+		genai.Text("Look at this sequence: 2, 6, 12, 20, 30. What is the pattern and what would be the formula for the nth term?"),
+		&genai.GenerateContentConfig{
+			MaxOutputTokens: 2048,
+			SystemInstruction: genai.NewContentFromText(
+				"You are a mathematical reasoning assistant.",
+				genai.RoleUser,
+			),
+			ThinkingConfig: &genai.ThinkingConfig{
+				IncludeThoughts: true,
+				ThinkingBudget:  &thinkingBudget,
+			},
+		},
+	)
+	timeRange := timer.Tick()
+
+	require.NoError(err)
+	require.NotNil(resp)
+	assert.Contains(resp.Text(), "n")
+
+	ts := exporter.FlushOne()
+	ts.AssertInTimeRange(timeRange)
+	ts.AssertNameIs("generate_content")
+	assert.Equal(codes.Unset, ts.Status().Code)
+
+	metadata := ts.Metadata()
+	assert.Equal("gemini", metadata["provider"])
+	assert.Equal("gemini-2.5-flash", metadata["model"])
+	require.Contains(metadata, "thinkingConfig")
+	assert.Equal(map[string]any{
+		"includeThoughts": true,
+		"thinkingBudget":  float64(1024),
+	}, metadata["thinkingConfig"])
+
+	metrics := ts.Metrics()
+	assert.Greater(metrics["completion_reasoning_tokens"], float64(0))
+	assert.NotContains(metrics, "thoughts_token_count")
+	assert.Greater(metrics["prompt_tokens"], float64(0))
+	assert.Greater(metrics["tokens"], float64(0))
 }
 
 func TestParseUsageTokens(t *testing.T) {
