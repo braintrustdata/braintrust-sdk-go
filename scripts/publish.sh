@@ -28,46 +28,8 @@ fi
 
 echo "Releasing version $VERSION..."
 
-index_url() {
-    local label="$1"
-    local url="$2"
-    local attempts=10
-    local delay=3
-
-    for ((i = 1; i <= attempts; i++)); do
-        if curl -fsS "$url" > /dev/null; then
-            echo "Indexed ${label}"
-            return 0
-        fi
-
-        if (( i < attempts )); then
-            echo "Retrying ${label} (${i}/${attempts})..."
-            sleep "$delay"
-        fi
-    done
-
-    echo "Error: failed to index ${label}: ${url}" >&2
-    return 1
-}
-
 # Run goreleaser
 goreleaser release --clean
-
-# Index package with Go proxy
-echo ""
-echo "Indexing package with Go proxy..."
-echo "Indexing version: $VERSION"
-index_url \
-    "github.com/braintrustdata/braintrust-sdk-go@${VERSION}" \
-    "https://proxy.golang.org/github.com/braintrustdata/braintrust-sdk-go/@v/$VERSION.info"
-for module in "${NESTED_MODULES[@]}"; do
-    echo "Indexing module: github.com/braintrustdata/braintrust-sdk-go/${module}@${VERSION}"
-    index_url \
-        "github.com/braintrustdata/braintrust-sdk-go/${module}@${VERSION}" \
-        "https://proxy.golang.org/github.com/braintrustdata/braintrust-sdk-go/${module}/@v/$VERSION.info"
-done
-echo ""
-echo "Package indexed successfully!"
 
 # Get repository URL
 REPO_URL=$(git config --get remote.origin.url | sed 's/git@github.com:/https:\/\/github.com\//' | sed 's/\.git$//')
