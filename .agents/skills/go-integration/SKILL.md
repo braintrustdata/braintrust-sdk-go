@@ -15,29 +15,35 @@ Study existing integrations as examples. Choose the pattern that matches your pr
 |---------|-------------------------|----------|
 | **Middleware** | `trace/contrib/openai/` | SDK supports `option.WithMiddleware()` |
 | **Middleware** | `trace/contrib/anthropic/` | SDK supports `option.WithMiddleware()` |
+| **Middleware** | `trace/contrib/genkit/` | Framework exposes a `ModelMiddleware` / `ai.WithMiddleware` hook |
 | **HTTP Wrapper** | `trace/contrib/genai/` | SDK accepts custom `*http.Client` |
 | **HTTP Wrapper** | `trace/contrib/github.com/sashabaranov/go-openai/` | SDK accepts custom `*http.Client` |
 | **Callback** | `trace/contrib/langchaingo/` | SDK has callback/handler interface |
+| **Callback** | `trace/contrib/cloudwego/eino/` | Framework has a global `callbacks.Handler` + per-invocation hook |
+| **Callback** | `trace/contrib/adk/` | Framework wires per-agent / per-tool callbacks on a config struct |
 
 **Before starting**: Examine the provider library's documentation and source to identify ALL methods that call LLM APIs.
 
 ## Integration Patterns
 
 ### Pattern 1: Middleware-Based
-- **Reference**: `trace/contrib/openai/traceopenai.go`
+- **Reference**: `trace/contrib/openai/traceopenai.go`, `trace/contrib/anthropic/traceanthropic.go`
 - **Key components**: `NewMiddleware()` function, `middlewareConfig` struct, URL router
 - **Uses**: `trace/internal.Middleware()` helper with a router function
-- **Endpoint tracers**: Separate files per endpoint (e.g., `chatcompletions.go`, `responses.go`)
+- **Endpoint tracers**: Separate files per endpoint (e.g., `chatcompletions.go`, `responses.go`, `messages.go`)
+- **Framework-level variant**: `trace/contrib/genkit/tracegenkit.go` — wraps `ai.ModelFunc` instead of an HTTP middleware, but the shape (`NewMiddleware()` + config struct + options) is the same.
 
 ### Pattern 2: HTTP Client Wrapper
-- **Reference**: `trace/contrib/genai/tracegenai.go`
-- **Key components**: `WrapClient()` function, custom `roundTripper` implementing `http.RoundTripper`
+- **Reference**: `trace/contrib/genai/tracegenai.go`, `trace/contrib/github.com/sashabaranov/go-openai/traceopenai.go`
+- **Key components**: `WrapClient()` / `Client()` function, custom `roundTripper` implementing `http.RoundTripper`
 - **Intercepts**: Request/response at transport level
 
 ### Pattern 3: Callback-Based
-- **Reference**: `trace/contrib/langchaingo/tracelangchaingo.go`
-- **Key components**: Handler struct implementing SDK's callback interface
-- **Manages**: Span stack for nested calls (chain → llm → tools)
+- **Reference**: `trace/contrib/langchaingo/tracelangchaingo.go` (chain → llm → tool span stack)
+- **Reference**: `trace/contrib/cloudwego/eino/traceeino.go` (global `callbacks.Handler` + per-invocation registration, streaming `wg`)
+- **Reference**: `trace/contrib/adk/traceadk.go` (per-agent / per-model / per-tool callbacks keyed by session + invocation id)
+- **Key components**: Handler / Callbacks struct implementing the framework's callback interface
+- **Manages**: Span stack or session-keyed span map for nested calls (chain/agent → llm → tools)
 
 ## Endpoint-Specific Tracers
 
@@ -65,13 +71,13 @@ Each integration lives in its own Go module under `trace/contrib/`. **Do in this
 - [ ] **Endpoint parsers**: `trace/contrib/yourprovider/messages.go` (etc.)
 - [ ] **Tests**: `trace/contrib/yourprovider/traceyourprovider_test.go`
 - [ ] **VCR cassettes**: `trace/contrib/yourprovider/testdata/cassettes/`
-- [ ] **Orchestrion config**: `trace/contrib/yourprovider/orchestrion.yml`
-- [ ] **Orchestrion deps**: `trace/contrib/yourprovider/orchestrion.go`
-- [ ] **Update all package**: Add import to `trace/contrib/all/all.go` + add `require`/`replace` in `trace/contrib/all/go.mod`
-- [ ] **Run generate**: `make generate` to update combined orchestrion.yml
-- [ ] **Tidy all modules**: `make mod-verify` to ensure all go.mod/go.sum are consistent
-- [ ] **Customer example**: `examples/yourprovider/main.go`
-- [ ] **Internal example**: `examples/internal/yourprovider/main.go`
+- [ ] **Orchestrion config**: `trace/contrib/yourprovider/orchestrion.yml` — **mandatory**
+- [ ] **Orchestrion deps**: `trace/contrib/yourprovider/orchestrion.go` — **mandatory**, even if the YAML template's imports appear already satisfied. Every integration ships both files; use blank imports (see `trace/contrib/openai/orchestrion.go` and `trace/contrib/anthropic/orchestrion.go`) to pull the packages referenced by `orchestrion.yml` into the module graph.
+- [ ] **Update all package**: Add blank import to `trace/contrib/all/all.go` + add `require` and `replace` directives in `trace/contrib/all/go.mod`
+- [ ] **Run generate**: `make generate` to regenerate `trace/contrib/all/orchestrion.yml` from the per-integration YAML files
+- [ ] **Tidy all modules**: `make mod-verify` to ensure all go.mod/go.sum are consistent and the manifest matches
+- [ ] **Customer example**: `examples/yourprovider/main.go` (nested paths are fine, e.g. `examples/cloudwego/eino/main.go`)
+- [ ] **Internal example**: `examples/internal/yourprovider/main.go` (nested paths are fine, e.g. `examples/internal/cloudwego/eino/main.go`)
 
 ## Module Setup
 
@@ -86,6 +92,8 @@ module github.com/braintrustdata/braintrust-sdk-go/trace/contrib/yourprovider
 
 go 1.24.4
 
+toolchain go1.26.1
+
 require (
     github.com/braintrustdata/braintrust-sdk-go v0.0.0
     github.com/yourprovider/sdk-go vX.Y.Z
@@ -93,11 +101,13 @@ require (
 )
 
 // Required: point to repo root so local development works in go.work mode.
-// The release pipeline replaces v0.0.0 with the real version before publishing.
+// The release pipeline pins v0.0.0 to the real version (e.g. v0.5.0) before
+// tagging via `go mod edit` + `GOWORK=off go mod tidy`; do NOT hand-edit it.
 replace github.com/braintrustdata/braintrust-sdk-go => ../../..
 ```
 
-The `replace` directive depth depends on nesting: `../../..` for `trace/contrib/yourprovider/`, `../../../..` for `trace/contrib/cloudwego/eino/`, etc.
+- Use `v0.0.0` when first creating the module. After the next release, the merged `go.mod` on `main` will carry the real pinned version — that is expected (see `docs/PUBLISHING.md`).
+- The `replace` directive depth depends on nesting: `../../..` for `trace/contrib/yourprovider/`, `../../../..` for `trace/contrib/cloudwego/eino/`, etc.
 
 ### 2. Register the module
 
@@ -116,9 +126,13 @@ _ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/yourprovider"
 ```
 
 ```
-// In all/go.mod — add require + replace
+// In trace/contrib/all/go.mod — add to the existing require() and replace() blocks.
+// all/go.mod already lists every nested integration's require + replace; add yours
+// in the same style. For nested paths, keep the full import path intact.
 require github.com/braintrustdata/braintrust-sdk-go/trace/contrib/yourprovider v0.0.0
 replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/yourprovider => ../yourprovider
+// Nested example (see the existing cloudwego/eino entry):
+// replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino => ../cloudwego/eino
 ```
 
 ### 4. Run `make mod-verify`
@@ -149,9 +163,9 @@ Many LLM frameworks support multi-step agents with tool calling, subagent delega
 - **Subagents / nested agents**: If the framework emits a callback when one agent calls another, capture it as a child span. Use a descriptive span type (`"function"` or `"task"`) and include the subagent name.
 - **Graph nodes / chains**: If the SDK wraps components (retrievers, embedders, rerankers) in a graph and fires per-node callbacks, capture them too using the appropriate span type.
 
-**Key pattern**: Dispatch on the SDK's callback input/output type to determine what kind of span to create. Ignore types that don't map to a recognizable span type. Check with `tool.ConvCallbackInput`, `model.ConvCallbackInput`, etc. and fall through to `return ctx` for unknown types.
+**Key pattern**: Dispatch on the SDK's callback input/output type to determine what kind of span to create. Ignore types that don't map to a recognizable span type. See `trace/contrib/cloudwego/eino/traceeino.go` (uses `model.ConvCallbackInput` / `tool.ConvCallbackInput` and falls through to `return ctx` for unknown types) and `trace/contrib/adk/traceadk.go` (session + invocation-id keyed span map across `BeforeAgent`/`AfterAgent`/`BeforeModel`/`AfterModel`/`BeforeTool`/`AfterTool`).
 
-**Internal example must cover**: at minimum one full agentic turn — model call → tool execution → model incorporating result — to verify the full span chain appears correctly in Braintrust.
+**Internal example must cover**: at minimum one full agentic turn — model call → tool execution → model incorporating result — to verify the full span chain appears correctly in Braintrust. See `examples/internal/adk-parallel/main.go` and `examples/internal/cloudwego/eino/main.go`.
 
 ## VCR Testing
 
@@ -181,25 +195,32 @@ Use `internal/vcr` and `internal/oteltest` packages for HTTP recording/replay an
 
 ## Orchestrion Auto-Instrumentation
 
-Orchestrion provides compile-time tracing injection with zero code changes.
+Orchestrion provides compile-time tracing injection with zero code changes. **Every integration must ship both `orchestrion.yml` and `orchestrion.go`.** There are no exceptions.
 
 **References:**
-- Middleware pattern: `trace/contrib/openai/orchestrion.yml`
-- HTTP wrapper pattern: `trace/contrib/genai/orchestrion.yml`
-- Dependency file: `trace/contrib/openai/orchestrion.go`
-- Combined config: `trace/contrib/all/orchestrion.yml` (auto-generated)
+- Middleware pattern (SDK option): `trace/contrib/openai/orchestrion.yml`, `trace/contrib/anthropic/orchestrion.yml`
+- Middleware pattern (framework option append): `trace/contrib/genkit/orchestrion.yml`
+- HTTP wrapper pattern: `trace/contrib/genai/orchestrion.yml`, `trace/contrib/github.com/sashabaranov/go-openai/orchestrion.yml`
+- Callback pattern (append to `AppendGlobalHandlers`): `trace/contrib/cloudwego/eino/orchestrion.yml`
+- Callback pattern (struct-literal wrap): `trace/contrib/adk/orchestrion.yml`
+- Callback pattern (function-call arg append): `trace/contrib/langchaingo/orchestrion.yml`
+- Dependency file: `trace/contrib/openai/orchestrion.go`, `trace/contrib/anthropic/orchestrion.go`
+- Combined config: `trace/contrib/all/orchestrion.yml` (auto-generated — do not hand-edit)
+- Generator source: `internal/genorchestrion/` (run via `make generate`)
 
-**Required files:**
-1. `orchestrion.yml` - Define join-points and advice (follow OpenAI pattern for middleware, GenAI pattern for HTTP wrapper)
-2. `orchestrion.go` - Blank imports ensuring dependencies are in module graph
-3. Add import to `trace/contrib/all/all.go`
-4. Run `make generate` to update combined orchestrion.yml
+**Required files (all mandatory):**
+1. `orchestrion.yml` — Define join-points and advice. Pick the closest reference above.
+2. `orchestrion.go` — Blank imports pulling every package referenced by `orchestrion.yml` templates into the module graph (e.g. `_ "github.com/openai/openai-go/option"`). Required even when those packages are already imported elsewhere in the integration — the contract is uniform across integrations.
+3. Blank import in `trace/contrib/all/all.go`.
+4. Corresponding `require` + `replace` in `trace/contrib/all/go.mod`.
+5. Run `make generate` to update the combined `trace/contrib/all/orchestrion.yml`, then `make mod-verify` to tidy go.mod/go.sum everywhere.
 
 ## Examples
 
 **References:**
-- Customer example pattern: `examples/openai/main.go`
-- Internal example pattern: `examples/internal/autoinstrumentation/main.go`
+- Customer example pattern: `examples/openai/main.go`, `examples/anthropic/main.go`, `examples/genkit/main.go`, `examples/cloudwego/eino/main.go`, `examples/adk/main.go`
+- Internal example pattern: `examples/internal/autoinstrumentation/main.go` (orchestrion end-to-end), `examples/internal/kitchensink/main.go` (multi-provider coverage), `examples/internal/genkit/main.go`, `examples/internal/cloudwego/eino/main.go`, `examples/internal/adk-parallel/main.go`
+- Internal examples README: `examples/internal/README.md` — shows the "kitchen sink" convention per provider
 
 **Customer example** (`examples/yourprovider/main.go`):
 - Concise, shows basic usage with manual middleware
@@ -286,14 +307,18 @@ VCR_MODE=record go test -C trace/contrib/yourprovider -v -run=TestName ./...
 
 ## Reference Files
 
-- Integrations: `trace/contrib/{openai,anthropic,genai,langchaingo,adk,genkit,cloudwego/eino}/`
+- Integrations (one Go module each): `trace/contrib/{openai,anthropic,genai,genkit,langchaingo,adk,cloudwego/eino,github.com/sashabaranov/go-openai}/`
 - Module manifests: `trace/contrib/*/go.mod`
-- Tests: `trace/contrib/*/trace*_test.go`
+- Tests: `trace/contrib/*/trace*_test.go` (also `context_test.go`, `nested_test.go`, `integration_test.go`, `golden_test.go` in some integrations)
+- Shared middleware helper: `trace/internal/middleware.go`, `trace/internal/utils.go`
 - Test helpers: `internal/oteltest/oteltest.go`, `internal/vcr/vcr.go`
-- Examples: `examples/{openai,anthropic,genai}/main.go`
-- Internal examples: `examples/internal/*/main.go`
-- Orchestrion: `trace/contrib/*/orchestrion.yml`
+- Examples: `examples/{openai,anthropic,genai,genkit,langchaingo,adk,sashabaranov-openai}/main.go`, `examples/cloudwego/eino/main.go`
+- Internal examples: `examples/internal/*/main.go` (see `examples/internal/README.md`)
+- Orchestrion per-integration: `trace/contrib/*/orchestrion.yml` + `trace/contrib/*/orchestrion.go`
+- Orchestrion combined (generated): `trace/contrib/all/orchestrion.yml`
+- Orchestrion generator: `internal/genorchestrion/` (invoked by `make generate`)
 - All-integrations meta-module: `trace/contrib/all/all.go`, `trace/contrib/all/go.mod`
 - Workspace: `go.work`
-- Nested module registry: `scripts/nested_modules.txt`
-- Release docs: `docs/PUBLISHING.md`
+- Nested module registry: `scripts/nested_modules.txt`, verified by `scripts/check_nested_modules.sh`
+- Manual-instrumentation guide (user-facing): `trace/contrib/README.md`
+- Release docs: `docs/PUBLISHING.md` (explains the v0.0.0 → real-version pin flow)
