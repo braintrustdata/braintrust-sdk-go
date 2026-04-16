@@ -269,7 +269,7 @@ func TestContainsGenerateContent(t *testing.T) {
 		{"/v1beta/models/gemini-2.0-flash:streamGenerateContent", true},
 		{"/v1beta/models/gemini-2.0-flash/streamGenerateContent", true},
 		{"/v1/projects/p/locations/l/publishers/google/models/gemini-2.0-flash:streamGenerateContent", true},
-		// Non-matching
+		// Non-matching for generateContent, but now routed by containsEmbedContent
 		{"/v1beta/models/gemini-2.0-flash/embedContent", false},
 		{"/v1beta/models", false},
 	}
@@ -277,6 +277,87 @@ func TestContainsGenerateContent(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.path, func(t *testing.T) {
 			assert.Equal(t, tt.matches, containsGenerateContent(tt.path))
+		})
+	}
+}
+
+func TestContainsEmbedContent(t *testing.T) {
+	tests := []struct {
+		path    string
+		matches bool
+	}{
+		// Single embed — Gemini API (colon + slash variants)
+		{"/v1beta/models/text-embedding-004:embedContent", true},
+		{"/v1beta/models/text-embedding-004/embedContent", true},
+		// Batch embed — Gemini API
+		{"/v1beta/models/text-embedding-004:batchEmbedContents", true},
+		{"/v1beta/models/text-embedding-004/batchEmbedContents", true},
+		// Vertex AI
+		{"/v1/projects/p/locations/l/publishers/google/models/text-embedding-004:embedContent", true},
+		{"/v1/projects/p/locations/l/publishers/google/models/text-embedding-004:batchEmbedContents", true},
+		// Non-matching
+		{"/v1beta/models/gemini-2.0-flash:generateContent", false},
+		{"/v1beta/models", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.path, func(t *testing.T) {
+			assert.Equal(t, tt.matches, containsEmbedContent(tt.path))
+		})
+	}
+}
+
+func TestIsBatchEmbedPath(t *testing.T) {
+	assert.True(t, isBatchEmbedPath("/v1beta/models/text-embedding-004:batchEmbedContents"))
+	assert.False(t, isBatchEmbedPath("/v1beta/models/text-embedding-004:embedContent"))
+}
+
+func TestExtractModelFromEmbedPath(t *testing.T) {
+	assert.Equal(t, "text-embedding-004", extractModelFromPath("/v1beta/models/text-embedding-004:embedContent"))
+	assert.Equal(t, "text-embedding-004", extractModelFromPath("/v1beta/models/text-embedding-004:batchEmbedContents"))
+	assert.Equal(t, "text-embedding-004", extractModelFromPath("/v1beta/models/text-embedding-004/embedContent"))
+}
+
+func TestEmbedContentOutputSummary(t *testing.T) {
+	cases := []struct {
+		name string
+		raw  map[string]interface{}
+		want map[string]any
+	}{
+		{
+			name: "single",
+			raw: map[string]interface{}{
+				"embedding": map[string]interface{}{
+					"values": []interface{}{0.1, 0.2, 0.3},
+				},
+			},
+			want: map[string]any{"embedding_length": 3, "embeddings_count": 1},
+		},
+		{
+			name: "batch",
+			raw: map[string]interface{}{
+				"embeddings": []interface{}{
+					map[string]interface{}{"values": []interface{}{0.1, 0.2}},
+					map[string]interface{}{"values": []interface{}{0.3, 0.4}},
+					map[string]interface{}{"values": []interface{}{0.5, 0.6}},
+				},
+			},
+			want: map[string]any{"embedding_length": 2, "embeddings_count": 3},
+		},
+		{
+			name: "empty batch",
+			raw:  map[string]interface{}{"embeddings": []interface{}{}},
+			want: map[string]any{"embeddings_count": 0},
+		},
+		{
+			name: "empty object",
+			raw:  map[string]interface{}{},
+			want: map[string]any{},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := embedContentOutputSummary(tc.raw)
+			assert.Equal(t, tc.want, got)
 		})
 	}
 }

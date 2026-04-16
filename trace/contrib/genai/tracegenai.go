@@ -149,6 +149,11 @@ func genaiRouter(cfg *config, path string) internal.MiddlewareTracer {
 		streaming := isStreamingPath(path)
 		return newGenerateContentTracer(cfg, model, streaming)
 	}
+	if containsEmbedContent(path) {
+		model := extractModelFromPath(path)
+		batch := isBatchEmbedPath(path)
+		return newEmbedContentTracer(cfg, model, batch)
+	}
 	return nil
 }
 
@@ -159,6 +164,20 @@ func containsGenerateContent(path string) bool {
 		strings.Contains(path, "/generateContent") ||
 		strings.Contains(path, ":streamGenerateContent") ||
 		strings.Contains(path, "/streamGenerateContent")
+}
+
+// containsEmbedContent checks if the path is for an embedContent or batchEmbedContents endpoint.
+// Both Gemini API (`:embedContent`) and Vertex AI style paths are covered.
+func containsEmbedContent(path string) bool {
+	return strings.Contains(path, ":embedContent") ||
+		strings.Contains(path, "/embedContent") ||
+		strings.Contains(path, ":batchEmbedContents") ||
+		strings.Contains(path, "/batchEmbedContents")
+}
+
+// isBatchEmbedPath reports whether the path is the batch embeddings endpoint.
+func isBatchEmbedPath(path string) bool {
+	return strings.Contains(path, "batchEmbedContents")
 }
 
 // isStreamingPath checks if the path is for the streaming endpoint
@@ -180,12 +199,17 @@ func extractModelFromPath(path string) string {
 	// Get the model part (after /models/)
 	modelPart := parts[1]
 
-	// Remove the endpoint suffix (handles both streaming and non-streaming)
+	// Remove the endpoint suffix (handles both streaming and non-streaming
+	// plus the embed variants).
 	for _, suffix := range []string{
 		":streamGenerateContent",
 		"/streamGenerateContent",
 		":generateContent",
 		"/generateContent",
+		":batchEmbedContents",
+		"/batchEmbedContents",
+		":embedContent",
+		"/embedContent",
 	} {
 		modelPart = strings.TrimSuffix(modelPart, suffix)
 	}

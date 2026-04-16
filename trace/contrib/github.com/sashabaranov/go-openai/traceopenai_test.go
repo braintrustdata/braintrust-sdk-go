@@ -220,6 +220,46 @@ func TestStreamingChatCompletions(t *testing.T) {
 	assert.Greater(t, metrics["completion_tokens"], float64(0))
 }
 
+func TestSashabaranovEmbeddings(t *testing.T) {
+	client, exporter := setUpTest(t)
+
+	timer := oteltest.NewTimer()
+	resp, err := client.CreateEmbeddings(context.Background(), openai.EmbeddingRequest{
+		Model: openai.SmallEmbedding3,
+		Input: "The quick brown fox jumps over the lazy dog",
+	})
+	timeRange := timer.Tick()
+	require.NoError(t, err)
+	require.NotEmpty(t, resp.Data)
+	require.NotEmpty(t, resp.Data[0].Embedding)
+
+	ts := exporter.FlushOne()
+	ts.AssertInTimeRange(timeRange)
+	ts.AssertNameIs("openai.embeddings.create")
+
+	ts.AssertJSONAttrEquals("braintrust.span_attributes", map[string]any{"type": "llm"})
+
+	inputAttr := ts.Attr("braintrust.input_json")
+	require.NotNil(t, inputAttr)
+	assert.Contains(t, inputAttr.String(), "quick brown fox")
+
+	output := ts.Output()
+	outputMap, ok := output.(map[string]interface{})
+	require.True(t, ok)
+	embLen, ok := outputMap["embedding_length"].(float64)
+	require.True(t, ok)
+	assert.Greater(t, embLen, float64(0))
+
+	metadata := ts.Metadata()
+	assert.Equal(t, "openai", metadata["provider"])
+	assert.Equal(t, "/v1/embeddings", metadata["endpoint"])
+	assert.Contains(t, metadata["model"], "text-embedding-3-small")
+
+	metrics := ts.Metrics()
+	assert.Greater(t, metrics["prompt_tokens"], float64(0))
+	assert.Greater(t, metrics["tokens"], float64(0))
+}
+
 func TestErrorHandling(t *testing.T) {
 	tp, exporter := oteltest.Setup(t)
 
