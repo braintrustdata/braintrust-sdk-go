@@ -137,15 +137,15 @@ func main() {
 	fmt.Println("----------------")
 	longContextExample(ctx, tracer, llm)
 
-	// Example 14: Metadata passing
-	fmt.Println("\n14. Metadata Passing")
-	fmt.Println("--------------------")
-	metadataExample(ctx, tracer, llm)
-
-	// Example 15: Embeddings
-	fmt.Println("\n15. Embeddings")
+	// Example 14: Embeddings
+	fmt.Println("\n14. Embeddings")
 	fmt.Println("--------------")
 	embeddingsExample(ctx, tracer, tp, llm)
+
+	// Example 15: Metadata passing
+	fmt.Println("\n15. Metadata Passing")
+	fmt.Println("--------------------")
+	metadataExample(ctx, tracer, llm)
 
 	// End the root span
 	rootSpan.End()
