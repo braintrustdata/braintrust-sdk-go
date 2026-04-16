@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	einoembed "github.com/cloudwego/eino-ext/components/embedding/openai"
 	einoopenai "github.com/cloudwego/eino-ext/components/model/openai"
 	"github.com/cloudwego/eino/callbacks"
 	"github.com/cloudwego/eino/components"
@@ -224,4 +225,77 @@ func TestIntegration_ToolCalling(t *testing.T) {
 	finalMetrics := finalSpans[0].Metrics()
 	require.NotNil(t, finalMetrics)
 	assert.Greater(t, finalMetrics["tokens"], float64(0))
+}
+
+// --- Embedding integration tests ---
+
+func setUpEmbedderTest(t *testing.T) (*einoembed.Embedder, *Handler, *oteltest.Exporter) {
+	t.Helper()
+
+	tp, exporter := oteltest.Setup(t)
+
+	mode := vcr.GetVCRMode()
+	apiKey := os.Getenv("OPENAI_API_KEY")
+	if mode != vcr.ModeReplay && apiKey == "" {
+		t.Fatal("OPENAI_API_KEY not set (required in record/off mode)")
+	}
+	if apiKey == "" {
+		apiKey = "dummy-openai-key-for-replay"
+	}
+
+	httpClient := vcr.NewHTTPClient(t)
+
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
+
+	e, err := einoembed.NewEmbedder(context.Background(), &einoembed.EmbeddingConfig{
+		Model:      "text-embedding-3-small",
+		APIKey:     apiKey,
+		HTTPClient: httpClient,
+	})
+	require.NoError(t, err)
+
+	return e, handler, exporter
+}
+
+// ctxWithEmbedderHandler registers the handler for embedding callbacks.
+func ctxWithEmbedderHandler(handler *Handler) context.Context {
+	return callbacks.InitCallbacks(context.Background(), &callbacks.RunInfo{
+		Component: components.ComponentOfEmbedding,
+	}, handler)
+}
+
+func TestIntegration_EmbedStrings(t *testing.T) {
+	e, handler, exporter := setUpEmbedderTest(t)
+
+	ctx := ctxWithEmbedderHandler(handler)
+	vectors, err := e.EmbedStrings(ctx, []string{
+		"The quick brown fox jumps over the lazy dog",
+		"braintrust tracing",
+	})
+	require.NoError(t, err)
+	handler.Wait()
+
+	require.Len(t, vectors, 2)
+	assert.Greater(t, len(vectors[0]), 0)
+
+	spans := exporter.Flush()
+	require.Len(t, spans, 1)
+	span := spans[0]
+
+	span.AssertJSONAttrEquals("braintrust.span_attributes", map[string]any{"type": "llm"})
+
+	inp := span.Input()
+	arr, ok := inp.([]interface{})
+	require.True(t, ok)
+	require.Len(t, arr, 2)
+	assert.Equal(t, "The quick brown fox jumps over the lazy dog", arr[0])
+
+	out := span.Output()
+	outMap, ok := out.(map[string]interface{})
+	require.True(t, ok)
+	assert.Equal(t, float64(len(vectors[0])), outMap["embedding_length"])
+	assert.Equal(t, float64(2), outMap["embeddings_count"])
+
+	metadata := span.Metadata()
+	assert.Equal(t, "text-embedding-3-small", metadata["model"])
 }

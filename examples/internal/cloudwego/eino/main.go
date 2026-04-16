@@ -22,6 +22,7 @@ import (
 	"go.opentelemetry.io/otel"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
+	einoembed "github.com/cloudwego/eino-ext/components/embedding/openai"
 	einoclaude "github.com/cloudwego/eino-ext/components/model/claude"
 	einoopenai "github.com/cloudwego/eino-ext/components/model/openai"
 	"github.com/cloudwego/eino/callbacks"
@@ -223,6 +224,26 @@ func main() {
 	} else {
 		fmt.Printf("Model answered directly: %s\n", firstResp.Content)
 	}
+
+	// Example 6: OpenAI embeddings
+	fmt.Println("\n6. OpenAI embeddings")
+	fmt.Println("--------------------")
+	embedder, err := einoembed.NewEmbedder(ctx, &einoembed.EmbeddingConfig{
+		APIKey: os.Getenv("OPENAI_API_KEY"),
+		Model:  "text-embedding-3-small",
+	})
+	if err != nil {
+		log.Fatalf("embedder init failed: %v", err)
+	}
+	vectors, err := embedder.EmbedStrings(ctx, []string{
+		"The quick brown fox jumps over the lazy dog",
+		"braintrust tracing",
+	})
+	if err != nil {
+		log.Fatalf("EmbedStrings failed: %v", err)
+	}
+	fmt.Printf("Embedded %d texts, %d dims each\n", len(vectors), len(vectors[0]))
+	handler.Wait()
 
 	fmt.Printf("\nView traces: %s\n", bt.Permalink(rootSpan))
 }
