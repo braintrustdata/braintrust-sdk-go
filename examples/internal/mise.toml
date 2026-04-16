@@ -1,0 +1,5 @@
+[env]
+# Internal examples are standalone modules with replace directives that conflict
+# with the repo root's go.work. Disable workspace mode so go commands resolve
+# dependencies from each example's own go.mod instead.
+GOWORK = "off"

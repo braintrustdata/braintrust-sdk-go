@@ -3,7 +3,7 @@ module github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
 go 1.26.1
 
 require (
-	github.com/braintrustdata/braintrust-sdk-go v0.4.0
+	github.com/braintrustdata/braintrust-sdk-go v0.4.1
 	github.com/firebase/genkit/go v1.5.0
 	github.com/openai/openai-go v1.12.0
 	github.com/stretchr/testify v1.11.1

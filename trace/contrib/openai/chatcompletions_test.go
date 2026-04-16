@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/openai/openai-go"
+	"github.com/openai/openai-go/shared"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/codes"
@@ -1164,4 +1165,42 @@ func TestMultipleMessagesIssue33(t *testing.T) {
 
 	assert.Equal("user", messages[3]["role"])
 	assert.Equal("What is the population?", messages[3]["content"])
+}
+
+// TestChatCompletionsReasoningParams verifies that reasoning model parameters
+// (max_completion_tokens, reasoning_effort) are captured in span metadata (issue #63).
+func TestChatCompletionsReasoningParams(t *testing.T) {
+	client, _, exporter := setUpTest(t)
+	assert := assert.New(t)
+	require := require.New(t)
+
+	params := openai.ChatCompletionNewParams{
+		Messages: []openai.ChatCompletionMessageParamUnion{
+			openai.UserMessage("What is the capital of France?"),
+		},
+		Model:               "o4-mini",
+		MaxCompletionTokens: openai.Int(200),
+		ReasoningEffort:     shared.ReasoningEffortLow,
+	}
+
+	timer := oteltest.NewTimer()
+	resp, err := client.Chat.Completions.New(context.Background(), params)
+	timeRange := timer.Tick()
+	require.NoError(err)
+	require.NotNil(resp)
+
+	ts := exporter.FlushOne()
+
+	ts.AssertInTimeRange(timeRange)
+	ts.AssertNameIs("Chat Completion")
+
+	metadata := ts.Metadata()
+	assert.Equal("openai", metadata["provider"])
+	assert.Equal("/v1/chat/completions", metadata["endpoint"])
+
+	// Verify max_completion_tokens is captured
+	assert.Equal(200.0, metadata["max_completion_tokens"], "max_completion_tokens should be captured in metadata")
+
+	// Verify reasoning_effort is captured
+	assert.Equal("low", metadata["reasoning_effort"], "reasoning_effort should be captured in metadata")
 }

@@ -20,6 +20,8 @@ import (
 	traceopenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"
 )
 
+var tracer = otel.Tracer("openai-v2-examples")
+
 func main() {
 	tp := trace.NewTracerProvider()
 	defer tp.Shutdown(context.Background()) //nolint:errcheck
@@ -35,32 +37,81 @@ func main() {
 
 	client := openai.NewClient(option.WithMiddleware(traceopenai.NewMiddleware()))
 
-	// Create a root span to wrap all examples
-	tracer := otel.Tracer("openai-v2-examples")
 	ctx, rootSpan := tracer.Start(context.Background(), "examples/internal/openai-v2/main.go")
 	defer rootSpan.End()
 
-	// Responses API with reasoning (for reasoning models like GPT-5)
-	fmt.Println("Responses API with reasoning...")
-	reasonResp, err := client.Responses.New(ctx, responses.ResponseNewParams{
+	for _, example := range []struct {
+		name string
+		fn   func(context.Context, openai.Client) error
+	}{
+		{"responses-reasoning", responsesReasoning},
+		{"chat-reasoning", chatReasoning},
+		{"chat-completion", chatCompletion},
+		{"chat-multi-turn", chatMultiTurn},
+		{"chat-streaming", chatStreaming},
+		{"chat-tools", chatTools},
+		{"chat-streaming-tools", chatStreamingTools},
+		{"responses", responsesAPI},
+		{"responses-structured-output", responsesStructuredOutput},
+		{"responses-streaming", responsesStreaming},
+		{"conversations", conversationsAPI},
+		{"models-list", modelsList},
+		{"chat-vision", chatVision},
+	} {
+		fmt.Printf("%s...\n", example.name)
+		exampleCtx, span := tracer.Start(ctx, example.name)
+		if err := example.fn(exampleCtx, client); err != nil {
+			span.End()
+			log.Fatal(err)
+		}
+		span.End()
+	}
+
+	fmt.Println("\nAll OpenAI v2 features tested!")
+	fmt.Printf("View trace: %s\n", bt.Permalink(rootSpan))
+}
+
+func responsesReasoning(ctx context.Context, client openai.Client) error {
+	resp, err := client.Responses.New(ctx, responses.ResponseNewParams{
 		Input: responses.ResponseNewParamsInputUnion{OfString: openai.String("What is the capital of France?")},
-		Model: "gpt-5", // Use GPT-5 reasoning model
+		Model: "gpt-5",
 		Reasoning: shared.ReasoningParam{
 			Effort:  shared.ReasoningEffortLow,
 			Summary: shared.ReasoningSummaryAuto,
 		},
 	})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	output := reasonResp.OutputText()
+	output := resp.OutputText()
 	if len(output) > 40 {
 		output = output[:40] + "..."
 	}
-	fmt.Printf("✓ %s (reasoning params sent)\n", output)
+	fmt.Printf("  %s\n", output)
+	return nil
+}
 
-	// Chat completion
-	fmt.Println("Chat completion...")
+func chatReasoning(ctx context.Context, client openai.Client) error {
+	resp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
+		Messages: []openai.ChatCompletionMessageParamUnion{
+			openai.UserMessage("What is the capital of France?"),
+		},
+		Model:               "o4-mini",
+		MaxCompletionTokens: openai.Int(200),
+		ReasoningEffort:     shared.ReasoningEffortLow,
+	})
+	if err != nil {
+		return err
+	}
+	output := resp.Choices[0].Message.Content
+	if len(output) > 40 {
+		output = output[:40] + "..."
+	}
+	fmt.Printf("  %s\n", output)
+	return nil
+}
+
+func chatCompletion(ctx context.Context, client openai.Client) error {
 	resp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage("Say hello"),
@@ -68,13 +119,14 @@ func main() {
 		Model: openai.ChatModelGPT4oMini,
 	})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	fmt.Printf("✓ %s\n", resp.Choices[0].Message.Content)
+	fmt.Printf("  %s\n", resp.Choices[0].Message.Content)
+	return nil
+}
 
-	// Multiple messages (conversation history)
-	fmt.Println("Multiple messages...")
-	multiResp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
+func chatMultiTurn(ctx context.Context, client openai.Client) error {
+	resp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.SystemMessage("You are a helpful assistant."),
 			openai.UserMessage("What is the capital of France?"),
@@ -84,33 +136,32 @@ func main() {
 		Model: openai.ChatModelGPT4oMini,
 	})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	fmt.Printf("✓ %s\n", multiResp.Choices[0].Message.Content)
+	fmt.Printf("  %s\n", resp.Choices[0].Message.Content)
+	return nil
+}
 
-	// Streaming chat completion
-	fmt.Println("Streaming...")
+func chatStreaming(ctx context.Context, client openai.Client) error {
 	stream := client.Chat.Completions.NewStreaming(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage("Count 1 to 3"),
 		},
 		Model: openai.ChatModelGPT4oMini,
 	})
-	fmt.Print("✓ ")
+	fmt.Print("  ")
 	for stream.Next() {
 		chunk := stream.Current()
 		if len(chunk.Choices) > 0 && chunk.Choices[0].Delta.Content != "" {
 			fmt.Print(chunk.Choices[0].Delta.Content)
 		}
 	}
-	if err := stream.Err(); err != nil {
-		log.Fatal(err)
-	}
 	fmt.Println()
+	return stream.Err()
+}
 
-	// Chat with tools
-	fmt.Println("Chat with tools...")
-	toolResp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
+func chatTools(ctx context.Context, client openai.Client) error {
+	resp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage("What's the weather in San Francisco?"),
 		},
@@ -133,18 +184,19 @@ func main() {
 		},
 	})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	if len(toolResp.Choices) > 0 && len(toolResp.Choices[0].Message.ToolCalls) > 0 {
-		toolCall := toolResp.Choices[0].Message.ToolCalls[0]
-		fmt.Printf("✓ Tool call: %s(%s)\n", toolCall.Function.Name, toolCall.Function.Arguments)
+	if len(resp.Choices) > 0 && len(resp.Choices[0].Message.ToolCalls) > 0 {
+		tc := resp.Choices[0].Message.ToolCalls[0]
+		fmt.Printf("  Tool call: %s(%s)\n", tc.Function.Name, tc.Function.Arguments)
 	} else {
-		fmt.Printf("✓ Response: %s\n", toolResp.Choices[0].Message.Content)
+		fmt.Printf("  %s\n", resp.Choices[0].Message.Content)
 	}
+	return nil
+}
 
-	// Streaming with tools
-	fmt.Println("Streaming with tools...")
-	toolStream := client.Chat.Completions.NewStreaming(ctx, openai.ChatCompletionNewParams{
+func chatStreamingTools(ctx context.Context, client openai.Client) error {
+	stream := client.Chat.Completions.NewStreaming(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage("What's the weather in Tokyo?"),
 		},
@@ -166,84 +218,116 @@ func main() {
 			}),
 		},
 	})
-	var toolCallName string
-	var toolCallArgs string
-	for toolStream.Next() {
-		chunk := toolStream.Current()
+	var name, args string
+	for stream.Next() {
+		chunk := stream.Current()
 		if len(chunk.Choices) > 0 && len(chunk.Choices[0].Delta.ToolCalls) > 0 {
 			tc := chunk.Choices[0].Delta.ToolCalls[0]
 			if tc.Function.Name != "" {
-				toolCallName = tc.Function.Name
+				name = tc.Function.Name
 			}
 			if tc.Function.Arguments != "" {
-				toolCallArgs += tc.Function.Arguments
+				args += tc.Function.Arguments
 			}
 		}
 	}
-	if err := toolStream.Err(); err != nil {
-		log.Fatal(err)
+	if err := stream.Err(); err != nil {
+		return err
 	}
-	if toolCallName != "" {
-		fmt.Printf("✓ Streamed tool call: %s(%s)\n", toolCallName, toolCallArgs)
+	if name != "" {
+		fmt.Printf("  Streamed tool call: %s(%s)\n", name, args)
 	}
+	return nil
+}
 
-	// Responses API
-	fmt.Println("Responses API...")
-	respAPI, err := client.Responses.New(ctx, responses.ResponseNewParams{
+func responsesAPI(ctx context.Context, client openai.Client) error {
+	resp, err := client.Responses.New(ctx, responses.ResponseNewParams{
 		Input: responses.ResponseNewParamsInputUnion{OfString: openai.String("Recommend pizza in NYC")},
 		Model: openai.ChatModelGPT4,
 	})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	output7 := respAPI.OutputText()
-	if len(output7) > 50 {
-		output7 = output7[:50] + "..."
+	output := resp.OutputText()
+	if len(output) > 50 {
+		output = output[:50] + "..."
 	}
-	fmt.Printf("✓ %s\n", output7)
+	fmt.Printf("  %s\n", output)
+	return nil
+}
 
-	// Streaming responses
-	fmt.Println("Streaming responses...")
-	respStream := client.Responses.NewStreaming(ctx, responses.ResponseNewParams{
+func responsesStructuredOutput(ctx context.Context, client openai.Client) error {
+	resp, err := client.Responses.New(ctx, responses.ResponseNewParams{
+		Input: responses.ResponseNewParamsInputUnion{OfString: openai.String("What is the capital of France? Return as JSON with fields: city, country, population.")},
+		Model: openai.ChatModelGPT4oMini,
+		Text: responses.ResponseTextConfigParam{
+			Format: responses.ResponseFormatTextConfigParamOfJSONSchema("capital_info", map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"city":       map[string]any{"type": "string"},
+					"country":    map[string]any{"type": "string"},
+					"population": map[string]any{"type": "number"},
+				},
+				"required":             []string{"city", "country", "population"},
+				"additionalProperties": false,
+			}),
+		},
+	})
+	if err != nil {
+		return err
+	}
+	output := resp.OutputText()
+	if len(output) > 80 {
+		output = output[:80] + "..."
+	}
+	fmt.Printf("  %s\n", output)
+	return nil
+}
+
+func responsesStreaming(ctx context.Context, client openai.Client) error {
+	stream := client.Responses.NewStreaming(ctx, responses.ResponseNewParams{
 		Model: openai.ChatModelGPT4,
 		Input: responses.ResponseNewParamsInputUnion{OfString: openai.String("Quick coffee rec")},
 	})
 	var final string
-	for respStream.Next() {
-		data := respStream.Current()
+	for stream.Next() {
+		data := stream.Current()
 		if data.Text != "" {
 			final = data.Text
 		}
 	}
-	if err := respStream.Err(); err != nil {
-		log.Fatal(err)
+	if err := stream.Err(); err != nil {
+		return err
 	}
 	if len(final) > 30 {
 		final = final[:30] + "..."
 	}
-	fmt.Printf("✓ %s\n", final)
+	fmt.Printf("  %s\n", final)
+	return nil
+}
 
-	// Conversations API (new in v2)
-	fmt.Println("Conversations API...")
+func conversationsAPI(ctx context.Context, client openai.Client) error {
 	conv, err := client.Conversations.New(ctx, conversations.ConversationNewParams{})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	fmt.Printf("✓ Conversation created: %s\n", conv.ID)
+	fmt.Printf("  Conversation created: %s\n", conv.ID)
+	return nil
+}
 
-	// Models.List (untraced endpoint)
-	fmt.Println("Models.List...")
+func modelsList(ctx context.Context, client openai.Client) error {
 	models, err := client.Models.List(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	fmt.Printf("✓ Models.List succeeded: %d models\n", len(models.Data))
+	fmt.Printf("  %d models\n", len(models.Data))
+	return nil
+}
 
-	// Vision - image with text
-	fmt.Println("Vision with image...")
+func chatVision(ctx context.Context, client openai.Client) error {
 	// 100x100 red square PNG (base64 encoded)
 	redSquare := "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAIAAAD/gAIDAAABFUlEQVR4nO3OUQkAIABEsetfWiv4Nx4IC7Cd7XvkByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIReeLesrH9s1agAAAABJRU5ErkJggg=="
-	visionResp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
+	resp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage([]openai.ChatCompletionContentPartUnionParam{
 				openai.TextContentPart("What color is this image?"),
@@ -255,10 +339,8 @@ func main() {
 		Model: openai.ChatModelGPT4o,
 	})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	fmt.Printf("✓ %s\n", visionResp.Choices[0].Message.Content)
-
-	fmt.Println("\n✅ All OpenAI features tested!")
-	fmt.Printf("View trace: %s\n", bt.Permalink(rootSpan))
+	fmt.Printf("  %s\n", resp.Choices[0].Message.Content)
+	return nil
 }
