@@ -499,6 +499,84 @@ func TestStreamingWithThinking(t *testing.T) {
 	assert.NotNil(t, metadata["thinking"])
 }
 
+// TestStreamingWithCitations tests tracing with streaming and document citations enabled.
+func TestStreamingWithCitations(t *testing.T) {
+	client, exporter := setUpTest(t)
+
+	document := anthropic.NewDocumentBlock(anthropic.PlainTextSourceParam{
+		Data: "France's capital is Paris. Paris lies on the Seine River. The Louvre Museum is also in Paris.",
+	})
+	document.OfDocument.Title = anthropic.String("France facts")
+	document.OfDocument.Citations.Enabled = anthropic.Bool(true)
+
+	timer := oteltest.NewTimer()
+	ctx := context.Background()
+	stream := client.Messages.NewStreaming(ctx, anthropic.MessageNewParams{
+		Model:     anthropic.ModelClaudeHaiku4_5,
+		MaxTokens: 256,
+		Messages: []anthropic.MessageParam{
+			anthropic.NewUserMessage(
+				document,
+				anthropic.NewTextBlock("Use only the provided document. In one sentence, what is the capital of France? Include citations in the answer."),
+			),
+		},
+	})
+
+	var responseText string
+	var citationDeltas int
+
+	for stream.Next() {
+		event := stream.Current()
+		switch eventVariant := event.AsAny().(type) {
+		case anthropic.ContentBlockDeltaEvent:
+			switch deltaVariant := eventVariant.Delta.AsAny().(type) {
+			case anthropic.TextDelta:
+				responseText += deltaVariant.Text
+			case anthropic.CitationsDelta:
+				citationDeltas++
+			}
+		}
+	}
+	require.NoError(t, stream.Err())
+	timeRange := timer.Tick()
+
+	require.NotEmpty(t, responseText)
+	require.Greater(t, citationDeltas, 0, "expected citations_delta events in streaming response")
+
+	span := exporter.FlushOne()
+	assertSpanValid(t, span, timeRange)
+
+	output := span.Output()
+	messages, ok := output.([]any)
+	require.True(t, ok, "expected output to be a message array")
+	require.Len(t, messages, 1)
+
+	message, ok := messages[0].(map[string]any)
+	require.True(t, ok, "expected first output item to be an assistant message")
+
+	content, ok := message["content"].([]any)
+	require.True(t, ok, "expected assistant message content to be an array")
+	require.NotEmpty(t, content)
+
+	foundTextBlockWithCitations := false
+	for _, blockAny := range content {
+		block, ok := blockAny.(map[string]any)
+		if !ok {
+			continue
+		}
+		if block["type"] != "text" {
+			continue
+		}
+		citations, ok := block["citations"].([]any)
+		if ok && len(citations) > 0 {
+			foundTextBlockWithCitations = true
+			break
+		}
+	}
+
+	assert.True(t, foundTextBlockWithCitations, "expected streamed span output to preserve citations")
+}
+
 // TestMultipleMessages tests tracing with multiple messages (conversation history)
 func TestMultipleMessages(t *testing.T) {
 	client, exporter := setUpTest(t)

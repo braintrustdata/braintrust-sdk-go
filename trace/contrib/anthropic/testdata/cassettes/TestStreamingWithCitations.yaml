@@ -1,0 +1,130 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 464
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"max_tokens":256,"messages":[{"content":[{"source":{"data":"France''s capital is Paris. Paris lies on the Seine River. The Louvre Museum is also in Paris.","media_type":"text/plain","type":"text"},"title":"France facts","citations":{"enabled":true},"type":"document"},{"text":"Use only the provided document. In one sentence, what is the capital of France? Include citations in the answer.","type":"text"}],"role":"user"}],"model":"claude-haiku-4-5","stream":true}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Anthropic-Version:
+                - "2023-06-01"
+            Content-Type:
+                - application/json
+            User-Agent:
+                - Anthropic/Go 1.23.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 1.23.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.26.2
+        url: https://api.anthropic.com/v1/messages
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |+
+            event: message_start
+            data: {"type":"message_start","message":{"model":"claude-haiku-4-5-20251001","id":"msg_01XaNCLzs28h5jpZUQvQQEew","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"stop_details":null,"usage":{"input_tokens":632,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":5,"service_tier":"standard","inference_geo":"not_available"}}               }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":0,"content_block":{"citations":[],"type":"text","text":""}               }
+
+            event: ping
+            data: {"type": "ping"}
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"citations_delta","citation":{"type":"char_location","cited_text":"France's capital is Paris. ","document_index":0,"document_title":"France facts","start_char_index":0,"end_char_index":27}}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"France's capital is Paris."}          }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":0   }
+
+            event: message_delta
+            data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null,"stop_details":null},"usage":{"input_tokens":632,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":25}          }
+
+            event: message_stop
+            data: {"type":"message_stop"          }
+
+        headers:
+            Anthropic-Ratelimit-Input-Tokens-Limit:
+                - "4000000"
+            Anthropic-Ratelimit-Input-Tokens-Remaining:
+                - "4000000"
+            Anthropic-Ratelimit-Input-Tokens-Reset:
+                - "2026-04-16T17:11:21Z"
+            Anthropic-Ratelimit-Output-Tokens-Limit:
+                - "800000"
+            Anthropic-Ratelimit-Output-Tokens-Remaining:
+                - "800000"
+            Anthropic-Ratelimit-Output-Tokens-Reset:
+                - "2026-04-16T17:11:21Z"
+            Anthropic-Ratelimit-Requests-Limit:
+                - "20000"
+            Anthropic-Ratelimit-Requests-Remaining:
+                - "19999"
+            Anthropic-Ratelimit-Requests-Reset:
+                - "2026-04-16T17:11:21Z"
+            Anthropic-Ratelimit-Tokens-Limit:
+                - "4800000"
+            Anthropic-Ratelimit-Tokens-Remaining:
+                - "4800000"
+            Anthropic-Ratelimit-Tokens-Reset:
+                - "2026-04-16T17:11:21Z"
+            Cache-Control:
+                - no-cache
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - 9ed4cf01acb6ebba-YYZ
+            Content-Security-Policy:
+                - default-src 'none'; frame-ancestors 'none'
+            Content-Type:
+                - text/event-stream; charset=utf-8
+            Date:
+                - Thu, 16 Apr 2026 17:11:22 GMT
+            Request-Id:
+                - req_011Ca7pdnK44yg2Toq7KK6Jg
+            Server:
+                - cloudflare
+            Server-Timing:
+                - x-originResponse;dur=2341
+            Set-Cookie:
+                - _cfuvid=aoUjC1E0Wz62VDd2jFpADsIUUQo.dK2s.IW4u7qJgOE-1776359480.5852005-1.0.1.1-r1Edc3m9pVOTxB1vr5U8QgX_L5f9ftUDLMB4ha8mepw; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.anthropic.com
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            Vary:
+                - Accept-Encoding
+            X-Envoy-Upstream-Service-Time:
+                - "2339"
+            X-Robots-Tag:
+                - none
+        status: 200 OK
+        code: 200
+        duration: 2.540096459s

@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
@@ -163,6 +164,56 @@ func (a *AnthropicBot) streaming(ctx context.Context) error {
 	return nil
 }
 
+// streamingCitations demonstrates streaming with document citations enabled.
+func (a *AnthropicBot) streamingCitations(ctx context.Context) error {
+	ctx, span := tracer.Start(ctx, "streaming-citations")
+	defer span.End()
+
+	fmt.Println("\n=== Example 3b: Streaming Citations ===")
+
+	document := anthropic.NewDocumentBlock(anthropic.PlainTextSourceParam{
+		Data: "France's capital is Paris. Paris lies on the Seine River. The Louvre Museum is also in Paris.",
+	})
+	document.OfDocument.Title = anthropic.String("France facts")
+	document.OfDocument.Citations.Enabled = anthropic.Bool(true)
+
+	stream := a.client.Messages.NewStreaming(ctx, anthropic.MessageNewParams{
+		Model:     anthropic.ModelClaudeHaiku4_5,
+		MaxTokens: 256,
+		Messages: []anthropic.MessageParam{
+			anthropic.NewUserMessage(
+				document,
+				anthropic.NewTextBlock("Use only the provided document. In one sentence, what is the capital of France? Include citations in the answer."),
+			),
+		},
+	})
+
+	var response strings.Builder
+	citationCount := 0
+
+	for stream.Next() {
+		event := stream.Current()
+		switch eventVariant := event.AsAny().(type) {
+		case anthropic.ContentBlockDeltaEvent:
+			switch deltaVariant := eventVariant.Delta.AsAny().(type) {
+			case anthropic.TextDelta:
+				response.WriteString(deltaVariant.Text)
+			case anthropic.CitationsDelta:
+				citationCount++
+				fmt.Printf("  Citation %d: %s (%s)\n", citationCount, deltaVariant.Citation.CitedText, deltaVariant.Citation.Type)
+			}
+		}
+	}
+
+	if err := stream.Err(); err != nil {
+		return fmt.Errorf("streaming citations error: %v", err)
+	}
+
+	fmt.Printf("  Response: %s\n", response.String())
+	fmt.Printf("  Total citations: %d\n", citationCount)
+	return nil
+}
+
 // extendedThinking demonstrates Claude's extended thinking capability
 func (a *AnthropicBot) extendedThinking(ctx context.Context) error {
 	ctx, span := tracer.Start(ctx, "extended-thinking")
@@ -301,7 +352,7 @@ func main() {
 	// ======================
 	fmt.Println("\nAnthropic Messages Examples")
 	fmt.Println("===========================")
-	fmt.Println("Demonstrating: system prompts, tools, parameters, streaming, vision & non-streaming")
+	fmt.Println("Demonstrating: system prompts, tools, parameters, streaming, citations, vision & non-streaming")
 
 	bot := newAnthropicBot(client)
 
@@ -314,6 +365,10 @@ func main() {
 	}
 
 	if err := bot.streaming(ctx); err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+
+	if err := bot.streamingCitations(ctx); err != nil {
 		log.Fatalf("Error: %v", err)
 	}
 

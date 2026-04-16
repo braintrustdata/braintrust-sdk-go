@@ -259,6 +259,13 @@ func (mt *messagesTracer) postprocessStreamingResults(allResults []map[string]an
 						builders[idx].WriteString(partialJSON)
 						contentBlocks[idx]["type"] = "tool_use"
 					}
+				case "citations_delta":
+					// Accumulate citations for text blocks
+					if citation, ok := delta["citation"].(map[string]any); ok {
+						citations, _ := contentBlocks[idx]["citations"].([]any)
+						contentBlocks[idx]["citations"] = append(citations, citation)
+						contentBlocks[idx]["type"] = "text"
+					}
 				case "thinking_delta":
 					// Accumulate thinking text for extended thinking blocks
 					if thinking, ok := delta["thinking"].(string); ok {
