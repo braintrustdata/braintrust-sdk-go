@@ -55,7 +55,7 @@ type Config struct {
 	SpanFilterFuncs        []SpanFilterFunc
 
 	// Debug
-	EnableConsoleLog bool
+	EnableTraceConsoleLog bool
 
 	// Test override: provide custom exporter (e.g., memory exporter for tests)
 	Exporter sdktrace.SpanExporter
@@ -154,7 +154,7 @@ func AddSpanProcessor(tp *sdktrace.TracerProvider, session *auth.Session, cfg Co
 	log.Debug("registered Braintrust span processor")
 
 	// Add console log processor if requested
-	if cfg.EnableConsoleLog {
+	if cfg.EnableTraceConsoleLog {
 		consoleExporter, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
 		if err == nil {
 			tp.RegisterSpanProcessor(sdktrace.NewBatchSpanProcessor(consoleExporter))

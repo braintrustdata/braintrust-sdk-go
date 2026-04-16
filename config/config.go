@@ -24,6 +24,7 @@ type Config struct {
 	// Tracing configuration
 	FilterAISpans          bool
 	EnableBuiltinAdkTraces bool // if false (default), drop Google ADK native spans to avoid duplicates
+	EnableTraceConsoleLog  bool // log traces to stdout for debugging
 	SpanFilterFuncs        []SpanFilterFunc
 	Exporter               trace.SpanExporter
 
@@ -45,6 +46,7 @@ type SpanFilterFunc func(span trace.ReadOnlySpan) int
 //   - BRAINTRUST_DEFAULT_PROJECT_ID: Default project ID
 //   - BRAINTRUST_DEFAULT_PROJECT: Default project name (default: "default-go-project")
 //   - BRAINTRUST_BLOCKING_LOGIN: Enable blocking login (default: false)
+//   - BRAINTRUST_ENABLE_TRACE_CONSOLE_LOG: Log traces to stdout for debugging (default: false)
 //   - BRAINTRUST_OTEL_FILTER_AI_SPANS: Filter to keep only AI-related spans (default: false)
 //   - BRAINTRUST_OTEL_ENABLE_BUILTIN_ADK_TRACES: Enable exporting spans from Google ADK's built-in telemetry (default: false)
 func FromEnv() *Config {
@@ -57,6 +59,7 @@ func FromEnv() *Config {
 		DefaultProjectName:     getEnvString("BRAINTRUST_DEFAULT_PROJECT", "default-go-project"),
 		BlockingLogin:          getEnvBool("BRAINTRUST_BLOCKING_LOGIN", false),
 		FilterAISpans:          getEnvBool("BRAINTRUST_OTEL_FILTER_AI_SPANS", false),
+		EnableTraceConsoleLog:  getEnvBool("BRAINTRUST_ENABLE_TRACE_CONSOLE_LOG", false),
 		EnableBuiltinAdkTraces: getEnvBool("BRAINTRUST_OTEL_ENABLE_BUILTIN_ADK_TRACES", false),
 	}
 }

@@ -27,6 +27,7 @@ func TestFromEnv_Defaults(t *testing.T) {
 	assert.Equal(t, "default-go-project", cfg.DefaultProjectName)
 	assert.False(t, cfg.BlockingLogin)
 	assert.False(t, cfg.FilterAISpans)
+	assert.False(t, cfg.EnableTraceConsoleLog)
 }
 
 func TestFromEnv_LoadsEnvironmentVariables(t *testing.T) {
@@ -39,6 +40,7 @@ func TestFromEnv_LoadsEnvironmentVariables(t *testing.T) {
 	t.Setenv("BRAINTRUST_DEFAULT_PROJECT", "my-project")
 	t.Setenv("BRAINTRUST_BLOCKING_LOGIN", "true")
 	t.Setenv("BRAINTRUST_OTEL_FILTER_AI_SPANS", "true")
+	t.Setenv("BRAINTRUST_ENABLE_TRACE_CONSOLE_LOG", "true")
 
 	cfg := FromEnv()
 
@@ -50,6 +52,7 @@ func TestFromEnv_LoadsEnvironmentVariables(t *testing.T) {
 	assert.Equal(t, "my-project", cfg.DefaultProjectName)
 	assert.True(t, cfg.BlockingLogin)
 	assert.True(t, cfg.FilterAISpans)
+	assert.True(t, cfg.EnableTraceConsoleLog)
 }
 
 func TestFromEnv_TrimsWhitespace(t *testing.T) {
