@@ -152,10 +152,13 @@ func genaiRouter(cfg *config, path string) internal.MiddlewareTracer {
 	return nil
 }
 
-// containsGenerateContent checks if the path is for a generateContent or streamGenerateContent endpoint
+// containsGenerateContent checks if the path is for a generateContent or streamGenerateContent endpoint.
+// We require a delimiter (: or /) before the method name to avoid matching unrelated endpoints.
 func containsGenerateContent(path string) bool {
-	return strings.Contains(path, "generateContent") ||
-		strings.Contains(path, "GenerateContent")
+	return strings.Contains(path, ":generateContent") ||
+		strings.Contains(path, "/generateContent") ||
+		strings.Contains(path, ":streamGenerateContent") ||
+		strings.Contains(path, "/streamGenerateContent")
 }
 
 // isStreamingPath checks if the path is for the streaming endpoint

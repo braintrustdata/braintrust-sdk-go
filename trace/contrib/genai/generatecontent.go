@@ -205,7 +205,11 @@ func (gt *generateContentTracer) postprocessStreamingResults(allResults []map[st
 		return nil
 	}
 
-	// Aggregate text parts from all candidates across chunks
+	// Aggregate text parts from all candidates across chunks.
+	// NOTE: We only aggregate candidate index 0 from each chunk. If the API
+	// ever returns multiple candidate indices in a streaming response, their
+	// content will be silently dropped. The non-streaming path passes through
+	// all candidates as-is.
 	var textParts []string
 	var finishReason any
 	var role string
