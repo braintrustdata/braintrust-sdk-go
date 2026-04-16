@@ -133,7 +133,6 @@ func (g *GeminiBot) thinking(ctx context.Context) error {
 			ThinkingConfig: &genai.ThinkingConfig{
 				IncludeThoughts: true,
 				ThinkingBudget:  &thinkingBudget,
-				ThinkingLevel:   genai.ThinkingLevelMedium,
 			},
 			Temperature: genai.Ptr[float32](0.2),
 		},
