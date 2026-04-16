@@ -16,10 +16,10 @@ Unlike the customer-facing examples in the parent directory, these examples are 
 
 Comprehensive examples testing all features for each AI provider:
 
-- **[anthropic/](anthropic/)** - All Anthropic features (messages, tools, streaming, thinking, vision)
+- **[anthropic/](anthropic/)** - All Anthropic features (messages, tools, streaming, citations, thinking, vision)
 - **[openai-v1/](openai-v1/)** - All OpenAI v1 features (chat, streaming, tools, vision)
 - **[openai-v2/](openai-v2/)** - All OpenAI v2 features (Responses API, reasoning, conversations)
-- **[genai/](genai/)** - All Gemini features (text, system instruction, multi-turn, streaming, functions, safety, JSON mode, multimodal)
+- **[genai/](genai/)** - All Gemini features (text, system instruction, multi-turn, thinking, streaming, functions, safety, JSON mode, multimodal)
 - **[genkit/](genkit/)** - Genkit generation with manual middleware, config, and streaming coverage
 - **[langchaingo/](langchaingo/)** - All LangChainGo features (simple, multi-turn, chains, tools, agents, retriever, streaming, system prompt, temperature, max tokens, prefill, stop sequences, long context, metadata)
 

@@ -1,11 +1,16 @@
 module example.com/genai
 
-go 1.26.1
+go 1.24.4
+
+toolchain go1.26.1
 
 replace github.com/braintrustdata/braintrust-sdk-go => ../../..
 
+replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai => ../../../trace/contrib/genai
+
 require (
-	github.com/braintrustdata/braintrust-sdk-go v0.0.12
+	github.com/braintrustdata/braintrust-sdk-go v0.4.1
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.4.1
 	go.opentelemetry.io/otel v1.38.0
 	go.opentelemetry.io/otel/sdk v1.38.0
 	google.golang.org/genai v1.41.0
@@ -25,7 +30,7 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.6 // indirect
 	github.com/googleapis/gax-go/v2 v2.15.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.1 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.63.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.35.0 // indirect
@@ -33,7 +38,7 @@ require (
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.36.0 // indirect
 	go.opentelemetry.io/otel/metric v1.38.0 // indirect
 	go.opentelemetry.io/otel/trace v1.38.0 // indirect
-	go.opentelemetry.io/proto/otlp v1.5.0 // indirect
+	go.opentelemetry.io/proto/otlp v1.7.0 // indirect
 	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect

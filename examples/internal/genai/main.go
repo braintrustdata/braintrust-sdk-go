@@ -18,6 +18,13 @@ import (
 
 var tracer = otel.Tracer("genai-examples")
 
+func geminiAPIKey() string {
+	if apiKey := os.Getenv("GOOGLE_API_KEY"); apiKey != "" {
+		return apiKey
+	}
+	return os.Getenv("GEMINI_API_KEY")
+}
+
 // GeminiBot demonstrates using Google Gemini API with tracing
 type GeminiBot struct {
 	client *genai.Client
@@ -110,12 +117,41 @@ func (g *GeminiBot) multiTurnConversation(ctx context.Context) error {
 	return nil
 }
 
+// thinking demonstrates Gemini 2.5 reasoning / ThinkingConfig support
+func (g *GeminiBot) thinking(ctx context.Context) error {
+	ctx, span := tracer.Start(ctx, "thinking")
+	defer span.End()
+
+	fmt.Println("\n=== Example 4: Thinking / Reasoning ===")
+
+	thinkingBudget := int32(512)
+	resp, err := g.client.Models.GenerateContent(
+		ctx,
+		"gemini-2.5-flash",
+		genai.Text("Look at this sequence: 2, 6, 12, 20, 30. What is the formula for the nth term? Answer briefly."),
+		&genai.GenerateContentConfig{
+			ThinkingConfig: &genai.ThinkingConfig{
+				IncludeThoughts: true,
+				ThinkingBudget:  &thinkingBudget,
+				ThinkingLevel:   genai.ThinkingLevelMedium,
+			},
+			Temperature: genai.Ptr[float32](0.2),
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("thinking error: %v", err)
+	}
+
+	fmt.Printf("  %s\n", resp.Text())
+	return nil
+}
+
 // streaming demonstrates streaming responses
 func (g *GeminiBot) streaming(ctx context.Context) error {
 	ctx, span := tracer.Start(ctx, "streaming")
 	defer span.End()
 
-	fmt.Println("\n=== Example 4: Streaming ===")
+	fmt.Println("\n=== Example 5: Streaming ===")
 
 	iter := g.client.Models.GenerateContentStream(
 		ctx,
@@ -144,7 +180,7 @@ func (g *GeminiBot) functionCalling(ctx context.Context) error {
 	ctx, span := tracer.Start(ctx, "function-calling")
 	defer span.End()
 
-	fmt.Println("\n=== Example 5: Function Calling ===")
+	fmt.Println("\n=== Example 6: Function Calling ===")
 
 	// Define a weather function
 	getWeatherFunc := &genai.FunctionDeclaration{
@@ -206,7 +242,7 @@ func (g *GeminiBot) safetySettings(ctx context.Context) error {
 	ctx, span := tracer.Start(ctx, "safety-settings")
 	defer span.End()
 
-	fmt.Println("\n=== Example 6: Safety Settings ===")
+	fmt.Println("\n=== Example 7: Safety Settings ===")
 
 	resp, err := g.client.Models.GenerateContent(
 		ctx,
@@ -255,7 +291,7 @@ func (g *GeminiBot) jsonMode(ctx context.Context) error {
 	ctx, span := tracer.Start(ctx, "json-mode")
 	defer span.End()
 
-	fmt.Println("\n=== Example 7: JSON Mode (Structured Output) ===")
+	fmt.Println("\n=== Example 8: JSON Mode (Structured Output) ===")
 
 	// Define a JSON schema for the response
 	schema := &genai.Schema{
@@ -299,7 +335,7 @@ func (g *GeminiBot) multimodal(ctx context.Context) error {
 	ctx, span := tracer.Start(ctx, "multimodal")
 	defer span.End()
 
-	fmt.Println("\n=== Example 8: Multimodal (Images) ===")
+	fmt.Println("\n=== Example 9: Multimodal (Images) ===")
 	fmt.Println("  (Conceptual - would require actual image bytes)")
 
 	// In production, you'd load an actual image file like this:
@@ -348,7 +384,7 @@ func main() {
 	// Create a Gemini client with tracing
 	client, err := genai.NewClient(context.Background(), &genai.ClientConfig{
 		HTTPClient: tracegenai.Client(tracegenai.WithTracerProvider(tp)),
-		APIKey:     os.Getenv("GOOGLE_API_KEY"),
+		APIKey:     geminiAPIKey(),
 		Backend:    genai.BackendGeminiAPI,
 	})
 	if err != nil {
@@ -366,7 +402,7 @@ func main() {
 	// ======================
 	fmt.Println("\nGoogle Gemini API Examples")
 	fmt.Println("===========================")
-	fmt.Println("Demonstrating: text generation, system instructions, multi-turn,")
+	fmt.Println("Demonstrating: text generation, system instructions, multi-turn, thinking,")
 	fmt.Println("streaming, function calling, safety settings, JSON mode, and multimodal")
 
 	bot := newGeminiBot(client)
@@ -380,6 +416,10 @@ func main() {
 	}
 
 	if err := bot.multiTurnConversation(ctx); err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+
+	if err := bot.thinking(ctx); err != nil {
 		log.Fatalf("Error: %v", err)
 	}
 
