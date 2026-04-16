@@ -94,7 +94,8 @@ func (ct *chatCompletionsTracer) StartSpan(ctx context.Context, t time.Time, req
 		}
 	}
 
-	if err := internal.SetJSONAttr(span, "braintrust.span_attributes", map[string]string{"type": "llm"}); err != nil {
+	attrs := map[string]string{"type": "llm"}
+	if err := internal.SetJSONAttr(span, "braintrust.span_attributes", attrs); err != nil {
 		return ctx, span, err
 	}
 
