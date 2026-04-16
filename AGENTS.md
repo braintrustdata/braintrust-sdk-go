@@ -17,7 +17,7 @@
   - `VCR_MODE=off`: Hit live APIs (needs API keys)
 
 ## Examples
-- New features should be covered in `examples/internal/` for validation
+- **Every feature must be represented in `examples/internal/`.** This is not optional — a feature without an example is incomplete. Extend an existing per-integration example when the feature belongs to one (e.g. add an embeddings function to `examples/internal/openai-v2/main.go`), or create a new subdirectory when the feature stands alone.
 - Run a single example: `go run examples/internal/<name>/main.go`
 - Run all examples: `make examples`
 

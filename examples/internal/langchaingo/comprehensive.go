@@ -23,6 +23,7 @@ import (
 
 	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
@@ -140,6 +141,11 @@ func main() {
 	fmt.Println("\n14. Metadata Passing")
 	fmt.Println("--------------------")
 	metadataExample(ctx, tracer, llm)
+
+	// Example 15: Embeddings
+	fmt.Println("\n15. Embeddings")
+	fmt.Println("--------------")
+	embeddingsExample(ctx, tracer, tp, llm)
 
 	// End the root span
 	rootSpan.End()
@@ -594,4 +600,40 @@ func metadataExample(parentCtx context.Context, tracer oteltrace.Tracer, llm *op
 		fmt.Printf("Metadata: user_id=%s, session_id=%s, experiment=%s\n",
 			metadata["user_id"], metadata["session_id"], metadata["experiment"])
 	}
+}
+
+// embeddingsExample demonstrates tracing EmbedDocuments and EmbedQuery via WrapEmbedder.
+// LangChainGo's callback handler has no embedding hooks, so embeddings are traced
+// by decorating the embedder with tracelangchaingo.WrapEmbedder.
+func embeddingsExample(parentCtx context.Context, tracer oteltrace.Tracer, tp oteltrace.TracerProvider, llm *openai.LLM) {
+	ctx, span := tracer.Start(parentCtx, "embeddings")
+	defer span.End()
+
+	// langchaingo's openai.LLM implements embeddings.EmbedderClient
+	inner, err := embeddings.NewEmbedder(llm)
+	if err != nil {
+		log.Fatalf("NewEmbedder error: %v", err)
+	}
+
+	embedder := tracelangchaingo.WrapEmbedder(inner,
+		tracelangchaingo.WithEmbedderTracerProvider(tp),
+		tracelangchaingo.WithEmbedderProvider("openai"),
+		tracelangchaingo.WithEmbedderModel("text-embedding-ada-002"),
+	)
+
+	docs, err := embedder.EmbedDocuments(ctx, []string{
+		"the quick brown fox",
+		"jumps over the lazy dog",
+		"braintrust tracing",
+	})
+	if err != nil {
+		log.Fatalf("EmbedDocuments error: %v", err)
+	}
+	fmt.Printf("EmbedDocuments: %d embeddings, %d dims each\n", len(docs), len(docs[0]))
+
+	query, err := embedder.EmbedQuery(ctx, "what is braintrust?")
+	if err != nil {
+		log.Fatalf("EmbedQuery error: %v", err)
+	}
+	fmt.Printf("EmbedQuery: %d dims\n", len(query))
 }
