@@ -1074,6 +1074,7 @@ func assertChatSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.Ti
 
 	span.AssertInTimeRange(timeRange)
 	span.AssertNameIs("Chat Completion")
+	span.AssertJSONAttrEquals("braintrust.span_attributes", map[string]any{"type": "llm"})
 	assert.Equal(codes.Unset, span.Status().Code)
 
 	metadata := span.Metadata()

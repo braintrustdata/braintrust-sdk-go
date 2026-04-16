@@ -336,6 +336,7 @@ func assertSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.TimeRa
 
 	span.AssertInTimeRange(timeRange)
 	span.AssertNameIs("openai.responses.create")
+	span.AssertJSONAttrEquals("braintrust.span_attributes", map[string]any{"type": "llm"})
 	assert.Equal(codes.Unset, span.Stub.Status.Code)
 
 	metadata := span.Metadata()
