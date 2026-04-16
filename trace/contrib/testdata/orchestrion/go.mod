@@ -1,6 +1,8 @@
 module github.com/braintrustdata/braintrust-sdk-go/trace/contrib/testdata/orchestrion
 
-go 1.26.1
+go 1.24.4
+
+toolchain go1.26.1
 
 require (
 	github.com/DataDog/orchestrion v1.6.1
