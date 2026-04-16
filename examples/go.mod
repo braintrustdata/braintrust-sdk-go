@@ -6,13 +6,13 @@ toolchain go1.26.1
 
 require (
 	github.com/anthropics/anthropic-sdk-go v1.23.0
-	github.com/braintrustdata/braintrust-sdk-go v0.0.0
+	github.com/braintrustdata/braintrust-sdk-go v0.5.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.0.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino v0.0.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.0.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.0.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.0.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.0.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.5.0
 	github.com/cloudwego/eino v0.8.4
 	github.com/cloudwego/eino-ext/components/model/claude v0.1.15
 	github.com/cloudwego/eino-ext/components/model/openai v0.1.10
