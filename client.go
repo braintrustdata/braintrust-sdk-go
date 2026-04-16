@@ -121,7 +121,7 @@ func (c *Client) setupTracing() error {
 		FilterAISpans:          c.config.FilterAISpans,
 		EnableBuiltinAdkTraces: c.config.EnableBuiltinAdkTraces,
 		SpanFilterFuncs:        convertSpanFilters(c.config.SpanFilterFuncs),
-		EnableConsoleLog:       false,
+		EnableTraceConsoleLog:  c.config.EnableTraceConsoleLog,
 		Exporter:               c.config.Exporter,
 		Logger:                 c.logger,
 	}

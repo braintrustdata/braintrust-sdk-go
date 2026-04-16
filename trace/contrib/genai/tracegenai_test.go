@@ -91,11 +91,65 @@ func TestBasicGenerateContent(t *testing.T) {
 	output := ts.Output()
 	require.NotNil(output)
 
-	// Verify metrics (token counts)
+	// Verify metrics (token counts + time_to_first_token)
 	metrics := ts.Metrics()
 	assert.Greater(metrics["prompt_tokens"], float64(0))
 	assert.Greater(metrics["completion_tokens"], float64(0))
 	assert.Greater(metrics["tokens"], float64(0))
+	assert.Greater(metrics["time_to_first_token"], float64(0))
+}
+
+func TestStreamingGenerateContent(t *testing.T) {
+	client, exporter := setUpTest(t)
+
+	assert := assert.New(t)
+	require := require.New(t)
+
+	// Make a streaming generateContent request
+	timer := oteltest.NewTimer()
+	iter := client.Models.GenerateContentStream(
+		context.Background(),
+		"gemini-2.0-flash-exp",
+		genai.Text("Count from 1 to 3. Output only the numbers."),
+		nil,
+	)
+
+	var fullText string
+	for resp, err := range iter {
+		require.NoError(err)
+		fullText += resp.Text()
+	}
+	timeRange := timer.Tick()
+
+	assert.Contains(fullText, "1")
+	assert.Contains(fullText, "2")
+	assert.Contains(fullText, "3")
+
+	// Verify span was created
+	ts := exporter.FlushOne()
+	ts.AssertInTimeRange(timeRange)
+	ts.AssertNameIs("generate_content")
+	assert.Equal(codes.Unset, ts.Status().Code)
+
+	// Verify metadata
+	metadata := ts.Metadata()
+	assert.Equal("gemini", metadata["provider"])
+	assert.Equal("gemini-2.0-flash-exp", metadata["model"])
+
+	// Verify input
+	input := ts.Input()
+	require.NotNil(input)
+
+	// Verify output was reconstructed from stream
+	output := ts.Output()
+	require.NotNil(output)
+
+	// Verify metrics (token counts + time_to_first_token)
+	metrics := ts.Metrics()
+	assert.Greater(metrics["prompt_tokens"], float64(0))
+	assert.Greater(metrics["completion_tokens"], float64(0))
+	assert.Greater(metrics["tokens"], float64(0))
+	assert.Greater(metrics["time_to_first_token"], float64(0))
 }
 
 func TestParseUsageTokens(t *testing.T) {
@@ -146,6 +200,65 @@ func TestParseUsageTokens(t *testing.T) {
 		// Unknown field should be converted to snake_case
 		assert.Equal(t, int64(5), metrics["some_new_token_count"])
 	})
+}
+
+func TestContainsGenerateContent(t *testing.T) {
+	tests := []struct {
+		path    string
+		matches bool
+	}{
+		// Non-streaming
+		{"/v1beta/models/gemini-2.0-flash/generateContent", true},
+		{"/v1beta/models/gemini-2.0-flash:generateContent", true},
+		{"/v1/projects/p/locations/l/publishers/google/models/gemini-2.0-flash:generateContent", true},
+		// Streaming
+		{"/v1beta/models/gemini-2.0-flash:streamGenerateContent", true},
+		{"/v1beta/models/gemini-2.0-flash/streamGenerateContent", true},
+		{"/v1/projects/p/locations/l/publishers/google/models/gemini-2.0-flash:streamGenerateContent", true},
+		// Non-matching
+		{"/v1beta/models/gemini-2.0-flash/embedContent", false},
+		{"/v1beta/models", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.path, func(t *testing.T) {
+			assert.Equal(t, tt.matches, containsGenerateContent(tt.path))
+		})
+	}
+}
+
+func TestExtractModelFromPath(t *testing.T) {
+	tests := []struct {
+		path  string
+		model string
+	}{
+		{"/v1beta/models/gemini-2.0-flash:generateContent", "gemini-2.0-flash"},
+		{"/v1beta/models/gemini-2.0-flash:streamGenerateContent", "gemini-2.0-flash"},
+		{"/v1beta/models/gemini-2.0-flash/generateContent", "gemini-2.0-flash"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.path, func(t *testing.T) {
+			assert.Equal(t, tt.model, extractModelFromPath(tt.path))
+		})
+	}
+}
+
+func TestIsStreamingPath(t *testing.T) {
+	tests := []struct {
+		path      string
+		streaming bool
+	}{
+		{"/v1beta/models/gemini-2.0-flash:generateContent", false},
+		{"/v1beta/models/gemini-2.0-flash:streamGenerateContent", true},
+		{"/v1beta/models/gemini-2.0-flash/streamGenerateContent", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.path, func(t *testing.T) {
+			assert.Equal(t, tt.streaming, isStreamingPath(tt.path))
+		})
+	}
 }
 
 func TestCamelToSnake(t *testing.T) {

@@ -38,7 +38,7 @@ func (g *GeminiBot) basicText(ctx context.Context) error {
 
 	resp, err := g.client.Models.GenerateContent(
 		ctx,
-		"gemini-2.0-flash-exp",
+		"gemini-2.0-flash",
 		genai.Text("What is the capital of France?"),
 		nil,
 	)
@@ -59,7 +59,7 @@ func (g *GeminiBot) withSystemInstruction(ctx context.Context) error {
 
 	resp, err := g.client.Models.GenerateContent(
 		ctx,
-		"gemini-2.0-flash-exp",
+		"gemini-2.0-flash",
 		genai.Text("Explain quantum computing."),
 		&genai.GenerateContentConfig{
 			SystemInstruction: genai.NewContentFromText("You are a helpful science educator. Be concise and clear.", ""),
@@ -96,7 +96,7 @@ func (g *GeminiBot) multiTurnConversation(ctx context.Context) error {
 
 	resp, err := g.client.Models.GenerateContent(
 		ctx,
-		"gemini-2.0-flash-exp",
+		"gemini-2.0-flash",
 		history,
 		&genai.GenerateContentConfig{
 			Temperature: genai.Ptr[float32](0.5),
@@ -119,7 +119,7 @@ func (g *GeminiBot) streaming(ctx context.Context) error {
 
 	iter := g.client.Models.GenerateContentStream(
 		ctx,
-		"gemini-2.0-flash-exp",
+		"gemini-2.0-flash",
 		genai.Text("Count from 1 to 5 slowly, with one number per line."),
 		&genai.GenerateContentConfig{
 			Temperature: genai.Ptr[float32](0.9),
@@ -168,7 +168,7 @@ func (g *GeminiBot) functionCalling(ctx context.Context) error {
 
 	resp, err := g.client.Models.GenerateContent(
 		ctx,
-		"gemini-2.0-flash-exp",
+		"gemini-2.0-flash",
 		genai.Text("What's the weather like in Tokyo?"),
 		&genai.GenerateContentConfig{
 			Tools: []*genai.Tool{
@@ -210,7 +210,7 @@ func (g *GeminiBot) safetySettings(ctx context.Context) error {
 
 	resp, err := g.client.Models.GenerateContent(
 		ctx,
-		"gemini-2.0-flash-exp",
+		"gemini-2.0-flash",
 		genai.Text("Tell me about internet safety."),
 		&genai.GenerateContentConfig{
 			SafetySettings: []*genai.SafetySetting{
@@ -279,7 +279,7 @@ func (g *GeminiBot) jsonMode(ctx context.Context) error {
 
 	resp, err := g.client.Models.GenerateContent(
 		ctx,
-		"gemini-2.0-flash-exp",
+		"gemini-2.0-flash",
 		genai.Text("Create a profile for Albert Einstein"),
 		&genai.GenerateContentConfig{
 			ResponseMIMEType: "application/json",
@@ -316,7 +316,7 @@ func (g *GeminiBot) multimodal(ctx context.Context) error {
 
 	resp, err := g.client.Models.GenerateContent(
 		ctx,
-		"gemini-2.0-flash-exp",
+		"gemini-2.0-flash",
 		genai.Text("Describe a beautiful sunset over mountains."),
 		nil,
 	)
@@ -334,7 +334,8 @@ func main() {
 
 	// Initialize braintrust tracing with a specific project
 	tp := trace.NewTracerProvider()
-	defer tp.Shutdown(context.Background())
+	defer tp.Shutdown(context.Background()) //nolint:errcheck
+	otel.SetTracerProvider(tp)
 
 	bt, err := braintrust.New(tp,
 		braintrust.WithProject("go-sdk-examples"),

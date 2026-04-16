@@ -3,6 +3,7 @@ package genai
 // this file parses the generateContent API.
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"io"
@@ -20,12 +21,13 @@ type generateContentTracer struct {
 	streaming bool
 	metadata  map[string]any
 	model     string
+	startTime time.Time
 }
 
-func newGenerateContentTracer(cfg *config, model string) *generateContentTracer {
+func newGenerateContentTracer(cfg *config, model string, streaming bool) *generateContentTracer {
 	return &generateContentTracer{
 		cfg:       cfg,
-		streaming: false,
+		streaming: streaming,
 		model:     model,
 		metadata: map[string]any{
 			"provider": "gemini",
@@ -34,6 +36,7 @@ func newGenerateContentTracer(cfg *config, model string) *generateContentTracer 
 }
 
 func (gt *generateContentTracer) StartSpan(ctx context.Context, t time.Time, request io.Reader) (context.Context, trace.Span, error) {
+	gt.startTime = t
 	ctx, span := gt.cfg.tracer().Start(
 		ctx,
 		"generate_content",
@@ -122,9 +125,175 @@ func (gt *generateContentTracer) StartSpan(ctx context.Context, t time.Time, req
 }
 
 func (gt *generateContentTracer) TagSpan(span trace.Span, body io.Reader) error {
-	// For now, handle non-streaming responses
-	// Streaming will be handled separately
+	if gt.streaming {
+		return gt.parseStreamingResponse(span, body)
+	}
 	return gt.parseResponse(span, body)
+}
+
+func (gt *generateContentTracer) parseStreamingResponse(span trace.Span, body io.Reader) error {
+	scanner := bufio.NewScanner(body)
+	var allResults []map[string]any
+	var timeToFirstToken time.Duration
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		if !strings.HasPrefix(line, "data: ") {
+			continue
+		}
+
+		line = strings.TrimPrefix(line, "data: ")
+		if line == "[DONE]" {
+			break
+		}
+
+		if timeToFirstToken == 0 {
+			timeToFirstToken = time.Since(gt.startTime)
+		}
+
+		var chunk map[string]any
+		if err := json.Unmarshal([]byte(line), &chunk); err != nil {
+			return err
+		}
+
+		allResults = append(allResults, chunk)
+	}
+
+	// Aggregate chunks into a single response
+	output := gt.postprocessStreamingResults(allResults)
+	if output != nil {
+		if err := internal.SetJSONAttr(span, "braintrust.output_json", output); err != nil {
+			return err
+		}
+	}
+
+	// Collect usage from the last chunk (Gemini includes usage in the final chunk)
+	metrics := make(map[string]any)
+	for i := len(allResults) - 1; i >= 0; i-- {
+		if usageMetadata, ok := allResults[i]["usageMetadata"].(map[string]any); ok {
+			for k, v := range parseUsageTokens(usageMetadata) {
+				metrics[k] = v
+			}
+			break
+		}
+	}
+
+	// Extract model version from any chunk
+	for _, chunk := range allResults {
+		if modelVersion, ok := chunk["modelVersion"].(string); ok {
+			gt.metadata["model"] = modelVersion
+			break
+		}
+	}
+	if err := internal.SetJSONAttr(span, "braintrust.metadata", gt.metadata); err != nil {
+		return err
+	}
+
+	metrics["time_to_first_token"] = timeToFirstToken.Seconds()
+	if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
+		return err
+	}
+
+	return scanner.Err()
+}
+
+// postprocessStreamingResults aggregates streaming chunks into a single response
+// matching the non-streaming generateContent response format.
+func (gt *generateContentTracer) postprocessStreamingResults(allResults []map[string]any) map[string]any {
+	if len(allResults) == 0 {
+		return nil
+	}
+
+	// Aggregate text parts from all candidates across chunks.
+	// NOTE: We only aggregate candidate index 0 from each chunk. If the API
+	// ever returns multiple candidate indices in a streaming response, their
+	// content will be silently dropped. The non-streaming path passes through
+	// all candidates as-is.
+	var textParts []string
+	var finishReason any
+	var role string
+
+	for _, chunk := range allResults {
+		candidates, ok := chunk["candidates"].([]any)
+		if !ok || len(candidates) == 0 {
+			continue
+		}
+		candidate, ok := candidates[0].(map[string]any)
+		if !ok {
+			continue
+		}
+
+		if fr, ok := candidate["finishReason"]; ok && fr != nil {
+			finishReason = fr
+		}
+
+		content, ok := candidate["content"].(map[string]any)
+		if !ok {
+			continue
+		}
+
+		if r, ok := content["role"].(string); ok && role == "" {
+			role = r
+		}
+
+		parts, ok := content["parts"].([]any)
+		if !ok {
+			continue
+		}
+
+		for _, p := range parts {
+			part, ok := p.(map[string]any)
+			if !ok {
+				continue
+			}
+			if text, ok := part["text"].(string); ok {
+				textParts = append(textParts, text)
+			}
+		}
+	}
+
+	// Build aggregated response in Gemini format
+	result := map[string]any{
+		"candidates": []any{
+			map[string]any{
+				"content": map[string]any{
+					"parts": []any{
+						map[string]any{
+							"text": strings.Join(textParts, ""),
+						},
+					},
+					"role": role,
+				},
+			},
+		},
+	}
+
+	if finishReason != nil {
+		if candidates, ok := result["candidates"].([]any); ok && len(candidates) > 0 {
+			if c, ok := candidates[0].(map[string]any); ok {
+				c["finishReason"] = finishReason
+			}
+		}
+	}
+
+	// Include usage from the last chunk
+	for i := len(allResults) - 1; i >= 0; i-- {
+		if usage, ok := allResults[i]["usageMetadata"]; ok {
+			result["usageMetadata"] = usage
+			break
+		}
+	}
+
+	// Include model version
+	for _, chunk := range allResults {
+		if mv, ok := chunk["modelVersion"]; ok {
+			result["modelVersion"] = mv
+			break
+		}
+	}
+
+	return result
 }
 
 func (gt *generateContentTracer) parseResponse(span trace.Span, body io.Reader) error {
@@ -153,12 +322,16 @@ func (gt *generateContentTracer) handleResponse(span trace.Span, raw map[string]
 		return err
 	}
 
-	// Parse usage metadata (token counts)
+	// Parse usage metadata (token counts) and time_to_first_token
+	metrics := make(map[string]any)
 	if usageMetadata, ok := raw["usageMetadata"].(map[string]any); ok {
-		metrics := parseUsageTokens(usageMetadata)
-		if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
-			return err
+		for k, v := range parseUsageTokens(usageMetadata) {
+			metrics[k] = v
 		}
+	}
+	metrics["time_to_first_token"] = time.Since(gt.startTime).Seconds()
+	if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
+		return err
 	}
 
 	return nil

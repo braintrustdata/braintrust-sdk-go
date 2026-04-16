@@ -80,6 +80,14 @@ func WithExporter(exporter trace.SpanExporter) Option {
 	}
 }
 
+// WithEnableTraceConsoleLog enables logging traces to stdout for debugging.
+// Environment variable: BRAINTRUST_ENABLE_TRACE_CONSOLE_LOG
+func WithEnableTraceConsoleLog(enabled bool) Option {
+	return func(c *config.Config) {
+		c.EnableTraceConsoleLog = enabled
+	}
+}
+
 // WithFilterAISpans enables filtering to keep only AI-related spans
 // When enabled, only spans with AI-related names or attributes will be sent
 func WithFilterAISpans(enabled bool) Option {
