@@ -108,7 +108,7 @@ func (e *tracedEmbedder) EmbedQuery(ctx context.Context, text string) ([]float32
 	ctx, span := e.tracer().Start(ctx, "langchain.embedder.embed_query")
 	defer span.End()
 
-	e.tagStart(span, []string{text})
+	e.tagStart(span, text)
 
 	vector, err := e.inner.EmbedQuery(ctx, text)
 	if err != nil {

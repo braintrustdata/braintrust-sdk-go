@@ -151,8 +151,7 @@ func genaiRouter(cfg *config, path string) internal.MiddlewareTracer {
 	}
 	if containsEmbedContent(path) {
 		model := extractModelFromPath(path)
-		batch := isBatchEmbedPath(path)
-		return newEmbedContentTracer(cfg, model, batch)
+		return newEmbedContentTracer(cfg, model)
 	}
 	return nil
 }
@@ -173,11 +172,6 @@ func containsEmbedContent(path string) bool {
 		strings.Contains(path, "/embedContent") ||
 		strings.Contains(path, ":batchEmbedContents") ||
 		strings.Contains(path, "/batchEmbedContents")
-}
-
-// isBatchEmbedPath reports whether the path is the batch embeddings endpoint.
-func isBatchEmbedPath(path string) bool {
-	return strings.Contains(path, "batchEmbedContents")
 }
 
 // isStreamingPath checks if the path is for the streaming endpoint

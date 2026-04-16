@@ -96,10 +96,7 @@ func TestWrapEmbedderEmbedQuery(t *testing.T) {
 	span.AssertJSONAttrEquals("braintrust.span_attributes", map[string]any{"type": "llm"})
 
 	inp := span.Input()
-	arr, ok := inp.([]interface{})
-	require.True(t, ok)
-	require.Len(t, arr, 1)
-	assert.Equal(t, "what is braintrust?", arr[0])
+	assert.Equal(t, "what is braintrust?", inp)
 
 	out := span.Output()
 	outMap, ok := out.(map[string]interface{})

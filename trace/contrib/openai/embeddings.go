@@ -108,6 +108,10 @@ func (et *embeddingsTracer) TagSpan(span trace.Span, body io.Reader) error {
 // embeddingsOutputSummary returns shape-only metadata about embeddings to match
 // the Python SDK convention, which records {"embedding_length": N} instead of
 // the full vectors.
+//
+// When the request set encoding_format=base64, the embedding arrives as a
+// string rather than a []float; we can't extract a dimension count and return
+// an empty map, matching the Python SDK's behavior.
 func embeddingsOutputSummary(raw map[string]interface{}) map[string]any {
 	out := map[string]any{}
 	data, ok := raw["data"].([]interface{})

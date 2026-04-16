@@ -21,7 +21,7 @@ type embedContentTracer struct {
 	model    string
 }
 
-func newEmbedContentTracer(cfg *config, model string, _ bool) *embedContentTracer {
+func newEmbedContentTracer(cfg *config, model string) *embedContentTracer {
 	return &embedContentTracer{
 		cfg:   cfg,
 		model: model,

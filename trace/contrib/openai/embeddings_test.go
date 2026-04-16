@@ -183,6 +183,18 @@ func TestEmbeddingsOutputSummary(t *testing.T) {
 			raw:  map[string]interface{}{},
 			want: map[string]any{},
 		},
+		{
+			// When encoding_format=base64, the embedding arrives as a string, not
+			// a []float. We can't report a dimension count for it — the Python SDK
+			// has the same gap. Document the silent-empty behavior.
+			name: "base64 encoding returns empty summary",
+			raw: map[string]interface{}{
+				"data": []interface{}{
+					map[string]interface{}{"embedding": "gAAAAA=="},
+				},
+			},
+			want: map[string]any{},
+		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

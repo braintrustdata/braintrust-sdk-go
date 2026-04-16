@@ -306,11 +306,6 @@ func TestContainsEmbedContent(t *testing.T) {
 	}
 }
 
-func TestIsBatchEmbedPath(t *testing.T) {
-	assert.True(t, isBatchEmbedPath("/v1beta/models/text-embedding-004:batchEmbedContents"))
-	assert.False(t, isBatchEmbedPath("/v1beta/models/text-embedding-004:embedContent"))
-}
-
 func TestExtractModelFromEmbedPath(t *testing.T) {
 	assert.Equal(t, "text-embedding-004", extractModelFromPath("/v1beta/models/text-embedding-004:embedContent"))
 	assert.Equal(t, "text-embedding-004", extractModelFromPath("/v1beta/models/text-embedding-004:batchEmbedContents"))
