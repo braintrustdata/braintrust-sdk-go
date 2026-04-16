@@ -3,8 +3,8 @@ module github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sash
 go 1.26.1
 
 require (
-	github.com/braintrustdata/braintrust-sdk-go v0.4.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.4.0
+	github.com/braintrustdata/braintrust-sdk-go v0.4.1
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.4.1
 	github.com/sashabaranov/go-openai v1.41.2
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/otel/trace v1.38.0
