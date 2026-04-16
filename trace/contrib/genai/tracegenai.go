@@ -141,20 +141,30 @@ func (rt *roundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 
 // genaiRouter maps Gemini API paths to their corresponding tracers.
 func genaiRouter(cfg *config, path string) internal.MiddlewareTracer {
-	// Match both Gemini API and Vertex AI paths
-	// Gemini API: /v1beta/models/{model}/generateContent
+	// Match both Gemini API and Vertex AI paths for generateContent and streamGenerateContent
+	// Gemini API: /v1beta/models/{model}:generateContent or :streamGenerateContent
 	// Vertex AI: /v1/projects/{project}/locations/{location}/publishers/google/models/{model}:generateContent
 	if containsGenerateContent(path) {
 		model := extractModelFromPath(path)
-		return newGenerateContentTracer(cfg, model)
+		streaming := isStreamingPath(path)
+		return newGenerateContentTracer(cfg, model, streaming)
 	}
 	return nil
 }
 
-// containsGenerateContent checks if the path is for a generateContent endpoint
+// containsGenerateContent checks if the path is for a generateContent or streamGenerateContent endpoint.
+// We require a delimiter (: or /) before the method name to avoid matching unrelated endpoints.
 func containsGenerateContent(path string) bool {
-	return strings.Contains(path, "/generateContent") ||
-		strings.Contains(path, ":generateContent")
+	return strings.Contains(path, ":generateContent") ||
+		strings.Contains(path, "/generateContent") ||
+		strings.Contains(path, ":streamGenerateContent") ||
+		strings.Contains(path, "/streamGenerateContent")
+}
+
+// isStreamingPath checks if the path is for the streaming endpoint
+func isStreamingPath(path string) bool {
+	return strings.Contains(path, "streamGenerateContent") ||
+		strings.Contains(path, "StreamGenerateContent")
 }
 
 // extractModelFromPath extracts the model name from the URL path
@@ -170,9 +180,15 @@ func extractModelFromPath(path string) string {
 	// Get the model part (after /models/)
 	modelPart := parts[1]
 
-	// Remove :generateContent or /generateContent suffix
-	modelPart = strings.TrimSuffix(modelPart, ":generateContent")
-	modelPart = strings.TrimSuffix(modelPart, "/generateContent")
+	// Remove the endpoint suffix (handles both streaming and non-streaming)
+	for _, suffix := range []string{
+		":streamGenerateContent",
+		"/streamGenerateContent",
+		":generateContent",
+		"/generateContent",
+	} {
+		modelPart = strings.TrimSuffix(modelPart, suffix)
+	}
 
 	return modelPart
 }
