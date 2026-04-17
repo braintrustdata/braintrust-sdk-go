@@ -188,6 +188,35 @@ func main() {
 		}
 	}()
 
+	// --- Example 7: Embeddings (WrapEmbedder) ---
+	// Genkit has no middleware hook for embedders, so embedders are traced by
+	// wrapping them with tracegenkit.WrapEmbedder. The wrapper delegates to
+	// the underlying embedder and emits a Braintrust llm span per Embed call.
+	func() {
+		ctx, span := tracer.Start(ctx, "embeddings")
+		defer span.End()
+
+		fmt.Println("\n=== Example 7: Embeddings ===")
+		embedder := tracegenkit.WrapEmbedder(
+			genkit.LookupEmbedder(g, "googleai/gemini-embedding-001"),
+			tracegenkit.WithEmbedderModel("gemini-embedding-001"),
+			tracegenkit.WithEmbedderProvider("googleai"),
+		)
+
+		resp, err := genkit.Embed(ctx, g,
+			ai.WithEmbedder(embedder),
+			ai.WithTextDocs(
+				"Braintrust is an evaluation platform for LLM apps.",
+				"Genkit is an AI framework from Firebase.",
+			),
+		)
+		if err != nil {
+			log.Fatalf("Embed error: %v", err)
+		}
+		fmt.Printf("  %d embeddings, %d dims each\n",
+			len(resp.Embeddings), len(resp.Embeddings[0].Embedding))
+	}()
+
 	fmt.Println("\n=== Tracing Complete ===")
 	fmt.Printf("View trace: %s\n", bt.Permalink(rootSpan))
 }
