@@ -97,9 +97,10 @@ func (e *tracedEmbedder) EmbedDocuments(ctx context.Context, texts []string) ([]
 	if len(vectors) > 0 {
 		out["embedding_length"] = len(vectors[0])
 	}
-	if setErr := internal.SetJSONAttr(span, "braintrust.output_json", out); setErr != nil {
-		span.RecordError(setErr)
-	}
+	// Instrumentation errors from SetJSONAttr are silently dropped — the
+	// embedding itself succeeded, and marking the span as errored would
+	// misreport the caller's operation.
+	_ = internal.SetJSONAttr(span, "braintrust.output_json", out)
 
 	return vectors, nil
 }
@@ -120,22 +121,18 @@ func (e *tracedEmbedder) EmbedQuery(ctx context.Context, text string) ([]float32
 	out := map[string]any{
 		"embedding_length": len(vector),
 	}
-	if setErr := internal.SetJSONAttr(span, "braintrust.output_json", out); setErr != nil {
-		span.RecordError(setErr)
-	}
+	_ = internal.SetJSONAttr(span, "braintrust.output_json", out)
 
 	return vector, nil
 }
 
 // tagStart writes the common span attributes shared by EmbedDocuments and
-// EmbedQuery: span type, input, and metadata.
+// EmbedQuery: span type, input, and metadata. Instrumentation errors are
+// silently dropped — the caller's embedding operation has not yet run or has
+// already succeeded, and marking the span as errored would misreport it.
 func (e *tracedEmbedder) tagStart(span trace.Span, input any) {
-	if err := internal.SetJSONAttr(span, "braintrust.span_attributes", map[string]string{"type": "llm"}); err != nil {
-		span.RecordError(err)
-	}
-	if err := internal.SetJSONAttr(span, "braintrust.input_json", input); err != nil {
-		span.RecordError(err)
-	}
+	_ = internal.SetJSONAttr(span, "braintrust.span_attributes", map[string]string{"type": "llm"})
+	_ = internal.SetJSONAttr(span, "braintrust.input_json", input)
 
 	metadata := map[string]any{
 		"provider": e.cfg.provider,
@@ -143,9 +140,7 @@ func (e *tracedEmbedder) tagStart(span trace.Span, input any) {
 	if e.cfg.model != "" {
 		metadata["model"] = e.cfg.model
 	}
-	if err := internal.SetJSONAttr(span, "braintrust.metadata", metadata); err != nil {
-		span.RecordError(err)
-	}
+	_ = internal.SetJSONAttr(span, "braintrust.metadata", metadata)
 }
 
 // Compile-time assertion that tracedEmbedder implements the Embedder interface.

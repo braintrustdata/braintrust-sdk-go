@@ -173,20 +173,17 @@ func (h *Handler) onStartEmbedding(ctx context.Context, info *callbacks.RunInfo,
 	spanName := spanNameFromInfo(info)
 	childCtx, span := h.tracer().Start(ctx, spanName, trace.WithSpanKind(trace.SpanKindClient))
 
-	if err := traceinternal.SetJSONAttr(span, "braintrust.span_attributes", map[string]string{"type": "llm"}); err != nil {
-		span.RecordError(err)
-	}
+	// Instrumentation errors from SetJSONAttr are silently dropped — the
+	// underlying embedding operation is unaffected, and marking the span
+	// as errored would misreport the caller's operation.
+	_ = traceinternal.SetJSONAttr(span, "braintrust.span_attributes", map[string]string{"type": "llm"})
 
 	if len(embInput.Texts) > 0 {
-		if err := traceinternal.SetJSONAttr(span, "braintrust.input_json", embInput.Texts); err != nil {
-			span.RecordError(err)
-		}
+		_ = traceinternal.SetJSONAttr(span, "braintrust.input_json", embInput.Texts)
 	}
 
 	metadata := buildEmbeddingMetadata(info, embInput.Config)
-	if err := traceinternal.SetJSONAttr(span, "braintrust.metadata", metadata); err != nil {
-		span.RecordError(err)
-	}
+	_ = traceinternal.SetJSONAttr(span, "braintrust.metadata", metadata)
 
 	if embInput.Config != nil && embInput.Config.Model != "" {
 		span.SetAttributes(attribute.String("gen_ai.request.model", embInput.Config.Model))
@@ -240,16 +237,13 @@ func (h *Handler) OnEnd(ctx context.Context, info *callbacks.RunInfo, output cal
 	}
 
 	if embOutput := embedding.ConvCallbackOutput(output); embOutput != nil {
-		out := embeddingOutputSummary(embOutput.Embeddings)
-		if err := traceinternal.SetJSONAttr(span, "braintrust.output_json", out); err != nil {
-			span.RecordError(err)
-		}
+		// Instrumentation errors are silently dropped — the embedding call
+		// already succeeded; marking the span errored would misreport it.
+		_ = traceinternal.SetJSONAttr(span, "braintrust.output_json", embeddingOutputSummary(embOutput.Embeddings))
 		if embOutput.TokenUsage != nil {
 			metrics := embeddingTokenUsageToMetrics(embOutput.TokenUsage)
 			if len(metrics) > 0 {
-				if err := traceinternal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
-					span.RecordError(err)
-				}
+				_ = traceinternal.SetJSONAttr(span, "braintrust.metrics", metrics)
 			}
 		}
 		return ctx
