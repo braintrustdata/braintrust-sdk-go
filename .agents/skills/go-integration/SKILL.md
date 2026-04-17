@@ -169,6 +169,13 @@ Many LLM frameworks support multi-step agents with tool calling, subagent delega
 
 ## VCR Testing
 
+**Prefer real tests over mocks.** All integration tests must use real API requests recorded via VCR — actual HTTP against the live provider, captured into a cassette that later runs in replay mode. Mocks, fake HTTP handlers, `httptest.NewServer` with canned JSON, stub SDK clients, hand-crafted eventstream frames, and similar test doubles are a **last resort**. They are only acceptable when:
+
+- the real API cannot be recorded (e.g. a non-deterministic binary protocol that go-vcr can't round-trip), **or**
+- the provider has no accessible test account for this repo
+
+When you reach for a mock, document in a comment on the test *why* VCR wasn't viable. Do not default to mocks because they're faster to write — cassettes catch real bugs (wire-format changes, header scrubbing, streaming framing) that mocks will not.
+
 Use `internal/vcr` and `internal/oteltest` packages for HTTP recording/replay and span verification.
 
 **References:**

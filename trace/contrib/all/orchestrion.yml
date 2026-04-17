@@ -80,6 +80,23 @@ aspects:
                 bt: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic
                 option: github.com/anthropics/anthropic-sdk-go/option
               template: option.WithMiddleware(bt.NewMiddleware())
+  - id: bedrockruntime-newfromconfig-wrap
+    join-point:
+      function-call: github.com/aws/aws-sdk-go-v2/service/bedrockruntime.NewFromConfig
+    advice:
+      - wrap-expression:
+          imports:
+            tracebedrockruntime: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime
+            bedrockruntime: github.com/aws/aws-sdk-go-v2/service/bedrockruntime
+          template: |-
+            func() *bedrockruntime.Client {
+              {{- $cfg := index .AST.Args 0 }}
+              __opts := []func(*bedrockruntime.Options){tracebedrockruntime.NewMiddleware()}
+              {{- range $i, $arg := .AST.Args }}{{ if gt $i 0 }}
+              __opts = append(__opts, {{ $arg }})
+              {{- end }}{{ end }}
+              return bedrockruntime.NewFromConfig({{ $cfg }}, __opts...)
+            }()
   - id: cloudwego-eino-append-global-handler
     join-point:
       function-call: github.com/cloudwego/eino/callbacks.AppendGlobalHandlers

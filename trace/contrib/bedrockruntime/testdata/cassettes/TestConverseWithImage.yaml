@@ -1,0 +1,50 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 402
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"inferenceConfig":{"maxTokens":64},"messages":[{"content":[{"text":"What color is this image? Reply in one word."},{"image":{"format":"png","source":{"bytes":"iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAAaklEQVR4nOzPUQkAIQDA0OMwgnHsn8IwhvDjIewl2Mae63vZrwNuNaA1oDWgNaA1oDWgNaA1oDWgNaA1oDWgNaA1oDWgNaA1oDWgNaA1oDWgNaA1oDWgNaA1oDWgNaA1oDWgNaCdAAAA//9eUwGv6mfnzwAAAABJRU5ErkJggg=="}}}],"role":"user"}]}'
+        form: {}
+        headers:
+            Amz-Sdk-Invocation-Id:
+                - 2b259a1f-59b1-4569-badd-767e53e9aad9
+            Amz-Sdk-Request:
+                - attempt=1; max=3
+            Content-Type:
+                - application/json
+            User-Agent:
+                - aws-sdk-go-v2/1.41.5 ua/2.1 os/macos lang/go#1.26.2 md/GOOS#darwin md/GOARCH#arm64 api/bedrockruntime#1.50.4 m/E,g
+            X-Amz-Date:
+                - 20260417T175542Z
+        url: https://bedrock-runtime.us-east-2.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/converse
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 315
+        uncompressed: false
+        body: '{"metrics":{"latencyMs":1214},"output":{"message":{"content":[{"text":"Red"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":30,"outputTokens":4,"serverToolUsage":{},"totalTokens":34}}'
+        headers:
+            Content-Length:
+                - "315"
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 17 Apr 2026 17:55:44 GMT
+            X-Amzn-Requestid:
+                - 732ea8f0-f627-41fd-95fb-dce90c26246c
+        status: 200 OK
+        code: 200
+        duration: 1.258318709s

@@ -18,6 +18,7 @@
 // This is equivalent to importing each integration individually:
 //   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai (OpenAI official SDK)
 //   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic (Anthropic SDK)
+//   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime (AWS Bedrock Runtime)
 //   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai (Google GenAI)
 //   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai (sashabaranov/go-openai)
 //   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk (Google ADK)
@@ -32,6 +33,9 @@ import (
 
 	// Anthropic SDK (github.com/anthropics/anthropic-sdk-go)
 	_ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic"
+
+	// AWS Bedrock Runtime (github.com/aws/aws-sdk-go-v2/service/bedrockruntime)
+	_ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime"
 
 	// Google GenAI (google.golang.org/genai)
 	_ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"

@@ -8,7 +8,7 @@
 
 ## Testing
 - Follow TDD: write failing test first, then implement
-- Integration tests should use real API requests recorded via VCR, not synthetic/mock data
+- **Prefer real tests over mocks.** Integration tests must use real API requests recorded via VCR. Mocks, fake HTTP handlers, canned JSON responses, and stub SDK clients are a last resort — only acceptable when the real API cannot be recorded (e.g. non-deterministic binary protocols the cassette can't replay, or third-party services without a test account). If you reach for a mock, document in the test *why* VCR wasn't viable.
 - Single test: `go test -v -run=TestName ./path/to/package`
 - Record single cassette: `VCR_MODE=record go test -v -run=TestName ./path/to/package`
 - VCR modes:

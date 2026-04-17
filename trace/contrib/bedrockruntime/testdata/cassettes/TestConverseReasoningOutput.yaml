@@ -1,0 +1,50 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 208
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"additionalModelRequestFields":{"thinking":{"budget_tokens":2000,"type":"enabled"}},"inferenceConfig":{"maxTokens":4000,"temperature":1},"messages":[{"content":[{"text":"What is 27 * 453?"}],"role":"user"}]}'
+        form: {}
+        headers:
+            Amz-Sdk-Invocation-Id:
+                - 34255084-1e74-4b8a-8982-4e30708a09a8
+            Amz-Sdk-Request:
+                - attempt=1; max=3
+            Content-Type:
+                - application/json
+            User-Agent:
+                - aws-sdk-go-v2/1.41.5 ua/2.1 os/macos lang/go#1.26.2 md/GOOS#darwin md/GOARCH#arm64 api/bedrockruntime#1.50.4 m/E,g
+            X-Amz-Date:
+                - 20260417T175545Z
+        url: https://bedrock-runtime.us-east-2.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/converse
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 1191
+        uncompressed: false
+        body: '{"metrics":{"latencyMs":1498},"output":{"message":{"content":[{"reasoningContent":{"reasoningText":{"signature":"EpMDCkgIDBABGAIqQEoEfgxMJcBzHgy7TQpjIH8tnSRN+NY6DNj5J5jgYqGkUqETwo+GoBAc1E5RD/UI8/OVIkBch15hJYTcG4MY28cSDEivsSpuLmKaNF/hbhoMlU7B8E0q6ZckOnCvIjBE1yIaEj/JG3WvmM2HbKYhFDp8ajz9Ym4U8QloIIKYNTEVkCskMSDArzxHzMTh3uwq+AEhai6S5tbqzMCcFPGmMkX7seMRvyCsuI9LSxENCUyREWbtku3vyvQl1VCtYGa0M/3/jQDkuZVTAFWy8hsqniW6a715bMMzPGFoyl4+5Vv+Wy8qwtW9bDrNk0qu8N5DGQ9VUcpyX8eA7igVQX0OlQg6fpoEwsRmvtEr0TOB4+y2Ayiq8KUL81DNDyBYD9ep/BIumbymplfevlzMTtqLjzNnhZrl8QM4F4kY2bKlkIVgLrWa7RWiXGGrD+/yUIEerh7zA6KNKkRbDN7NOZsY2+C52cFW1ZAhOUDmdLpuhi2Ro8A04cGtd4iHglwY/nQzfuYPjCeM+QIX3xgB","text":"27 * 453\n\nLet me break this down:\n27 * 453 = 27 * (400 + 50 + 3)\n= 27 * 400 + 27 * 50 + 27 * 3\n= 10,800 + 1,350 + 81\n= 12,231\n\nLet me verify:\n27 * 400 = 10,800 ✓\n27 * 50 = 1,350 ✓\n27 * 3 = 81 ✓\n10,800 + 1,350 + 81 = 12,231 ✓"}}},{"text":"27 × 453 = **12,231**"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":45,"outputTokens":179,"serverToolUsage":{},"totalTokens":224}}'
+        headers:
+            Content-Length:
+                - "1191"
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 17 Apr 2026 17:55:47 GMT
+            X-Amzn-Requestid:
+                - c64fc441-fc6a-4264-a8e0-60e0dbd2ac6e
+        status: 200 OK
+        code: 200
+        duration: 1.540751167s

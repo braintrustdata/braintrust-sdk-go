@@ -7,6 +7,7 @@ toolchain go1.26.1
 require (
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk v0.5.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.5.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime v0.0.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino v0.5.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.5.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.5.0
@@ -20,6 +21,12 @@ require (
 	cloud.google.com/go/auth v0.17.0 // indirect
 	cloud.google.com/go/compute/metadata v0.9.0 // indirect
 	github.com/anthropics/anthropic-sdk-go v1.23.0 // indirect
+	github.com/aws/aws-sdk-go-v2 v1.41.5 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.8 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.21 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.21 // indirect
+	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.50.4 // indirect
+	github.com/aws/smithy-go v1.25.0 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/braintrustdata/braintrust-sdk-go v0.5.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
@@ -98,6 +105,7 @@ replace (
 	github.com/braintrustdata/braintrust-sdk-go => ../../..
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk => ../adk
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic => ../anthropic
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime => ../bedrockruntime
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino => ../cloudwego/eino
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai => ../genai
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit => ../genkit

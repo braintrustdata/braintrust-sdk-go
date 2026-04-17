@@ -8,6 +8,7 @@ use (
 	./trace/contrib/adk
 	./trace/contrib/all
 	./trace/contrib/anthropic
+	./trace/contrib/bedrockruntime
 	./trace/contrib/cloudwego/eino
 	./trace/contrib/genai
 	./trace/contrib/genkit
