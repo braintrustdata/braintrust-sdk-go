@@ -48,6 +48,7 @@ func TestOrchestrionInjection(t *testing.T) {
 				"github.com/DataDog/orchestrion",
 				"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic",
 				"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai",
+				"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit",
 				"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai",
 				"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo",
 				"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai",
