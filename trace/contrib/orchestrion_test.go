@@ -178,13 +178,16 @@ func rewriteFixtureReplaceDirectives(t *testing.T, fixtureDir, repoRoot string) 
 		"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai":                            filepath.Join(repoRoot, "trace", "contrib", "openai"),
 	}
 
+	// Build one go mod edit call with all -replace flags to avoid 11 subprocess round-trips.
+	args := []string{"mod", "edit"}
 	for modulePath, replacementPath := range replacements {
-		cmd := exec.Command("go", "mod", "edit", "-replace="+modulePath+"="+replacementPath)
-		cmd.Dir = fixtureDir
-		cmd.Env = append(os.Environ(), "GOWORK=off")
-		if output, err := cmd.CombinedOutput(); err != nil {
-			t.Fatalf("rewrite replace directive for %s: %v\n%s", modulePath, err, output)
-		}
+		args = append(args, "-replace="+modulePath+"="+replacementPath)
+	}
+	cmd := exec.Command("go", args...)
+	cmd.Dir = fixtureDir
+	cmd.Env = append(os.Environ(), "GOWORK=off")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("rewrite replace directives: %v\n%s", err, output)
 	}
 }
 
