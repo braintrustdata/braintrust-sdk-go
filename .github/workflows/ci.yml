@@ -39,10 +39,6 @@ jobs:
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version: ${{ matrix.go-version }}
-      - name: Install orchestrion
-        env:
-          GOTOOLCHAIN: local
-        run: go install github.com/DataDog/orchestrion@v1.6.1
       - name: Verify modules
         run: make mod-verify
         env:
@@ -56,9 +52,32 @@ jobs:
         env:
           GOTOOLCHAIN: local
 
+  orchestrion:
+    runs-on: ubuntu-latest
+    env:
+      CGO_ENABLED: 0
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY}}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY}}
+      BRAINTRUST_API_KEY: ${{ secrets.BRAINTRUST_API_KEY}}
+      RUN_ORCHESTRION_TESTS: "1"
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up Go
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        with:
+          go-version: 1.26.x
+      - name: Install orchestrion
+        env:
+          GOTOOLCHAIN: local
+        run: go install github.com/DataDog/orchestrion@v1.6.1
+      - name: Test orchestrion injection
+        run: VCR_MODE=replay go test -run=TestOrchestrionInjection -count=1 ./trace/contrib/
+        env:
+          GOTOOLCHAIN: local
+
   ci-passed:
     name: ci-passed
-    needs: [lint, test]
+    needs: [lint, test, orchestrion]
     runs-on: ubuntu-latest
     steps:
       - name: Mark CI as passed

@@ -22,6 +22,12 @@ func TestOrchestrionInjection(t *testing.T) {
 		t.Skip("skipping orchestrion test in short mode")
 	}
 
+	// In CI this test runs in a dedicated job (RUN_ORCHESTRION_TESTS=1).
+	// Skip it in the main matrix so the 6 platform jobs stay fast (~30s each).
+	if os.Getenv("GITHUB_ACTIONS") == "true" && os.Getenv("RUN_ORCHESTRION_TESTS") != "1" {
+		t.Skip("orchestrion tests run in a dedicated CI job; set RUN_ORCHESTRION_TESTS=1 to run locally in CI")
+	}
+
 	// Check orchestrion is available.
 	if _, err := exec.LookPath("orchestrion"); err != nil {
 		t.Fatal("orchestrion not found in PATH (install: go install github.com/DataDog/orchestrion@v1.6.1)")
