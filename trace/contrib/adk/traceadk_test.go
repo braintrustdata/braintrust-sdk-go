@@ -7,7 +7,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	"google.golang.org/adk/agent"
 	"google.golang.org/adk/agent/llmagent"
@@ -24,6 +23,7 @@ import (
 )
 
 func TestCleanupJSON(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		input    interface{}
@@ -113,11 +113,11 @@ func calculator(ctx tool.Context, args calculatorArgs) (float64, error) {
 
 // TestAgentIntegration tests the ADK tracing with a real agent using VCR
 func TestAgentIntegration(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
 	// Set up test tracer and VCR
 	tp, exporter := oteltest.Setup(t)
-	otel.SetTracerProvider(tp)
 
 	mode := vcr.GetVCRMode()
 
