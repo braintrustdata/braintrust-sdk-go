@@ -103,9 +103,6 @@ func (e *tracedEmbedder) Embed(ctx context.Context, req *ai.EmbedRequest) (*ai.E
 	if len(resp.Embeddings) > 0 && resp.Embeddings[0] != nil {
 		out["embedding_length"] = len(resp.Embeddings[0].Embedding)
 	}
-	// Instrumentation errors from SetJSONAttr are silently dropped — the
-	// embedding itself succeeded, and marking the span as errored would
-	// misreport the caller's operation.
 	_ = internal.SetJSONAttr(span, "braintrust.output_json", out)
 
 	return resp, nil
