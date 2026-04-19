@@ -2,7 +2,8 @@ package langchaingo
 
 import (
 	"context"
-	"fmt"
+	"errors"
+	"net/http"
 	"testing"
 
 	"github.com/tmc/langchaingo/llms"
@@ -17,29 +18,23 @@ func TestContextIdentity(t *testing.T) {
 
 	// Create a custom handler that captures context pointers
 	handler := &contextCapturingHandler{
-		onStart: func(ctx context.Context) {
-			startCtx = ctx
-			fmt.Printf("Start ctx: %p\n", ctx)
-		},
-		onEnd: func(ctx context.Context) {
-			endCtx = ctx
-			fmt.Printf("End ctx: %p\n", ctx)
-		},
+		onStart: func(ctx context.Context) { startCtx = ctx },
+		onEnd:   func(ctx context.Context) { endCtx = ctx },
 	}
 
-	// Create an OpenAI client with our handler
-	// Note: This test doesn't actually call the API, we're just testing the callback flow
+	// Fail immediately so the test never touches the network.
+	fastFail := &http.Client{Transport: &errorTransport{}}
+
 	llm, err := openai.New(
 		openai.WithToken("fake-token"),
+		openai.WithHTTPClient(fastFail),
 		openai.WithCallback(handler),
 	)
 	if err != nil {
 		t.Fatalf("Failed to create LLM: %v", err)
 	}
 
-	// Create a context
 	ctx := context.Background()
-	fmt.Printf("Original ctx: %p\n", ctx)
 
 	// Make a call (will fail but that's OK, we just need to trigger callbacks)
 	messages := []llms.MessageContent{
@@ -52,7 +47,6 @@ func TestContextIdentity(t *testing.T) {
 		t.Fatal("Start callback was not called")
 	}
 
-	// Check if contexts are the same pointer
 	if startCtx != ctx {
 		t.Logf("WARNING: Start context (%p) differs from original (%p)", startCtx, ctx)
 	}
@@ -61,6 +55,14 @@ func TestContextIdentity(t *testing.T) {
 		t.Errorf("PROBLEM: End context (%p) differs from start context (%p)", endCtx, startCtx)
 		t.Error("Our span tracking approach will not work if LangChainGo creates derived contexts")
 	}
+}
+
+// errorTransport is an http.RoundTripper that immediately returns an error,
+// used to avoid real network calls in tests that only care about callback behavior.
+type errorTransport struct{}
+
+func (e *errorTransport) RoundTrip(*http.Request) (*http.Response, error) {
+	return nil, errors.New("no network in tests")
 }
 
 // contextCapturingHandler implements callbacks.Handler but only tracks contexts
