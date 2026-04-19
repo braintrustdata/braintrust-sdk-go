@@ -14,6 +14,7 @@ import (
 var readme string
 
 func TestReadmeSnippets(t *testing.T) {
+	t.Parallel()
 	lines := strings.Split(readme, "\n")
 	var snippet []string
 	snippetCount := 0

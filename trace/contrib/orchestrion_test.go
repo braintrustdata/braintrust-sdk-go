@@ -17,6 +17,7 @@ import (
 // The inner tests create SDK clients WITHOUT manual middleware, make mocked API
 // calls, and verify spans were created.
 func TestOrchestrionInjection(t *testing.T) {
+	t.Parallel()
 	if testing.Short() {
 		t.Skip("skipping orchestrion test in short mode")
 	}
