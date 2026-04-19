@@ -11,7 +11,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	"google.golang.org/adk/agent"
 	"google.golang.org/adk/agent/llmagent"
@@ -38,9 +37,9 @@ const (
 // Returns ctx, tracer provider, and exporter for span assertions.
 func setupGoldenTest(t *testing.T) (context.Context, oteltrace.TracerProvider, *oteltest.Exporter) {
 	t.Helper()
+	t.Parallel()
 	ctx := context.Background()
 	tp, exporter := oteltest.Setup(t)
-	otel.SetTracerProvider(tp)
 	return ctx, tp, exporter
 }
 
