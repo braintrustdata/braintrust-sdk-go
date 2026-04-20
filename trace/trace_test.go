@@ -670,3 +670,86 @@ func TestPermalink_NoopSpan(t *testing.T) {
 
 	noopSpan.End()
 }
+
+func TestExport(t *testing.T) {
+	assert := assert.New(t)
+
+	tp := sdktrace.NewTracerProvider()
+	exporter := tracetest.NewInMemoryExporter()
+
+	session := newTestSession()
+	cfg := Config{
+		DefaultProjectID: "export-test-project",
+		Exporter:         exporter,
+		Logger:           logger.Discard(),
+	}
+
+	err := AddSpanProcessor(tp, session, cfg)
+	assert.NoError(err)
+
+	tracer := tp.Tracer("test")
+	_, span := tracer.Start(context.Background(), "parent-operation")
+
+	exported, err := Export(span)
+	assert.NoError(err)
+	assert.NotEmpty(exported)
+
+	components, err := DecodeV4(exported)
+	assert.NoError(err)
+	assert.Equal(SpanObjectTypeProjectLogs, components.ObjectType)
+	assert.Equal("export-test-project", components.ObjectID)
+	assert.Equal(span.SpanContext().SpanID().String(), components.SpanID)
+	assert.Equal(span.SpanContext().TraceID().String(), components.RootSpanID)
+
+	span.End()
+}
+
+func TestExport_NoopSpanFails(t *testing.T) {
+	noopTP := noop.NewTracerProvider()
+	noopTracer := noopTP.Tracer("test")
+	_, noopSpan := noopTracer.Start(context.Background(), "noop")
+
+	_, err := Export(noopSpan)
+	assert.Error(t, err)
+
+	noopSpan.End()
+}
+
+func TestContextWithExportedSpan(t *testing.T) {
+	assert := assert.New(t)
+
+	tp := sdktrace.NewTracerProvider()
+	exporter := tracetest.NewInMemoryExporter()
+
+	session := newTestSession()
+	cfg := Config{
+		DefaultProjectID: "ctx-export-project",
+		Exporter:         exporter,
+		Logger:           logger.Discard(),
+	}
+
+	err := AddSpanProcessor(tp, session, cfg)
+	assert.NoError(err)
+
+	tracer := tp.Tracer("test")
+	_, parentSpan := tracer.Start(context.Background(), "parent")
+	exported, err := Export(parentSpan)
+	assert.NoError(err)
+	parentSpan.End()
+
+	components, err := DecodeV4(exported)
+	assert.NoError(err)
+
+	childCtx, err := ContextWithExportedSpan(context.Background(), exported)
+	assert.NoError(err)
+
+	_, childSpan := tracer.Start(childCtx, "child")
+	childSpan.End()
+
+	// Child should be in same trace as the exported parent
+	assert.Equal(components.RootSpanID, childSpan.SpanContext().TraceID().String())
+
+	_ = tp.ForceFlush(context.Background())
+	spans := exporter.GetSpans()
+	assert.GreaterOrEqual(len(spans), 1)
+}
