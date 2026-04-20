@@ -1,0 +1,62 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 174
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"anthropic_version":"bedrock-2023-05-31","max_tokens":50,"messages":[{"content":[{"text":"What is the capital of France? Reply in one word.","type":"text"}],"role":"user"}]}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Amz-Sdk-Invocation-Id:
+                - 741e2a9c-6a0f-4045-aeba-65b6623c04c3
+            Amz-Sdk-Request:
+                - attempt=1; max=3
+            Content-Type:
+                - application/json
+            User-Agent:
+                - aws-sdk-go-v2/1.41.5 ua/2.1 os/macos lang/go#1.26.2 md/GOOS#darwin md/GOARCH#arm64 api/bedrockruntime#1.50.4 m/E,g
+            X-Amz-Date:
+                - 20260417T175549Z
+        url: https://bedrock-runtime.us-east-2.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/invoke
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 388
+        uncompressed: false
+        body: '{"model":"claude-haiku-4-5-20251001","id":"msg_bdrk_0154D8ckJUGmkwgXoqCfKKKn","type":"message","role":"assistant","content":[{"type":"text","text":"Paris"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":19,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":4}}'
+        headers:
+            Content-Length:
+                - "388"
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 17 Apr 2026 17:55:50 GMT
+            X-Amzn-Bedrock-Cache-Read-Input-Token-Count:
+                - "0"
+            X-Amzn-Bedrock-Cache-Write-Input-Token-Count:
+                - "0"
+            X-Amzn-Bedrock-Input-Token-Count:
+                - "19"
+            X-Amzn-Bedrock-Invocation-Latency:
+                - "1026"
+            X-Amzn-Bedrock-Output-Token-Count:
+                - "4"
+            X-Amzn-Requestid:
+                - 3ac304ba-487a-40e8-bb7c-080c856fa4c5
+        status: 200 OK
+        code: 200
+        duration: 1.068148625s

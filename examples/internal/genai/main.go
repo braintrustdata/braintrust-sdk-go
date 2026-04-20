@@ -133,7 +133,6 @@ func (g *GeminiBot) thinking(ctx context.Context) error {
 			ThinkingConfig: &genai.ThinkingConfig{
 				IncludeThoughts: true,
 				ThinkingBudget:  &thinkingBudget,
-				ThinkingLevel:   genai.ThinkingLevelMedium,
 			},
 			Temperature: genai.Ptr[float32](0.2),
 		},
@@ -364,6 +363,41 @@ func (g *GeminiBot) multimodal(ctx context.Context) error {
 	return nil
 }
 
+// embeddings demonstrates single- and batch-input embedding generation.
+func (g *GeminiBot) embeddings(ctx context.Context) error {
+	ctx, span := tracer.Start(ctx, "embeddings")
+	defer span.End()
+
+	fmt.Println("\n=== Example 10: Embeddings ===")
+
+	single, err := g.client.Models.EmbedContent(
+		ctx,
+		"gemini-embedding-001",
+		genai.Text("The quick brown fox jumps over the lazy dog"),
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("embed single error: %v", err)
+	}
+	fmt.Printf("  single: %d dims\n", len(single.Embeddings[0].Values))
+
+	batch, err := g.client.Models.EmbedContent(
+		ctx,
+		"gemini-embedding-001",
+		[]*genai.Content{
+			{Parts: []*genai.Part{{Text: "hello world"}}},
+			{Parts: []*genai.Part{{Text: "goodbye world"}}},
+			{Parts: []*genai.Part{{Text: "braintrust tracing"}}},
+		},
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("embed batch error: %v", err)
+	}
+	fmt.Printf("  batch: %d embeddings, %d dims each\n", len(batch.Embeddings), len(batch.Embeddings[0].Values))
+	return nil
+}
+
 func main() {
 	fmt.Println("Braintrust Google Gemini Tracing Examples")
 	fmt.Println("==========================================")
@@ -440,6 +474,10 @@ func main() {
 	}
 
 	if err := bot.multimodal(ctx); err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+
+	if err := bot.embeddings(ctx); err != nil {
 		log.Fatalf("Error: %v", err)
 	}
 

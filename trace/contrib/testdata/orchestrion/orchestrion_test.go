@@ -6,6 +6,9 @@ import (
 
 	"github.com/anthropics/anthropic-sdk-go"
 	anthropicoption "github.com/anthropics/anthropic-sdk-go/option"
+	"github.com/firebase/genkit/go/ai"
+	"github.com/firebase/genkit/go/genkit"
+	compatopenai "github.com/firebase/genkit/go/plugins/compat_oai/openai"
 	"github.com/openai/openai-go"
 	openaioption "github.com/openai/openai-go/option"
 	openaiv2 "github.com/openai/openai-go/v2"
@@ -294,6 +297,51 @@ func TestLangChainGo(t *testing.T) {
 		}
 	}
 	require.True(t, found, "Expected langchain.llm.generate_content span")
+}
+
+// TestGenkit verifies that orchestrion auto-injects the Braintrust middleware
+// into genkit.Generate calls. The test initializes Genkit with the compat_oai
+// OpenAI plugin but does NOT pass ai.WithMiddleware — if orchestrion is
+// working, it appends tracegenkit.NewMiddleware() as a GenerateOption at
+// compile time and a genkit.generate span is emitted.
+func TestGenkit(t *testing.T) {
+	exporter := setupOtel(t)
+
+	httpClient := vcr.NewHTTPClient(t)
+
+	ctx := context.Background()
+	g := genkit.Init(ctx,
+		genkit.WithPlugins(&compatopenai.OpenAI{
+			APIKey: "dummy-key-for-vcr",
+			Opts: []openaioption.RequestOption{
+				openaioption.WithHTTPClient(httpClient),
+			},
+		}),
+		genkit.WithDefaultModel("openai/gpt-4o-mini"),
+	)
+
+	_, err := genkit.Generate(ctx, g,
+		ai.WithPrompt("Say hello"),
+		// NOTE: No WithMiddleware here! Orchestrion should inject it.
+	)
+	require.NoError(t, err)
+
+	spans := exporter.Flush()
+	require.NotEmpty(t, spans, "No spans created - orchestrion did not inject middleware for Genkit")
+
+	t.Logf("SUCCESS: %d span(s) created for Genkit", len(spans))
+	for _, span := range spans {
+		t.Logf("  - %s", span.Name())
+	}
+
+	found := false
+	for _, span := range spans {
+		if span.Name() == "genkit.generate" {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "Expected genkit.generate span")
 }
 
 // TestMultipleIntegrations verifies that multiple Braintrust contrib integrations

@@ -6,6 +6,9 @@
 //   - sashabaranov/go-openai
 //   - LangChainGo (OpenAI provider)
 //   - ADK (with Gemini model)
+//   - Google GenAI (direct client)
+//   - CloudWeGo Eino
+//   - Firebase Genkit
 //
 // Note: NO manual middleware or callbacks are added to any client.
 // When built with `orchestrion go build`, tracing middleware is injected at compile time.
@@ -26,6 +29,12 @@ import (
 	"os"
 
 	"github.com/anthropics/anthropic-sdk-go"
+	einoopenai "github.com/cloudwego/eino-ext/components/model/openai"
+	"github.com/cloudwego/eino/callbacks"
+	"github.com/cloudwego/eino/schema"
+	"github.com/firebase/genkit/go/ai"
+	"github.com/firebase/genkit/go/genkit"
+	"github.com/firebase/genkit/go/plugins/googlegenai"
 	"github.com/openai/openai-go"
 	sashabaranov "github.com/sashabaranov/go-openai"
 	"github.com/tmc/langchaingo/llms"
@@ -90,12 +99,27 @@ func main() {
 	fmt.Println("5. ADK (with Gemini model)...")
 	runADK(ctx)
 
+	// 6. Google GenAI (direct) - NO HTTPClient wrapping
+	fmt.Println("6. Google GenAI (direct)...")
+	runGenai(ctx)
+
+	// 7. CloudWeGo Eino - NO callback handler added
+	fmt.Println("7. CloudWeGo Eino...")
+	runEino(ctx)
+
+	// 8. Firebase Genkit - NO middleware added
+	fmt.Println("8. Firebase Genkit...")
+	runGenkit(ctx)
+
 	fmt.Println("\n=== All providers tested ===")
 	fmt.Println("If tracing worked, you should see LLM spans for each provider in Braintrust.")
 	fmt.Printf("View trace: %s\n", bt.Permalink(rootSpan))
 }
 
 func runOpenAI(ctx context.Context) {
+	ctx, span := otel.Tracer("autoinstrumentation-example").Start(ctx, "openai")
+	defer span.End()
+
 	// NO middleware - Orchestrion injects it
 	client := openai.NewClient()
 
@@ -113,11 +137,14 @@ func runOpenAI(ctx context.Context) {
 }
 
 func runAnthropic(ctx context.Context) {
+	ctx, span := otel.Tracer("autoinstrumentation-example").Start(ctx, "anthropic")
+	defer span.End()
+
 	// NO middleware - Orchestrion injects it
 	client := anthropic.NewClient()
 
 	message, err := client.Messages.New(ctx, anthropic.MessageNewParams{
-		Model: anthropic.ModelClaude3_5HaikuLatest,
+		Model: anthropic.ModelClaudeHaiku4_5,
 		Messages: []anthropic.MessageParam{
 			anthropic.NewUserMessage(anthropic.NewTextBlock("Say 'Hello from Anthropic' in exactly those words.")),
 		},
@@ -131,6 +158,9 @@ func runAnthropic(ctx context.Context) {
 }
 
 func runSashabaranov(ctx context.Context) {
+	ctx, span := otel.Tracer("autoinstrumentation-example").Start(ctx, "sashabaranov")
+	defer span.End()
+
 	// NO HTTPClient wrapping - Orchestrion injects it
 	config := sashabaranov.DefaultConfig(os.Getenv("OPENAI_API_KEY"))
 	client := sashabaranov.NewClientWithConfig(config)
@@ -149,6 +179,9 @@ func runSashabaranov(ctx context.Context) {
 }
 
 func runLangChainGo(ctx context.Context) {
+	ctx, span := otel.Tracer("autoinstrumentation-example").Start(ctx, "langchaingo")
+	defer span.End()
+
 	// NO callback - Orchestrion injects it
 	llm, err := langchainopenai.New()
 	if err != nil {
@@ -167,6 +200,9 @@ func runLangChainGo(ctx context.Context) {
 }
 
 func runADK(ctx context.Context) {
+	ctx, span := otel.Tracer("autoinstrumentation-example").Start(ctx, "adk")
+	defer span.End()
+
 	// NO callbacks - Orchestrion injects them
 	model, err := gemini.NewModel(ctx, "gemini-2.5-flash", &genai.ClientConfig{
 		APIKey: os.Getenv("GOOGLE_API_KEY"),
@@ -222,4 +258,71 @@ func runADK(ctx context.Context) {
 			}
 		}
 	}
+}
+
+func runGenai(ctx context.Context) {
+	ctx, span := otel.Tracer("autoinstrumentation-example").Start(ctx, "genai")
+	defer span.End()
+
+	// NO HTTPClient wrapping - Orchestrion injects it
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{
+		APIKey: os.Getenv("GOOGLE_API_KEY"),
+	})
+	if err != nil {
+		log.Printf("   GenAI error: %v", err)
+		return
+	}
+
+	resp, err := client.Models.GenerateContent(ctx, "gemini-2.5-flash",
+		genai.Text("Say 'Hello from GenAI' in exactly those words."), nil)
+	if err != nil {
+		log.Printf("   GenAI error: %v", err)
+		return
+	}
+	fmt.Printf("   Response: %s\n", resp.Text())
+}
+
+func runEino(ctx context.Context) {
+	ctx, span := otel.Tracer("autoinstrumentation-example").Start(ctx, "eino")
+	defer span.End()
+
+	// NO handler added - Orchestrion injects it
+	callbacks.AppendGlobalHandlers()
+
+	model, err := einoopenai.NewChatModel(ctx, &einoopenai.ChatModelConfig{
+		Model:  "gpt-4o-mini",
+		APIKey: os.Getenv("OPENAI_API_KEY"),
+	})
+	if err != nil {
+		log.Printf("   Eino error: %v", err)
+		return
+	}
+
+	resp, err := model.Generate(ctx, []*schema.Message{
+		{Role: schema.User, Content: "Say 'Hello from Eino' in exactly those words."},
+	})
+	if err != nil {
+		log.Printf("   Eino error: %v", err)
+		return
+	}
+	fmt.Printf("   Response: %s\n", resp.Content)
+}
+
+func runGenkit(ctx context.Context) {
+	ctx, span := otel.Tracer("autoinstrumentation-example").Start(ctx, "genkit")
+	defer span.End()
+
+	g := genkit.Init(ctx,
+		genkit.WithPlugins(&googlegenai.GoogleAI{}),
+		genkit.WithDefaultModel("googleai/gemini-2.5-flash"),
+	)
+
+	// NO middleware - Orchestrion injects it
+	resp, err := genkit.Generate(ctx, g,
+		ai.WithPrompt("Say 'Hello from Genkit' in exactly those words."))
+	if err != nil {
+		log.Printf("   Genkit error: %v", err)
+		return
+	}
+	fmt.Printf("   Response: %s\n", resp.Text())
 }

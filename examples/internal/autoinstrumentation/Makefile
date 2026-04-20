@@ -16,7 +16,7 @@ help:
 	@echo "  make build  - Build with orchestrion auto-instrumentation"
 
 run:
-	orchestrion go run .
+	GOWORK=off orchestrion go run .
 
 build:
-	orchestrion go build -o autoinstrumentation-example .
+	GOWORK=off orchestrion go build -o autoinstrumentation-example .

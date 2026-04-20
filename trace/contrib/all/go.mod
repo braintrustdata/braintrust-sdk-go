@@ -5,14 +5,15 @@ go 1.24.4
 toolchain go1.26.1
 
 require (
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk v0.5.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.5.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino v0.5.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.5.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.5.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.5.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.5.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.5.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk v0.6.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.6.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime v0.6.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino v0.6.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.6.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.6.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.6.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.6.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.6.0
 )
 
 require (
@@ -20,8 +21,14 @@ require (
 	cloud.google.com/go/auth v0.17.0 // indirect
 	cloud.google.com/go/compute/metadata v0.9.0 // indirect
 	github.com/anthropics/anthropic-sdk-go v1.23.0 // indirect
+	github.com/aws/aws-sdk-go-v2 v1.41.5 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.8 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.21 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.21 // indirect
+	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.50.4 // indirect
+	github.com/aws/smithy-go v1.25.0 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
-	github.com/braintrustdata/braintrust-sdk-go v0.5.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go v0.6.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.15.0 // indirect
@@ -47,14 +54,14 @@ require (
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/invopop/jsonschema v0.13.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/cpuid/v2 v2.2.9 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
 	github.com/mailru/easyjson v0.9.0 // indirect
 	github.com/mbleigh/raymond v0.0.0-20250414171441-6b3a58ab9e0a // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/nikolalohinski/gonja v1.5.3 // indirect
 	github.com/openai/openai-go v1.12.0 // indirect
-	github.com/pelletier/go-toml/v2 v2.0.9 // indirect
+	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
 	github.com/sashabaranov/go-openai v1.41.2 // indirect
@@ -78,7 +85,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.38.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.38.0 // indirect
 	go.opentelemetry.io/otel/trace v1.38.0 // indirect
-	golang.org/x/arch v0.11.0 // indirect
+	golang.org/x/arch v0.15.0 // indirect
 	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
 	golang.org/x/net v0.47.0 // indirect
@@ -98,6 +105,7 @@ replace (
 	github.com/braintrustdata/braintrust-sdk-go => ../../..
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk => ../adk
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic => ../anthropic
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime => ../bedrockruntime
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino => ../cloudwego/eino
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai => ../genai
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit => ../genkit

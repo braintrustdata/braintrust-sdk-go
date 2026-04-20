@@ -8,7 +8,7 @@
 
 ## Testing
 - Follow TDD: write failing test first, then implement
-- Integration tests should use real API requests recorded via VCR, not synthetic/mock data
+- **Prefer real tests over mocks.** Integration tests must use real API requests recorded via VCR. Mocks, fake HTTP handlers, canned JSON responses, and stub SDK clients are a last resort — only acceptable when the real API cannot be recorded (e.g. non-deterministic binary protocols the cassette can't replay, or third-party services without a test account). If you reach for a mock, document in the test *why* VCR wasn't viable.
 - Single test: `go test -v -run=TestName ./path/to/package`
 - Record single cassette: `VCR_MODE=record go test -v -run=TestName ./path/to/package`
 - VCR modes:
@@ -17,7 +17,7 @@
   - `VCR_MODE=off`: Hit live APIs (needs API keys)
 
 ## Examples
-- New features should be covered in `examples/internal/` for validation
+- **Every feature must be represented in `examples/internal/`.** This is not optional — a feature without an example is incomplete. Extend an existing per-integration example when the feature belongs to one (e.g. add an embeddings function to `examples/internal/openai-v2/main.go`), or create a new subdirectory when the feature stands alone.
 - Run a single example: `go run examples/internal/<name>/main.go`
 - Run all examples: `make examples`
 

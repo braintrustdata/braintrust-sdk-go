@@ -82,11 +82,14 @@ func NewVCRRecorder(t *testing.T, cassettePath string) (*recorder.Recorder, erro
 // scrubCredentials removes sensitive headers from cassette interactions
 // before they are saved to disk.
 func scrubCredentials(i *cassette.Interaction) error {
-	// Sensitive header patterns to scrub
+	// Sensitive header patterns to scrub (case-insensitive substring match).
 	sensitivePatterns := []string{
 		"authorization",
 		"api-key",
 		"organization-id",
+		// AWS SigV4: session tokens are temporary STS credentials that
+		// shouldn't live in cassettes even though replay doesn't need them.
+		"x-amz-security-token",
 	}
 
 	targets := []map[string][]string{

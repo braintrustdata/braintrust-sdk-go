@@ -116,6 +116,10 @@ func openaiRouter(cfg *middlewareConfig, path string) internal.MiddlewareTracer 
 		return newResponsesTracer(cfg)
 	}
 
+	if strings.HasSuffix(path, "/v1/embeddings") {
+		return newEmbeddingsTracer(cfg)
+	}
+
 	return nil
 }
 

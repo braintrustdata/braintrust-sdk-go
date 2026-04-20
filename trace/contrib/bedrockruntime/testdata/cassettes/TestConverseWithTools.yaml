@@ -1,0 +1,50 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 359
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"inferenceConfig":{"maxTokens":256},"messages":[{"content":[{"text":"What''s the weather in Paris? Call the tool."}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"Get weather for a city","inputSchema":{"json":{"properties":{"city":{"type":"string"}},"required":["city"],"type":"object"}},"name":"get_weather"}}]}}'
+        form: {}
+        headers:
+            Amz-Sdk-Invocation-Id:
+                - 0520661b-9848-43b4-956b-bf38c5425aa1
+            Amz-Sdk-Request:
+                - attempt=1; max=3
+            Content-Type:
+                - application/json
+            User-Agent:
+                - aws-sdk-go-v2/1.41.5 ua/2.1 os/macos lang/go#1.26.2 md/GOOS#darwin md/GOARCH#arm64 api/bedrockruntime#1.50.4 m/E,g
+            X-Amz-Date:
+                - 20260417T175540Z
+        url: https://bedrock-runtime.us-east-2.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/converse
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 426
+        uncompressed: false
+        body: '{"metrics":{"latencyMs":1614},"output":{"message":{"content":[{"toolUse":{"input":{"city":"Paris"},"name":"get_weather","toolUseId":"tooluse_DWkjDzxB23n7SWnZvl3sy0","type":"tool_use"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":567,"outputTokens":54,"serverToolUsage":{},"totalTokens":621}}'
+        headers:
+            Content-Length:
+                - "426"
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 17 Apr 2026 17:55:42 GMT
+            X-Amzn-Requestid:
+                - 61716b46-b9fb-4fc6-94af-f3d50faea36e
+        status: 200 OK
+        code: 200
+        duration: 1.671020084s

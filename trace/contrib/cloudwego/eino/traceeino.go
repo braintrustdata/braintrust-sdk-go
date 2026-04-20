@@ -39,6 +39,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/cloudwego/eino/callbacks"
+	"github.com/cloudwego/eino/components/embedding"
 	"github.com/cloudwego/eino/components/model"
 	"github.com/cloudwego/eino/components/tool"
 	"github.com/cloudwego/eino/schema"
@@ -110,6 +111,9 @@ func (h *Handler) OnStart(ctx context.Context, info *callbacks.RunInfo, input ca
 	if toolInput := tool.ConvCallbackInput(input); toolInput != nil {
 		return h.onStartTool(ctx, info, toolInput)
 	}
+	if embInput := embedding.ConvCallbackInput(input); embInput != nil {
+		return h.onStartEmbedding(ctx, info, embInput)
+	}
 	return ctx
 }
 
@@ -165,6 +169,29 @@ func (h *Handler) onStartTool(ctx context.Context, info *callbacks.RunInfo, tool
 	return context.WithValue(childCtx, spanKey{}, span)
 }
 
+func (h *Handler) onStartEmbedding(ctx context.Context, info *callbacks.RunInfo, embInput *embedding.CallbackInput) context.Context {
+	spanName := spanNameFromInfo(info)
+	childCtx, span := h.tracer().Start(ctx, spanName, trace.WithSpanKind(trace.SpanKindClient))
+
+	// Instrumentation errors from SetJSONAttr are silently dropped — the
+	// underlying embedding operation is unaffected, and marking the span
+	// as errored would misreport the caller's operation.
+	_ = traceinternal.SetJSONAttr(span, "braintrust.span_attributes", map[string]string{"type": "llm"})
+
+	if len(embInput.Texts) > 0 {
+		_ = traceinternal.SetJSONAttr(span, "braintrust.input_json", embInput.Texts)
+	}
+
+	metadata := buildEmbeddingMetadata(info, embInput.Config)
+	_ = traceinternal.SetJSONAttr(span, "braintrust.metadata", metadata)
+
+	if embInput.Config != nil && embInput.Config.Model != "" {
+		span.SetAttributes(attribute.String("gen_ai.request.model", embInput.Config.Model))
+	}
+
+	return context.WithValue(childCtx, spanKey{}, span)
+}
+
 // OnEnd is called after a component returns successfully. It captures output
 // and metrics for ChatModel and Tool components, then ends the span.
 func (h *Handler) OnEnd(ctx context.Context, info *callbacks.RunInfo, output callbacks.CallbackOutput) context.Context {
@@ -204,6 +231,19 @@ func (h *Handler) OnEnd(ctx context.Context, info *callbacks.RunInfo, output cal
 				span.SetAttributes(attribute.String("braintrust.output_json", toolOutput.Response))
 			} else if err := traceinternal.SetJSONAttr(span, "braintrust.output_json", toolOutput.Response); err != nil {
 				span.RecordError(err)
+			}
+		}
+		return ctx
+	}
+
+	if embOutput := embedding.ConvCallbackOutput(output); embOutput != nil {
+		// Instrumentation errors are silently dropped — the embedding call
+		// already succeeded; marking the span errored would misreport it.
+		_ = traceinternal.SetJSONAttr(span, "braintrust.output_json", embeddingOutputSummary(embOutput.Embeddings))
+		if embOutput.TokenUsage != nil {
+			metrics := embeddingTokenUsageToMetrics(embOutput.TokenUsage)
+			if len(metrics) > 0 {
+				_ = traceinternal.SetJSONAttr(span, "braintrust.metrics", metrics)
 			}
 		}
 		return ctx
@@ -510,6 +550,50 @@ func schemaTokenUsageToMetrics(u *schema.TokenUsage) map[string]int64 {
 	}
 	if u.CompletionTokensDetails.ReasoningTokens > 0 {
 		metrics["completion_reasoning_tokens"] = int64(u.CompletionTokensDetails.ReasoningTokens)
+	}
+	return metrics
+}
+
+// buildEmbeddingMetadata constructs the braintrust.metadata map for embedding spans.
+func buildEmbeddingMetadata(info *callbacks.RunInfo, cfg *embedding.Config) map[string]any {
+	metadata := map[string]any{
+		"provider": "cloudwego/eino",
+	}
+	if info != nil && info.Type != "" {
+		metadata["provider"] = info.Type
+	}
+	if cfg != nil {
+		if cfg.Model != "" {
+			metadata["model"] = cfg.Model
+		}
+		if cfg.EncodingFormat != "" {
+			metadata["encoding_format"] = cfg.EncodingFormat
+		}
+	}
+	return metadata
+}
+
+// embeddingOutputSummary mirrors the Python SDK convention for multi-input
+// embedding calls: {"embedding_length": N, "embeddings_count": M}.
+func embeddingOutputSummary(embeddings [][]float64) map[string]any {
+	out := map[string]any{
+		"embeddings_count": len(embeddings),
+	}
+	if len(embeddings) > 0 {
+		out["embedding_length"] = len(embeddings[0])
+	}
+	return out
+}
+
+// embeddingTokenUsageToMetrics converts embedding.TokenUsage into the standard
+// Braintrust metrics map. Embeddings have no completion tokens.
+func embeddingTokenUsageToMetrics(u *embedding.TokenUsage) map[string]int64 {
+	metrics := make(map[string]int64)
+	if u.PromptTokens > 0 {
+		metrics["prompt_tokens"] = int64(u.PromptTokens)
+	}
+	if u.TotalTokens > 0 {
+		metrics["tokens"] = int64(u.TotalTokens)
 	}
 	return metrics
 }

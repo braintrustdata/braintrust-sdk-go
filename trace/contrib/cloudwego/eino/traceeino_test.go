@@ -12,6 +12,7 @@ import (
 	oteltrace "go.opentelemetry.io/otel/trace"
 
 	"github.com/cloudwego/eino/callbacks"
+	"github.com/cloudwego/eino/components/embedding"
 	"github.com/cloudwego/eino/components/model"
 	"github.com/cloudwego/eino/components/tool"
 	"github.com/cloudwego/eino/schema"
@@ -739,4 +740,100 @@ func TestSpanNameFallback(t *testing.T) {
 			assert.Equal(t, tt.expected, spanNameFromInfo(tt.info))
 		})
 	}
+}
+
+func TestEmbeddingCallback(t *testing.T) {
+	tp, exporter := oteltest.Setup(t)
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
+
+	ctx := context.Background()
+	info := makeRunInfo("my-embedder", "OpenAI")
+
+	input := &embedding.CallbackInput{
+		Texts: []string{"hello world", "braintrust tracing"},
+		Config: &embedding.Config{
+			Model:          "text-embedding-3-small",
+			EncodingFormat: "float",
+		},
+	}
+	output := &embedding.CallbackOutput{
+		Embeddings: [][]float64{
+			{0.1, 0.2, 0.3},
+			{0.4, 0.5, 0.6},
+		},
+		TokenUsage: &embedding.TokenUsage{
+			PromptTokens: 5,
+			TotalTokens:  5,
+		},
+	}
+
+	ctx2 := handler.OnStart(ctx, info, input)
+	handler.OnEnd(ctx2, info, output)
+
+	spans := exporter.Flush()
+	require.Len(t, spans, 1)
+	span := spans[0]
+
+	span.AssertNameIs("eino.my-embedder")
+	span.AssertJSONAttrEquals("braintrust.span_attributes", map[string]any{"type": "llm"})
+
+	inp := span.Input()
+	require.NotNil(t, inp)
+	texts, ok := inp.([]interface{})
+	require.True(t, ok, "input should be array of texts")
+	require.Len(t, texts, 2)
+	assert.Equal(t, "hello world", texts[0])
+	assert.Equal(t, "braintrust tracing", texts[1])
+
+	out := span.Output()
+	outMap, ok := out.(map[string]interface{})
+	require.True(t, ok)
+	assert.Equal(t, float64(3), outMap["embedding_length"])
+	assert.Equal(t, float64(2), outMap["embeddings_count"])
+
+	metadata := span.Metadata()
+	assert.Equal(t, "OpenAI", metadata["provider"])
+	assert.Equal(t, "text-embedding-3-small", metadata["model"])
+	assert.Equal(t, "float", metadata["encoding_format"])
+
+	metrics := span.Metrics()
+	assert.Equal(t, float64(5), metrics["prompt_tokens"])
+	assert.Equal(t, float64(5), metrics["tokens"])
+	_, hasCompletion := metrics["completion_tokens"]
+	assert.False(t, hasCompletion, "embeddings should not have completion_tokens")
+}
+
+func TestEmbeddingOutputSummary(t *testing.T) {
+	cases := []struct {
+		name string
+		in   [][]float64
+		want map[string]any
+	}{
+		{
+			name: "non-empty",
+			in:   [][]float64{{0.1, 0.2, 0.3}, {0.4, 0.5, 0.6}},
+			want: map[string]any{"embedding_length": 3, "embeddings_count": 2},
+		},
+		{
+			name: "empty",
+			in:   nil,
+			want: map[string]any{"embeddings_count": 0},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, embeddingOutputSummary(tc.in))
+		})
+	}
+}
+
+func TestEmbeddingTokenUsageToMetrics(t *testing.T) {
+	m := embeddingTokenUsageToMetrics(&embedding.TokenUsage{
+		PromptTokens: 7,
+		TotalTokens:  7,
+	})
+	assert.Equal(t, int64(7), m["prompt_tokens"])
+	assert.Equal(t, int64(7), m["tokens"])
+	_, hasCompletion := m["completion_tokens"]
+	assert.False(t, hasCompletion)
 }
