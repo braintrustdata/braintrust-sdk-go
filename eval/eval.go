@@ -31,6 +31,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"sync"
 	"time"
 
@@ -620,7 +621,7 @@ func (e *eval[I, R]) permalink() string {
 	}
 
 	if orgName != "" && e.experimentID != "" {
-		return fmt.Sprintf("%s/app/%s/object?object_type=experiment&object_id=%s", appURL, orgName, e.experimentID)
+		return fmt.Sprintf("%s/app/%s/object?object_type=experiment&object_id=%s", appURL, url.PathEscape(orgName), e.experimentID)
 	}
 
 	return ""

@@ -11,6 +11,8 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 
+	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/logger"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
 	"github.com/braintrustdata/braintrust-sdk-go/trace"
@@ -250,6 +252,40 @@ func TestNewEval_Success(t *testing.T) {
 			"braintrust.span_attributes": map[string]any{"type": "eval"},
 		},
 	})
+}
+
+func TestPermalink_EscapesOrgName(t *testing.T) {
+	t.Parallel()
+
+	session := auth.NewTestSession(
+		auth.TestAPIKey,
+		"org-test-12345",
+		"Test Org With Space",
+		"https://api-test.braintrust.dev",
+		"https://test.braintrust.dev",
+		"https://test.braintrust.dev",
+		logger.NewFailTestLogger(t),
+	)
+
+	tp, _ := oteltest.Setup(t)
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{}, nil
+	})
+	e := testNewEval[testInput, testOutput](
+		session,
+		tp.Tracer(t.Name()),
+		"exp-12345678",
+		"test-experiment",
+		"proj-87654321",
+		"test-project",
+		NewDataset([]Case[testInput, testOutput]{}),
+		task,
+		nil,
+		1,
+	)
+
+	const want = "https://test.braintrust.dev/app/Test%20Org%20With%20Space/object?object_type=experiment&object_id=exp-12345678"
+	assert.Equal(t, want, e.permalink())
 }
 
 func TestNewEval_Parallelism(t *testing.T) {
