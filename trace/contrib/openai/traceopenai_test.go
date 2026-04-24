@@ -4,9 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
@@ -570,4 +573,122 @@ func TestResponsesAPIWithReasoning(t *testing.T) {
 	require.True(ok, "reasoning should be a map")
 	assert.Equal("low", reasonMap["effort"], "effort should be 'low'")
 	assert.Contains([]string{"auto", "detailed", "concise"}, reasonMap["summary"], "summary should be a valid value")
+}
+
+// TestResponsesStreamingErrorEvent verifies that when the stream carries a
+// `type: error` event (e.g. context_length_exceeded), TagSpan returns an
+// error so the middleware can mark the span with the standard OTel error
+// signals (issue #113).
+func TestResponsesStreamingErrorEvent(t *testing.T) {
+	tp, _ := oteltest.Setup(t)
+	assert := assert.New(t)
+	require := require.New(t)
+
+	rt := newResponsesTracer(&middlewareConfig{tracerProvider: tp})
+	rt.streaming = true
+
+	reqBody := strings.NewReader(`{"model":"gpt-4","input":"hi","stream":true}`)
+	_, span, err := rt.StartSpan(context.Background(), time.Now(), reqBody)
+	require.NoError(err)
+
+	stream := strings.Join([]string{
+		`event: error`,
+		`data: {"type":"error","code":"context_length_exceeded","message":"This model's maximum context length is 8192 tokens.","param":null,"sequence_number":1}`,
+		``,
+		``,
+	}, "\n")
+
+	tagErr := rt.TagSpan(span, strings.NewReader(stream))
+	span.End()
+
+	require.Error(tagErr, "TagSpan should return an error when the stream carries an error event")
+	assert.Contains(tagErr.Error(), "context_length_exceeded")
+}
+
+// TestResponsesStreamingEndsWithoutCompleted verifies that when the stream
+// ends without a response.completed event and no error event, TagSpan does
+// not surface an error — the truncation could be a legitimate client-side
+// close, so we don't want to mark the span as failed.
+func TestResponsesStreamingEndsWithoutCompleted(t *testing.T) {
+	tp, _ := oteltest.Setup(t)
+	require := require.New(t)
+
+	rt := newResponsesTracer(&middlewareConfig{tracerProvider: tp})
+	rt.streaming = true
+
+	reqBody := strings.NewReader(`{"model":"gpt-4","input":"hi","stream":true}`)
+	_, span, err := rt.StartSpan(context.Background(), time.Now(), reqBody)
+	require.NoError(err)
+
+	stream := strings.Join([]string{
+		`event: response.created`,
+		`data: {"type":"response.created","sequence_number":0}`,
+		``,
+		``,
+	}, "\n")
+
+	tagErr := rt.TagSpan(span, strings.NewReader(stream))
+	span.End()
+
+	require.NoError(tagErr, "an incomplete stream without a type:error event should not be surfaced as an OTel error")
+}
+
+// TestResponsesStreamingErrorEventEndToEnd runs the full middleware +
+// openai client path for a streaming response whose body carries a
+// `type: error` event. The span should end with OTel error status and a
+// recorded exception event (issue #113).
+func TestResponsesStreamingErrorEventEndToEnd(t *testing.T) {
+	_, tp, exporter := setUpTest(t)
+	assert := assert.New(t)
+	require := require.New(t)
+
+	errorBody := strings.Join([]string{
+		`event: response.created`,
+		`data: {"type":"response.created","sequence_number":0}`,
+		``,
+		`event: error`,
+		`data: {"type":"error","code":"context_length_exceeded","message":"This model's maximum context length is 8192 tokens.","sequence_number":1}`,
+		``,
+		``,
+	}, "\n")
+
+	streamware := func(_ *http.Request, _ NextMiddleware) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: 200,
+			Header:     http.Header{"Content-Type": []string{"text/event-stream"}},
+			Body:       io.NopCloser(strings.NewReader(errorBody)),
+		}, nil
+	}
+
+	client := openai.NewClient(
+		option.WithMaxRetries(0),
+		option.WithMiddleware(NewMiddleware(WithTracerProvider(tp))), //nolint:bodyclose // false positive - NewMiddleware returns middleware func
+		option.WithMiddleware(streamware),
+	)
+
+	stream := client.Responses.NewStreaming(context.Background(), responses.ResponseNewParams{
+		Input: responses.ResponseNewParamsInputUnion{OfString: openai.String("hai")},
+		Model: testModel,
+	})
+	// Drain so the middleware gets the whole body.
+	for stream.Next() {
+	}
+	require.NoError(stream.Close())
+
+	ts := exporter.FlushOne()
+	assert.Equal(codes.Error, ts.Stub.Status.Code)
+	assert.Contains(ts.Stub.Status.Description, "context_length_exceeded")
+
+	// Verify an exception event was recorded with the error message.
+	var found bool
+	for _, ev := range ts.Stub.Events {
+		if ev.Name == "exception" {
+			for _, a := range ev.Attributes {
+				if string(a.Key) == "exception.message" && strings.Contains(a.Value.AsString(), "context_length_exceeded") {
+					found = true
+				}
+			}
+		}
+	}
+	assert.True(found, "expected an exception event with the stream error message")
 }

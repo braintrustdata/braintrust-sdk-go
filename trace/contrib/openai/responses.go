@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"strings"
 	"time"
@@ -110,6 +111,7 @@ func (rt *responsesTracer) parseStreamingResponse(span trace.Span, body io.Reade
 	scanner := bufio.NewScanner(body)
 	var timeToFirstToken time.Duration
 	var completedMsg map[string]any
+	var streamError string
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -130,9 +132,9 @@ func (rt *responsesTracer) parseStreamingResponse(span trace.Span, body io.Reade
 		}
 
 		if msgType, ok := envelope["type"].(string); ok {
-			// the response.completed message has everything, so just parse that. Should we
-			// parse the other messages too?
-			if msgType == "response.completed" {
+			switch msgType {
+			case "response.completed":
+				// the response.completed message has everything, so just parse that.
 				if msg, ok := envelope["response"].(map[string]any); ok {
 					// For streaming responses, copy extra fields from the envelope
 					// that might be present in the outer wrapper
@@ -142,6 +144,15 @@ func (rt *responsesTracer) parseStreamingResponse(span trace.Span, body io.Reade
 						}
 					}
 					completedMsg = msg
+				}
+			case "error":
+				// OpenAI Responses API delivers stream errors (e.g. context_length_exceeded)
+				// as HTTP 200 responses with a `type: error` data event. Capture the envelope
+				// verbatim so downstream consumers can see the code/message/param.
+				if b, err := json.Marshal(envelope); err == nil {
+					streamError = string(b)
+				} else {
+					streamError = line
 				}
 			}
 		}
@@ -156,8 +167,20 @@ func (rt *responsesTracer) parseStreamingResponse(span trace.Span, body io.Reade
 		if err := rt.handleResponseCompletedMessage(span, completedMsg, timeToFirstToken); err != nil {
 			return err
 		}
+		return nil
 	}
 
+	// If the stream carried an explicit error event (OpenAI delivers errors like
+	// context_length_exceeded as HTTP 200 with a `type: error` data event),
+	// surface it so the middleware can mark the span as errored via
+	// span.RecordError / span.SetStatus (issue #113).
+	if streamError != "" {
+		return errors.New(streamError)
+	}
+
+	// Stream ended without response.completed and no error event — likely a
+	// client-side close. Don't flag it as an error because we can't distinguish
+	// truncation from a clean abort.
 	return nil
 }
 
