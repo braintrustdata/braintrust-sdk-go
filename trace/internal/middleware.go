@@ -90,6 +90,8 @@ func Middleware(getMiddlewareTracer TracerRouter, log logger.Logger) func(*http.
 			now := time.Now()
 			if err := mt.TagSpan(span, r); err != nil {
 				log.Warn("Error tagging span", "error", err)
+				span.RecordError(err)
+				span.SetStatus(codes.Error, err.Error())
 			}
 			span.End(trace.WithTimestamp(now))
 		}

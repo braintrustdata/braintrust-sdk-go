@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
@@ -261,4 +263,75 @@ func TestToInt64(t *testing.T) {
 			}
 		})
 	}
+}
+
+// errorTagSpanTracer is a MiddlewareTracer whose TagSpan always returns an error.
+type errorTagSpanTracer struct {
+	tp       trace.TracerProvider
+	tagErr   error
+	startErr error
+}
+
+func (e *errorTagSpanTracer) StartSpan(ctx context.Context, start time.Time, _ io.Reader) (context.Context, trace.Span, error) {
+	tracer := e.tp.Tracer("braintrust")
+	newCtx, span := tracer.Start(ctx, "error-tagspan-span", trace.WithTimestamp(start))
+	return newCtx, span, e.startErr
+}
+
+func (e *errorTagSpanTracer) TagSpan(_ trace.Span, _ io.Reader) error {
+	return e.tagErr
+}
+
+// TestMiddlewarePropagatesTagSpanError verifies the middleware calls
+// span.RecordError and span.SetStatus(codes.Error, ...) when TagSpan returns
+// a non-nil error, matching the transport-level error path (issue #113).
+func TestMiddlewarePropagatesTagSpanError(t *testing.T) {
+	tp, exporter := oteltest.Setup(t)
+
+	tagErr := errors.New("stream ended with error: context_length_exceeded")
+	mt := &errorTagSpanTracer{tp: tp, tagErr: tagErr}
+
+	router := func(path string) MiddlewareTracer {
+		return mt
+	}
+
+	middleware := Middleware(router, nil) //nolint:bodyclose // false positive - responses closed by the test
+
+	req := httptest.NewRequest("POST", "/v1/responses", strings.NewReader(`{"stream":true}`))
+	req.Header.Set("Content-Type", "application/json")
+
+	next := func(req *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: 200,
+			Header:     http.Header{"Content-Type": []string{"text/event-stream"}},
+			Body:       io.NopCloser(strings.NewReader(`event: error` + "\n" + `data: {"type":"error"}` + "\n\n")),
+		}, nil
+	}
+
+	resp, err := middleware(req, next)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	_, err = io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.NoError(t, resp.Body.Close())
+
+	ts := exporter.FlushOne()
+	assert.Equal(t, codes.Error, ts.Stub.Status.Code, "span status should be Error when TagSpan returns an error")
+	assert.Contains(t, ts.Stub.Status.Description, "context_length_exceeded")
+
+	// Verify the error was recorded as an exception event on the span.
+	events := ts.Stub.Events
+	require.NotEmpty(t, events, "expected at least one event recording the error")
+	var found bool
+	for _, ev := range events {
+		if ev.Name == "exception" {
+			for _, attr := range ev.Attributes {
+				if string(attr.Key) == "exception.message" && strings.Contains(attr.Value.AsString(), "context_length_exceeded") {
+					found = true
+				}
+			}
+		}
+	}
+	assert.True(t, found, "expected an exception event with the TagSpan error message")
 }

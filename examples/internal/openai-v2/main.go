@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/conversations"
@@ -54,6 +55,7 @@ func main() {
 		{"responses", responsesAPI},
 		{"responses-structured-output", responsesStructuredOutput},
 		{"responses-streaming", responsesStreaming},
+		{"responses-streaming-error", responsesStreamingError},
 		{"conversations", conversationsAPI},
 		{"models-list", modelsList},
 		{"chat-vision", chatVision},
@@ -305,6 +307,26 @@ func responsesStreaming(ctx context.Context, client openai.Client) error {
 		final = final[:30] + "..."
 	}
 	fmt.Printf("  %s\n", final)
+	return nil
+}
+
+// responsesStreamingError exercises the streaming error path: it sends an
+// input well over the model's context window so OpenAI returns a mid-stream
+// `type: error` event. The middleware marks the span with an OTel error
+// status + exception event so the failure is visible in the trace.
+func responsesStreamingError(ctx context.Context, client openai.Client) error {
+	huge := strings.Repeat("context overflow ", 20000)
+	stream := client.Responses.NewStreaming(ctx, responses.ResponseNewParams{
+		Model: openai.ChatModelGPT4,
+		Input: responses.ResponseNewParamsInputUnion{OfString: openai.String(huge)},
+	})
+	for stream.Next() {
+	}
+	if err := stream.Err(); err != nil {
+		fmt.Printf("  stream errored as expected: %v\n", err)
+		return nil
+	}
+	fmt.Println("  stream completed without an error (model may have accepted the input)")
 	return nil
 }
 
