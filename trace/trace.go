@@ -26,6 +26,7 @@ package trace
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -62,6 +63,15 @@ type Config struct {
 
 	// Logger
 	Logger logger.Logger
+
+	// AttachmentUploader flushes/shuts down attachment uploads owned by this processor.
+	AttachmentUploader AttachmentUploader
+}
+
+// AttachmentUploader tracks pending attachment uploads for span processor flush/shutdown.
+type AttachmentUploader interface {
+	ForceFlush(ctx context.Context) error
+	Shutdown(ctx context.Context) error
 }
 
 // SpanFilterFunc decides which spans to send to Braintrust.
@@ -130,6 +140,7 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 		rootFilters,
 		session,
 		log,
+		cfg.AttachmentUploader,
 	)
 	if err != nil {
 		return nil, err
@@ -343,12 +354,13 @@ func (o *otelAttrs) makeAttrs() {
 }
 
 type spanProcessor struct {
-	wrapped     sdktrace.SpanProcessor
-	filters     []SpanFilterFunc
-	rootFilters []SpanFilterFunc
-	otelAttrs   *otelAttrs
-	session     *auth.Session // Session provides endpoints and org name
-	logger      logger.Logger
+	wrapped            sdktrace.SpanProcessor
+	filters            []SpanFilterFunc
+	rootFilters        []SpanFilterFunc
+	otelAttrs          *otelAttrs
+	session            *auth.Session // Session provides endpoints and org name
+	logger             logger.Logger
+	attachmentUploader AttachmentUploader
 }
 
 // newSpanProcessor creates a new span processor that wraps another processor and adds parent labeling.
@@ -359,6 +371,7 @@ func newSpanProcessor(
 	rootFilters []SpanFilterFunc,
 	session *auth.Session,
 	log logger.Logger,
+	attachmentUploader AttachmentUploader,
 ) (*spanProcessor, error) {
 	// Get app URL from session
 	appURL := session.AppPublicURL()
@@ -367,12 +380,13 @@ func newSpanProcessor(
 	attrs := newOtelAttrs(defaultParent, "", appURL)
 
 	sp := &spanProcessor{
-		wrapped:     proc,
-		filters:     filters,
-		rootFilters: rootFilters,
-		otelAttrs:   attrs,
-		session:     session,
-		logger:      log,
+		wrapped:            proc,
+		filters:            filters,
+		rootFilters:        rootFilters,
+		otelAttrs:          attrs,
+		session:            session,
+		logger:             log,
+		attachmentUploader: attachmentUploader,
 	}
 
 	return sp, nil
@@ -454,12 +468,32 @@ func (sp *spanProcessor) shouldForwardSpan(span sdktrace.ReadOnlySpan) bool {
 
 // Shutdown shuts down the span processor.
 func (sp *spanProcessor) Shutdown(ctx context.Context) error {
-	return sp.wrapped.Shutdown(ctx)
+	return errors.Join(
+		sp.wrapped.Shutdown(ctx),
+		sp.shutdownAttachments(ctx),
+	)
+}
+
+func (sp *spanProcessor) shutdownAttachments(ctx context.Context) error {
+	if sp.attachmentUploader == nil {
+		return nil
+	}
+	return sp.attachmentUploader.Shutdown(ctx)
 }
 
 // ForceFlush forces a flush of the span processor.
 func (sp *spanProcessor) ForceFlush(ctx context.Context) error {
-	return sp.wrapped.ForceFlush(ctx)
+	return errors.Join(
+		sp.wrapped.ForceFlush(ctx),
+		sp.flushAttachments(ctx),
+	)
+}
+
+func (sp *spanProcessor) flushAttachments(ctx context.Context) error {
+	if sp.attachmentUploader == nil {
+		return nil
+	}
+	return sp.attachmentUploader.ForceFlush(ctx)
 }
 
 var _ sdktrace.SpanProcessor = &spanProcessor{}

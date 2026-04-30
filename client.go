@@ -2,17 +2,23 @@ package braintrust
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/trace"
 	oteltrace "go.opentelemetry.io/otel/trace"
+
+	"github.com/google/uuid"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/eval"
+	internalattachment "github.com/braintrustdata/braintrust-sdk-go/internal/attachment"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 	bttrace "github.com/braintrustdata/braintrust-sdk-go/trace"
+	bttraceattachment "github.com/braintrustdata/braintrust-sdk-go/trace/attachment"
 )
 
 // Client is the main Braintrust SDK client
@@ -21,6 +27,7 @@ type Client struct {
 	logger         logger.Logger
 	session        *auth.Session
 	tracerProvider *trace.TracerProvider
+	uploader       *internalattachment.LazyUploader
 }
 
 // New creates a new Braintrust client.
@@ -90,9 +97,12 @@ func New(tp *trace.TracerProvider, opts ...Option) (*Client, error) {
 
 	client.session = session
 	client.tracerProvider = tp
+	client.uploader = internalattachment.NewLazyUploader(session, log)
 
 	// Setup tracing with provided TracerProvider
 	if err := client.setupTracing(); err != nil {
+		_ = client.uploader.Shutdown(context.Background())
+		session.Close()
 		log.Error("failed to setup tracing", "error", err)
 		return nil, fmt.Errorf("failed to setup tracing: %w", err)
 	}
@@ -103,6 +113,8 @@ func New(tp *trace.TracerProvider, opts ...Option) (*Client, error) {
 		log.Debug("waiting for login to complete")
 		err := session.Login(context.Background())
 		if err != nil {
+			_ = client.uploader.Shutdown(context.Background())
+			session.Close()
 			log.Error("blocking login failed", "error", err)
 			return nil, fmt.Errorf("login failed: %w", err)
 		}
@@ -124,6 +136,7 @@ func (c *Client) setupTracing() error {
 		EnableTraceConsoleLog:  c.config.EnableTraceConsoleLog,
 		Exporter:               c.config.Exporter,
 		Logger:                 c.logger,
+		AttachmentUploader:     c.uploader,
 	}
 
 	// Add Braintrust span processor to the provided TracerProvider
@@ -189,6 +202,60 @@ func (c *Client) TracerProvider() *trace.TracerProvider {
 //	defer span.End()
 func (c *Client) Tracer(name string, opts ...oteltrace.TracerOption) oteltrace.Tracer {
 	return c.tracerProvider.Tracer(name, opts...)
+}
+
+// SetJSONAttachment serializes data as JSON, sets a Braintrust attachment reference on span,
+// and enqueues the attachment upload on this client.
+//
+// To attach JSON already encoded as bytes, pass json.RawMessage(data). Passing a
+// raw []byte directly will marshal it as a base64 JSON string.
+func (c *Client) SetJSONAttachment(ctx context.Context, span oteltrace.Span, key string, data any, opts ...bttraceattachment.JSONAttachmentOption) (*bttraceattachment.AttachmentReference, error) {
+	options := jsonAttachmentOptions("data.json", opts...)
+
+	var b []byte
+	var err error
+	if options.Pretty {
+		b, err = json.MarshalIndent(data, "", "  ")
+	} else {
+		b, err = json.Marshal(data)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal JSON attachment: %w", err)
+	}
+
+	return c.setJSONBytes(ctx, span, key, b, options.Filename)
+}
+
+func jsonAttachmentOptions(defaultFilename string, opts ...bttraceattachment.JSONAttachmentOption) bttraceattachment.JSONAttachmentOptions {
+	options := bttraceattachment.JSONAttachmentOptions{Filename: defaultFilename}
+	for _, opt := range opts {
+		opt(&options)
+	}
+	if options.Filename == "" {
+		options.Filename = defaultFilename
+	}
+	return options
+}
+
+func (c *Client) setJSONBytes(ctx context.Context, span oteltrace.Span, key string, data []byte, filename string) (*bttraceattachment.AttachmentReference, error) {
+	ref := bttraceattachment.AttachmentReference{
+		Type:        "braintrust_attachment",
+		Filename:    filename,
+		ContentType: bttraceattachment.JSON,
+		Key:         uuid.NewString(),
+	}
+
+	refJSON, err := json.Marshal(ref)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal attachment reference: %w", err)
+	}
+
+	if err := c.uploader.Enqueue(ctx, internalattachment.Upload{Reference: ref, Data: data}); err != nil {
+		return nil, err
+	}
+
+	span.SetAttributes(attribute.String(key, string(refJSON)))
+	return &ref, nil
 }
 
 // NewEvaluator creates a new evaluator for running multiple evaluations with the same

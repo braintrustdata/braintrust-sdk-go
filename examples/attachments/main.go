@@ -41,7 +41,7 @@ func main() {
 		log.Fatalf("Failed to initialize Braintrust: %v", err)
 	}
 
-	tracer := otel.Tracer("attachments-example")
+	tracer := bt.Tracer("attachments-example")
 	ctx := context.Background()
 
 	// Create a parent span to wrap all examples
@@ -66,6 +66,10 @@ func main() {
 	// Example 5: Use attachment in manual span logging
 	fmt.Println("\nExample 5: Manual span with attachment")
 	exampleManualSpan(ctx, tracer)
+
+	// Example 6: Background-uploaded JSON attachment reference
+	fmt.Println("\nExample 6: JSON attachment")
+	exampleJSONAttachment(ctx, bt, tracer)
 
 	// End the main span
 	span.End()
@@ -254,6 +258,24 @@ func logAttachment(span oteltrace.Span, att *attachment.Attachment) error {
 	messagesJSON, _ := json.Marshal(messages)
 	span.SetAttributes(attribute.String("braintrust.input_json", string(messagesJSON)))
 	return nil
+}
+
+func exampleJSONAttachment(ctx context.Context, bt *braintrust.Client, tracer oteltrace.Tracer) {
+	_, span := tracer.Start(ctx, "attachment.json")
+	defer span.End()
+
+	transcript := []map[string]string{
+		{"role": "user", "content": "Summarize this conversation."},
+		{"role": "assistant", "content": "Sure — upload the transcript as JSON."},
+	}
+
+	_, err := bt.SetJSONAttachment(ctx, span, "braintrust.input_json", transcript,
+		attachment.WithFilename("conversation_transcript.json"),
+		attachment.WithPrettyJSON(),
+	)
+	if err != nil {
+		log.Printf("Failed to create JSON attachment: %v", err)
+	}
 }
 
 // createTestImage creates a temporary 10x10 PNG image for testing

@@ -2,6 +2,9 @@ package braintrust
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -72,6 +75,32 @@ func TestNew_WithBlockingLogin(t *testing.T) {
 	str := client.String()
 	assert.Contains(t, str, "test-org-name")
 	assert.Contains(t, str, "test-org-id")
+}
+
+func TestNew_WithBlockingLoginFailureShutsDownUploader(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/apikey/login":
+			http.Error(w, "nope", http.StatusUnauthorized)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(context.Background()) }()
+
+	client, err := New(tp,
+		WithAPIKey("bad-key"),
+		WithProject("test-project"),
+		WithAppURL(server.URL),
+		WithAPIURL(server.URL),
+		WithBlockingLogin(true),
+		WithLogger(logger.Discard()),
+	)
+	require.Error(t, err)
+	require.Nil(t, client)
 }
 
 func TestNew_MissingAPIKey(t *testing.T) {
@@ -175,6 +204,63 @@ func TestTracing_EndToEnd(t *testing.T) {
 	// Verify span was captured by our exporter
 	spans := exporter.GetSpans()
 	assert.GreaterOrEqual(t, len(spans), 1, "Expected at least one span to be exported")
+}
+
+func TestClientSetJSONUploadsAttachment(t *testing.T) {
+	var statusReq map[string]any
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/apikey/login":
+			require.Equal(t, http.MethodPost, r.Method)
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"org_info": []map[string]any{{
+					"id":        "org-id",
+					"name":      "org-name",
+					"api_url":   "http://" + r.Host,
+					"proxy_url": "http://" + r.Host,
+				}},
+			})
+		case "/attachment":
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"signedUrl": "http://" + r.Host + "/upload",
+				"headers":   map[string]string{},
+			})
+		case "/upload":
+			w.WriteHeader(http.StatusOK)
+		case "/attachment/status":
+			require.NoError(t, json.NewDecoder(r.Body).Decode(&statusReq))
+			w.WriteHeader(http.StatusOK)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	exporter := tracetest.NewInMemoryExporter()
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(context.Background()) }()
+
+	client, err := New(tp,
+		WithAPIKey("api-key"),
+		WithProject("test-project"),
+		WithAppURL(server.URL),
+		WithAPIURL(server.URL),
+		WithExporter(exporter),
+		WithBlockingLogin(true),
+		WithLogger(logger.Discard()),
+	)
+	require.NoError(t, err)
+
+	ctx, span := tp.Tracer("raw-tracer").Start(context.Background(), "span")
+	_, err = client.SetJSONAttachment(ctx, span, "braintrust.input_json", map[string]any{"hello": "world"})
+	require.NoError(t, err)
+	span.End()
+
+	require.NoError(t, tp.ForceFlush(context.Background()))
+	require.NotNil(t, statusReq)
+	status, ok := statusReq["status"].(map[string]any)
+	require.True(t, ok)
+	require.Equal(t, "done", status["upload_status"])
 }
 
 func TestTracing_WithExporter(t *testing.T) {
