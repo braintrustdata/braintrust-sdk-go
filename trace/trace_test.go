@@ -2,10 +2,14 @@ package trace
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.opentelemetry.io/otel/trace"
@@ -669,4 +673,30 @@ func TestPermalink_NoopSpan(t *testing.T) {
 	assert.Contains(link, "noop-span")
 
 	noopSpan.End()
+}
+
+func TestHTTPOtelOptsEnableGzipCompression(t *testing.T) {
+	contentEncoding := make(chan string, 1)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		contentEncoding <- r.Header.Get("Content-Encoding")
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	opts, err := getHTTPOtelOpts(server.URL, "test-api-key")
+	assert.NoError(t, err)
+
+	exporter, err := otlptrace.New(
+		context.Background(),
+		otlptracehttp.NewClient(opts...),
+	)
+	assert.NoError(t, err)
+
+	tp := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(sdktrace.NewSimpleSpanProcessor(exporter)))
+	_, span := tp.Tracer("test").Start(context.Background(), "test-span")
+	span.End()
+
+	assert.NoError(t, tp.ForceFlush(context.Background()))
+	assert.Equal(t, "gzip", <-contentEncoding)
+	assert.NoError(t, tp.Shutdown(context.Background()))
 }

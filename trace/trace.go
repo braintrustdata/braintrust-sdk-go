@@ -502,6 +502,7 @@ func getHTTPOtelOpts(fullURL, apiKey string) ([]otlptracehttp.Option, error) {
 		otlptracehttp.WithHeaders(map[string]string{
 			"Authorization": "Bearer " + apiKey,
 		}),
+		otlptracehttp.WithCompression(otlptracehttp.GzipCompression),
 	}
 
 	if protocol == "http" {
