@@ -225,24 +225,12 @@ func runAttachmentDemos(ctx context.Context, tracer oteltrace.Tracer) {
 		imageBytes := getTestImageBytes()
 		att := attachment.FromBytes(attachment.ImagePNG, imageBytes)
 
-		// Log attachment in a manual span
-		attMsg, err := att.Base64Message()
-		if err != nil {
-			log.Printf("Failed to create attachment message: %v", err)
+		// Log attachment as a top-level span attribute.
+		if err := attachment.SetAttachmentOnSpan(span, "demo.image", att); err != nil {
+			log.Printf("Failed to set attachment on span: %v", err)
 			return
 		}
-
-		messages := []map[string]interface{}{
-			{
-				"role": "user",
-				"content": []interface{}{
-					map[string]interface{}{"type": "text", "text": "Test image from bytes"},
-					attMsg,
-				},
-			},
-		}
-		messagesJSON, _ := json.Marshal(messages)
-		span.SetAttributes(attribute.String("braintrust.input_json", string(messagesJSON)))
+		span.SetAttributes(attribute.String("braintrust.input_json", `{"prompt":"Test image from bytes","attachment_attr":"demo.image"}`))
 		span.SetAttributes(attribute.String("braintrust.output_json", `{"response": "Image received"}`))
 
 		fmt.Printf("     Created attachment from bytes (%d bytes)\n", len(imageBytes))

@@ -20,10 +20,14 @@ package attachment
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Common MIME types for attachments
@@ -124,6 +128,40 @@ func (a *Attachment) Base64URL() (string, error) {
 	}
 
 	return buf.String(), nil
+}
+
+// attachmentDataAttrPrefix is the private OpenTelemetry attribute prefix used
+// to carry inline attachment data until the Braintrust span processor rewrites
+// it into a public attachment reference.
+const attachmentDataAttrPrefix = "braintrust.attachment.data."
+
+// SetAttachmentOnSpan records an attachment on span under key.
+//
+// The attachment is uploaded by the Braintrust span processor when the span is
+// exported. The private inline data attribute is removed before export and key
+// is exported as a Braintrust attachment reference.
+func SetAttachmentOnSpan(span trace.Span, key string, attachment *Attachment) error {
+	if key == "" {
+		return fmt.Errorf("attachment key cannot be empty")
+	}
+	if attachment == nil {
+		return fmt.Errorf("attachment cannot be nil")
+	}
+
+	msg, err := attachment.Base64Message()
+	if err != nil {
+		return err
+	}
+	b, err := json.Marshal(msg)
+	if err != nil {
+		return fmt.Errorf("failed to marshal attachment data: %w", err)
+	}
+
+	span.SetAttributes(
+		attribute.String(key, `{"type":"braintrust_attachment_pending"}`),
+		attribute.String(attachmentDataAttrPrefix+key, string(b)),
+	)
+	return nil
 }
 
 // Base64Message returns the attachment in message format for AI providers.

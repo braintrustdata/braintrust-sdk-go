@@ -26,6 +26,7 @@ package trace
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -37,7 +38,10 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+
 	oteltrace "go.opentelemetry.io/otel/trace"
+
+	"github.com/braintrustdata/braintrust-sdk-go/trace/attachment"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
@@ -349,6 +353,7 @@ type spanProcessor struct {
 	otelAttrs   *otelAttrs
 	session     *auth.Session // Session provides endpoints and org name
 	logger      logger.Logger
+	uploader    *attachment.Uploader
 }
 
 // newSpanProcessor creates a new span processor that wraps another processor and adds parent labeling.
@@ -366,6 +371,8 @@ func newSpanProcessor(
 	// Initialize with empty org name - will be looked up dynamically from session
 	attrs := newOtelAttrs(defaultParent, "", appURL)
 
+	uploader := attachment.NewUploader(session, log)
+
 	sp := &spanProcessor{
 		wrapped:     proc,
 		filters:     filters,
@@ -373,6 +380,7 @@ func newSpanProcessor(
 		otelAttrs:   attrs,
 		session:     session,
 		logger:      log,
+		uploader:    uploader,
 	}
 
 	return sp, nil
@@ -420,9 +428,24 @@ func (sp *spanProcessor) OnStart(ctx context.Context, span sdktrace.ReadWriteSpa
 func (sp *spanProcessor) OnEnd(span sdktrace.ReadOnlySpan) {
 	// Apply filters to determine if we should forward this span
 	if sp.shouldForwardSpan(span) {
-		sp.wrapped.OnEnd(span)
+		sp.wrapped.OnEnd(sp.processAttachments(span))
 	}
 }
+
+func (sp *spanProcessor) processAttachments(span sdktrace.ReadOnlySpan) sdktrace.ReadOnlySpan {
+	attrs, changed := sp.uploader.ReplaceSpanAttachmentAttrs(span.Attributes())
+	if !changed {
+		return span
+	}
+	return &attachmentSpan{ReadOnlySpan: span, attrs: attrs}
+}
+
+type attachmentSpan struct {
+	sdktrace.ReadOnlySpan
+	attrs []attribute.KeyValue
+}
+
+func (s *attachmentSpan) Attributes() []attribute.KeyValue { return s.attrs }
 
 // shouldForwardSpan applies filter functions to determine if a span should be forwarded.
 // Only rootFilters are applied to root spans. Filter functions are applied in
@@ -454,12 +477,16 @@ func (sp *spanProcessor) shouldForwardSpan(span sdktrace.ReadOnlySpan) bool {
 
 // Shutdown shuts down the span processor.
 func (sp *spanProcessor) Shutdown(ctx context.Context) error {
-	return sp.wrapped.Shutdown(ctx)
+	uploadErr := sp.uploader.Shutdown(ctx)
+	shutdownErr := sp.wrapped.Shutdown(ctx)
+	return errors.Join(uploadErr, shutdownErr)
 }
 
 // ForceFlush forces a flush of the span processor.
 func (sp *spanProcessor) ForceFlush(ctx context.Context) error {
-	return sp.wrapped.ForceFlush(ctx)
+	waitErr := sp.uploader.Wait(ctx)
+	flushErr := sp.wrapped.ForceFlush(ctx)
+	return errors.Join(waitErr, flushErr)
 }
 
 var _ sdktrace.SpanProcessor = &spanProcessor{}

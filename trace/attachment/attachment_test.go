@@ -13,7 +13,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test the new reader-based Attachment API
 func TestAttachment_NewAPI_FromBytes(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)

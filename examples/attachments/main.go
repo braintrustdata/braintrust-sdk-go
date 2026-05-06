@@ -63,8 +63,12 @@ func main() {
 	fmt.Println("\nExample 4: FromURL")
 	exampleFromURL(ctx, tracer)
 
-	// Example 5: Use attachment in manual span logging
-	fmt.Println("\nExample 5: Manual span with attachment")
+	// Example 5: Create a JSON attachment
+	fmt.Println("\nExample 5: JSON attachment")
+	exampleJSONAttachment(ctx, tracer)
+
+	// Example 6: Use attachment in manual span logging
+	fmt.Println("\nExample 6: Manual span with attachment")
 	exampleManualSpan(ctx, tracer)
 
 	// End the main span
@@ -174,6 +178,33 @@ func exampleFromURL(ctx context.Context, tracer oteltrace.Tracer) {
 	err = logAttachment(span, att)
 	if err != nil {
 		log.Printf("Failed to log attachment: %v", err)
+	}
+}
+
+func exampleJSONAttachment(ctx context.Context, tracer oteltrace.Tracer) {
+	_, span := tracer.Start(ctx, "attachment.json")
+	defer span.End()
+
+	payload := map[string]interface{}{
+		"kind": "example-json-attachment",
+		"items": []map[string]interface{}{
+			{"id": 1, "label": "first"},
+			{"id": 2, "label": "second"},
+		},
+		"metadata": map[string]interface{}{
+			"source": "examples/attachments/main.go",
+		},
+	}
+
+	data, err := json.MarshalIndent(payload, "", "  ")
+	if err != nil {
+		log.Printf("Failed to marshal JSON attachment: %v", err)
+		return
+	}
+
+	att := attachment.FromBytes("application/json", data)
+	if err := logAttachment(span, att); err != nil {
+		log.Printf("Failed to log JSON attachment: %v", err)
 	}
 }
 

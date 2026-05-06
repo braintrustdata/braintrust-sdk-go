@@ -2,6 +2,9 @@ package trace
 
 import (
 	"context"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,6 +16,7 @@ import (
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
+	btattachment "github.com/braintrustdata/braintrust-sdk-go/trace/attachment"
 )
 
 // Test helper: create a session for testing with proper auth info
@@ -26,6 +30,62 @@ func newTestSession() *auth.Session {
 		"https://www.braintrust.dev",
 		logger.Discard(),
 	)
+}
+
+func TestSpanProcessor_SetAttachmentOnSpanExportsReference(t *testing.T) {
+	var uploaded string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/attachment":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = io.WriteString(w, `{"signedUrl":"`+serverURL(r)+`/upload","headers":{"Content-Type":"text/plain"}}`)
+		case "/upload":
+			body, _ := io.ReadAll(r.Body)
+			uploaded = string(body)
+			w.WriteHeader(http.StatusOK)
+		default:
+			t.Fatalf("unexpected path: %s", r.URL.Path)
+		}
+	}))
+	defer server.Close()
+
+	session := auth.NewTestSession("test-api-key", "test-org-id", "test-org", server.URL, server.URL, server.URL, logger.Discard())
+	exporter := tracetest.NewInMemoryExporter()
+	processor, err := newSpanProcessor(sdktrace.NewSimpleSpanProcessor(exporter), getParent(Config{}), nil, nil, session, logger.Discard())
+	assert.NoError(t, err)
+	tp := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(processor))
+
+	_, span := tp.Tracer("test").Start(context.Background(), "span")
+	requireNoError(t, btattachment.SetAttachmentOnSpan(span, "custom.image", btattachment.FromBytes(btattachment.TextPlain, []byte("hello"))))
+	span.End()
+	requireNoError(t, tp.ForceFlush(context.Background()))
+
+	spans := exporter.GetSpans()
+	assert.Len(t, spans, 1)
+	assert.Empty(t, findAttr(spans[0].Attributes, "braintrust.attachment.data.custom.image"))
+	attr := findAttr(spans[0].Attributes, "custom.image")
+	assert.NotContains(t, attr, "aGVsbG8=")
+	assert.Contains(t, attr, "braintrust_attachment")
+	assert.Contains(t, attr, "text/plain")
+	assert.Equal(t, "hello", uploaded)
+}
+
+func serverURL(r *http.Request) string { return "http://" + r.Host }
+
+func requireNoError(t *testing.T, err error) {
+	t.Helper()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func findAttr(attrs []attribute.KeyValue, key string) string {
+	for _, attr := range attrs {
+		if string(attr.Key) == key {
+			return attr.Value.AsString()
+		}
+	}
+	return ""
 }
 
 func TestSpanFilterFunc_WithAttributes(t *testing.T) {
