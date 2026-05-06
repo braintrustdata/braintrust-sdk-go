@@ -41,6 +41,8 @@ type uploadTask struct {
 	data []byte
 }
 
+// Uploader uploads span attachment data and rewrites private attachment
+// attributes into exported Braintrust attachment references.
 type Uploader struct {
 	session *auth.Session
 	logger  btlog.Logger
@@ -56,6 +58,7 @@ type Uploader struct {
 	inFlight int
 }
 
+// NewUploader creates and starts an attachment uploader for a Braintrust session.
 func NewUploader(session *auth.Session, log btlog.Logger) *Uploader {
 	if log == nil {
 		log = btlog.Discard()
@@ -73,6 +76,7 @@ func NewUploader(session *auth.Session, log btlog.Logger) *Uploader {
 	return u
 }
 
+// Start launches the background attachment upload workers.
 func (u *Uploader) Start() {
 	u.startOnce.Do(func() {
 		for i := 0; i < maxConcurrentUploads; i++ {
@@ -81,12 +85,14 @@ func (u *Uploader) Start() {
 	})
 }
 
+// Shutdown waits for queued uploads to finish and stops the uploader workers.
 func (u *Uploader) Shutdown(ctx context.Context) error {
 	err := u.Wait(ctx)
 	u.closeOnce.Do(func() { close(u.queue) })
 	return err
 }
 
+// Wait blocks until all in-flight attachment uploads complete.
 func (u *Uploader) Wait(ctx context.Context) error {
 	done, idle := u.doneChan()
 	if idle {
@@ -101,6 +107,8 @@ func (u *Uploader) Wait(ctx context.Context) error {
 	}
 }
 
+// ReplaceSpanAttachmentAttrs rewrites private attachment data attributes into
+// public Braintrust attachment reference attributes and queues uploads.
 func (u *Uploader) ReplaceSpanAttachmentAttrs(attrs []attribute.KeyValue) ([]attribute.KeyValue, bool) {
 	var rewritten []attribute.KeyValue
 	changed := false
@@ -283,7 +291,7 @@ func (u *Uploader) upload(ctx context.Context, ref Reference, data []byte) error
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("signed URL request failed: %s", resp.Status)
 	}
