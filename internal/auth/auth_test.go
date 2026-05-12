@@ -224,10 +224,18 @@ func TestSession_NoAppURL(t *testing.T) {
 	assert.Contains(t, err.Error(), "app URL")
 }
 
-// TestSession_WithRealAPIKey tests login with a real API key from environment
+// TestSession_WithRealAPIKey tests login with a real API key from environment.
+// It is opt-in because normal CI/test runs use VCR replay mode and should not
+// depend on a live Braintrust API key.
 func TestSession_WithRealAPIKey(t *testing.T) {
 	t.Parallel()
+	if os.Getenv("VCR_MODE") != "off" {
+		t.Skip("skipping live API key test unless VCR_MODE=off")
+	}
 	apiKey := os.Getenv("BRAINTRUST_API_KEY")
+	if apiKey == "" {
+		t.Skip("BRAINTRUST_API_KEY is not set")
+	}
 	appURL := os.Getenv("BRAINTRUST_APP_URL")
 	if appURL == "" {
 		appURL = DefaultAppURL

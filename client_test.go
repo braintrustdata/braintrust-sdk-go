@@ -23,6 +23,7 @@ func TestNew_WithMinimalConfig(t *testing.T) {
 
 	// Create client with minimal config
 	client, err := New(tp,
+		WithAPIKey(auth.TestAPIKey),
 		WithProject("test-project"),
 		WithLogger(intlogger.NewFailTestLogger(t)),
 	)
