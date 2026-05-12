@@ -9,8 +9,8 @@ replace github.com/braintrustdata/braintrust-sdk-go => ../../..
 replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai => ../../../trace/contrib/openai
 
 require (
-	github.com/braintrustdata/braintrust-sdk-go v0.5.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.4.0
+	github.com/braintrustdata/braintrust-sdk-go v0.6.1
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.6.1
 	github.com/openai/openai-go v1.12.0
 	go.opentelemetry.io/otel v1.38.0
 	go.opentelemetry.io/otel/sdk v1.38.0
