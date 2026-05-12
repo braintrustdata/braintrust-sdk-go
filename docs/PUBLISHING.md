@@ -22,13 +22,14 @@ Go to **Actions → Prepare Release → Run workflow** and enter the version (e.
 
 The workflow:
 - Pins the root module version and any nested-module interdependencies in each nested module's `go.mod` using `go mod edit` + `GOWORK=off go mod tidy`
+- Pins Braintrust SDK dependencies in every `examples/**/go.mod` to the release version and runs `GOWORK=off go mod tidy` for each example module, so standalone examples reference the latest release
 - Opens a pull request titled `chore: release vX.Y.Z` on a `release/vX.Y.Z` branch
 
 > **Why pin the version?** During development, `go mod tidy` runs in Go workspace mode and uses `v0.0.0` as a placeholder version for workspace-local modules. The published `go.mod` must reference a real version so downstream users can resolve the dependency from the Go module proxy.
 
 ### 2. Review and merge
 
-Review the PR (it should only contain nested `go.mod` / `go.sum` version-pin updates) and merge it through the normal protected-branch process.
+Review the PR (it should only contain nested module and example `go.mod` / `go.sum` version-pin updates) and merge it through the normal protected-branch process.
 
 ### 3. Tag and publish (automatic)
 

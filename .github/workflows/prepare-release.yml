@@ -1,6 +1,6 @@
 # Starts the release process by creating a release branch with pinned nested
-# module versions and opening a pull request. Merge the PR to trigger tagging
-# and publishing via the tag-release workflow.
+# module and example dependency versions and opening a pull request. Merge the PR
+# to trigger tagging and publishing via the tag-release workflow.
 name: Prepare Release
 
 on:
@@ -44,7 +44,7 @@ jobs:
           app-id: ${{ secrets.BRAINTRUST_BOT_APP_ID }}
           private-key: ${{ secrets.BRAINTRUST_BOT_PRIVATE_KEY }}
 
-      - name: Pin nested module versions
+      - name: Pin nested module and example versions
         run: ./scripts/prepare_release.sh "${{ inputs.version }}"
 
       - name: Build release PR path list
@@ -56,6 +56,13 @@ jobs:
               echo "${module}/go.mod"
               echo "${module}/go.sum"
             done < <(./scripts/list_nested_modules.sh)
+            while IFS= read -r gomod; do
+              echo "${gomod}"
+              gosum="${gomod%/go.mod}/go.sum"
+              if [[ -f "${gosum}" ]]; then
+                echo "${gosum}"
+              fi
+            done < <(find examples -name go.mod -print | sort)
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
 

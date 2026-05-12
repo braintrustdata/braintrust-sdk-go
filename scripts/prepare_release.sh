@@ -18,12 +18,14 @@ if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
 fi
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd -- "$SCRIPT_DIR/.." && pwd)
 ROOT_MODULE="github.com/braintrustdata/braintrust-sdk-go"
 
 mapfile -t NESTED_MODULES < <("$SCRIPT_DIR/list_nested_modules.sh")
 
-for module in "${NESTED_MODULES[@]}"; do
-    gomod="${module}/go.mod"
+pin_braintrust_versions() {
+    local module_dir="$1"
+    local gomod="${module_dir}/go.mod"
 
     # Match module path followed by a version (works for both single-line and
     # multi-line require blocks).
@@ -37,6 +39,17 @@ for module in "${NESTED_MODULES[@]}"; do
         fi
     done
 
-    GOWORK=off go mod tidy -C "${module}"
+    GOWORK=off go mod tidy -C "${module_dir}"
+}
+
+cd "$REPO_ROOT"
+
+for module in "${NESTED_MODULES[@]}"; do
+    pin_braintrust_versions "${module}"
 done
 
+# Examples are not published, but release PRs pin their Braintrust dependencies
+# to the new release so standalone example modules stay current for users.
+while IFS= read -r gomod; do
+    pin_braintrust_versions "$(dirname "${gomod}")"
+done < <(find examples -name go.mod -print | sort)
