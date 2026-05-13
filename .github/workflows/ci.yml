@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: [1.24.4, 1.25.x, 1.26.x]
+        go-version: [1.25.x, 1.26.x]
         # FIXME[matt] add windows testing, we need to fix some timing
         # tests.
         os: [ubuntu-latest, macos-latest]
