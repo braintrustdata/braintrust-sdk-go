@@ -101,3 +101,16 @@ require (
 	rsc.io/omap v1.2.0 // indirect
 	rsc.io/ordered v1.1.1 // indirect
 )
+
+replace (
+	github.com/braintrustdata/braintrust-sdk-go => ../../..
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk => ../adk
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic => ../anthropic
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime => ../bedrockruntime
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino => ../cloudwego/eino
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai => ../genai
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit => ../genkit
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai => ../github.com/sashabaranov/go-openai
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo => ../langchaingo
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai => ../openai
+)
