@@ -8,6 +8,7 @@ import (
 
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
+	"github.com/openai/openai-go/responses"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/trace"
 
@@ -39,17 +40,26 @@ func main() {
 	ctx, span := tracer.Start(context.Background(), "examples/openai/main.go")
 	defer span.End()
 
-	// Make a simple chat completion request
-	resp, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
-		Messages: []openai.ChatCompletionMessageParamUnion{
-			openai.UserMessage("What is the capital of France?"),
-		},
+	// Make a simple Responses API request
+	resp, err := client.Responses.New(ctx, responses.ResponseNewParams{
 		Model: openai.ChatModelGPT4oMini,
+		Input: responses.ResponseNewParamsInputUnion{OfString: openai.String("What is the capital of France?")},
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Printf("Response: %s\n", resp.Choices[0].Message.Content)
-	fmt.Printf("View trace: %s\n", bt.Permalink(span))
+	switch resp.Status {
+	case responses.ResponseStatusCompleted:
+		fmt.Printf("Response: %s\n", resp.OutputText())
+		fmt.Printf("View trace: %s\n", bt.Permalink(span))
+	case responses.ResponseStatusIncomplete:
+		fmt.Println("incomplete:", resp.IncompleteDetails.Reason)
+		fmt.Printf("Response: %s\n", resp.OutputText())
+		fmt.Printf("View trace: %s\n", bt.Permalink(span))
+	case responses.ResponseStatusFailed:
+		fmt.Println("failed:", resp.Error.Message)
+		fmt.Printf("View trace: %s\n", bt.Permalink(span))
+	default:
+		fmt.Println("status:", resp.Status)
+	}
 }

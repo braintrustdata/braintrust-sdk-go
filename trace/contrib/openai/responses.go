@@ -130,9 +130,8 @@ func (rt *responsesTracer) parseStreamingResponse(span trace.Span, body io.Reade
 		}
 
 		if msgType, ok := envelope["type"].(string); ok {
-			// the response.completed message has everything, so just parse that. Should we
-			// parse the other messages too?
-			if msgType == "response.completed" {
+			switch msgType {
+			case "response.completed", "response.failed", "response.incomplete":
 				if msg, ok := envelope["response"].(map[string]any); ok {
 					// For streaming responses, copy extra fields from the envelope
 					// that might be present in the outer wrapper
@@ -181,6 +180,7 @@ func (rt *responsesTracer) handleResponseCompletedMessage(span trace.Span, rawMs
 	metadataFields := []string{
 		"id",
 		"object",
+		"status",
 		"system_fingerprint",
 		"completion_tokens",
 		"created",
@@ -193,6 +193,9 @@ func (rt *responsesTracer) handleResponseCompletedMessage(span trace.Span, rawMs
 		"content_filter_results",
 		"reasoning",
 		"text",
+		"usage",
+		"incomplete_details",
+		"error",
 	}
 
 	for _, field := range metadataFields {

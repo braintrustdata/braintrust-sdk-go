@@ -262,6 +262,88 @@ func TestOpenAIResponsesStreaming(t *testing.T) {
 	assert.GreaterOrEqual(ttft, 0.0, "time_to_first_token should be >= 0")
 }
 
+// TestOpenAIResponsesCompletedUsage verifies that a completed response records
+// status "completed" and usage (input/output/total tokens) in metadata.
+func TestOpenAIResponsesCompletedUsage(t *testing.T) {
+	client, _, exporter := setUpTest(t)
+	assert := assert.New(t)
+	require := require.New(t)
+
+	resp, err := client.Responses.New(context.Background(), responses.ResponseNewParams{
+		Input: responses.ResponseNewParamsInputUnion{OfString: openai.String("What is the capital of France?")},
+		Model: openai.ChatModelGPT4oMini,
+	})
+	require.NoError(err)
+	assert.Contains(resp.OutputText(), "Paris")
+
+	ts := exporter.FlushOne()
+
+	metadata := ts.Metadata()
+	assert.Equal("completed", metadata["status"])
+
+	usage, ok := metadata["usage"].(map[string]interface{})
+	require.True(ok, "usage should be present in metadata")
+	assert.Greater(usage["input_tokens"].(float64), float64(0))
+	assert.Greater(usage["output_tokens"].(float64), float64(0))
+	assert.Greater(usage["total_tokens"].(float64), float64(0))
+
+	metrics := ts.Metrics()
+	assert.Greater(metrics["tokens"], float64(0))
+	assert.Greater(metrics["prompt_tokens"], float64(0))
+	assert.Greater(metrics["completion_tokens"], float64(0))
+}
+
+// TestOpenAIResponsesStreamingIncomplete verifies that a streaming response truncated
+// by max_output_tokens is recorded with status "incomplete" and usage in metadata.
+func TestOpenAIResponsesStreamingIncomplete(t *testing.T) {
+	client, _, exporter := setUpTest(t)
+	assert := assert.New(t)
+	require := require.New(t)
+
+	ctx := context.Background()
+
+	timer := oteltest.NewTimer()
+	stream := client.Responses.NewStreaming(ctx, responses.ResponseNewParams{
+		Input:           responses.ResponseNewParamsInputUnion{OfString: openai.String("What is the history of the capital of France?")},
+		Model:           openai.ChatModelGPT4oMini,
+		MaxOutputTokens: openai.Int(16),
+	})
+
+	var partialText string
+	for stream.Next() {
+		data := stream.Current()
+		if data.Text != "" {
+			partialText = data.Text
+		}
+	}
+	require.NoError(stream.Err())
+	timeRange := timer.Tick()
+
+	ts := exporter.FlushOne()
+
+	ts.AssertInTimeRange(timeRange)
+	ts.AssertNameIs("openai.responses.create")
+
+	assert.NotEmpty(partialText, "should have received partial output")
+
+	metadata := ts.Metadata()
+	assert.Equal("incomplete", metadata["status"])
+
+	usage, ok := metadata["usage"].(map[string]interface{})
+	require.True(ok, "usage should be present in metadata")
+	assert.Equal(float64(16), usage["output_tokens"], "output_tokens should equal max_output_tokens")
+	assert.Greater(usage["input_tokens"].(float64), float64(0))
+	assert.Greater(usage["total_tokens"].(float64), float64(0))
+
+	incompleteDetails, ok := metadata["incomplete_details"].(map[string]interface{})
+	require.True(ok, "incomplete_details should be present in metadata")
+	assert.Equal("max_output_tokens", incompleteDetails["reason"])
+
+	metrics := ts.Metrics()
+	assert.Greater(metrics["tokens"], float64(0))
+	assert.GreaterOrEqual(metrics["time_to_first_token"], float64(0))
+}
+
 func TestOpenAIResponsesWithListInput(t *testing.T) {
 	client, _, exporter := setUpTest(t)
 	assert := assert.New(t)

@@ -13,7 +13,6 @@ help:
 	@echo "  test-vcr-record  - Record/update VCR cassettes (requires API keys)"
 	@echo "  test-vcr-verify  - Verify VCR cassettes work without API keys"
 	@echo "  cover            - Run tests with coverage report"
-	@echo "  cover-path       - Run coverage for specific path (e.g., make cover-path PATH=./config)"
 	@echo "  clean            - Clean build artifacts and coverage files"
 	@echo "  fmt              - Format Go code"
 	@echo "  lint             - Run golangci-lint"

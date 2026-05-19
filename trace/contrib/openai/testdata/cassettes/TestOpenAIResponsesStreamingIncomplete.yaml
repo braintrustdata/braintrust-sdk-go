@@ -1,0 +1,152 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 116
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"max_output_tokens":16,"input":"What is the history of the capital of France?","model":"gpt-4o-mini","stream":true}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+            User-Agent:
+                - OpenAI/Go 1.12.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 1.12.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.26.2
+        url: https://api.openai.com/v1/responses
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: |+
+            event: response.created
+            data: {"type":"response.created","response":{"id":"resp_029e855511ca05f10069f0d0b0bdac819b9cdbe52098b831ab","object":"response","created_at":1777389744,"status":"in_progress","background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":16,"max_tool_calls":null,"model":"gpt-4o-mini-2024-07-18","moderation":null,"output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":"in_memory","reasoning":{"effort":null,"summary":null},"safety_identifier":null,"service_tier":"auto","store":true,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":0}
+
+            event: response.in_progress
+            data: {"type":"response.in_progress","response":{"id":"resp_029e855511ca05f10069f0d0b0bdac819b9cdbe52098b831ab","object":"response","created_at":1777389744,"status":"in_progress","background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":16,"max_tool_calls":null,"model":"gpt-4o-mini-2024-07-18","moderation":null,"output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":"in_memory","reasoning":{"effort":null,"summary":null},"safety_identifier":null,"service_tier":"auto","store":true,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":1}
+
+            event: response.output_item.added
+            data: {"type":"response.output_item.added","item":{"id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","type":"message","status":"in_progress","content":[],"role":"assistant"},"output_index":0,"sequence_number":2}
+
+            event: response.content_part.added
+            data: {"type":"response.content_part.added","content_index":0,"item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","output_index":0,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":""},"sequence_number":3}
+
+            event: response.output_text.delta
+            data: {"type":"response.output_text.delta","content_index":0,"delta":"The","item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","logprobs":[],"obfuscation":"9PUOj9CiuEZZ9","output_index":0,"sequence_number":4}
+
+            event: response.output_text.delta
+            data: {"type":"response.output_text.delta","content_index":0,"delta":" history","item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","logprobs":[],"obfuscation":"7DlE81sQ","output_index":0,"sequence_number":5}
+
+            event: response.output_text.delta
+            data: {"type":"response.output_text.delta","content_index":0,"delta":" of","item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","logprobs":[],"obfuscation":"qYhvLaMtc0Qia","output_index":0,"sequence_number":6}
+
+            event: response.output_text.delta
+            data: {"type":"response.output_text.delta","content_index":0,"delta":" Paris","item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","logprobs":[],"obfuscation":"vNylhxPzYt","output_index":0,"sequence_number":7}
+
+            event: response.output_text.delta
+            data: {"type":"response.output_text.delta","content_index":0,"delta":",","item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","logprobs":[],"obfuscation":"a3moehiA1qGzWeg","output_index":0,"sequence_number":8}
+
+            event: response.output_text.delta
+            data: {"type":"response.output_text.delta","content_index":0,"delta":" the","item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","logprobs":[],"obfuscation":"dQWvVleLwHaS","output_index":0,"sequence_number":9}
+
+            event: response.output_text.delta
+            data: {"type":"response.output_text.delta","content_index":0,"delta":" capital","item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","logprobs":[],"obfuscation":"gK8ZYDvM","output_index":0,"sequence_number":10}
+
+            event: response.output_text.delta
+            data: {"type":"response.output_text.delta","content_index":0,"delta":" of","item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","logprobs":[],"obfuscation":"z81KHjUogBdQe","output_index":0,"sequence_number":11}
+
+            event: response.output_text.delta
+            data: {"type":"response.output_text.delta","content_index":0,"delta":" France","item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","logprobs":[],"obfuscation":"3afkfJiDT","output_index":0,"sequence_number":12}
+
+            event: response.output_text.delta
+            data: {"type":"response.output_text.delta","content_index":0,"delta":",","item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","logprobs":[],"obfuscation":"7eLb1pSCShxfq8m","output_index":0,"sequence_number":13}
+
+            event: response.output_text.delta
+            data: {"type":"response.output_text.delta","content_index":0,"delta":" is","item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","logprobs":[],"obfuscation":"BF3QxR2QVk34n","output_index":0,"sequence_number":14}
+
+            event: response.output_text.delta
+            data: {"type":"response.output_text.delta","content_index":0,"delta":" rich","item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","logprobs":[],"obfuscation":"fF2RH06PpVV","output_index":0,"sequence_number":15}
+
+            event: response.output_text.delta
+            data: {"type":"response.output_text.delta","content_index":0,"delta":" and","item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","logprobs":[],"obfuscation":"Z78UlFSmbg9R","output_index":0,"sequence_number":16}
+
+            event: response.output_text.delta
+            data: {"type":"response.output_text.delta","content_index":0,"delta":" complex","item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","logprobs":[],"obfuscation":"nwGWIP4a","output_index":0,"sequence_number":17}
+
+            event: response.output_text.delta
+            data: {"type":"response.output_text.delta","content_index":0,"delta":",","item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","logprobs":[],"obfuscation":"ydgoVQ2CLddPf7C","output_index":0,"sequence_number":18}
+
+            event: response.output_text.delta
+            data: {"type":"response.output_text.delta","content_index":0,"delta":" spanning","item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","logprobs":[],"obfuscation":"9wiCHZB","output_index":0,"sequence_number":19}
+
+            event: response.output_text.done
+            data: {"type":"response.output_text.done","content_index":0,"item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","logprobs":[],"output_index":0,"sequence_number":20,"text":"The history of Paris, the capital of France, is rich and complex, spanning"}
+
+            event: response.content_part.done
+            data: {"type":"response.content_part.done","content_index":0,"item_id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","output_index":0,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":"The history of Paris, the capital of France, is rich and complex, spanning"},"sequence_number":21}
+
+            event: response.output_item.done
+            data: {"type":"response.output_item.done","item":{"id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","type":"message","status":"incomplete","content":[{"type":"output_text","annotations":[],"logprobs":[],"text":"The history of Paris, the capital of France, is rich and complex, spanning"}],"role":"assistant"},"output_index":0,"sequence_number":22}
+
+            event: response.incomplete
+            data: {"type":"response.incomplete","response":{"id":"resp_029e855511ca05f10069f0d0b0bdac819b9cdbe52098b831ab","object":"response","created_at":1777389744,"status":"incomplete","background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":{"reason":"max_output_tokens"},"instructions":null,"max_output_tokens":16,"max_tool_calls":null,"model":"gpt-4o-mini-2024-07-18","moderation":null,"output":[{"id":"msg_029e855511ca05f10069f0d0b1b9a4819b844dc1f66e33f58b","type":"message","status":"incomplete","content":[{"type":"output_text","annotations":[],"logprobs":[],"text":"The history of Paris, the capital of France, is rich and complex, spanning"}],"role":"assistant"}],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":"in_memory","reasoning":{"effort":null,"summary":null},"safety_identifier":null,"service_tier":"default","store":true,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":{"input_tokens":17,"input_tokens_details":{"cached_tokens":0},"output_tokens":16,"output_tokens_details":{"reasoning_tokens":0},"total_tokens":33},"user":null,"metadata":{}},"sequence_number":23}
+
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=86400
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - 9f370fef1bf2b785-EWR
+            Content-Type:
+                - text/event-stream; charset=utf-8
+            Date:
+                - Tue, 28 Apr 2026 15:22:25 GMT
+            Openai-Organization:
+                - braintrust-data
+            Openai-Processing-Ms:
+                - "294"
+            Openai-Project:
+                - proj_vsCSXafhhByzWOThMrJcZiw9
+            Openai-Version:
+                - "2020-10-01"
+            Server:
+                - cloudflare
+            Set-Cookie:
+                - __cf_bm=vE_aZWmG4Or4IfRqUpKCgtK1eIFNpHTNSawzooHnEXc-1777389744.494582-1.0.1.1-8ijD1NUw6im6e6XvLKFICw7VACQltpl6carTRCf7NpV2E9kGQDcG_aTPe2JEQx8vxPyNatMXPtI.CrE0AwwLou_GsYqmfOdxfnAg_05ZdbByXzd1ZqGRHsfxJuTBNs8B; HttpOnly; Secure; Path=/; Domain=api.openai.com; Expires=Tue, 28 Apr 2026 15:52:25 GMT
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            X-Content-Type-Options:
+                - nosniff
+            X-Request-Id:
+                - req_46a1f6b19530490e85425745aa2c3078
+        status: 200 OK
+        code: 200
+        duration: 729.641209ms
