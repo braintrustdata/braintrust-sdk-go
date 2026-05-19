@@ -70,7 +70,6 @@ lint:
 	./scripts/apply_local_braintrust_replaces.sh
 	golangci-lint fmt -d
 	golangci-lint run ./...
-	./scripts/drop_local_braintrust_replaces.sh
 
 fmt:
 	golangci-lint fmt
@@ -84,7 +83,6 @@ mod-verify:
 	for dir in $(NESTED_MODULE_DIRS); do GOWORK=off go mod tidy -C $$dir; done
 	go mod verify
 	for dir in $(NESTED_MODULE_DIRS); do (cd $$dir && go mod verify); done
-	./scripts/drop_local_braintrust_replaces.sh
 	git diff --exit-code go.mod go.sum \
 		$(foreach dir,$(NESTED_MODULE_DIRS),$(dir)/go.mod $(dir)/go.sum)
 	./scripts/check_nested_modules.sh
