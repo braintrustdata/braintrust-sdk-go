@@ -5,8 +5,8 @@ go 1.25.0
 toolchain go1.26.1
 
 require (
-	github.com/braintrustdata/braintrust-sdk-go v0.6.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.6.1
+	github.com/braintrustdata/braintrust-sdk-go v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.7.0
 	github.com/tmc/langchaingo v0.1.14
 	go.opentelemetry.io/otel v1.43.0
 	go.opentelemetry.io/otel/sdk v1.43.0
@@ -59,7 +59,3 @@ require (
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/braintrustdata/braintrust-sdk-go => ../../..
-
-replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo => ../../../trace/contrib/langchaingo

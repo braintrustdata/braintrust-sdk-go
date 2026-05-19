@@ -4,13 +4,9 @@ go 1.25.0
 
 toolchain go1.26.1
 
-replace github.com/braintrustdata/braintrust-sdk-go => ../../..
-
-replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai => ../../../trace/contrib/genai
-
 require (
-	github.com/braintrustdata/braintrust-sdk-go v0.6.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.6.1
+	github.com/braintrustdata/braintrust-sdk-go v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.7.0
 	go.opentelemetry.io/otel v1.43.0
 	go.opentelemetry.io/otel/sdk v1.43.0
 	google.golang.org/genai v1.41.0

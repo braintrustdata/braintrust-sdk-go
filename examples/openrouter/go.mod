@@ -5,13 +5,11 @@ go 1.25.0
 toolchain go1.26.1
 
 require (
-	github.com/braintrustdata/braintrust-sdk-go v0.6.1
+	github.com/braintrustdata/braintrust-sdk-go v0.7.0
 	github.com/openai/openai-go v1.12.0
 	go.opentelemetry.io/otel v1.43.0
 	go.opentelemetry.io/otel/sdk v1.43.0
 )
-
-replace github.com/braintrustdata/braintrust-sdk-go => ../..
 
 require (
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect

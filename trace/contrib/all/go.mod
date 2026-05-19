@@ -5,15 +5,15 @@ go 1.25.0
 toolchain go1.26.1
 
 require (
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk v0.6.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.6.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime v0.6.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino v0.6.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.6.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.6.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.6.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.6.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.6.1
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.7.0
 )
 
 require (
@@ -28,7 +28,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.50.4 // indirect
 	github.com/aws/smithy-go v1.25.0 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
-	github.com/braintrustdata/braintrust-sdk-go v0.6.1 // indirect
+	github.com/braintrustdata/braintrust-sdk-go v0.7.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.15.0 // indirect
@@ -100,17 +100,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	rsc.io/omap v1.2.0 // indirect
 	rsc.io/ordered v1.1.1 // indirect
-)
-
-replace (
-	github.com/braintrustdata/braintrust-sdk-go => ../../..
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk => ../adk
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic => ../anthropic
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime => ../bedrockruntime
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino => ../cloudwego/eino
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai => ../genai
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit => ../genkit
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai => ../github.com/sashabaranov/go-openai
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo => ../langchaingo
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai => ../openai
 )

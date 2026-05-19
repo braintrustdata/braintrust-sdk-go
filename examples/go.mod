@@ -7,13 +7,13 @@ toolchain go1.26.1
 require (
 	github.com/anthropics/anthropic-sdk-go v1.23.0
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.50.4
-	github.com/braintrustdata/braintrust-sdk-go v0.6.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.6.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino v0.6.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.6.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.6.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.6.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.6.1
+	github.com/braintrustdata/braintrust-sdk-go v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.7.0
 	github.com/cloudwego/eino v0.8.4
 	github.com/cloudwego/eino-ext/components/embedding/openai v0.0.0-20260416081055-0ebab92e14f2
 	github.com/cloudwego/eino-ext/components/model/claude v0.1.15
@@ -52,7 +52,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.41.10 // indirect
 	github.com/aws/smithy-go v1.25.0 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime v0.6.1
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime v0.7.0
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.15.0 // indirect
@@ -125,14 +125,6 @@ require (
 )
 
 replace (
-	github.com/braintrustdata/braintrust-sdk-go => ..
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk => ../trace/contrib/adk
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic => ../trace/contrib/anthropic
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime => ../trace/contrib/bedrockruntime
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino => ../trace/contrib/cloudwego/eino
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai => ../trace/contrib/genai
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit => ../trace/contrib/genkit
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai => ../trace/contrib/github.com/sashabaranov/go-openai
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo => ../trace/contrib/langchaingo
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai => ../trace/contrib/openai
 )

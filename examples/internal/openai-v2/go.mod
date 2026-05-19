@@ -5,8 +5,8 @@ go 1.25.0
 toolchain go1.26.1
 
 require (
-	github.com/braintrustdata/braintrust-sdk-go v0.6.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.6.1
+	github.com/braintrustdata/braintrust-sdk-go v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.7.0
 )
 
 require (
@@ -14,10 +14,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/openai/openai-go v1.12.0 // indirect
 )
-
-replace github.com/braintrustdata/braintrust-sdk-go => ../../..
-
-replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai => ../../../trace/contrib/openai
 
 require (
 	github.com/go-logr/logr v1.4.3 // indirect
