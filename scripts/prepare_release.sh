@@ -21,25 +21,43 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd -- "$SCRIPT_DIR/.." && pwd)
 ROOT_MODULE="github.com/braintrustdata/braintrust-sdk-go"
 
-mapfile -t NESTED_MODULES < <("$SCRIPT_DIR/list_nested_modules.sh")
+NESTED_MODULES=()
+while IFS= read -r module; do
+    NESTED_MODULES+=("$module")
+done < <("$SCRIPT_DIR/list_nested_modules.sh")
 
 pin_braintrust_versions() {
     local module_dir="$1"
     local gomod="${module_dir}/go.mod"
+    local -a pinned_modules=()
 
     # Match module path followed by a version (works for both single-line and
     # multi-line require blocks).
     if grep -q "${ROOT_MODULE} v" "${gomod}"; then
         GOWORK=off go mod edit -require="${ROOT_MODULE}@${VERSION}" "${gomod}"
+        pinned_modules+=("${ROOT_MODULE}")
     fi
 
     for other in "${NESTED_MODULES[@]}"; do
         if grep -q "${ROOT_MODULE}/${other} v" "${gomod}"; then
             GOWORK=off go mod edit -require="${ROOT_MODULE}/${other}@${VERSION}" "${gomod}"
+            pinned_modules+=("${ROOT_MODULE}/${other}")
         fi
     done
 
+    # Release PRs are opened before the new tags exist. Add temporary local
+    # replacements so tidy can resolve the just-pinned Braintrust modules, then
+    # drop the replacements before committing go.mod.
+    for pinned_module in "${pinned_modules[@]}"; do
+        local replacement="${REPO_ROOT}${pinned_module#${ROOT_MODULE}}"
+        GOWORK=off go mod edit -replace="${pinned_module}=${replacement}" "${gomod}"
+    done
+
     GOWORK=off go mod tidy -C "${module_dir}"
+
+    for pinned_module in "${pinned_modules[@]}"; do
+        GOWORK=off go mod edit -dropreplace="${pinned_module}" "${gomod}"
+    done
 }
 
 cd "$REPO_ROOT"
