@@ -38,3 +38,5 @@ require (
 )
 
 replace github.com/tmc/langchaingo => github.com/clutchski/langchaingo v0.0.0-20251028011745-5d819833dead
+
+replace github.com/braintrustdata/braintrust-sdk-go => ../../..

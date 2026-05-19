@@ -30,6 +30,7 @@ pin_braintrust_versions() {
     local module_dir="$1"
     local gomod="${module_dir}/go.mod"
     local -a pinned_modules=()
+    local -a temporary_replace_modules=()
 
     # Match module path followed by a version (works for both single-line and
     # multi-line require blocks).
@@ -47,17 +48,23 @@ pin_braintrust_versions() {
 
     # Release PRs are opened before the new tags exist. Add temporary local
     # replacements so tidy can resolve the just-pinned Braintrust modules, then
-    # drop the replacements before committing go.mod.
+    # drop only the replacements that this script added. Pre-existing example
+    # replacements are kept because examples are intended to run from checkout.
     for pinned_module in "${pinned_modules[@]}"; do
-        local replacement="${REPO_ROOT}${pinned_module#${ROOT_MODULE}}"
-        GOWORK=off go mod edit -replace="${pinned_module}=${replacement}" "${gomod}"
+        if ! grep -q "^replace ${pinned_module} =>" "${gomod}"; then
+            local replacement="${REPO_ROOT}${pinned_module#${ROOT_MODULE}}"
+            GOWORK=off go mod edit -replace="${pinned_module}=${replacement}" "${gomod}"
+            temporary_replace_modules+=("${pinned_module}")
+        fi
     done
 
     GOWORK=off go mod tidy -C "${module_dir}"
 
-    for pinned_module in "${pinned_modules[@]}"; do
-        GOWORK=off go mod edit -dropreplace="${pinned_module}" "${gomod}"
-    done
+    if (( ${#temporary_replace_modules[@]} > 0 )); then
+        for pinned_module in "${temporary_replace_modules[@]}"; do
+            GOWORK=off go mod edit -dropreplace="${pinned_module}" "${gomod}"
+        done
+    fi
 }
 
 cd "$REPO_ROOT"
