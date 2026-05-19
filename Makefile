@@ -1,4 +1,4 @@
-.PHONY: help ci build clean test test-quiet test-vcr-off test-vcr-record test-vcr-verify cover cover-path lint fmt mod-verify fix godoc examples release generate check-nested-modules
+.PHONY: help ci build clean test test-quiet test-vcr-off test-vcr-record test-vcr-verify cover cover-path lint fmt mod-verify fix godoc examples release generate check-nested-modules local-braintrust-replaces
 
 # Releasable nested modules, read from the manifest at make-time.
 NESTED_MODULE_DIRS := $(shell ./scripts/list_nested_modules.sh)
@@ -25,7 +25,10 @@ help:
 	@echo "  precommit        - Run fmt then ci"
 	@echo "  release          - Publish release with goreleaser"
 
-ci: clean lint mod-verify test build
+ci: clean lint mod-verify local-braintrust-replaces test build
+
+local-braintrust-replaces:
+	./scripts/apply_local_braintrust_replaces.sh
 
 build:
 	go build ./...
@@ -64,23 +67,27 @@ cover:
 	go tool cover -html=coverage.out -o coverage.html
 
 lint:
+	./scripts/apply_local_braintrust_replaces.sh
 	golangci-lint fmt -d
 	golangci-lint run ./...
+	./scripts/drop_local_braintrust_replaces.sh
 
 fmt:
 	golangci-lint fmt
 
 mod-verify:
+	./scripts/apply_local_braintrust_replaces.sh
 	go mod tidy
-	# Use GOWORK=off so tidy uses the replace directive instead of the workspace.
-	# This preserves an explicit version pin in the nested go.mod (e.g. set by
-	# release.sh before tagging) rather than resetting it to v0.0.0.
+	# Use GOWORK=off so tidy uses the local replace directives instead of the workspace.
+	# This preserves explicit version pins in nested go.mod files (e.g. set by
+	# prepare_release.sh before tags exist) rather than resetting them to v0.0.0.
 	for dir in $(NESTED_MODULE_DIRS); do GOWORK=off go mod tidy -C $$dir; done
+	go mod verify
+	for dir in $(NESTED_MODULE_DIRS); do (cd $$dir && go mod verify); done
+	./scripts/drop_local_braintrust_replaces.sh
 	git diff --exit-code go.mod go.sum \
 		$(foreach dir,$(NESTED_MODULE_DIRS),$(dir)/go.mod $(dir)/go.sum)
 	./scripts/check_nested_modules.sh
-	go mod verify
-	for dir in $(NESTED_MODULE_DIRS); do (cd $$dir && go mod verify); done
 
 check-nested-modules:
 	./scripts/check_nested_modules.sh
