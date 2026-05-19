@@ -125,6 +125,14 @@ require (
 )
 
 replace (
+	github.com/braintrustdata/braintrust-sdk-go => ..
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk => ../trace/contrib/adk
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic => ../trace/contrib/anthropic
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime => ../trace/contrib/bedrockruntime
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino => ../trace/contrib/cloudwego/eino
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai => ../trace/contrib/genai
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit => ../trace/contrib/genkit
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai => ../trace/contrib/github.com/sashabaranov/go-openai
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo => ../trace/contrib/langchaingo
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai => ../trace/contrib/openai
 )
