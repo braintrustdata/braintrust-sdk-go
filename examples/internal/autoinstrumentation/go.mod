@@ -204,3 +204,25 @@ require (
 	rsc.io/ordered v1.1.1 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
+
+replace github.com/braintrustdata/braintrust-sdk-go => ../../..
+
+replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/all => ../../../trace/contrib/all
+
+replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk => ../../../trace/contrib/adk
+
+replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic => ../../../trace/contrib/anthropic
+
+replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime => ../../../trace/contrib/bedrockruntime
+
+replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino => ../../../trace/contrib/cloudwego/eino
+
+replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai => ../../../trace/contrib/genai
+
+replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit => ../../../trace/contrib/genkit
+
+replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai => ../../../trace/contrib/github.com/sashabaranov/go-openai
+
+replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo => ../../../trace/contrib/langchaingo
+
+replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai => ../../../trace/contrib/openai
