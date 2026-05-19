@@ -32,3 +32,8 @@ require (
 	gopkg.in/dnaeon/go-vcr.v3 v3.2.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace (
+	github.com/braintrustdata/braintrust-sdk-go => ../../../../..
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai => ../../../openai
+)
