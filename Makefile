@@ -1,4 +1,4 @@
-.PHONY: help ci build clean test test-quiet test-vcr-off test-vcr-record test-vcr-verify cover cover-path lint fmt mod-verify fix godoc examples release generate check-nested-modules local-braintrust-replaces
+.PHONY: help ci build build-examples clean test test-quiet test-vcr-off test-vcr-record test-vcr-verify cover cover-path lint fmt mod-verify fix godoc examples release generate check-nested-modules local-braintrust-replaces
 
 # Releasable nested modules, read from the manifest at make-time.
 NESTED_MODULE_DIRS := $(shell ./scripts/list_nested_modules.sh)
@@ -7,6 +7,7 @@ help:
 	@echo "Available commands:"
 	@echo "  help             - Show this help message"
 	@echo "  build            - Build all packages"
+	@echo "  build-examples   - Compile-check every example module"
 	@echo "  test             - Run all tests (VCR replay mode, fast)"
 	@echo "  test-quiet       - Run all tests (quiet - no 'ok' lines)"
 	@echo "  test-vcr-off     - Run all tests without VCR (requires API keys)"
@@ -33,6 +34,24 @@ local-braintrust-replaces:
 build:
 	go build ./...
 	for dir in $(NESTED_MODULE_DIRS); do go build -C $$dir ./...; done
+
+# Compile-check every example module. Used by CI to catch SDK API
+# regressions that would silently rot examples. We use `go vet` instead
+# of `go build` because vet compiles + typechecks without emitting
+# binaries (and `go build ./...` writes per-package binaries even with
+# -o /dev/null when multiple main packages are present). `make examples`
+# would also catch this but requires API keys to execute.
+#
+# This mutates example go.mod files with local replace directives, so
+# don't chain this into `make ci` / `make release` (publish.sh requires
+# a clean tree).
+build-examples:
+	./scripts/apply_local_braintrust_replaces.sh --include-examples
+	@find examples -name go.mod -print | while IFS= read -r gomod; do \
+		dir=$$(dirname "$$gomod"); \
+		echo "Checking $$dir..."; \
+		GOWORK=off go vet -C "$$dir" ./... || exit 1; \
+	done
 
 clean:
 	go clean
@@ -104,6 +123,10 @@ examples:
 
 precommit: fmt ci
 
+# Publish a tagged release. Runs CI first so local / ad-hoc invocations
+# are always lint+test+build gated. The release workflow skips this by
+# calling ./scripts/publish.sh directly (CI is already covered upstream
+# by tag-release.yml or by the environment reviewer gate on manual dispatch).
 release: ci
 	./scripts/publish.sh
 

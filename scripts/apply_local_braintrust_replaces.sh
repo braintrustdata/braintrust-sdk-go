@@ -6,10 +6,31 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd -- "$SCRIPT_DIR/.." && pwd)
 ROOT_MODULE="github.com/braintrustdata/braintrust-sdk-go"
 
+# Default: only patch the SDK root + releasable nested modules. Pass
+# --include-examples to also patch out-of-workspace example modules
+# (used by `make build-examples` to verify examples build against
+# current SDK source). We keep this off by default because
+# scripts/publish.sh requires a clean working tree, and mutating
+# example go.mod files would break the release path.
+INCLUDE_EXAMPLES=false
+if [[ "${1:-}" == "--include-examples" ]]; then
+    INCLUDE_EXAMPLES=true
+fi
+
 MODULE_DIRS=(".")
 while IFS= read -r module; do
     MODULE_DIRS+=("$module")
 done < <("$SCRIPT_DIR/list_nested_modules.sh")
+
+if [[ "$INCLUDE_EXAMPLES" == "true" ]]; then
+    while IFS= read -r gomod; do
+        abs_dir=$(dirname "$gomod")
+        rel_dir=${abs_dir#"$REPO_ROOT/"}
+        # Skip the in-workspace examples module (resolved via go.work).
+        [[ "$rel_dir" == "examples" ]] && continue
+        MODULE_DIRS+=("$rel_dir")
+    done < <(find "$REPO_ROOT/examples" -name go.mod -print | sort)
+fi
 
 has_replace() {
     local module="$1"
