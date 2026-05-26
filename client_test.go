@@ -2,7 +2,13 @@ package braintrust
 
 import (
 	"context"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -80,6 +86,14 @@ func TestNew_MissingAPIKey(t *testing.T) {
 
 	// Clear environment variable to ensure no API key is set
 	t.Setenv("BRAINTRUST_API_KEY", "")
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".env.braintrust"), []byte("BRAINTRUST_API_KEY=\n"), 0o600))
+	oldwd, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(dir))
+	t.Cleanup(func() {
+		require.NoError(t, os.Chdir(oldwd))
+	})
 
 	tp := trace.NewTracerProvider()
 	defer func() { _ = tp.Shutdown(context.Background()) }()
@@ -90,10 +104,205 @@ func TestNew_MissingAPIKey(t *testing.T) {
 		WithLogger(logger.Discard()),
 	)
 
-	// Should fail with error about API key
-	require.Error(t, err)
-	assert.Nil(t, client)
-	assert.Contains(t, err.Error(), "API key")
+	// The client can initialize because .env.braintrust discovery is lazy and
+	// runs outside the constructor path.
+	require.NoError(t, err)
+	require.NotNil(t, client)
+}
+
+func TestNew_UsesEnvBraintrustFallbackForBlockingLogin(t *testing.T) {
+	// Note: No t.Parallel() because this test changes the process cwd.
+	t.Setenv("BRAINTRUST_API_KEY", "")
+
+	root := t.TempDir()
+	nested := filepath.Join(root, "nested", "project")
+	require.NoError(t, os.MkdirAll(nested, 0o755))
+	require.NoError(t, os.WriteFile(
+		filepath.Join(root, ".env.braintrust"),
+		[]byte("export BRAINTRUST_API_KEY="+auth.TestAPIKey+"\nOTHER_SECRET=ignored\n"),
+		0o600,
+	))
+
+	oldwd, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(nested))
+	t.Cleanup(func() {
+		require.NoError(t, os.Chdir(oldwd))
+	})
+
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(context.Background()) }()
+
+	client, err := New(tp,
+		WithProject("test-project"),
+		WithBlockingLogin(true),
+		WithLogger(intlogger.NewFailTestLogger(t)),
+	)
+
+	require.NoError(t, err)
+	require.NotNil(t, client)
+	assert.Equal(t, "", os.Getenv("BRAINTRUST_API_KEY"))
+
+	org := client.session.OrgInfo()
+	assert.Equal(t, "test-org-id", org.ID)
+	assert.Equal(t, "test-org-name", org.Name)
+	assert.Equal(t, auth.TestAPIKey, client.session.APIInfo().APIKey)
+}
+
+func TestNew_APIKeyPrecedenceOverEnvBraintrust(t *testing.T) {
+	// Note: No t.Parallel() because this test changes the process cwd.
+	t.Setenv("BRAINTRUST_API_KEY", auth.TestAPIKey)
+
+	root := t.TempDir()
+	require.NoError(t, os.WriteFile(
+		filepath.Join(root, ".env.braintrust"),
+		[]byte("BRAINTRUST_API_KEY=file-key\n"),
+		0o600,
+	))
+
+	oldwd, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(root))
+	t.Cleanup(func() {
+		require.NoError(t, os.Chdir(oldwd))
+	})
+
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(context.Background()) }()
+
+	client, err := New(tp,
+		WithProject("test-project"),
+		WithBlockingLogin(true),
+		WithLogger(intlogger.NewFailTestLogger(t)),
+	)
+
+	require.NoError(t, err)
+	require.NotNil(t, client)
+	assert.Equal(t, auth.TestAPIKey, client.session.APIInfo().APIKey)
+}
+
+func TestNew_ExplicitAPIKeyPrecedence(t *testing.T) {
+	// Note: No t.Parallel() because this test changes the process cwd.
+	t.Setenv("BRAINTRUST_API_KEY", "env-key")
+
+	root := t.TempDir()
+	require.NoError(t, os.WriteFile(
+		filepath.Join(root, ".env.braintrust"),
+		[]byte("BRAINTRUST_API_KEY=file-key\n"),
+		0o600,
+	))
+
+	oldwd, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(root))
+	t.Cleanup(func() {
+		require.NoError(t, os.Chdir(oldwd))
+	})
+
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(context.Background()) }()
+
+	client, err := New(tp,
+		WithAPIKey(auth.TestAPIKey),
+		WithProject("test-project"),
+		WithBlockingLogin(true),
+		WithLogger(intlogger.NewFailTestLogger(t)),
+	)
+
+	require.NoError(t, err)
+	require.NotNil(t, client)
+	assert.Equal(t, auth.TestAPIKey, client.session.APIInfo().APIKey)
+}
+
+func TestNew_BlankExplicitAPIKeyUsesEnvBraintrustFallback(t *testing.T) {
+	// Note: No t.Parallel() because this test changes the process cwd.
+	t.Setenv("BRAINTRUST_API_KEY", "")
+
+	root := t.TempDir()
+	require.NoError(t, os.WriteFile(
+		filepath.Join(root, ".env.braintrust"),
+		[]byte("BRAINTRUST_API_KEY="+auth.TestAPIKey+"\n"),
+		0o600,
+	))
+
+	oldwd, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(root))
+	t.Cleanup(func() {
+		require.NoError(t, os.Chdir(oldwd))
+	})
+
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(context.Background()) }()
+
+	client, err := New(tp,
+		WithAPIKey(os.Getenv("BRAINTRUST_API_KEY")),
+		WithProject("test-project"),
+		WithBlockingLogin(true),
+		WithLogger(intlogger.NewFailTestLogger(t)),
+	)
+
+	require.NoError(t, err)
+	require.NotNil(t, client)
+	assert.Equal(t, auth.TestAPIKey, client.session.APIInfo().APIKey)
+}
+
+func TestTracing_OTLPExporterWaitsForEnvBraintrustFallback(t *testing.T) {
+	// Note: No t.Parallel() because this test changes the process cwd.
+	t.Setenv("BRAINTRUST_API_KEY", "")
+
+	root := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(root, ".env.braintrust"), []byte("BRAINTRUST_API_KEY=file-api-key\n"), 0o600))
+
+	oldwd, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(root))
+	t.Cleanup(func() {
+		require.NoError(t, os.Chdir(oldwd))
+	})
+
+	otelAuth := make(chan string, 1)
+	var server *httptest.Server
+	server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/apikey/login":
+			assert.Equal(t, "Bearer file-api-key", r.Header.Get("Authorization"))
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = fmt.Fprintf(w, `{"org_info":[{"id":"test-org-id","name":"test-org","api_url":%q,"proxy_url":%q}]}`, server.URL, server.URL)
+		case "/otel/v1/traces":
+			otelAuth <- r.Header.Get("Authorization")
+			w.WriteHeader(http.StatusOK)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(context.Background()) }()
+
+	client, err := New(tp,
+		WithProject("test-project"),
+		WithAPIURL(server.URL),
+		WithAppURL(server.URL),
+		WithLogger(logger.Discard()),
+	)
+	require.NoError(t, err)
+
+	tracer := client.Tracer("test-app")
+	_, span := tracer.Start(context.Background(), "test-span")
+	span.End()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	require.NoError(t, tp.ForceFlush(ctx))
+
+	select {
+	case authHeader := <-otelAuth:
+		assert.Equal(t, "Bearer file-api-key", authHeader)
+	case <-ctx.Done():
+		t.Fatal("timed out waiting for OTLP export")
+	}
 }
 
 func TestNew_MissingAppURL(t *testing.T) {

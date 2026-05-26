@@ -31,6 +31,7 @@ type Session struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 	opts   Options // Store original options for access before login completes
+	apiKey string
 }
 
 // NewSession creates a session and starts login with retry in the background.
@@ -39,7 +40,7 @@ type Session struct {
 // If opts.Logger is nil, a noop logger is used.
 // If opts.Client is nil, a default client will be created.
 func NewSession(ctx context.Context, opts Options) (*Session, error) {
-	if opts.APIKey == "" {
+	if opts.APIKey == "" && opts.APIKeyResolver == nil {
 		return nil, fmt.Errorf("API key is required")
 	}
 	if opts.AppURL == "" {
@@ -53,7 +54,7 @@ func NewSession(ctx context.Context, opts Options) (*Session, error) {
 	}
 
 	// Create default client if none provided
-	if opts.Client == nil {
+	if opts.Client == nil && opts.APIKey != "" {
 		opts.Client = https.NewClient(opts.APIKey, opts.AppURL, log)
 	}
 
@@ -64,6 +65,7 @@ func NewSession(ctx context.Context, opts Options) (*Session, error) {
 		ctx:    ctx,
 		cancel: cancel,
 		opts:   opts,
+		apiKey: opts.APIKey,
 	}
 	go s.loginWithRetry(opts)
 	return s, nil
@@ -89,11 +91,10 @@ func (s *Session) OrgInfo() Org {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	ok, result := s.getLoginResult()
-	if ok {
+	if s.result != nil {
 		return Org{
-			ID:   result.OrgID,
-			Name: result.OrgName,
+			ID:   s.result.OrgID,
+			Name: s.result.OrgName,
 		}
 	}
 
@@ -107,12 +108,11 @@ func (s *Session) APIInfo() APIInfo {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	apiKey := s.opts.APIKey
+	apiKey := s.apiKey
 	apiURL := s.opts.APIURL
 
-	ok, result := s.getLoginResult()
-	if ok {
-		apiURL = result.APIURL
+	if s.result != nil {
+		apiURL = s.result.APIURL
 	}
 
 	if apiURL == "" {
@@ -125,13 +125,34 @@ func (s *Session) APIInfo() APIInfo {
 	}
 }
 
-func (s *Session) getLoginResult() (bool, *loginResult) {
+// ResolveAPIKey returns the configured API key or waits for the lazy resolver.
+func (s *Session) ResolveAPIKey(ctx context.Context) (string, bool) {
 	s.mu.RLock()
-	defer s.mu.RUnlock()
-	if s.result == nil {
-		return false, nil
+	if s.apiKey != "" {
+		apiKey := s.apiKey
+		s.mu.RUnlock()
+		return apiKey, true
 	}
-	return true, s.result
+	resolver := s.opts.APIKeyResolver
+	s.mu.RUnlock()
+
+	if resolver == nil {
+		return "", false
+	}
+
+	apiKey, ok := resolver.APIKey(ctx)
+	if !ok || apiKey == "" {
+		return "", false
+	}
+
+	s.mu.Lock()
+	if s.apiKey == "" {
+		s.apiKey = apiKey
+		s.opts.APIKey = apiKey
+	}
+	apiKey = s.apiKey
+	s.mu.Unlock()
+	return apiKey, true
 }
 
 // AppPublicURL returns the public app URL from config.
@@ -157,6 +178,20 @@ func (s *Session) loginWithRetry(opts Options) {
 	defer close(s.done)
 
 	s.logger.Debug("starting login with retry")
+
+	apiKey, ok := s.ResolveAPIKey(s.ctx)
+	if !ok {
+		err := fmt.Errorf("API key is required")
+		s.mu.Lock()
+		s.err = err
+		s.mu.Unlock()
+		s.logger.Warn("login failed", "error", err)
+		return
+	}
+	opts.APIKey = apiKey
+	if opts.Client == nil {
+		opts.Client = https.NewClient(apiKey, opts.AppURL, s.logger)
+	}
 
 	// Use loginUntilSuccess which retries on network/5xx errors
 	result, err := loginUntilSuccess(s.ctx, opts.Client, opts.OrgName)
@@ -198,5 +233,6 @@ func NewTestSession(apiKey, orgID, orgName, apiURL, appURL, appPublicURL string,
 			AppPublicURL: appPublicURL,
 			APIURL:       apiURL,
 		},
+		apiKey: apiKey,
 	}
 }

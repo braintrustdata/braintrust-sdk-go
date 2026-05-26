@@ -76,12 +76,13 @@ func New(tp *trace.TracerProvider, opts ...Option) (*Client, error) {
 
 	// Create auth session - starts async login immediately
 	session, err := auth.NewSession(context.Background(), auth.Options{
-		AppURL:       cfg.AppURL,
-		AppPublicURL: cfg.AppURL,
-		APIURL:       cfg.APIURL,
-		APIKey:       cfg.APIKey,
-		OrgName:      cfg.OrgName,
-		Logger:       log,
+		AppURL:         cfg.AppURL,
+		AppPublicURL:   cfg.AppURL,
+		APIURL:         cfg.APIURL,
+		APIKey:         cfg.APIKey,
+		APIKeyResolver: cfg.APIKeyResolver,
+		OrgName:        cfg.OrgName,
+		Logger:         log,
 	})
 	if err != nil {
 		log.Error("failed to create auth session", "error", err)
@@ -235,6 +236,8 @@ func NewEvaluator[I, R any](client *Client) *eval.Evaluator[I, R] {
 //	    Description: "My test dataset",
 //	})
 func (c *Client) API() *api.API {
+	_, _ = c.session.ResolveAPIKey(context.Background())
+
 	// Get API credentials from session (prefers logged-in info, falls back to config)
 	apiInfo := c.session.APIInfo()
 

@@ -47,6 +47,8 @@ type Options struct {
 	APIURL string
 	// APIKey is the API key to use
 	APIKey string
+	// APIKeyResolver resolves the API key when APIKey is not provided
+	APIKeyResolver APIKeyResolver
 	// OrgName is the name of a specific organization to connect to (optional)
 	OrgName string
 	// Logger is the logger to use (optional, defaults to noop logger)
@@ -55,6 +57,11 @@ type Options struct {
 	// If not provided, a default https.Client will be created
 	// This is primarily used for testing with VCR
 	Client *https.Client
+}
+
+// APIKeyResolver resolves a Braintrust API key on demand.
+type APIKeyResolver interface {
+	APIKey(context.Context) (string, bool)
 }
 
 // loginResult holds only the server response data from authentication.

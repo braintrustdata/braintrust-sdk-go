@@ -86,19 +86,8 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 		exporter = cfg.Exporter
 		log.Debug("using provided exporter")
 	} else {
-		otelOpts, err := getHTTPOtelOpts(apiInfo.APIURL, apiInfo.APIKey)
-		if err != nil {
-			return nil, err
-		}
-
-		exporter, err = otlptrace.New(
-			context.Background(),
-			otlptracehttp.NewClient(otelOpts...),
-		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create OTLP exporter: %w", err)
-		}
-		log.Debug("created OTLP HTTP exporter", "endpoint", apiInfo.APIURL)
+		exporter = newAPIKeyResolvingExporter(session, log)
+		log.Debug("created lazy OTLP HTTP exporter", "endpoint", apiInfo.APIURL)
 	}
 
 	// Wrap in batch processor
@@ -165,6 +154,88 @@ func AddSpanProcessor(tp *sdktrace.TracerProvider, session *auth.Session, cfg Co
 	}
 
 	return nil
+}
+
+type apiKeyResolvingExporter struct {
+	session *auth.Session
+	logger  logger.Logger
+
+	mu       sync.Mutex
+	exporter sdktrace.SpanExporter
+	shutdown bool
+}
+
+func newAPIKeyResolvingExporter(session *auth.Session, log logger.Logger) sdktrace.SpanExporter {
+	return &apiKeyResolvingExporter{session: session, logger: log}
+}
+
+func (e *apiKeyResolvingExporter) ExportSpans(ctx context.Context, spans []sdktrace.ReadOnlySpan) error {
+	exporter, err := e.getExporter(ctx)
+	if err != nil {
+		return err
+	}
+	return exporter.ExportSpans(ctx, spans)
+}
+
+func (e *apiKeyResolvingExporter) Shutdown(ctx context.Context) error {
+	e.mu.Lock()
+	exporter := e.exporter
+	e.shutdown = true
+	e.mu.Unlock()
+
+	if exporter == nil {
+		return nil
+	}
+	return exporter.Shutdown(ctx)
+}
+
+func (e *apiKeyResolvingExporter) getExporter(ctx context.Context) (sdktrace.SpanExporter, error) {
+	e.mu.Lock()
+	if e.exporter != nil {
+		exporter := e.exporter
+		e.mu.Unlock()
+		return exporter, nil
+	}
+	if e.shutdown {
+		e.mu.Unlock()
+		return nil, fmt.Errorf("OTLP exporter is shut down")
+	}
+	e.mu.Unlock()
+
+	apiKey, ok := e.session.ResolveAPIKey(ctx)
+	if !ok {
+		return nil, fmt.Errorf("API key is required")
+	}
+
+	apiInfo := e.session.APIInfo()
+	otelOpts, err := getHTTPOtelOpts(apiInfo.APIURL, apiKey)
+	if err != nil {
+		return nil, err
+	}
+
+	exporter, err := otlptrace.New(ctx, otlptracehttp.NewClient(otelOpts...))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create OTLP exporter: %w", err)
+	}
+
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if e.exporter != nil {
+		if shutdownErr := exporter.Shutdown(ctx); shutdownErr != nil {
+			e.logger.Warn("failed to shut down duplicate OTLP exporter", "error", shutdownErr)
+		}
+		return e.exporter, nil
+	}
+	if e.shutdown {
+		if shutdownErr := exporter.Shutdown(ctx); shutdownErr != nil {
+			e.logger.Warn("failed to shut down unused OTLP exporter", "error", shutdownErr)
+		}
+		return nil, fmt.Errorf("OTLP exporter is shut down")
+	}
+
+	e.exporter = exporter
+	e.logger.Debug("initialized OTLP HTTP exporter", "endpoint", apiInfo.APIURL)
+	return e.exporter, nil
 }
 
 // ParentOtelAttrKey is the OpenTelemetry attribute key used to associate spans with Braintrust parents.
