@@ -49,6 +49,7 @@ var (
 	// Private error variables (users don't need to check these)
 	errEval         = errors.New("eval error")
 	errScorer       = errors.New("scorer error")
+	errClassifier   = errors.New("classifier error")
 	errTaskRun      = errors.New("task run error")
 	errCaseIterator = errors.New("case iterator error")
 )
@@ -75,7 +76,12 @@ type Opts[I, R any] struct {
 	Experiment string
 	Dataset    Dataset[I, R]
 	Task       TaskFunc[I, R]
-	Scorers    []Scorer[I, R]
+
+	// At least one of Scorers or Classifiers must be provided.
+	// Scorers return numeric scores; Classifiers return categorical labels.
+	// They run in parallel for each case and are independent of each other.
+	Scorers     []Scorer[I, R]
+	Classifiers []Classifier[I, R]
 
 	// Optional
 	ProjectName string   // Project name (uses default from config if not specified)
@@ -230,6 +236,7 @@ type eval[I, R any] struct {
 	datasetID      string // For origin.object_id
 	task           TaskFunc[I, R]
 	scorers        []Scorer[I, R]
+	classifiers    []Classifier[I, R]
 	tracer         oteltrace.Tracer
 	startSpanOpt   oteltrace.SpanStartOption
 	goroutines     int
@@ -254,6 +261,7 @@ func newEval[I, R any](
 	dataset Dataset[I, R],
 	task TaskFunc[I, R],
 	scorers []Scorer[I, R],
+	classifiers []Classifier[I, R],
 	parallelism int,
 	quiet bool,
 ) *eval[I, R] {
@@ -281,6 +289,7 @@ func newEval[I, R any](
 		datasetID:      datasetID,
 		task:           task,
 		scorers:        scorers,
+		classifiers:    classifiers,
 		tracer:         tracer,
 		startSpanOpt:   startSpanOpt,
 		goroutines:     goroutines,
@@ -320,6 +329,7 @@ func newEvalOpts[I, R any](ctx context.Context, s *auth.Session, tp *trace.Trace
 		opts.Dataset,
 		opts.Task,
 		opts.Scorers,
+		opts.Classifiers,
 		opts.Parallelism,
 		opts.Quiet,
 	), nil
@@ -449,12 +459,32 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 		return err
 	}
 
-	_, err = e.runScorers(ctx, taskResult)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return err
+	// Run scorers and classifiers in parallel. Each pass is independent —
+	// a failing scorer must not block classifiers (and vice versa), and
+	// per-pass errors are aggregated rather than fatal.
+	var (
+		scorerErr     error
+		classifierErr error
+		wg            sync.WaitGroup
+	)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		_, scorerErr = e.runScorers(ctx, taskResult)
+	}()
+	if len(e.classifiers) > 0 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			classifierErr = e.runClassifiers(ctx, span, c, taskResult)
+		}()
 	}
+	wg.Wait()
 
+	if joined := errors.Join(scorerErr, classifierErr); joined != nil {
+		span.SetStatus(codes.Error, joined.Error())
+		return joined
+	}
 	return nil
 }
 
@@ -611,6 +641,159 @@ func (e *eval[I, R]) runScorer(ctx context.Context, scorer Scorer[I, R], taskRes
 	return scores, nil
 }
 
+// runClassifiers runs each classifier concurrently in its own span,
+// aggregates the resulting classifications by name onto the eval span,
+// and records any per-classifier errors as non-fatal aggregate errors.
+//
+// Per the cross-SDK spec, classifier failures must not abort the eval
+// or affect other classifiers/scorers; they are surfaced via
+// braintrust.metadata.classifier_errors on the eval span and joined into
+// the returned error.
+func (e *eval[I, R]) runClassifiers(ctx context.Context, evalSpan oteltrace.Span, c Case[I, R], taskResult TaskResult[I, R]) error {
+	// Run all classifiers in parallel. Each goroutine writes to its own
+	// slot in `results`, so no synchronization is needed during execution.
+	// We merge results sequentially below in declaration order to keep
+	// cross-classifier aggregation deterministic.
+	type classifierResult struct {
+		spanName string
+		items    []classificationItem
+		err      error
+	}
+	results := make([]classifierResult, len(e.classifiers))
+	var wg sync.WaitGroup
+	for i, classifier := range e.classifiers {
+		wg.Add(1)
+		go func(i int, classifier Classifier[I, R]) {
+			defer wg.Done()
+			spanName := classifier.Name()
+			if spanName == "" {
+				spanName = fmt.Sprintf("classifier_%d", i)
+			}
+			items, err := e.runClassifier(ctx, spanName, classifier, taskResult)
+			results[i] = classifierResult{spanName: spanName, items: items, err: err}
+		}(i, classifier)
+	}
+	wg.Wait()
+
+	aggregated := make(map[string][]map[string]any)
+	classifierErrors := make(map[string]string)
+	var errs []error
+
+	for _, r := range results {
+		if r.err != nil {
+			classifierErrors[r.spanName] = r.err.Error()
+			errs = append(errs, r.err)
+			continue
+		}
+
+		// Group items by their resolved name. Items keep their stable order;
+		// duplicates with the same {name, id} are preserved.
+		for _, item := range r.items {
+			aggregated[item.name] = append(aggregated[item.name], item.payload)
+		}
+	}
+
+	// Log aggregated classifications onto the eval span, if any.
+	if len(aggregated) > 0 {
+		if err := setJSONAttr(evalSpan, "braintrust.classifications", aggregated); err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	// Merge classifier_errors into the eval span's metadata. The eval span's
+	// metadata was set in runCase before classifiers ran, so we rewrite it
+	// with the merged map.
+	if len(classifierErrors) > 0 {
+		merged := make(map[string]any, len(c.Metadata)+1)
+		for k, v := range c.Metadata {
+			merged[k] = v
+		}
+		merged["classifier_errors"] = classifierErrors
+		if err := setJSONAttr(evalSpan, "braintrust.metadata", merged); err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	return errors.Join(errs...)
+}
+
+// classificationItem is the wire-format payload (id/label?/metadata?) paired
+// with the resolved grouping name, used internally during aggregation.
+type classificationItem struct {
+	name    string
+	payload map[string]any
+}
+
+// runClassifier executes a single classifier in its own span. It mirrors
+// runScorer: a child span named after the classifier, with input_json set
+// to the task result, and the classifier's output written to output_json.
+func (e *eval[I, R]) runClassifier(ctx context.Context, spanName string, classifier Classifier[I, R], taskResult TaskResult[I, R]) ([]classificationItem, error) {
+	ctx, span := e.tracer.Start(ctx, spanName, e.startSpanOpt)
+	defer span.End()
+
+	spanAttrs := map[string]any{
+		"type":    "classifier",
+		"name":    spanName,
+		"purpose": "scorer",
+	}
+	if err := setJSONAttr(span, "braintrust.span_attributes", spanAttrs); err != nil {
+		return nil, err
+	}
+
+	// Log the task result (input/expected/output) as the classifier's input.
+	classifierInput := map[string]any{
+		"input":    taskResult.Input,
+		"expected": taskResult.Expected,
+		"output":   taskResult.Output,
+	}
+	if err := setJSONAttr(span, "braintrust.input_json", classifierInput); err != nil {
+		return nil, err
+	}
+
+	classifications, err := classifier.Run(ctx, taskResult)
+	if err != nil {
+		werr := fmt.Errorf("%w: classifier %q failed: %w", errClassifier, spanName, err)
+		recordSpanError(span, werr)
+		return nil, werr
+	}
+
+	// Normalize and validate each classification:
+	//   - default missing/empty Name to the classifier's resolved span name
+	//   - require a non-empty ID (spec: each item must be a non-empty object)
+	items := make([]classificationItem, 0, len(classifications))
+	outputByName := make(map[string][]map[string]any)
+	for _, c := range classifications {
+		if c.ID == "" {
+			werr := fmt.Errorf("%w: classifier %q returned a classification with empty ID", errClassifier, spanName)
+			recordSpanError(span, werr)
+			return nil, werr
+		}
+		name := c.Name
+		if name == "" {
+			name = spanName
+		}
+		payload := map[string]any{"id": c.ID}
+		if c.Label != "" {
+			payload["label"] = c.Label
+		}
+		if len(c.Metadata) > 0 {
+			payload["metadata"] = c.Metadata
+		}
+		items = append(items, classificationItem{name: name, payload: payload})
+		outputByName[name] = append(outputByName[name], payload)
+	}
+
+	// Log the classifier's output: always grouped by name as a slice of
+	// wire-format items, matching the spec's ClassificationItem shape.
+	if len(outputByName) > 0 {
+		if err := setJSONAttr(span, "braintrust.output_json", outputByName); err != nil {
+			return nil, err
+		}
+	}
+
+	return items, nil
+}
+
 // permalink generates a URL to view the eval in Braintrust UI.
 func (e *eval[I, R]) permalink() string {
 	appURL := e.session.AppPublicURL()
@@ -640,6 +823,9 @@ func run[I, R any](ctx context.Context, opts Opts[I, R], s *auth.Session, tp *tr
 	}
 	if opts.Task == nil {
 		return nil, fmt.Errorf("%w: Task is required", errEval)
+	}
+	if len(opts.Scorers) == 0 && len(opts.Classifiers) == 0 {
+		return nil, fmt.Errorf("%w: at least one of Scorers or Classifiers is required", errEval)
 	}
 
 	// Create eval executor
@@ -681,6 +867,8 @@ func recordSpanError(span oteltrace.Span, err error) {
 	switch {
 	case errors.Is(err, errScorer):
 		errType = "ErrScorer"
+	case errors.Is(err, errClassifier):
+		errType = "ErrClassifier"
 	case errors.Is(err, errTaskRun):
 		errType = "ErrTaskRun"
 	case errors.Is(err, errCaseIterator):
@@ -736,6 +924,7 @@ func testNewEval[I, R any](
 	dataset Dataset[I, R],
 	task TaskFunc[I, R],
 	scorers []Scorer[I, R],
+	classifiers []Classifier[I, R],
 	parallelism int,
 ) *eval[I, R] {
 	// Call low-level newEval with quiet=true for tests
@@ -749,6 +938,7 @@ func testNewEval[I, R any](
 		dataset,
 		task,
 		scorers,
+		classifiers,
 		parallelism,
 		true, // quiet=true for tests
 	)

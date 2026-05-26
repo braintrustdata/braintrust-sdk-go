@@ -37,6 +37,14 @@ type unitTestEval[I, R any] struct {
 // It generates its own fake session, config, tracer, experiment/project IDs, etc.
 func newUnitTestEval[I, R any](t *testing.T, dataset Dataset[I, R], task TaskFunc[I, R], scorers []Scorer[I, R], parallelism int) *unitTestEval[I, R] {
 	t.Helper()
+	return newUnitTestEvalWithClassifiers(t, dataset, task, scorers, nil, parallelism)
+}
+
+// newUnitTestEvalWithClassifiers is the underlying constructor that accepts both
+// scorers and classifiers. Most existing tests only exercise scorers and go
+// through newUnitTestEval.
+func newUnitTestEvalWithClassifiers[I, R any](t *testing.T, dataset Dataset[I, R], task TaskFunc[I, R], scorers []Scorer[I, R], classifiers []Classifier[I, R], parallelism int) *unitTestEval[I, R] {
+	t.Helper()
 
 	// Create test tracer and exporter using oteltest
 	tp, exporter := oteltest.Setup(t)
@@ -56,6 +64,7 @@ func newUnitTestEval[I, R any](t *testing.T, dataset Dataset[I, R], task TaskFun
 		dataset,
 		task,
 		scorers,
+		classifiers,
 		parallelism,
 	)
 
@@ -280,6 +289,7 @@ func TestPermalink_EscapesOrgName(t *testing.T) {
 		"test-project",
 		NewDataset([]Case[testInput, testOutput]{}),
 		task,
+		nil,
 		nil,
 		1,
 	)

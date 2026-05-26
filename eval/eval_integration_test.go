@@ -719,6 +719,11 @@ func TestEval_NoProjectName(t *testing.T) {
 		Task: T(func(ctx context.Context, input string) (string, error) {
 			return input, nil
 		}),
+		Scorers: []Scorer[string, string]{
+			NewScorer("noop", func(ctx context.Context, _ TaskResult[string, string]) (Scores, error) {
+				return S(1.0), nil
+			}),
+		},
 		Quiet: true,
 	})
 
