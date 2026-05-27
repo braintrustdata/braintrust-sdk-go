@@ -44,6 +44,12 @@ func TestParseBraintrustAPIKey(t *testing.T) {
 			found: true,
 		},
 		{
+			name:  "yaml-style dotenv assignment",
+			input: "BRAINTRUST_API_KEY: test-key\n",
+			key:   "test-key",
+			found: true,
+		},
+		{
 			name: "ignores other variables",
 			input: `OTHER_SECRET=ignored
 BRAINTRUST_API_KEY=test-key

@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/joho/godotenv"
 )
 
 const (
@@ -62,6 +64,8 @@ func lookupEnvBraintrustAPIKeyFromDir(dir string) (string, bool) {
 	paths := candidateEnvBraintrustFiles(dir)
 	results := make([]envBraintrustReadResult, len(paths))
 
+	// Start candidate reads together, but consume results nearest-first below so
+	// a slower local .env.braintrust still beats a faster parent directory.
 	var wg sync.WaitGroup
 	for i, path := range paths {
 		wg.Add(1)
@@ -115,100 +119,10 @@ func candidateEnvBraintrustFiles(dir string) []string {
 }
 
 func parseBraintrustAPIKey(data []byte) (string, bool) {
-	for _, line := range strings.Split(string(data), "\n") {
-		key, value, ok := parseDotenvLine(line)
-		if !ok || key != braintrustAPIKeyEnv {
-			continue
-		}
-		value = strings.TrimSpace(value)
-		if value != "" {
-			return value, true
-		}
+	env, err := godotenv.UnmarshalBytes(data)
+	if err != nil {
+		return "", false
 	}
-	return "", false
-}
-
-func parseDotenvLine(line string) (key, value string, ok bool) {
-	line = strings.TrimSpace(strings.TrimSuffix(line, "\r"))
-	if line == "" || strings.HasPrefix(line, "#") {
-		return "", "", false
-	}
-
-	if strings.HasPrefix(line, "export") && len(line) > len("export") && isSpace(line[len("export")]) {
-		line = strings.TrimSpace(line[len("export"):])
-	}
-
-	equals := strings.IndexByte(line, '=')
-	if equals < 0 {
-		return "", "", false
-	}
-
-	key = strings.TrimSpace(line[:equals])
-	value = parseDotenvValue(line[equals+1:])
-	return key, value, true
-}
-
-func parseDotenvValue(value string) string {
-	value = strings.TrimLeft(value, " \t")
-	if value == "" {
-		return ""
-	}
-
-	switch value[0] {
-	case '\'':
-		if parsed, ok := parseQuotedDotenvValue(value, '\'', false); ok {
-			return parsed
-		}
-	case '"':
-		if parsed, ok := parseQuotedDotenvValue(value, '"', true); ok {
-			return parsed
-		}
-	}
-
-	for i := 0; i < len(value); i++ {
-		if value[i] == '#' && (i == 0 || isSpace(value[i-1])) {
-			value = value[:i]
-			break
-		}
-	}
-	return strings.TrimSpace(value)
-}
-
-func parseQuotedDotenvValue(value string, quote byte, expandEscapes bool) (string, bool) {
-	var builder strings.Builder
-	escaped := false
-	for i := 1; i < len(value); i++ {
-		ch := value[i]
-		if escaped {
-			if expandEscapes {
-				switch ch {
-				case 'n':
-					builder.WriteByte('\n')
-				case 'r':
-					builder.WriteByte('\r')
-				case 't':
-					builder.WriteByte('\t')
-				default:
-					builder.WriteByte(ch)
-				}
-			} else {
-				builder.WriteByte(ch)
-			}
-			escaped = false
-			continue
-		}
-		if ch == '\\' {
-			escaped = true
-			continue
-		}
-		if ch == quote {
-			return builder.String(), true
-		}
-		builder.WriteByte(ch)
-	}
-	return "", false
-}
-
-func isSpace(ch byte) bool {
-	return ch == ' ' || ch == '\t'
+	value := strings.TrimSpace(env[braintrustAPIKeyEnv])
+	return value, value != ""
 }

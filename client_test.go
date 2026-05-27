@@ -81,7 +81,7 @@ func TestNew_WithBlockingLogin(t *testing.T) {
 	assert.Contains(t, str, "test-org-id")
 }
 
-func TestNew_MissingAPIKey(t *testing.T) {
+func TestNew_InitializesWithoutImmediateAPIKey(t *testing.T) {
 	// Note: No t.Parallel() because we're setting environment variables
 
 	// Clear environment variable to ensure no API key is set
@@ -108,6 +108,34 @@ func TestNew_MissingAPIKey(t *testing.T) {
 	// runs outside the constructor path.
 	require.NoError(t, err)
 	require.NotNil(t, client)
+}
+
+func TestNew_BlockingLoginFailsWhenEnvBraintrustHasNoAPIKey(t *testing.T) {
+	// Note: No t.Parallel() because this test changes the process cwd.
+	t.Setenv("BRAINTRUST_API_KEY", "")
+
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".env.braintrust"), []byte("BRAINTRUST_API_KEY=\n"), 0o600))
+
+	oldwd, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(dir))
+	t.Cleanup(func() {
+		require.NoError(t, os.Chdir(oldwd))
+	})
+
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(context.Background()) }()
+
+	client, err := New(tp,
+		WithProject("test-project"),
+		WithBlockingLogin(true),
+		WithLogger(logger.Discard()),
+	)
+
+	require.Error(t, err)
+	assert.Nil(t, client)
+	assert.Contains(t, err.Error(), "API key is required")
 }
 
 func TestNew_UsesEnvBraintrustFallbackForBlockingLogin(t *testing.T) {
@@ -204,6 +232,39 @@ func TestNew_ExplicitAPIKeyPrecedence(t *testing.T) {
 
 	client, err := New(tp,
 		WithAPIKey(auth.TestAPIKey),
+		WithProject("test-project"),
+		WithBlockingLogin(true),
+		WithLogger(intlogger.NewFailTestLogger(t)),
+	)
+
+	require.NoError(t, err)
+	require.NotNil(t, client)
+	assert.Equal(t, auth.TestAPIKey, client.session.APIInfo().APIKey)
+}
+
+func TestNew_BlankExplicitAPIKeyPreservesEnvironmentFallback(t *testing.T) {
+	// Note: No t.Parallel() because this test changes the process cwd.
+	t.Setenv("BRAINTRUST_API_KEY", auth.TestAPIKey)
+
+	root := t.TempDir()
+	require.NoError(t, os.WriteFile(
+		filepath.Join(root, ".env.braintrust"),
+		[]byte("BRAINTRUST_API_KEY=file-key\n"),
+		0o600,
+	))
+
+	oldwd, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(root))
+	t.Cleanup(func() {
+		require.NoError(t, os.Chdir(oldwd))
+	})
+
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(context.Background()) }()
+
+	client, err := New(tp,
+		WithAPIKey("  "),
 		WithProject("test-project"),
 		WithBlockingLogin(true),
 		WithLogger(intlogger.NewFailTestLogger(t)),

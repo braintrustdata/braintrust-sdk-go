@@ -12,8 +12,9 @@ import (
 // Option is a functional option for configuring a Braintrust client
 type Option func(*config.Config)
 
-// WithAPIKey sets the API key (overrides BRAINTRUST_API_KEY).
-// Blank values are ignored so fallback lookup can still run.
+// WithAPIKey sets a nonblank API key (overrides BRAINTRUST_API_KEY).
+// Blank or whitespace-only values are treated as unset and leave environment
+// and .env.braintrust fallback lookup available.
 func WithAPIKey(apiKey string) Option {
 	return func(c *config.Config) {
 		apiKey = strings.TrimSpace(apiKey)
