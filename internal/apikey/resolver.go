@@ -61,18 +61,44 @@ func lookupEnvBraintrustAPIKey() (string, bool) {
 }
 
 func lookupEnvBraintrustAPIKeyFromDir(dir string) (string, bool) {
-	for _, path := range candidateEnvBraintrustFiles(dir) {
-		data, err := os.ReadFile(path)
-		if errors.Is(err, os.ErrNotExist) {
-			continue
+	paths := candidateEnvBraintrustFiles(dir)
+	results := make([]envBraintrustReadResult, len(paths))
+	ready := make([]bool, len(paths))
+	resultCh := make(chan envBraintrustReadResult, len(paths))
+
+	for i, path := range paths {
+		go func(i int, path string) {
+			data, err := os.ReadFile(path)
+			resultCh <- envBraintrustReadResult{index: i, data: data, err: err}
+		}(i, path)
+	}
+
+	next := 0
+	for range paths {
+		result := <-resultCh
+		results[result.index] = result
+		ready[result.index] = true
+
+		for next < len(paths) && ready[next] {
+			result := results[next]
+			if errors.Is(result.err, os.ErrNotExist) {
+				next++
+				continue
+			}
+			if result.err != nil {
+				return "", false
+			}
+			return parseBraintrustAPIKey(result.data)
 		}
-		if err != nil {
-			return "", false
-		}
-		return parseBraintrustAPIKey(data)
 	}
 
 	return "", false
+}
+
+type envBraintrustReadResult struct {
+	index int
+	data  []byte
+	err   error
 }
 
 func candidateEnvBraintrustFiles(dir string) []string {
