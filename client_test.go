@@ -410,6 +410,27 @@ func TestNew_MissingAPIURL(t *testing.T) {
 	assert.Contains(t, err.Error(), "API URL")
 }
 
+func TestNew_InvalidAPIURLWithImmediateAPIKey(t *testing.T) {
+	t.Parallel()
+
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(context.Background()) }()
+
+	client, err := New(tp,
+		WithAPIKey(auth.TestAPIKey),
+		WithProject("test-project"),
+		WithAPIURL("not-a-url"),
+		WithLogger(logger.Discard()),
+	)
+	if client != nil {
+		defer client.session.Close()
+	}
+
+	require.Error(t, err)
+	assert.Nil(t, client)
+	assert.Contains(t, err.Error(), "invalid url")
+}
+
 func TestTracing_EndToEnd(t *testing.T) {
 	t.Parallel()
 

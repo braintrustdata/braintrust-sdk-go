@@ -61,43 +61,18 @@ func lookupEnvBraintrustAPIKey() (string, bool) {
 }
 
 func lookupEnvBraintrustAPIKeyFromDir(dir string) (string, bool) {
-	paths := candidateEnvBraintrustFiles(dir)
-	results := make([]envBraintrustReadResult, len(paths))
-
-	// Start candidate reads together, but consume results nearest-first below so
-	// a slower local .env.braintrust still beats a faster parent directory.
-	var wg sync.WaitGroup
-	for i, path := range paths {
-		wg.Add(1)
-		go func(i int, path string) {
-			defer wg.Done()
-			data, err := os.ReadFile(path)
-			results[i] = envBraintrustReadResult{data: data, err: err}
-		}(i, path)
-	}
-	wg.Wait()
-
-	for _, result := range results {
-		if errors.Is(result.err, os.ErrNotExist) {
+	for _, path := range candidateEnvBraintrustFiles(dir) {
+		data, err := os.ReadFile(path)
+		if errors.Is(err, os.ErrNotExist) {
 			continue
 		}
-		if result.err != nil {
+		if err != nil {
 			return "", false
 		}
-
-		key, found := parseBraintrustAPIKey(result.data)
-		if found {
-			return key, true
-		}
-		return "", false
+		return parseBraintrustAPIKey(data)
 	}
 
 	return "", false
-}
-
-type envBraintrustReadResult struct {
-	data []byte
-	err  error
 }
 
 func candidateEnvBraintrustFiles(dir string) []string {

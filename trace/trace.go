@@ -85,6 +85,20 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 	if cfg.Exporter != nil {
 		exporter = cfg.Exporter
 		log.Debug("using provided exporter")
+	} else if apiInfo.APIKey != "" {
+		otelOpts, err := getHTTPOtelOpts(apiInfo.APIURL, apiInfo.APIKey)
+		if err != nil {
+			return nil, err
+		}
+
+		exporter, err = otlptrace.New(
+			context.Background(),
+			otlptracehttp.NewClient(otelOpts...),
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create OTLP exporter: %w", err)
+		}
+		log.Debug("created OTLP HTTP exporter", "endpoint", apiInfo.APIURL)
 	} else {
 		exporter = newAPIKeyResolvingExporter(session, log)
 		log.Debug("created lazy OTLP HTTP exporter", "endpoint", apiInfo.APIURL)
