@@ -5,8 +5,8 @@ go 1.25.0
 toolchain go1.26.1
 
 require (
-	github.com/braintrustdata/braintrust-sdk-go v0.7.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.7.1
+	github.com/braintrustdata/braintrust-sdk-go v0.7.2
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.7.2
 )
 
 require (
