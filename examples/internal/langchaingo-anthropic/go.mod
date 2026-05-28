@@ -5,8 +5,8 @@ go 1.25.0
 toolchain go1.26.1
 
 require (
-	github.com/braintrustdata/braintrust-sdk-go v0.7.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go v0.6.2
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.6.2
 	github.com/tmc/langchaingo v0.1.13
 	go.opentelemetry.io/otel v1.43.0
 	go.opentelemetry.io/otel/sdk v1.43.0

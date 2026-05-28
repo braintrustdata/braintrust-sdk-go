@@ -6,7 +6,7 @@ toolchain go1.26.1
 
 require (
 	github.com/braintrustdata/braintrust-sdk-go v0.7.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.6.2
 	github.com/sashabaranov/go-openai v1.41.2
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/otel/trace v1.43.0
@@ -31,9 +31,4 @@ require (
 	golang.org/x/sys v0.42.0 // indirect
 	gopkg.in/dnaeon/go-vcr.v3 v3.2.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
-
-replace (
-	github.com/braintrustdata/braintrust-sdk-go => ../../../../..
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai => ../../../openai
 )

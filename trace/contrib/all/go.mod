@@ -5,15 +5,15 @@ go 1.25.0
 toolchain go1.26.1
 
 require (
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk v0.7.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.7.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime v0.7.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino v0.7.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.7.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.7.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.7.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.7.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.7.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk v0.6.2
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.6.2
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime v0.6.2
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino v0.6.2
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.6.2
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.6.2
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.6.2
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.6.2
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.6.2
 )
 
 require (
@@ -100,17 +100,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	rsc.io/omap v1.2.0 // indirect
 	rsc.io/ordered v1.1.1 // indirect
-)
-
-replace (
-	github.com/braintrustdata/braintrust-sdk-go => ../../..
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk => ../adk
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic => ../anthropic
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime => ../bedrockruntime
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino => ../cloudwego/eino
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai => ../genai
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit => ../genkit
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai => ../github.com/sashabaranov/go-openai
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo => ../langchaingo
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai => ../openai
 )
