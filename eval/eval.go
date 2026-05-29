@@ -467,11 +467,13 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 		classifierErr error
 		wg            sync.WaitGroup
 	)
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		_, scorerErr = e.runScorers(ctx, taskResult)
-	}()
+	if len(e.scorers) > 0 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, scorerErr = e.runScorers(ctx, taskResult)
+		}()
+	}
 	if len(e.classifiers) > 0 {
 		wg.Add(1)
 		go func() {
