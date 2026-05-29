@@ -35,14 +35,6 @@ type Classification struct {
 // Classifications is a collection of Classification results returned by classifiers.
 type Classifications = []Classification
 
-// C is a helper to concisely return a single classification from a classifier.
-// The Name defaults to the classifier's name when empty.
-//
-//	return eval.C("positive"), nil
-func C(id string) Classifications {
-	return Classifications{{ID: id}}
-}
-
 // ClassifyFunc is a function that classifies a task result and returns a list of Classifications.
 type ClassifyFunc[I, R any] func(ctx context.Context, result TaskResult[I, R]) (Classifications, error)
 

@@ -31,13 +31,13 @@ func main() {
 
 	evaluator := braintrust.NewEvaluator[string, string](bt)
 
-	// 1. Single classification using the C() helper. Empty Name on the
-	//    Classification defaults to the classifier's name ("category").
+	// 1. Single-label classifier. Empty Name on the Classification
+	//    defaults to the classifier's name ("category").
 	singleLabel := eval.NewClassifier("category", func(_ context.Context, r eval.TaskResult[string, string]) (eval.Classifications, error) {
 		if strings.Contains(strings.ToLower(r.Input), "hello") {
-			return eval.C("greeting"), nil
+			return eval.Classifications{{ID: "greeting"}}, nil
 		}
-		return eval.C("other"), nil
+		return eval.Classifications{{ID: "other"}}, nil
 	})
 
 	// 2. Multi-label classification: several items under the same name.
@@ -59,7 +59,7 @@ func main() {
 	// 3. Classifier returning no classifications for some inputs.
 	emptyAllowed := eval.NewClassifier("flag", func(_ context.Context, r eval.TaskResult[string, string]) (eval.Classifications, error) {
 		if strings.Contains(strings.ToLower(r.Output), "error") {
-			return eval.C("contains_error"), nil
+			return eval.Classifications{{ID: "contains_error"}}, nil
 		}
 		return nil, nil
 	})

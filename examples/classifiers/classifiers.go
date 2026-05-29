@@ -43,7 +43,7 @@ func main() {
 		case regexp.MustCompile(`(?i)damaged|refund`).MatchString(r.Input):
 			return eval.Classifications{{ID: "complaint", Label: "Complaint"}}, nil
 		default:
-			return eval.C("other"), nil
+			return eval.Classifications{{ID: "other"}}, nil
 		}
 	})
 

@@ -372,14 +372,3 @@ func TestRun_RequiresScorerOrClassifier(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "at least one of Scorers or Classifiers")
 }
-
-func TestC_HelperReturnsSingleClassification(t *testing.T) {
-	t.Parallel()
-
-	got := C("positive")
-	require.Len(t, got, 1)
-	assert.Equal(t, "positive", got[0].ID)
-	assert.Empty(t, got[0].Name)
-	assert.Empty(t, got[0].Label)
-	assert.Nil(t, got[0].Metadata)
-}
