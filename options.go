@@ -121,3 +121,13 @@ func WithSpanFilterFuncs(filterFuncs ...config.SpanFilterFunc) Option {
 		c.SpanFilterFuncs = append(c.SpanFilterFuncs, filterFuncs...)
 	}
 }
+
+// WithAutoConvertAIAttachments controls whether the SDK automatically scans
+// spans for base64 LLM attachments and replaces them with uploaded
+// references. Defaults to true.
+// Environment variable: BRAINTRUST_AUTO_CONVERT_AI_ATTACHMENTS
+func WithAutoConvertAIAttachments(enabled bool) Option {
+	return func(c *config.Config) {
+		c.AutoConvertAIAttachments = enabled
+	}
+}

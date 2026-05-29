@@ -26,6 +26,17 @@ while IFS= read -r module; do
     NESTED_MODULES+=("$module")
 done < <("$SCRIPT_DIR/list_nested_modules.sh")
 
+# Modules that depend on Braintrust SDK modules but are not themselves released
+# via tags. We still pin their Braintrust dependencies so they stay in sync with
+# the release. (e.g. btx is an internal helper module that is not published.)
+# Sourced from scripts/pinned_unreleased_modules.txt so the new check in
+# scripts/check_release_coverage.sh can validate the same set.
+PINNED_UNRELEASED_MODULES=()
+while IFS= read -r module; do
+    [[ -z "$module" || "$module" =~ ^[[:space:]]*# ]] && continue
+    PINNED_UNRELEASED_MODULES+=("$module")
+done < "$SCRIPT_DIR/pinned_unreleased_modules.txt"
+
 pin_braintrust_versions() {
     local module_dir="$1"
     local gomod="${module_dir}/go.mod"
@@ -50,8 +61,13 @@ pin_braintrust_versions() {
     # replacements so tidy can resolve the just-pinned Braintrust modules, then
     # drop only the replacements that this script added. Pre-existing example
     # replacements are kept because examples are intended to run from checkout.
+    #
+    # Match both single-line (`replace foo => bar`) and block-form
+    # (`replace (\n    foo => bar\n)`) replace directives so we don't append a
+    # duplicate when the module already has a committed local replacement.
     for pinned_module in "${pinned_modules[@]}"; do
-        if ! grep -q "^replace ${pinned_module} =>" "${gomod}"; then
+        if ! grep -q "^replace ${pinned_module} =>" "${gomod}" && \
+           ! grep -q "^[[:space:]]*${pinned_module} =>" "${gomod}"; then
             local replacement="${REPO_ROOT}${pinned_module#${ROOT_MODULE}}"
             GOWORK=off go mod edit -replace="${pinned_module}=${replacement}" "${gomod}"
             temporary_replace_modules+=("${pinned_module}")
@@ -70,6 +86,13 @@ pin_braintrust_versions() {
 cd "$REPO_ROOT"
 
 for module in "${NESTED_MODULES[@]}"; do
+    pin_braintrust_versions "${module}"
+done
+
+# Pin Braintrust dependencies in unreleased helper modules (e.g. btx) so they
+# track the release version. These modules are not tagged or published, but
+# CI's mod-verify expects their go.mod files to be clean.
+for module in "${PINNED_UNRELEASED_MODULES[@]}"; do
     pin_braintrust_versions "${module}"
 done
 

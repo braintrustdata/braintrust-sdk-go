@@ -303,10 +303,10 @@ func TestConverseStream(t *testing.T) {
 	assert.Contains(t, gotText.String(), "Paris")
 
 	span := exporter.FlushOne()
-	assertSpanValid(t, span, timeRange, "bedrock.converse_stream")
+	assertSpanValid(t, span, timeRange, "bedrock.converse-stream")
 
 	metadata := span.Metadata()
-	assert.Equal(t, "converse_stream", metadata["endpoint"])
+	assert.Equal(t, "converse-stream", metadata["endpoint"])
 	assert.Equal(t, true, metadata["stream"])
 	assert.Equal(t, "end_turn", metadata["stop_reason"])
 

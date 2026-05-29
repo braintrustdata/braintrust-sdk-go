@@ -22,11 +22,11 @@ type converseStreamTracer struct {
 }
 
 func (t *converseStreamTracer) StartSpan(ctx context.Context, start time.Time, in any) (context.Context, trace.Span) {
-	ctx, span := t.cfg.tracer().Start(ctx, "bedrock.converse_stream", trace.WithTimestamp(start))
+	ctx, span := t.cfg.tracer().Start(ctx, "bedrock.converse-stream", trace.WithTimestamp(start))
 
 	t.metadata = map[string]any{
 		"provider": "bedrock",
-		"endpoint": "converse_stream",
+		"endpoint": "converse-stream",
 	}
 
 	params, ok := in.(*bedrockruntime.ConverseStreamInput)

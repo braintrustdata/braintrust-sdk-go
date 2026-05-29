@@ -1,0 +1,50 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 224
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"messages":[{"content":[{"text":"What color is this image?"},{"image":{"format":"png","source":{"bytes":"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg=="}}}],"role":"user"}]}'
+        form: {}
+        headers:
+            Amz-Sdk-Invocation-Id:
+                - c1d89c2c-c182-4353-a8f9-5dc733535e81
+            Amz-Sdk-Request:
+                - attempt=1; max=3
+            Content-Type:
+                - application/json
+            User-Agent:
+                - aws-sdk-go-v2/1.41.5 ua/2.1 os/macos lang/go#1.26.3 md/GOOS#darwin md/GOARCH#arm64 api/bedrockruntime#1.50.4 m/E,g
+            X-Amz-Date:
+                - 20260519T215705Z
+        url: https://bedrock-runtime.us-east-2.amazonaws.com/model/us.amazon.nova-lite-v1%3A0/converse
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 350
+        uncompressed: false
+        body: '{"metrics":{"latencyMs":525},"output":{"message":{"content":[{"text":"I can''t see any image in the provided information. Could you please provide more context or a description of the image so I can assist you better?"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":536,"outputTokens":32,"serverToolUsage":{},"totalTokens":568}}'
+        headers:
+            Content-Length:
+                - "350"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 19 May 2026 21:57:06 GMT
+            X-Amzn-Requestid:
+                - cc12a1c9-0b74-4796-8981-55e8bbf69ce5
+        status: 200 OK
+        code: 200
+        duration: 918.572167ms

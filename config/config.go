@@ -31,11 +31,12 @@ type Config struct {
 	BlockingLogin      bool
 
 	// Tracing configuration
-	FilterAISpans          bool
-	EnableBuiltinAdkTraces bool // if false (default), drop Google ADK native spans to avoid duplicates
-	EnableTraceConsoleLog  bool // log traces to stdout for debugging
-	SpanFilterFuncs        []SpanFilterFunc
-	Exporter               trace.SpanExporter
+	FilterAISpans            bool
+	EnableBuiltinAdkTraces   bool // if false (default), drop Google ADK native spans to avoid duplicates
+	EnableTraceConsoleLog    bool // log traces to stdout for debugging
+	AutoConvertAIAttachments bool // scan spans for base64 attachments and upload them (default: true)
+	SpanFilterFuncs          []SpanFilterFunc
+	Exporter                 trace.SpanExporter
 
 	// Logger
 	Logger logger.Logger
@@ -60,19 +61,21 @@ type SpanFilterFunc func(span trace.ReadOnlySpan) int
 //   - BRAINTRUST_ENABLE_TRACE_CONSOLE_LOG: Log traces to stdout for debugging (default: false)
 //   - BRAINTRUST_OTEL_FILTER_AI_SPANS: Filter to keep only AI-related spans (default: false)
 //   - BRAINTRUST_OTEL_ENABLE_BUILTIN_ADK_TRACES: Enable exporting spans from Google ADK's built-in telemetry (default: false)
+//   - BRAINTRUST_AUTO_CONVERT_AI_ATTACHMENTS: Scan spans for base64 attachments and upload them (default: true)
 func FromEnv() *Config {
 	apiKey := getEnvString("BRAINTRUST_API_KEY", "")
 	cfg := &Config{
-		APIKey:                 apiKey,
-		APIURL:                 getEnvString("BRAINTRUST_API_URL", "https://api.braintrust.dev"),
-		AppURL:                 getEnvString("BRAINTRUST_APP_URL", "https://www.braintrust.dev"),
-		OrgName:                getEnvString("BRAINTRUST_ORG_NAME", ""),
-		DefaultProjectID:       getEnvString("BRAINTRUST_DEFAULT_PROJECT_ID", ""),
-		DefaultProjectName:     getEnvString("BRAINTRUST_DEFAULT_PROJECT", "default-go-project"),
-		BlockingLogin:          getEnvBool("BRAINTRUST_BLOCKING_LOGIN", false),
-		FilterAISpans:          getEnvBool("BRAINTRUST_OTEL_FILTER_AI_SPANS", false),
-		EnableTraceConsoleLog:  getEnvBool("BRAINTRUST_ENABLE_TRACE_CONSOLE_LOG", false),
-		EnableBuiltinAdkTraces: getEnvBool("BRAINTRUST_OTEL_ENABLE_BUILTIN_ADK_TRACES", false),
+		APIKey:                   apiKey,
+		APIURL:                   getEnvString("BRAINTRUST_API_URL", "https://api.braintrust.dev"),
+		AppURL:                   getEnvString("BRAINTRUST_APP_URL", "https://www.braintrust.dev"),
+		OrgName:                  getEnvString("BRAINTRUST_ORG_NAME", ""),
+		DefaultProjectID:         getEnvString("BRAINTRUST_DEFAULT_PROJECT_ID", ""),
+		DefaultProjectName:       getEnvString("BRAINTRUST_DEFAULT_PROJECT", "default-go-project"),
+		BlockingLogin:            getEnvBool("BRAINTRUST_BLOCKING_LOGIN", false),
+		FilterAISpans:            getEnvBool("BRAINTRUST_OTEL_FILTER_AI_SPANS", false),
+		EnableTraceConsoleLog:    getEnvBool("BRAINTRUST_ENABLE_TRACE_CONSOLE_LOG", false),
+		EnableBuiltinAdkTraces:   getEnvBool("BRAINTRUST_OTEL_ENABLE_BUILTIN_ADK_TRACES", false),
+		AutoConvertAIAttachments: getEnvBool("BRAINTRUST_AUTO_CONVERT_AI_ATTACHMENTS", true),
 	}
 	if cfg.APIKey == "" {
 		cfg.APIKeyResolver = apikey.NewResolver()

@@ -17,6 +17,7 @@ import (
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/trace/attachmentprocessor"
 )
 
 // Test helper: create a session for testing with proper auth info
@@ -699,4 +700,139 @@ func TestHTTPOtelOptsEnableGzipCompression(t *testing.T) {
 	assert.NoError(t, tp.ForceFlush(context.Background()))
 	assert.Equal(t, "gzip", <-contentEncoding)
 	assert.NoError(t, tp.Shutdown(context.Background()))
+}
+
+func TestAttachmentProcessing_ReplacesBase64InSpan(t *testing.T) {
+	assert := assert.New(t)
+
+	tp := sdktrace.NewTracerProvider()
+	exporter := tracetest.NewInMemoryExporter()
+
+	session := newTestSession()
+	cfg := Config{
+		DefaultProjectID:         "attachment-test",
+		AutoConvertAIAttachments: true,
+		AttachmentUploader:       &attachmentprocessor.NoopUploader{},
+		Exporter:                 exporter,
+		Logger:                   logger.Discard(),
+	}
+
+	err := AddSpanProcessor(tp, session, cfg)
+	assert.NoError(err)
+
+	tracer := tp.Tracer("test")
+
+	// Create a span with OpenAI-format base64 image data
+	base64PNG := "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg=="
+	inputJSON := `[{"role":"user","content":[{"type":"image_url","image_url":{"url":"data:image/png;base64,` + base64PNG + `"}}]}]`
+
+	_, span := tracer.Start(context.Background(), "chat-completion")
+	span.SetAttributes(attribute.String("braintrust.input_json", inputJSON))
+	span.End()
+
+	_ = tp.ForceFlush(context.Background())
+	spans := exporter.GetSpans()
+
+	assert.Len(spans, 1)
+	assert.Equal("chat-completion", spans[0].Name)
+
+	// Find the input_json attribute
+	var exportedInputJSON string
+	for _, a := range spans[0].Attributes {
+		if string(a.Key) == "braintrust.input_json" {
+			exportedInputJSON = a.Value.AsString()
+			break
+		}
+	}
+
+	assert.NotEmpty(exportedInputJSON)
+	assert.NotEqual(inputJSON, exportedInputJSON, "base64 data should have been replaced")
+	assert.NotContains(exportedInputJSON, base64PNG, "base64 data should not appear in exported span")
+	assert.Contains(exportedInputJSON, "braintrust_attachment", "should contain attachment reference")
+}
+
+func TestAttachmentProcessing_DisabledByConfig(t *testing.T) {
+	assert := assert.New(t)
+
+	tp := sdktrace.NewTracerProvider()
+	exporter := tracetest.NewInMemoryExporter()
+
+	session := newTestSession()
+	cfg := Config{
+		DefaultProjectID:         "no-attachment-test",
+		AutoConvertAIAttachments: false, // disabled
+		Exporter:                 exporter,
+		Logger:                   logger.Discard(),
+	}
+
+	err := AddSpanProcessor(tp, session, cfg)
+	assert.NoError(err)
+
+	tracer := tp.Tracer("test")
+
+	base64PNG := "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg=="
+	inputJSON := `[{"role":"user","content":[{"type":"image_url","image_url":{"url":"data:image/png;base64,` + base64PNG + `"}}]}]`
+
+	_, span := tracer.Start(context.Background(), "chat-completion")
+	span.SetAttributes(attribute.String("braintrust.input_json", inputJSON))
+	span.End()
+
+	_ = tp.ForceFlush(context.Background())
+	spans := exporter.GetSpans()
+
+	assert.Len(spans, 1)
+
+	// Find the input_json attribute — should be unchanged
+	var exportedInputJSON string
+	for _, a := range spans[0].Attributes {
+		if string(a.Key) == "braintrust.input_json" {
+			exportedInputJSON = a.Value.AsString()
+			break
+		}
+	}
+
+	assert.Equal(inputJSON, exportedInputJSON, "input should be unchanged when attachment processing is disabled")
+}
+
+func TestAttachmentProcessing_NoAttachmentsPassThrough(t *testing.T) {
+	assert := assert.New(t)
+
+	tp := sdktrace.NewTracerProvider()
+	exporter := tracetest.NewInMemoryExporter()
+
+	session := newTestSession()
+	cfg := Config{
+		DefaultProjectID:         "passthrough-test",
+		AutoConvertAIAttachments: true,
+		AttachmentUploader:       &attachmentprocessor.NoopUploader{},
+		Exporter:                 exporter,
+		Logger:                   logger.Discard(),
+	}
+
+	err := AddSpanProcessor(tp, session, cfg)
+	assert.NoError(err)
+
+	tracer := tp.Tracer("test")
+
+	// Create a span with no base64 data
+	inputJSON := `[{"role":"user","content":"Hello, world!"}]`
+
+	_, span := tracer.Start(context.Background(), "plain-chat")
+	span.SetAttributes(attribute.String("braintrust.input_json", inputJSON))
+	span.End()
+
+	_ = tp.ForceFlush(context.Background())
+	spans := exporter.GetSpans()
+
+	assert.Len(spans, 1)
+
+	var exportedInputJSON string
+	for _, a := range spans[0].Attributes {
+		if string(a.Key) == "braintrust.input_json" {
+			exportedInputJSON = a.Value.AsString()
+			break
+		}
+	}
+
+	assert.Equal(inputJSON, exportedInputJSON, "non-attachment spans should pass through unchanged")
 }

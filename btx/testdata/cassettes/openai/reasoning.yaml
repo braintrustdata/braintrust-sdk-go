@@ -1,0 +1,361 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 219
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"input":[{"content":"Look at this sequence: 2, 6, 12, 20, 30. What is the pattern and what would be the formula for the nth term?\n","role":"user"}],"model":"o4-mini","reasoning":{"effort":"high","summary":"detailed"}}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+            User-Agent:
+                - OpenAI/Go 1.12.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 1.12.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.26.3
+        url: https://api.openai.com/v1/responses
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |-
+            {
+              "id": "resp_0c2cd20eb299ac8d006a0e8973115881999ccd340d31018ba1",
+              "object": "response",
+              "created_at": 1779337587,
+              "status": "completed",
+              "background": false,
+              "billing": {
+                "payer": "developer"
+              },
+              "completed_at": 1779337594,
+              "error": null,
+              "frequency_penalty": 0.0,
+              "incomplete_details": null,
+              "instructions": null,
+              "max_output_tokens": null,
+              "max_tool_calls": null,
+              "model": "o4-mini-2025-04-16",
+              "moderation": null,
+              "output": [
+                {
+                  "id": "rs_0c2cd20eb299ac8d006a0e89736de08199af93a017faf6f1e0",
+                  "type": "reasoning",
+                  "summary": [
+                    {
+                      "type": "summary_text",
+                      "text": "**Exploring the sequence pattern**\n\nThe user's sequence is 2, 6, 12, 20, 30. I notice that these numbers can be expressed as n(n+1) \u2014 for example, 2 = 1*2, 6 = 2*3, and so on. This shows the pattern follows the formula a_n = n(n+1), so they\u2019re also pronic numbers. Alternatively, I observe that the differences between terms increase consistently: +4, +6, +8, +10, indicating that the second differences are constant at 2, which points to a quadratic nature."
+                    },
+                    {
+                      "type": "summary_text",
+                      "text": "**Clarifying the nth term formula**\n\nI'm working on the sequence formula, realizing that the nth term, a_n, can be expressed as n(n+1) or equivalently n^2 + n. This pattern connects to pronic numbers, where each term results from multiplying two consecutive integers. Starting from n=1 gives us 2, 6, and so on. \n\nThe differences between terms increase consistently by 2, indicating a quadratic nature. So, my final conclusion is that the nth term formula is a_n = n(n+1), identifying these numbers as pronic."
+                    }
+                  ]
+                },
+                {
+                  "id": "msg_0c2cd20eb299ac8d006a0e897a3d648199a583c5e5b3a90739",
+                  "type": "message",
+                  "status": "completed",
+                  "content": [
+                    {
+                      "type": "output_text",
+                      "annotations": [],
+                      "logprobs": [],
+                      "text": "The easiest way to see what\u2019s going on is to look at the differences:\n\n  2,   6,   12,   20,   30  \n   \u21974   \u21976    \u21978    \u219710  \n\nSince the increments go up by 2 each time, the second difference is constant (2), so the sequence is given by a quadratic in n.  A more direct observation is:\n\n  2 = 1\u00b72  \n  6 = 2\u00b73  \n 12 = 3\u00b74  \n 20 = 4\u00b75  \n 30 = 5\u00b76  \n\nIn other words the nth term is the product of two consecutive integers:\n\n  a\u2099 = n\u2009(n + 1)  \n\nEquivalently,\n\n  a\u2099 = n\u00b2 + n."
+                    }
+                  ],
+                  "role": "assistant"
+                }
+              ],
+              "parallel_tool_calls": true,
+              "presence_penalty": 0.0,
+              "previous_response_id": null,
+              "prompt_cache_key": null,
+              "prompt_cache_retention": "in_memory",
+              "reasoning": {
+                "effort": "high",
+                "summary": "detailed"
+              },
+              "safety_identifier": null,
+              "service_tier": "default",
+              "store": true,
+              "temperature": 1.0,
+              "text": {
+                "format": {
+                  "type": "text"
+                },
+                "verbosity": "medium"
+              },
+              "tool_choice": "auto",
+              "tools": [],
+              "top_logprobs": 0,
+              "top_p": 1.0,
+              "truncation": "disabled",
+              "usage": {
+                "input_tokens": 41,
+                "input_tokens_details": {
+                  "cached_tokens": 0
+                },
+                "output_tokens": 1003,
+                "output_tokens_details": {
+                  "reasoning_tokens": 768
+                },
+                "total_tokens": 1044
+              },
+              "user": null,
+              "metadata": {}
+            }
+        headers:
+            Access-Control-Expose-Headers:
+                - X-Request-ID
+                - CF-Ray
+                - CF-Ray
+            Alt-Svc:
+                - h3=":443"; ma=86400
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - 9ff0d2ac38bd9b6d-SEA
+            Content-Type:
+                - application/json
+            Date:
+                - Thu, 21 May 2026 04:26:34 GMT
+            Openai-Organization:
+                - braintrust-data
+            Openai-Processing-Ms:
+                - "8061"
+            Openai-Project:
+                - proj_vsCSXafhhByzWOThMrJcZiw9
+            Openai-Version:
+                - "2020-10-01"
+            Server:
+                - cloudflare
+            Set-Cookie:
+                - __cf_bm=YffoGhR.CQ1MJ4LxzaM3nxMZ0JDjQkDtk6RgJDt_eYQ-1779337586.5951757-1.0.1.1-Tc82esciUit8iigxGSc4NXOP0OL23t4zLu6kI5P.gyXbbG54UKt41_e_KbWUTqwCIUFOE7iYP1kCYLzBFF.wjeP3xoofxy3Lep0b.CMWDyVcA_XZfJMEVCVV8J7jzLOS; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 21 May 2026 04:56:34 GMT
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            X-Content-Type-Options:
+                - nosniff
+            X-Ratelimit-Limit-Requests:
+                - "30000"
+            X-Ratelimit-Limit-Tokens:
+                - "150000000"
+            X-Ratelimit-Remaining-Requests:
+                - "29999"
+            X-Ratelimit-Remaining-Tokens:
+                - "149999752"
+            X-Ratelimit-Reset-Requests:
+                - 2ms
+            X-Ratelimit-Reset-Tokens:
+                - 0s
+            X-Request-Id:
+                - req_79e4895b3da040ab99ce78d99f1a5034
+        status: 200 OK
+        code: 200
+        duration: 8.495933791s
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 2191
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"input":[{"content":"Look at this sequence: 2, 6, 12, 20, 30. What is the pattern and what would be the formula for the nth term?\n","role":"user"},{"id":"rs_0c2cd20eb299ac8d006a0e89736de08199af93a017faf6f1e0","summary":[{"text":"**Exploring the sequence pattern**\n\nThe user''s sequence is 2, 6, 12, 20, 30. I notice that these numbers can be expressed as n(n+1) — for example, 2 = 1*2, 6 = 2*3, and so on. This shows the pattern follows the formula a_n = n(n+1), so they’re also pronic numbers. Alternatively, I observe that the differences between terms increase consistently: +4, +6, +8, +10, indicating that the second differences are constant at 2, which points to a quadratic nature.","type":"summary_text"},{"text":"**Clarifying the nth term formula**\n\nI''m working on the sequence formula, realizing that the nth term, a_n, can be expressed as n(n+1) or equivalently n^2 + n. This pattern connects to pronic numbers, where each term results from multiplying two consecutive integers. Starting from n=1 gives us 2, 6, and so on. \n\nThe differences between terms increase consistently by 2, indicating a quadratic nature. So, my final conclusion is that the nth term formula is a_n = n(n+1), identifying these numbers as pronic.","type":"summary_text"}],"type":"reasoning"},{"id":"msg_0c2cd20eb299ac8d006a0e897a3d648199a583c5e5b3a90739","content":[{"annotations":[],"text":"The easiest way to see what’s going on is to look at the differences:\n\n  2,   6,   12,   20,   30  \n   ↗4   ↗6    ↗8    ↗10  \n\nSince the increments go up by 2 each time, the second difference is constant (2), so the sequence is given by a quadratic in n.  A more direct observation is:\n\n  2 = 1·2  \n  6 = 2·3  \n 12 = 3·4  \n 20 = 4·5  \n 30 = 5·6  \n\nIn other words the nth term is the product of two consecutive integers:\n\n  aₙ = n (n + 1)  \n\nEquivalently,\n\n  aₙ = n² + n.","type":"output_text"}],"status":"completed","role":"assistant","type":"message"},{"content":"Using the pattern you discovered, what would be the 10th term? And can you find the sum of the first 10 terms?","role":"user"}],"model":"o4-mini","reasoning":{"effort":"high","summary":"detailed"}}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+            User-Agent:
+                - OpenAI/Go 1.12.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 1.12.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.26.3
+        url: https://api.openai.com/v1/responses
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |-
+            {
+              "id": "resp_0c2cd20eb299ac8d006a0e897b27288199a8ec347091012ef2",
+              "object": "response",
+              "created_at": 1779337595,
+              "status": "completed",
+              "background": false,
+              "billing": {
+                "payer": "developer"
+              },
+              "completed_at": 1779337602,
+              "error": null,
+              "frequency_penalty": 0.0,
+              "incomplete_details": null,
+              "instructions": null,
+              "max_output_tokens": null,
+              "max_tool_calls": null,
+              "model": "o4-mini-2025-04-16",
+              "moderation": null,
+              "output": [
+                {
+                  "id": "rs_0c2cd20eb299ac8d006a0e897bb9fc8199ae7e583d3970e8dc",
+                  "type": "reasoning",
+                  "summary": [
+                    {
+                      "type": "summary_text",
+                      "text": "**Calculating terms and sums**\n\nThe user asks to find the 10th term using the pattern \\( a_n = n(n+1) \\). For the 10th term, I calculate \\( a_{10} = 10 \\times 11 = 110 \\). Then, I find the sum of the first 10 terms. The sum \\( S_{10} = \\sum_{n=1}^{10} n(n+1) = \\sum n^2 + \\sum n \\) equals 440 when calculated. I also mention the closed form for \\( S_n = \\frac{n(n+1)(n+2)}{3} \\)."
+                    },
+                    {
+                      "type": "summary_text",
+                      "text": "**Presenting results**\n\nI calculate the 10th term as \\(10 \\times 11 = 110\\) and find the sum of the first ten terms to be 440. Additionally, I should mention the closed-form expression for the sum, which is \\(S_n = \\frac{n(n+1)(n+2)}{3}\\). So, the final answers are the 10th term, 110, and the sum, 440, along with the formula for future reference. Keeping these points clear is key!"
+                    }
+                  ]
+                },
+                {
+                  "id": "msg_0c2cd20eb299ac8d006a0e8981fcc88199ba398ddb74e142ad",
+                  "type": "message",
+                  "status": "completed",
+                  "content": [
+                    {
+                      "type": "output_text",
+                      "annotations": [],
+                      "logprobs": [],
+                      "text": "The nth term is  \n  a\u2099 = n(n + 1).  \n\nSo for n = 10:  \n  a\u2081\u2080 = 10\u00b711 = 110.  \n\nThe sum of the first 10 terms is  \n  S\u2081\u2080 = \u2211\u2096\u208c\u2081\u00b9\u2070 k(k + 1)  \n      = \u2211k\u00b2 + \u2211k  \n      = [10\u00b711\u00b721/6] + [10\u00b711/2]  \n      = 385 + 55  \n      = 440.  \n\n(Equivalently, S\u2099 = n(n + 1)(n + 2)/3, so S\u2081\u2080 = 10\u00b711\u00b712/3 = 440.)"
+                    }
+                  ],
+                  "role": "assistant"
+                }
+              ],
+              "parallel_tool_calls": true,
+              "presence_penalty": 0.0,
+              "previous_response_id": null,
+              "prompt_cache_key": null,
+              "prompt_cache_retention": "in_memory",
+              "reasoning": {
+                "effort": "high",
+                "summary": "detailed"
+              },
+              "safety_identifier": null,
+              "service_tier": "default",
+              "store": true,
+              "temperature": 1.0,
+              "text": {
+                "format": {
+                  "type": "text"
+                },
+                "verbosity": "medium"
+              },
+              "tool_choice": "auto",
+              "tools": [],
+              "top_logprobs": 0,
+              "top_p": 1.0,
+              "truncation": "disabled",
+              "usage": {
+                "input_tokens": 252,
+                "input_tokens_details": {
+                  "cached_tokens": 0
+                },
+                "output_tokens": 552,
+                "output_tokens_details": {
+                  "reasoning_tokens": 320
+                },
+                "total_tokens": 804
+              },
+              "user": null,
+              "metadata": {}
+            }
+        headers:
+            Access-Control-Expose-Headers:
+                - X-Request-ID
+                - CF-Ray
+                - CF-Ray
+            Alt-Svc:
+                - h3=":443"; ma=86400
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - 9ff0d2e15d939b6d-SEA
+            Content-Type:
+                - application/json
+            Date:
+                - Thu, 21 May 2026 04:26:42 GMT
+            Openai-Organization:
+                - braintrust-data
+            Openai-Processing-Ms:
+                - "7359"
+            Openai-Project:
+                - proj_vsCSXafhhByzWOThMrJcZiw9
+            Openai-Version:
+                - "2020-10-01"
+            Server:
+                - cloudflare
+            Set-Cookie:
+                - __cf_bm=Y9PzXOtB7xeKcN1_PXJQYfPdvVHfQ_yxsVMIEyjUw94-1779337595.0944118-1.0.1.1-R0lfO9ih0qDZ_BPwDI.yDQMGZ5HS52qQ7kR5FwurWcEd4yvZPj_ReiYzuyUsyXxtLj41JvzQ4yyXDvHjMt3BOho8sFeuJbdlXVBMEMch.qaGKaZj2LfMETX6EJpQaZVU; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 21 May 2026 04:56:42 GMT
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            X-Content-Type-Options:
+                - nosniff
+            X-Ratelimit-Limit-Requests:
+                - "30000"
+            X-Ratelimit-Limit-Tokens:
+                - "150000000"
+            X-Ratelimit-Remaining-Requests:
+                - "29999"
+            X-Ratelimit-Remaining-Tokens:
+                - "149999540"
+            X-Ratelimit-Reset-Requests:
+                - 2ms
+            X-Ratelimit-Reset-Tokens:
+                - 0s
+            X-Request-Id:
+                - req_7bd871fd031544edb26d5c708f3a8bc7
+        status: 200 OK
+        code: 200
+        duration: 7.67716125s

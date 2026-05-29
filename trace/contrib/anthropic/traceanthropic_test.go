@@ -329,7 +329,7 @@ func TestMiddlewareIntegrationStreaming(t *testing.T) {
 	// Validate spans were generated correctly
 	span := exporter.FlushOne()
 
-	assertSpanValid(t, span, timeRange)
+	assertStreamingSpanValid(t, span, timeRange)
 
 	// Verify span content
 	input := span.Attr("braintrust.input_json").String()
@@ -388,13 +388,24 @@ func setUpTest(t *testing.T) (anthropic.Client, *oteltest.Exporter) {
 	return client, exporter
 }
 
-// assertSpanValid asserts all the common properties of an Anthropic span are valid.
+// assertSpanValid asserts all the common properties of a non-streaming Anthropic span.
 func assertSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.TimeRange) {
+	t.Helper()
+	assertSpanValidWithName(t, span, timeRange, "anthropic.messages.create")
+}
+
+// assertStreamingSpanValid asserts all the common properties of a streaming Anthropic span.
+func assertStreamingSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.TimeRange) {
+	t.Helper()
+	assertSpanValidWithName(t, span, timeRange, "anthropic.messages.stream")
+}
+
+func assertSpanValidWithName(t *testing.T, span oteltest.Span, timeRange oteltest.TimeRange, expectedName string) {
 	t.Helper()
 	assert := assert.New(t)
 
 	span.AssertInTimeRange(timeRange)
-	span.AssertNameIs("anthropic.messages.create")
+	span.AssertNameIs(expectedName)
 	assert.Equal(codes.Unset, span.Stub.Status.Code)
 
 	metadata := span.Metadata()
@@ -476,7 +487,7 @@ func TestStreamingWithThinking(t *testing.T) {
 
 	// Validate span
 	span := exporter.FlushOne()
-	assertSpanValid(t, span, timeRange)
+	assertStreamingSpanValid(t, span, timeRange)
 
 	// Verify the span output contains both thinking and text blocks
 	outputStr := span.Attr("braintrust.output_json").String()
@@ -544,7 +555,7 @@ func TestStreamingWithCitations(t *testing.T) {
 	require.Greater(t, citationDeltas, 0, "expected citations_delta events in streaming response")
 
 	span := exporter.FlushOne()
-	assertSpanValid(t, span, timeRange)
+	assertStreamingSpanValid(t, span, timeRange)
 
 	output := span.Output()
 	messages, ok := output.([]any)
@@ -720,7 +731,7 @@ func TestStreamingWithTools(t *testing.T) {
 
 	// Validate span
 	span := exporter.FlushOne()
-	assertSpanValid(t, span, timeRange)
+	assertStreamingSpanValid(t, span, timeRange)
 
 	// Verify metadata
 	metadata := span.Metadata()

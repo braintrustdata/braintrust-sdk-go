@@ -37,14 +37,11 @@ func newMessagesTracer(cfg *middlewareConfig) *messagesTracer {
 
 func (mt *messagesTracer) StartSpan(ctx context.Context, t time.Time, request io.Reader) (context.Context, trace.Span, error) {
 	mt.startTime = t
-	ctx, span := mt.cfg.tracer().Start(
-		ctx,
-		"anthropic.messages.create",
-		trace.WithTimestamp(t),
-	)
 
 	var raw map[string]interface{}
 	if err := json.NewDecoder(request).Decode(&raw); err != nil {
+		// Fall back to default span name on parse error.
+		ctx, span := mt.cfg.tracer().Start(ctx, "anthropic.messages.create", trace.WithTimestamp(t))
 		return ctx, span, err
 	}
 
@@ -78,20 +75,35 @@ func (mt *messagesTracer) StartSpan(ctx context.Context, t time.Time, request io
 		}
 	}
 
-	// Build input messages array, prepending system prompt if present
+	// Use a distinct span name for streaming calls.
+	spanName := "anthropic.messages.create"
+	if mt.streaming {
+		spanName = "anthropic.messages.stream"
+	}
+
+	ctx, span := mt.cfg.tracer().Start(ctx, spanName, trace.WithTimestamp(t))
+
+	// Build input messages array, appending system prompt last
 	var msgs []any
 
-	// Prepend system prompt as a message if present
+	// Add user/assistant messages first, normalizing content blocks
+	if messages, ok := raw["messages"].([]any); ok {
+		for _, m := range messages {
+			if msg, ok := m.(map[string]any); ok {
+				msgs = append(msgs, normalizeMessageContent(msg))
+			} else {
+				msgs = append(msgs, m)
+			}
+		}
+	}
+
+	// Append system prompt as a message at the end.
+	// The system field can be a string or a list of content blocks.
 	if system, ok := raw["system"]; ok {
 		msgs = append(msgs, map[string]any{
 			"role":    "system",
-			"content": system,
+			"content": simplifyContentBlocks(system),
 		})
-	}
-
-	// Add user/assistant messages
-	if messages, ok := raw["messages"].([]any); ok {
-		msgs = append(msgs, messages...)
 	}
 
 	if len(msgs) > 0 {
@@ -101,6 +113,10 @@ func (mt *messagesTracer) StartSpan(ctx context.Context, t time.Time, request io
 	}
 
 	if err := internal.SetJSONAttr(span, "braintrust.metadata", mt.metadata); err != nil {
+		return ctx, span, err
+	}
+
+	if err := internal.SetJSONAttr(span, "braintrust.span_attributes", map[string]string{"type": "llm"}); err != nil {
 		return ctx, span, err
 	}
 
@@ -406,4 +422,52 @@ func (mt *messagesTracer) handleMessageResponse(span trace.Span, rawMsg map[stri
 	}
 
 	return nil
+}
+
+// normalizeMessageContent simplifies a message's content field when it is a
+// single text block with no extra fields (e.g. cache_control), converting
+// [{type: "text", text: "hello"}] to just "hello".
+func normalizeMessageContent(msg map[string]any) map[string]any {
+	content := msg["content"]
+	// Only attempt simplification for list content.
+	if _, isList := content.([]any); !isList {
+		return msg
+	}
+	simplified := simplifyContentBlocks(content)
+	// If simplifyContentBlocks returned a string, it was simplified.
+	if _, isStr := simplified.(string); !isStr {
+		return msg
+	}
+	// Shallow-copy to avoid mutating the original map.
+	out := make(map[string]any, len(msg))
+	for k, v := range msg {
+		out[k] = v
+	}
+	out["content"] = simplified
+	return out
+}
+
+// simplifyContentBlocks converts a list of content blocks to a plain string
+// when the list contains exactly one text block with only type+text fields.
+func simplifyContentBlocks(content any) any {
+	blocks, ok := content.([]any)
+	if !ok || len(blocks) != 1 {
+		return content
+	}
+	block, ok := blocks[0].(map[string]any)
+	if !ok {
+		return content
+	}
+	if block["type"] != "text" {
+		return content
+	}
+	text, ok := block["text"].(string)
+	if !ok {
+		return content
+	}
+	// Only simplify if there are no extra fields (e.g. cache_control).
+	if len(block) > 2 {
+		return content
+	}
+	return text
 }

@@ -1,0 +1,50 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: ""
+        proto_major: 0
+        proto_minor: 0
+        content_length: 84
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"messages":[{"content":[{"text":"What is the capital of France?"}],"role":"user"}]}'
+        form: {}
+        headers:
+            Amz-Sdk-Invocation-Id:
+                - 591a200e-ad13-4267-bbfd-6747f01d1ce1
+            Amz-Sdk-Request:
+                - attempt=1; max=3
+            Content-Type:
+                - application/json
+            User-Agent:
+                - aws-sdk-go-v2/1.41.5 ua/2.1 os/macos lang/go#1.26.3 md/GOOS#darwin md/GOARCH#arm64 api/bedrockruntime#1.50.4 m/E,g
+            X-Amz-Date:
+                - 20260521T042614Z
+        url: https://bedrock-runtime.us-east-2.amazonaws.com/model/us.amazon.nova-lite-v1%3A0/converse
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 966
+        uncompressed: false
+        body: '{"metrics":{"latencyMs":955},"output":{"message":{"content":[{"text":"The capital of France is Paris. Paris is not only the capital but also the largest city in France. It is situated in the northern central part of the country, along the Seine River. The city is famous for its rich history, culture, and landmarks, such as the Eiffel Tower, Notre-Dame Cathedral, the Louvre Museum, and the Champs-Élysées. Paris is a global center for art, fashion, gastronomy, and culture, and it is well-known for its significant contributions to various fields, including philosophy, science, and politics. The city is divided into 20 arrondissements (districts), each with its own unique character and attractions. Paris is also a major hub for transportation, education, and business, making it one of the most important cities in the world."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":7,"outputTokens":164,"serverToolUsage":{},"totalTokens":171}}'
+        headers:
+            Content-Length:
+                - "966"
+            Content-Type:
+                - application/json
+            Date:
+                - Thu, 21 May 2026 04:26:15 GMT
+            X-Amzn-Requestid:
+                - f54ee992-aef1-4b63-82d2-9376602077bd
+        status: 200 OK
+        code: 200
+        duration: 1.276778958s

@@ -1,0 +1,106 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 232
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"max_tokens":128,"messages":[{"content":[{"text":"What is the capital of France?","type":"text"}],"role":"user"}],"model":"claude-haiku-4-5-20251001","temperature":0,"system":[{"text":"You are a helpful assistant.","type":"text"}]}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Anthropic-Version:
+                - "2023-06-01"
+            Content-Type:
+                - application/json
+            User-Agent:
+                - Anthropic/Go 1.23.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 1.23.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.26.3
+            X-Stainless-Timeout:
+                - "600"
+        url: https://api.anthropic.com/v1/messages
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"model":"claude-haiku-4-5-20251001","id":"msg_016h886hcjVsv71vC9gJDGyo","type":"message","role":"assistant","content":[{"type":"text","text":"The capital of France is Paris."}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null,"usage":{"input_tokens":20,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":10,"service_tier":"standard","inference_geo":"not_available"}}'
+        headers:
+            Anthropic-Ratelimit-Input-Tokens-Limit:
+                - "4000000"
+            Anthropic-Ratelimit-Input-Tokens-Remaining:
+                - "4000000"
+            Anthropic-Ratelimit-Input-Tokens-Reset:
+                - "2026-05-21T04:26:11Z"
+            Anthropic-Ratelimit-Output-Tokens-Limit:
+                - "800000"
+            Anthropic-Ratelimit-Output-Tokens-Remaining:
+                - "800000"
+            Anthropic-Ratelimit-Output-Tokens-Reset:
+                - "2026-05-21T04:26:11Z"
+            Anthropic-Ratelimit-Requests-Limit:
+                - "20000"
+            Anthropic-Ratelimit-Requests-Remaining:
+                - "19999"
+            Anthropic-Ratelimit-Requests-Reset:
+                - "2026-05-21T04:26:11Z"
+            Anthropic-Ratelimit-Tokens-Limit:
+                - "4800000"
+            Anthropic-Ratelimit-Tokens-Remaining:
+                - "4800000"
+            Anthropic-Ratelimit-Tokens-Reset:
+                - "2026-05-21T04:26:11Z"
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - 9ff0d24c3e288691-SEA
+            Content-Security-Policy:
+                - default-src 'none'; frame-ancestors 'none'
+            Content-Type:
+                - application/json
+            Date:
+                - Thu, 21 May 2026 04:26:11 GMT
+            Request-Id:
+                - req_011CbF5beoZ6sEE1M4RmEVHX
+            Server:
+                - cloudflare
+            Set-Cookie:
+                - _cfuvid=YElUVazmLwof99qfTTNNaIRUBBLx8.q8ULk0imAl7Jw-1779337571.234837-1.0.1.1-.wMOd7SIfhOAQQuedEWH1sg_z4FSY1pZYjM_tZCYKhk; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.anthropic.com
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            Traceresponse:
+                - 00-3cdce7558c22cb834149cb8fbd76e28e-288340abbe20c310-01
+            Vary:
+                - Accept-Encoding
+            X-Envoy-Upstream-Service-Time:
+                - "393"
+            X-Robots-Tag:
+                - none
+        status: 200 OK
+        code: 200
+        duration: 542.257416ms

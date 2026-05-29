@@ -30,6 +30,7 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"time"
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/baggage"
@@ -41,6 +42,7 @@ import (
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/trace/attachmentprocessor"
 )
 
 // Config holds configuration for Braintrust tracing
@@ -54,11 +56,17 @@ type Config struct {
 	EnableBuiltinAdkTraces bool // if false (default), drop spans from Google ADK (gcp.vertex.agent) to avoid duplicates
 	SpanFilterFuncs        []SpanFilterFunc
 
+	// Attachment processing
+	AutoConvertAIAttachments bool // scan spans for base64 attachments and upload them
+
 	// Debug
 	EnableTraceConsoleLog bool
 
 	// Test override: provide custom exporter (e.g., memory exporter for tests)
 	Exporter sdktrace.SpanExporter
+
+	// Test override: custom attachment uploader (e.g., noop for tests)
+	AttachmentUploader attachmentprocessor.Uploader
 
 	// Logger
 	Logger logger.Logger
@@ -124,6 +132,24 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 		log.Debug("AI span filtering enabled")
 	}
 
+	// Set up attachment processor if enabled.
+	var ap *attachmentprocessor.Processor
+	var uploader attachmentprocessor.Uploader
+	if cfg.AutoConvertAIAttachments {
+		if cfg.AttachmentUploader != nil {
+			uploader = cfg.AttachmentUploader
+		} else {
+			uploader = attachmentprocessor.NewS3Uploader(attachmentprocessor.UploaderConfig{
+				APIURL:   apiInfo.APIURL,
+				APIKey:   apiInfo.APIKey,
+				LoginURL: session.AppPublicURL(),
+				Logger:   log,
+			})
+		}
+		ap = attachmentprocessor.NewProcessor(uploader, log)
+		log.Debug("attachment processing enabled")
+	}
+
 	// Wrap with Braintrust span processor (adds parent labels, filtering, etc.)
 	// The processor will get endpoints and org name from session dynamically
 	btProcessor, err := newSpanProcessor(
@@ -133,6 +159,8 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 		rootFilters,
 		session,
 		log,
+		ap,
+		uploader,
 	)
 	if err != nil {
 		return nil, err
@@ -427,13 +455,21 @@ func (o *otelAttrs) makeAttrs() {
 	o.mu.Unlock()
 }
 
+// OTel attribute keys for Braintrust span input/output.
+const (
+	inputJSONAttrKey  = attribute.Key("braintrust.input_json")
+	outputJSONAttrKey = attribute.Key("braintrust.output_json")
+)
+
 type spanProcessor struct {
-	wrapped     sdktrace.SpanProcessor
-	filters     []SpanFilterFunc
-	rootFilters []SpanFilterFunc
-	otelAttrs   *otelAttrs
-	session     *auth.Session // Session provides endpoints and org name
-	logger      logger.Logger
+	wrapped             sdktrace.SpanProcessor
+	filters             []SpanFilterFunc
+	rootFilters         []SpanFilterFunc
+	otelAttrs           *otelAttrs
+	session             *auth.Session // Session provides endpoints and org name
+	logger              logger.Logger
+	attachmentProcessor *attachmentprocessor.Processor // nil when attachment processing is disabled
+	attachmentUploader  attachmentprocessor.Uploader   // nil when attachment processing is disabled
 }
 
 // newSpanProcessor creates a new span processor that wraps another processor and adds parent labeling.
@@ -444,6 +480,8 @@ func newSpanProcessor(
 	rootFilters []SpanFilterFunc,
 	session *auth.Session,
 	log logger.Logger,
+	ap *attachmentprocessor.Processor,
+	uploader attachmentprocessor.Uploader,
 ) (*spanProcessor, error) {
 	// Get app URL from session
 	appURL := session.AppPublicURL()
@@ -452,12 +490,14 @@ func newSpanProcessor(
 	attrs := newOtelAttrs(defaultParent, "", appURL)
 
 	sp := &spanProcessor{
-		wrapped:     proc,
-		filters:     filters,
-		rootFilters: rootFilters,
-		otelAttrs:   attrs,
-		session:     session,
-		logger:      log,
+		wrapped:             proc,
+		filters:             filters,
+		rootFilters:         rootFilters,
+		otelAttrs:           attrs,
+		session:             session,
+		logger:              log,
+		attachmentProcessor: ap,
+		attachmentUploader:  uploader,
 	}
 
 	return sp, nil
@@ -504,9 +544,46 @@ func (sp *spanProcessor) OnStart(ctx context.Context, span sdktrace.ReadWriteSpa
 // OnEnd is called when a span ends.
 func (sp *spanProcessor) OnEnd(span sdktrace.ReadOnlySpan) {
 	// Apply filters to determine if we should forward this span
-	if sp.shouldForwardSpan(span) {
-		sp.wrapped.OnEnd(span)
+	if !sp.shouldForwardSpan(span) {
+		return
 	}
+
+	// Process attachments if enabled.
+	if sp.attachmentProcessor != nil {
+		span = sp.processAttachments(span)
+	}
+
+	sp.wrapped.OnEnd(span)
+}
+
+// processAttachments scans input_json and output_json for base64 attachments,
+// uploads them, and returns a transformed span with replacement references.
+func (sp *spanProcessor) processAttachments(span sdktrace.ReadOnlySpan) sdktrace.ReadOnlySpan {
+	var inputJSON, outputJSON string
+	for _, a := range span.Attributes() {
+		switch a.Key {
+		case inputJSONAttrKey:
+			inputJSON = a.Value.AsString()
+		case outputJSONAttrKey:
+			outputJSON = a.Value.AsString()
+		}
+	}
+
+	newInputJSON := sp.attachmentProcessor.ProcessAndUpload(inputJSON)
+	newOutputJSON := sp.attachmentProcessor.ProcessAndUpload(outputJSON)
+
+	if newInputJSON == inputJSON && newOutputJSON == outputJSON {
+		return span
+	}
+
+	overrides := make(map[attribute.Key]string)
+	if newInputJSON != inputJSON {
+		overrides[inputJSONAttrKey] = newInputJSON
+	}
+	if newOutputJSON != outputJSON {
+		overrides[outputJSONAttrKey] = newOutputJSON
+	}
+	return attachmentprocessor.NewTransformedSpan(span, overrides)
 }
 
 // shouldForwardSpan applies filter functions to determine if a span should be forwarded.
@@ -537,14 +614,54 @@ func (sp *spanProcessor) shouldForwardSpan(span sdktrace.ReadOnlySpan) bool {
 	return true
 }
 
-// Shutdown shuts down the span processor.
+// Shutdown shuts down the span processor. It is bounded by ctx's deadline
+// (if any) so a stuck uploader cannot block process exit beyond the caller's
+// budget.
 func (sp *spanProcessor) Shutdown(ctx context.Context) error {
-	return sp.wrapped.Shutdown(ctx)
+	// Shut down the span exporter first so all buffered spans (including
+	// those with attachment references) are flushed to the collector.
+	err := sp.wrapped.Shutdown(ctx)
+
+	if sp.attachmentUploader == nil {
+		return err
+	}
+
+	// Shutdown drains any remaining queued uploads and exits, bounded by
+	// the uploader's internal ShutdownTimeout (default 120s). Run it in a
+	// goroutine so we can give up early if ctx expires.
+	done := make(chan struct{})
+	go func() {
+		sp.attachmentUploader.Shutdown()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+	case <-ctx.Done():
+		sp.logger.Warn("attachment uploader shutdown abandoned: context done", "error", ctx.Err())
+	}
+	return err
 }
 
 // ForceFlush forces a flush of the span processor.
 func (sp *spanProcessor) ForceFlush(ctx context.Context) error {
-	return sp.wrapped.ForceFlush(ctx)
+	err := sp.wrapped.ForceFlush(ctx)
+	if sp.attachmentUploader != nil {
+		sp.attachmentUploader.ForceFlush(timeoutFromContext(ctx, 30*time.Second))
+	}
+	return err
+}
+
+// timeoutFromContext returns the time remaining until ctx's deadline, or
+// fallback if ctx has no deadline.
+func timeoutFromContext(ctx context.Context, fallback time.Duration) time.Duration {
+	if deadline, ok := ctx.Deadline(); ok {
+		if remaining := time.Until(deadline); remaining > 0 {
+			return remaining
+		}
+		return 0
+	}
+	return fallback
 }
 
 var _ sdktrace.SpanProcessor = &spanProcessor{}

@@ -117,14 +117,15 @@ func New(tp *trace.TracerProvider, opts ...Option) (*Client, error) {
 func (c *Client) setupTracing() error {
 	// Build trace config from client config
 	traceConfig := bttrace.Config{
-		DefaultProjectID:       c.config.DefaultProjectID,
-		DefaultProjectName:     c.config.DefaultProjectName,
-		FilterAISpans:          c.config.FilterAISpans,
-		EnableBuiltinAdkTraces: c.config.EnableBuiltinAdkTraces,
-		SpanFilterFuncs:        convertSpanFilters(c.config.SpanFilterFuncs),
-		EnableTraceConsoleLog:  c.config.EnableTraceConsoleLog,
-		Exporter:               c.config.Exporter,
-		Logger:                 c.logger,
+		DefaultProjectID:         c.config.DefaultProjectID,
+		DefaultProjectName:       c.config.DefaultProjectName,
+		FilterAISpans:            c.config.FilterAISpans,
+		EnableBuiltinAdkTraces:   c.config.EnableBuiltinAdkTraces,
+		SpanFilterFuncs:          convertSpanFilters(c.config.SpanFilterFuncs),
+		EnableTraceConsoleLog:    c.config.EnableTraceConsoleLog,
+		AutoConvertAIAttachments: c.config.AutoConvertAIAttachments,
+		Exporter:                 c.config.Exporter,
+		Logger:                   c.logger,
 	}
 
 	// Add Braintrust span processor to the provided TracerProvider
