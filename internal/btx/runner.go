@@ -2,15 +2,16 @@ package btx
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace"
 
 	braintrust "github.com/braintrustdata/braintrust-sdk-go"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
@@ -31,15 +32,15 @@ var skipSpecs = map[string]string{
 	"bedrock/attachments": "attachment nesting format differs from spec",
 }
 
-// specRoot is set by TestMain after fetching specs.
+type ExecuteFunc func(context.Context, LlmSpanSpec, trace.TracerProvider, *http.Client) error
+
+// specRoot is set by RunProviderSpecs after fetching specs.
 var specRoot string
 
-func TestMain(m *testing.M) {
+func RunProviderSpecs(t *testing.T, executor ExecuteFunc, providers ...string) {
+	t.Helper()
 	root, err := fetchSpec()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "btx: failed to fetch spec: %v\n", err)
-		os.Exit(1)
-	}
+	require.NoError(t, err, "failed to fetch spec")
 	specRoot = root
 
 	// Default BRAINTRUST_AUTO_CONVERT_AI_ATTACHMENTS based on VCR mode,
@@ -49,14 +50,8 @@ func TestMain(m *testing.M) {
 		if vcr.GetVCRMode() == vcr.ModeReplay {
 			val = "true"
 		}
-		_ = os.Setenv("BRAINTRUST_AUTO_CONVERT_AI_ATTACHMENTS", val)
+		t.Setenv("BRAINTRUST_AUTO_CONVERT_AI_ATTACHMENTS", val)
 	}
-
-	os.Exit(m.Run())
-}
-
-func TestBTXSpec(t *testing.T) {
-	providers := []string{"openai", "anthropic", "google", "bedrock"}
 	specs, err := loadSpecs(specRoot, providers)
 	require.NoError(t, err, "failed to load specs")
 	require.NotEmpty(t, specs, "no specs found")
@@ -67,12 +62,12 @@ func TestBTXSpec(t *testing.T) {
 				t.Skipf("skipped: %s", reason)
 			}
 
-			runSpec(t, spec)
+			runSpec(t, spec, executor)
 		})
 	}
 }
 
-func runSpec(t *testing.T, spec LlmSpanSpec) {
+func runSpec(t *testing.T, spec LlmSpanSpec, executor ExecuteFunc) {
 	t.Helper()
 
 	mode := vcr.GetVCRMode()
@@ -85,7 +80,7 @@ func runSpec(t *testing.T, spec LlmSpanSpec) {
 		// Replay mode: capture spans in-memory, no network calls.
 		tp, exporter := oteltest.Setup(t)
 
-		traceID, err := executeSpec(ctx, spec, tp, httpClient)
+		traceID, err := executeSpec(ctx, spec, tp, httpClient, executor)
 		require.NoError(t, err, "spec execution failed")
 		require.NotEmpty(t, traceID, "empty trace ID")
 
@@ -98,7 +93,7 @@ func runSpec(t *testing.T, spec LlmSpanSpec) {
 		_, err := braintrust.New(tp, braintrust.WithProject(projectName))
 		require.NoError(t, err, "failed to create Braintrust client")
 
-		traceID, err := executeSpec(ctx, spec, tp, httpClient)
+		traceID, err := executeSpec(ctx, spec, tp, httpClient, executor)
 		require.NoError(t, err, "spec execution failed")
 		require.NotEmpty(t, traceID, "empty trace ID")
 
@@ -175,7 +170,9 @@ func newBTXHTTPClient(t *testing.T, spec LlmSpanSpec) *http.Client {
 
 	// Build cassette path: testdata/cassettes/<provider>/<name>
 	// (go-vcr appends .yaml automatically)
-	cassettePath := filepath.Join("testdata", "cassettes", spec.Provider, spec.Name)
+	_, filename, _, ok := runtime.Caller(0)
+	require.True(t, ok, "failed to locate BTX cassette directory")
+	cassettePath := filepath.Join(filepath.Dir(filename), "testdata", "cassettes", spec.Provider, spec.Name)
 
 	r, err := vcr.NewVCRRecorder(t, cassettePath)
 	require.NoError(t, err, "failed to create VCR recorder for %s", spec.DisplayName)

@@ -56,17 +56,6 @@ jobs:
               echo "${module}/go.mod"
               echo "${module}/go.sum"
             done < <(./scripts/list_nested_modules.sh)
-            # Unreleased helper modules (e.g. btx) — their go.mod is pinned by
-            # prepare_release.sh and must be included in the release PR so the
-            # commit matches the on-runner workspace.
-            while IFS= read -r module; do
-              [[ -z "${module}" || "${module}" =~ ^[[:space:]]*# ]] && continue
-              echo "${module}/go.mod"
-              gosum="${module}/go.sum"
-              if [[ -f "${gosum}" ]]; then
-                echo "${gosum}"
-              fi
-            done < scripts/pinned_unreleased_modules.txt
             while IFS= read -r gomod; do
               echo "${gomod}"
               gosum="${gomod%/go.mod}/go.sum"

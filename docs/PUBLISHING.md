@@ -22,7 +22,6 @@ Go to **Actions → Prepare Release → Run workflow** and enter the version (e.
 
 The workflow:
 - Pins the root module version and any nested-module interdependencies in each nested module's `go.mod` using `go mod edit` + `GOWORK=off go mod tidy`
-- Pins Braintrust SDK dependencies in every module listed in [`scripts/pinned_unreleased_modules.txt`](../scripts/pinned_unreleased_modules.txt) (e.g. `btx`). These modules are not tagged or published, but their go.mod files must stay in sync with the release for CI's `mod-verify` to pass.
 - Pins Braintrust SDK dependencies in every `examples/**/go.mod` to the release version and runs `GOWORK=off go mod tidy` for each example module, so standalone examples reference the latest release
 - Opens a pull request titled `chore: release vX.Y.Z` on a `release/vX.Y.Z` branch
 

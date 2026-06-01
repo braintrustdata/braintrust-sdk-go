@@ -2,15 +2,13 @@
 
 # Verifies that every go.mod file in the repo that depends on the Braintrust
 # SDK is covered by the release-prep flow. This catches the failure mode where
-# a new top-level module (like btx) is added that depends on braintrust-sdk-go
-# but is not listed in scripts/nested_modules.txt or
-# scripts/pinned_unreleased_modules.txt, which would cause prepare_release.sh
-# to skip pinning it and break mod-verify at release time.
+# a helper module is added that depends on braintrust-sdk-go but is not covered
+# by the nested-module or example release-prep flows, which would cause
+# prepare_release.sh to skip pinning it and break mod-verify at release time.
 #
 # A go.mod is "covered" if it matches one of:
-#   - The root SDK module itself (./go.mod)
+#   - The root SDK module itself (./go.mod, handled explicitly by prepare_release.sh)
 #   - A path listed in scripts/nested_modules.txt (published nested modules)
-#   - A path listed in scripts/pinned_unreleased_modules.txt (unreleased helpers)
 #   - A path under examples/ (handled by prepare_release.sh's find loop)
 #   - A path under any */testdata/* directory (test fixtures, not real modules)
 
@@ -29,11 +27,6 @@ COVERED=$'.\n'
 while IFS= read -r module; do
     COVERED+="${module}"$'\n'
 done < <("$SCRIPT_DIR/list_nested_modules.sh")
-while IFS= read -r module; do
-    [[ -z "$module" || "$module" =~ ^[[:space:]]*# ]] && continue
-    COVERED+="${module}"$'\n'
-done < "$SCRIPT_DIR/pinned_unreleased_modules.txt"
-
 is_covered() {
     local dir="$1"
     printf '%s' "$COVERED" | grep -Fxq -- "$dir"
@@ -73,9 +66,8 @@ if (( ${#uncovered[@]} > 0 )); then
     done
     echo ""
     echo "Add each one to ONE of:"
-    echo "  - scripts/nested_modules.txt          (if it should be tagged and published)"
-    echo "  - scripts/pinned_unreleased_modules.txt (if it's an internal helper like btx)"
-    echo "  - move under examples/                (if it's a standalone example)"
+    echo "  - scripts/nested_modules.txt (if it should be tagged and published)"
+    echo "  - examples/                  (if it's a standalone example)"
     echo ""
     echo "Without coverage, prepare_release.sh will not pin its Braintrust deps,"
     echo "and mod-verify will fail during the release flow."
