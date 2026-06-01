@@ -26,17 +26,6 @@ while IFS= read -r module; do
     NESTED_MODULES+=("$module")
 done < <("$SCRIPT_DIR/list_nested_modules.sh")
 
-# Modules that depend on Braintrust SDK modules but are not themselves released
-# via tags. We still pin their Braintrust dependencies so they stay in sync with
-# the release. (e.g. btx is an internal helper module that is not published.)
-# Sourced from scripts/pinned_unreleased_modules.txt so the new check in
-# scripts/check_release_coverage.sh can validate the same set.
-PINNED_UNRELEASED_MODULES=()
-while IFS= read -r module; do
-    [[ -z "$module" || "$module" =~ ^[[:space:]]*# ]] && continue
-    PINNED_UNRELEASED_MODULES+=("$module")
-done < "$SCRIPT_DIR/pinned_unreleased_modules.txt"
-
 pin_braintrust_versions() {
     local module_dir="$1"
     local gomod="${module_dir}/go.mod"
@@ -74,6 +63,23 @@ pin_braintrust_versions() {
         fi
     done
 
+    # When a module replaces the root SDK locally, tests can see root/internal
+    # packages. Those packages may import nested modules, so add temporary
+    # replacements for them too; otherwise tidy tries to download just-pinned
+    # nested-module tags before the release PR is tagged.
+    for pinned_module in "${pinned_modules[@]}"; do
+        if [[ "${pinned_module}" == "${ROOT_MODULE}" ]]; then
+            for other in "${NESTED_MODULES[@]}"; do
+                local nested_module="${ROOT_MODULE}/${other}"
+                if ! grep -q "^replace ${nested_module} =>" "${gomod}" && \
+                   ! grep -q "^[[:space:]]*${nested_module} =>" "${gomod}"; then
+                    GOWORK=off go mod edit -replace="${nested_module}=${REPO_ROOT}/${other}" "${gomod}"
+                    temporary_replace_modules+=("${nested_module}")
+                fi
+            done
+        fi
+    done
+
     GOWORK=off go mod tidy -C "${module_dir}"
 
     if (( ${#temporary_replace_modules[@]} > 0 )); then
@@ -85,14 +91,12 @@ pin_braintrust_versions() {
 
 cd "$REPO_ROOT"
 
-for module in "${NESTED_MODULES[@]}"; do
-    pin_braintrust_versions "${module}"
-done
+# The root module's tests may depend on published nested contrib modules.
+# Pin those self-dependencies alongside nested modules so release prep cannot
+# leave root go.mod pointing at an older release while workspace tests pass.
+pin_braintrust_versions "."
 
-# Pin Braintrust dependencies in unreleased helper modules (e.g. btx) so they
-# track the release version. These modules are not tagged or published, but
-# CI's mod-verify expects their go.mod files to be clean.
-for module in "${PINNED_UNRELEASED_MODULES[@]}"; do
+for module in "${NESTED_MODULES[@]}"; do
     pin_braintrust_versions "${module}"
 done
 

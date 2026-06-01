@@ -33,7 +33,6 @@ local-braintrust-replaces:
 build:
 	go build ./...
 	for dir in $(NESTED_MODULE_DIRS); do go build -C $$dir ./...; done
-	go build -C btx ./...
 
 clean:
 	go clean
@@ -42,29 +41,24 @@ clean:
 test:
 	VCR_MODE=replay go test ./...
 	for dir in $(NESTED_MODULE_DIRS); do VCR_MODE=replay go test -C $$dir ./...; done
-	VCR_MODE=replay go test -C btx ./...
 
 test-quiet:
 	VCR_MODE=replay go test ./... | grep -v -E "^ok|no test files|^\\?" || true
 	for dir in $(NESTED_MODULE_DIRS); do VCR_MODE=replay go test -C $$dir ./... | grep -v -E "^ok|no test files|^\\?" || true; done
-	VCR_MODE=replay go test -C btx ./... | grep -v -E "^ok|no test files|^\\?" || true
 
 test-vcr-off:
 	VCR_MODE=off go test ./...
 	for dir in $(NESTED_MODULE_DIRS); do VCR_MODE=off go test -C $$dir ./...; done
-	VCR_MODE=off go test -C btx ./...
 
 test-vcr-record:
 	VCR_MODE=record go test ./...
 	for dir in $(NESTED_MODULE_DIRS); do VCR_MODE=record go test -C $$dir ./...; done
-	VCR_MODE=record go test -C btx ./...
 
 # Verify that VCR cassettes work without API keys
 # This ensures VCR-enabled tests can run in CI/CD without credentials
 test-vcr-verify:
 	env -u BRAINTRUST_API_KEY VCR_MODE=replay go test ./...
 	for dir in $(NESTED_MODULE_DIRS); do env -u BRAINTRUST_API_KEY VCR_MODE=replay go test -C $$dir ./...; done
-	env -u BRAINTRUST_API_KEY VCR_MODE=replay go test -C btx ./...
 
 cover:
 	go test $$(go list ./... | grep -v /examples/) -coverpkg=./... -coverprofile=coverage.out
@@ -76,11 +70,9 @@ lint:
 	./scripts/apply_local_braintrust_replaces.sh
 	golangci-lint fmt -d
 	golangci-lint run ./...
-	cd btx && golangci-lint fmt -d && golangci-lint run ./...
 
 fmt:
 	golangci-lint fmt
-	cd btx && golangci-lint fmt
 
 mod-verify:
 	./scripts/apply_local_braintrust_replaces.sh
@@ -89,13 +81,10 @@ mod-verify:
 	# This preserves explicit version pins in nested go.mod files (e.g. set by
 	# prepare_release.sh before tags exist) rather than resetting them to v0.0.0.
 	for dir in $(NESTED_MODULE_DIRS); do GOWORK=off go mod tidy -C $$dir; done
-	GOWORK=off go mod tidy -C btx
 	go mod verify
 	for dir in $(NESTED_MODULE_DIRS); do (cd $$dir && go mod verify); done
-	(cd btx && go mod verify)
 	git diff --exit-code go.mod go.sum \
-		$(foreach dir,$(NESTED_MODULE_DIRS),$(dir)/go.mod $(dir)/go.sum) \
-		btx/go.mod btx/go.sum
+		$(foreach dir,$(NESTED_MODULE_DIRS),$(dir)/go.mod $(dir)/go.sum)
 	./scripts/check_nested_modules.sh
 	./scripts/check_release_coverage.sh
 

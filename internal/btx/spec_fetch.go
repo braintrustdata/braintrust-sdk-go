@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -28,7 +29,7 @@ func fetchSpec() (string, error) {
 		return "", fmt.Errorf("reading spec ref: %w", err)
 	}
 
-	cacheDir := filepath.Join(specCacheDir, ref)
+	cacheDir := filepath.Join(packageDir(), specCacheDir, ref)
 	marker := filepath.Join(cacheDir, "test", "llm_span")
 
 	// Idempotent: skip if already cached.
@@ -58,11 +59,19 @@ func fetchSpec() (string, error) {
 
 // readSpecRef reads the pinned ref from spec_ref.txt.
 func readSpecRef() (string, error) {
-	data, err := os.ReadFile("spec_ref.txt")
+	data, err := os.ReadFile(filepath.Join(packageDir(), "spec_ref.txt"))
 	if err != nil {
 		return "", err
 	}
 	return strings.TrimSpace(string(data)), nil
+}
+
+func packageDir() string {
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		return "."
+	}
+	return filepath.Dir(filename)
 }
 
 // extractTarGz extracts a tar.gz stream into destDir, stripping the top-level

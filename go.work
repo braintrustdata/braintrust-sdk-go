@@ -4,7 +4,6 @@ toolchain go1.26.1
 
 use (
 	.
-	./btx
 	./examples
 	./trace/contrib/adk
 	./trace/contrib/all

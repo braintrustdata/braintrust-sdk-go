@@ -66,8 +66,8 @@ examples/internal/email-evals/email-evals
 # Added by goreleaser init:
 dist/
 
-# btx spec cache
-btx/.spec-cache/
+# BTX spec cache
+internal/btx/.spec-cache/
 
 # emacs
 *~
