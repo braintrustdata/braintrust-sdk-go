@@ -48,7 +48,7 @@ type SpanFilterFunc func(span trace.ReadOnlySpan) int
 
 // FromEnv loads configuration from environment variables with defaults. If
 // BRAINTRUST_API_KEY is unset or blank, API key discovery can fall back to the
-// nearest .env.braintrust file when authentication or export first needs it.
+// nearest .braintrust.json file when authentication or export first needs it.
 //
 // Supported environment variables:
 //   - BRAINTRUST_API_KEY: API key for authentication

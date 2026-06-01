@@ -3,22 +3,20 @@ package apikey
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
-
-	"github.com/joho/godotenv"
 )
 
 const (
-	envBraintrustFilename = ".env.braintrust"
-	braintrustAPIKeyEnv   = "BRAINTRUST_API_KEY"
-	maxParentDirs         = 64
+	braintrustConfigFilename = ".braintrust.json"
+	maxParentDirs            = 64
 )
 
-// Resolver lazily discovers BRAINTRUST_API_KEY from .env.braintrust.
+// Resolver lazily discovers BRAINTRUST_API_KEY from .braintrust.json.
 type Resolver struct {
 	once  sync.Once
 	done  chan struct{}
@@ -26,7 +24,7 @@ type Resolver struct {
 	found bool
 }
 
-// NewResolver creates a lazy .env.braintrust API key resolver.
+// NewResolver creates a lazy .braintrust.json API key resolver.
 func NewResolver() *Resolver {
 	return &Resolver{done: make(chan struct{})}
 }
@@ -39,7 +37,7 @@ func (r *Resolver) APIKey(ctx context.Context) (string, bool) {
 
 	r.once.Do(func() {
 		go func() {
-			r.key, r.found = lookupEnvBraintrustAPIKey()
+			r.key, r.found = lookupBraintrustConfigAPIKey()
 			close(r.done)
 		}()
 	})
@@ -52,24 +50,24 @@ func (r *Resolver) APIKey(ctx context.Context) (string, bool) {
 	}
 }
 
-func lookupEnvBraintrustAPIKey() (string, bool) {
+func lookupBraintrustConfigAPIKey() (string, bool) {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return "", false
 	}
-	return lookupEnvBraintrustAPIKeyFromDir(cwd)
+	return lookupBraintrustConfigAPIKeyFromDir(cwd)
 }
 
-func lookupEnvBraintrustAPIKeyFromDir(dir string) (string, bool) {
-	paths := candidateEnvBraintrustFiles(dir)
-	results := make([]envBraintrustReadResult, len(paths))
+func lookupBraintrustConfigAPIKeyFromDir(dir string) (string, bool) {
+	paths := candidateBraintrustConfigFiles(dir)
+	results := make([]braintrustConfigReadResult, len(paths))
 	ready := make([]bool, len(paths))
-	resultCh := make(chan envBraintrustReadResult, len(paths))
+	resultCh := make(chan braintrustConfigReadResult, len(paths))
 
 	for i, path := range paths {
 		go func(i int, path string) {
 			data, err := os.ReadFile(path)
-			resultCh <- envBraintrustReadResult{index: i, data: data, err: err}
+			resultCh <- braintrustConfigReadResult{index: i, data: data, err: err}
 		}(i, path)
 	}
 
@@ -95,13 +93,13 @@ func lookupEnvBraintrustAPIKeyFromDir(dir string) (string, bool) {
 	return "", false
 }
 
-type envBraintrustReadResult struct {
+type braintrustConfigReadResult struct {
 	index int
 	data  []byte
 	err   error
 }
 
-func candidateEnvBraintrustFiles(dir string) []string {
+func candidateBraintrustConfigFiles(dir string) []string {
 	if dir == "" {
 		return nil
 	}
@@ -109,7 +107,7 @@ func candidateEnvBraintrustFiles(dir string) []string {
 	dir = filepath.Clean(dir)
 	paths := make([]string, 0, maxParentDirs+1)
 	for depth := 0; depth <= maxParentDirs; depth++ {
-		paths = append(paths, filepath.Join(dir, envBraintrustFilename))
+		paths = append(paths, filepath.Join(dir, braintrustConfigFilename))
 		parent := filepath.Dir(dir)
 		if parent == dir {
 			break
@@ -120,10 +118,12 @@ func candidateEnvBraintrustFiles(dir string) []string {
 }
 
 func parseBraintrustAPIKey(data []byte) (string, bool) {
-	env, err := godotenv.UnmarshalBytes(data)
-	if err != nil {
+	var cfg struct {
+		APIKey string `json:"BRAINTRUST_API_KEY"`
+	}
+	if err := json.Unmarshal(data, &cfg); err != nil {
 		return "", false
 	}
-	value := strings.TrimSpace(env[braintrustAPIKeyEnv])
+	value := strings.TrimSpace(cfg.APIKey)
 	return value, value != ""
 }

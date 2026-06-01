@@ -20,62 +20,49 @@ func TestParseBraintrustAPIKey(t *testing.T) {
 		found bool
 	}{
 		{
-			name:  "plain assignment",
-			input: "BRAINTRUST_API_KEY=test-key\n",
+			name:  "api key string",
+			input: `{"BRAINTRUST_API_KEY":"test-key"}`,
 			key:   "test-key",
 			found: true,
 		},
 		{
-			name:  "export assignment",
-			input: "export BRAINTRUST_API_KEY=test-key\n",
+			name:  "trims whitespace",
+			input: `{"BRAINTRUST_API_KEY":"  test-key  "}`,
 			key:   "test-key",
 			found: true,
 		},
 		{
-			name:  "quoted assignment with comment",
-			input: "BRAINTRUST_API_KEY=\"test-key\" # comment\n",
+			name: "ignores other keys",
+			input: `{
+				"OTHER_SECRET": "ignored",
+				"BRAINTRUST_API_KEY": "test-key"
+			}`,
 			key:   "test-key",
-			found: true,
-		},
-		{
-			name:  "single quoted assignment",
-			input: "BRAINTRUST_API_KEY='test-key'\n",
-			key:   "test-key",
-			found: true,
-		},
-		{
-			name:  "yaml-style dotenv assignment",
-			input: "BRAINTRUST_API_KEY: test-key\n",
-			key:   "test-key",
-			found: true,
-		},
-		{
-			name: "ignores other variables",
-			input: `OTHER_SECRET=ignored
-BRAINTRUST_API_KEY=test-key
-`,
-			key:   "test-key",
-			found: true,
-		},
-		{
-			name:  "keeps hash without preceding whitespace",
-			input: "BRAINTRUST_API_KEY=test#key\n",
-			key:   "test#key",
 			found: true,
 		},
 		{
 			name:  "empty value is not found",
-			input: "BRAINTRUST_API_KEY=\n",
+			input: `{"BRAINTRUST_API_KEY":""}`,
 			found: false,
 		},
 		{
 			name:  "whitespace value is not found",
-			input: "BRAINTRUST_API_KEY=   \n",
+			input: `{"BRAINTRUST_API_KEY":"   "}`,
 			found: false,
 		},
 		{
-			name:  "comments only are not found",
-			input: "# BRAINTRUST_API_KEY=ignored\n",
+			name:  "missing key is not found",
+			input: `{"OTHER_SECRET":"ignored"}`,
+			found: false,
+		},
+		{
+			name:  "non-string key is not found",
+			input: `{"BRAINTRUST_API_KEY":123}`,
+			found: false,
+		},
+		{
+			name:  "malformed json is not found",
+			input: `{"BRAINTRUST_API_KEY":`,
 			found: false,
 		},
 	}
@@ -92,52 +79,52 @@ BRAINTRUST_API_KEY=test-key
 	}
 }
 
-func TestLookupEnvBraintrustAPIKeyNearestWins(t *testing.T) {
+func TestLookupBraintrustConfigAPIKeyNearestWins(t *testing.T) {
 	t.Parallel()
 
 	root := t.TempDir()
 	child := filepath.Join(root, "child")
 	grandchild := filepath.Join(child, "grandchild")
 	require.NoError(t, os.MkdirAll(grandchild, 0o755))
-	require.NoError(t, os.WriteFile(filepath.Join(root, envBraintrustFilename), []byte("BRAINTRUST_API_KEY=root-key\n"), 0o600))
-	require.NoError(t, os.WriteFile(filepath.Join(child, envBraintrustFilename), []byte("BRAINTRUST_API_KEY=child-key\n"), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(root, braintrustConfigFilename), []byte(`{"BRAINTRUST_API_KEY":"root-key"}`), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(child, braintrustConfigFilename), []byte(`{"BRAINTRUST_API_KEY":"child-key"}`), 0o600))
 
-	key, found := lookupEnvBraintrustAPIKeyFromDir(grandchild)
+	key, found := lookupBraintrustConfigAPIKeyFromDir(grandchild)
 
 	assert.True(t, found)
 	assert.Equal(t, "child-key", key)
 }
 
-func TestLookupEnvBraintrustAPIKeyNearestFileIsBoundary(t *testing.T) {
+func TestLookupBraintrustConfigAPIKeyNearestFileIsBoundary(t *testing.T) {
 	t.Parallel()
 
 	root := t.TempDir()
 	child := filepath.Join(root, "child")
 	require.NoError(t, os.MkdirAll(child, 0o755))
-	require.NoError(t, os.WriteFile(filepath.Join(root, envBraintrustFilename), []byte("BRAINTRUST_API_KEY=root-key\n"), 0o600))
-	require.NoError(t, os.WriteFile(filepath.Join(child, envBraintrustFilename), []byte("BRAINTRUST_API_KEY=   \n"), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(root, braintrustConfigFilename), []byte(`{"BRAINTRUST_API_KEY":"root-key"}`), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(child, braintrustConfigFilename), []byte(`{"BRAINTRUST_API_KEY":"   "}`), 0o600))
 
-	key, found := lookupEnvBraintrustAPIKeyFromDir(child)
+	key, found := lookupBraintrustConfigAPIKeyFromDir(child)
 
 	assert.False(t, found)
 	assert.Empty(t, key)
 }
 
-func TestLookupEnvBraintrustAPIKeyUnreadableNearestFileIsBoundary(t *testing.T) {
+func TestLookupBraintrustConfigAPIKeyUnreadableNearestFileIsBoundary(t *testing.T) {
 	t.Parallel()
 
 	root := t.TempDir()
 	child := filepath.Join(root, "child")
-	require.NoError(t, os.MkdirAll(filepath.Join(child, envBraintrustFilename), 0o755))
-	require.NoError(t, os.WriteFile(filepath.Join(root, envBraintrustFilename), []byte("BRAINTRUST_API_KEY=root-key\n"), 0o600))
+	require.NoError(t, os.MkdirAll(filepath.Join(child, braintrustConfigFilename), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(root, braintrustConfigFilename), []byte(`{"BRAINTRUST_API_KEY":"root-key"}`), 0o600))
 
-	key, found := lookupEnvBraintrustAPIKeyFromDir(child)
+	key, found := lookupBraintrustConfigAPIKeyFromDir(child)
 
 	assert.False(t, found)
 	assert.Empty(t, key)
 }
 
-func TestLookupEnvBraintrustAPIKeyDepthCap(t *testing.T) {
+func TestLookupBraintrustConfigAPIKeyDepthCap(t *testing.T) {
 	t.Parallel()
 
 	root := t.TempDir()
@@ -147,13 +134,13 @@ func TestLookupEnvBraintrustAPIKeyDepthCap(t *testing.T) {
 	}
 	require.NoError(t, os.MkdirAll(current, 0o755))
 
-	require.NoError(t, os.WriteFile(filepath.Join(root, envBraintrustFilename), []byte("BRAINTRUST_API_KEY=too-far\n"), 0o600))
-	key, found := lookupEnvBraintrustAPIKeyFromDir(current)
+	require.NoError(t, os.WriteFile(filepath.Join(root, braintrustConfigFilename), []byte(`{"BRAINTRUST_API_KEY":"too-far"}`), 0o600))
+	key, found := lookupBraintrustConfigAPIKeyFromDir(current)
 	assert.False(t, found)
 	assert.Empty(t, key)
 
-	require.NoError(t, os.WriteFile(filepath.Join(root, "d0", envBraintrustFilename), []byte("BRAINTRUST_API_KEY=in-range\n"), 0o600))
-	key, found = lookupEnvBraintrustAPIKeyFromDir(current)
+	require.NoError(t, os.WriteFile(filepath.Join(root, "d0", braintrustConfigFilename), []byte(`{"BRAINTRUST_API_KEY":"in-range"}`), 0o600))
+	key, found = lookupBraintrustConfigAPIKeyFromDir(current)
 	assert.True(t, found)
 	assert.Equal(t, "in-range", key)
 }

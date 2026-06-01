@@ -87,7 +87,7 @@ func TestNew_InitializesWithoutImmediateAPIKey(t *testing.T) {
 	// Clear environment variable to ensure no API key is set
 	t.Setenv("BRAINTRUST_API_KEY", "")
 	dir := t.TempDir()
-	require.NoError(t, os.WriteFile(filepath.Join(dir, ".env.braintrust"), []byte("BRAINTRUST_API_KEY=\n"), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".braintrust.json"), []byte(`{"BRAINTRUST_API_KEY":""}`), 0o600))
 	oldwd, err := os.Getwd()
 	require.NoError(t, err)
 	require.NoError(t, os.Chdir(dir))
@@ -104,18 +104,18 @@ func TestNew_InitializesWithoutImmediateAPIKey(t *testing.T) {
 		WithLogger(logger.Discard()),
 	)
 
-	// The client can initialize because .env.braintrust discovery is lazy and
+	// The client can initialize because .braintrust.json discovery is lazy and
 	// runs outside the constructor path.
 	require.NoError(t, err)
 	require.NotNil(t, client)
 }
 
-func TestNew_BlockingLoginFailsWhenEnvBraintrustHasNoAPIKey(t *testing.T) {
+func TestNew_BlockingLoginFailsWhenBraintrustJSONHasNoAPIKey(t *testing.T) {
 	// Note: No t.Parallel() because this test changes the process cwd.
 	t.Setenv("BRAINTRUST_API_KEY", "")
 
 	dir := t.TempDir()
-	require.NoError(t, os.WriteFile(filepath.Join(dir, ".env.braintrust"), []byte("BRAINTRUST_API_KEY=\n"), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".braintrust.json"), []byte(`{"BRAINTRUST_API_KEY":""}`), 0o600))
 
 	oldwd, err := os.Getwd()
 	require.NoError(t, err)
@@ -138,7 +138,7 @@ func TestNew_BlockingLoginFailsWhenEnvBraintrustHasNoAPIKey(t *testing.T) {
 	assert.Contains(t, err.Error(), "API key is required")
 }
 
-func TestNew_UsesEnvBraintrustFallbackForBlockingLogin(t *testing.T) {
+func TestNew_UsesBraintrustJSONFallbackForBlockingLogin(t *testing.T) {
 	// Note: No t.Parallel() because this test changes the process cwd.
 	t.Setenv("BRAINTRUST_API_KEY", "")
 
@@ -146,8 +146,8 @@ func TestNew_UsesEnvBraintrustFallbackForBlockingLogin(t *testing.T) {
 	nested := filepath.Join(root, "nested", "project")
 	require.NoError(t, os.MkdirAll(nested, 0o755))
 	require.NoError(t, os.WriteFile(
-		filepath.Join(root, ".env.braintrust"),
-		[]byte("export BRAINTRUST_API_KEY="+auth.TestAPIKey+"\nOTHER_SECRET=ignored\n"),
+		filepath.Join(root, ".braintrust.json"),
+		[]byte(fmt.Sprintf(`{"BRAINTRUST_API_KEY":%q,"OTHER_SECRET":"ignored"}`, auth.TestAPIKey)),
 		0o600,
 	))
 
@@ -177,14 +177,14 @@ func TestNew_UsesEnvBraintrustFallbackForBlockingLogin(t *testing.T) {
 	assert.Equal(t, auth.TestAPIKey, client.session.APIInfo().APIKey)
 }
 
-func TestNew_APIKeyPrecedenceOverEnvBraintrust(t *testing.T) {
+func TestNew_APIKeyPrecedenceOverBraintrustJSON(t *testing.T) {
 	// Note: No t.Parallel() because this test changes the process cwd.
 	t.Setenv("BRAINTRUST_API_KEY", auth.TestAPIKey)
 
 	root := t.TempDir()
 	require.NoError(t, os.WriteFile(
-		filepath.Join(root, ".env.braintrust"),
-		[]byte("BRAINTRUST_API_KEY=file-key\n"),
+		filepath.Join(root, ".braintrust.json"),
+		[]byte(`{"BRAINTRUST_API_KEY":"file-key"}`),
 		0o600,
 	))
 
@@ -215,8 +215,8 @@ func TestNew_ExplicitAPIKeyPrecedence(t *testing.T) {
 
 	root := t.TempDir()
 	require.NoError(t, os.WriteFile(
-		filepath.Join(root, ".env.braintrust"),
-		[]byte("BRAINTRUST_API_KEY=file-key\n"),
+		filepath.Join(root, ".braintrust.json"),
+		[]byte(`{"BRAINTRUST_API_KEY":"file-key"}`),
 		0o600,
 	))
 
@@ -248,8 +248,8 @@ func TestNew_BlankExplicitAPIKeyPreservesEnvironmentFallback(t *testing.T) {
 
 	root := t.TempDir()
 	require.NoError(t, os.WriteFile(
-		filepath.Join(root, ".env.braintrust"),
-		[]byte("BRAINTRUST_API_KEY=file-key\n"),
+		filepath.Join(root, ".braintrust.json"),
+		[]byte(`{"BRAINTRUST_API_KEY":"file-key"}`),
 		0o600,
 	))
 
@@ -275,14 +275,14 @@ func TestNew_BlankExplicitAPIKeyPreservesEnvironmentFallback(t *testing.T) {
 	assert.Equal(t, auth.TestAPIKey, client.session.APIInfo().APIKey)
 }
 
-func TestNew_BlankExplicitAPIKeyUsesEnvBraintrustFallback(t *testing.T) {
+func TestNew_BlankExplicitAPIKeyUsesBraintrustJSONFallback(t *testing.T) {
 	// Note: No t.Parallel() because this test changes the process cwd.
 	t.Setenv("BRAINTRUST_API_KEY", "")
 
 	root := t.TempDir()
 	require.NoError(t, os.WriteFile(
-		filepath.Join(root, ".env.braintrust"),
-		[]byte("BRAINTRUST_API_KEY="+auth.TestAPIKey+"\n"),
+		filepath.Join(root, ".braintrust.json"),
+		[]byte(fmt.Sprintf(`{"BRAINTRUST_API_KEY":%q}`, auth.TestAPIKey)),
 		0o600,
 	))
 
@@ -308,12 +308,12 @@ func TestNew_BlankExplicitAPIKeyUsesEnvBraintrustFallback(t *testing.T) {
 	assert.Equal(t, auth.TestAPIKey, client.session.APIInfo().APIKey)
 }
 
-func TestTracing_OTLPExporterWaitsForEnvBraintrustFallback(t *testing.T) {
+func TestTracing_OTLPExporterWaitsForBraintrustJSONFallback(t *testing.T) {
 	// Note: No t.Parallel() because this test changes the process cwd.
 	t.Setenv("BRAINTRUST_API_KEY", "")
 
 	root := t.TempDir()
-	require.NoError(t, os.WriteFile(filepath.Join(root, ".env.braintrust"), []byte("BRAINTRUST_API_KEY=file-api-key\n"), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(root, ".braintrust.json"), []byte(`{"BRAINTRUST_API_KEY":"file-api-key"}`), 0o600))
 
 	oldwd, err := os.Getwd()
 	require.NoError(t, err)
