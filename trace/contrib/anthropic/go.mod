@@ -6,7 +6,7 @@ toolchain go1.26.1
 
 require (
 	github.com/anthropics/anthropic-sdk-go v1.23.0
-	github.com/braintrustdata/braintrust-sdk-go v0.7.2
+	github.com/braintrustdata/braintrust-sdk-go v0.8.0
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/otel v1.43.0
 	go.opentelemetry.io/otel/trace v1.43.0
