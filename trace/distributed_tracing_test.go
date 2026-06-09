@@ -80,7 +80,7 @@ func TestDistributedTracing_Inject_TraceparentWellFormed(t *testing.T) {
 
 	// trace id and parent id are non-zero.
 	sc := span.SpanContext()
-	assert.False(sc.TraceID().IsValid() == false, "active span must have a valid trace id")
+	assert.True(sc.TraceID().IsValid(), "active span must have a valid trace id")
 	parts := strings.Split(tp, "-")
 	require.Len(t, parts, 4)
 	assert.NotEqual("00000000000000000000000000000000", parts[1], "trace id must be non-zero")
