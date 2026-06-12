@@ -89,6 +89,7 @@ type Opts[I, R any] struct {
 	Metadata    Metadata // Metadata to attach to the experiment
 	Update      bool     // If true, append to existing experiment (default: false)
 	Parallelism int      // Number of goroutines (default: 1)
+	TrialCount  int      // Number of times to run each case (default: 1)
 	Quiet       bool     // Suppress result output (default: false)
 }
 
@@ -108,6 +109,10 @@ type Case[I, R any] struct {
 	// Metadata is additional metadata for this case.
 	// Optional.
 	Metadata map[string]interface{}
+
+	// TrialCount overrides Opts.TrialCount for this case.
+	// Optional. Values less than 1 use the evaluation default.
+	TrialCount int
 
 	// These fields are only set if the Case is part of a Dataset.
 	// They link the eval result back to the source dataset row.
@@ -240,13 +245,15 @@ type eval[I, R any] struct {
 	tracer         oteltrace.Tracer
 	startSpanOpt   oteltrace.SpanStartOption
 	goroutines     int
+	trialCount     int
 	quiet          bool
 }
 
 // nextCase is a wrapper for sending cases through a channel.
 type nextCase[I, R any] struct {
-	c       Case[I, R]
-	iterErr error
+	c          Case[I, R]
+	trialIndex int
+	iterErr    error
 }
 
 // newEval creates a new eval executor from concrete parameters (low-level constructor).
@@ -263,6 +270,7 @@ func newEval[I, R any](
 	scorers []Scorer[I, R],
 	classifiers []Classifier[I, R],
 	parallelism int,
+	trialCount int,
 	quiet bool,
 ) *eval[I, R] {
 	// Build parent span option
@@ -276,6 +284,10 @@ func newEval[I, R any](
 	goroutines := parallelism
 	if goroutines < 1 {
 		goroutines = 1
+	}
+
+	if trialCount < 1 {
+		trialCount = 1
 	}
 
 	return &eval[I, R]{
@@ -293,6 +305,7 @@ func newEval[I, R any](
 		tracer:         tracer,
 		startSpanOpt:   startSpanOpt,
 		goroutines:     goroutines,
+		trialCount:     trialCount,
 		quiet:          quiet,
 	}
 }
@@ -331,6 +344,7 @@ func newEvalOpts[I, R any](ctx context.Context, s *auth.Session, tp *trace.Trace
 		opts.Scorers,
 		opts.Classifiers,
 		opts.Parallelism,
+		opts.TrialCount,
 		opts.Quiet,
 	), nil
 }
@@ -373,7 +387,17 @@ func (e *eval[I, R]) run(ctx context.Context) (*Result, error) {
 			close(nextCases)
 			break
 		}
-		nextCases <- nextCase[I, R]{c: c, iterErr: err}
+		if err != nil {
+			nextCases <- nextCase[I, R]{iterErr: err}
+			continue
+		}
+		trialCount := c.TrialCount
+		if trialCount < 1 {
+			trialCount = e.trialCount
+		}
+		for trialIndex := range trialCount {
+			nextCases <- nextCase[I, R]{c: c, trialIndex: trialIndex, iterErr: err}
+		}
 	}
 
 	// Wait for all the goroutines to finish.
@@ -419,11 +443,11 @@ func (e *eval[I, R]) runNextCase(ctx context.Context, nextCase nextCase[I, R]) e
 	}
 
 	// otherwise let's run the case (using the existing span)
-	return e.runCase(ctx, span, nextCase.c)
+	return e.runCase(ctx, span, nextCase.c, nextCase.trialIndex)
 }
 
 // runCase orchestrates task + scorers for one case.
-func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I, R]) error {
+func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I, R], trialIndex int) error {
 	// Set all non-output attributes upfront so they're captured even if the task fails.
 	attrs := map[string]any{
 		"braintrust.span_attributes": evalSpanAttrs,
@@ -449,7 +473,7 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 		span.SetAttributes(attribute.StringSlice("braintrust.tags", c.Tags))
 	}
 
-	taskResult, err := e.runTask(ctx, span, c)
+	taskResult, err := e.runTask(ctx, span, c, trialIndex)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return err
@@ -492,7 +516,7 @@ func (e *eval[I, R]) runCase(ctx context.Context, span oteltrace.Span, c Case[I,
 
 // runTask executes the task function and creates a task span.
 // Returns a TaskResult containing all task execution data.
-func (e *eval[I, R]) runTask(ctx context.Context, evalSpan oteltrace.Span, c Case[I, R]) (TaskResult[I, R], error) {
+func (e *eval[I, R]) runTask(ctx context.Context, evalSpan oteltrace.Span, c Case[I, R], trialIndex int) (TaskResult[I, R], error) {
 	ctx, taskSpan := e.tracer.Start(ctx, "task", e.startSpanOpt)
 	defer taskSpan.End()
 
@@ -511,11 +535,12 @@ func (e *eval[I, R]) runTask(ctx context.Context, evalSpan oteltrace.Span, c Cas
 
 	// Construct TaskHooks with both spans and case data
 	hooks := &TaskHooks{
-		Expected: c.Expected,
-		Metadata: c.Metadata,
-		Tags:     c.Tags,
-		TaskSpan: taskSpan,
-		EvalSpan: evalSpan,
+		Expected:   c.Expected,
+		Metadata:   c.Metadata,
+		Tags:       c.Tags,
+		TrialIndex: trialIndex,
+		TaskSpan:   taskSpan,
+		EvalSpan:   evalSpan,
 	}
 
 	// Call task with new signature
@@ -942,6 +967,7 @@ func testNewEval[I, R any](
 		scorers,
 		classifiers,
 		parallelism,
+		1,    // trialCount=1 for tests
 		true, // quiet=true for tests
 	)
 }

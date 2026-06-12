@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"io"
+	"sync"
+	"sync/atomic"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -310,6 +312,60 @@ func TestNewEval_Parallelism(t *testing.T) {
 
 	ute := newUnitTestEval(t, cases, task, nil, 4)
 	assert.Equal(t, 4, ute.eval.goroutines)
+}
+
+func TestEval_TrialCount(t *testing.T) {
+	t.Parallel()
+
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "test1"}},
+		{Input: testInput{Value: "test2"}},
+	})
+
+	var calls atomic.Int64
+	var mu sync.Mutex
+	trialIndices := map[string][]int{}
+	task := func(ctx context.Context, input testInput, hooks *TaskHooks) (TaskOutput[testOutput], error) {
+		calls.Add(1)
+		mu.Lock()
+		trialIndices[input.Value] = append(trialIndices[input.Value], hooks.TrialIndex)
+		mu.Unlock()
+		return TaskOutput[testOutput]{Value: testOutput{Result: input.Value}}, nil
+	}
+
+	ute := newUnitTestEval(t, cases, task, nil, 1)
+	ute.eval.trialCount = 3
+
+	_, err := ute.eval.run(context.Background())
+	require.NoError(t, err)
+	assert.Equal(t, int64(6), calls.Load())
+	assert.ElementsMatch(t, []int{0, 1, 2}, trialIndices["test1"])
+	assert.ElementsMatch(t, []int{0, 1, 2}, trialIndices["test2"])
+
+	spans := ute.exporter.Flush()
+	assert.Len(t, spans, 12) // 2 cases * 3 trials * (task + eval)
+}
+
+func TestEval_CaseTrialCountOverridesDefault(t *testing.T) {
+	t.Parallel()
+
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "test1"}},
+		{Input: testInput{Value: "test2"}, TrialCount: 4},
+	})
+
+	var calls atomic.Int64
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		calls.Add(1)
+		return testOutput{Result: input.Value}, nil
+	})
+
+	ute := newUnitTestEval(t, cases, task, nil, 1)
+	ute.eval.trialCount = 2
+
+	_, err := ute.eval.run(context.Background())
+	require.NoError(t, err)
+	assert.Equal(t, int64(6), calls.Load())
 }
 
 func TestNewEval_DefaultParallelism(t *testing.T) {
@@ -872,6 +928,7 @@ func TestEval_ParallelWithIteratorErrors(t *testing.T) {
 	})
 
 	ute := newUnitTestEval(t, generator, task, nil, 2) // parallel=2
+	ute.eval.trialCount = 3
 
 	ctx := context.Background()
 	result, err := ute.eval.run(ctx)
@@ -882,8 +939,8 @@ func TestEval_ParallelWithIteratorErrors(t *testing.T) {
 	assert.NotNil(t, result)
 
 	spans := ute.exporter.Flush()
-	// No scorers: 3 successful cases * 2 spans (task+eval) + 1 iterator error span = 7 spans
-	assert.Len(t, spans, 7)
+	// No scorers: 3 successful cases * 3 trials * 2 spans (task+eval) + 1 iterator error span = 19 spans
+	assert.Len(t, spans, 19)
 }
 
 // customCases allows custom Next() implementation for testing

@@ -19,9 +19,10 @@ type TaskHooks struct {
 
 	// Readonly fields. These aren't necessarily recommended to be included in the task function,
 	// but are available for advanced use cases.
-	Expected any      // Not usually used in tasks, so this is untyped
-	Metadata Metadata // Case metadata
-	Tags     []string // Case tags
+	Expected   any      // Not usually used in tasks, so this is untyped
+	Metadata   Metadata // Case metadata
+	Tags       []string // Case tags
+	TrialIndex int      // The index of the current trial (0-based)
 }
 
 // TaskOutput wraps the output value from a task.
