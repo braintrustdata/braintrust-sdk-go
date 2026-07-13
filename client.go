@@ -127,6 +127,12 @@ func (c *Client) setupTracing() error {
 		Exporter:                 c.config.Exporter,
 		Logger:                   c.logger,
 	}
+	if c.config.Environment != nil {
+		traceConfig.Environment = &bttrace.SpanOriginEnvironment{
+			Type: c.config.Environment.Type,
+			Name: c.config.Environment.Name,
+		}
+	}
 
 	// Add Braintrust span processor to the provided TracerProvider
 	c.logger.Debug("enabling braintrust tracing on provider")

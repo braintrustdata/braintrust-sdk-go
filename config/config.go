@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -37,9 +38,15 @@ type Config struct {
 	AutoConvertAIAttachments bool // scan spans for base64 attachments and upload them (default: true)
 	SpanFilterFuncs          []SpanFilterFunc
 	Exporter                 trace.SpanExporter
+	Environment              *Environment
 
 	// Logger
 	Logger logger.Logger
+}
+
+type Environment struct {
+	Type string
+	Name string
 }
 
 // SpanFilterFunc is a function that decides which spans to send to Braintrust.
@@ -76,6 +83,7 @@ func FromEnv() *Config {
 		EnableTraceConsoleLog:    getEnvBool("BRAINTRUST_ENABLE_TRACE_CONSOLE_LOG", false),
 		EnableBuiltinAdkTraces:   getEnvBool("BRAINTRUST_OTEL_ENABLE_BUILTIN_ADK_TRACES", false),
 		AutoConvertAIAttachments: getEnvBool("BRAINTRUST_AUTO_CONVERT_AI_ATTACHMENTS", true),
+		Environment:              DetectEnvironment(nil),
 	}
 	if cfg.APIKey == "" {
 		cfg.APIKeyResolver = apikey.NewResolver()
@@ -83,12 +91,83 @@ func FromEnv() *Config {
 	return cfg
 }
 
+func DetectEnvironment(explicit *Environment) *Environment {
+	if explicit != nil {
+		return explicit
+	}
+	if envType := getEnvString("BRAINTRUST_ENVIRONMENT_TYPE", ""); envType != "" {
+		return &Environment{Type: envType, Name: getEnvString("BRAINTRUST_ENVIRONMENT_NAME", "")}
+	}
+	for key, name := range map[string]string{
+		"GITHUB_ACTIONS": "github_actions", "GITLAB_CI": "gitlab_ci", "CIRCLECI": "circleci",
+		"BUILDKITE": "buildkite", "JENKINS_URL": "jenkins", "JENKINS_HOME": "jenkins",
+		"TF_BUILD": "azure_pipelines", "TEAMCITY_VERSION": "teamcity", "TRAVIS": "travis",
+		"BITBUCKET_BUILD_NUMBER": "bitbucket",
+	} {
+		if getProcessEnvString(key) != "" {
+			return &Environment{Type: "ci", Name: name}
+		}
+	}
+	if getProcessEnvString("CI") != "" {
+		return &Environment{Type: "ci", Name: "ci"}
+	}
+	for key, name := range map[string]string{
+		"VERCEL": "vercel", "NETLIFY": "netlify", "AWS_LAMBDA_FUNCTION_NAME": "aws_lambda",
+		"AWS_EXECUTION_ENV": "aws_lambda", "K_SERVICE": "cloud_run", "FUNCTION_TARGET": "gcp_functions",
+		"KUBERNETES_SERVICE_HOST": "kubernetes", "ECS_CONTAINER_METADATA_URI": "ecs",
+		"ECS_CONTAINER_METADATA_URI_V4": "ecs", "DYNO": "heroku", "FLY_APP_NAME": "fly",
+		"RAILWAY_ENVIRONMENT": "railway", "RENDER_SERVICE_NAME": "render",
+	} {
+		if getProcessEnvString(key) != "" {
+			return &Environment{Type: "server", Name: name}
+		}
+	}
+	return nil
+}
+
+func getProcessEnvString(key string) string {
+	return strings.TrimSpace(os.Getenv(key))
+}
+
 // getEnvString returns the trimmed environment variable value or the default
 func getEnvString(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return strings.TrimSpace(value)
+	if value := getProcessEnvString(key); value != "" {
+		return value
+	}
+	if value := getBraintrustEnvFileValue(key); value != "" {
+		return value
 	}
 	return defaultValue
+}
+
+func getBraintrustEnvFileValue(key string) string {
+	dir, err := os.Getwd()
+	if err != nil {
+		return ""
+	}
+	for depth := 0; depth <= 64; depth++ {
+		envPath := filepath.Join(dir, ".env.braintrust")
+		if data, err := os.ReadFile(envPath); err == nil {
+			for _, line := range strings.Split(string(data), "\n") {
+				line = strings.TrimSpace(line)
+				if line == "" || strings.HasPrefix(line, "#") {
+					continue
+				}
+				name, value, ok := strings.Cut(line, "=")
+				if !ok || strings.TrimSpace(name) != key {
+					continue
+				}
+				return strings.Trim(strings.TrimSpace(value), `"'`)
+			}
+			return ""
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+		dir = parent
+	}
+	return ""
 }
 
 // getEnvBool returns the environment variable as a bool or the default

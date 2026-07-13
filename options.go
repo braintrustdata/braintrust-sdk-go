@@ -61,6 +61,16 @@ func WithProjectID(projectID string) Option {
 	}
 }
 
+// WithEnvironment sets span-origin environment provenance.
+func WithEnvironment(environmentType string, name ...string) Option {
+	return func(c *config.Config) {
+		c.Environment = &config.Environment{Type: environmentType}
+		if len(name) > 0 {
+			c.Environment.Name = name[0]
+		}
+	}
+}
+
 // WithLogger sets a custom logger for the SDK
 // If not provided, a default logger will be used
 func WithLogger(l logger.Logger) Option {
