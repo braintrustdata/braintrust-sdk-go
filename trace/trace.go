@@ -300,11 +300,9 @@ const ParentOtelAttrKey = "braintrust.parent"
 
 // Internal attribute keys for Braintrust span metadata.
 const (
-	orgAttrKey             = "braintrust.org"
-	appURLAttrKey          = "braintrust.app_url"
-	contextJSONAttrKey     = "braintrust.context_json"
-	environmentTypeAttrKey = "braintrust.environment.type"
-	environmentNameAttrKey = "braintrust.environment.name"
+	orgAttrKey         = "braintrust.org"
+	appURLAttrKey      = "braintrust.app_url"
+	contextJSONAttrKey = "braintrust.context_json"
 )
 
 type contextKey string
@@ -740,12 +738,6 @@ func (sp *spanProcessor) OnEnd(span sdktrace.ReadOnlySpan) {
 func (sp *spanProcessor) addSpanOrigin(span sdktrace.ReadOnlySpan) sdktrace.ReadOnlySpan {
 	overrides := make(map[attribute.Key]string)
 	overrides[contextJSONAttrKey] = spanOriginContextJSON(span, sp.environment)
-	if sp.environment != nil {
-		overrides[environmentTypeAttrKey] = sp.environment.Type
-		if sp.environment.Name != "" {
-			overrides[environmentNameAttrKey] = sp.environment.Name
-		}
-	}
 	return attachmentprocessor.NewTransformedSpan(span, overrides)
 }
 
@@ -960,9 +952,7 @@ func aiSpanFilterFunc(span sdktrace.ReadOnlySpan) int {
 		if attrKey == ParentOtelAttrKey ||
 			attrKey == orgAttrKey ||
 			attrKey == appURLAttrKey ||
-			attrKey == contextJSONAttrKey ||
-			attrKey == environmentTypeAttrKey ||
-			attrKey == environmentNameAttrKey {
+			attrKey == contextJSONAttrKey {
 			continue
 		}
 		for _, prefix := range aiOtelPrefixes {

@@ -62,8 +62,9 @@ func TestSpanProcessor_MergesSpanOriginWithContextJSONSetAfterStart(t *testing.T
 	for _, attr := range spans[0].Attributes {
 		if attr.Key == contextJSONAttrKey {
 			contextJSON = attr.Value.AsString()
-			break
 		}
+		assert.NotEqual(attribute.Key("braintrust.environment.type"), attr.Key)
+		assert.NotEqual(attribute.Key("braintrust.environment.name"), attr.Key)
 	}
 	assert.NotEmpty(contextJSON)
 
