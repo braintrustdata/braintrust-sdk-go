@@ -44,6 +44,7 @@ type Config struct {
 	Logger logger.Logger
 }
 
+// Environment describes where spans are produced for span-origin provenance.
 type Environment struct {
 	Type string
 	Name string
@@ -91,6 +92,8 @@ func FromEnv() *Config {
 	return cfg
 }
 
+// DetectEnvironment resolves span-origin environment provenance from an
+// explicit value, Braintrust environment variables, CI, and server runtimes.
 func DetectEnvironment(explicit *Environment) *Environment {
 	if explicit != nil {
 		return explicit

@@ -78,6 +78,7 @@ type Config struct {
 	Environment *SpanOriginEnvironment
 }
 
+// SpanOriginEnvironment describes where spans are produced for span-origin provenance.
 type SpanOriginEnvironment struct {
 	Type string
 	Name string
@@ -573,7 +574,11 @@ func spanOriginAttrs(environment *SpanOriginEnvironment) []attribute.KeyValue {
 		if environment.Name != "" {
 			env["name"] = environment.Name
 		}
-		origin["span_origin"].(map[string]any)["environment"] = env
+		spanOrigin, ok := origin["span_origin"].(map[string]any)
+		if !ok {
+			return nil
+		}
+		spanOrigin["environment"] = env
 	}
 	data, err := json.Marshal(origin)
 	if err != nil {
