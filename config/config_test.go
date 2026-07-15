@@ -109,6 +109,22 @@ func TestDetectEnvironment_AWSExecutionEnvClassifiesECSBeforeLambda(t *testing.T
 	assert.Equal(t, "ecs", env.Name)
 }
 
+func TestDetectEnvironment_ExplicitNameWithoutType(t *testing.T) {
+	t.Setenv("GITHUB_ACTIONS", "")
+	t.Setenv("GITLAB_CI", "")
+	t.Setenv("CIRCLECI", "")
+	t.Setenv("BUILDKITE", "")
+	t.Setenv("CI", "")
+	t.Setenv("BRAINTRUST_ENVIRONMENT_TYPE", "")
+	t.Setenv("BRAINTRUST_ENVIRONMENT_NAME", "staging")
+
+	env := DetectEnvironment(nil)
+
+	assert.NotNil(t, env)
+	assert.Empty(t, env.Type)
+	assert.Equal(t, "staging", env.Name)
+}
+
 func TestDetectEnvironment_AWSExecutionEnvClassifiesLambdaWhenLambdaSpecific(t *testing.T) {
 	t.Setenv("GITHUB_ACTIONS", "")
 	t.Setenv("GITLAB_CI", "")

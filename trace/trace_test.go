@@ -74,6 +74,45 @@ func TestSpanProcessor_MergesSpanOriginWithContextJSONSetAfterStart(t *testing.T
 	assert.Equal("braintrust.sdk.go", context["span_origin"].(map[string]any)["name"])
 }
 
+func TestSpanProcessor_PreservesEnvironmentNameWithoutType(t *testing.T) {
+	assert := assert.New(t)
+
+	tp := sdktrace.NewTracerProvider()
+	exporter := tracetest.NewInMemoryExporter()
+	session := newTestSession()
+	cfg := Config{
+		DefaultProjectID: "environment-name-only-test",
+		Exporter:         exporter,
+		Logger:           logger.Discard(),
+		Environment:      &SpanOriginEnvironment{Name: "staging"},
+	}
+
+	err := AddSpanProcessor(tp, session, cfg)
+	assert.NoError(err)
+
+	tracer := tp.Tracer("test")
+	_, span := tracer.Start(context.Background(), "environment-name-only")
+	span.End()
+
+	_ = tp.ForceFlush(context.Background())
+	spans := exporter.GetSpans()
+	assert.Len(spans, 1)
+
+	var contextJSON string
+	for _, attr := range spans[0].Attributes {
+		if attr.Key == contextJSONAttrKey {
+			contextJSON = attr.Value.AsString()
+		}
+	}
+	assert.NotEmpty(contextJSON)
+
+	var context map[string]any
+	assert.NoError(json.Unmarshal([]byte(contextJSON), &context))
+	environment := context["span_origin"].(map[string]any)["environment"].(map[string]any)
+	assert.Equal("staging", environment["name"])
+	assert.NotContains(environment, "type")
+}
+
 func TestSpanFilterFunc_WithAttributes(t *testing.T) {
 	assert := assert.New(t)
 

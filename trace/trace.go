@@ -595,7 +595,10 @@ func spanOriginContextJSON(span sdktrace.ReadOnlySpan, environment *SpanOriginEn
 			return "{}"
 		}
 		if _, exists := spanOrigin["environment"]; !exists {
-			env := map[string]any{"type": environment.Type}
+			env := map[string]any{}
+			if environment.Type != "" {
+				env["type"] = environment.Type
+			}
 			if environment.Name != "" {
 				env["name"] = environment.Name
 			}
@@ -631,8 +634,10 @@ func resolveEnvironment(explicit *SpanOriginEnvironment) *SpanOriginEnvironment 
 	if explicit != nil {
 		return explicit
 	}
-	if typ := envValue("BRAINTRUST_ENVIRONMENT_TYPE"); typ != "" {
-		return &SpanOriginEnvironment{Type: typ, Name: envValue("BRAINTRUST_ENVIRONMENT_NAME")}
+	typ := envValue("BRAINTRUST_ENVIRONMENT_TYPE")
+	name := envValue("BRAINTRUST_ENVIRONMENT_NAME")
+	if typ != "" || name != "" {
+		return &SpanOriginEnvironment{Type: typ, Name: name}
 	}
 	for key, name := range map[string]string{
 		"GITHUB_ACTIONS": "github_actions", "GITLAB_CI": "gitlab_ci", "CIRCLECI": "circleci",

@@ -98,8 +98,10 @@ func DetectEnvironment(explicit *Environment) *Environment {
 	if explicit != nil {
 		return explicit
 	}
-	if envType := getEnvString("BRAINTRUST_ENVIRONMENT_TYPE", ""); envType != "" {
-		return &Environment{Type: envType, Name: getEnvString("BRAINTRUST_ENVIRONMENT_NAME", "")}
+	envType := getEnvString("BRAINTRUST_ENVIRONMENT_TYPE", "")
+	envName := getEnvString("BRAINTRUST_ENVIRONMENT_NAME", "")
+	if envType != "" || envName != "" {
+		return &Environment{Type: envType, Name: envName}
 	}
 	for key, name := range map[string]string{
 		"GITHUB_ACTIONS": "github_actions", "GITLAB_CI": "gitlab_ci", "CIRCLECI": "circleci",
