@@ -114,18 +114,38 @@ func DetectEnvironment(explicit *Environment) *Environment {
 	if getProcessEnvString("CI") != "" {
 		return &Environment{Type: "ci", Name: "ci"}
 	}
-	for key, name := range map[string]string{
-		"VERCEL": "vercel", "NETLIFY": "netlify", "AWS_LAMBDA_FUNCTION_NAME": "aws_lambda",
-		"AWS_EXECUTION_ENV": "aws_lambda", "K_SERVICE": "cloud_run", "FUNCTION_TARGET": "gcp_functions",
-		"KUBERNETES_SERVICE_HOST": "kubernetes", "ECS_CONTAINER_METADATA_URI": "ecs",
-		"ECS_CONTAINER_METADATA_URI_V4": "ecs", "DYNO": "heroku", "FLY_APP_NAME": "fly",
-		"RAILWAY_ENVIRONMENT": "railway", "RENDER_SERVICE_NAME": "render",
-	} {
-		if getProcessEnvString(key) != "" {
-			return &Environment{Type: "server", Name: name}
-		}
+	if name := detectServerEnvironmentName(); name != "" {
+		return &Environment{Type: "server", Name: name}
 	}
 	return nil
+}
+
+func detectServerEnvironmentName() string {
+	for key, name := range map[string]string{"VERCEL": "vercel", "NETLIFY": "netlify"} {
+		if getProcessEnvString(key) != "" {
+			return name
+		}
+	}
+	if getProcessEnvString("ECS_CONTAINER_METADATA_URI") != "" || getProcessEnvString("ECS_CONTAINER_METADATA_URI_V4") != "" {
+		return "ecs"
+	}
+	if value := getProcessEnvString("AWS_EXECUTION_ENV"); strings.HasPrefix(value, "AWS_ECS_") {
+		return "ecs"
+	} else if strings.HasPrefix(value, "AWS_Lambda_") {
+		return "aws_lambda"
+	}
+	if getProcessEnvString("AWS_LAMBDA_FUNCTION_NAME") != "" {
+		return "aws_lambda"
+	}
+	for key, name := range map[string]string{
+		"K_SERVICE": "cloud_run", "FUNCTION_TARGET": "gcp_functions", "KUBERNETES_SERVICE_HOST": "kubernetes",
+		"DYNO": "heroku", "FLY_APP_NAME": "fly", "RAILWAY_ENVIRONMENT": "railway", "RENDER_SERVICE_NAME": "render",
+	} {
+		if getProcessEnvString(key) != "" {
+			return name
+		}
+	}
+	return ""
 }
 
 func getProcessEnvString(key string) string {

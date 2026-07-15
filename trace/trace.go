@@ -555,13 +555,12 @@ func (sp *spanProcessor) OnStart(ctx context.Context, span sdktrace.ReadWriteSpa
 
 	// Set any other additional attributes (org name, app URL, etc.)
 	span.SetAttributes(attrs...)
-	span.SetAttributes(spanOriginAttrs(sp.environment)...)
 
 	// Delegate to wrapped processor
 	sp.wrapped.OnStart(ctx, span)
 }
 
-func spanOriginAttrs(environment *SpanOriginEnvironment) []attribute.KeyValue {
+func spanOriginContextJSON(span sdktrace.ReadOnlySpan, environment *SpanOriginEnvironment) string {
 	origin := map[string]any{
 		"span_origin": map[string]any{
 			"name":            "braintrust.sdk.go",
@@ -569,29 +568,47 @@ func spanOriginAttrs(environment *SpanOriginEnvironment) []attribute.KeyValue {
 			"instrumentation": map[string]any{"name": "braintrust-go"},
 		},
 	}
-	if environment != nil {
-		env := map[string]any{"type": environment.Type}
-		if environment.Name != "" {
-			env["name"] = environment.Name
+	for _, attr := range span.Attributes() {
+		if attr.Key != contextJSONAttrKey {
+			continue
 		}
+		var existing map[string]any
+		if err := json.Unmarshal([]byte(attr.Value.AsString()), &existing); err == nil {
+			for key, value := range existing {
+				if key == "span_origin" {
+					continue
+				}
+				origin[key] = value
+			}
+			if existingOrigin, ok := existing["span_origin"].(map[string]any); ok {
+				spanOrigin, ok := origin["span_origin"].(map[string]any)
+				if ok {
+					for key, value := range existingOrigin {
+						spanOrigin[key] = value
+					}
+				}
+			}
+		}
+		break
+	}
+	if environment != nil {
 		spanOrigin, ok := origin["span_origin"].(map[string]any)
 		if !ok {
-			return nil
+			return "{}"
 		}
-		spanOrigin["environment"] = env
+		if _, exists := spanOrigin["environment"]; !exists {
+			env := map[string]any{"type": environment.Type}
+			if environment.Name != "" {
+				env["name"] = environment.Name
+			}
+			spanOrigin["environment"] = env
+		}
 	}
 	data, err := json.Marshal(origin)
 	if err != nil {
-		return nil
+		return "{}"
 	}
-	attrs := []attribute.KeyValue{attribute.String(contextJSONAttrKey, string(data))}
-	if environment != nil {
-		attrs = append(attrs, attribute.String(environmentTypeAttrKey, environment.Type))
-		if environment.Name != "" {
-			attrs = append(attrs, attribute.String(environmentNameAttrKey, environment.Name))
-		}
-	}
-	return attrs
+	return string(data)
 }
 
 func sdkVersion() string {
@@ -632,18 +649,39 @@ func resolveEnvironment(explicit *SpanOriginEnvironment) *SpanOriginEnvironment 
 	if os.Getenv("CI") != "" {
 		return &SpanOriginEnvironment{Type: "ci", Name: "ci"}
 	}
-	for key, name := range map[string]string{
-		"VERCEL": "vercel", "NETLIFY": "netlify", "AWS_LAMBDA_FUNCTION_NAME": "aws_lambda",
-		"AWS_EXECUTION_ENV": "aws_lambda", "K_SERVICE": "cloud_run", "FUNCTION_TARGET": "gcp_functions",
-		"KUBERNETES_SERVICE_HOST": "kubernetes", "ECS_CONTAINER_METADATA_URI": "ecs",
-		"ECS_CONTAINER_METADATA_URI_V4": "ecs", "DYNO": "heroku", "FLY_APP_NAME": "fly",
-		"RAILWAY_ENVIRONMENT": "railway", "RENDER_SERVICE_NAME": "render",
-	} {
-		if strings.TrimSpace(os.Getenv(key)) != "" {
-			return &SpanOriginEnvironment{Type: "server", Name: name}
-		}
+	if name := detectServerEnvironmentName(); name != "" {
+		return &SpanOriginEnvironment{Type: "server", Name: name}
 	}
 	return nil
+}
+
+func detectServerEnvironmentName() string {
+	for key, name := range map[string]string{"VERCEL": "vercel", "NETLIFY": "netlify"} {
+		if strings.TrimSpace(os.Getenv(key)) != "" {
+			return name
+		}
+	}
+	if strings.TrimSpace(os.Getenv("ECS_CONTAINER_METADATA_URI")) != "" ||
+		strings.TrimSpace(os.Getenv("ECS_CONTAINER_METADATA_URI_V4")) != "" {
+		return "ecs"
+	}
+	if value := strings.TrimSpace(os.Getenv("AWS_EXECUTION_ENV")); strings.HasPrefix(value, "AWS_ECS_") {
+		return "ecs"
+	} else if strings.HasPrefix(value, "AWS_Lambda_") {
+		return "aws_lambda"
+	}
+	if strings.TrimSpace(os.Getenv("AWS_LAMBDA_FUNCTION_NAME")) != "" {
+		return "aws_lambda"
+	}
+	for key, name := range map[string]string{
+		"K_SERVICE": "cloud_run", "FUNCTION_TARGET": "gcp_functions", "KUBERNETES_SERVICE_HOST": "kubernetes",
+		"DYNO": "heroku", "FLY_APP_NAME": "fly", "RAILWAY_ENVIRONMENT": "railway", "RENDER_SERVICE_NAME": "render",
+	} {
+		if strings.TrimSpace(os.Getenv(key)) != "" {
+			return name
+		}
+	}
+	return ""
 }
 
 func envValue(key string) string {
@@ -694,8 +732,21 @@ func (sp *spanProcessor) OnEnd(span sdktrace.ReadOnlySpan) {
 	if sp.attachmentProcessor != nil {
 		span = sp.processAttachments(span)
 	}
+	span = sp.addSpanOrigin(span)
 
 	sp.wrapped.OnEnd(span)
+}
+
+func (sp *spanProcessor) addSpanOrigin(span sdktrace.ReadOnlySpan) sdktrace.ReadOnlySpan {
+	overrides := make(map[attribute.Key]string)
+	overrides[contextJSONAttrKey] = spanOriginContextJSON(span, sp.environment)
+	if sp.environment != nil {
+		overrides[environmentTypeAttrKey] = sp.environment.Type
+		if sp.environment.Name != "" {
+			overrides[environmentNameAttrKey] = sp.environment.Name
+		}
+	}
+	return attachmentprocessor.NewTransformedSpan(span, overrides)
 }
 
 // processAttachments scans input_json and output_json for base64 attachments,

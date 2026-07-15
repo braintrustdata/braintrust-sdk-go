@@ -94,6 +94,36 @@ func TestFromEnv_BooleanParsing(t *testing.T) {
 	}
 }
 
+func TestDetectEnvironment_AWSExecutionEnvClassifiesECSBeforeLambda(t *testing.T) {
+	t.Setenv("GITHUB_ACTIONS", "")
+	t.Setenv("GITLAB_CI", "")
+	t.Setenv("CIRCLECI", "")
+	t.Setenv("BUILDKITE", "")
+	t.Setenv("CI", "")
+	t.Setenv("AWS_EXECUTION_ENV", "AWS_ECS_FARGATE")
+
+	env := DetectEnvironment(nil)
+
+	assert.NotNil(t, env)
+	assert.Equal(t, "server", env.Type)
+	assert.Equal(t, "ecs", env.Name)
+}
+
+func TestDetectEnvironment_AWSExecutionEnvClassifiesLambdaWhenLambdaSpecific(t *testing.T) {
+	t.Setenv("GITHUB_ACTIONS", "")
+	t.Setenv("GITLAB_CI", "")
+	t.Setenv("CIRCLECI", "")
+	t.Setenv("BUILDKITE", "")
+	t.Setenv("CI", "")
+	t.Setenv("AWS_EXECUTION_ENV", "AWS_Lambda_go1.x")
+
+	env := DetectEnvironment(nil)
+
+	assert.NotNil(t, env)
+	assert.Equal(t, "server", env.Type)
+	assert.Equal(t, "aws_lambda", env.Name)
+}
+
 func TestConfig_IsValid(t *testing.T) {
 	tests := []struct {
 		name      string
