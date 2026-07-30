@@ -1,3 +1,5 @@
+[![Braintrust](./braintrust-logo.svg)](https://www.braintrust.dev/)
+
 # Braintrust Go SDK
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/braintrustdata/braintrust-sdk-go.svg)](https://pkg.go.dev/github.com/braintrustdata/braintrust-sdk-go)
