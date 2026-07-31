@@ -18,7 +18,7 @@ type DatasetAPI[I, R any] struct {
 
 // DatasetQueryOpts contains options for querying datasets.
 type DatasetQueryOpts struct {
-	// Name is the dataset name (requires project context)
+	// Name is the dataset name (requires ProjectID or ProjectName)
 	Name string
 
 	// ID is the dataset ID
@@ -29,6 +29,12 @@ type DatasetQueryOpts struct {
 
 	// Limit specifies the maximum number of records to return (0 = unlimited)
 	Limit int
+
+	// ProjectID is the project ID (used with Name to disambiguate datasets)
+	ProjectID string
+
+	// ProjectName is the project name (used with Name to disambiguate datasets)
+	ProjectName string
 }
 
 // Get loads a dataset by ID and returns a Dataset iterator.
@@ -64,6 +70,12 @@ func (d *DatasetAPI[I, R]) Query(ctx context.Context, opts DatasetQueryOpts) (Da
 	}
 	if opts.Version != "" {
 		queryParams.Version = opts.Version
+	}
+	if opts.ProjectID != "" {
+		queryParams.ProjectID = opts.ProjectID
+	}
+	if opts.ProjectName != "" {
+		queryParams.ProjectName = opts.ProjectName
 	}
 
 	response, err := d.api.Datasets().Query(ctx, queryParams)
