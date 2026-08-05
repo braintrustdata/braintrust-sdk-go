@@ -1297,7 +1297,7 @@ func TestOnCaseComplete_Callback(t *testing.T) {
 		"proj-callback", "callback-project",
 		cases, task,
 		[]Scorer[testInput, testOutput]{scorer},
-		1, true, callback, trace.Parent{}, nil,
+		nil, 1, 1, true, callback, trace.Parent{}, nil,
 	)
 
 	result, err := e.run(context.Background())
@@ -1344,7 +1344,7 @@ func TestOnCaseComplete_CallbackOnError(t *testing.T) {
 		"exp-err", "err-experiment",
 		"proj-err", "err-project",
 		cases, task,
-		nil, 1, true, callback, trace.Parent{}, nil,
+		nil, nil, 1, 1, true, callback, trace.Parent{}, nil,
 	)
 
 	_, _ = e.run(context.Background())
@@ -1375,7 +1375,7 @@ func TestOnCaseComplete_NilCallback(t *testing.T) {
 		"exp-nil", "nil-experiment",
 		"proj-nil", "nil-project",
 		cases, task,
-		nil, 1, true, nil, trace.Parent{}, nil,
+		nil, nil, 1, 1, true, nil, trace.Parent{}, nil,
 	)
 
 	result, err := e.run(context.Background())
@@ -1422,7 +1422,7 @@ func TestOnCaseComplete_Parallel(t *testing.T) {
 		"proj-parallel", "parallel-project",
 		cases, task,
 		[]Scorer[testInput, testOutput]{scorer},
-		4, true, callback, trace.Parent{}, nil,
+		nil, 4, 1, true, callback, trace.Parent{}, nil,
 	)
 
 	result, err := e.run(context.Background())
@@ -1465,7 +1465,7 @@ func TestCaseProgress_IDIsSpanID(t *testing.T) {
 		"exp-id", "id-experiment",
 		"proj-id", "id-project",
 		cases, task,
-		nil, 1, true, callback, trace.Parent{}, nil,
+		nil, nil, 1, 1, true, callback, trace.Parent{}, nil,
 	)
 
 	_, err := e.run(context.Background())
@@ -1506,7 +1506,7 @@ func TestCaseProgress_OriginFromDataset(t *testing.T) {
 		"exp-origin", "origin-experiment",
 		"proj-origin", "origin-project",
 		cases, task,
-		nil, 1, true, callback, trace.Parent{}, nil,
+		nil, nil, 1, 1, true, callback, trace.Parent{}, nil,
 	)
 
 	_, err := e.run(context.Background())
@@ -1543,7 +1543,7 @@ func TestCaseProgress_OriginNilWithoutDatasetID(t *testing.T) {
 		"exp-no-origin", "no-origin-experiment",
 		"proj-no-origin", "no-origin-project",
 		cases, task,
-		nil, 1, true, callback, trace.Parent{}, nil,
+		nil, nil, 1, 1, true, callback, trace.Parent{}, nil,
 	)
 
 	_, err := e.run(context.Background())
@@ -1572,7 +1572,7 @@ func TestResult_ProjectIDAndProjectName(t *testing.T) {
 		"exp-proj", "project-experiment",
 		"proj-abc123", "test-project-name",
 		cases, task,
-		nil, 1, true, nil, trace.Parent{}, nil,
+		nil, nil, 1, 1, true, nil, trace.Parent{}, nil,
 	)
 
 	result, err := e.run(context.Background())
@@ -1758,7 +1758,7 @@ func TestSpanParentOverride(t *testing.T) {
 		"proj-id", "proj-name",
 		cases, task,
 		[]Scorer[testInput, testOutput]{scorer},
-		1, true, nil,
+		nil, 1, 1, true, nil,
 		trace.NewParent(trace.ParentTypePlaygroundID, "pg-999"), // SpanParent override
 		42, // Generation
 	)
@@ -1803,8 +1803,8 @@ func TestSpanParentDefault(t *testing.T) {
 		session, tracer,
 		"exp-id", "exp-name",
 		"proj-id", "proj-name",
-		cases, task, nil,
-		1, true, nil,
+		cases, task, nil, nil,
+		1, 1, true, nil,
 		trace.Parent{}, nil, // no override, no generation
 	)
 
