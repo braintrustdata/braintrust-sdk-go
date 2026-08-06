@@ -16,6 +16,11 @@ type EvalRequest struct {
 	// ProjectID overrides the project ID (optional).
 	ProjectID string `json:"project_id,omitempty"`
 
+	// Parameters holds the resolved parameter values selected in the playground
+	// (a flat name->value map). Merged over declared defaults and surfaced to the
+	// task via eval.TaskHooks.Parameters.
+	Parameters map[string]any `json:"parameters,omitempty"`
+
 	// Parent specifies the parent span for tracing (optional).
 	Parent *ParentInfo `json:"parent,omitempty"`
 }
@@ -77,17 +82,41 @@ type parametersMeta struct {
 }
 
 // wireParameterDef is the wire format for a parameter in the dev server protocol.
-// Each parameter is wrapped with type "data" and a nested schema object.
+// Scalar ("data") parameters are wrapped with type "data" and a nested schema
+// object; "model" (and "prompt") parameters use their own top-level type and omit
+// the nested schema.
 type wireParameterDef struct {
-	Type        string      `json:"type"`
-	Schema      schemaField `json:"schema"`
-	Default     any         `json:"default,omitempty"`
-	Description string      `json:"description,omitempty"`
+	Type        string       `json:"type"`
+	Schema      *schemaField `json:"schema,omitempty"`
+	Default     any          `json:"default,omitempty"`
+	Description string       `json:"description,omitempty"`
 }
 
 // schemaField is the inner schema for a wire parameter definition.
 type schemaField struct {
 	Type string `json:"type"`
+}
+
+// toWireParameterDef converts a user-declared ParameterDef into its dev-server
+// wire form. "model" and "prompt" parameters map to their own top-level type
+// with no nested schema; everything else is a scalar "data" parameter carrying a
+// nested JSON-schema-ish {type} object.
+func toWireParameterDef(def ParameterDef) wireParameterDef {
+	switch def.Type {
+	case "model", "prompt":
+		return wireParameterDef{
+			Type:        def.Type,
+			Default:     def.Default,
+			Description: def.Description,
+		}
+	default:
+		return wireParameterDef{
+			Type:        "data",
+			Schema:      &schemaField{Type: def.Type},
+			Default:     def.Default,
+			Description: def.Description,
+		}
+	}
 }
 
 // progressEvent is an SSE progress event sent per evaluation case.

@@ -8,8 +8,9 @@ Results (outputs + scores) stream back to the UI and are recorded as an experime
 
 - Starting a remote eval server with `server.New(...)` and `srv.Start()`
 - Registering an evaluator (`food-classifier`, a `string → string` task) with two scorers
-  (`exact_match`, `valid_category`) and a UI-visible `model` parameter
-- Driving that evaluator from a Braintrust **Playground** and viewing streamed results
+  (`exact_match`, `valid_category`) and a `model` parameter the task actually reads
+- Driving that evaluator from a Braintrust **Playground**, changing the `model` parameter to
+  alter task behavior, and viewing streamed results
 
 The task is intentionally rule-based (simple string matching), so the example needs **no
 LLM API key** — the focus is the remote-eval wiring, not the model.
@@ -58,6 +59,9 @@ is needed** as long as your browser is on the same machine as the server.
    Create remote eval source**. Give it a name and set the URL to `http://localhost:8300`.
 2. **Add the task**: open a **Playground**, choose **+ Task → Remote eval**, and pick
    `food-classifier`. The `model` control (from the eval's parameter schema) appears here.
+   It isn't cosmetic — the task reads it: leave it at `rule-based` (lenient substring matching,
+   so `"A crisp red apple"` → `fruit`) or set it to `strict` (only an exact single word matches,
+   so the descriptive rows below fall through to `unknown`). Try both and watch `exact_match` move.
 3. **Attach a dataset**: the playground supplies the cases (the eval's own dataset is not
    used). Click **Select a dataset → Create new dataset**, then add rows manually or upload
    a JSON/CSV file. Each row needs an `input` and an `expected` field:

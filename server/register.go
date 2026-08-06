@@ -221,6 +221,7 @@ func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) 
 		OnCaseComplete: onComplete,
 		SpanParent:     spanParent,
 		Generation:     generation,
+		Parameters:     resolveParameters(r.opts.Parameters, req.Parameters),
 	})
 
 	// Flush traces before sending summary so the UI can poll for scores immediately.
@@ -316,4 +317,31 @@ func (r *registeredEvalImpl[I, R]) parseInlineData(raw json.RawMessage) (eval.Da
 	}
 
 	return eval.NewDataset(cases), nil
+}
+
+// resolveParameters merges the values selected in the playground request over the
+// evaluator's declared defaults, producing the resolved set surfaced to the task
+// via eval.TaskHooks.Parameters. Request values win; unknown keys pass through
+// (matching the other SDKs). Returns nil when there is nothing to surface.
+func resolveParameters(schema *Parameters, req map[string]any) eval.Parameters {
+	if schema == nil && len(req) == 0 {
+		return nil
+	}
+
+	resolved := make(eval.Parameters)
+	if schema != nil {
+		for name, def := range schema.Schema {
+			if def.Default != nil {
+				resolved[name] = def.Default
+			}
+		}
+	}
+	for name, val := range req {
+		resolved[name] = val
+	}
+
+	if len(resolved) == 0 {
+		return nil
+	}
+	return resolved
 }

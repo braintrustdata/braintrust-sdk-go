@@ -136,6 +136,53 @@ func TestListEndpoint_WithParameters(t *testing.T) {
 	assert.Equal(t, "Model to use", modelParam.Description)
 }
 
+func TestListEndpoint_ModelParameter(t *testing.T) {
+	srv := New(WithNoAuth())
+
+	task := eval.T(func(ctx context.Context, input string) (string, error) {
+		return input, nil
+	})
+	scorer := eval.NewScorer("score", func(ctx context.Context, r eval.TaskResult[string, string]) (eval.Scores, error) {
+		return eval.S(1.0), nil
+	})
+
+	RegisterEval(srv, &eval.Eval[string, string]{
+		Name:    "model-eval",
+		Task:    task,
+		Scorers: []eval.Scorer[string, string]{scorer},
+	}, RegisterEvalOpts{
+		Parameters: &Parameters{
+			Schema: map[string]ParameterDef{
+				"model": {Type: "model", Default: "gpt-4o", Description: "Model picker"},
+			},
+		},
+	})
+
+	ts := httptest.NewServer(srv.Handler())
+	defer ts.Close()
+
+	resp, err := http.Get(ts.URL + "/list")
+	require.NoError(t, err)
+	defer resp.Body.Close() //nolint:errcheck
+
+	var body map[string]json.RawMessage
+	require.NoError(t, json.NewDecoder(resp.Body).Decode(&body))
+
+	var info struct {
+		Parameters *parametersMeta `json:"parameters"`
+	}
+	require.NoError(t, json.Unmarshal(body["model-eval"], &info))
+	require.NotNil(t, info.Parameters)
+
+	// A model parameter uses the union's "model" shape: top-level type "model",
+	// no nested schema object.
+	modelParam := info.Parameters.Schema["model"]
+	assert.Equal(t, "model", modelParam.Type)
+	assert.Nil(t, modelParam.Schema, "model params must not carry a nested schema")
+	assert.Equal(t, "gpt-4o", modelParam.Default)
+	assert.Equal(t, "Model picker", modelParam.Description)
+}
+
 func TestEvalEndpoint_MissingName(t *testing.T) {
 	srv := New(WithNoAuth())
 	ts := httptest.NewServer(srv.Handler())

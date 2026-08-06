@@ -15,6 +15,8 @@ import (
 	"log"
 	"strings"
 
+	"go.opentelemetry.io/otel/attribute"
+
 	"github.com/braintrustdata/braintrust-sdk-go/eval"
 	"github.com/braintrustdata/braintrust-sdk-go/server"
 )
@@ -29,17 +31,24 @@ func main() {
 		server.WithNoAuth(),
 	)
 
-	// Define a simple task: classify food items.
-	classifyTask := eval.T(func(ctx context.Context, input string) (string, error) {
-		input = strings.ToLower(input)
-		switch {
-		case strings.Contains(input, "apple") || strings.Contains(input, "banana"):
-			return "fruit", nil
-		case strings.Contains(input, "carrot") || strings.Contains(input, "lettuce"):
-			return "vegetable", nil
-		default:
-			return "unknown", nil
+	// Define the task with TaskWithHooks so it can read the "model" parameter
+	// the user selects in the playground. Two modes are supported:
+	//
+	//   - "rule-based" (default): lenient substring matching.
+	//   - "strict":               only an exact, single-word match counts.
+	//
+	// Selecting a different model in the playground changes how inputs classify.
+	classifyTask := eval.TaskWithHooks(func(ctx context.Context, input string, hooks *eval.TaskHooks) (string, error) {
+		model := hooks.Parameters.String("model")
+
+		// Record the model on the task span so it's visible in the trace.
+		hooks.TaskSpan.SetAttributes(attribute.String("model", model))
+
+		normalized := strings.ToLower(strings.TrimSpace(input))
+		if model == "strict" {
+			return classifyStrict(normalized), nil
 		}
+		return classifyRuleBased(normalized), nil
 	})
 
 	// Define a scorer: exact match.
@@ -72,14 +81,15 @@ func main() {
 		ProjectName: "go-sdk-examples",
 	}
 
-	// Register with the server.
+	// Register with the server. The "model" parameter is a model-picker control
+	// in the playground; its selected value reaches the task via hooks.Parameters.
 	server.RegisterEval(srv, foodClassifier, server.RegisterEvalOpts{
 		Parameters: &server.Parameters{
 			Schema: map[string]server.ParameterDef{
 				"model": {
-					Type:        "string",
+					Type:        "model",
 					Default:     "rule-based",
-					Description: "Classification model to use",
+					Description: "Classification strategy: rule-based (lenient) or strict",
 				},
 			},
 		},
@@ -91,4 +101,30 @@ func main() {
 	log.Printf("Health check: http://localhost:8300/")
 	log.Printf("List evals:   http://localhost:8300/list")
 	log.Fatal(srv.Start())
+}
+
+// classifyRuleBased matches on substrings, so descriptive phrases still classify
+// (e.g. "a crisp red apple" -> fruit).
+func classifyRuleBased(input string) string {
+	switch {
+	case strings.Contains(input, "apple") || strings.Contains(input, "banana"):
+		return "fruit"
+	case strings.Contains(input, "carrot") || strings.Contains(input, "lettuce"):
+		return "vegetable"
+	default:
+		return "unknown"
+	}
+}
+
+// classifyStrict only classifies an exact, single-word input, so descriptive
+// phrases fall through to "unknown" — a deliberately stricter strategy.
+func classifyStrict(input string) string {
+	switch input {
+	case "apple", "banana":
+		return "fruit"
+	case "carrot", "lettuce":
+		return "vegetable"
+	default:
+		return "unknown"
+	}
 }

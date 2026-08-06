@@ -23,6 +23,12 @@ type TaskHooks struct {
 	Metadata   Metadata // Case metadata
 	Tags       []string // Case tags
 	TrialIndex int      // The index of the current trial (0-based)
+
+	// Parameters holds the resolved parameter values for this run. When the eval
+	// is driven from a Braintrust playground via the remote eval server, these
+	// are the values a user configured for the run (with declared defaults
+	// merged in). Empty for a local run unless set via [RunOpts.Parameters].
+	Parameters Parameters
 }
 
 // TaskOutput wraps the output value from a task.
@@ -57,6 +63,21 @@ type TaskResult[I, R any] struct {
 func T[I, R any](fn func(ctx context.Context, input I) (R, error)) TaskFunc[I, R] {
 	return func(ctx context.Context, input I, hooks *TaskHooks) (TaskOutput[R], error) {
 		val, err := fn(ctx, input)
+		return TaskOutput[R]{Value: val}, err
+	}
+}
+
+// TaskWithHooks is like [T] but also passes the [TaskHooks], for tasks that need
+// to read parameters, metadata, or tags. It handles the [TaskOutput] wrapping so
+// you can return a plain value.
+//
+//	task := eval.TaskWithHooks(func(ctx context.Context, input string, hooks *eval.TaskHooks) (string, error) {
+//		model := hooks.Parameters.String("model")
+//		return classify(input, model), nil
+//	})
+func TaskWithHooks[I, R any](fn func(ctx context.Context, input I, hooks *TaskHooks) (R, error)) TaskFunc[I, R] {
+	return func(ctx context.Context, input I, hooks *TaskHooks) (TaskOutput[R], error) {
+		val, err := fn(ctx, input, hooks)
 		return TaskOutput[R]{Value: val}, err
 	}
 }

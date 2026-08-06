@@ -100,6 +100,11 @@ type Opts[I, R any] struct {
 	// invocation) and injected into braintrust.span_attributes on every span.
 	// The Braintrust backend uses it to link eval spans back to the triggering context.
 	Generation any
+
+	// Parameters holds resolved parameter values surfaced to the task via
+	// [TaskHooks.Parameters]. The remote eval server sets this from the playground
+	// request; for a direct run it defaults to empty.
+	Parameters Parameters
 }
 
 // CaseProgress contains the result of a single completed evaluation case.
@@ -190,6 +195,11 @@ type RunOpts[I, R any] struct {
 	// invocation) and injected into braintrust.span_attributes on every span.
 	// The Braintrust backend uses it to link eval spans back to the triggering context.
 	Generation any
+
+	// Parameters holds resolved parameter values to surface to the task via
+	// [TaskHooks.Parameters]. The remote eval server sets this from the playground
+	// request; most direct runs leave it empty.
+	Parameters Parameters
 }
 
 // mergeOpts combines an Eval definition with RunOpts into an Opts for
@@ -219,6 +229,7 @@ func mergeOpts[I, R any](ev *Eval[I, R], ro RunOpts[I, R]) Opts[I, R] {
 		OnCaseComplete: ro.OnCaseComplete,
 		SpanParent:     ro.SpanParent,
 		Generation:     ro.Generation,
+		Parameters:     ro.Parameters,
 	}
 }
 
@@ -388,6 +399,7 @@ type eval[I, R any] struct {
 	quiet          bool
 	onCaseComplete func(CaseProgress)
 	generation     any
+	parameters     Parameters
 }
 
 // nextCase is a wrapper for sending cases through a channel.
@@ -416,6 +428,7 @@ func newEval[I, R any](
 	onCaseComplete func(CaseProgress),
 	spanParent bttrace.Parent,
 	generation any,
+	parameters Parameters,
 ) *eval[I, R] {
 	// Build parent span option. Use explicit override if provided (e.g. from
 	// the remote eval server linking spans to a playground), otherwise default
@@ -463,6 +476,7 @@ func newEval[I, R any](
 		quiet:          quiet,
 		onCaseComplete: onCaseComplete,
 		generation:     generation,
+		parameters:     parameters,
 	}
 }
 
@@ -505,6 +519,7 @@ func newEvalOpts[I, R any](ctx context.Context, s *auth.Session, tp *trace.Trace
 		opts.OnCaseComplete,
 		opts.SpanParent,
 		opts.Generation,
+		opts.Parameters,
 	), nil
 }
 
@@ -742,6 +757,7 @@ func (e *eval[I, R]) runTask(ctx context.Context, evalSpan oteltrace.Span, c Cas
 		TrialIndex: trialIndex,
 		TaskSpan:   taskSpan,
 		EvalSpan:   evalSpan,
+		Parameters: e.parameters,
 	}
 
 	// Call task with new signature
@@ -1171,5 +1187,6 @@ func testNewEval[I, R any](
 		nil,              // no callback for tests
 		bttrace.Parent{}, // no parent override
 		nil,              // no generation
+		nil,              // no parameters
 	)
 }

@@ -224,12 +224,7 @@ func (s *Server) handleList(w http.ResponseWriter, _ *http.Request) {
 		if params := e.parameters(); params != nil {
 			wireSchema := make(map[string]wireParameterDef, len(params.Schema))
 			for k, v := range params.Schema {
-				wireSchema[k] = wireParameterDef{
-					Type:        "data",
-					Schema:      schemaField{Type: v.Type},
-					Default:     v.Default,
-					Description: v.Description,
-				}
+				wireSchema[k] = toWireParameterDef(v)
 			}
 			info.Parameters = &parametersMeta{
 				Type:   "braintrust.staticParameters",
