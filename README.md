@@ -129,7 +129,11 @@ If you prefer explicit control, you can add tracing middleware manually to your 
 
 ## Evaluations
 
-Run [evals](https://www.braintrust.dev/docs/guides/evals) with custom test cases and scoring functions:
+Run [evals](https://www.braintrust.dev/docs/guides/evals) with custom test cases and scoring functions.
+
+### Define and run
+
+Define an eval once with its task and scorers, then run it against any dataset:
 
 ```go
 package main
@@ -159,16 +163,9 @@ func main() {
         log.Fatal(err)
     }
 
-    // Create an evaluator with your task's input and output types
-    evaluator := braintrust.NewEvaluator[string, string](client)
-
-    // Run an evaluation
-    _, err = evaluator.Run(ctx, eval.Opts[string, string]{
-        Experiment: "greeting-experiment",
-        Dataset: eval.NewDataset([]eval.Case[string, string]{
-            {Input: "World", Expected: "Hello World"},
-            {Input: "Alice", Expected: "Hello Alice"},
-        }),
+    // Create an eval
+    e := braintrust.NewEval(client, &eval.Eval[string, string]{
+        Name: "greeting-experiment",
         Task: eval.T(func(ctx context.Context, input string) (string, error) {
             return "Hello " + input, nil
         }),
@@ -181,6 +178,14 @@ func main() {
                 return eval.S(score), nil
             }),
         },
+    })
+
+    // Run against a dataset
+    _, err = e.Run(ctx, eval.RunOpts[string, string]{
+        Dataset: eval.NewDataset([]eval.Case[string, string]{
+            {Input: "World", Expected: "Hello World"},
+            {Input: "Alice", Expected: "Hello Alice"},
+        }),
     })
     if err != nil {
         log.Fatal(err)

@@ -61,3 +61,49 @@ func Example() {
 
 	fmt.Printf("Evaluation complete: %s\n", result.Name())
 }
+
+// Example_evalDefinition demonstrates how to define a reusable evaluation
+// that can be run locally or registered with a remote eval server.
+func Example_evalDefinition() {
+	ctx := context.Background()
+
+	// Create tracer provider
+	tp := trace.NewTracerProvider()
+	defer func() { _ = tp.Shutdown(ctx) }()
+
+	// Create Braintrust client
+	client, err := braintrust.New(tp, braintrust.WithProject("test-project"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Create a runnable eval
+	e := braintrust.NewEval(client, &eval.Eval[string, string]{
+		Name: "classify",
+		Task: eval.T(func(ctx context.Context, input string) (string, error) {
+			return input + "!", nil
+		}),
+		Scorers: []eval.Scorer[string, string]{
+			eval.NewScorer("exact-match", func(ctx context.Context, result eval.TaskResult[string, string]) (eval.Scores, error) {
+				if result.Output == result.Expected {
+					return eval.S(1.0), nil
+				}
+				return eval.S(0.0), nil
+			}),
+		},
+		ProjectName: "test-project",
+	})
+
+	// Run it
+	result, err := e.Run(ctx, eval.RunOpts[string, string]{
+		Dataset: eval.NewDataset([]eval.Case[string, string]{
+			{Input: "hello", Expected: "hello!"},
+		}),
+		Quiet: true,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Evaluation complete: %s\n", result.Name())
+}

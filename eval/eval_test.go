@@ -3,6 +3,7 @@ package eval
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"sync"
 	"sync/atomic"
@@ -1260,6 +1261,327 @@ func TestEval_ParentPropagation(t *testing.T) {
 	assert.Equal(scorerParent, trace.Parent{Type: trace.ParentTypeExperimentID, ID: result.ID()})
 }
 
+func TestOnCaseComplete_Callback(t *testing.T) {
+	t.Parallel()
+
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "test1"}, Expected: testOutput{Result: "expected1"}},
+		{Input: testInput{Value: "test2"}, Expected: testOutput{Result: "expected2"}},
+	})
+
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: "output-" + input.Value}, nil
+	})
+
+	scorer := NewScorer("accuracy", func(ctx context.Context, result TaskResult[testInput, testOutput]) (Scores, error) {
+		return S(0.75), nil
+	})
+
+	// Track callback invocations
+	var mu sync.Mutex
+	var progresses []CaseProgress
+	callback := func(cp CaseProgress) {
+		mu.Lock()
+		progresses = append(progresses, cp)
+		mu.Unlock()
+	}
+
+	// Create eval manually with the callback
+	tp, _ := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-callback", "callback-experiment",
+		"proj-callback", "callback-project",
+		cases, task,
+		[]Scorer[testInput, testOutput]{scorer},
+		nil, 1, 1, true, callback, trace.Parent{}, nil,
+	)
+
+	result, err := e.run(context.Background())
+	require.NoError(t, err)
+	assert.NotNil(t, result)
+
+	mu.Lock()
+	defer mu.Unlock()
+	require.Len(t, progresses, 2)
+
+	// Both should have scores and no errors
+	for _, p := range progresses {
+		assert.NoError(t, p.Error)
+		assert.NotNil(t, p.Scores)
+		assert.Equal(t, 0.75, p.Scores["accuracy"])
+		assert.NotNil(t, p.Output)
+	}
+}
+
+func TestOnCaseComplete_CallbackOnError(t *testing.T) {
+	t.Parallel()
+
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "will-fail"}},
+	})
+
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{}, errors.New("task failed")
+	})
+
+	var called bool
+	var capturedProgress CaseProgress
+	callback := func(cp CaseProgress) {
+		called = true
+		capturedProgress = cp
+	}
+
+	tp, _ := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-err", "err-experiment",
+		"proj-err", "err-project",
+		cases, task,
+		nil, nil, 1, 1, true, callback, trace.Parent{}, nil,
+	)
+
+	_, _ = e.run(context.Background())
+
+	assert.True(t, called)
+	assert.Error(t, capturedProgress.Error)
+	assert.Contains(t, capturedProgress.Error.Error(), "task failed")
+}
+
+func TestOnCaseComplete_NilCallback(t *testing.T) {
+	t.Parallel()
+
+	// Ensure nil callback doesn't panic
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "test"}},
+	})
+
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: "ok"}, nil
+	})
+
+	tp, _ := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-nil", "nil-experiment",
+		"proj-nil", "nil-project",
+		cases, task,
+		nil, nil, 1, 1, true, nil, trace.Parent{}, nil,
+	)
+
+	result, err := e.run(context.Background())
+	require.NoError(t, err)
+	assert.NotNil(t, result)
+}
+
+func TestOnCaseComplete_Parallel(t *testing.T) {
+	t.Parallel()
+
+	// 20 cases with parallelism=4 to exercise concurrent callback invocation
+	var inputCases []Case[testInput, testOutput]
+	for i := 0; i < 20; i++ {
+		inputCases = append(inputCases, Case[testInput, testOutput]{
+			Input:    testInput{Value: fmt.Sprintf("test%d", i)},
+			Expected: testOutput{Result: fmt.Sprintf("output-test%d", i)},
+		})
+	}
+	cases := NewDataset(inputCases)
+
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: "output-" + input.Value}, nil
+	})
+
+	scorer := NewScorer("score", func(ctx context.Context, result TaskResult[testInput, testOutput]) (Scores, error) {
+		return S(1.0), nil
+	})
+
+	var mu sync.Mutex
+	var progresses []CaseProgress
+	callback := func(cp CaseProgress) {
+		mu.Lock()
+		progresses = append(progresses, cp)
+		mu.Unlock()
+	}
+
+	tp, _ := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-parallel", "parallel-experiment",
+		"proj-parallel", "parallel-project",
+		cases, task,
+		[]Scorer[testInput, testOutput]{scorer},
+		nil, 4, 1, true, callback, trace.Parent{}, nil,
+	)
+
+	result, err := e.run(context.Background())
+	require.NoError(t, err)
+	assert.NotNil(t, result)
+
+	mu.Lock()
+	defer mu.Unlock()
+	require.Len(t, progresses, 20, "callback should fire for all 20 cases")
+
+	for _, p := range progresses {
+		assert.NoError(t, p.Error)
+		assert.Equal(t, 1.0, p.Scores["score"])
+		assert.NotNil(t, p.Output)
+	}
+}
+
+func TestCaseProgress_IDIsSpanID(t *testing.T) {
+	t.Parallel()
+
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "test"}},
+	})
+
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: "ok"}, nil
+	})
+
+	var capturedProgress CaseProgress
+	callback := func(cp CaseProgress) {
+		capturedProgress = cp
+	}
+
+	tp, _ := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-id", "id-experiment",
+		"proj-id", "id-project",
+		cases, task,
+		nil, nil, 1, 1, true, callback, trace.Parent{}, nil,
+	)
+
+	_, err := e.run(context.Background())
+	require.NoError(t, err)
+
+	// ID should be a 16-character hex span ID
+	assert.NotEmpty(t, capturedProgress.ID)
+	assert.Regexp(t, `^[0-9a-f]{16}$`, capturedProgress.ID)
+}
+
+func TestCaseProgress_OriginFromDataset(t *testing.T) {
+	t.Parallel()
+
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{
+			Input:   testInput{Value: "test"},
+			ID:      "case-123",
+			XactID:  "xact-456",
+			Created: "2024-01-15T10:30:00Z",
+		},
+	})
+
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: "ok"}, nil
+	})
+
+	var capturedProgress CaseProgress
+	callback := func(cp CaseProgress) {
+		capturedProgress = cp
+	}
+
+	tp, _ := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-origin", "origin-experiment",
+		"proj-origin", "origin-project",
+		cases, task,
+		nil, nil, 1, 1, true, callback, trace.Parent{}, nil,
+	)
+
+	_, err := e.run(context.Background())
+	require.NoError(t, err)
+
+	require.NotNil(t, capturedProgress.Origin)
+	assert.Equal(t, "dataset", capturedProgress.Origin["object_type"])
+	assert.Equal(t, "case-123", capturedProgress.Origin["id"])
+	assert.Equal(t, "xact-456", capturedProgress.Origin["_xact_id"])
+}
+
+func TestCaseProgress_OriginNilWithoutDatasetID(t *testing.T) {
+	t.Parallel()
+
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "test"}},
+	})
+
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: "ok"}, nil
+	})
+
+	var capturedProgress CaseProgress
+	callback := func(cp CaseProgress) {
+		capturedProgress = cp
+	}
+
+	tp, _ := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-no-origin", "no-origin-experiment",
+		"proj-no-origin", "no-origin-project",
+		cases, task,
+		nil, nil, 1, 1, true, callback, trace.Parent{}, nil,
+	)
+
+	_, err := e.run(context.Background())
+	require.NoError(t, err)
+
+	assert.Nil(t, capturedProgress.Origin)
+}
+
+func TestResult_ProjectIDAndProjectName(t *testing.T) {
+	t.Parallel()
+
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "test"}},
+	})
+
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: "ok"}, nil
+	})
+
+	tp, _ := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-proj", "project-experiment",
+		"proj-abc123", "test-project-name",
+		cases, task,
+		nil, nil, 1, 1, true, nil, trace.Parent{}, nil,
+	)
+
+	result, err := e.run(context.Background())
+	require.NoError(t, err)
+
+	assert.Equal(t, "proj-abc123", result.ProjectID())
+	assert.Equal(t, "test-project-name", result.ProjectName())
+}
+
 func TestTaskOutput_UserData(t *testing.T) {
 	t.Parallel()
 
@@ -1411,5 +1733,97 @@ func TestEval_EvalSpanAttrsOnTaskFailure(t *testing.T) {
 		}
 	}
 	assert.Equal(t, []string{"tag1"}, foundTags)
+}
 
+func TestSpanParentOverride(t *testing.T) {
+	t.Parallel()
+
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "x"}, Expected: testOutput{Result: "y"}},
+	})
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: input.Value}, nil
+	})
+	scorer := NewScorer[testInput, testOutput]("s", func(_ context.Context, _ TaskResult[testInput, testOutput]) (Scores, error) {
+		return S(1.0), nil
+	})
+
+	tp, exporter := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-id", "exp-name",
+		"proj-id", "proj-name",
+		cases, task,
+		[]Scorer[testInput, testOutput]{scorer},
+		nil, 1, 1, true, nil,
+		trace.NewParent(trace.ParentTypePlaygroundID, "pg-999"), // SpanParent override
+		42, // Generation
+	)
+
+	result, err := e.run(context.Background())
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	spans := exporter.Flush()
+	require.NotEmpty(t, spans)
+
+	// Every span should have the overridden parent attribute
+	for _, span := range spans {
+		parentVal := span.Attr("braintrust.parent").Value.AsString()
+		assert.Equal(t, "playground_id:pg-999", parentVal,
+			"span %q should have overridden parent", span.Name())
+	}
+
+	// Eval span should have generation in span_attributes
+	evalSpan := spans[len(spans)-1]
+	evalSpan.AssertNameIs("eval")
+	spanAttrsJSON := evalSpan.Attr("braintrust.span_attributes").Value.AsString()
+	assert.Contains(t, spanAttrsJSON, `"generation"`)
+	assert.Contains(t, spanAttrsJSON, `42`)
+}
+
+func TestSpanParentDefault(t *testing.T) {
+	t.Parallel()
+
+	cases := NewDataset([]Case[testInput, testOutput]{
+		{Input: testInput{Value: "x"}, Expected: testOutput{Result: "y"}},
+	})
+	task := T(func(ctx context.Context, input testInput) (testOutput, error) {
+		return testOutput{Result: input.Value}, nil
+	})
+
+	tp, exporter := oteltest.Setup(t)
+	tracer := tp.Tracer(t.Name())
+	session := tests.NewSession(t)
+
+	e := newEval(
+		session, tracer,
+		"exp-id", "exp-name",
+		"proj-id", "proj-name",
+		cases, task, nil, nil,
+		1, 1, true, nil,
+		trace.Parent{}, nil, // no override, no generation
+	)
+
+	result, err := e.run(context.Background())
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	spans := exporter.Flush()
+	require.NotEmpty(t, spans)
+
+	// Every span should have the default experiment_id parent
+	for _, span := range spans {
+		parentVal := span.Attr("braintrust.parent").Value.AsString()
+		assert.Equal(t, "experiment_id:exp-id", parentVal,
+			"span %q should have default experiment parent", span.Name())
+	}
+
+	// Eval span should NOT have generation in span_attributes
+	evalSpan := spans[len(spans)-1]
+	spanAttrsJSON := evalSpan.Attr("braintrust.span_attributes").Value.AsString()
+	assert.NotContains(t, spanAttrsJSON, `"generation"`)
 }
