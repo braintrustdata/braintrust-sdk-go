@@ -193,6 +193,50 @@ func main() {
 }
 ```
 
+### Remote Eval Server
+
+The same eval definition can be registered with a [remote eval server](https://www.braintrust.dev/docs/evaluate/remote-evals), letting you run evals from the Braintrust playground against code on your own infrastructure:
+
+```go
+package main
+
+import (
+    "context"
+    "log"
+    "strings"
+
+    "github.com/braintrustdata/braintrust-sdk-go/eval"
+    "github.com/braintrustdata/braintrust-sdk-go/server"
+)
+
+func main() {
+    // Define the eval once
+    classify := &eval.Eval[string, string]{
+        Name: "classify",
+        Task: eval.T(func(ctx context.Context, input string) (string, error) {
+            return strings.ToUpper(input), nil
+        }),
+        Scorers: []eval.Scorer[string, string]{
+            eval.NewScorer("exact_match", func(ctx context.Context, r eval.TaskResult[string, string]) (eval.Scores, error) {
+                if r.Output == r.Expected { return eval.S(1.0), nil }
+                return eval.S(0.0), nil
+            }),
+        },
+    }
+
+    // Register with server for remote execution
+    srv := server.New(
+        server.WithAddress("localhost:8300"),
+        server.WithNoAuth(), // Remove for production
+    )
+    server.RegisterEval(srv, classify, server.RegisterEvalOpts{})
+
+    log.Fatal(srv.Start())
+}
+```
+
+Then configure `http://localhost:8300` in your Braintrust project settings under **Remote evals**.
+
 ## API Client
 
 Manage Braintrust resources programmatically:
@@ -295,6 +339,7 @@ Complete working examples are available in [`examples/`](./examples/):
 ## Features
 
 - **Evaluations** - Systematic testing with custom scoring functions
+- **Remote Eval Server** - Run evals from the Braintrust UI against your own code
 - **Tracing** - Automatic instrumentation for major LLM providers
 - **Datasets** - Manage and version evaluation datasets
 - **Experiments** - Track versions and configurations
