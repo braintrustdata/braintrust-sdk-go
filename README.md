@@ -335,6 +335,7 @@ Complete working examples are available in [`examples/`](./examples/):
 - **[prompts](./examples/prompts/main.go)** - Use Braintrust hosted prompts
 - **[distributed-tracing](./examples/distributed-tracing/main.go)** - W3C baggage propagation across services
 - **[otel](./examples/otel/main.go)** - Add Braintrust to existing OpenTelemetry setup
+- **[eval-server](./examples/internal/eval-server/main.go)** - Remote eval server
 
 ## Features
 
