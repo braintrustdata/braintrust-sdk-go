@@ -110,52 +110,66 @@ func anthropicRouter(cfg *middlewareConfig, path string) internal.MiddlewareTrac
 	return nil
 }
 
-// parseUsageTokens parses the usage tokens from Anthropic API responses
-// It handles Anthropic-specific fields including cache tokens
+// parseUsageTokens normalizes the Anthropic usage response to the metric names
+// permitted by the Braintrust instrumentation specification. Missing or
+// invalid values are omitted rather than fabricated.
 func parseUsageTokens(usage map[string]interface{}) map[string]int64 {
 	metrics := make(map[string]int64)
-
 	if usage == nil {
 		return metrics
 	}
 
-	var inputTokens, cacheCreationTokens, cacheReadTokens int64
+	inputTokens, hasInput := nonNegativeInt64(usage["input_tokens"])
+	outputTokens, hasOutput := nonNegativeInt64(usage["output_tokens"])
+	cacheCreationTokens, hasCacheCreation := nonNegativeInt64(usage["cache_creation_input_tokens"])
+	cacheReadTokens, hasCacheRead := nonNegativeInt64(usage["cache_read_input_tokens"])
 
-	// Single pass: process all tokens
-	for k, v := range usage {
-		if ok, i := internal.ToInt64(v); ok {
-			switch k {
-			case "input_tokens":
-				inputTokens = i
-			case "cache_creation_input_tokens":
-				cacheCreationTokens = i
-				metrics["prompt_cache_creation_tokens"] = i
-			case "cache_read_input_tokens":
-				cacheReadTokens = i
-				metrics["prompt_cached_tokens"] = i
-			case "output_tokens":
-				metrics["completion_tokens"] = i
-			case "total_tokens":
-				metrics["tokens"] = i
-			default:
-				// Keep other fields as-is (future-proofing for new Anthropic fields)
-				metrics[k] = i
-			}
-		}
+	if hasOutput {
+		metrics["completion_tokens"] = outputTokens
+	}
+	if hasCacheRead {
+		metrics["prompt_cached_tokens"] = cacheReadTokens
 	}
 
-	// Calculate total prompt tokens (input + cache tokens)
-	totalPromptTokens := inputTokens + cacheCreationTokens + cacheReadTokens
-	metrics["prompt_tokens"] = totalPromptTokens
+	// Newer Anthropic responses break cache creation down by TTL. Prefer those
+	// explicit buckets over the aggregate metric when they are present.
+	var cacheCreation5m, cacheCreation1h int64
+	var hasCacheCreation5m, hasCacheCreation1h bool
+	if cacheCreation, ok := usage["cache_creation"].(map[string]interface{}); ok {
+		cacheCreation5m, hasCacheCreation5m = nonNegativeInt64(cacheCreation["ephemeral_5m_input_tokens"])
+		cacheCreation1h, hasCacheCreation1h = nonNegativeInt64(cacheCreation["ephemeral_1h_input_tokens"])
+	}
+	if hasCacheCreation5m {
+		metrics["prompt_cache_creation_5m_tokens"] = cacheCreation5m
+	}
+	if hasCacheCreation1h {
+		metrics["prompt_cache_creation_1h_tokens"] = cacheCreation1h
+	}
+	if hasCacheCreation && !hasCacheCreation5m && !hasCacheCreation1h {
+		metrics["prompt_cache_creation_tokens"] = cacheCreationTokens
+	}
 
-	// Calculate total tokens if not provided by Anthropic
-	if _, hasTokens := metrics["tokens"]; !hasTokens {
-		if completionTokens, hasCompletion := metrics["completion_tokens"]; hasCompletion {
-			metrics["tokens"] = totalPromptTokens + completionTokens
+	cacheCreationForPrompt := cacheCreationTokens
+	if !hasCacheCreation {
+		cacheCreationForPrompt = cacheCreation5m + cacheCreation1h
+	}
+	if hasInput || hasCacheCreation || hasCacheCreation5m || hasCacheCreation1h || hasCacheRead {
+		promptTokens := inputTokens + cacheCreationForPrompt + cacheReadTokens
+		metrics["prompt_tokens"] = promptTokens
+		if hasOutput {
+			metrics["tokens"] = promptTokens + outputTokens
 		}
+	}
+	if totalTokens, ok := nonNegativeInt64(usage["total_tokens"]); ok {
+		metrics["tokens"] = totalTokens
 	}
 
 	return metrics
+}
+
+func nonNegativeInt64(value interface{}) (int64, bool) {
+	ok, integer := internal.ToInt64(value)
+	return integer, ok && integer >= 0
 }
 
 // Ensure our tracers implement the shared interface

@@ -292,12 +292,40 @@ func (a *AnthropicBot) streamingExtendedThinking(ctx context.Context) error {
 	return nil
 }
 
+// promptCaching demonstrates Anthropic's prompt cache usage metrics.
+func (a *AnthropicBot) promptCaching(ctx context.Context) error {
+	ctx, span := tracer.Start(ctx, "prompt-caching")
+	defer span.End()
+
+	fmt.Println("\n=== Example 5: Prompt Caching ===")
+
+	cachedInstructions := anthropic.TextBlockParam{
+		Text: strings.Repeat("Answer geography questions accurately and concisely. ", 300),
+	}
+	cachedInstructions.CacheControl = anthropic.NewCacheControlEphemeralParam()
+
+	msg, err := a.client.Messages.New(ctx, anthropic.MessageNewParams{
+		Model:     anthropic.ModelClaudeSonnet4_5_20250929,
+		MaxTokens: 128,
+		System:    []anthropic.TextBlockParam{cachedInstructions},
+		Messages: []anthropic.MessageParam{
+			anthropic.NewUserMessage(anthropic.NewTextBlock("What is the capital of France?")),
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("prompt caching error: %v", err)
+	}
+
+	fmt.Printf("  %s\n", msg.Content[0].Text)
+	return nil
+}
+
 // vision demonstrates Claude's vision capability with images
 func (a *AnthropicBot) vision(ctx context.Context) error {
 	ctx, span := tracer.Start(ctx, "vision")
 	defer span.End()
 
-	fmt.Println("\n=== Example 5: Vision ===")
+	fmt.Println("\n=== Example 6: Vision ===")
 
 	// 100x100 red square PNG (base64 encoded)
 	redSquare := "iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAIAAAD/gAIDAAABFUlEQVR4nO3OUQkAIABEsetfWiv4Nx4IC7Cd7XvkByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIX4Q4gchfhDiByF+EOIHIReeLesrH9s1agAAAABJRU5ErkJggg=="
@@ -352,7 +380,7 @@ func main() {
 	// ======================
 	fmt.Println("\nAnthropic Messages Examples")
 	fmt.Println("===========================")
-	fmt.Println("Demonstrating: system prompts, tools, parameters, streaming, citations, vision & non-streaming")
+	fmt.Println("Demonstrating: system prompts, tools, parameters, streaming, citations, prompt caching, vision & non-streaming")
 
 	bot := newAnthropicBot(client)
 
@@ -377,6 +405,10 @@ func main() {
 	}
 
 	if err := bot.streamingExtendedThinking(ctx); err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+
+	if err := bot.promptCaching(ctx); err != nil {
 		log.Fatalf("Error: %v", err)
 	}
 

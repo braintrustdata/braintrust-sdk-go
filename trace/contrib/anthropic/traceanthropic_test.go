@@ -145,7 +145,8 @@ func TestMiddlewareMatchesProxyPrefixedMessagesPath(t *testing.T) {
 
 	span := exporter.FlushOne()
 	span.AssertNameIs("anthropic.messages.create")
-	assert.Equal(t, "/v1/messages", span.Metadata()["endpoint"])
+	assert.Equal(t, "anthropic", span.Metadata()["provider"])
+	assert.NotContains(t, span.Metadata(), "endpoint")
 }
 
 func TestMessagesTracer(t *testing.T) {
@@ -155,7 +156,7 @@ func TestMessagesTracer(t *testing.T) {
 	assert.NotNil(t, tracer)
 	assert.False(t, tracer.streaming)
 	assert.Equal(t, "anthropic", tracer.metadata["provider"])
-	assert.Equal(t, "/v1/messages", tracer.metadata["endpoint"])
+	assert.NotContains(t, tracer.metadata, "endpoint")
 
 	// Test StartSpan
 	requestBody := `{
@@ -221,12 +222,142 @@ func TestParseUsageTokens(t *testing.T) {
 	usage := map[string]interface{}{
 		"input_tokens":  float64(12),
 		"output_tokens": float64(9),
+		"service_tier":  float64(42),
 	}
 
 	metrics := parseUsageTokens(usage)
 
-	assert.Equal(t, int64(12), metrics["prompt_tokens"])
-	assert.Equal(t, int64(9), metrics["completion_tokens"])
+	assert.Equal(t, map[string]int64{
+		"prompt_tokens":     12,
+		"completion_tokens": 9,
+		"tokens":            21,
+	}, metrics)
+}
+
+func TestParseUsageTokensOmitsMissingAndInvalidMetrics(t *testing.T) {
+	assert.Empty(t, parseUsageTokens(nil))
+	assert.Empty(t, parseUsageTokens(map[string]interface{}{}))
+	assert.Empty(t, parseUsageTokens(map[string]interface{}{
+		"input_tokens":  float64(-1),
+		"output_tokens": "unknown",
+	}))
+}
+
+func TestParseUsageTokensWithCacheTTLs(t *testing.T) {
+	metrics := parseUsageTokens(map[string]interface{}{
+		"input_tokens":                float64(10),
+		"output_tokens":               float64(5),
+		"cache_creation_input_tokens": float64(100),
+		"cache_read_input_tokens":     float64(25),
+		"cache_creation": map[string]interface{}{
+			"ephemeral_5m_input_tokens": float64(40),
+			"ephemeral_1h_input_tokens": float64(60),
+		},
+	})
+
+	assert.Equal(t, map[string]int64{
+		"prompt_tokens":                   135,
+		"completion_tokens":               5,
+		"tokens":                          140,
+		"prompt_cached_tokens":            25,
+		"prompt_cache_creation_5m_tokens": 40,
+		"prompt_cache_creation_1h_tokens": 60,
+	}, metrics)
+}
+
+func TestMessagesTracerCapturesRequestMetadata(t *testing.T) {
+	tp, exporter := oteltest.Setup(t)
+	tracer := newMessagesTracer(&middlewareConfig{tracerProvider: tp})
+	requestBody := `{
+		"model":"claude-haiku-4-5",
+		"max_tokens":128,
+		"temperature":0,
+		"top_p":0.9,
+		"stop_sequences":["END"],
+		"top_k":10,
+		"stream":false,
+		"metadata":{"user_id":"private"},
+		"thinking":{"type":"enabled","budget_tokens":1024},
+		"messages":[{"role":"user","content":"Hello"}],
+		"tools":[{
+			"name":"get_weather",
+			"description":"Get the weather",
+			"input_schema":{"type":"object","properties":{"city":{"type":"string"}}},
+			"strict":true
+		}],
+		"tool_choice":{"type":"any","disable_parallel_tool_use":true}
+	}`
+
+	_, span, err := tracer.StartSpan(t.Context(), time.Now(), strings.NewReader(requestBody))
+	require.NoError(t, err)
+	span.End()
+
+	exported := exporter.FlushOne()
+	metadata := exported.Metadata()
+	assert.Equal(t, map[string]any{
+		"provider":       "anthropic",
+		"model":          "claude-haiku-4-5",
+		"max_tokens":     float64(128),
+		"temperature":    float64(0),
+		"top_p":          float64(0.9),
+		"top_k":          float64(10),
+		"stop_sequences": []any{"END"},
+		"stream":         false,
+		"metadata":       map[string]any{"user_id": "private"},
+		"thinking": map[string]any{
+			"type":          "enabled",
+			"budget_tokens": float64(1024),
+		},
+		"tools": []any{map[string]any{
+			"name":        "get_weather",
+			"description": "Get the weather",
+			"input_schema": map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"city": map[string]any{"type": "string"},
+				},
+			},
+			"strict": true,
+		}},
+		"tool_choice": map[string]any{
+			"type":                      "any",
+			"disable_parallel_tool_use": true,
+		},
+	}, metadata)
+}
+
+func TestMessagesTracerCapturesNativeResponse(t *testing.T) {
+	tp, exporter := oteltest.Setup(t)
+	tracer := newMessagesTracer(&middlewareConfig{tracerProvider: tp})
+
+	_, span, err := tracer.StartSpan(t.Context(), time.Now(), strings.NewReader(`{
+		"model":"claude-haiku-4-5",
+		"max_tokens":128,
+		"messages":[{"role":"user","content":"Hello"}]
+	}`))
+	require.NoError(t, err)
+	require.NoError(t, tracer.TagSpan(span, strings.NewReader(`{
+		"role":"assistant",
+		"content":[{"type":"tool_use","id":"toolu_123","name":"lookup","input":{"q":"answer"}}],
+		"model":"claude-haiku-4-5-20251001",
+		"stop_reason":"tool_use",
+		"usage":{"input_tokens":10,"output_tokens":5}
+	}`)))
+	span.End()
+
+	exported := exporter.FlushOne()
+	assert.Equal(t, map[string]any{
+		"role": "assistant",
+		"content": []any{map[string]any{
+			"type":  "tool_use",
+			"id":    "toolu_123",
+			"name":  "lookup",
+			"input": map[string]any{"q": "answer"},
+		}},
+		"stop_reason": "tool_use",
+	}, exported.Output())
+	assert.Equal(t, "claude-haiku-4-5-20251001", exported.Metadata()["model"])
+	assert.NotContains(t, exported.Metrics(), "time_to_first_token")
 }
 
 func TestParseUsageTokensWithCache(t *testing.T) {
@@ -341,7 +472,7 @@ func TestMiddlewareIntegration(t *testing.T) {
 
 	metadata := span.Metadata()
 	assert.Equal(t, "anthropic", metadata["provider"])
-	assert.Equal(t, "/v1/messages", metadata["endpoint"])
+	assert.NotContains(t, metadata, "endpoint")
 	assert.Equal(t, "claude-3-haiku-20240307", metadata["model"])
 	assert.Equal(t, float64(1024), metadata["max_tokens"])
 
@@ -407,12 +538,12 @@ func TestMiddlewareIntegrationStreaming(t *testing.T) {
 
 	metadata := span.Metadata()
 	assert.Equal(t, "anthropic", metadata["provider"])
-	assert.Equal(t, "/v1/messages", metadata["endpoint"])
+	assert.NotContains(t, metadata, "endpoint")
 	assert.Equal(t, "claude-3-haiku-20240307", metadata["model"])
 	assert.Equal(t, float64(512), metadata["max_tokens"])
 	assert.Equal(t, 0.8, metadata["temperature"])
 	assert.Equal(t, 0.95, metadata["top_p"])
-	assert.Equal(t, true, metadata["stream"]) // Should detect streaming mode
+	assert.Equal(t, true, metadata["stream"])
 
 }
 
@@ -468,21 +599,27 @@ func assertSpanValidWithName(t *testing.T, span oteltest.Span, timeRange oteltes
 
 	metadata := span.Metadata()
 	assert.Equal("anthropic", metadata["provider"])
-	assert.Equal("/v1/messages", metadata["endpoint"])
+	assert.NotContains(metadata, "endpoint")
 
 	// validate metrics
 	metrics := span.Metrics()
 	gtez := func(v float64) bool { return v >= 0 }
 	gtz := func(v float64) bool { return v > 0 }
 
-	// All expected metrics must be present - core metrics and cache metrics
 	requiredMetrics := map[string]func(float64) bool{
-		"prompt_tokens":                gtz,  // Should always be > 0
-		"completion_tokens":            gtz,  // Should always be > 0
-		"tokens":                       gtz,  // Should always be > 0
-		"prompt_cached_tokens":         gtez, // Should always be ≥ 0 (even if 0)
-		"prompt_cache_creation_tokens": gtez, // Should always be ≥ 0 (even if 0)
-		"time_to_first_token":          gtz,  // Should always be > 0
+		"prompt_tokens":     gtz,
+		"completion_tokens": gtz,
+		"tokens":            gtz,
+	}
+	if expectedName == "anthropic.messages.stream" {
+		requiredMetrics["time_to_first_token"] = gtez
+	}
+	allowedOptionalMetrics := map[string]func(float64) bool{
+		"prompt_cached_tokens":            gtez,
+		"prompt_cache_creation_tokens":    gtez,
+		"prompt_cache_creation_5m_tokens": gtez,
+		"prompt_cache_creation_1h_tokens": gtez,
+		"completion_reasoning_tokens":     gtez,
 	}
 
 	// First, ensure all required metrics are present
@@ -494,11 +631,12 @@ func assertSpanValidWithName(t *testing.T, span oteltest.Span, timeRange oteltes
 	for n, v := range metrics {
 		validator, ok := requiredMetrics[n]
 		if !ok {
-			// Unknown metric - just log it but don't fail the test
-			t.Logf("Unknown metric %s with value %v - this is likely a new Anthropic metric", n, v)
-			continue
+			validator, ok = allowedOptionalMetrics[n]
 		}
-		assert.True(validator(v), "metric %s is not valid (value: %v)", n, v)
+		assert.True(ok, "metric %s is not allowed by the instrumentation spec", n)
+		if ok {
+			assert.True(validator(v), "metric %s is not valid (value: %v)", n, v)
+		}
 	}
 
 	// a crude check to make sure all json is parsed
@@ -562,7 +700,6 @@ func TestStreamingWithThinking(t *testing.T) {
 	// Verify the streamed text matches what's in the span
 	assert.Contains(t, outputStr, responseText[:10])
 
-	// Verify metadata
 	metadata := span.Metadata()
 	assert.Equal(t, true, metadata["stream"])
 	assert.NotNil(t, metadata["thinking"])
@@ -616,12 +753,8 @@ func TestStreamingWithCitations(t *testing.T) {
 	assertStreamingSpanValid(t, span, timeRange)
 
 	output := span.Output()
-	messages, ok := output.([]any)
-	require.True(t, ok, "expected output to be a message array")
-	require.Len(t, messages, 1)
-
-	message, ok := messages[0].(map[string]any)
-	require.True(t, ok, "expected first output item to be an assistant message")
+	message, ok := output.(map[string]any)
+	require.True(t, ok, "expected provider-native assistant output")
 
 	content, ok := message["content"].([]any)
 	require.True(t, ok, "expected assistant message content to be an array")
@@ -733,9 +866,9 @@ func TestWithTools(t *testing.T) {
 	span := exporter.FlushOne()
 	assertSpanValid(t, span, timeRange)
 
-	// Verify metadata contains tools
+	// Verify metadata contains the provider-native tool definition.
 	metadata := span.Metadata()
-	assert.Contains(t, metadata, "tools")
+	assertAnthropicFunctionTool(t, metadata, "get_weather")
 }
 
 // TestStreamingWithTools tests tracing with streaming and tool use
@@ -794,5 +927,27 @@ func TestStreamingWithTools(t *testing.T) {
 	// Verify metadata
 	metadata := span.Metadata()
 	assert.Equal(t, true, metadata["stream"])
-	assert.Contains(t, metadata, "tools")
+	assertAnthropicFunctionTool(t, metadata, "get_weather")
+
+	output, ok := span.Output().(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "tool_use", output["stop_reason"])
+	content, ok := output["content"].([]any)
+	require.True(t, ok)
+	require.Len(t, content, 1)
+	toolUse, ok := content[0].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "get_weather", toolUse["name"])
+	assert.Equal(t, map[string]any{"location": "Tokyo"}, toolUse["input"])
+}
+
+func assertAnthropicFunctionTool(t *testing.T, metadata map[string]any, expectedName string) {
+	t.Helper()
+	tools, ok := metadata["tools"].([]any)
+	require.True(t, ok)
+	require.Len(t, tools, 1)
+	tool, ok := tools[0].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, expectedName, tool["name"])
+	assert.Contains(t, tool, "input_schema")
 }

@@ -30,7 +30,6 @@ func newMessagesTracer(cfg *middlewareConfig) *messagesTracer {
 		streaming: false,
 		metadata: map[string]any{
 			"provider": "anthropic",
-			"endpoint": "/v1/messages",
 		},
 	}
 }
@@ -154,13 +153,14 @@ func (mt *messagesTracer) parseStreamingResponse(span trace.Span, body io.Reader
 		}
 	}
 
-	if output := accumulator.Output(); len(output) > 0 {
+	if messages := accumulator.Output(); len(messages) > 0 {
+		output := messages[0]
+		if stopReason := accumulator.StopReason(); stopReason != nil {
+			output["stop_reason"] = stopReason
+		}
 		if err := internal.SetJSONAttr(span, "braintrust.output_json", output); err != nil {
 			return err
 		}
-	}
-	if stopReason := accumulator.StopReason(); stopReason != nil {
-		mt.metadata["stop_reason"] = stopReason
 	}
 	if model := accumulator.Model(); model != "" {
 		mt.metadata["model"] = model
@@ -176,39 +176,26 @@ func (mt *messagesTracer) parseStreamingResponse(span trace.Span, body io.Reader
 	if timeToFirstToken > 0 {
 		metrics["time_to_first_token"] = timeToFirstToken.Seconds()
 	}
-	if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
-		return err
+	if len(metrics) > 0 {
+		if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
+			return err
+		}
 	}
 	return scanner.Err()
 }
 
 func (mt *messagesTracer) parseResponse(span trace.Span, body io.Reader) error {
-	timeToFirstToken := time.Since(mt.startTime)
-
 	var raw map[string]any
 	err := json.NewDecoder(body).Decode(&raw)
 	if err != nil {
 		return err
 	}
 
-	return mt.handleMessageResponse(span, raw, timeToFirstToken)
+	return mt.handleMessageResponse(span, raw)
 }
 
-func (mt *messagesTracer) handleMessageResponse(span trace.Span, rawMsg map[string]any, timeToFirstToken time.Duration) error {
-	// Only add response-level metadata that's relevant
-	// (stop_reason, stop_sequence, model if not already set)
-	responseMetadataFields := []string{
-		"stop_reason",
-		"stop_sequence",
-	}
-
-	for _, field := range responseMetadataFields {
-		if v, ok := rawMsg[field]; ok {
-			mt.metadata[field] = v
-		}
-	}
-
-	// Update model if present in response (in case it was resolved from "latest")
+func (mt *messagesTracer) handleMessageResponse(span trace.Span, rawMsg map[string]any) error {
+	// Update model if present in response (in case it was resolved from "latest").
 	if model, ok := rawMsg["model"].(string); ok {
 		mt.metadata["model"] = model
 	}
@@ -217,25 +204,23 @@ func (mt *messagesTracer) handleMessageResponse(span trace.Span, rawMsg map[stri
 		return err
 	}
 
-	metrics := make(map[string]any)
 	if usage, ok := rawMsg["usage"].(map[string]any); ok {
-		for k, v := range parseUsageTokens(usage) {
-			metrics[k] = v
+		metrics := parseUsageTokens(usage)
+		if len(metrics) > 0 {
+			if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
+				return err
+			}
 		}
 	}
-	metrics["time_to_first_token"] = timeToFirstToken.Seconds()
-	if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
-		return err
-	}
 
-	// Format output as array of messages (same format as input)
 	if content, ok := rawMsg["content"]; ok {
 		role, _ := rawMsg["role"].(string)
-		output := []map[string]any{
-			{
-				"role":    role,
-				"content": content,
-			},
+		output := map[string]any{
+			"role":    role,
+			"content": content,
+		}
+		if stopReason, exists := rawMsg["stop_reason"]; exists && stopReason != nil {
+			output["stop_reason"] = stopReason
 		}
 		if err := internal.SetJSONAttr(span, "braintrust.output_json", output); err != nil {
 			return err

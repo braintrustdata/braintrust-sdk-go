@@ -20,12 +20,7 @@ import (
 
 // skipSpecs lists spec display names that should be skipped.
 // Add specs here when they test features not yet supported by the Go SDK.
-var skipSpecs = map[string]string{
-	// Prompt caching metrics (prompt_cache_creation_5m_tokens etc.) are not yet
-	// tracked by the Go SDK's Anthropic instrumentation.
-	"anthropic/prompt_caching_5m": "prompt caching metrics not yet supported",
-	"anthropic/prompt_caching_1h": "prompt caching metrics not yet supported",
-}
+var skipSpecs = map[string]string{}
 
 // specRoot is set by TestMain after fetching specs.
 var specRoot string
