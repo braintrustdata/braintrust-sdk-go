@@ -338,49 +338,33 @@ func (gt *generateContentTracer) handleResponse(span trace.Span, raw map[string]
 	return nil
 }
 
-// parseUsageTokens parses the usage tokens from Gemini API responses
+// parseUsageTokens normalizes Gemini UsageMetadata to Braintrust metrics.
 func parseUsageTokens(usage map[string]interface{}) map[string]int64 {
 	metrics := make(map[string]int64)
 
-	if usage == nil {
-		return metrics
+	hasPromptTokens, promptTokens := internal.ToInt64(usage["promptTokenCount"])
+	hasToolUsePromptTokens, toolUsePromptTokens := internal.ToInt64(usage["toolUsePromptTokenCount"])
+	if hasPromptTokens || hasToolUsePromptTokens {
+		metrics["prompt_tokens"] = promptTokens + toolUsePromptTokens
 	}
 
-	for k, v := range usage {
-		if ok, i := internal.ToInt64(v); ok {
-			switch k {
-			case "promptTokenCount":
-				metrics["prompt_tokens"] = i
-			case "candidatesTokenCount":
-				metrics["completion_tokens"] = i
-			case "totalTokenCount":
-				metrics["tokens"] = i
-			case "cachedContentTokenCount":
-				metrics["prompt_cached_tokens"] = i
-			case "thoughtsTokenCount":
-				metrics["completion_reasoning_tokens"] = i
-			default:
-				// Keep other fields as-is for future-proofing
-				// Convert camelCase to snake_case for consistency
-				snakeKey := camelToSnake(k)
-				metrics[snakeKey] = i
-			}
-		}
+	hasCandidateTokens, candidateTokens := internal.ToInt64(usage["candidatesTokenCount"])
+	hasThoughtTokens, thoughtTokens := internal.ToInt64(usage["thoughtsTokenCount"])
+	if hasCandidateTokens || hasThoughtTokens {
+		metrics["completion_tokens"] = candidateTokens + thoughtTokens
+	}
+	if hasThoughtTokens {
+		metrics["completion_reasoning_tokens"] = thoughtTokens
+	}
+
+	if ok, totalTokens := internal.ToInt64(usage["totalTokenCount"]); ok {
+		metrics["tokens"] = totalTokens
+	}
+	if ok, cachedTokens := internal.ToInt64(usage["cachedContentTokenCount"]); ok {
+		metrics["prompt_cached_tokens"] = cachedTokens
 	}
 
 	return metrics
-}
-
-// camelToSnake converts camelCase to snake_case
-func camelToSnake(s string) string {
-	var result strings.Builder
-	for i, r := range s {
-		if i > 0 && r >= 'A' && r <= 'Z' {
-			result.WriteRune('_')
-		}
-		result.WriteRune(r)
-	}
-	return strings.ToLower(result.String())
 }
 
 // Ensure our tracer implements the shared interface

@@ -22,6 +22,39 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
+func TestUsageMetrics(t *testing.T) {
+	t.Run("aggregates_reasoning_and_tool_use_tokens", func(t *testing.T) {
+		usage := &genai.GenerateContentResponseUsageMetadata{
+			PromptTokenCount:        12,
+			ToolUsePromptTokenCount: 3,
+			CandidatesTokenCount:    9,
+			ThoughtsTokenCount:      6,
+			TotalTokenCount:         30,
+			CachedContentTokenCount: 4,
+		}
+
+		assert.Equal(t, map[string]int64{
+			"prompt_tokens":               15,
+			"completion_tokens":           15,
+			"completion_reasoning_tokens": 6,
+			"tokens":                      30,
+			"prompt_cached_tokens":        4,
+		}, usageMetrics(usage))
+	})
+
+	t.Run("preserves_core_zero_values_and_omits_unavailable_details", func(t *testing.T) {
+		assert.Equal(t, map[string]int64{
+			"prompt_tokens":     0,
+			"completion_tokens": 0,
+			"tokens":            0,
+		}, usageMetrics(&genai.GenerateContentResponseUsageMetadata{}))
+	})
+
+	t.Run("nil_usage", func(t *testing.T) {
+		assert.Empty(t, usageMetrics(nil))
+	})
+}
+
 func TestCleanupJSON(t *testing.T) {
 	t.Parallel()
 	tests := []struct {

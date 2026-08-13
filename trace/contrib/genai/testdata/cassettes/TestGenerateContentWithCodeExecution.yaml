@@ -1,0 +1,113 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 194
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"Calculate the sum of the first five prime numbers using Python, then explain the result."}],"role":"user"}],"generationConfig":{},"tools":[{"codeExecution":{}}]}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Goog-Api-Client:
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "executableCode": {
+                          "language": "PYTHON",
+                          "code": "prime_numbers = [2, 3, 5, 7, 11]\nsum_of_primes = sum(prime_numbers)\nprint(f\"The sum of the first five prime numbers is: {sum_of_primes}\")\n"
+                        }
+                      },
+                      {
+                        "codeExecutionResult": {
+                          "outcome": "OUTCOME_OK",
+                          "output": "The sum of the first five prime numbers is: 28\n"
+                        }
+                      },
+                      {
+                        "text": "The first five prime numbers are 2, 3, 5, 7, and 11.\n\nUsing Python, the sum of these numbers is calculated as:\n2 + 3 + 5 + 7 + 11 = 28\n\nThe result of the calculation is **28**."
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "STOP",
+                  "index": 0
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 18,
+                "candidatesTokenCount": 121,
+                "totalTokenCount": 545,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 18
+                  }
+                ],
+                "toolUsePromptTokenCount": 247,
+                "toolUsePromptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 247
+                  }
+                ],
+                "thoughtsTokenCount": 159,
+                "serviceTier": "standard"
+              },
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "Yx1-apbFNZ33jrEP3dfm4A0"
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Type:
+                - application/json; charset=UTF-8
+            Date:
+                - Thu, 13 Aug 2026 19:39:17 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=1967
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Gemini-Service-Tier:
+                - standard
+            X-Xss-Protection:
+                - "0"
+        status: 200 OK
+        code: 200
+        duration: 2.204086084s

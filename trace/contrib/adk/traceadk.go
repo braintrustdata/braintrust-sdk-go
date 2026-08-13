@@ -375,16 +375,9 @@ func (c *callbacksImpl) AfterModel(ctx agent.CallbackContext, resp *model.LLMRes
 			c.logger.Debug("Failed to set braintrust.output_json", "error", err)
 		}
 
-		// Record token usage if available
 		if resp.UsageMetadata != nil {
-			if resp.UsageMetadata.PromptTokenCount > 0 {
-				span.SetAttributes(attribute.Int64("gen_ai.usage.prompt_tokens", int64(resp.UsageMetadata.PromptTokenCount)))
-			}
-			if resp.UsageMetadata.CandidatesTokenCount > 0 {
-				span.SetAttributes(attribute.Int64("gen_ai.usage.completion_tokens", int64(resp.UsageMetadata.CandidatesTokenCount)))
-			}
-			if resp.UsageMetadata.TotalTokenCount > 0 {
-				span.SetAttributes(attribute.Int64("gen_ai.usage.total_tokens", int64(resp.UsageMetadata.TotalTokenCount)))
+			if metricsErr := internal.SetJSONAttr(span, "braintrust.metrics", usageMetrics(resp.UsageMetadata)); metricsErr != nil {
+				c.logger.Debug("Failed to set braintrust.metrics", "error", metricsErr)
 			}
 		}
 
@@ -395,6 +388,27 @@ func (c *callbacksImpl) AfterModel(ctx agent.CallbackContext, resp *model.LLMRes
 	}
 
 	return nil, nil
+}
+
+// usageMetrics normalizes Google UsageMetadata to Braintrust metrics.
+func usageMetrics(usage *genai.GenerateContentResponseUsageMetadata) map[string]int64 {
+	if usage == nil {
+		return map[string]int64{}
+	}
+
+	metrics := map[string]int64{
+		"prompt_tokens":     int64(usage.PromptTokenCount) + int64(usage.ToolUsePromptTokenCount),
+		"completion_tokens": int64(usage.CandidatesTokenCount) + int64(usage.ThoughtsTokenCount),
+		"tokens":            int64(usage.TotalTokenCount),
+	}
+	if usage.ThoughtsTokenCount > 0 {
+		metrics["completion_reasoning_tokens"] = int64(usage.ThoughtsTokenCount)
+	}
+	if usage.CachedContentTokenCount > 0 {
+		metrics["prompt_cached_tokens"] = int64(usage.CachedContentTokenCount)
+	}
+
+	return metrics
 }
 
 // BeforeTool is called before executing a tool.

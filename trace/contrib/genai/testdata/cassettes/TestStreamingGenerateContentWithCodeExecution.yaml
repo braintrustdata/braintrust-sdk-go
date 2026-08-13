@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 169
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"Use Python to calculate 123 times 456, then explain the result."}],"role":"user"}],"generationConfig":{},"tools":[{"codeExecution":{}}]}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Goog-Api-Client:
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"executableCode\": {\"language\": \"PYTHON\",\"code\": \"result = 123 * 456\\nprint(f'{result=}')\\n\"}}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 20,\"candidatesTokenCount\": 19,\"totalTokenCount\": 76,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 20}],\"thoughtsTokenCount\": 37,\"serviceTier\": \"standard\"},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"gR1-aqX8GvKZ-8YPuMPJ4Q8\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"codeExecutionResult\": {\"outcome\": \"OUTCOME_OK\",\"output\": \"result=56088\\n\"}}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 20,\"candidatesTokenCount\": 19,\"totalTokenCount\": 76,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 20}],\"thoughtsTokenCount\": 37,\"serviceTier\": \"standard\"},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"gR1-aqX8GvKZ-8YPuMPJ4Q8\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"The product\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 20,\"candidatesTokenCount\": 21,\"totalTokenCount\": 163,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 20}],\"toolUsePromptTokenCount\": 85,\"toolUsePromptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 85}],\"thoughtsTokenCount\": 37,\"serviceTier\": \"standard\"},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"gR1-aqX8GvKZ-8YPuMPJ4Q8\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \" of 123 multiplied by 456 is 56,\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 20,\"candidatesTokenCount\": 37,\"totalTokenCount\": 179,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 20}],\"toolUsePromptTokenCount\": 85,\"toolUsePromptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 85}],\"thoughtsTokenCount\": 37,\"serviceTier\": \"standard\"},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"gR1-aqX8GvKZ-8YPuMPJ4Q8\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"088. This means that if you have 123 groups of 456 items, or vice versa, the total number of items is 56,088.\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 20,\"candidatesTokenCount\": 77,\"totalTokenCount\": 219,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 20}],\"toolUsePromptTokenCount\": 85,\"toolUsePromptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 85}],\"thoughtsTokenCount\": 37,\"serviceTier\": \"standard\"},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"gR1-aqX8GvKZ-8YPuMPJ4Q8\"}\r\n\r\n"
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Disposition:
+                - attachment
+            Content-Type:
+                - text/event-stream
+            Date:
+                - Thu, 13 Aug 2026 19:39:46 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=666
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Xss-Protection:
+                - "0"
+        status: 200 OK
+        code: 200
+        duration: 823.194208ms

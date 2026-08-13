@@ -19,6 +19,7 @@ import (
 	"google.golang.org/adk/session"
 	"google.golang.org/adk/tool"
 	"google.golang.org/adk/tool/functiontool"
+	"google.golang.org/adk/tool/geminitool"
 	"google.golang.org/genai"
 
 	oteltrace "go.opentelemetry.io/otel/trace"
@@ -555,6 +556,41 @@ func TestToolUse(t *testing.T) {
 		"model span should be child of agent span")
 }
 
+func TestGoogleSearchUsage(t *testing.T) {
+	ctx, tp, exporter := setupGoldenTest(t)
+
+	sid := "session-google-search"
+	r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
+		Name:                  "search_agent",
+		Instruction:           "Use Google Search to answer the user's question.",
+		Tools:                 []tool.Tool{geminitool.GoogleSearch{}},
+		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 500},
+	})
+
+	msg := genai.NewContentFromText("Search the web for the current stable Go release and name its major and minor version.", genai.RoleUser)
+	responses := runAndCollectFinal(ctx, t, r, sid, msg, agent.RunConfig{})
+	text := assertFinalResponse(t, responses)
+	t.Logf("Response: %s", text)
+
+	spans := assertSpansExist(t, exporter)
+	var modelSpan *oteltest.Span
+	for i := range spans {
+		if spans[i].Name() == "call_llm" {
+			modelSpan = &spans[i]
+			break
+		}
+	}
+	require.NotNil(t, modelSpan)
+
+	metrics := modelSpan.Metrics()
+	assert.Equal(t, float64(157), metrics["prompt_tokens"])
+	assert.Equal(t, float64(295), metrics["completion_tokens"])
+	assert.Equal(t, float64(239), metrics["completion_reasoning_tokens"])
+	assert.Equal(t, float64(452), metrics["tokens"])
+	assert.Equal(t, metrics["tokens"], metrics["prompt_tokens"]+metrics["completion_tokens"])
+	assert.NotContains(t, metrics, "tool_use_prompt_token_count")
+}
+
 func TestReasoning(t *testing.T) {
 	ctx, tp, exporter := setupGoldenTest(t)
 
@@ -579,5 +615,28 @@ func TestReasoning(t *testing.T) {
 	text = assertFinalResponse(t, responses)
 	t.Logf("Follow-up response: %s", text)
 
-	assertSpansExist(t, exporter)
+	spans := assertSpansExist(t, exporter)
+	var modelSpans []*oteltest.Span
+	for i := range spans {
+		if spans[i].Name() == "call_llm" {
+			modelSpans = append(modelSpans, &spans[i])
+		}
+	}
+	require.Len(t, modelSpans, 2)
+
+	firstMetrics := modelSpans[0].Metrics()
+	assert.Equal(t, float64(47), firstMetrics["prompt_tokens"])
+	assert.Equal(t, float64(1608), firstMetrics["completion_tokens"])
+	assert.Equal(t, float64(765), firstMetrics["completion_reasoning_tokens"])
+	assert.Equal(t, float64(1655), firstMetrics["tokens"])
+	assert.Equal(t, firstMetrics["tokens"], firstMetrics["prompt_tokens"]+firstMetrics["completion_tokens"])
+	assert.NotContains(t, firstMetrics, "tool_use_prompt_token_count")
+	assert.False(t, modelSpans[0].HasAttr("gen_ai.usage.prompt_tokens"))
+
+	secondMetrics := modelSpans[1].Metrics()
+	assert.Equal(t, float64(1475), secondMetrics["prompt_tokens"])
+	assert.Equal(t, float64(1627), secondMetrics["completion_tokens"])
+	assert.Equal(t, float64(900), secondMetrics["completion_reasoning_tokens"])
+	assert.Equal(t, float64(3102), secondMetrics["tokens"])
+	assert.Equal(t, secondMetrics["tokens"], secondMetrics["prompt_tokens"]+secondMetrics["completion_tokens"])
 }

@@ -200,10 +200,73 @@ func TestGenerateContentWithThinking(t *testing.T) {
 	}, metadata["thinkingConfig"])
 
 	metrics := ts.Metrics()
-	assert.Greater(metrics["completion_reasoning_tokens"], float64(0))
+	assert.Equal(float64(47), metrics["prompt_tokens"])
+	assert.Equal(float64(1711), metrics["completion_tokens"])
+	assert.Equal(float64(874), metrics["completion_reasoning_tokens"])
+	assert.Equal(float64(1758), metrics["tokens"])
+	assert.Equal(metrics["tokens"], metrics["prompt_tokens"]+metrics["completion_tokens"])
 	assert.NotContains(metrics, "thoughts_token_count")
-	assert.Greater(metrics["prompt_tokens"], float64(0))
-	assert.Greater(metrics["tokens"], float64(0))
+}
+
+func TestGenerateContentWithCodeExecution(t *testing.T) {
+	client, exporter := setUpTest(t)
+
+	resp, err := client.Models.GenerateContent(
+		context.Background(),
+		"gemini-2.5-flash",
+		genai.Text("Calculate the sum of the first five prime numbers using Python, then explain the result."),
+		&genai.GenerateContentConfig{
+			Tools: []*genai.Tool{{CodeExecution: &genai.ToolCodeExecution{}}},
+		},
+	)
+
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	assert.Contains(t, resp.Text(), "28")
+
+	ts := exporter.FlushOne()
+	ts.AssertNameIs("generate_content")
+	assert.Equal(t, codes.Unset, ts.Status().Code)
+
+	metrics := ts.Metrics()
+	assert.Equal(t, float64(265), metrics["prompt_tokens"])
+	assert.Equal(t, float64(280), metrics["completion_tokens"])
+	assert.Equal(t, float64(159), metrics["completion_reasoning_tokens"])
+	assert.Equal(t, float64(545), metrics["tokens"])
+	assert.Equal(t, metrics["tokens"], metrics["prompt_tokens"]+metrics["completion_tokens"])
+	assert.NotContains(t, metrics, "tool_use_prompt_token_count")
+}
+
+func TestStreamingGenerateContentWithCodeExecution(t *testing.T) {
+	client, exporter := setUpTest(t)
+
+	iter := client.Models.GenerateContentStream(
+		context.Background(),
+		"gemini-2.5-flash",
+		genai.Text("Use Python to calculate 123 times 456, then explain the result."),
+		&genai.GenerateContentConfig{
+			Tools: []*genai.Tool{{CodeExecution: &genai.ToolCodeExecution{}}},
+		},
+	)
+
+	var fullText string
+	for resp, err := range iter {
+		require.NoError(t, err)
+		fullText += resp.Text()
+	}
+	assert.Contains(t, fullText, "56,088")
+
+	ts := exporter.FlushOne()
+	ts.AssertNameIs("generate_content")
+	assert.Equal(t, codes.Unset, ts.Status().Code)
+
+	metrics := ts.Metrics()
+	assert.Equal(t, float64(105), metrics["prompt_tokens"])
+	assert.Equal(t, float64(114), metrics["completion_tokens"])
+	assert.Equal(t, float64(37), metrics["completion_reasoning_tokens"])
+	assert.Equal(t, float64(219), metrics["tokens"])
+	assert.Equal(t, metrics["tokens"], metrics["prompt_tokens"]+metrics["completion_tokens"])
+	assert.NotContains(t, metrics, "tool_use_prompt_token_count")
 }
 
 func TestParseUsageTokens(t *testing.T) {
@@ -237,12 +300,44 @@ func TestParseUsageTokens(t *testing.T) {
 		assert.Equal(t, int64(80), metrics["prompt_cached_tokens"])
 	})
 
-	t.Run("nil_usage", func(t *testing.T) {
-		metrics := parseUsageTokens(nil)
-		assert.Empty(t, metrics)
+	t.Run("aggregates_reasoning_and_tool_use_tokens", func(t *testing.T) {
+		usage := map[string]interface{}{
+			"promptTokenCount":        float64(12),
+			"toolUsePromptTokenCount": float64(3),
+			"candidatesTokenCount":    float64(9),
+			"thoughtsTokenCount":      float64(6),
+			"totalTokenCount":         float64(30),
+		}
+
+		metrics := parseUsageTokens(usage)
+
+		assert.Equal(t, int64(15), metrics["prompt_tokens"])
+		assert.Equal(t, int64(15), metrics["completion_tokens"])
+		assert.Equal(t, int64(6), metrics["completion_reasoning_tokens"])
+		assert.Equal(t, int64(30), metrics["tokens"])
+		assert.NotContains(t, metrics, "tool_use_prompt_token_count")
 	})
 
-	t.Run("unknown_field", func(t *testing.T) {
+	t.Run("preserves_reported_zero_values", func(t *testing.T) {
+		usage := map[string]interface{}{
+			"promptTokenCount":        float64(0),
+			"toolUsePromptTokenCount": float64(0),
+			"candidatesTokenCount":    float64(0),
+			"thoughtsTokenCount":      float64(0),
+			"totalTokenCount":         float64(0),
+		}
+
+		metrics := parseUsageTokens(usage)
+
+		assert.Equal(t, map[string]int64{
+			"prompt_tokens":               0,
+			"completion_tokens":           0,
+			"completion_reasoning_tokens": 0,
+			"tokens":                      0,
+		}, metrics)
+	})
+
+	t.Run("omits_unavailable_values", func(t *testing.T) {
 		usage := map[string]interface{}{
 			"promptTokenCount":  float64(10),
 			"someNewTokenCount": float64(5),
@@ -250,9 +345,13 @@ func TestParseUsageTokens(t *testing.T) {
 
 		metrics := parseUsageTokens(usage)
 
-		assert.Equal(t, int64(10), metrics["prompt_tokens"])
-		// Unknown field should be converted to snake_case
-		assert.Equal(t, int64(5), metrics["some_new_token_count"])
+		assert.Equal(t, map[string]int64{"prompt_tokens": 10}, metrics)
+		assert.NotContains(t, metrics, "some_new_token_count")
+	})
+
+	t.Run("nil_usage", func(t *testing.T) {
+		metrics := parseUsageTokens(nil)
+		assert.Empty(t, metrics)
 	})
 }
 
@@ -387,26 +486,6 @@ func TestIsStreamingPath(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.path, func(t *testing.T) {
 			assert.Equal(t, tt.streaming, isStreamingPath(tt.path))
-		})
-	}
-}
-
-func TestCamelToSnake(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{"promptTokenCount", "prompt_token_count"},
-		{"cachedContentTokenCount", "cached_content_token_count"},
-		{"totalTokenCount", "total_token_count"},
-		{"simpleWord", "simple_word"},
-		{"ABC", "a_b_c"},
-	}
-
-	for _, test := range tests {
-		t.Run(test.input, func(t *testing.T) {
-			result := camelToSnake(test.input)
-			assert.Equal(t, test.expected, result)
 		})
 	}
 }
