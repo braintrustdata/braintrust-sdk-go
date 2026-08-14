@@ -9,11 +9,11 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.32.15
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.14
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.50.4
-	github.com/braintrustdata/braintrust-sdk-go v0.10.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.10.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime v0.10.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.10.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.10.0
+	github.com/braintrustdata/braintrust-sdk-go v0.11.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.11.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime v0.11.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.11.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.11.0
 	github.com/google/uuid v1.6.0
 	github.com/openai/openai-go v1.12.0
 	github.com/stretchr/testify v1.11.1
