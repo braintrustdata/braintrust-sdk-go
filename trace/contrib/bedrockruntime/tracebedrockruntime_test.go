@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"image"
 	"image/color"
 	"image/png"
@@ -79,6 +78,34 @@ func TestParseUsageTokens(t *testing.T) {
 		m := parseUsageTokens(u)
 		assert.Equal(t, int64(10), m["tokens"])
 	})
+
+	t.Run("missing usage is omitted rather than fabricated as zero", func(t *testing.T) {
+		m := parseUsageTokens(&types.TokenUsage{OutputTokens: aws.Int32(6)})
+		assert.NotContains(t, m, "prompt_tokens")
+		assert.NotContains(t, m, "tokens")
+		assert.Equal(t, int64(6), m["completion_tokens"])
+	})
+
+	t.Run("cache write TTL details are normalized", func(t *testing.T) {
+		m := parseUsageTokens(&types.TokenUsage{
+			InputTokens: aws.Int32(20),
+			CacheDetails: []types.CacheDetail{
+				{Ttl: types.CacheTTLFiveMinutes, InputTokens: aws.Int32(5)},
+				{Ttl: types.CacheTTLOneHour, InputTokens: aws.Int32(15)},
+			},
+		})
+		assert.Equal(t, int64(5), m["prompt_cache_creation_5m_tokens"])
+		assert.Equal(t, int64(15), m["prompt_cache_creation_1h_tokens"])
+	})
+
+	t.Run("negative provider usage is omitted", func(t *testing.T) {
+		m := parseUsageTokens(&types.TokenUsage{
+			InputTokens:  aws.Int32(-1),
+			OutputTokens: aws.Int32(-2),
+			TotalTokens:  aws.Int32(-3),
+		})
+		assert.Empty(t, m)
+	})
 }
 
 // TestExtractUsageForModel verifies InvokeModel's Claude-only token branch.
@@ -151,7 +178,7 @@ func setUpTest(t *testing.T) (*bedrockruntime.Client, *oteltest.Exporter) {
 }
 
 // assertSpanValid checks the common properties of a Bedrock span.
-func assertSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.TimeRange, wantName string) {
+func assertSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.TimeRange, wantName string, streaming bool) {
 	t.Helper()
 	a := assert.New(t)
 
@@ -163,10 +190,15 @@ func assertSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.TimeRa
 	a.Equal("bedrock", metadata["provider"])
 
 	metrics := span.Metrics()
-	required := []string{"prompt_tokens", "completion_tokens", "tokens", "time_to_first_token"}
+	required := []string{"prompt_tokens", "completion_tokens", "tokens"}
 	for _, m := range required {
 		a.Contains(metrics, m, "missing metric %s", m)
 		a.Greater(metrics[m], float64(0), "metric %s should be > 0", m)
+	}
+	if streaming {
+		a.Greater(metrics["time_to_first_token"], float64(0))
+	} else {
+		a.NotContains(metrics, "time_to_first_token")
 	}
 }
 
@@ -183,8 +215,9 @@ func TestConverse(t *testing.T) {
 			},
 		}},
 		InferenceConfig: &types.InferenceConfiguration{
-			MaxTokens:   aws.Int32(64),
-			Temperature: aws.Float32(0.2),
+			MaxTokens:     aws.Int32(64),
+			Temperature:   aws.Float32(0.2),
+			StopSequences: []string{"DONE"},
 		},
 	})
 	timeRange := timer.Tick()
@@ -196,13 +229,15 @@ func TestConverse(t *testing.T) {
 	require.NotEmpty(t, msg.Value.Content)
 
 	span := exporter.FlushOne()
-	assertSpanValid(t, span, timeRange, "bedrock.converse")
+	assertSpanValid(t, span, timeRange, "bedrock.converse", false)
 
 	metadata := span.Metadata()
 	assert.Equal(t, "converse", metadata["endpoint"])
 	assert.Equal(t, testModelID, metadata["model"])
 	assert.Equal(t, float64(64), metadata["max_tokens"])
 	assert.Equal(t, 0.2, metadata["temperature"])
+	assert.Equal(t, []any{"DONE"}, metadata["stop"])
+	assert.NotContains(t, metadata, "stop_sequences")
 	assert.Equal(t, "end_turn", metadata["stop_reason"])
 
 	input := span.Attr("braintrust.input_json").String()
@@ -253,15 +288,28 @@ func TestConverseWithTools(t *testing.T) {
 	assert.Equal(t, types.StopReasonToolUse, out.StopReason)
 
 	span := exporter.FlushOne()
-	assertSpanValid(t, span, timeRange, "bedrock.converse")
+	assertSpanValid(t, span, timeRange, "bedrock.converse", false)
 
 	metadata := span.Metadata()
 	assert.Equal(t, "tool_use", metadata["stop_reason"])
 	tools, ok := metadata["tools"].([]any)
 	require.True(t, ok, "tools should be a list in metadata")
 	require.Len(t, tools, 1)
-	assert.Contains(t, fmt.Sprint(tools[0]), "get_weather")
-	assert.Equal(t, map[string]any{"type": "auto"}, metadata["tool_choice"])
+	assert.Equal(t, map[string]any{
+		"type": "function",
+		"function": map[string]any{
+			"name":        "get_weather",
+			"description": "Get weather for a city",
+			"parameters": map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"city": map[string]any{"type": "string"},
+				},
+				"required": []any{"city"},
+			},
+		},
+	}, tools[0])
+	assert.Equal(t, "auto", metadata["tool_choice"])
 
 	output := span.Attr("braintrust.output_json").String()
 	assert.Contains(t, output, "tool_use")
@@ -303,7 +351,7 @@ func TestConverseStream(t *testing.T) {
 	assert.Contains(t, gotText.String(), "Paris")
 
 	span := exporter.FlushOne()
-	assertSpanValid(t, span, timeRange, "bedrock.converse-stream")
+	assertSpanValid(t, span, timeRange, "bedrock.converse-stream", true)
 
 	metadata := span.Metadata()
 	assert.Equal(t, "converse-stream", metadata["endpoint"])
@@ -341,10 +389,9 @@ func TestConverseWithImage(t *testing.T) {
 	span := exporter.FlushOne()
 	input := span.Attr("braintrust.input_json").String()
 	assert.Contains(t, input, `"type":"image"`)
-	assert.Contains(t, input, `"format":"png"`)
-	assert.Contains(t, input, `"type":"base64"`)
-	assert.Contains(t, input, `"media_type":"image/png"`)
-	assert.Contains(t, input, `"data":"iVBORw0KGgo`)
+	assert.Contains(t, input, `"image":{"format":"png"`)
+	assert.Contains(t, input, `"source":{"bytes":"iVBORw0KGgo`)
+	assert.NotContains(t, input, `"type":"base64"`)
 }
 
 func TestConverseWithDocumentCitations(t *testing.T) {
@@ -416,6 +463,7 @@ func TestConverseReasoningOutput(t *testing.T) {
 	require.NoError(t, err)
 
 	span := exporter.FlushOne()
+	assert.NotContains(t, span.Metadata(), "additional_model_request_fields")
 	output := span.Attr("braintrust.output_json").String()
 	// Claude with thinking enabled returns a reasoningContent block and a text
 	// answer. The model may format 12231 with or without a thousands separator,
@@ -491,20 +539,28 @@ func TestInvokeModelClaude(t *testing.T) {
 	metadata := span.Metadata()
 	assert.Equal(t, "bedrock", metadata["provider"])
 	assert.Equal(t, "invoke_model", metadata["endpoint"])
-	assert.Equal(t, testModelID, metadata["model"])
+	assert.Equal(t, "claude-haiku-4-5-20251001", metadata["model"])
+	assert.Equal(t, float64(50), metadata["max_tokens"])
 
 	input := span.Attr("braintrust.input_json").String()
 	assert.Contains(t, input, "capital of France")
+	assert.NotContains(t, input, "anthropic_version")
+	assert.NotContains(t, input, "max_tokens")
 
 	output := span.Attr("braintrust.output_json").String()
 	assert.Contains(t, output, "Paris")
+	assert.Contains(t, output, `"role":"assistant"`)
+	assert.NotContains(t, output, `"usage"`)
+	assert.NotContains(t, output, `"id"`)
 
 	// Claude token branch fires on any model id starting with anthropic.claude.
 	metrics := span.Metrics()
 	assert.Greater(t, metrics["prompt_tokens"], float64(0))
 	assert.Greater(t, metrics["completion_tokens"], float64(0))
 	assert.Greater(t, metrics["tokens"], float64(0))
-	assert.Greater(t, metrics["time_to_first_token"], float64(0))
+	assert.Equal(t, float64(0), metrics["prompt_cache_creation_5m_tokens"])
+	assert.Equal(t, float64(0), metrics["prompt_cache_creation_1h_tokens"])
+	assert.NotContains(t, metrics, "time_to_first_token")
 }
 
 func TestConverseError(t *testing.T) {

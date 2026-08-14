@@ -419,6 +419,46 @@ func (b *BedrockBot) invokeModelClaude(ctx context.Context) error {
 	return nil
 }
 
+// invokeModelClaudeStream demonstrates stream accumulation and TTFT capture
+// for the low-level Claude InvokeModelWithResponseStream API.
+func (b *BedrockBot) invokeModelClaudeStream(ctx context.Context) error {
+	ctx, span := tracer.Start(ctx, "invoke-model-claude-stream")
+	defer span.End()
+
+	fmt.Println("\n=== Example 7: InvokeModelWithResponseStream (Claude) ===")
+
+	body, err := json.Marshal(map[string]any{
+		"anthropic_version": "bedrock-2023-05-31",
+		"max_tokens":        100,
+		"messages": []any{map[string]any{
+			"role":    "user",
+			"content": []any{map[string]any{"type": "text", "text": "Count to three."}},
+		}},
+	})
+	if err != nil {
+		return fmt.Errorf("invoke-model-stream marshal: %w", err)
+	}
+	out, err := b.client.InvokeModelWithResponseStream(ctx, &bedrockruntime.InvokeModelWithResponseStreamInput{
+		ModelId:     aws.String(haikuModelID),
+		Body:        body,
+		ContentType: aws.String("application/json"),
+		Accept:      aws.String("application/json"),
+	})
+	if err != nil {
+		return fmt.Errorf("invoke-model-stream: %w", err)
+	}
+	defer out.GetStream().Close() //nolint:errcheck
+	for event := range out.GetStream().Events() {
+		if chunk, ok := event.(*types.ResponseStreamMemberChunk); ok {
+			fmt.Printf("  %s\n", truncate(string(chunk.Value.Bytes), 200))
+		}
+	}
+	if err := out.GetStream().Err(); err != nil {
+		return fmt.Errorf("invoke-model-stream events: %w", err)
+	}
+	return nil
+}
+
 // firstText extracts the first text block from a Converse output.
 func firstText(out types.ConverseOutput) string {
 	m, ok := out.(*types.ConverseOutputMemberMessage)
@@ -507,6 +547,7 @@ func main() {
 		{"streaming-extended-thinking", bot.streamingExtendedThinking},
 		{"vision", bot.vision},
 		{"invoke-model-claude", bot.invokeModelClaude},
+		{"invoke-model-claude-stream", bot.invokeModelClaudeStream},
 	}
 	for _, s := range steps {
 		if err := s.fn(ctx); err != nil {

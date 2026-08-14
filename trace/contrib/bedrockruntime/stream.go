@@ -2,12 +2,14 @@ package bedrockruntime
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
@@ -35,7 +37,7 @@ func (t *converseStreamTracer) StartSpan(ctx context.Context, start time.Time, i
 	}
 
 	setConverseInputAttrs(t.cfg.logger, span, t.metadata, params.ModelId, params.Messages, params.System,
-		params.InferenceConfig, params.ToolConfig, params.AdditionalModelRequestFields, true)
+		params.InferenceConfig, params.ToolConfig, true)
 	return ctx, span
 }
 
@@ -209,9 +211,15 @@ func (o *observedConverseStream) finalize() {
 			case "reasoning":
 				block["text"] = s
 			case "tool_use":
-				// Per Bedrock spec, tool_use delta inputs are raw JSON fragments;
-				// store them as a single string field for now.
-				block["input"] = s
+				// Bedrock sends tool input as JSON fragments. Decode the complete
+				// value so streaming output matches non-streaming output. Preserve
+				// malformed model output verbatim rather than dropping it.
+				var input any
+				if err := json.Unmarshal([]byte(s), &input); err == nil {
+					block["input"] = input
+				} else {
+					block["input"] = s
+				}
 			}
 		}
 
@@ -236,9 +244,15 @@ func (o *observedConverseStream) finalize() {
 		for k, v := range parseUsageTokens(o.usage) {
 			metrics[k] = v
 		}
-		metrics["time_to_first_token"] = o.timeToFirst.Seconds()
+		if o.ttftRecorded {
+			metrics["time_to_first_token"] = o.timeToFirst.Seconds()
+		}
 		setJSONAttr(o.log, o.span, "braintrust.metrics", metrics)
 
+		if err := o.inner.Err(); err != nil {
+			o.span.RecordError(err)
+			o.span.SetStatus(codes.Error, err.Error())
+		}
 		o.span.End()
 	})
 }

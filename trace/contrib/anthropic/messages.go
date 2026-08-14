@@ -132,233 +132,54 @@ func (mt *messagesTracer) TagSpan(span trace.Span, body io.Reader) error {
 
 func (mt *messagesTracer) parseStreamingResponse(span trace.Span, body io.Reader) error {
 	scanner := bufio.NewScanner(body)
-	var allResults []map[string]any
+	accumulator := internal.NewClaudeStreamAccumulator()
 	var timeToFirstToken time.Duration
-	usage := make(map[string]any)
 
 	for scanner.Scan() {
 		line := scanner.Text()
-
 		if !strings.HasPrefix(line, "data: ") {
 			continue
 		}
-
 		line = strings.TrimPrefix(line, "data: ")
 		if line == "[DONE]" {
-			break // End of stream
-		}
-
-		if timeToFirstToken == 0 {
-			timeToFirstToken = time.Since(mt.startTime)
+			break
 		}
 
 		var chunk map[string]any
-		err := json.Unmarshal([]byte(line), &chunk)
-		if err != nil {
+		if err := json.Unmarshal([]byte(line), &chunk); err != nil {
 			return err
 		}
-
-		allResults = append(allResults, chunk)
-
-		// Handle usage in streaming response from different event types
-		eventType, ok := chunk["type"].(string)
-		if ok {
-			switch eventType {
-
-			// Contains input and cache tokens
-			case "message_start":
-				// Usage is nested in message object for message_start events
-				if message, ok := chunk["message"].(map[string]any); ok {
-					if curUsage, ok := message["usage"].(map[string]any); ok {
-						// Initialize combined usage with message_start data (contains input_tokens)
-						for k, v := range curUsage {
-							usage[k] = v
-						}
-					}
-				}
-
-			// Contains output tokens, There can be multiple "message_delta" events in a single response.
-			// But the usage data in there is supposed to be cumulative as per the docs.
-			// So using the last usage data is fine.
-			case "message_delta":
-				// Usage is at top level for message_delta events (contains final output_tokens)
-				if curUsage, ok := chunk["usage"].(map[string]any); ok {
-					// message_delta usage is cumulative, so it overrides any previous values
-					for k, v := range curUsage {
-						usage[k] = v
-					}
-				}
-			}
+		if accumulator.Add(chunk) && timeToFirstToken == 0 {
+			timeToFirstToken = time.Since(mt.startTime)
 		}
 	}
 
-	// Post-process streaming results to match expected output format
-	output := mt.postprocessStreamingResults(allResults)
-	if len(output) > 0 {
+	if output := accumulator.Output(); len(output) > 0 {
 		if err := internal.SetJSONAttr(span, "braintrust.output_json", output); err != nil {
 			return err
 		}
 	}
-
-	// Handle usage metrics
-	metrics := make(map[string]any)
-	if len(usage) > 0 {
-		for k, v := range parseUsageTokens(usage) {
-			metrics[k] = v
-		}
+	if stopReason := accumulator.StopReason(); stopReason != nil {
+		mt.metadata["stop_reason"] = stopReason
 	}
-	metrics["time_to_first_token"] = timeToFirstToken.Seconds()
-	if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
+	if model := accumulator.Model(); model != "" {
+		mt.metadata["model"] = model
+	}
+	if err := internal.SetJSONAttr(span, "braintrust.metadata", mt.metadata); err != nil {
 		return err
 	}
 
+	metrics := make(map[string]any)
+	for key, value := range parseUsageTokens(accumulator.Usage()) {
+		metrics[key] = value
+	}
+	if timeToFirstToken > 0 {
+		metrics["time_to_first_token"] = timeToFirstToken.Seconds()
+	}
+	if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
+		return err
+	}
 	return scanner.Err()
-}
-
-func (mt *messagesTracer) postprocessStreamingResults(allResults []map[string]any) []map[string]any {
-	// Track content blocks by index
-	contentBlocks := make(map[int]map[string]any)
-	builders := make(map[int]*strings.Builder)
-	var stopReason interface{}
-
-	for _, result := range allResults {
-		eventType, ok := result["type"].(string)
-		if !ok {
-			continue
-		}
-
-		switch eventType {
-		case "content_block_start":
-			// Initialize a new content block
-			indexf64, ok := result["index"].(float64)
-			if !ok {
-				continue
-			}
-			if contentBlock, ok := result["content_block"].(map[string]any); ok {
-				contentBlocks[int(indexf64)] = contentBlock
-			}
-
-		case "content_block_delta":
-			indexf64, ok := result["index"].(float64)
-			if !ok {
-				continue
-			}
-			idx := int(indexf64)
-
-			if delta, ok := result["delta"].(map[string]any); ok {
-				deltaType, ok := delta["type"].(string)
-				if !ok {
-					continue
-				}
-
-				// Ensure block exists
-				if _, exists := contentBlocks[idx]; !exists {
-					contentBlocks[idx] = make(map[string]any)
-				}
-
-				switch deltaType {
-				case "text_delta":
-					// Accumulate text for text blocks
-					if text, ok := delta["text"].(string); ok {
-						if builders[idx] == nil {
-							builders[idx] = &strings.Builder{}
-						}
-						builders[idx].WriteString(text)
-						contentBlocks[idx]["type"] = "text"
-					}
-				case "input_json_delta":
-					// Accumulate JSON for tool_use blocks
-					if partialJSON, ok := delta["partial_json"].(string); ok {
-						if builders[idx] == nil {
-							builders[idx] = &strings.Builder{}
-						}
-						builders[idx].WriteString(partialJSON)
-						contentBlocks[idx]["type"] = "tool_use"
-					}
-				case "citations_delta":
-					// Accumulate citations for text blocks
-					if citation, ok := delta["citation"].(map[string]any); ok {
-						citations, _ := contentBlocks[idx]["citations"].([]any)
-						contentBlocks[idx]["citations"] = append(citations, citation)
-						contentBlocks[idx]["type"] = "text"
-					}
-				case "thinking_delta":
-					// Accumulate thinking text for extended thinking blocks
-					if thinking, ok := delta["thinking"].(string); ok {
-						if builders[idx] == nil {
-							builders[idx] = &strings.Builder{}
-						}
-						builders[idx].WriteString(thinking)
-						contentBlocks[idx]["type"] = "thinking"
-					}
-				case "signature_delta":
-					// Store signature for extended thinking blocks
-					if sig, ok := delta["signature"].(string); ok {
-						contentBlocks[idx]["signature"] = sig
-					}
-				}
-			}
-
-		case "message_delta":
-			if delta, ok := result["delta"].(map[string]any); ok {
-				if sr, ok := delta["stop_reason"]; ok {
-					stopReason = sr
-				}
-			}
-		}
-	}
-
-	// Convert builders to strings in the appropriate field
-	for idx, builder := range builders {
-		if block, ok := contentBlocks[idx]; ok {
-			msg := builder.String()
-			// Check block type to determine which field to set
-			if blockType, ok := block["type"].(string); ok {
-				switch blockType {
-				case "text":
-					block["text"] = msg
-				case "tool_use":
-					block["input"] = msg
-				case "thinking":
-					block["thinking"] = msg
-				}
-			}
-		}
-	}
-
-	// Store stop reason in metadata if present
-	if stopReason != nil {
-		mt.metadata["stop_reason"] = stopReason
-	}
-
-	// Convert map to sorted content array
-	if len(contentBlocks) == 0 {
-		return nil
-	}
-
-	content := make([]map[string]any, 0, len(contentBlocks))
-	for i := 0; i < len(contentBlocks); i++ {
-		if block, ok := contentBlocks[i]; ok {
-			// Parse accumulated JSON string for tool_use blocks
-			if block["type"] == "tool_use" {
-				if inputStr, ok := block["input"].(string); ok && inputStr != "" {
-					var inputObj any
-					if err := json.Unmarshal([]byte(inputStr), &inputObj); err == nil {
-						block["input"] = inputObj
-					}
-				}
-			}
-			content = append(content, block)
-		}
-	}
-
-	// Format as array of messages (same format as input)
-	return []map[string]any{
-		{
-			"role":    "assistant",
-			"content": content,
-		},
-	}
 }
 
 func (mt *messagesTracer) parseResponse(span trace.Span, body io.Reader) error {

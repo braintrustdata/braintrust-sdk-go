@@ -30,8 +30,9 @@
 //
 // Coverage notes:
 //   - Converse and ConverseStream are fully instrumented (input/output/metrics).
-//   - InvokeModel and InvokeModelWithResponseStream capture input/output bodies;
-//     token metrics are normalized only for Anthropic Claude models.
+//   - InvokeModel and InvokeModelWithResponseStream normalize Anthropic Claude
+//     messages, streamed output, and token metrics. Other model-specific body
+//     formats are not captured because their schemas are provider-defined.
 //   - InvokeModelWithBidirectionalStream is not instrumented.
 package bedrockruntime
 

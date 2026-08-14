@@ -25,10 +25,6 @@ var skipSpecs = map[string]string{
 	// tracked by the Go SDK's Anthropic instrumentation.
 	"anthropic/prompt_caching_5m": "prompt caching metrics not yet supported",
 	"anthropic/prompt_caching_1h": "prompt caching metrics not yet supported",
-	// Bedrock attachment format: the Go SDK puts the braintrust_attachment
-	// reference under source (Anthropic-style), but the spec expects it under
-	// image.source.bytes (Bedrock-native nesting).
-	"bedrock/attachments": "attachment nesting format differs from spec",
 }
 
 // specRoot is set by TestMain after fetching specs.

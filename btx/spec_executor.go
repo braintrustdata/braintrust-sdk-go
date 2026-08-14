@@ -700,23 +700,45 @@ func buildBedrockContentBlock(raw any) brtypes.ContentBlock {
 	// Image block: {image: {format: "png", source: {bytes: "<base64>"}}}
 	if img, ok := m["image"].(map[string]any); ok {
 		format := stringFromMap(img, "format")
-		if src, ok := img["source"].(map[string]any); ok {
-			if b64, ok := src["bytes"].(string); ok {
-				data, err := base64.StdEncoding.DecodeString(b64)
-				if err != nil {
-					return nil
-				}
-				return &brtypes.ContentBlockMemberImage{
-					Value: brtypes.ImageBlock{
-						Format: brtypes.ImageFormat(format),
-						Source: &brtypes.ImageSourceMemberBytes{Value: data},
-					},
-				}
+		if data, ok := bedrockBlockBytes(img); ok {
+			return &brtypes.ContentBlockMemberImage{
+				Value: brtypes.ImageBlock{
+					Format: brtypes.ImageFormat(format),
+					Source: &brtypes.ImageSourceMemberBytes{Value: data},
+				},
+			}
+		}
+	}
+
+	// Document block: {document: {format: "pdf", name: "blank", source: {bytes: "..."}}}
+	if doc, ok := m["document"].(map[string]any); ok {
+		format := stringFromMap(doc, "format")
+		name := stringFromMap(doc, "name")
+		if data, ok := bedrockBlockBytes(doc); ok {
+			return &brtypes.ContentBlockMemberDocument{
+				Value: brtypes.DocumentBlock{
+					Format: brtypes.DocumentFormat(format),
+					Name:   &name,
+					Source: &brtypes.DocumentSourceMemberBytes{Value: data},
+				},
 			}
 		}
 	}
 
 	return nil
+}
+
+func bedrockBlockBytes(block map[string]any) ([]byte, bool) {
+	source, ok := block["source"].(map[string]any)
+	if !ok {
+		return nil, false
+	}
+	encoded, ok := source["bytes"].(string)
+	if !ok {
+		return nil, false
+	}
+	data, err := base64.StdEncoding.DecodeString(encoded)
+	return data, err == nil
 }
 
 // --- Google/Gemini executor ---

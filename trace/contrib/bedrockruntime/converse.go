@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
-	smithydoc "github.com/aws/aws-sdk-go-v2/service/bedrockruntime/document"
+	bedrockdoc "github.com/aws/aws-sdk-go-v2/service/bedrockruntime/document"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
 	"go.opentelemetry.io/otel/trace"
 
@@ -26,28 +26,58 @@ func parseUsageTokens(u *types.TokenUsage) map[string]int64 {
 	}
 
 	var input, cacheRead, cacheWrite int64
-	if u.InputTokens != nil {
+	hasPromptUsage := false
+	if u.InputTokens != nil && *u.InputTokens >= 0 {
 		input = int64(*u.InputTokens)
+		hasPromptUsage = true
 	}
-	if u.OutputTokens != nil {
+	if u.OutputTokens != nil && *u.OutputTokens >= 0 {
 		metrics["completion_tokens"] = int64(*u.OutputTokens)
 	}
-	if u.CacheReadInputTokens != nil {
+	if u.CacheReadInputTokens != nil && *u.CacheReadInputTokens >= 0 {
 		cacheRead = int64(*u.CacheReadInputTokens)
 		metrics["prompt_cached_tokens"] = cacheRead
+		hasPromptUsage = true
 	}
-	if u.CacheWriteInputTokens != nil {
+	if u.CacheWriteInputTokens != nil && *u.CacheWriteInputTokens >= 0 {
 		cacheWrite = int64(*u.CacheWriteInputTokens)
 		metrics["prompt_cache_creation_tokens"] = cacheWrite
+		hasPromptUsage = true
 	}
 
-	promptTotal := input + cacheRead + cacheWrite
-	metrics["prompt_tokens"] = promptTotal
+	var detailedCacheWrite int64
+	hasDetailedCacheWrite := false
+	for _, detail := range u.CacheDetails {
+		if detail.InputTokens == nil || *detail.InputTokens < 0 {
+			continue
+		}
+		value := int64(*detail.InputTokens)
+		detailedCacheWrite += value
+		hasDetailedCacheWrite = true
+		switch detail.Ttl {
+		case types.CacheTTLFiveMinutes:
+			metrics["prompt_cache_creation_5m_tokens"] += value
+		case types.CacheTTLOneHour:
+			metrics["prompt_cache_creation_1h_tokens"] += value
+		}
+	}
+	if hasDetailedCacheWrite {
+		hasPromptUsage = true
+		if u.CacheWriteInputTokens == nil || *u.CacheWriteInputTokens < 0 {
+			cacheWrite = detailedCacheWrite
+			metrics["prompt_cache_creation_tokens"] = cacheWrite
+		}
+	}
 
-	if u.TotalTokens != nil {
+	if hasPromptUsage {
+		promptTotal := input + cacheRead + cacheWrite
+		metrics["prompt_tokens"] = promptTotal
+		if completion, ok := metrics["completion_tokens"]; ok && u.TotalTokens == nil {
+			metrics["tokens"] = promptTotal + completion
+		}
+	}
+	if u.TotalTokens != nil && *u.TotalTokens >= 0 {
 		metrics["tokens"] = int64(*u.TotalTokens)
-	} else if completion, ok := metrics["completion_tokens"]; ok {
-		metrics["tokens"] = promptTotal + completion
 	}
 	return metrics
 }
@@ -72,13 +102,12 @@ func (t *converseTracer) StartSpan(ctx context.Context, start time.Time, in any)
 	}
 
 	setConverseInputAttrs(t.cfg.logger, span, t.metadata, params.ModelId, params.Messages, params.System,
-		params.InferenceConfig, params.ToolConfig, params.AdditionalModelRequestFields, false)
+		params.InferenceConfig, params.ToolConfig, false)
 	return ctx, span
 }
 
-func (t *converseTracer) TagOutput(span trace.Span, out any, start time.Time) {
+func (t *converseTracer) TagOutput(span trace.Span, out any, _ time.Time) {
 	defer span.End()
-	timeToLastByte := time.Since(start).Seconds()
 
 	resp, ok := out.(*bedrockruntime.ConverseOutput)
 	if !ok || resp == nil {
@@ -98,7 +127,6 @@ func (t *converseTracer) TagOutput(span trace.Span, out any, start time.Time) {
 	for k, v := range parseUsageTokens(resp.Usage) {
 		metrics[k] = v
 	}
-	metrics["time_to_first_token"] = timeToLastByte
 	setJSONAttr(t.cfg.logger, span, "braintrust.metrics", metrics)
 }
 
@@ -113,7 +141,6 @@ func setConverseInputAttrs(
 	system []types.SystemContentBlock,
 	infer *types.InferenceConfiguration,
 	toolCfg *types.ToolConfiguration,
-	additional smithydoc.Interface,
 	streaming bool,
 ) {
 	if modelID != nil {
@@ -130,7 +157,7 @@ func setConverseInputAttrs(
 			metadata["top_p"] = *infer.TopP
 		}
 		if len(infer.StopSequences) > 0 {
-			metadata["stop_sequences"] = infer.StopSequences
+			metadata["stop"] = infer.StopSequences
 		}
 	}
 	if toolCfg != nil {
@@ -139,12 +166,6 @@ func setConverseInputAttrs(
 		}
 		if tc := toolChoiceToJSON(toolCfg.ToolChoice); tc != nil {
 			metadata["tool_choice"] = tc
-		}
-	}
-	if additional != nil {
-		var v any
-		if err := additional.UnmarshalSmithyDocument(&v); err == nil && v != nil {
-			metadata["additional_model_request_fields"] = v
 		}
 	}
 	if streaming {
@@ -230,6 +251,10 @@ func contentBlockToJSON(b types.ContentBlock) any {
 		return imageBlockToJSON(v.Value)
 	case *types.ContentBlockMemberDocument:
 		return documentBlockToJSON(v.Value)
+	case *types.ContentBlockMemberAudio:
+		return audioBlockToJSON(v.Value)
+	case *types.ContentBlockMemberVideo:
+		return videoBlockToJSON(v.Value)
 	case *types.ContentBlockMemberReasoningContent:
 		return reasoningBlockToJSON(v.Value)
 	default:
@@ -238,42 +263,77 @@ func contentBlockToJSON(b types.ContentBlock) any {
 }
 
 func imageBlockToJSON(b types.ImageBlock) map[string]any {
-	out := map[string]any{"type": "image", "format": string(b.Format)}
+	image := map[string]any{"format": string(b.Format)}
 	switch src := b.Source.(type) {
 	case *types.ImageSourceMemberBytes:
-		// Emit the Anthropic-style base64 data URL shape so the Braintrust UI
-		// can render the image inline, matching the trace/contrib/anthropic
-		// integration's representation.
-		out["source"] = map[string]any{
-			"type":       "base64",
-			"media_type": "image/" + string(b.Format),
-			"data":       base64.StdEncoding.EncodeToString(src.Value),
-		}
+		image["source"] = map[string]any{"bytes": base64.StdEncoding.EncodeToString(src.Value)}
 	case *types.ImageSourceMemberS3Location:
-		s3 := map[string]any{"type": "s3"}
-		if src.Value.Uri != nil {
-			s3["uri"] = *src.Value.Uri
-		}
-		out["source"] = s3
+		image["source"] = s3SourceToJSON(src.Value)
 	}
-	return out
+	return map[string]any{"type": "image", "image": image}
 }
 
 func documentBlockToJSON(b types.DocumentBlock) map[string]any {
-	out := map[string]any{"type": "document", "format": string(b.Format)}
+	document := map[string]any{"format": string(b.Format)}
 	if b.Name != nil {
-		out["name"] = *b.Name
+		document["name"] = *b.Name
+	}
+	if b.Context != nil {
+		document["context"] = *b.Context
 	}
 	if b.Citations != nil && b.Citations.Enabled != nil {
-		out["citations_enabled"] = *b.Citations.Enabled
+		document["citations_enabled"] = *b.Citations.Enabled
 	}
 	switch src := b.Source.(type) {
 	case *types.DocumentSourceMemberText:
-		out["source"] = map[string]any{"type": "text", "text": src.Value}
+		document["source"] = map[string]any{"text": src.Value}
 	case *types.DocumentSourceMemberBytes:
-		out["source"] = map[string]any{"type": "bytes", "size": len(src.Value)}
+		document["source"] = map[string]any{"bytes": base64.StdEncoding.EncodeToString(src.Value)}
+	case *types.DocumentSourceMemberContent:
+		content := make([]any, 0, len(src.Value))
+		for _, block := range src.Value {
+			if text, ok := block.(*types.DocumentContentBlockMemberText); ok {
+				content = append(content, map[string]any{"text": text.Value})
+			}
+		}
+		document["source"] = map[string]any{"content": content}
+	case *types.DocumentSourceMemberS3Location:
+		document["source"] = s3SourceToJSON(src.Value)
 	}
-	return out
+	return map[string]any{"type": "document", "document": document}
+}
+
+func audioBlockToJSON(b types.AudioBlock) map[string]any {
+	audio := map[string]any{"format": string(b.Format)}
+	switch src := b.Source.(type) {
+	case *types.AudioSourceMemberBytes:
+		audio["source"] = map[string]any{"bytes": base64.StdEncoding.EncodeToString(src.Value)}
+	case *types.AudioSourceMemberS3Location:
+		audio["source"] = s3SourceToJSON(src.Value)
+	}
+	return map[string]any{"type": "audio", "audio": audio}
+}
+
+func videoBlockToJSON(b types.VideoBlock) map[string]any {
+	video := map[string]any{"format": string(b.Format)}
+	switch src := b.Source.(type) {
+	case *types.VideoSourceMemberBytes:
+		video["source"] = map[string]any{"bytes": base64.StdEncoding.EncodeToString(src.Value)}
+	case *types.VideoSourceMemberS3Location:
+		video["source"] = s3SourceToJSON(src.Value)
+	}
+	return map[string]any{"type": "video", "video": video}
+}
+
+func s3SourceToJSON(location types.S3Location) map[string]any {
+	s3 := map[string]any{}
+	if location.Uri != nil {
+		s3["uri"] = *location.Uri
+	}
+	if location.BucketOwner != nil {
+		s3["bucket_owner"] = *location.BucketOwner
+	}
+	return map[string]any{"s3_location": s3}
 }
 
 func reasoningBlockToJSON(b types.ReasoningContentBlock) map[string]any {
@@ -297,11 +357,8 @@ func toolUseBlockToJSON(u types.ToolUseBlock) map[string]any {
 	if u.Name != nil {
 		out["name"] = *u.Name
 	}
-	if u.Input != nil {
-		var v any
-		if err := u.Input.UnmarshalSmithyDocument(&v); err == nil {
-			out["input"] = v
-		}
+	if input, ok := smithyDocumentToJSON(u.Input); ok {
+		out["input"] = input
 	}
 	return out
 }
@@ -320,10 +377,7 @@ func toolResultBlockToJSON(r types.ToolResultBlock) map[string]any {
 		case *types.ToolResultContentBlockMemberText:
 			content = append(content, map[string]any{"type": "text", "text": v.Value})
 		case *types.ToolResultContentBlockMemberJson:
-			var jv any
-			if v.Value != nil {
-				_ = v.Value.UnmarshalSmithyDocument(&jv)
-			}
+			jv, _ := smithyDocumentToJSON(v.Value)
 			content = append(content, map[string]any{"type": "json", "json": jv})
 		default:
 			content = append(content, fallbackMarshal(c))
@@ -348,56 +402,82 @@ func fallbackMarshal(v any) any {
 	return out
 }
 
-// toolsToJSON flattens a list of Tools into JSON-ready maps.
+// toolsToJSON normalizes function tools to the OpenAI tool-definition shape.
+// Bedrock system tools remain provider-native because they are not functions.
 func toolsToJSON(tools []types.Tool) []any {
 	if len(tools) == 0 {
 		return nil
 	}
 	out := make([]any, 0, len(tools))
-	for _, t := range tools {
-		switch v := t.(type) {
+	for _, tool := range tools {
+		switch v := tool.(type) {
 		case *types.ToolMemberToolSpec:
-			spec := map[string]any{}
+			function := map[string]any{}
 			if v.Value.Name != nil {
-				spec["name"] = *v.Value.Name
+				function["name"] = *v.Value.Name
 			}
 			if v.Value.Description != nil {
-				spec["description"] = *v.Value.Description
+				function["description"] = *v.Value.Description
 			}
-			if v.Value.InputSchema != nil {
-				if js, ok := v.Value.InputSchema.(*types.ToolInputSchemaMemberJson); ok && js.Value != nil {
-					var schema any
-					if err := js.Value.UnmarshalSmithyDocument(&schema); err == nil {
-						spec["input_schema"] = schema
-					}
+			if v.Value.Strict != nil {
+				function["strict"] = *v.Value.Strict
+			}
+			if schema, ok := v.Value.InputSchema.(*types.ToolInputSchemaMemberJson); ok {
+				if parameters, ok := smithyDocumentToJSON(schema.Value); ok {
+					function["parameters"] = parameters
 				}
 			}
-			out = append(out, map[string]any{"tool_spec": spec})
-		default:
-			out = append(out, fallbackMarshal(t))
+			out = append(out, map[string]any{"type": "function", "function": function})
+		case *types.ToolMemberSystemTool:
+			systemTool := map[string]any{"type": "system"}
+			if v.Value.Name != nil {
+				systemTool["name"] = *v.Value.Name
+			}
+			out = append(out, systemTool)
+		case *types.ToolMemberCachePoint:
+			cachePoint := map[string]any{"type": "cache_point", "cache_type": string(v.Value.Type)}
+			if v.Value.Ttl != "" {
+				cachePoint["ttl"] = string(v.Value.Ttl)
+			}
+			out = append(out, cachePoint)
 		}
 	}
 	return out
 }
 
 func toolChoiceToJSON(tc types.ToolChoice) any {
-	if tc == nil {
-		return nil
-	}
 	switch v := tc.(type) {
 	case *types.ToolChoiceMemberAuto:
-		return map[string]any{"type": "auto"}
+		return "auto"
 	case *types.ToolChoiceMemberAny:
-		return map[string]any{"type": "any"}
+		return "required"
 	case *types.ToolChoiceMemberTool:
-		out := map[string]any{"type": "tool"}
+		function := map[string]any{}
 		if v.Value.Name != nil {
-			out["name"] = *v.Value.Name
+			function["name"] = *v.Value.Name
 		}
-		return out
+		return map[string]any{"type": "function", "function": function}
 	default:
-		return fallbackMarshal(tc)
+		return nil
 	}
+}
+
+func smithyDocumentToJSON(document bedrockdoc.Interface) (any, bool) {
+	// Request documents created by document.NewLazyDocument are marshalers.
+	// Marshal first so their original value is available before AWS sends it;
+	// UnmarshalSmithyDocument is primarily reliable for response documents.
+	if document == nil {
+		return nil, false
+	}
+	data, err := document.MarshalSmithyDocument()
+	if err != nil {
+		return nil, false
+	}
+	var value any
+	if err := json.Unmarshal(data, &value); err != nil {
+		return nil, false
+	}
+	return value, true
 }
 
 // extractOutputMessage returns a JSON-friendly message map from a ConverseOutput union.
