@@ -192,38 +192,48 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// First turn: model decides to call the tool
-	firstResp, err := openaiModel.Generate(ctx, []*schema.Message{
+	// Run the full model → tool → model turn inside an Eino graph. The graph
+	// becomes a parent task span, with each model call and tool execution as a child.
+	agentTurn := compose.InvokableLambda(func(ctx context.Context, messages []*schema.Message) (*schema.Message, error) {
+		firstResp, err := openaiModel.Generate(ctx, messages)
+		if err != nil {
+			return nil, fmt.Errorf("initial model call: %w", err)
+		}
+		if len(firstResp.ToolCalls) == 0 {
+			return firstResp, nil
+		}
+
+		toolResults, err := toolsNode.Invoke(ctx, firstResp)
+		if err != nil {
+			return nil, fmt.Errorf("tool execution: %w", err)
+		}
+		followUp := append(append([]*schema.Message{}, messages...), firstResp)
+		followUp = append(followUp, toolResults...)
+		return openaiModel.Generate(ctx, followUp)
+	})
+
+	agentGraph := compose.NewGraph[[]*schema.Message, *schema.Message]()
+	if err := agentGraph.AddLambdaNode("agent_turn", agentTurn); err != nil {
+		log.Fatal(err)
+	}
+	if err := agentGraph.AddEdge(compose.START, "agent_turn"); err != nil {
+		log.Fatal(err)
+	}
+	if err := agentGraph.AddEdge("agent_turn", compose.END); err != nil {
+		log.Fatal(err)
+	}
+	agent, err := agentGraph.Compile(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	finalResp, err := agent.Invoke(ctx, []*schema.Message{
 		{Role: schema.User, Content: "What is 6 multiplied by 7?"},
 	})
 	if err != nil {
-		log.Fatalf("Tool calling Generate failed: %v", err)
+		log.Fatalf("Agent turn failed: %v", err)
 	}
+	fmt.Printf("Tool call result: %s\n", finalResp.Content)
 	handler.Wait()
-
-	// Second turn: execute tool calls via ToolsNode
-	if len(firstResp.ToolCalls) > 0 {
-		toolResults, err := toolsNode.Invoke(ctx, firstResp)
-		if err != nil {
-			log.Fatalf("ToolsNode Invoke failed: %v", err)
-		}
-		handler.Wait()
-
-		// Third turn: model incorporates tool results
-		messages := []*schema.Message{
-			{Role: schema.User, Content: "What is 6 multiplied by 7?"},
-			firstResp,
-		}
-		messages = append(messages, toolResults...)
-		finalResp, err := openaiModel.Generate(ctx, messages)
-		if err != nil {
-			log.Fatalf("Final Generate failed: %v", err)
-		}
-		fmt.Printf("Tool call result: %s\n", finalResp.Content)
-		handler.Wait()
-	} else {
-		fmt.Printf("Model answered directly: %s\n", firstResp.Content)
-	}
 
 	// Example 6: OpenAI embeddings
 	fmt.Println("\n6. OpenAI embeddings")
