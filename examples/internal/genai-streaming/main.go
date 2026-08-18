@@ -3,9 +3,9 @@
 // calls produced spans -- streaming calls silently passed through without
 // any tracing.
 //
-// The example makes one non-streaming call and one streaming call, then
-// inspects the captured spans to show that both produce complete trace data
-// including output, token metrics, and time_to_first_token.
+// The example makes non-streaming, streaming thinking, and streaming image
+// calls, then inspects the captured spans to show complete trace data. Streamed
+// thought and media parts are accumulated without the SSE parser truncating them.
 package main
 
 import (
@@ -56,10 +56,17 @@ func main() {
 	}
 	fmt.Printf("Response: %s\n", resp.Text())
 
-	// --- Streaming call (was previously uninstrumented) ---
-	fmt.Println("\n=== Streaming call ===")
-	iter := client.Models.GenerateContentStream(ctx, "gemini-2.0-flash",
-		genai.Text("Count from 1 to 3, one number per line."), nil)
+	// --- Streaming thinking call ---
+	fmt.Println("\n=== Streaming thinking call ===")
+	thinkingBudget := int32(256)
+	iter := client.Models.GenerateContentStream(ctx, "gemini-2.5-flash",
+		genai.Text("Explain briefly why the sky appears blue."),
+		&genai.GenerateContentConfig{
+			ThinkingConfig: &genai.ThinkingConfig{
+				IncludeThoughts: true,
+				ThinkingBudget:  &thinkingBudget,
+			},
+		})
 	fmt.Print("Response: ")
 	for chunk, err := range iter {
 		if err != nil {
@@ -68,6 +75,24 @@ func main() {
 		fmt.Print(chunk.Text())
 	}
 	fmt.Println()
+
+	// --- Streaming image call (the SSE data line is typically larger than 64 KiB) ---
+	fmt.Println("\n=== Streaming image call ===")
+	imageIter := client.Models.GenerateContentStream(ctx, "gemini-2.5-flash-image",
+		genai.Text("Generate a simple blue square icon."),
+		&genai.GenerateContentConfig{ResponseModalities: []string{"TEXT", "IMAGE"}})
+	for chunk, err := range imageIter {
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, candidate := range chunk.Candidates {
+			for _, part := range candidate.Content.Parts {
+				if part.InlineData != nil {
+					fmt.Printf("Received %d image bytes\n", len(part.InlineData.Data))
+				}
+			}
+		}
+	}
 
 	// --- Inspect spans ---
 	fmt.Println("\n=== Captured spans ===")
@@ -84,19 +109,38 @@ func main() {
 		fmt.Printf("  model:              %v\n", metadata["model"])
 		fmt.Printf("  prompt_tokens:      %v\n", metrics["prompt_tokens"])
 		fmt.Printf("  completion_tokens:  %v\n", metrics["completion_tokens"])
-		fmt.Printf("  time_to_first_token: %v seconds\n", metrics["time_to_first_token"])
+		if ttft, ok := metrics["time_to_first_token"]; ok {
+			fmt.Printf("  time_to_first_token: %v seconds\n", ttft)
+		}
 
 		output := jsonAttr(span, "braintrust.output_json")
 		if candidates, ok := output["candidates"].([]any); ok && len(candidates) > 0 {
 			if c, ok := candidates[0].(map[string]any); ok {
 				if content, ok := c["content"].(map[string]any); ok {
-					if parts, ok := content["parts"].([]any); ok && len(parts) > 0 {
-						if p, ok := parts[0].(map[string]any); ok {
-							text := fmt.Sprintf("%v", p["text"])
+					if parts, ok := content["parts"].([]any); ok {
+						for _, rawPart := range parts {
+							part, ok := rawPart.(map[string]any)
+							if !ok {
+								continue
+							}
+							if inlineData, ok := part["inlineData"].(map[string]any); ok {
+								if data, ok := inlineData["data"].(string); ok {
+									fmt.Printf("  output image:       %d base64 characters\n", len(data))
+								}
+								continue
+							}
+							text, ok := part["text"].(string)
+							if !ok {
+								continue
+							}
 							if len(text) > 80 {
 								text = text[:80] + "..."
 							}
-							fmt.Printf("  output text:        %q\n", text)
+							label := "output text"
+							if thought, _ := part["thought"].(bool); thought {
+								label = "thought"
+							}
+							fmt.Printf("  %-19s %q\n", label+":", text)
 						}
 					}
 				}

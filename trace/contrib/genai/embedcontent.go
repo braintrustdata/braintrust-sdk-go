@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"strings"
 	"time"
 
 	"go.opentelemetry.io/otel/trace"
@@ -26,7 +27,7 @@ func newEmbedContentTracer(cfg *config, model string) *embedContentTracer {
 		cfg:   cfg,
 		model: model,
 		metadata: map[string]any{
-			"provider": "gemini",
+			"provider": "google",
 		},
 	}
 }
@@ -51,43 +52,9 @@ func (et *embedContentTracer) StartSpan(ctx context.Context, t time.Time, reques
 		et.metadata["model"] = et.model
 	}
 
-	// Fields can live at the top level (legacy :embedContent body) or inside
-	// each element of `requests` (the `batchEmbedContents` body that the Go
-	// SDK always sends, even for a single input).
-	metaFields := []string{"taskType", "title", "outputDimensionality"}
-	for _, field := range metaFields {
-		if v, ok := raw[field]; ok {
-			et.metadata[field] = v
-		}
+	if err := internal.SetJSONAttr(span, "braintrust.input_json", canonicalEmbeddingInput(raw)); err != nil {
+		return ctx, span, err
 	}
-	if reqs, ok := raw["requests"].([]interface{}); ok && len(reqs) > 0 {
-		if first, ok := reqs[0].(map[string]interface{}); ok {
-			for _, field := range metaFields {
-				if _, already := et.metadata[field]; already {
-					continue
-				}
-				if v, ok := first[field]; ok {
-					et.metadata[field] = v
-				}
-			}
-		}
-	}
-
-	inputLog := map[string]any{}
-	if et.model != "" {
-		inputLog["model"] = et.model
-	}
-	if reqs, ok := raw["requests"]; ok {
-		inputLog["requests"] = reqs
-	} else if content, ok := raw["content"]; ok {
-		inputLog["content"] = content
-	}
-	if len(inputLog) > 0 {
-		if err := internal.SetJSONAttr(span, "braintrust.input_json", inputLog); err != nil {
-			return ctx, span, err
-		}
-	}
-
 	if err := internal.SetJSONAttr(span, "braintrust.metadata", et.metadata); err != nil {
 		return ctx, span, err
 	}
@@ -104,15 +71,13 @@ func (et *embedContentTracer) TagSpan(span trace.Span, body io.Reader) error {
 	if err := internal.SetJSONAttr(span, "braintrust.metadata", et.metadata); err != nil {
 		return err
 	}
-
-	output := embedContentOutputSummary(raw)
-	if err := internal.SetJSONAttr(span, "braintrust.output_json", output); err != nil {
+	if err := internal.SetJSONAttr(span, "braintrust.output_json", embedContentOutputSummary(raw)); err != nil {
 		return err
 	}
 
 	metrics := make(map[string]any)
 	if usage, ok := raw["usageMetadata"].(map[string]any); ok {
-		for k, v := range parseUsageTokens(usage) {
+		for k, v := range parseEmbeddingUsageTokens(usage) {
 			metrics[k] = v
 		}
 	}
@@ -123,36 +88,153 @@ func (et *embedContentTracer) TagSpan(span trace.Span, body io.Reader) error {
 	return nil
 }
 
-// embedContentOutputSummary returns shape-only metadata about embeddings to
-// match the Python SDK convention for Google GenAI:
-//
-//	{"embedding_length": N, "embeddings_count": M}.
-//
-// For single-input responses (`{"embedding": {"values": [...]}}`),
-// embeddings_count is 1. For batch responses (`{"embeddings": [...]}`) it is
-// the length of the list.
+// embedContentOutputSummary intentionally reports only the number of returned
+// embeddings. Raw vectors, dimensions, and derived vector data are omitted.
 func embedContentOutputSummary(raw map[string]interface{}) map[string]any {
-	out := map[string]any{}
-	// Single-input embedContent response
-	if emb, ok := raw["embedding"].(map[string]interface{}); ok {
-		if values, ok := emb["values"].([]interface{}); ok {
-			out["embedding_length"] = len(values)
-			out["embeddings_count"] = 1
-			return out
-		}
+	if _, ok := raw["embedding"].(map[string]interface{}); ok {
+		return map[string]any{"count": 1}
 	}
-	// Batch response
-	if list, ok := raw["embeddings"].([]interface{}); ok {
-		out["embeddings_count"] = len(list)
-		if len(list) > 0 {
-			if first, ok := list[0].(map[string]interface{}); ok {
-				if values, ok := first["values"].([]interface{}); ok {
-					out["embedding_length"] = len(values)
-				}
+	if embeddings, ok := raw["embeddings"].([]interface{}); ok {
+		return map[string]any{"count": len(embeddings)}
+	}
+	return map[string]any{"count": 0}
+}
+
+func canonicalEmbeddingInput(raw map[string]any) map[string]any {
+	input := map[string]any{"inputs": []any{}}
+	inputs := make([]any, 0)
+
+	if requests, ok := raw["requests"].([]any); ok {
+		for _, rawRequest := range requests {
+			request, ok := rawRequest.(map[string]any)
+			if !ok {
+				continue
+			}
+			if content, ok := request["content"].(map[string]any); ok {
+				inputs = append(inputs, map[string]any{"content": canonicalEmbeddingContent(content)})
+			}
+		}
+	} else if content, ok := raw["content"].(map[string]any); ok {
+		inputs = append(inputs, map[string]any{"content": canonicalEmbeddingContent(content)})
+	}
+	input["inputs"] = inputs
+
+	if dimensions, ok := raw["outputDimensionality"]; ok {
+		input["output_dimensions"] = dimensions
+	} else if requests, ok := raw["requests"].([]any); ok && len(requests) > 0 {
+		if first, ok := requests[0].(map[string]any); ok {
+			if dimensions, ok := first["outputDimensionality"]; ok {
+				input["output_dimensions"] = dimensions
 			}
 		}
 	}
-	return out
+
+	return input
+}
+
+func canonicalEmbeddingContent(content map[string]any) any {
+	parts, _ := content["parts"].([]any)
+	if len(parts) == 1 {
+		if part, ok := parts[0].(map[string]any); ok {
+			if text, ok := part["text"].(string); ok {
+				return text
+			}
+		}
+	}
+
+	// The canonical embedding schema only permits text, image_url, and file
+	// parts. Provider-only companion fields and unsupported part types are
+	// intentionally omitted rather than copied into arbitrary telemetry.
+	normalized := make([]any, 0, len(parts))
+	for _, rawPart := range parts {
+		part, ok := rawPart.(map[string]any)
+		if !ok {
+			continue
+		}
+		if text, ok := part["text"].(string); ok {
+			normalized = append(normalized, map[string]any{"type": "text", "text": text})
+			continue
+		}
+		if mediaPart := canonicalEmbeddingMediaPart(part); mediaPart != nil {
+			normalized = append(normalized, mediaPart)
+		}
+	}
+	return normalized
+}
+
+func canonicalEmbeddingMediaPart(part map[string]any) any {
+	inlineData, _ := part["inlineData"].(map[string]any)
+	if inlineData == nil {
+		inlineData, _ = part["inline_data"].(map[string]any)
+	}
+	if inlineData != nil {
+		mimeType, _ := inlineData["mimeType"].(string)
+		if mimeType == "" {
+			mimeType, _ = inlineData["mime_type"].(string)
+		}
+		data, _ := inlineData["data"].(string)
+		if mimeType == "" || data == "" {
+			return nil
+		}
+		return canonicalEmbeddingMedia(mimeType, "data:"+mimeType+";base64,"+data, "")
+	}
+
+	fileData, _ := part["fileData"].(map[string]any)
+	if fileData == nil {
+		fileData, _ = part["file_data"].(map[string]any)
+	}
+	if fileData != nil {
+		mimeType, _ := fileData["mimeType"].(string)
+		if mimeType == "" {
+			mimeType, _ = fileData["mime_type"].(string)
+		}
+		uri, _ := fileData["fileUri"].(string)
+		if uri == "" {
+			uri, _ = fileData["file_uri"].(string)
+		}
+		if uri == "" {
+			return nil
+		}
+		filename, _ := fileData["displayName"].(string)
+		if filename == "" {
+			filename, _ = fileData["display_name"].(string)
+		}
+		return canonicalEmbeddingMedia(mimeType, uri, filename)
+	}
+	return nil
+}
+
+func canonicalEmbeddingMedia(mimeType, value, filename string) any {
+	if strings.HasPrefix(mimeType, "image/") {
+		return map[string]any{
+			"type":      "image_url",
+			"image_url": map[string]any{"url": value},
+		}
+	}
+	file := map[string]any{"file_data": value}
+	if filename != "" {
+		file["filename"] = filename
+	}
+	return map[string]any{
+		"type": "file",
+		"file": file,
+	}
+}
+
+func parseEmbeddingUsageTokens(usage map[string]any) map[string]int64 {
+	metrics := map[string]int64{}
+	if ok, promptTokens := internal.ToInt64(usage["promptTokenCount"]); ok {
+		metrics["prompt_tokens"] = promptTokens
+	}
+	if ok, totalTokens := internal.ToInt64(usage["totalTokenCount"]); ok {
+		metrics["tokens"] = totalTokens
+	} else if promptTokens, ok := metrics["prompt_tokens"]; ok {
+		metrics["tokens"] = promptTokens
+	}
+	if tokens, ok := sumModalityTokens(usage["promptTokensDetails"], "AUDIO"); ok {
+		metrics["prompt_audio_tokens"] = tokens
+	}
+	return metrics
 }
 
 // Ensure our tracer implements the shared interface

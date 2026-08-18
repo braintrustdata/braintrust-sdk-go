@@ -36,22 +36,15 @@ func TestEmbedContentSingle(t *testing.T) {
 
 	ts.AssertJSONAttrEquals("braintrust.span_attributes", map[string]any{"type": "llm"})
 
-	inputAttr := ts.Attr("braintrust.input_json")
-	require.NotNil(t, inputAttr)
-	assert.Contains(t, inputAttr.String(), "quick brown fox")
-
-	output := ts.Output()
-	outputMap, ok := output.(map[string]interface{})
-	require.True(t, ok)
-	embLen, ok := outputMap["embedding_length"].(float64)
-	require.True(t, ok, "output should include embedding_length")
-	assert.Greater(t, embLen, float64(0))
-	count, ok := outputMap["embeddings_count"].(float64)
-	require.True(t, ok, "output should include embeddings_count")
-	assert.Equal(t, float64(1), count)
+	assert.Equal(t, map[string]any{
+		"inputs": []any{
+			map[string]any{"content": "The quick brown fox jumps over the lazy dog"},
+		},
+	}, ts.Input())
+	assert.Equal(t, map[string]any{"count": float64(1)}, ts.Output())
 
 	metadata := ts.Metadata()
-	assert.Equal(t, "gemini", metadata["provider"])
+	assert.Equal(t, "google", metadata["provider"])
 	assert.Equal(t, testEmbeddingModel, metadata["model"])
 }
 
@@ -77,38 +70,109 @@ func TestEmbedContentBatch(t *testing.T) {
 	ts := exporter.FlushOne()
 	ts.AssertNameIs("embed_content")
 
-	inputAttr := ts.Attr("braintrust.input_json")
-	require.NotNil(t, inputAttr)
-	for _, want := range []string{"hello world", "goodbye world", "braintrust tracing"} {
-		assert.Contains(t, inputAttr.String(), want)
-	}
-
-	output := ts.Output()
-	outputMap, ok := output.(map[string]interface{})
-	require.True(t, ok)
-	embLen, ok := outputMap["embedding_length"].(float64)
-	require.True(t, ok)
-	assert.Greater(t, embLen, float64(0))
-	count, ok := outputMap["embeddings_count"].(float64)
-	require.True(t, ok)
-	assert.Equal(t, float64(3), count)
+	assert.Equal(t, map[string]any{
+		"inputs": []any{
+			map[string]any{"content": "hello world"},
+			map[string]any{"content": "goodbye world"},
+			map[string]any{"content": "braintrust tracing"},
+		},
+	}, ts.Input())
+	assert.Equal(t, map[string]any{"count": float64(3)}, ts.Output())
 }
 
 func TestEmbedContentWithTaskType(t *testing.T) {
 	client, exporter := setUpTest(t)
 
+	outputDimensions := int32(256)
 	resp, err := client.Models.EmbedContent(
 		context.Background(),
 		testEmbeddingModel,
 		genai.Text("What is the capital of France?"),
 		&genai.EmbedContentConfig{
-			TaskType: "RETRIEVAL_QUERY",
+			TaskType:             "RETRIEVAL_QUERY",
+			OutputDimensionality: &outputDimensions,
 		},
 	)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 
 	ts := exporter.FlushOne()
+	assert.Equal(t, map[string]any{
+		"inputs": []any{
+			map[string]any{"content": "What is the capital of France?"},
+		},
+		"output_dimensions": float64(256),
+	}, ts.Input())
+
 	metadata := ts.Metadata()
-	assert.Equal(t, "RETRIEVAL_QUERY", metadata["taskType"])
+	assert.Equal(t, map[string]any{
+		"provider": "google",
+		"model":    testEmbeddingModel,
+	}, metadata)
+}
+
+func TestCanonicalEmbeddingInput(t *testing.T) {
+	raw := map[string]any{
+		"requests": []any{
+			map[string]any{
+				"content": map[string]any{
+					"parts": []any{
+						map[string]any{"text": "Describe this image"},
+						map[string]any{"inlineData": map[string]any{
+							"mimeType": "image/png",
+							"data":     "aGVsbG8=",
+						}},
+						map[string]any{
+							"fileData": map[string]any{
+								"mimeType":    "video/mp4",
+								"fileUri":     "gs://bucket/demo.mp4",
+								"displayName": "demo.mp4",
+							},
+							"videoMetadata": map[string]any{"startOffset": "1s"},
+						},
+					},
+				},
+				"outputDimensionality": float64(256),
+			},
+		},
+	}
+
+	assert.Equal(t, map[string]any{
+		"inputs": []any{
+			map[string]any{
+				"content": []any{
+					map[string]any{"type": "text", "text": "Describe this image"},
+					map[string]any{
+						"type":      "image_url",
+						"image_url": map[string]any{"url": "data:image/png;base64,aGVsbG8="},
+					},
+					map[string]any{
+						"type": "file",
+						"file": map[string]any{
+							"file_data": "gs://bucket/demo.mp4",
+							"filename":  "demo.mp4",
+						},
+					},
+				},
+			},
+		},
+		"output_dimensions": float64(256),
+	}, canonicalEmbeddingInput(raw))
+}
+
+func TestParseEmbeddingUsageTokens(t *testing.T) {
+	metrics := parseEmbeddingUsageTokens(map[string]any{
+		"promptTokenCount":     float64(12),
+		"candidatesTokenCount": float64(99),
+		"totalTokenCount":      float64(12),
+		"promptTokensDetails": []any{
+			map[string]any{"modality": "AUDIO", "tokenCount": float64(3)},
+		},
+	})
+
+	assert.Equal(t, map[string]int64{
+		"prompt_tokens":       12,
+		"tokens":              12,
+		"prompt_audio_tokens": 3,
+	}, metrics)
 }

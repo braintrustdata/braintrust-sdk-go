@@ -6,7 +6,9 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
+	"reflect"
 	"strings"
 	"time"
 
@@ -30,7 +32,8 @@ func newGenerateContentTracer(cfg *config, model string, streaming bool) *genera
 		streaming: streaming,
 		model:     model,
 		metadata: map[string]any{
-			"provider": "gemini",
+			"provider": "google",
+			"model":    model,
 		},
 	}
 }
@@ -48,40 +51,25 @@ func (gt *generateContentTracer) StartSpan(ctx context.Context, t time.Time, req
 		return ctx, span, err
 	}
 
-	// Extract metadata fields from request
-	metadataFields := []string{
-		"model",
-		"systemInstruction",
-		"tools",
-		"toolConfig",
-		"safetySettings",
-		"cachedContent",
-	}
-
-	for _, field := range metadataFields {
+	// Extract explicitly allowlisted provider configuration. Conversation
+	// content and system instructions belong in input, while tool definitions
+	// use Braintrust's normalized metadata shape.
+	for _, field := range []string{"safetySettings", "cachedContent"} {
 		if value, exists := raw[field]; exists {
 			gt.metadata[field] = value
 		}
 	}
+	if tools, ok := raw["tools"].([]any); ok && len(tools) > 0 {
+		if normalized := normalizeTools(tools); len(normalized) > 0 {
+			gt.metadata["tools"] = normalized
+		}
+	}
+	if toolConfig, ok := raw["toolConfig"].(map[string]any); ok {
+		captureToolConfig(gt.metadata, toolConfig)
+	}
 
-	// Handle generationConfig
 	if genConfig, ok := raw["generationConfig"].(map[string]any); ok {
-		configFields := []string{
-			"temperature",
-			"topP",
-			"topK",
-			"candidateCount",
-			"maxOutputTokens",
-			"stopSequences",
-			"responseMimeType",
-			"responseSchema",
-			"thinkingConfig",
-		}
-		for _, field := range configFields {
-			if value, exists := genConfig[field]; exists {
-				gt.metadata[field] = value
-			}
-		}
+		captureGenerationConfig(gt.metadata, genConfig)
 	}
 
 	// Log the raw request format
@@ -90,18 +78,17 @@ func (gt *generateContentTracer) StartSpan(ctx context.Context, t time.Time, req
 	// Add model from URL path (or from body if present)
 	if model, ok := raw["model"].(string); ok {
 		inputLog["model"] = model
+		gt.metadata["model"] = model
 	} else if gt.model != "" {
 		inputLog["model"] = gt.model
 	}
 
-	// Add contents as-is
+	// Add conversation content and the separate system instruction as-is.
 	if contents, ok := raw["contents"]; ok {
 		inputLog["contents"] = contents
 	}
-
-	// Add generationConfig as config
-	if genConfig, ok := raw["generationConfig"]; ok {
-		inputLog["config"] = genConfig
+	if systemInstruction, ok := raw["systemInstruction"]; ok {
+		inputLog["systemInstruction"] = systemInstruction
 	}
 
 	if len(inputLog) > 0 {
@@ -133,32 +120,36 @@ func (gt *generateContentTracer) TagSpan(span trace.Span, body io.Reader) error 
 }
 
 func (gt *generateContentTracer) parseStreamingResponse(span trace.Span, body io.Reader) error {
-	scanner := bufio.NewScanner(body)
+	reader := bufio.NewReader(body)
 	var allResults []map[string]any
 	var timeToFirstToken time.Duration
 
-	for scanner.Scan() {
-		line := scanner.Text()
+	for {
+		line, readErr := reader.ReadString('\n')
+		line = strings.TrimRight(line, "\r\n")
+		if strings.HasPrefix(line, "data: ") {
+			line = strings.TrimPrefix(line, "data: ")
+			if line == "[DONE]" {
+				break
+			}
 
-		if !strings.HasPrefix(line, "data: ") {
-			continue
+			if timeToFirstToken == 0 {
+				timeToFirstToken = time.Since(gt.startTime)
+			}
+
+			var chunk map[string]any
+			if err := json.Unmarshal([]byte(line), &chunk); err != nil {
+				return err
+			}
+			allResults = append(allResults, chunk)
 		}
 
-		line = strings.TrimPrefix(line, "data: ")
-		if line == "[DONE]" {
-			break
+		if readErr != nil {
+			if errors.Is(readErr, io.EOF) {
+				break
+			}
+			return readErr
 		}
-
-		if timeToFirstToken == 0 {
-			timeToFirstToken = time.Since(gt.startTime)
-		}
-
-		var chunk map[string]any
-		if err := json.Unmarshal([]byte(line), &chunk); err != nil {
-			return err
-		}
-
-		allResults = append(allResults, chunk)
 	}
 
 	// Aggregate chunks into a single response
@@ -169,13 +160,14 @@ func (gt *generateContentTracer) parseStreamingResponse(span trace.Span, body io
 		}
 	}
 
-	// Collect usage from the last chunk (Gemini includes usage in the final chunk)
+	// Collect usage from the final usage-bearing chunk.
 	metrics := make(map[string]any)
 	for i := len(allResults) - 1; i >= 0; i-- {
 		if usageMetadata, ok := allResults[i]["usageMetadata"].(map[string]any); ok {
 			for k, v := range parseUsageTokens(usageMetadata) {
 				metrics[k] = v
 			}
+			gt.captureUsageMetadata(usageMetadata)
 			break
 		}
 	}
@@ -196,105 +188,112 @@ func (gt *generateContentTracer) parseStreamingResponse(span trace.Span, body io
 		return err
 	}
 
-	return scanner.Err()
+	return nil
 }
 
-// postprocessStreamingResults aggregates streaming chunks into a single response
-// matching the non-streaming generateContent response format.
+// postprocessStreamingResults aggregates streaming chunks into one provider-
+// native response. It preserves all candidates and non-text parts (thoughts,
+// function calls, code execution, and media) instead of flattening to text.
 func (gt *generateContentTracer) postprocessStreamingResults(allResults []map[string]any) map[string]any {
 	if len(allResults) == 0 {
 		return nil
 	}
 
-	// Aggregate text parts from all candidates across chunks.
-	// NOTE: We only aggregate candidate index 0 from each chunk. If the API
-	// ever returns multiple candidate indices in a streaming response, their
-	// content will be silently dropped. The non-streaming path passes through
-	// all candidates as-is.
-	var textParts []string
-	var finishReason any
-	var role string
+	result := map[string]any{}
+	candidatesByIndex := map[int]map[string]any{}
+	var candidateOrder []int
 
 	for _, chunk := range allResults {
-		candidates, ok := chunk["candidates"].([]any)
-		if !ok || len(candidates) == 0 {
-			continue
-		}
-		candidate, ok := candidates[0].(map[string]any)
-		if !ok {
-			continue
+		for key, value := range chunk {
+			if key != "candidates" {
+				result[key] = value
+			}
 		}
 
-		if fr, ok := candidate["finishReason"]; ok && fr != nil {
-			finishReason = fr
-		}
-
-		content, ok := candidate["content"].(map[string]any)
-		if !ok {
-			continue
-		}
-
-		if r, ok := content["role"].(string); ok && role == "" {
-			role = r
-		}
-
-		parts, ok := content["parts"].([]any)
-		if !ok {
-			continue
-		}
-
-		for _, p := range parts {
-			part, ok := p.(map[string]any)
+		candidates, _ := chunk["candidates"].([]any)
+		for position, rawCandidate := range candidates {
+			candidate, ok := rawCandidate.(map[string]any)
 			if !ok {
 				continue
 			}
-			if text, ok := part["text"].(string); ok {
-				textParts = append(textParts, text)
+			index := position
+			if ok, parsed := internal.ToInt64(candidate["index"]); ok {
+				index = int(parsed)
 			}
-		}
-	}
-
-	// Build aggregated response in Gemini format
-	result := map[string]any{
-		"candidates": []any{
-			map[string]any{
-				"content": map[string]any{
-					"parts": []any{
-						map[string]any{
-							"text": strings.Join(textParts, ""),
-						},
-					},
-					"role": role,
-				},
-			},
-		},
-	}
-
-	if finishReason != nil {
-		if candidates, ok := result["candidates"].([]any); ok && len(candidates) > 0 {
-			if c, ok := candidates[0].(map[string]any); ok {
-				c["finishReason"] = finishReason
+			aggregated, exists := candidatesByIndex[index]
+			if !exists {
+				aggregated = map[string]any{}
+				candidatesByIndex[index] = aggregated
+				candidateOrder = append(candidateOrder, index)
 			}
+			mergeStreamingCandidate(aggregated, candidate)
 		}
 	}
 
-	// Include usage from the last chunk
-	for i := len(allResults) - 1; i >= 0; i-- {
-		if usage, ok := allResults[i]["usageMetadata"]; ok {
-			result["usageMetadata"] = usage
-			break
+	if len(candidateOrder) > 0 {
+		candidates := make([]any, 0, len(candidateOrder))
+		for _, index := range candidateOrder {
+			candidates = append(candidates, candidatesByIndex[index])
 		}
-	}
-
-	// Include model version
-	for _, chunk := range allResults {
-		if mv, ok := chunk["modelVersion"]; ok {
-			result["modelVersion"] = mv
-			break
-		}
+		result["candidates"] = candidates
 	}
 
 	return result
+}
+
+func mergeStreamingCandidate(dst, src map[string]any) {
+	for key, value := range src {
+		if key != "content" {
+			dst[key] = value
+		}
+	}
+
+	srcContent, ok := src["content"].(map[string]any)
+	if !ok {
+		return
+	}
+	dstContent, ok := dst["content"].(map[string]any)
+	if !ok {
+		dstContent = map[string]any{}
+		dst["content"] = dstContent
+	}
+	for key, value := range srcContent {
+		if key != "parts" {
+			dstContent[key] = value
+		}
+	}
+
+	srcParts, _ := srcContent["parts"].([]any)
+	dstParts, _ := dstContent["parts"].([]any)
+	for _, rawPart := range srcParts {
+		part, ok := rawPart.(map[string]any)
+		if !ok {
+			dstParts = append(dstParts, rawPart)
+			continue
+		}
+		if len(dstParts) > 0 {
+			if previous, ok := dstParts[len(dstParts)-1].(map[string]any); ok && mergeTextPart(previous, part) {
+				continue
+			}
+		}
+		dstParts = append(dstParts, part)
+	}
+	dstContent["parts"] = dstParts
+}
+
+func mergeTextPart(dst, src map[string]any) bool {
+	dstText, dstOK := dst["text"].(string)
+	srcText, srcOK := src["text"].(string)
+	if !dstOK || !srcOK || len(dst) != len(src) {
+		return false
+	}
+	for key, value := range src {
+		if key != "text" && !reflect.DeepEqual(dst[key], value) {
+			return false
+		}
+	}
+	dst["text"] = dstText + srcText
+	return true
 }
 
 func (gt *generateContentTracer) parseResponse(span trace.Span, body io.Reader) error {
@@ -308,34 +307,25 @@ func (gt *generateContentTracer) parseResponse(span trace.Span, body io.Reader) 
 }
 
 func (gt *generateContentTracer) handleResponse(span trace.Span, raw map[string]any) error {
-	// Extract model version if present
 	if modelVersion, ok := raw["modelVersion"].(string); ok {
 		gt.metadata["model"] = modelVersion
 	}
 
-	// Update metadata
-	if err := internal.SetJSONAttr(span, "braintrust.metadata", gt.metadata); err != nil {
-		return err
-	}
-
-	// Log the raw response format
-	if err := internal.SetJSONAttr(span, "braintrust.output_json", raw); err != nil {
-		return err
-	}
-
-	// Parse usage metadata (token counts) and time_to_first_token
 	metrics := make(map[string]any)
 	if usageMetadata, ok := raw["usageMetadata"].(map[string]any); ok {
 		for k, v := range parseUsageTokens(usageMetadata) {
 			metrics[k] = v
 		}
-	}
-	metrics["time_to_first_token"] = time.Since(gt.startTime).Seconds()
-	if err := internal.SetJSONAttr(span, "braintrust.metrics", metrics); err != nil {
-		return err
+		gt.captureUsageMetadata(usageMetadata)
 	}
 
-	return nil
+	if err := internal.SetJSONAttr(span, "braintrust.metadata", gt.metadata); err != nil {
+		return err
+	}
+	if err := internal.SetJSONAttr(span, "braintrust.output_json", raw); err != nil {
+		return err
+	}
+	return internal.SetJSONAttr(span, "braintrust.metrics", metrics)
 }
 
 // parseUsageTokens normalizes Gemini UsageMetadata to Braintrust metrics.
@@ -364,7 +354,222 @@ func parseUsageTokens(usage map[string]interface{}) map[string]int64 {
 		metrics["prompt_cached_tokens"] = cachedTokens
 	}
 
+	if tokens, ok := sumModalityTokens(usage["promptTokensDetails"], "AUDIO"); ok {
+		metrics["prompt_audio_tokens"] = tokens
+	}
+	if tokens, ok := sumModalityTokens(usage["candidatesTokensDetails"], "AUDIO"); ok {
+		metrics["completion_audio_tokens"] = tokens
+	}
+	if tokens, ok := sumModalityTokens(usage["candidatesTokensDetails"], "IMAGE"); ok {
+		metrics["completion_image_tokens"] = tokens
+	}
+
 	return metrics
+}
+
+func sumModalityTokens(raw any, modality string) (int64, bool) {
+	details, ok := raw.([]any)
+	if !ok {
+		return 0, false
+	}
+	var total int64
+	found := false
+	for _, rawDetail := range details {
+		detail, ok := rawDetail.(map[string]any)
+		if !ok {
+			continue
+		}
+		detailModality, ok := detail["modality"].(string)
+		if !ok || !strings.EqualFold(detailModality, modality) {
+			continue
+		}
+		if ok, count := internal.ToInt64(detail["tokenCount"]); ok {
+			total += count
+			found = true
+		}
+	}
+	return total, found
+}
+
+func (gt *generateContentTracer) captureUsageMetadata(usage map[string]any) {
+	byModality := map[string]any{}
+	if details, ok := usage["cachedContentTokenCountDetails"]; ok {
+		byModality["cache_tokens_details"] = details
+	} else if details, ok := usage["cacheTokensDetails"]; ok {
+		byModality["cache_tokens_details"] = details
+	}
+	if details, ok := usage["toolUsePromptTokensDetails"]; ok {
+		byModality["tool_use_prompt_tokens_details"] = details
+	}
+	if len(byModality) > 0 {
+		gt.metadata["usage_by_modality"] = byModality
+	}
+}
+
+func captureGenerationConfig(metadata, genConfig map[string]any) {
+	// Common fields use Braintrust's canonical names.
+	for source, target := range map[string]string{
+		"temperature":      "temperature",
+		"topP":             "top_p",
+		"maxOutputTokens":  "max_tokens",
+		"stopSequences":    "stop",
+		"presencePenalty":  "presence_penalty",
+		"frequencyPenalty": "frequency_penalty",
+	} {
+		if value, exists := genConfig[source]; exists {
+			metadata[target] = value
+		}
+	}
+
+	// Preserve the remaining reproducibility-relevant Google settings through
+	// an explicit allowlist rather than copying generationConfig wholesale.
+	for _, field := range []string{
+		"topK",
+		"candidateCount",
+		"responseLogprobs",
+		"logprobs",
+		"seed",
+		"responseMimeType",
+		"responseSchema",
+		"responseJsonSchema",
+		"routingConfig",
+		"modelSelectionConfig",
+		"responseModalities",
+		"mediaResolution",
+		"speechConfig",
+		"audioTimestamp",
+		"thinkingConfig",
+		"imageConfig",
+		"enableEnhancedCivicAnswers",
+	} {
+		if value, exists := genConfig[field]; exists {
+			metadata[field] = value
+		}
+	}
+}
+
+func normalizeTools(tools []any) []any {
+	normalized := make([]any, 0, len(tools))
+	for _, rawTool := range tools {
+		tool, ok := rawTool.(map[string]any)
+		if !ok {
+			continue
+		}
+		if declarations, ok := tool["functionDeclarations"].([]any); ok {
+			for _, rawDeclaration := range declarations {
+				declaration, ok := rawDeclaration.(map[string]any)
+				if !ok {
+					continue
+				}
+				function := map[string]any{}
+				for _, field := range []string{"name", "description"} {
+					if value, exists := declaration[field]; exists {
+						function[field] = value
+					}
+				}
+				if parameters, exists := declaration["parameters"]; exists {
+					function["parameters"] = normalizeJSONSchema(parameters)
+				} else if parameters, exists := declaration["parametersJsonSchema"]; exists {
+					function["parameters"] = normalizeJSONSchema(parameters)
+				}
+				if _, ok := function["name"].(string); ok {
+					normalized = append(normalized, map[string]any{
+						"type":     "function",
+						"function": function,
+					})
+				}
+			}
+		}
+
+		builtIn := map[string]any{}
+		for key, value := range tool {
+			if key != "functionDeclarations" {
+				builtIn[key] = value
+			}
+		}
+		if len(builtIn) > 0 {
+			normalized = append(normalized, builtIn)
+		}
+	}
+	return normalized
+}
+
+func normalizeJSONSchema(value any) any {
+	switch value := value.(type) {
+	case map[string]any:
+		normalized := make(map[string]any, len(value))
+		for key, child := range value {
+			if key == "type" {
+				if schemaType, ok := child.(string); ok {
+					normalized[key] = strings.ToLower(schemaType)
+					continue
+				}
+			}
+			normalized[key] = normalizeJSONSchema(child)
+		}
+		return normalized
+	case []any:
+		normalized := make([]any, len(value))
+		for i, child := range value {
+			normalized[i] = normalizeJSONSchema(child)
+		}
+		return normalized
+	default:
+		return value
+	}
+}
+
+func captureToolConfig(metadata, toolConfig map[string]any) {
+	if toolChoice := normalizeToolChoice(toolConfig); toolChoice != nil {
+		metadata["tool_choice"] = toolChoice
+	}
+
+	functionConfig, ok := toolConfig["functionCallingConfig"].(map[string]any)
+	if !ok {
+		return
+	}
+	if mode, _ := functionConfig["mode"].(string); strings.EqualFold(mode, "VALIDATED") {
+		metadata["function_calling_mode"] = "VALIDATED"
+	}
+	rawNames, ok := functionConfig["allowedFunctionNames"].([]any)
+	if !ok || len(rawNames) < 2 {
+		return
+	}
+	names := make([]string, 0, len(rawNames))
+	for _, rawName := range rawNames {
+		if name, ok := rawName.(string); ok {
+			names = append(names, name)
+		}
+	}
+	if len(names) > 1 {
+		metadata["allowed_function_names"] = names
+	}
+}
+
+func normalizeToolChoice(toolConfig map[string]any) any {
+	functionConfig, ok := toolConfig["functionCallingConfig"].(map[string]any)
+	if !ok {
+		return nil
+	}
+	mode, _ := functionConfig["mode"].(string)
+	switch strings.ToUpper(mode) {
+	case "AUTO", "VALIDATED":
+		return "auto"
+	case "NONE":
+		return "none"
+	case "ANY":
+		if names, ok := functionConfig["allowedFunctionNames"].([]any); ok && len(names) == 1 {
+			if name, ok := names[0].(string); ok {
+				return map[string]any{
+					"type":     "function",
+					"function": map[string]any{"name": name},
+				}
+			}
+		}
+		return "required"
+	default:
+		return nil
+	}
 }
 
 // Ensure our tracer implements the shared interface

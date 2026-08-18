@@ -1,0 +1,101 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 474
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"Call get_weather for Paris, France. Do not answer directly."}],"role":"user"}],"generationConfig":{},"toolConfig":{"functionCallingConfig":{"allowedFunctionNames":["get_weather"],"mode":"ANY"}},"tools":[{"functionDeclarations":[{"description":"Get the current weather for a location","name":"get_weather","parameters":{"properties":{"location":{"description":"City and country","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Goog-Api-Client:
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "functionCall": {
+                          "name": "get_weather",
+                          "args": {
+                            "location": "Paris, France"
+                          }
+                        },
+                        "thoughtSignature": "CtABARFNMg9YJkiQVLNlGqIfZ7gRDq2T24DSB5q4Zbv1PRixW4HWaN9eek5H6b/2Ap9oY5DhrTpeic5nTWMkeiB+rex9Rzd+298qdfMu5OGdyMlcR6uHebBeS67CRK98jVok+E75B1tXz7daj0JIXU8XCrfVePFkzWx8gJDqQNOG3BP6rmIlbhfj0IfNVA8Js3vqeWj7bu4kzp2VVLJqUeKEik5jRN3z91U0FhgWqgOi6VNyxv7OzJeOj+5D3qVnF1yNLhIuouRB61if7xCagPfaGQ=="
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "STOP",
+                  "index": 0,
+                  "finishMessage": "Model generated function call(s)."
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 56,
+                "candidatesTokenCount": 17,
+                "totalTokenCount": 120,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 56
+                  }
+                ],
+                "thoughtsTokenCount": 47,
+                "serviceTier": "standard"
+              },
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "VLCEauTGIoya-8YPt6G9yQ8"
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Type:
+                - application/json; charset=UTF-8
+            Date:
+                - Tue, 18 Aug 2026 19:19:49 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=600
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Gemini-Service-Tier:
+                - standard
+            X-Xss-Protection:
+                - "0"
+        status: 200 OK
+        code: 200
+        duration: 805.257667ms

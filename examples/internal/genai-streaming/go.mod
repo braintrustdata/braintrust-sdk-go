@@ -38,3 +38,5 @@ require (
 )
 
 replace github.com/braintrustdata/braintrust-sdk-go => ../../..
+
+replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai => ../../../trace/contrib/genai

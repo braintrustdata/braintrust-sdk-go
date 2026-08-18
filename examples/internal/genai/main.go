@@ -3,6 +3,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"os"
@@ -329,30 +330,33 @@ func (g *GeminiBot) jsonMode(ctx context.Context) error {
 	return nil
 }
 
-// multimodal demonstrates working with images (conceptual example)
+// multimodal demonstrates tracing a real inline image request.
 func (g *GeminiBot) multimodal(ctx context.Context) error {
 	ctx, span := tracer.Start(ctx, "multimodal")
 	defer span.End()
 
 	fmt.Println("\n=== Example 9: Multimodal (Images) ===")
-	fmt.Println("  (Conceptual - would require actual image bytes)")
 
-	// In production, you'd load an actual image file like this:
-	// imageBytes, _ := os.ReadFile("image.jpg")
-	// content := &genai.Content{
-	// 	Parts: []*genai.Part{
-	// 		{Text: "What's in this image?"},
-	// 		{InlineData: &genai.Blob{
-	// 			MIMEType: "image/jpeg",
-	// 			Data:     imageBytes,
-	// 		}},
-	// 	},
-	// }
+	// A 1x1 red PNG keeps the example self-contained while exercising Gemini's
+	// real multimodal API and Braintrust attachment conversion.
+	imageBytes, err := base64.StdEncoding.DecodeString(
+		"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+	)
+	if err != nil {
+		return fmt.Errorf("decode image: %v", err)
+	}
+	content := []*genai.Content{{
+		Role: "user",
+		Parts: []*genai.Part{
+			{Text: "What color is this image? Answer in one word."},
+			{InlineData: &genai.Blob{MIMEType: "image/png", Data: imageBytes}},
+		},
+	}}
 
 	resp, err := g.client.Models.GenerateContent(
 		ctx,
 		"gemini-2.0-flash",
-		genai.Text("Describe a beautiful sunset over mountains."),
+		content,
 		nil,
 	)
 	if err != nil {
@@ -370,11 +374,12 @@ func (g *GeminiBot) embeddings(ctx context.Context) error {
 
 	fmt.Println("\n=== Example 10: Embeddings ===")
 
+	outputDimensions := int32(256)
 	single, err := g.client.Models.EmbedContent(
 		ctx,
 		"gemini-embedding-001",
 		genai.Text("The quick brown fox jumps over the lazy dog"),
-		nil,
+		&genai.EmbedContentConfig{OutputDimensionality: &outputDimensions},
 	)
 	if err != nil {
 		return fmt.Errorf("embed single error: %v", err)

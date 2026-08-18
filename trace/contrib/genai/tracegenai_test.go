@@ -52,6 +52,23 @@ func setUpTest(t *testing.T) (*genai.Client, *oteltest.Exporter) {
 	return client, exporter
 }
 
+func candidateParts(t *testing.T, output any, candidateIndex int) []any {
+	t.Helper()
+
+	outputMap, ok := output.(map[string]any)
+	require.True(t, ok)
+	candidates, ok := outputMap["candidates"].([]any)
+	require.True(t, ok)
+	require.Greater(t, len(candidates), candidateIndex)
+	candidate, ok := candidates[candidateIndex].(map[string]any)
+	require.True(t, ok)
+	content, ok := candidate["content"].(map[string]any)
+	require.True(t, ok)
+	parts, ok := content["parts"].([]any)
+	require.True(t, ok)
+	return parts
+}
+
 func TestBasicGenerateContent(t *testing.T) {
 	client, exporter := setUpTest(t)
 
@@ -83,23 +100,30 @@ func TestBasicGenerateContent(t *testing.T) {
 
 	// Verify metadata
 	metadata := ts.Metadata()
-	assert.Equal("gemini", metadata["provider"])
+	assert.Equal("google", metadata["provider"])
 	assert.Equal("gemini-2.0-flash-exp", metadata["model"])
 
-	// Verify input
-	input := ts.Input()
-	require.NotNil(input)
+	// Verify the provider-native input excludes request configuration.
+	assert.Equal(map[string]any{
+		"model": "gemini-2.0-flash-exp",
+		"contents": []any{
+			map[string]any{
+				"parts": []any{map[string]any{"text": "What is 2+2? Answer with just the number."}},
+				"role":  "user",
+			},
+		},
+	}, ts.Input())
 
 	// Verify output
 	output := ts.Output()
 	require.NotNil(output)
 
-	// Verify metrics (token counts + time_to_first_token)
+	// Verify metrics. TTFT only applies to streaming calls.
 	metrics := ts.Metrics()
 	assert.Greater(metrics["prompt_tokens"], float64(0))
 	assert.Greater(metrics["completion_tokens"], float64(0))
 	assert.Greater(metrics["tokens"], float64(0))
-	assert.Greater(metrics["time_to_first_token"], float64(0))
+	assert.NotContains(metrics, "time_to_first_token")
 }
 
 func TestStreamingGenerateContent(t *testing.T) {
@@ -136,7 +160,7 @@ func TestStreamingGenerateContent(t *testing.T) {
 
 	// Verify metadata
 	metadata := ts.Metadata()
-	assert.Equal("gemini", metadata["provider"])
+	assert.Equal("google", metadata["provider"])
 	assert.Equal("gemini-2.0-flash-exp", metadata["model"])
 
 	// Verify input
@@ -153,6 +177,86 @@ func TestStreamingGenerateContent(t *testing.T) {
 	assert.Greater(metrics["completion_tokens"], float64(0))
 	assert.Greater(metrics["tokens"], float64(0))
 	assert.Greater(metrics["time_to_first_token"], float64(0))
+}
+
+func TestStreamingGenerateContentWithThinking(t *testing.T) {
+	client, exporter := setUpTest(t)
+
+	thinkingBudget := int32(256)
+	iter := client.Models.GenerateContentStream(
+		context.Background(),
+		"gemini-2.5-flash",
+		genai.Text("Explain briefly why 2 plus 2 equals 4."),
+		&genai.GenerateContentConfig{
+			ThinkingConfig: &genai.ThinkingConfig{
+				IncludeThoughts: true,
+				ThinkingBudget:  &thinkingBudget,
+			},
+		},
+	)
+	for _, err := range iter {
+		require.NoError(t, err)
+	}
+
+	ts := exporter.FlushOne()
+	parts := candidateParts(t, ts.Output(), 0)
+
+	var thoughtText string
+	for _, rawPart := range parts {
+		part, ok := rawPart.(map[string]any)
+		if ok && part["thought"] == true {
+			if text, ok := part["text"].(string); ok {
+				thoughtText += text
+			}
+		}
+	}
+	assert.NotEmpty(t, thoughtText)
+
+	metrics := ts.Metrics()
+	assert.Greater(t, metrics["completion_reasoning_tokens"], float64(0))
+	assert.Greater(t, metrics["time_to_first_token"], float64(0))
+}
+
+func TestStreamingGenerateContentWithImage(t *testing.T) {
+	client, exporter := setUpTest(t)
+
+	iter := client.Models.GenerateContentStream(
+		context.Background(),
+		"gemini-2.5-flash-image",
+		genai.Text("Generate a simple blue square icon."),
+		&genai.GenerateContentConfig{ResponseModalities: []string{"TEXT", "IMAGE"}},
+	)
+	var imageBytes int
+	for resp, err := range iter {
+		require.NoError(t, err)
+		for _, candidate := range resp.Candidates {
+			for _, part := range candidate.Content.Parts {
+				if part.InlineData != nil {
+					imageBytes += len(part.InlineData.Data)
+				}
+			}
+		}
+	}
+	require.Greater(t, imageBytes, 64*1024)
+
+	ts := exporter.FlushOne()
+	parts := candidateParts(t, ts.Output(), 0)
+	var tracedImageBytes int
+	for _, rawPart := range parts {
+		part, ok := rawPart.(map[string]any)
+		if !ok {
+			continue
+		}
+		inlineData, ok := part["inlineData"].(map[string]any)
+		if !ok {
+			continue
+		}
+		if data, ok := inlineData["data"].(string); ok {
+			tracedImageBytes += len(data)
+		}
+	}
+	assert.Greater(t, tracedImageBytes, 64*1024)
+	assert.Greater(t, ts.Metrics()["time_to_first_token"], float64(0))
 }
 
 func TestGenerateContentWithThinking(t *testing.T) {
@@ -191,13 +295,27 @@ func TestGenerateContentWithThinking(t *testing.T) {
 	assert.Equal(codes.Unset, ts.Status().Code)
 
 	metadata := ts.Metadata()
-	assert.Equal("gemini", metadata["provider"])
+	assert.Equal("google", metadata["provider"])
 	assert.Equal("gemini-2.5-flash", metadata["model"])
 	require.Contains(metadata, "thinkingConfig")
+	assert.Equal(float64(2048), metadata["max_tokens"])
+	assert.NotContains(metadata, "maxOutputTokens")
+	assert.NotContains(metadata, "systemInstruction")
 	assert.Equal(map[string]any{
 		"includeThoughts": true,
 		"thinkingBudget":  float64(1024),
 	}, metadata["thinkingConfig"])
+
+	input, ok := ts.Input().(map[string]any)
+	require.True(ok)
+	assert.Contains(input, "systemInstruction")
+
+	parts := candidateParts(t, ts.Output(), 0)
+	require.Len(parts, 2)
+	thought, ok := parts[0].(map[string]any)
+	require.True(ok)
+	assert.Equal(true, thought["thought"])
+	assert.NotEmpty(thought["text"])
 
 	metrics := ts.Metrics()
 	assert.Equal(float64(47), metrics["prompt_tokens"])
@@ -206,6 +324,85 @@ func TestGenerateContentWithThinking(t *testing.T) {
 	assert.Equal(float64(1758), metrics["tokens"])
 	assert.Equal(metrics["tokens"], metrics["prompt_tokens"]+metrics["completion_tokens"])
 	assert.NotContains(metrics, "thoughts_token_count")
+}
+
+func TestGenerateContentWithFunctionCall(t *testing.T) {
+	client, exporter := setUpTest(t)
+
+	resp, err := client.Models.GenerateContent(
+		context.Background(),
+		"gemini-2.5-flash",
+		genai.Text("Call get_weather for Paris, France. Do not answer directly."),
+		&genai.GenerateContentConfig{
+			Tools: []*genai.Tool{{
+				FunctionDeclarations: []*genai.FunctionDeclaration{{
+					Name:        "get_weather",
+					Description: "Get the current weather for a location",
+					Parameters: &genai.Schema{
+						Type: genai.TypeObject,
+						Properties: map[string]*genai.Schema{
+							"location": {
+								Type:        genai.TypeString,
+								Description: "City and country",
+							},
+						},
+						Required: []string{"location"},
+					},
+				}},
+			}},
+			ToolConfig: &genai.ToolConfig{
+				FunctionCallingConfig: &genai.FunctionCallingConfig{
+					Mode:                 genai.FunctionCallingConfigModeAny,
+					AllowedFunctionNames: []string{"get_weather"},
+				},
+			},
+		},
+	)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	require.NotEmpty(t, resp.FunctionCalls())
+	assert.Equal(t, "get_weather", resp.FunctionCalls()[0].Name)
+
+	ts := exporter.FlushOne()
+	ts.AssertNameIs("generate_content")
+	metadata := ts.Metadata()
+	assert.Equal(t, []any{
+		map[string]any{
+			"type": "function",
+			"function": map[string]any{
+				"name":        "get_weather",
+				"description": "Get the current weather for a location",
+				"parameters": map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"location": map[string]any{
+							"type":        "string",
+							"description": "City and country",
+						},
+					},
+					"required": []any{"location"},
+				},
+			},
+		},
+	}, metadata["tools"])
+	assert.Equal(t, map[string]any{
+		"type":     "function",
+		"function": map[string]any{"name": "get_weather"},
+	}, metadata["tool_choice"])
+
+	input, ok := ts.Input().(map[string]any)
+	require.True(t, ok)
+	assert.NotContains(t, input, "tools")
+	assert.NotContains(t, input, "toolConfig")
+
+	parts := candidateParts(t, ts.Output(), 0)
+	require.NotEmpty(t, parts)
+	part, ok := parts[0].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, map[string]any{
+		"name": "get_weather",
+		"args": map[string]any{"location": "Paris, France"},
+	}, part["functionCall"])
 }
 
 func TestGenerateContentWithCodeExecution(t *testing.T) {
@@ -227,6 +424,10 @@ func TestGenerateContentWithCodeExecution(t *testing.T) {
 	ts := exporter.FlushOne()
 	ts.AssertNameIs("generate_content")
 	assert.Equal(t, codes.Unset, ts.Status().Code)
+
+	metadata := ts.Metadata()
+	assert.Equal(t, "google", metadata["provider"])
+	assert.Equal(t, []any{map[string]any{"codeExecution": map[string]any{}}}, metadata["tools"])
 
 	metrics := ts.Metrics()
 	assert.Equal(t, float64(265), metrics["prompt_tokens"])
@@ -259,6 +460,21 @@ func TestStreamingGenerateContentWithCodeExecution(t *testing.T) {
 	ts := exporter.FlushOne()
 	ts.AssertNameIs("generate_content")
 	assert.Equal(t, codes.Unset, ts.Status().Code)
+
+	parts := candidateParts(t, ts.Output(), 0)
+	require.Len(t, parts, 3)
+	assert.Contains(t, parts[0], "executableCode")
+	assert.Contains(t, parts[1], "codeExecutionResult")
+	assert.Equal(t, map[string]any{
+		"text": "The product of 123 multiplied by 456 is 56,088. This means that if you have 123 groups of 456 items, or vice versa, the total number of items is 56,088.",
+	}, parts[2])
+
+	metadata := ts.Metadata()
+	assert.Equal(t, map[string]any{
+		"tool_use_prompt_tokens_details": []any{
+			map[string]any{"modality": "TEXT", "tokenCount": float64(85)},
+		},
+	}, metadata["usage_by_modality"])
 
 	metrics := ts.Metrics()
 	assert.Equal(t, float64(105), metrics["prompt_tokens"])
@@ -349,10 +565,164 @@ func TestParseUsageTokens(t *testing.T) {
 		assert.NotContains(t, metrics, "some_new_token_count")
 	})
 
+	t.Run("captures_supported_modality_details", func(t *testing.T) {
+		usage := map[string]interface{}{
+			"promptTokensDetails": []any{
+				map[string]any{"modality": "AUDIO", "tokenCount": float64(3)},
+				map[string]any{"modality": "AUDIO", "tokenCount": float64(4)},
+				map[string]any{"modality": "IMAGE", "tokenCount": float64(8)},
+			},
+			"candidatesTokensDetails": []any{
+				map[string]any{"modality": "AUDIO", "tokenCount": float64(5)},
+				map[string]any{"modality": "IMAGE", "tokenCount": float64(6)},
+			},
+		}
+
+		metrics := parseUsageTokens(usage)
+
+		assert.Equal(t, int64(7), metrics["prompt_audio_tokens"])
+		assert.Equal(t, int64(5), metrics["completion_audio_tokens"])
+		assert.Equal(t, int64(6), metrics["completion_image_tokens"])
+		assert.NotContains(t, metrics, "prompt_image_tokens")
+	})
+
 	t.Run("nil_usage", func(t *testing.T) {
 		metrics := parseUsageTokens(nil)
 		assert.Empty(t, metrics)
 	})
+}
+
+func TestCaptureGenerationConfig(t *testing.T) {
+	metadata := map[string]any{}
+	captureGenerationConfig(metadata, map[string]any{
+		"temperature":                float64(0.5),
+		"topP":                       float64(0.9),
+		"maxOutputTokens":            float64(128),
+		"stopSequences":              []any{"done"},
+		"presencePenalty":            float64(0.2),
+		"frequencyPenalty":           float64(0.3),
+		"topK":                       float64(40),
+		"candidateCount":             float64(2),
+		"responseLogprobs":           true,
+		"logprobs":                   float64(5),
+		"seed":                       float64(42),
+		"responseMimeType":           "application/json",
+		"responseSchema":             map[string]any{"type": "OBJECT"},
+		"responseJsonSchema":         map[string]any{"type": "object"},
+		"routingConfig":              map[string]any{"autoMode": map[string]any{}},
+		"modelSelectionConfig":       map[string]any{"featureSelectionPreference": "BALANCED"},
+		"responseModalities":         []any{"TEXT", "AUDIO"},
+		"mediaResolution":            "MEDIA_RESOLUTION_HIGH",
+		"speechConfig":               map[string]any{"languageCode": "en-US"},
+		"audioTimestamp":             true,
+		"thinkingConfig":             map[string]any{"includeThoughts": true},
+		"imageConfig":                map[string]any{"aspectRatio": "1:1"},
+		"enableEnhancedCivicAnswers": true,
+		"unknownSetting":             "omit me",
+	})
+
+	assert.Equal(t, map[string]any{
+		"temperature":                float64(0.5),
+		"top_p":                      float64(0.9),
+		"max_tokens":                 float64(128),
+		"stop":                       []any{"done"},
+		"presence_penalty":           float64(0.2),
+		"frequency_penalty":          float64(0.3),
+		"topK":                       float64(40),
+		"candidateCount":             float64(2),
+		"responseLogprobs":           true,
+		"logprobs":                   float64(5),
+		"seed":                       float64(42),
+		"responseMimeType":           "application/json",
+		"responseSchema":             map[string]any{"type": "OBJECT"},
+		"responseJsonSchema":         map[string]any{"type": "object"},
+		"routingConfig":              map[string]any{"autoMode": map[string]any{}},
+		"modelSelectionConfig":       map[string]any{"featureSelectionPreference": "BALANCED"},
+		"responseModalities":         []any{"TEXT", "AUDIO"},
+		"mediaResolution":            "MEDIA_RESOLUTION_HIGH",
+		"speechConfig":               map[string]any{"languageCode": "en-US"},
+		"audioTimestamp":             true,
+		"thinkingConfig":             map[string]any{"includeThoughts": true},
+		"imageConfig":                map[string]any{"aspectRatio": "1:1"},
+		"enableEnhancedCivicAnswers": true,
+	}, metadata)
+}
+
+func TestNormalizeTools(t *testing.T) {
+	raw := []any{
+		map[string]any{
+			"functionDeclarations": []any{
+				map[string]any{
+					"name":        "get_weather",
+					"description": "Get the weather",
+					"parameters": map[string]any{
+						"type": "OBJECT",
+					},
+				},
+			},
+		},
+		map[string]any{"googleSearch": map[string]any{}},
+	}
+
+	assert.Equal(t, []any{
+		map[string]any{
+			"type": "function",
+			"function": map[string]any{
+				"name":        "get_weather",
+				"description": "Get the weather",
+				"parameters":  map[string]any{"type": "object"},
+			},
+		},
+		map[string]any{"googleSearch": map[string]any{}},
+	}, normalizeTools(raw))
+}
+
+func TestCaptureToolConfig(t *testing.T) {
+	metadata := map[string]any{}
+	captureToolConfig(metadata, map[string]any{
+		"functionCallingConfig": map[string]any{
+			"mode":                 "ANY",
+			"allowedFunctionNames": []any{"get_weather", "get_forecast"},
+		},
+	})
+
+	assert.Equal(t, map[string]any{
+		"tool_choice":            "required",
+		"allowed_function_names": []string{"get_weather", "get_forecast"},
+	}, metadata)
+
+	metadata = map[string]any{}
+	captureToolConfig(metadata, map[string]any{
+		"functionCallingConfig": map[string]any{"mode": "VALIDATED"},
+	})
+	assert.Equal(t, map[string]any{
+		"tool_choice":           "auto",
+		"function_calling_mode": "VALIDATED",
+	}, metadata)
+}
+
+func TestNormalizeToolChoice(t *testing.T) {
+	assert.Equal(t, "auto", normalizeToolChoice(map[string]any{
+		"functionCallingConfig": map[string]any{"mode": "AUTO"},
+	}))
+	assert.Equal(t, "none", normalizeToolChoice(map[string]any{
+		"functionCallingConfig": map[string]any{"mode": "NONE"},
+	}))
+	assert.Equal(t, "required", normalizeToolChoice(map[string]any{
+		"functionCallingConfig": map[string]any{"mode": "ANY"},
+	}))
+	assert.Equal(t, "auto", normalizeToolChoice(map[string]any{
+		"functionCallingConfig": map[string]any{"mode": "VALIDATED"},
+	}))
+	assert.Equal(t, map[string]any{
+		"type":     "function",
+		"function": map[string]any{"name": "get_weather"},
+	}, normalizeToolChoice(map[string]any{
+		"functionCallingConfig": map[string]any{
+			"mode":                 "ANY",
+			"allowedFunctionNames": []any{"get_weather"},
+		},
+	}))
 }
 
 func TestContainsGenerateContent(t *testing.T) {
@@ -424,7 +794,7 @@ func TestEmbedContentOutputSummary(t *testing.T) {
 					"values": []interface{}{0.1, 0.2, 0.3},
 				},
 			},
-			want: map[string]any{"embedding_length": 3, "embeddings_count": 1},
+			want: map[string]any{"count": 1},
 		},
 		{
 			name: "batch",
@@ -435,17 +805,17 @@ func TestEmbedContentOutputSummary(t *testing.T) {
 					map[string]interface{}{"values": []interface{}{0.5, 0.6}},
 				},
 			},
-			want: map[string]any{"embedding_length": 2, "embeddings_count": 3},
+			want: map[string]any{"count": 3},
 		},
 		{
 			name: "empty batch",
 			raw:  map[string]interface{}{"embeddings": []interface{}{}},
-			want: map[string]any{"embeddings_count": 0},
+			want: map[string]any{"count": 0},
 		},
 		{
 			name: "empty object",
 			raw:  map[string]interface{}{},
-			want: map[string]any{},
+			want: map[string]any{"count": 0},
 		},
 	}
 	for _, tc := range cases {
