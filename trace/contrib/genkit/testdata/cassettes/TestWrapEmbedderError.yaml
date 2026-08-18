@@ -1,0 +1,87 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 79
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"input":["x"],"model":"nonexistent-embedding-model","encoding_format":"float"}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+            User-Agent:
+                - OpenAI/Go 1.12.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 1.12.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.26.5
+        url: https://api.openai.com/v1/embeddings
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+                "error": {
+                    "message": "The model `nonexistent-embedding-model` does not exist or you do not have access to it.",
+                    "type": "invalid_request_error",
+                    "param": null,
+                    "code": "model_not_found"
+                }
+            }
+        headers:
+            Access-Control-Expose-Headers:
+                - CF-Ray
+                - CF-Ray
+            Alt-Svc:
+                - h3=":443"; ma=86400
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - a2d34554ad510c26-YYZ
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Tue, 18 Aug 2026 19:19:33 GMT
+            Server:
+                - cloudflare
+            Set-Cookie:
+                - __cf_bm=keyWpdGEC4ACL9b2WIIjPBA9nMqwvHDYF6j4hat9lAc-1787080773.8623068-1.0.1.1-BkPGPB1WguSkvnxtkI6BldVXiOXJVrm.1ybj1cA.xK3wZowXLkZgk0N97YTf7G6_6jgpcBEbZJ3FzhKVeq68qeBHfsnk1SNtcMA2KOxlZZV7fc3lviAoIpz_z3r6rcJU; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Tue, 18 Aug 2026 19:49:33 GMT
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            Vary:
+                - Origin
+            X-Content-Type-Options:
+                - nosniff
+            X-Openai-Proxy-Wasm:
+                - v0.1
+            X-Request-Id:
+                - req_723b387ad3f44cdc81cedd358561068d
+        status: 404 Not Found
+        code: 404
+        duration: 116.431125ms

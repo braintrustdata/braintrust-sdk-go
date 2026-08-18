@@ -44,7 +44,10 @@ func main() {
 
 	resp, err := genkit.Generate(ctx, g,
 		ai.WithPrompt("What is the capital of France?"),
-		ai.WithMiddleware(tracegenkit.NewMiddleware()),
+		ai.WithMiddleware(tracegenkit.NewMiddleware(
+			tracegenkit.WithProvider("google"),
+			tracegenkit.WithModel("gemini-2.5-flash"),
+		)),
 	)
 	if err != nil {
 		log.Fatal(err)

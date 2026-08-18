@@ -36,3 +36,18 @@ aspects:
                 tracegenkit: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
                 ai: github.com/firebase/genkit/go/ai
               template: ai.WithMiddleware(tracegenkit.NewMiddleware())
+  - id: genkit-definetool-tracing
+    join-point:
+      function-call: github.com/firebase/genkit/go/genkit.DefineTool
+    advice:
+      - replace-function: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit.DefineTool
+  - id: genkit-definetoolwithinputschema-tracing
+    join-point:
+      function-call: github.com/firebase/genkit/go/genkit.DefineToolWithInputSchema
+    advice:
+      - replace-function: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit.DefineToolWithInputSchema
+  - id: genkit-definemultiparttool-tracing
+    join-point:
+      function-call: github.com/firebase/genkit/go/genkit.DefineMultipartTool
+    advice:
+      - replace-function: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit.DefineMultipartTool

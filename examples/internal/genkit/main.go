@@ -49,10 +49,13 @@ func main() {
 		genkit.WithDefaultModel("googleai/gemini-2.0-flash"),
 	)
 
-	mw := tracegenkit.NewMiddleware()
+	mw := tracegenkit.NewMiddleware(
+		tracegenkit.WithProvider("google"),
+		tracegenkit.WithModel("gemini-2.0-flash"),
+	)
 
 	// Define a tool for the model to use
-	weatherTool := genkit.DefineTool(g, "get_weather",
+	weatherTool := tracegenkit.DefineTool(g, "get_weather",
 		"Get the current weather for a city",
 		func(ctx *ai.ToolContext, input WeatherInput) (string, error) {
 			weather := map[string]string{
@@ -200,7 +203,7 @@ func main() {
 		embedder := tracegenkit.WrapEmbedder(
 			genkit.LookupEmbedder(g, "googleai/gemini-embedding-001"),
 			tracegenkit.WithEmbedderModel("gemini-embedding-001"),
-			tracegenkit.WithEmbedderProvider("googleai"),
+			tracegenkit.WithEmbedderProvider("google"),
 		)
 
 		resp, err := genkit.Embed(ctx, g,

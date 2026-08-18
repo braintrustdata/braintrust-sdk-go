@@ -133,14 +133,19 @@ func main() {
 
     _, _ = genkit.Generate(ctx, g,
         ai.WithPrompt("Hello!"),
-        ai.WithMiddleware(tracegenkit.NewMiddleware()),
+        ai.WithMiddleware(tracegenkit.NewMiddleware(
+            tracegenkit.WithProvider("google"),
+            tracegenkit.WithModel("gemini-2.5-flash"),
+        )),
     )
 }
 ```
 
-Use `trace/contrib/genkit` as the top-level tracing layer for Genkit requests. Avoid combining it with lower-level provider integrations such as `trace/contrib/openai`, `trace/contrib/anthropic`, or `trace/contrib/genai` on the same request path, or you may emit nested LLM spans.
+Use `trace/contrib/genkit` as the top-level tracing layer for Genkit requests. Avoid combining it with lower-level provider integrations such as `trace/contrib/openai`, `trace/contrib/anthropic`, or `trace/contrib/genai` on the same request path, or you may emit nested LLM spans. Tool-enabled generation emits an agent `task` with child `llm` and `tool` spans. Genkit does not always expose the selected model to model middleware, so pass `WithProvider` and `WithModel` when they cannot be inferred from the provider response.
 
-With orchestrion, `ai.WithMiddleware(tracegenkit.NewMiddleware())` is injected automatically into all `genkit.Generate`, `genkit.GenerateText`, and `genkit.GenerateStream` calls.
+For manual instrumentation, define tools with `tracegenkit.DefineTool`, `tracegenkit.DefineToolWithInputSchema`, or `tracegenkit.DefineMultipartTool` so each handler is traced for its full execution, including failures.
+
+With orchestrion, middleware is injected automatically into all `genkit.Generate`, `genkit.GenerateText`, and `genkit.GenerateStream` calls, and Genkit tool definitions are replaced with their traced equivalents.
 
 ## sashabaranov/go-openai
 

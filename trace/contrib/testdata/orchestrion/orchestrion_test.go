@@ -344,6 +344,35 @@ func TestGenkit(t *testing.T) {
 	require.True(t, found, "Expected genkit.generate span")
 }
 
+// TestGenkitTool verifies that orchestrion replaces Genkit tool definitions so
+// the actual handler execution is traced without a manual wrapper.
+func TestGenkitTool(t *testing.T) {
+	exporter := setupOtel(t)
+	g := genkit.Init(context.Background())
+	type input struct {
+		Value string `json:"value"`
+	}
+	tool := genkit.DefineTool(g, "echo_tool", "Echo a value",
+		func(_ *ai.ToolContext, in input) (string, error) {
+			return in.Value, nil
+		},
+	)
+
+	output, err := tool.RunRaw(context.Background(), map[string]any{"value": "hello"})
+	require.NoError(t, err)
+	require.Equal(t, "hello", output)
+
+	found := false
+	for _, span := range exporter.Flush() {
+		if span.Name() == "echo_tool" && span.HasAttr("braintrust.span_attributes") {
+			span.AssertJSONAttrEquals("braintrust.span_attributes", map[string]any{"type": "tool"})
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "orchestrion did not replace genkit.DefineTool")
+}
+
 // TestMultipleIntegrations verifies that multiple Braintrust contrib integrations
 // can be enabled together with orchestrion and all produce spans in the same trace.
 func TestMultipleIntegrations(t *testing.T) {
