@@ -160,17 +160,26 @@ aspects:
               template: ai.WithMiddleware(tracegenkit.NewMiddleware())
   - id: genkit-definetool-tracing
     join-point:
-      function-call: github.com/firebase/genkit/go/genkit.DefineTool
+      all-of:
+        - function-call: github.com/firebase/genkit/go/genkit.DefineTool
+        - not:
+            import-path: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
     advice:
       - replace-function: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit.DefineTool
   - id: genkit-definetoolwithinputschema-tracing
     join-point:
-      function-call: github.com/firebase/genkit/go/genkit.DefineToolWithInputSchema
+      all-of:
+        - function-call: github.com/firebase/genkit/go/genkit.DefineToolWithInputSchema
+        - not:
+            import-path: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
     advice:
       - replace-function: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit.DefineToolWithInputSchema
   - id: genkit-definemultiparttool-tracing
     join-point:
-      function-call: github.com/firebase/genkit/go/genkit.DefineMultipartTool
+      all-of:
+        - function-call: github.com/firebase/genkit/go/genkit.DefineMultipartTool
+        - not:
+            import-path: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
     advice:
       - replace-function: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit.DefineMultipartTool
   - id: sashabaranov-newclientwithconfig-wrap
