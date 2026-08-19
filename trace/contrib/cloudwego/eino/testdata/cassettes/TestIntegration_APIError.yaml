@@ -1,0 +1,71 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 103
+        transfer_encoding: []
+        trailer: {}
+        host: api.openai.com
+        remote_addr: ""
+        request_uri: ""
+        body: '{"model":"braintrust-invalid-model","messages":[{"role":"user","content":"This request should fail."}]}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+        url: https://api.openai.com/v1/chat/completions
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+                "error": {
+                    "message": "The model `braintrust-invalid-model` does not exist or you do not have access to it.",
+                    "type": "invalid_request_error",
+                    "param": null,
+                    "code": "model_not_found"
+                }
+            }
+        headers:
+            Access-Control-Expose-Headers:
+                - CF-Ray
+                - CF-Ray
+            Alt-Svc:
+                - h3=":443"; ma=86400
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - a2b29e38cf3d3701-YYZ
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 14 Aug 2026 20:13:04 GMT
+            Server:
+                - cloudflare
+            Set-Cookie:
+                - __cf_bm=Hxnbuj037Jxoxa0VxUMLlULHRSZxZyQDjcyQ2SyiBGM-1786738384.769396-1.0.1.1-dRcsXKyvjQ9R5TE7LXaaQTXLJ9V3NQYyX4pihrnpodsMS6RX55OHqh7N1Y.HGbRi_IDvD6BGk9izu6_e4F.bf4XLY_Wc5WY3CAWuHk3R6_B2PZAuvar78DG.igmzcnqr; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri, 14 Aug 2026 20:43:04 GMT
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            Vary:
+                - Origin
+            X-Content-Type-Options:
+                - nosniff
+            X-Openai-Proxy-Wasm:
+                - v0.1
+            X-Request-Id:
+                - req_5fb91207bdf04aa3bc38fd442fd41873
+        status: 404 Not Found
+        code: 404
+        duration: 213.726333ms

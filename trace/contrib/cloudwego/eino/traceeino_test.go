@@ -15,6 +15,7 @@ import (
 	"github.com/cloudwego/eino/components/embedding"
 	"github.com/cloudwego/eino/components/model"
 	"github.com/cloudwego/eino/components/tool"
+	"github.com/cloudwego/eino/compose"
 	"github.com/cloudwego/eino/schema"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
@@ -34,6 +35,18 @@ func makeRunInfo(name, typ string) *callbacks.RunInfo {
 func invokeChatModel(ctx context.Context, h *Handler, info *callbacks.RunInfo, input *model.CallbackInput, output *model.CallbackOutput) {
 	ctx = h.OnStart(ctx, info, input)
 	h.OnEnd(ctx, info, output)
+}
+
+func requireOutputMessage(t *testing.T, output any) (map[string]any, map[string]any) {
+	t.Helper()
+	choices, ok := output.([]any)
+	require.True(t, ok, "output should be an array of choices, got %T", output)
+	require.Len(t, choices, 1)
+	choice, ok := choices[0].(map[string]any)
+	require.True(t, ok)
+	message, ok := choice["message"].(map[string]any)
+	require.True(t, ok)
+	return choice, message
 }
 
 func TestOnStart(t *testing.T) {
@@ -106,10 +119,10 @@ func TestOnEnd_WithTokenUsage(t *testing.T) {
 
 	out := span.Output()
 	require.NotNil(t, out)
-	choice, ok := out.(map[string]interface{})
-	require.True(t, ok, "output should be a message object")
-	assert.Equal(t, "assistant", choice["role"])
-	assert.Equal(t, "Hello there!", choice["content"])
+	choice, message := requireOutputMessage(t, out)
+	assert.Equal(t, "stop", choice["finish_reason"])
+	assert.Equal(t, "assistant", message["role"])
+	assert.Equal(t, "Hello there!", message["content"])
 
 	metrics := span.Metrics()
 	require.NotNil(t, metrics)
@@ -183,9 +196,9 @@ func TestOnEndWithStreamOutput(t *testing.T) {
 
 	out := span.Output()
 	require.NotNil(t, out)
-	choice, ok := out.(map[string]interface{})
-	require.True(t, ok, "output should be a message object")
-	assert.Equal(t, "1 2 3", choice["content"])
+	choice, message := requireOutputMessage(t, out)
+	assert.Equal(t, "stop", choice["finish_reason"])
+	assert.Equal(t, "1 2 3", message["content"])
 
 	metrics := span.Metrics()
 	require.NotNil(t, metrics)
@@ -257,9 +270,8 @@ func TestOnStartWithStreamInput_ModelInput(t *testing.T) {
 
 	out := span.Output()
 	require.NotNil(t, out)
-	outMap, ok := out.(map[string]interface{})
-	require.True(t, ok)
-	assert.Equal(t, "response", outMap["content"])
+	_, message := requireOutputMessage(t, out)
+	assert.Equal(t, "response", message["content"])
 
 	meta := span.Metadata()
 	require.NotNil(t, meta)
@@ -293,6 +305,66 @@ func TestOnStartWithStreamInput_ToolInput(t *testing.T) {
 	out := span.Output()
 	require.NotNil(t, out)
 	assert.Equal(t, "72F", out)
+}
+
+func TestOnStartWithStreamInput_TaskPreservesAllChunks(t *testing.T) {
+	tp, exporter := oteltest.Setup(t)
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
+	info := &callbacks.RunInfo{Component: compose.ComponentOfGraph}
+
+	sr, sw := schema.Pipe[callbacks.CallbackInput](3)
+	sw.Send(map[string]any{"chunk": 1}, nil)
+	sw.Send(map[string]any{"chunk": 2}, nil)
+	sw.Send(map[string]any{"chunk": 3}, nil)
+	sw.Close()
+
+	ctx := handler.OnStartWithStreamInput(context.Background(), info, sr)
+	handler.OnEnd(ctx, info, map[string]any{"done": true})
+
+	span := exporter.FlushOne()
+	inputs, ok := span.Input().([]any)
+	require.True(t, ok)
+	require.Len(t, inputs, 3)
+	assert.Equal(t, float64(1), inputs[0].(map[string]any)["chunk"])
+	assert.Equal(t, float64(3), inputs[2].(map[string]any)["chunk"])
+}
+
+func TestOnEndWithStreamOutput_TaskPreservesGenericChunks(t *testing.T) {
+	tp, exporter := oteltest.Setup(t)
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
+	info := &callbacks.RunInfo{Component: compose.ComponentOfGraph}
+	ctx := handler.OnStart(context.Background(), info, map[string]any{"input": true})
+
+	sr, sw := schema.Pipe[callbacks.CallbackOutput](2)
+	sw.Send(map[string]any{"chunk": 1}, nil)
+	sw.Send(map[string]any{"chunk": 2}, nil)
+	sw.Close()
+
+	handler.OnEndWithStreamOutput(ctx, info, sr)
+	handler.Wait()
+
+	span := exporter.FlushOne()
+	outputs, ok := span.Output().([]any)
+	require.True(t, ok)
+	require.Len(t, outputs, 2)
+	assert.Equal(t, float64(1), outputs[0].(map[string]any)["chunk"])
+	assert.Equal(t, float64(2), outputs[1].(map[string]any)["chunk"])
+}
+
+func TestOnEndWithStreamOutput_Tool(t *testing.T) {
+	tp, exporter := oteltest.Setup(t)
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
+	ctx := handler.OnStart(context.Background(), makeRunInfo("stream_tool", ""), &tool.CallbackInput{ArgumentsInJSON: `{}`})
+
+	sr, sw := schema.Pipe[callbacks.CallbackOutput](2)
+	sw.Send(&tool.CallbackOutput{Response: "hello "}, nil)
+	sw.Send(&tool.CallbackOutput{Response: "world"}, nil)
+	sw.Close()
+
+	handler.OnEndWithStreamOutput(ctx, nil, sr)
+	handler.Wait()
+	span := exporter.FlushOne()
+	assert.Equal(t, "hello world", span.Output())
 }
 
 func TestOnStartWithStreamInput_UnrecognizedInput(t *testing.T) {
@@ -334,6 +406,7 @@ func TestMetadata(t *testing.T) {
 	ctx := context.Background()
 	info := makeRunInfo("", "OpenAI")
 
+	toolChoice := schema.ToolChoiceForced
 	input := &model.CallbackInput{
 		Messages: []*schema.Message{{Role: schema.User, Content: "hi"}},
 		Config: &model.Config{
@@ -341,6 +414,14 @@ func TestMetadata(t *testing.T) {
 			MaxTokens:   100,
 			Temperature: 0.7,
 		},
+		Tools: []*schema.ToolInfo{{
+			Name: "get_weather",
+			Desc: "Get the current weather",
+			ParamsOneOf: schema.NewParamsOneOfByParams(map[string]*schema.ParameterInfo{
+				"location": {Type: schema.String, Desc: "City name", Required: true},
+			}),
+		}},
+		ToolChoice: &toolChoice,
 	}
 
 	ctx2 := handler.OnStart(ctx, info, input)
@@ -353,8 +434,19 @@ func TestMetadata(t *testing.T) {
 	meta := spans[0].Metadata()
 	require.NotNil(t, meta)
 	assert.Equal(t, "gpt-4o-mini", meta["model"])
-	// provider is derived from info.Type when available
-	assert.Equal(t, "OpenAI", meta["provider"])
+	// Provider and tool request controls are normalized for pricing and display.
+	assert.Equal(t, "openai", meta["provider"])
+	assert.Equal(t, "required", meta["tool_choice"])
+	tools, ok := meta["tools"].([]any)
+	require.True(t, ok)
+	require.Len(t, tools, 1)
+	toolDef := tools[0].(map[string]any)
+	assert.Equal(t, "function", toolDef["type"])
+	function := toolDef["function"].(map[string]any)
+	assert.Equal(t, "get_weather", function["name"])
+	parameters := function["parameters"].(map[string]any)
+	assert.Equal(t, "object", parameters["type"])
+	assert.Equal(t, []any{"location"}, parameters["required"])
 }
 
 func TestToolCallOutput(t *testing.T) {
@@ -394,6 +486,21 @@ func TestToolCallOutput(t *testing.T) {
 
 	inp := span.Input()
 	require.NotNil(t, inp)
+
+	choice, message := requireOutputMessage(t, span.Output())
+	assert.Equal(t, "tool_calls", choice["finish_reason"])
+	assert.Nil(t, message["content"])
+	toolCalls, ok := message["tool_calls"].([]any)
+	require.True(t, ok)
+	require.Len(t, toolCalls, 1)
+	toolCall, ok := toolCalls[0].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "call_abc123", toolCall["id"])
+	assert.Equal(t, "function", toolCall["type"])
+	function, ok := toolCall["function"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "get_weather", function["name"])
+	assert.Equal(t, `{"location":"New York"}`, function["arguments"])
 }
 
 func TestStreamError(t *testing.T) {
@@ -484,6 +591,50 @@ func TestToolOutputJSON_NotDoubleEncoded(t *testing.T) {
 	outMap, ok := out.(map[string]any)
 	require.True(t, ok, "expected parsed JSON object, got %T", out)
 	assert.Equal(t, float64(42), outMap["result"])
+}
+
+func TestToolEmptyAndMalformedJSONValues(t *testing.T) {
+	tp, exporter := oteltest.Setup(t)
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
+
+	ctx := handler.OnStart(context.Background(), makeRunInfo("tool", ""), &tool.CallbackInput{
+		ArgumentsInJSON: "not-json",
+	})
+	handler.OnEnd(ctx, nil, &tool.CallbackOutput{Response: ""})
+
+	span := exporter.FlushOne()
+	assert.Equal(t, "not-json", span.Input())
+	assert.Equal(t, "", span.Output())
+}
+
+func TestStructuredToolOutput(t *testing.T) {
+	tp, exporter := oteltest.Setup(t)
+	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
+	imageData := "aW1hZ2U="
+
+	ctx := handler.OnStart(context.Background(), makeRunInfo("tool", ""), &tool.CallbackInput{ArgumentsInJSON: `{}`})
+	handler.OnEnd(ctx, nil, &tool.CallbackOutput{ToolOutput: &schema.ToolResult{Parts: []schema.ToolOutputPart{
+		{Type: schema.ToolPartTypeText, Text: "result"},
+		{Type: schema.ToolPartTypeImage, Image: &schema.ToolOutputImage{MessagePartCommon: schema.MessagePartCommon{
+			Base64Data: &imageData,
+			MIMEType:   "image/png",
+		}}},
+	}}})
+
+	span := exporter.FlushOne()
+	output := span.Output().(map[string]any)
+	parts := output["parts"].([]any)
+	require.Len(t, parts, 2)
+	assert.Equal(t, "result", parts[0].(map[string]any)["text"])
+	imageURL := parts[1].(map[string]any)["image_url"].(map[string]any)
+	assert.Equal(t, "data:image/png;base64,aW1hZ2U=", imageURL["url"])
+}
+
+func TestStructuredToolOutputRejectsMalformedParts(t *testing.T) {
+	_, err := convertToolResult(&schema.ToolResult{Parts: []schema.ToolOutputPart{{
+		Type: schema.ToolPartTypeImage,
+	}}})
+	require.Error(t, err)
 }
 
 func TestToolOutputPlainString(t *testing.T) {
@@ -779,22 +930,24 @@ func TestEmbeddingCallback(t *testing.T) {
 
 	inp := span.Input()
 	require.NotNil(t, inp)
-	texts, ok := inp.([]interface{})
-	require.True(t, ok, "input should be array of texts")
-	require.Len(t, texts, 2)
-	assert.Equal(t, "hello world", texts[0])
-	assert.Equal(t, "braintrust tracing", texts[1])
+	inputMap, ok := inp.(map[string]any)
+	require.True(t, ok)
+	inputs, ok := inputMap["inputs"].([]any)
+	require.True(t, ok)
+	require.Len(t, inputs, 2)
+	assert.Equal(t, "hello world", inputs[0].(map[string]any)["content"])
+	assert.Equal(t, "braintrust tracing", inputs[1].(map[string]any)["content"])
 
 	out := span.Output()
 	outMap, ok := out.(map[string]interface{})
 	require.True(t, ok)
-	assert.Equal(t, float64(3), outMap["embedding_length"])
-	assert.Equal(t, float64(2), outMap["embeddings_count"])
+	assert.Equal(t, float64(2), outMap["count"])
+	assert.NotContains(t, outMap, "embedding_length")
 
 	metadata := span.Metadata()
-	assert.Equal(t, "OpenAI", metadata["provider"])
+	assert.Equal(t, "openai", metadata["provider"])
 	assert.Equal(t, "text-embedding-3-small", metadata["model"])
-	assert.Equal(t, "float", metadata["encoding_format"])
+	assert.NotContains(t, metadata, "encoding_format")
 
 	metrics := span.Metrics()
 	assert.Equal(t, float64(5), metrics["prompt_tokens"])
@@ -812,12 +965,12 @@ func TestEmbeddingOutputSummary(t *testing.T) {
 		{
 			name: "non-empty",
 			in:   [][]float64{{0.1, 0.2, 0.3}, {0.4, 0.5, 0.6}},
-			want: map[string]any{"embedding_length": 3, "embeddings_count": 2},
+			want: map[string]any{"count": 2},
 		},
 		{
 			name: "empty",
 			in:   nil,
-			want: map[string]any{"embeddings_count": 0},
+			want: map[string]any{"count": 0},
 		},
 	}
 	for _, tc := range cases {
@@ -836,4 +989,72 @@ func TestEmbeddingTokenUsageToMetrics(t *testing.T) {
 	assert.Equal(t, int64(7), m["tokens"])
 	_, hasCompletion := m["completion_tokens"]
 	assert.False(t, hasCompletion)
+}
+
+func TestMetricsIncludeReportedZeroAndOmitNegativeValues(t *testing.T) {
+	metrics := modelTokenUsageToMetrics(&model.TokenUsage{
+		PromptTokens:     0,
+		CompletionTokens: -1,
+		TotalTokens:      0,
+	})
+	assert.Equal(t, int64(0), metrics["prompt_tokens"])
+	assert.Equal(t, int64(0), metrics["tokens"])
+	assert.NotContains(t, metrics, "completion_tokens")
+}
+
+func TestHandlerMetadataOverrides(t *testing.T) {
+	handler := NewHandlerWithOptions(HandlerOptions{
+		Provider: "Azure",
+		Model:    "deployment-name",
+	})
+	metadata := handler.buildMetadata(makeRunInfo("", "OpenAI"), &model.CallbackInput{})
+	assert.Equal(t, "azure", metadata["provider"])
+	assert.Equal(t, "deployment-name", metadata["model"])
+}
+
+func TestMultimodalInputUsesCanonicalContentParts(t *testing.T) {
+	imageData := "aW1hZ2U="
+	message := convertMessage(&schema.Message{
+		Role: schema.User,
+		UserInputMultiContent: []schema.MessageInputPart{
+			{Type: schema.ChatMessagePartTypeText, Text: "describe this"},
+			{
+				Type: schema.ChatMessagePartTypeImageURL,
+				Image: &schema.MessageInputImage{MessagePartCommon: schema.MessagePartCommon{
+					Base64Data: &imageData,
+					MIMEType:   "image/png",
+				}},
+			},
+		},
+	})
+
+	parts, ok := message["content"].([]map[string]any)
+	require.True(t, ok)
+	require.Len(t, parts, 2)
+	assert.Equal(t, map[string]any{"type": "text", "text": "describe this"}, parts[0])
+	imageURL := parts[1]["image_url"].(map[string]any)
+	assert.Equal(t, "data:image/png;base64,aW1hZ2U=", imageURL["url"])
+}
+
+func TestMultimodalOutputPreservesReasoning(t *testing.T) {
+	parts := convertOutputParts([]schema.MessageOutputPart{{
+		Type: schema.ChatMessagePartTypeReasoning,
+		Reasoning: &schema.MessageOutputReasoning{
+			Text:      "reasoning summary",
+			Signature: "signature",
+		},
+	}})
+
+	require.Len(t, parts, 1)
+	assert.Equal(t, map[string]any{
+		"type":      "reasoning",
+		"text":      "reasoning summary",
+		"signature": "signature",
+	}, parts[0])
+}
+
+func TestNormalizeFinishReason(t *testing.T) {
+	assert.Equal(t, "tool_calls", normalizeFinishReason("tool_use", true))
+	assert.Equal(t, "length", normalizeFinishReason("max_tokens", false))
+	assert.Equal(t, "stop", normalizeFinishReason("end_turn", false))
 }
