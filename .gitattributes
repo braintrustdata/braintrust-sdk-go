@@ -1,2 +1,5 @@
 # Disable automatic line ending conversion for Go files
 *.go -text
+
+# Mark VCR cassettes as generated so they collapse in diffs/PRs
+**/testdata/cassettes/** linguist-generated=true

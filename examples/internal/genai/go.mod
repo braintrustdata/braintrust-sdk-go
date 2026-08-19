@@ -5,8 +5,8 @@ go 1.25.0
 toolchain go1.26.1
 
 require (
-	github.com/braintrustdata/braintrust-sdk-go v0.10.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.10.0
+	github.com/braintrustdata/braintrust-sdk-go v0.11.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.11.0
 	go.opentelemetry.io/otel v1.44.0
 	go.opentelemetry.io/otel/sdk v1.44.0
 	google.golang.org/genai v1.41.0
