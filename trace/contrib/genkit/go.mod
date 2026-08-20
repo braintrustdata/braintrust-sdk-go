@@ -5,7 +5,7 @@ go 1.25.0
 toolchain go1.26.1
 
 require (
-	github.com/braintrustdata/braintrust-sdk-go v0.11.0
+	github.com/braintrustdata/braintrust-sdk-go v0.11.1
 	github.com/firebase/genkit/go v1.5.0
 	github.com/google/uuid v1.6.0
 	github.com/openai/openai-go v1.12.0
