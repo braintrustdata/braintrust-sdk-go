@@ -52,7 +52,7 @@ Use [Orchestrion](https://github.com/DataDog/orchestrion) to automatically injec
 
 **1. Install orchestrion:**
 ```bash
-go install github.com/DataDog/orchestrion@v1.6.1
+go install github.com/DataDog/orchestrion@v1.12.1
 ```
 
 **2. Create `orchestrion.tool.go` in your project root:**

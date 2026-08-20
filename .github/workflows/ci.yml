@@ -44,7 +44,7 @@ jobs:
       - name: Install orchestrion
         env:
           GOTOOLCHAIN: local
-        run: go install github.com/DataDog/orchestrion@v1.6.1
+        run: go install github.com/DataDog/orchestrion@v1.12.1
       - name: Verify modules
         run: make mod-verify
         env:

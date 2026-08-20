@@ -24,7 +24,7 @@ func TestOrchestrionInjection(t *testing.T) {
 
 	// Check orchestrion is available.
 	if _, err := exec.LookPath("orchestrion"); err != nil {
-		t.Fatal("orchestrion not found in PATH (install: go install github.com/DataDog/orchestrion@v1.6.1)")
+		t.Fatal("orchestrion not found in PATH (install: go install github.com/DataDog/orchestrion@v1.12.1)")
 	}
 
 	repoRoot, err := filepath.Abs(filepath.Join("..", ".."))
