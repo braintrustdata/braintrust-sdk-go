@@ -18,17 +18,21 @@ browser ──▶ bt eval --dev (localhost:8300) ──spawns──▶ this prog
 
 ## What This Example Shows
 
-- Registering an evaluator with `evalrunner.RegisterEval` and handing over with `evalrunner.Main`
+- Registering evaluators with `evalrunner.RegisterEval` and handing over with `evalrunner.Main`
 - A `food-classifier` (`string → string`) task with two scorers (`exact_match`, `valid_category`)
   and a `model` parameter the task actually reads
-- Driving that evaluator from a Braintrust **Playground**, changing `model` to alter task
-  behavior, and watching results stream in
+- A `summarizer` task driven by a **prompt parameter**: the prompt picked in the playground is
+  rendered in Go and sent to OpenAI, so editing the prompt in the UI changes what the model is
+  asked without touching the code
+- Driving both from a Braintrust **Playground**, changing parameters to alter behavior, and
+  watching results stream in
 
 ## Layout
 
 ```
 main.go                     wiring: New -> RegisterEval -> Main
-food_classifier_eval.go     the eval itself: task, scorers, parameters, dataset
+food_classifier_eval.go     an eval with no LLM call: task, scorers, parameters, dataset
+summarizer_eval.go          an eval driven by a prompt parameter, calling OpenAI
 ```
 
 The `_eval.go` suffix is how `bt` discovers Go evals in a directory, mirroring Go's own `_test.go`
@@ -41,7 +45,9 @@ one.
    [CLI docs](https://www.braintrust.dev/docs/reference/cli).
 2. **Braintrust API key**: `BRAINTRUST_API_KEY` must be set. If you have it in the repo's `.env`,
    mise loads it automatically; otherwise `export` it.
-3. The Braintrust project you'll run from. The example registers under `go-sdk-examples`, but
+3. **OpenAI API key**: `OPENAI_API_KEY`, for the `summarizer` eval. The `food-classifier` eval
+   needs no LLM.
+4. The Braintrust project you'll run from. The example registers under `go-sdk-examples`, but
    playground runs attach to *your* playground's project, so any project works.
 
 ## Running It
@@ -87,6 +93,17 @@ Then:
    > the JSON into the `model` parameter field: that's a task parameter, not the dataset.
 4. **Run.**
 
+#### Trying the prompt parameter
+
+Pick `summarizer` instead of `food-classifier` at step 2. Its `summary_prompt` control is a prompt
+picker: leave it on the default declared in `main.go`, or choose a prompt saved in your project.
+Either way the task calls `hooks.Parameters.Prompt("summary_prompt")`, renders it with the case
+input, and sends it to OpenAI. Each case's dataset row needs only an `input` — the scorers here
+(`non_empty`, `one_sentence`) do not compare against an expected value.
+
+Because the built prompt is annotated onto the task span, the trace links back to the prompt that
+produced it.
+
 Edit the Go code and run again — `bt` recompiles on each request, so there is no server to restart.
 
 ### From the command line
@@ -110,6 +127,7 @@ go run ./internal/eval-runner
 ```
 Registered evals:
   food-classifier  (scorers: exact_match, valid_category; parameters: model)
+  summarizer  (scorers: non_empty, one_sentence; parameters: summary_prompt)
 
 Run them with: bt eval <this package directory>
 ```

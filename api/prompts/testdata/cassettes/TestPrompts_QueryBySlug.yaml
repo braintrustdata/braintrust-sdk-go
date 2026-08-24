@@ -1,0 +1,201 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 23
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"go-sdk-tests"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"7f591203-74a0-4126-9103-1fb905b32618","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","name":"go-sdk-tests","description":null,"created":"2026-08-13T20:45:31.574Z","deleted_at":null,"user_id":"c755328d-f64a-4737-a984-e83c088cd9f7","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 14 Aug 2026 14:57:31 GMT
+            Etag:
+                - W/"fe-e5XSQJyAK+9rnBrPXkKT/jlKL04"
+            Expires:
+                - "0"
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 8268c85934c036cd715280e1605c2636.cloudfront.net (CloudFront), 1.1 38f01abc783d44e34c757455ac9006ce.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - CGPyVGwxoAMEa1A=
+            X-Amz-Cf-Id:
+                - f3cjPttyQZaXQNA8SuDzLJR-vs8ZuM3W-zhYDIr5UP3Fe8CfextcOw==
+            X-Amz-Cf-Pop:
+                - CMH68-P3
+                - CMH68-P5
+            X-Amzn-Requestid:
+                - 05fb1ce5-865f-43be-bf8b-fee995cc776f
+            X-Amzn-Trace-Id:
+                - Root=1-6a7f2cdb-50f603b9360baea210b46dc5;Parent=75cf02212fc1b03b;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Found-Existing:
+                - "true"
+            X-Bt-Internal-Trace-Id:
+                - 6a7f2cdb00000000170b24d6a9841b24
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 132.34905ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 418
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"project_id":"7f591203-74a0-4126-9103-1fb905b32618","name":"sdk-go-load-prompt","slug":"sdk-go-load-prompt","function_type":"prompt","function_data":{"type":"prompt"},"prompt_data":{"options":{"model":"gpt-4o-mini","params":{"temperature":0}},"prompt":{"messages":[{"content":"You greet people warmly.","role":"system"},{"content":"Say hello to {{name}}.","role":"user"}],"type":"chat"},"template_format":"mustache"}}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/function
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"log_id":"p","project_id":"7f591203-74a0-4126-9103-1fb905b32618","slug":"sdk-go-load-prompt","name":"sdk-go-load-prompt","function_type":"prompt","function_data":{"type":"prompt"},"prompt_data":{"options":{"model":"gpt-4o-mini","params":{"temperature":0}},"prompt":{"messages":[{"content":"You greet people warmly.","role":"system"},{"content":"Say hello to {{name}}.","role":"user"}],"type":"chat"},"template_format":"mustache"},"id":"9db0c7e3-4cd8-478b-9048-1af5b3d854fe","created":"2026-08-14T14:57:31.456Z","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","_xact_id":"1000197686698959449"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 14 Aug 2026 14:57:31 GMT
+            Etag:
+                - W/"251-oNjF6APGRyAKrXr1xn87Wdabubo"
+            Expires:
+                - "0"
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 bbc57e4c259e16f712316786b8f9a84a.cloudfront.net (CloudFront), 1.1 38f01abc783d44e34c757455ac9006ce.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - CGPyWHGrIAMEXxw=
+            X-Amz-Cf-Id:
+                - C-e_rQokhfu2Sux0K-hGxh9lwOUxUQWPBCCBE0_J2k0zYnRYukYv7w==
+            X-Amz-Cf-Pop:
+                - CMH68-P3
+                - CMH68-P5
+            X-Amzn-Requestid:
+                - d9484f14-d73c-42e2-b912-5507cea07c5e
+            X-Amzn-Trace-Id:
+                - Root=1-6a7f2cdb-5cf91660036125b870110b1a;Parent=36d65f354fa23d9f;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 6a7f2cdb0000000066eb14fbcbaadb78
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 358.87096ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/prompt?limit=1&project_name=go-sdk-tests&slug=sdk-go-load-prompt
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"objects":[{"_xact_id":"1000197686698959449","created":"2026-08-14T14:57:31.456Z","description":null,"function_type":"prompt","id":"9db0c7e3-4cd8-478b-9048-1af5b3d854fe","log_id":"p","metadata":null,"name":"sdk-go-load-prompt","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","project_id":"7f591203-74a0-4126-9103-1fb905b32618","prompt_data":{"prompt":{"type":"chat","messages":[{"role":"system","content":"You greet people warmly."},{"role":"user","content":"Say hello to {{name}}."}]},"options":{"model":"gpt-4o-mini","params":{"temperature":0}},"template_format":"mustache"},"slug":"sdk-go-load-prompt","tags":null,"function_data":{"type":"prompt"}}]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 14 Aug 2026 14:57:31 GMT
+            Etag:
+                - W/"28e-K+OQb5QHzAp0S80YmzX/871P+10"
+            Expires:
+                - "0"
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 126499baf467343ce75c3d087c3d3500.cloudfront.net (CloudFront), 1.1 38f01abc783d44e34c757455ac9006ce.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - CGPyaGJdoAMEkIQ=
+            X-Amz-Cf-Id:
+                - 78bmebL-fIjvzkRpZ4L8nsWgo5eo8St4B2LvqZvcgQ5_MUGduTmTvQ==
+            X-Amz-Cf-Pop:
+                - CMH68-P3
+                - CMH68-P5
+            X-Amzn-Requestid:
+                - e43e097f-1764-40db-bb51-d67defda4ea9
+            X-Amzn-Trace-Id:
+                - Root=1-6a7f2cdb-12b3a032082aa186753f10fd;Parent=7b789d2cddb3c42a;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 6a7f2cdb00000000594e72dca5901632
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 307.317695ms

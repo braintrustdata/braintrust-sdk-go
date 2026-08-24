@@ -31,7 +31,8 @@ Comprehensive examples testing all features for each AI provider:
 - **[rewrite/](rewrite/)** - Manual tracing and evaluator API testing
 - **[email-evals/](email-evals/)** - Realistic eval example with complex scoring
 - **[eval-updates/](eval-updates/)** - Testing Update option for appending to experiments
-- **[eval-server/](eval-server/)** - Remote eval server exposing evaluators over HTTP
+- **[eval-runner/](eval-runner/)** - Remote evals under `bt eval --dev`, with model and prompt parameters
+- **[prompts/](prompts/)** - Load a Braintrust prompt, render it locally, and call OpenAI with it
 - **[temporal/](temporal/)** - Temporal workflow distributed tracing (worker + client)
 
 ## For Learning

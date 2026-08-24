@@ -6,6 +6,7 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/api/experiments"
 	"github.com/braintrustdata/braintrust-sdk-go/api/functions"
 	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
+	"github.com/braintrustdata/braintrust-sdk-go/api/prompts"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
@@ -85,4 +86,9 @@ func (a *API) Datasets() *datasets.API {
 // Functions is used to access the Functions API
 func (a *API) Functions() *functions.API {
 	return functions.New(a.client)
+}
+
+// Prompts returns a client for reading prompts
+func (a *API) Prompts() *prompts.API {
+	return prompts.New(a.client)
 }

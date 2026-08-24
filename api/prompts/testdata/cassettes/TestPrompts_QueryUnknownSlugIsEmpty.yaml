@@ -1,0 +1,67 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/prompt?project_name=go-sdk-tests&slug=sdk-go-no-such-prompt
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"objects":[]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Fri, 14 Aug 2026 14:57:33 GMT
+            Etag:
+                - W/"e-xZKibKAiOxxBbzTm2byfFNRkvtA"
+            Expires:
+                - "0"
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 b7a454c5d7e9ad8ba2aca6a02bb25f14.cloudfront.net (CloudFront), 1.1 38f01abc783d44e34c757455ac9006ce.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - CGPynG9LoAMEsQw=
+            X-Amz-Cf-Id:
+                - tXwlLrjjKW1u6ndZc5FBdOhQLQnSQYmDyfnCozmUfKemspD2ihERAQ==
+            X-Amz-Cf-Pop:
+                - CMH68-P3
+                - CMH68-P5
+            X-Amzn-Requestid:
+                - 89a554f6-5e73-4430-9c53-71dcc0bafd0e
+            X-Amzn-Trace-Id:
+                - Root=1-6a7f2cdd-08ec7ce64acaf7b377576ae0;Parent=172a804a76cc9965;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 6a7f2cdd0000000040e68f6c97a7ada4
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 138.961548ms
