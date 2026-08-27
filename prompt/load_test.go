@@ -62,6 +62,28 @@ func TestLoad_ByID(t *testing.T) {
 	assert.Equal(t, "gpt-4o-mini", p.Model())
 }
 
+func TestLoad_ProjectIDWinsOverStaleProjectName(t *testing.T) {
+	client := testAPI(t)
+
+	// Resolve the prompt's real project ID via a slug lookup.
+	found, err := prompt.Load(context.Background(), client, prompt.LoadOpts{
+		Slug:    testSlug,
+		Project: testProject,
+	})
+	require.NoError(t, err)
+	require.NotEmpty(t, found.ProjectID)
+
+	// Loading by that ID plus a bogus project name must still find it: per the
+	// documented contract, ProjectID is authoritative and the name is dropped.
+	p, err := prompt.Load(context.Background(), client, prompt.LoadOpts{
+		Slug:      testSlug,
+		ProjectID: found.ProjectID,
+		Project:   "this-project-name-does-not-exist",
+	})
+	require.NoError(t, err)
+	assert.Equal(t, found.ID, p.ID)
+}
+
 func TestLoad_NotFound(t *testing.T) {
 	_, err := prompt.Load(context.Background(), testAPI(t), prompt.LoadOpts{
 		Slug:    "sdk-go-no-such-prompt",

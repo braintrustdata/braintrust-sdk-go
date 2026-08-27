@@ -72,8 +72,15 @@ func Load(ctx context.Context, client *api.API, opts LoadOpts) (*Prompt, error) 
 		return nil, fmt.Errorf("loading prompt %q needs a project", opts.Slug)
 	}
 
+	// ProjectID is authoritative: when it is set, don't also send a (possibly
+	// stale) project name, which the API would treat as an additional filter.
+	projectName := opts.Project
+	if opts.ProjectID != "" {
+		projectName = ""
+	}
+
 	rows, err := prompts.Query(ctx, promptsapi.QueryParams{
-		ProjectName: opts.Project,
+		ProjectName: projectName,
 		ProjectID:   opts.ProjectID,
 		Slug:        opts.Slug,
 		Version:     opts.Version,

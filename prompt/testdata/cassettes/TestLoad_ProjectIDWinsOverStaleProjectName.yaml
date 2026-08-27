@@ -1,0 +1,135 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/prompt?limit=1&project_name=go-sdk-tests&slug=sdk-go-load-prompt
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"objects":[{"_xact_id":"1000197686699028920","created":"2026-08-14T14:57:32.298Z","description":null,"function_type":"prompt","id":"9db0c7e3-4cd8-478b-9048-1af5b3d854fe","log_id":"p","metadata":null,"name":"sdk-go-load-prompt","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","project_id":"7f591203-74a0-4126-9103-1fb905b32618","prompt_data":{"prompt":{"type":"chat","messages":[{"role":"system","content":"You greet people warmly."},{"role":"user","content":"Say hello to {{name}}."}]},"options":{"model":"gpt-4o-mini","params":{"temperature":0}},"template_format":"mustache"},"slug":"sdk-go-load-prompt","tags":null,"function_data":{"type":"prompt"}}]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 27 Aug 2026 14:05:46 GMT
+            Etag:
+                - W/"28e-oiNY5yIaVrgkrkmBvxQCaQZo8Pw"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 7498df460de9ba3040b10360c8bb46da.cloudfront.net (CloudFront), 1.1 7f51b3ed93bc3627f3061df07d24a090.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Cw-ZOG9BIAMEJ6Q=
+            X-Amz-Cf-Id:
+                - upc5tk9fO3v_DFhH4kB1u3lhUizWbJVovnz9a4RcnhYz9LWiCXsdrQ==
+            X-Amz-Cf-Pop:
+                - CMH68-P7
+                - CMH68-P5
+            X-Amzn-Requestid:
+                - dd79bf25-99a8-4039-b484-68bf6282aee2
+            X-Amzn-Trace-Id:
+                - Root=1-6a90443a-16a67e667576bd007b4c9154;Parent=6f18901128305b03;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 6a90443a000000004522692922f792bd
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 462.355802ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/prompt?limit=1&project_id=7f591203-74a0-4126-9103-1fb905b32618&slug=sdk-go-load-prompt
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"objects":[{"_xact_id":"1000197686699028920","created":"2026-08-14T14:57:32.298Z","description":null,"function_type":"prompt","id":"9db0c7e3-4cd8-478b-9048-1af5b3d854fe","log_id":"p","metadata":null,"name":"sdk-go-load-prompt","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","project_id":"7f591203-74a0-4126-9103-1fb905b32618","prompt_data":{"prompt":{"type":"chat","messages":[{"role":"system","content":"You greet people warmly."},{"role":"user","content":"Say hello to {{name}}."}]},"options":{"model":"gpt-4o-mini","params":{"temperature":0}},"template_format":"mustache"},"slug":"sdk-go-load-prompt","tags":null,"function_data":{"type":"prompt"}}]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 27 Aug 2026 14:05:47 GMT
+            Etag:
+                - W/"28e-oiNY5yIaVrgkrkmBvxQCaQZo8Pw"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 3810876dcc6823c5e008a08f16061816.cloudfront.net (CloudFront), 1.1 7f51b3ed93bc3627f3061df07d24a090.cloudfront.net (CloudFront)
+            X-Amz-Apigw-Id:
+                - Cw-ZSHrKoAMEWBg=
+            X-Amz-Cf-Id:
+                - waNIMTH_ye8oAprd5YSUYtfD9HJZweIu5kU0AqP7HW5_n3djWXIM0w==
+            X-Amz-Cf-Pop:
+                - CMH68-P7
+                - CMH68-P5
+            X-Amzn-Requestid:
+                - c358db2a-2079-4b55-9967-192f8fb29e10
+            X-Amzn-Trace-Id:
+                - Root=1-6a90443a-65e3e0942d648b32720d026a;Parent=4d897f9769d297ef;Sampled=0;Lineage=1:24be3d11:0
+            X-Bt-Internal-Trace-Id:
+                - 6a90443a000000002100a1926a90275d
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 311.469977ms

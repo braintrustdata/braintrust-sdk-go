@@ -42,6 +42,17 @@ func TestFromValue(t *testing.T) {
 	}
 }
 
+func TestFromValue_TypedNilPointers(t *testing.T) {
+	// A typed nil pointer through the `any` interface (e.g. a
+	// ParameterDef.Default holding (*prompt.Definition)(nil)) must return the
+	// missing-prompt error, not panic on a nil dereference.
+	for _, value := range []any{(*Definition)(nil), (*Data)(nil), (*Prompt)(nil)} {
+		_, err := FromValue("my_prompt", value)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "my_prompt")
+	}
+}
+
 func TestFromValue_Errors(t *testing.T) {
 	tests := []struct {
 		name  string

@@ -67,10 +67,16 @@ func FromValue(name string, value any) (*Prompt, error) {
 	case Definition:
 		return FromData(name, v.Data()), nil
 	case *Definition:
+		if v == nil {
+			return nil, missingPromptError(name)
+		}
 		return FromData(name, v.Data()), nil
 	case Data:
 		return FromData(name, v), nil
 	case *Data:
+		if v == nil {
+			return nil, missingPromptError(name)
+		}
 		return FromData(name, *v), nil
 	}
 
