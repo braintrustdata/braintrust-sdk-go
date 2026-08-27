@@ -219,8 +219,7 @@ Complete working examples are available in [`examples/`](./examples/):
 **Advanced:**
 - **[manual-llm-logging](./examples/manual-llm-logging/main.go)** - Manually log LLM calls
 - **[attachments](./examples/attachments/main.go)** - Include images and files in traces
-- **[prompts](./examples/prompts/main.go)** - Use Braintrust hosted prompts, invoked server-side
-- **[local prompts](./examples/internal/prompts/main.go)** - Load a prompt, render it, and call the model yourself
+- **[prompts](./examples/prompts/main.go)** - Render a prompt locally and call the model yourself, or invoke it server-side
 - **[distributed-tracing](./examples/distributed-tracing/main.go)** - W3C baggage propagation across services
 - **[otel](./examples/otel/main.go)** - Add Braintrust to existing OpenTelemetry setup
 

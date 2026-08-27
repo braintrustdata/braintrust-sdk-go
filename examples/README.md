@@ -41,8 +41,7 @@ More specialized use cases and integrations:
 
 - **[manual-llm-logging/](manual-llm-logging/)** - Manually log LLM calls (for custom AI proxies)
 - **[attachments/](attachments/)** - Include images and files in traces
-- **[prompts/](prompts/)** - Use Braintrust hosted prompts in evaluations (invoked server-side)
-- **[local prompts](internal/prompts/)** - Load a prompt, render it, and call the model yourself
+- **[prompts/](prompts/)** - Render a prompt locally and call the model yourself, or invoke it server-side
 - **[distributed-tracing/](distributed-tracing/)** - W3C baggage propagation across services
 - **[otel/](otel/)** - Add Braintrust to existing OpenTelemetry setup
 
