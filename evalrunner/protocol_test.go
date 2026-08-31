@@ -21,6 +21,7 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/prompt"
 )
 
 // frame is one Server-Sent Event read back off the socket.
@@ -292,6 +293,77 @@ func TestEvalMode_ParametersReachTheTask(t *testing.T) {
 	assert.True(t, sawStrictOutput, "the strict model parameter did not reach the task")
 }
 
+// A prompt parameter has to survive the whole round trip: the playground sends
+// prompt data as JSON, and the task gets a prompt it can render.
+func TestEvalMode_PromptParameterReachesTheTask(t *testing.T) {
+	bt := startFakeBT(t)
+
+	requestJSON, err := json.Marshal(map[string]any{
+		"name": "prompt-echo",
+		"parameters": map[string]any{
+			"greeting": map[string]any{
+				"prompt": map[string]any{
+					"type": "chat",
+					"messages": []map[string]any{
+						{"role": "user", "content": "Howdy, {{input}}!"},
+					},
+				},
+				"options": map[string]any{"model": "gpt-4o"},
+			},
+		},
+		"data": map[string]any{
+			"data": []map[string]any{{"input": "Joe", "expected": "Howdy, Joe!"}},
+		},
+	})
+	require.NoError(t, err)
+
+	r, _ := newTestRunner(t, map[string]string{
+		"BT_EVAL_DEV_MODE":         "eval",
+		"BT_EVAL_DEV_REQUEST_JSON": string(requestJSON),
+		"BT_EVAL_SSE_SOCK":         bt.sockPath,
+	})
+	r.newSession = vcrSession(t)
+	registerPromptEcho(r)
+
+	require.NoError(t, Run(context.Background(), r))
+
+	frames := bt.collected(t)
+	var sawRendered bool
+	for _, f := range frames {
+		if f.event == "progress" && strings.Contains(f.data, `Howdy, Joe!`) {
+			sawRendered = true
+		}
+	}
+	assert.True(t, sawRendered, "the playground's prompt did not reach the task")
+
+	var summary summaryEvent
+	require.NoError(t, json.Unmarshal([]byte(firstFrame(t, frames, "summary").data), &summary))
+	assert.InDelta(t, 1.0, summary.Scores["exact_match"].Score, 0.0001)
+}
+
+// A prompt parameter the SDK cannot turn into a prompt is reported as an error
+// rather than handed to the task as a raw map.
+func TestEvalMode_InvalidPromptParameterReportsAnError(t *testing.T) {
+	bt := startFakeBT(t)
+
+	r, _ := newTestRunner(t, map[string]string{
+		"BT_EVAL_DEV_MODE": "eval",
+		"BT_EVAL_DEV_REQUEST_JSON": `{"name":"prompt-echo","parameters":{"greeting":"gpt-4o"},` +
+			`"data":{"data":[{"input":"Joe","expected":"Howdy, Joe!"}]}}`,
+		"BT_EVAL_SSE_SOCK": bt.sockPath,
+	})
+	registerPromptEcho(r)
+
+	require.NoError(t, Run(context.Background(), r))
+
+	// Reported as a bad request, before the runner even authenticates: a prompt
+	// value the SDK cannot use is the caller's problem, not a run failure.
+	var payload errorEvent
+	require.NoError(t, json.Unmarshal([]byte(firstFrame(t, bt.collected(t), "error").data), &payload))
+	assert.Equal(t, 400, payload.Status)
+	assert.Contains(t, payload.Message, "greeting")
+}
+
 func TestEvalMode_UnknownEvalReportsNotFound(t *testing.T) {
 	bt := startFakeBT(t)
 
@@ -439,6 +511,48 @@ func registerFoodClassifier(r *Runner) {
 				}
 				return eval.S(0.0), nil
 			}),
+		},
+	})
+}
+
+// registerPromptEcho registers an eval whose task renders a prompt parameter
+// and returns the rendered text, so a test can see exactly what the task got.
+func registerPromptEcho(r *Runner) {
+	echo := eval.TaskWithHooks(func(_ context.Context, input string, hooks *eval.TaskHooks) (string, error) {
+		p, ok := hooks.Parameters.Prompt("greeting")
+		if !ok {
+			return "", errors.New("greeting parameter is not a prompt")
+		}
+
+		built, err := p.Build(map[string]any{"input": input})
+		if err != nil {
+			return "", err
+		}
+		built.AnnotateSpan(hooks.TaskSpan)
+
+		return built.Messages[len(built.Messages)-1].Content.String(), nil
+	})
+
+	RegisterEval(r, &eval.Eval[string, string]{
+		Name:        "prompt-echo",
+		Task:        echo,
+		ProjectName: "go-sdk-tests",
+		Scorers: []eval.Scorer[string, string]{
+			eval.NewScorer("exact_match", func(_ context.Context, res eval.TaskResult[string, string]) (eval.Scores, error) {
+				if res.Output == res.Expected {
+					return eval.S(1.0), nil
+				}
+				return eval.S(0.0), nil
+			}),
+		},
+		ParameterSchema: eval.ParameterSchema{
+			"greeting": {
+				Type: eval.ParameterTypePrompt,
+				Default: prompt.Definition{
+					Model:    "gpt-4o",
+					Messages: []prompt.Message{prompt.User("Hello, {{input}}!")},
+				},
+			},
 		},
 	})
 }

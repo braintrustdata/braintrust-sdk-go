@@ -28,6 +28,11 @@ func main() {
 	// including its parameters -- is declared on the eval itself.
 	evalrunner.RegisterEval(r, foodClassifier())
 
+	// The second eval is driven by a prompt: its "summary_prompt" parameter
+	// becomes a prompt picker in the playground, and whatever is selected there
+	// is rendered by the task and sent to OpenAI. See summarizer_eval.go.
+	evalrunner.RegisterEval(r, summarizer())
+
 	// Main reads the environment bt set, dispatches, and exits. It never returns.
 	evalrunner.Main(r)
 }

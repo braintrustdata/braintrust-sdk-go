@@ -70,7 +70,7 @@ func foodClassifier() *eval.Eval[string, string] {
 		// hooks.Parameters, falling back to the default declared here.
 		ParameterSchema: eval.ParameterSchema{
 			"model": {
-				Type:        "model",
+				Type:        eval.ParameterTypeModel,
 				Default:     "rule-based",
 				Description: "Classification strategy: rule-based (lenient) or strict",
 			},

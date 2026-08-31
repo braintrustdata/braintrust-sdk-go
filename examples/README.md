@@ -33,7 +33,7 @@ Examples for other AI providers and client libraries:
 
 Run evaluations triggered from the Braintrust UI against your own infrastructure:
 
-- **[eval-server](internal/eval-server/)** - Remote eval server exposing evaluators over HTTP
+- **[eval-runner](internal/eval-runner/)** - Run evals from a playground under `bt eval --dev`, including a prompt parameter
 
 ## Advanced Features (30 minutes)
 
@@ -41,7 +41,7 @@ More specialized use cases and integrations:
 
 - **[manual-llm-logging/](manual-llm-logging/)** - Manually log LLM calls (for custom AI proxies)
 - **[attachments/](attachments/)** - Include images and files in traces
-- **[prompts/](prompts/)** - Use Braintrust hosted prompts in evaluations
+- **[prompts/](prompts/)** - Render a prompt locally and call the model yourself, or invoke it server-side
 - **[distributed-tracing/](distributed-tracing/)** - W3C baggage propagation across services
 - **[otel/](otel/)** - Add Braintrust to existing OpenTelemetry setup
 
