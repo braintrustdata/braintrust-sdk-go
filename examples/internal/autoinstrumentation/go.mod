@@ -5,8 +5,8 @@ go 1.25.0
 require (
 	github.com/DataDog/orchestrion v1.12.1
 	github.com/anthropics/anthropic-sdk-go v1.23.0
-	github.com/braintrustdata/braintrust-sdk-go v0.11.1
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/all v0.11.1
+	github.com/braintrustdata/braintrust-sdk-go v0.12.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/all v0.12.0
 	github.com/cloudwego/eino v0.8.4
 	github.com/cloudwego/eino-ext/components/model/openai v0.1.10
 	github.com/firebase/genkit/go v1.5.0
@@ -50,15 +50,15 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk v0.11.1 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.11.1 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime v0.11.1 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino v0.11.1 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.11.1 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.11.1 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.11.1 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.11.1 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.11.1 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk v0.12.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.12.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime v0.12.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino v0.12.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.12.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.12.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.12.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.12.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.12.0 // indirect
 	github.com/buger/jsonparser v1.1.2 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.15.0 // indirect
