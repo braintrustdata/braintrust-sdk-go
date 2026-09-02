@@ -31,6 +31,10 @@ import (
 const (
 	testModelID = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
 	testRegion  = "us-east-2"
+	// CountTokens rejects cross-region inference profile IDs (the "us." prefix
+	// on testModelID) with ValidationException: "The provided model doesn't
+	// support counting tokens." It only accepts the base foundation-model ID.
+	countTokensModelID = "anthropic.claude-haiku-4-5-20251001-v1:0"
 )
 
 // TestParseUsageTokens verifies token normalization for the typed Converse usage.
@@ -561,6 +565,51 @@ func TestInvokeModelClaude(t *testing.T) {
 	assert.Equal(t, float64(0), metrics["prompt_cache_creation_5m_tokens"])
 	assert.Equal(t, float64(0), metrics["prompt_cache_creation_1h_tokens"])
 	assert.NotContains(t, metrics, "time_to_first_token")
+}
+
+func TestCountTokens(t *testing.T) {
+	client, exporter := setUpTest(t)
+
+	reqBody, err := json.Marshal(map[string]any{
+		"anthropic_version": "bedrock-2023-05-31",
+		"max_tokens":        50,
+		"messages": []any{
+			map[string]any{
+				"role":    "user",
+				"content": []any{map[string]any{"type": "text", "text": "What is the capital of France? Reply in one word."}},
+			},
+		},
+	})
+	require.NoError(t, err)
+
+	timer := oteltest.NewTimer()
+	out, err := client.CountTokens(context.Background(), &bedrockruntime.CountTokensInput{
+		ModelId: aws.String(countTokensModelID),
+		Input:   &types.CountTokensInputMemberInvokeModel{Value: types.InvokeModelTokensRequest{Body: reqBody}},
+	})
+	timeRange := timer.Tick()
+
+	require.NoError(t, err)
+	require.NotNil(t, out)
+	require.NotNil(t, out.InputTokens)
+
+	span := exporter.FlushOne()
+	span.AssertInTimeRange(timeRange)
+	span.AssertNameIs("bedrock.count_tokens")
+
+	metadata := span.Metadata()
+	assert.Equal(t, "bedrock", metadata["provider"])
+	assert.Equal(t, "count_tokens", metadata["endpoint"])
+	assert.Equal(t, countTokensModelID, metadata["model"])
+
+	input := span.Attr("braintrust.input_json").String()
+	assert.Contains(t, input, "capital of France")
+
+	assert.False(t, span.HasAttr("braintrust.output_json"))
+
+	metrics := span.Metrics()
+	assert.Equal(t, float64(*out.InputTokens), metrics["prompt_tokens"])
+	assert.NotContains(t, metrics, "completion_tokens")
 }
 
 func TestConverseError(t *testing.T) {

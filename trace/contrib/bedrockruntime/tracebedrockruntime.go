@@ -33,6 +33,9 @@
 //   - InvokeModel and InvokeModelWithResponseStream normalize Anthropic Claude
 //     messages, streamed output, and token metrics. Other model-specific body
 //     formats are not captured because their schemas are provider-defined.
+//   - CountTokens records the prompt_tokens estimate and, for Claude InvokeModel-
+//     or Converse-shaped requests, the normalized input. There is no generation,
+//     so no output or completion metrics are recorded.
 //   - InvokeModelWithBidirectionalStream is not instrumented.
 package bedrockruntime
 
@@ -176,6 +179,8 @@ func pickTracer(cfg *middlewareConfig, opName string) opTracer {
 		return &invokeModelTracer{cfg: cfg}
 	case "InvokeModelWithResponseStream":
 		return &invokeModelStreamTracer{cfg: cfg}
+	case "CountTokens":
+		return &countTokensTracer{cfg: cfg}
 	}
 	return nil
 }

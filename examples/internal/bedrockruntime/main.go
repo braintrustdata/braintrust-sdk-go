@@ -31,6 +31,11 @@ import (
 // Inference-profile ID for the Claude Haiku 4.5 on-demand cross-region profile.
 const haikuModelID = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
 
+// CountTokens rejects cross-region inference profile IDs (the "us." prefix on
+// haikuModelID) with ValidationException: "The provided model doesn't support
+// counting tokens." It only accepts the base foundation-model ID.
+const countTokensModelID = "anthropic.claude-haiku-4-5-20251001-v1:0"
+
 var tracer = otel.Tracer("bedrockruntime-examples")
 
 // BedrockBot demonstrates the Bedrock Runtime API with tracing.
@@ -459,6 +464,37 @@ func (b *BedrockBot) invokeModelClaudeStream(ctx context.Context) error {
 	return nil
 }
 
+// countTokensClaude demonstrates the CountTokens API against a Claude
+// InvokeModel-shaped body, estimating the input token count with no
+// inference run.
+func (b *BedrockBot) countTokensClaude(ctx context.Context) error {
+	ctx, span := tracer.Start(ctx, "count-tokens-claude")
+	defer span.End()
+
+	fmt.Println("\n=== Example 8: CountTokens (Claude) ===")
+
+	body, err := json.Marshal(map[string]any{
+		"anthropic_version": "bedrock-2023-05-31",
+		"max_tokens":        100,
+		"messages": []any{map[string]any{
+			"role":    "user",
+			"content": []any{map[string]any{"type": "text", "text": "Say hi."}},
+		}},
+	})
+	if err != nil {
+		return fmt.Errorf("count-tokens marshal: %w", err)
+	}
+	out, err := b.client.CountTokens(ctx, &bedrockruntime.CountTokensInput{
+		ModelId: aws.String(countTokensModelID),
+		Input:   &types.CountTokensInputMemberInvokeModel{Value: types.InvokeModelTokensRequest{Body: body}},
+	})
+	if err != nil {
+		return fmt.Errorf("count-tokens: %w", err)
+	}
+	fmt.Printf("  input tokens: %d\n", aws.ToInt32(out.InputTokens))
+	return nil
+}
+
 // firstText extracts the first text block from a Converse output.
 func firstText(out types.ConverseOutput) string {
 	m, ok := out.(*types.ConverseOutputMemberMessage)
@@ -533,7 +569,7 @@ func main() {
 
 	fmt.Println("\nBedrock Converse Examples")
 	fmt.Println("=========================")
-	fmt.Println("Demonstrating: system prompts, tools, streaming, citations, extended thinking, vision, and InvokeModel")
+	fmt.Println("Demonstrating: system prompts, tools, streaming, citations, extended thinking, vision, InvokeModel, and CountTokens")
 
 	steps := []struct {
 		name string
@@ -548,6 +584,7 @@ func main() {
 		{"vision", bot.vision},
 		{"invoke-model-claude", bot.invokeModelClaude},
 		{"invoke-model-claude-stream", bot.invokeModelClaudeStream},
+		{"count-tokens-claude", bot.countTokensClaude},
 	}
 	for _, s := range steps {
 		if err := s.fn(ctx); err != nil {
