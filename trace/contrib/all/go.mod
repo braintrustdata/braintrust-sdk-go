@@ -13,6 +13,7 @@ require (
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.12.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.12.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.12.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/mcp v0.0.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.12.0
 )
 
@@ -46,6 +47,7 @@ require (
 	github.com/goccy/go-yaml v1.17.1 // indirect
 	github.com/google/dotprompt/go v0.0.0-20251014011017-8d056e027254 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
+	github.com/google/jsonschema-go v0.4.3 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/safehtml v0.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -58,6 +60,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
 	github.com/mailru/easyjson v0.9.0 // indirect
 	github.com/mbleigh/raymond v0.0.0-20250414171441-6b3a58ab9e0a // indirect
+	github.com/modelcontextprotocol/go-sdk v1.7.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/nikolalohinski/gonja v1.5.3 // indirect
@@ -66,6 +69,8 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
 	github.com/sashabaranov/go-openai v1.41.2 // indirect
+	github.com/segmentio/asm v1.1.3 // indirect
+	github.com/segmentio/encoding v0.5.4 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/slongfield/pyfmt v0.0.0-20220222012616-ea85ff4c361f // indirect
 	github.com/smarty/assertions v1.16.0 // indirect
@@ -91,8 +96,11 @@ require (
 	golang.org/x/crypto v0.54.0 // indirect
 	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
 	golang.org/x/net v0.57.0 // indirect
+	golang.org/x/oauth2 v0.36.0 // indirect
+	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.40.0 // indirect
+	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/adk v0.4.0 // indirect
 	google.golang.org/genai v1.41.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260720211330-0afa2a65878a // indirect
@@ -113,5 +121,6 @@ replace (
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit => ../genkit
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai => ../github.com/sashabaranov/go-openai
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo => ../langchaingo
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/mcp => ../mcp
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai => ../openai
 )

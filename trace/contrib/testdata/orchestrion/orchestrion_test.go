@@ -20,6 +20,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"google.golang.org/genai"
 
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 )
@@ -297,6 +298,52 @@ func TestLangChainGo(t *testing.T) {
 		}
 	}
 	require.True(t, found, "Expected langchain.llm.generate_content span")
+}
+
+// TestMCP verifies that orchestrion auto-injects Braintrust tracing for the
+// official MCP Go SDK when NewClient and NewServer are called.
+func TestMCP(t *testing.T) {
+	exporter := setupOtel(t)
+	ctx := context.Background()
+
+	server := mcp.NewServer(&mcp.Implementation{Name: "orchestrion-server", Version: "v1.0.0"}, nil)
+	mcp.AddTool(server, &mcp.Tool{Name: "greet", Description: "say hi"},
+		func(_ context.Context, _ *mcp.CallToolRequest, args struct {
+			Name string `json:"name"`
+		}) (*mcp.CallToolResult, any, error) {
+			return &mcp.CallToolResult{
+				Content: []mcp.Content{&mcp.TextContent{Text: "hi " + args.Name}},
+			}, nil, nil
+		})
+
+	client := mcp.NewClient(&mcp.Implementation{Name: "orchestrion-client", Version: "v1.0.0"}, nil)
+
+	clientTransport, serverTransport := mcp.NewInMemoryTransports()
+	serverSession, err := server.Connect(ctx, serverTransport, nil)
+	require.NoError(t, err)
+	defer func() { _ = serverSession.Wait() }()
+
+	session, err := client.Connect(ctx, clientTransport, nil)
+	require.NoError(t, err)
+	defer func() { _ = session.Close() }()
+
+	_, err = session.CallTool(ctx, &mcp.CallToolParams{
+		Name:      "greet",
+		Arguments: map[string]any{"name": "orchestrion"},
+	})
+	require.NoError(t, err)
+
+	spans := exporter.Flush()
+	require.NotEmpty(t, spans, "No spans created - orchestrion did not inject middleware for MCP")
+
+	found := false
+	for _, span := range spans {
+		if span.Name() == "mcp.tools.call [greet]" {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "Expected mcp.tools.call [greet] span")
 }
 
 // TestGenkit verifies that orchestrion auto-injects the Braintrust middleware

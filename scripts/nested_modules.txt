@@ -7,5 +7,6 @@ trace/contrib/genai
 trace/contrib/genkit
 trace/contrib/github.com/sashabaranov/go-openai
 trace/contrib/langchaingo
+trace/contrib/mcp
 trace/contrib/openai
 trace/contrib/all

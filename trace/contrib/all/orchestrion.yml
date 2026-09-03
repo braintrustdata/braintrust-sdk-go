@@ -208,6 +208,34 @@ aspects:
                 tracelangchaingo: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo
                 openai: github.com/tmc/langchaingo/llms/openai
               template: openai.WithCallback(tracelangchaingo.NewOpenAIHandler())
+  - id: mcp-newclient-instrument
+    join-point:
+      function-call: github.com/modelcontextprotocol/go-sdk/mcp.NewClient
+    advice:
+      - wrap-expression:
+          imports:
+            tracemcp: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/mcp
+            mcp: github.com/modelcontextprotocol/go-sdk/mcp
+          template: |-
+            func() *mcp.Client {
+              __client := mcp.NewClient({{ index .AST.Args 0 }}, {{ index .AST.Args 1 }})
+              tracemcp.InstrumentClient(__client)
+              return __client
+            }()
+  - id: mcp-newserver-instrument
+    join-point:
+      function-call: github.com/modelcontextprotocol/go-sdk/mcp.NewServer
+    advice:
+      - wrap-expression:
+          imports:
+            tracemcp: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/mcp
+            mcp: github.com/modelcontextprotocol/go-sdk/mcp
+          template: |-
+            func() *mcp.Server {
+              __server := mcp.NewServer({{ index .AST.Args 0 }}, {{ index .AST.Args 1 }})
+              tracemcp.InstrumentServer(__server)
+              return __server
+            }()
   - id: openai-newclient-middleware
     join-point:
       function-call: github.com/openai/openai-go.NewClient

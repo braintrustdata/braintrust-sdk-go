@@ -25,6 +25,7 @@
 //   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit (Firebase Genkit)
 //   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino (CloudWeGo Eino)
 //   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo (LangChainGo)
+//   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/mcp (Model Context Protocol Go SDK)
 package all
 
 import (
@@ -54,4 +55,7 @@ import (
 
 	// LangChainGo (github.com/tmc/langchaingo)
 	_ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo"
+
+	// MCP Go SDK (github.com/modelcontextprotocol/go-sdk)
+	_ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/mcp"
 )
