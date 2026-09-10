@@ -3,6 +3,11 @@ package eval
 import (
 	"encoding/json"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/braintrustdata/braintrust-sdk-go/prompt"
 )
 
 func TestParameters_String(t *testing.T) {
@@ -119,4 +124,56 @@ func TestParameters_NilSafe(t *testing.T) {
 	if _, ok := p.Get("model"); ok {
 		t.Error("nil Get ok = true, want false")
 	}
+}
+
+func TestParameters_Prompt(t *testing.T) {
+	definition := prompt.Definition{
+		Model:    "gpt-4o-mini",
+		Messages: []prompt.Message{prompt.User("hi {{name}}")},
+	}
+
+	// However the value arrives -- already converted by the remote eval runner,
+	// or set by hand for a local run -- the task reads it the same way.
+	tests := []struct {
+		name  string
+		value any
+	}{
+		{"converted prompt", prompt.FromData("greeting", definition.Data())},
+		{"definition", definition},
+		{"prompt data", definition.Data()},
+		{"decoded JSON", promptDataMap(t, definition)},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			params := Parameters{"greeting": tt.value}
+
+			p, ok := params.Prompt("greeting")
+			require.True(t, ok)
+
+			built, err := p.Build(map[string]any{"name": "Ada"})
+			require.NoError(t, err)
+			assert.Equal(t, "hi Ada", built.Messages[0].Content.String())
+		})
+	}
+}
+
+func TestParameters_PromptMissingOrWrongType(t *testing.T) {
+	params := Parameters{"model": "gpt-4o", "nothing": nil}
+
+	for _, name := range []string{"model", "nothing", "absent"} {
+		p, ok := params.Prompt(name)
+		assert.False(t, ok, "%s should not read as a prompt", name)
+		assert.Nil(t, p)
+	}
+}
+
+func promptDataMap(t *testing.T, definition prompt.Definition) map[string]any {
+	t.Helper()
+	encoded, err := json.Marshal(definition)
+	require.NoError(t, err)
+
+	var out map[string]any
+	require.NoError(t, json.Unmarshal(encoded, &out))
+	return out
 }
