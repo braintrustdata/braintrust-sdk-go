@@ -80,6 +80,16 @@ func Middleware(getMiddlewareTracer TracerRouter, log logger.Logger) func(*http.
 			return resp, err
 		}
 
+		// A non-2xx response is a successful RoundTrip as far as Go is concerned
+		// (err == nil) - status-code -> error conversion happens one layer above,
+		// inside each provider's client library. Flag it here so a failed API
+		// call doesn't look identical to a successful one in span status. This
+		// only inspects the status line, never the body, so it's safe even for
+		// streaming responses.
+		if resp.StatusCode >= 400 {
+			span.SetStatus(codes.Error, resp.Status)
+		}
+
 		// Intercept the response body, so we can gather tracing data.
 		//
 		// It's critical that we don't try to parse the whole response body here because
