@@ -1,10 +1,13 @@
 package eval
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/braintrustdata/braintrust-sdk-go/prompt"
 )
 
 func TestParameterSchemaResolve_DefaultsOnly(t *testing.T) {
@@ -89,4 +92,93 @@ func TestParameterSchemaResolve_IsIdempotent(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, once, twice)
+}
+
+// promptParameterSchema declares one prompt parameter with a Go-written default.
+func promptParameterSchema() ParameterSchema {
+	return ParameterSchema{
+		"summary_prompt": {
+			Type: ParameterTypePrompt,
+			Default: prompt.Definition{
+				Model:    "gpt-4o-mini",
+				Messages: []prompt.Message{prompt.User("Summarize {{input}}")},
+			},
+		},
+	}
+}
+
+func TestParameterSchemaResolve_PromptDefaultBecomesAPrompt(t *testing.T) {
+	t.Parallel()
+
+	resolved, err := promptParameterSchema().Resolve(nil)
+	require.NoError(t, err)
+
+	p, ok := resolved.Prompt("summary_prompt")
+	require.True(t, ok, "a prompt default must reach the task as a prompt, not a definition")
+
+	built, err := p.Build(map[string]any{"input": "an article"})
+	require.NoError(t, err)
+	assert.Equal(t, "gpt-4o-mini", built.Model)
+	assert.Equal(t, "Summarize an article", built.Messages[0].Content.String())
+}
+
+func TestParameterSchemaResolve_PromptValueFromPlayground(t *testing.T) {
+	t.Parallel()
+
+	// What the playground actually sends: prompt data as decoded JSON.
+	var value map[string]any
+	require.NoError(t, json.Unmarshal([]byte(`{
+		"prompt": {"type": "chat", "messages": [{"role": "user", "content": "Rewrite {{input}}"}]},
+		"options": {"model": "gpt-4o"},
+		"origin": {"prompt_id": "p-1", "project_id": "proj-1", "prompt_version": "v-1"}
+	}`), &value))
+
+	resolved, err := promptParameterSchema().Resolve(map[string]any{"summary_prompt": value})
+	require.NoError(t, err)
+
+	p, ok := resolved.Prompt("summary_prompt")
+	require.True(t, ok)
+
+	built, err := p.Build(map[string]any{"input": "a poem"})
+	require.NoError(t, err)
+	assert.Equal(t, "gpt-4o", built.Model, "the supplied value replaces the default")
+	assert.Equal(t, "Rewrite a poem", built.Messages[0].Content.String())
+	require.NotNil(t, built.Metadata)
+	assert.Equal(t, "p-1", built.Metadata.ID, "the prompt still links back to Braintrust")
+}
+
+func TestParameterSchemaResolve_PromptIsIdempotent(t *testing.T) {
+	t.Parallel()
+
+	schema := promptParameterSchema()
+
+	once, err := schema.Resolve(nil)
+	require.NoError(t, err)
+	twice, err := schema.Resolve(once)
+	require.NoError(t, err)
+
+	first, ok := once.Prompt("summary_prompt")
+	require.True(t, ok)
+	second, ok := twice.Prompt("summary_prompt")
+	require.True(t, ok)
+	assert.Same(t, first, second, "re-resolving must not rebuild the prompt")
+}
+
+func TestParameterSchemaResolve_InvalidPromptValue(t *testing.T) {
+	t.Parallel()
+
+	_, err := promptParameterSchema().Resolve(map[string]any{"summary_prompt": "gpt-4o"})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "summary_prompt")
+}
+
+func TestParameterSchemaResolve_PromptWithNoValueOrDefault(t *testing.T) {
+	t.Parallel()
+
+	// A prompt parameter with neither a value nor a default: the task cannot run.
+	schema := ParameterSchema{"summary_prompt": {Type: ParameterTypePrompt}}
+
+	_, err := schema.Resolve(nil)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "summary_prompt")
 }

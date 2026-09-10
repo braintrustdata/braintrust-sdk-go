@@ -2,6 +2,10 @@ version: "2"
 linters:
   default: standard
   exclusions:
+      paths:
+        # Vendored third-party code, kept as close to upstream as possible so
+        # re-syncing stays a readable diff. See internal/mustache/VENDOR.md.
+        - internal/mustache
       rules:
         - text: "^unused-parameter:"
           linters: [revive]

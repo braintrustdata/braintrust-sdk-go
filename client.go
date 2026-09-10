@@ -12,6 +12,7 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/eval"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/prompt"
 	bttrace "github.com/braintrustdata/braintrust-sdk-go/trace"
 )
 
@@ -247,6 +248,23 @@ func (c *Client) API() *api.API {
 		api.WithAPIURL(apiInfo.APIURL),
 		api.WithLogger(c.logger),
 	)
+}
+
+// LoadPrompt loads a prompt saved in Braintrust and returns it ready to render.
+//
+//	p, err := client.LoadPrompt(ctx, prompt.LoadOpts{Slug: "summarizer"})
+//	if err != nil {
+//		return err
+//	}
+//	built, err := p.Build(map[string]any{"input": article})
+//
+// Opts.Project defaults to the client's project. The prompt is fetched every
+// time; nothing is cached.
+func (c *Client) LoadPrompt(ctx context.Context, opts prompt.LoadOpts) (*prompt.Prompt, error) {
+	if opts.Project == "" && opts.ProjectID == "" {
+		opts.Project = c.config.DefaultProjectName
+	}
+	return prompt.Load(ctx, c.API(), opts)
 }
 
 // Permalink returns a URL to the span in the Braintrust UI.

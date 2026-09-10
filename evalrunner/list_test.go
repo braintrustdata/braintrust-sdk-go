@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/braintrustdata/braintrust-sdk-go/eval"
+	"github.com/braintrustdata/braintrust-sdk-go/prompt"
 )
 
 func TestListMode_EmptyRunnerEmitsEmptyObject(t *testing.T) {
@@ -101,6 +102,45 @@ func TestListMode_ModelParameterWireShape(t *testing.T) {
 	param := manifest["model-eval"].Parameters.Schema["model"]
 	assert.Equal(t, "model", param.Type)
 	assert.Nil(t, param.Schema, "model params must not carry a nested schema")
+}
+
+// A prompt parameter uses the union's "prompt" arm, and its Go-declared default
+// has to serialize as the prompt data the playground expects.
+func TestListMode_PromptParameterWireShape(t *testing.T) {
+	r, stdout := newTestRunner(t, map[string]string{"BT_EVAL_DEV_MODE": "list"})
+	registerTestEval(r, "prompt-eval", eval.ParameterSchema{
+		"summary_prompt": {
+			Type:        eval.ParameterTypePrompt,
+			Description: "How to summarize",
+			Default: prompt.Definition{
+				Model:    "gpt-4o-mini",
+				Messages: []prompt.Message{prompt.User("Summarize {{input}}")},
+				Params:   map[string]any{"temperature": 0},
+			},
+		},
+	})
+
+	require.NoError(t, Run(context.Background(), r))
+
+	var manifest map[string]struct {
+		Parameters *parametersMeta `json:"parameters"`
+	}
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &manifest))
+
+	param := manifest["prompt-eval"].Parameters.Schema["summary_prompt"]
+	assert.Equal(t, "prompt", param.Type)
+	assert.Nil(t, param.Schema, "prompt params must not carry a nested schema")
+	assert.Equal(t, "How to summarize", param.Description)
+
+	// The default is prompt data, not the Go Definition shape.
+	def, ok := param.Default.(map[string]any)
+	require.True(t, ok, "default should be an object, got %T", param.Default)
+	block, ok := def["prompt"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "chat", block["type"])
+	options, ok := def["options"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "gpt-4o-mini", options["model"])
 }
 
 func TestListMode_EvalWithoutParametersOmitsTheKey(t *testing.T) {

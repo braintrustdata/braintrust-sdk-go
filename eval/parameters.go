@@ -1,6 +1,10 @@
 package eval
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/braintrustdata/braintrust-sdk-go/prompt"
+)
 
 // ParameterSchema declares the parameters an eval accepts, keyed by name.
 //
@@ -78,6 +82,24 @@ func (s ParameterSchema) Resolve(values map[string]any) (Parameters, error) {
 		resolved[name] = value
 	}
 
+	// Prompt parameters need converting: a value chosen in the playground
+	// arrives as decoded JSON and a default declared in Go is a
+	// [prompt.Definition], and the task has to see the same usable type either
+	// way. Converting an already-converted prompt is a no-op, which is what
+	// keeps Resolve idempotent.
+	for name, def := range s {
+		if def.Type != ParameterTypePrompt {
+			continue
+		}
+		// FromValue names the parameter in its errors, so they are returned
+		// as they are rather than prefixed again.
+		p, err := prompt.FromValue(name, resolved[name])
+		if err != nil {
+			return nil, err
+		}
+		resolved[name] = p
+	}
+
 	if len(resolved) == 0 {
 		return nil, nil
 	}
@@ -100,6 +122,7 @@ func (s ParameterSchema) Resolve(values map[string]any) (Parameters, error) {
 //
 //	model := hooks.Parameters.String("model")
 //	max   := hooks.Parameters.Int("max_length")
+//	p, ok := hooks.Parameters.Prompt("summary_prompt")
 type Parameters map[string]any
 
 // Get returns the raw value for name and whether it was present.
@@ -170,4 +193,34 @@ func (p Parameters) Bool(name string) bool {
 		return b
 	}
 	return false
+}
+
+// Prompt returns the value for name as a [prompt.Prompt], and whether it is
+// one. A parameter declared with type "prompt" arrives as a prompt whether its
+// value was chosen in the playground or came from the default declared in Go.
+//
+//	p, ok := hooks.Parameters.Prompt("summary_prompt")
+//	if !ok {
+//		return "", errors.New("summary_prompt is not a prompt")
+//	}
+//	built, err := p.Build(map[string]any{"input": input})
+//
+// For a local run, prompt data set directly in [RunOpts.Parameters] -- a
+// [prompt.Definition], [prompt.Data], or decoded JSON -- is converted here, so
+// the task reads it the same way it would under the playground.
+func (p Parameters) Prompt(name string) (*prompt.Prompt, bool) {
+	value, ok := p[name]
+	if !ok || value == nil {
+		return nil, false
+	}
+
+	if typed, ok := value.(*prompt.Prompt); ok && typed != nil {
+		return typed, true
+	}
+
+	converted, err := prompt.FromValue(name, value)
+	if err != nil {
+		return nil, false
+	}
+	return converted, true
 }
