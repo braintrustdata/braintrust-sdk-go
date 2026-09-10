@@ -18,7 +18,9 @@ import (
 )
 
 // noopTracer is a minimal MiddlewareTracer stub for exercising Middleware()
-// independent of any real provider integration.
+// independent of any real provider integration. VCR doesn't apply here: this
+// tests Middleware()'s own status-mapping logic, not a call to any real API,
+// so there's nothing to record a cassette against.
 type noopTracer struct {
 	cfg *config
 }
