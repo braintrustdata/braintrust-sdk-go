@@ -1,0 +1,70 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 30
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"text":"I love this product"}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+            User-Agent:
+                - Cloudflare/Go 7.9.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 7.9.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.26.5
+        url: https://api.cloudflare.com/client/v4/accounts/dummy-account-id-for-replay/ai/run/@cf/huggingface/distilbert-sst-2-int8
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"result":[{"score":0.000121056436910294,"label":"NEGATIVE"},{"score":0.9998788833618164,"label":"POSITIVE"}],"success":true,"errors":[],"messages":[]}'
+        headers:
+            Api-Version:
+                - 2026-09-25.epoch
+            Cf-Ai-Neurons:
+                - "0.01"
+            Cf-Ai-Req-Id:
+                - 1b6f72ea-2553-4151-8455-f859105e46f7
+            Cf-Auditlog-Id:
+                - 01a0a15b-d43e-784b-95c7-86d3c6ffd728
+            Cf-Ray:
+                - a3b1bdc05f00cc8c-BOM
+            Content-Type:
+                - application/json
+            Date:
+                - Mon, 14 Sep 2026 19:19:05 GMT
+            Server:
+                - cloudflare
+            Set-Cookie:
+                - __cf_bm=nI4ShswfpuAt2YB6TLcJpYNDySyJkcgZVhc3bAeNMSg-1789413545.0153441-1.0.1.1-Ptr22Yw4O2yYiqJ.KiJhNhlbwrXJOG426v_jIPjX4Oji44i1l3Nf6a_hyyhyLGkqgpf_k29hnWF5_xBb7qW4adRjqadJen0eb0z50ORc8HqGNcLJH4MfTMbgE6WbMxZs; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.cloudflare.com; Expires=Mon, 14 Sep 2026 19:49:05 GMT
+        status: 200 OK
+        code: 200
+        duration: 154.3615ms

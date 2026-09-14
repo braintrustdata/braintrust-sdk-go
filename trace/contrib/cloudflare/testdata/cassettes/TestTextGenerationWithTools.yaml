@@ -1,0 +1,70 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 276
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"messages":[{"content":"What''s the weather in Paris?","role":"user"}],"tools":[{"description":"Get the current weather for a location","name":"get_weather","parameters":{"properties":{"location":{"type":"string"}},"required":["location"],"type":"object"},"type":"function"}]}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+            User-Agent:
+                - Cloudflare/Go 7.9.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 7.9.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.26.5
+        url: https://api.cloudflare.com/client/v4/accounts/dummy-account-id-for-replay/ai/run/@cf/meta/llama-3.1-8b-instruct-fast
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"result":{"choices":[{"finish_reason":"tool_calls","index":0,"logprobs":null,"message":{"annotations":null,"audio":null,"content":null,"function_call":null,"reasoning":null,"refusal":null,"role":"assistant","tool_calls":[{"function":{"arguments":"{\"location\": \"Paris\"}","name":"get_weather"},"id":"chatcmpl-tool-bbd38e244a77997d","type":"function"}]},"routed_experts":null,"stop_reason":128008,"token_ids":null}],"created":1789413544,"ec_transfer_params":null,"id":"chatcmpl-60d7f10e-529a-431c-9505-b6642ed50b8b","kv_transfer_params":null,"metrics":null,"model":"@cf/meta/llama-3.1-8b-fast-v2","object":"chat.completion","prompt_logprobs":null,"prompt_text":null,"prompt_token_ids":null,"response":null,"service_tier":null,"tool_calls":[{"arguments":{"location":"Paris"},"name":"get_weather"}],"usage":{"prompt_tokens":243,"completion_tokens":17,"total_tokens":260,"prompt_tokens_details":{"cached_tokens":0},"neurons":1.5935636758804321}},"success":true,"errors":[],"messages":[]}'
+        headers:
+            Api-Version:
+                - 2026-09-25.epoch
+            Cf-Ai-Neurons:
+                - "1.59"
+            Cf-Ai-Req-Id:
+                - 60d7f10e-529a-431c-9505-b6642ed50b8b
+            Cf-Auditlog-Id:
+                - 01a0a15b-d236-7c14-9ed4-e1ce26c22c06
+            Cf-Ray:
+                - a3b1bdbd1b26cc8c-BOM
+            Content-Type:
+                - application/json
+            Date:
+                - Mon, 14 Sep 2026 19:19:04 GMT
+            Server:
+                - cloudflare
+            Set-Cookie:
+                - __cf_bm=X8unX8T9DEo9mwp5OjdL6OM17ykg6yRa_6VLbkP.YPk-1789413544.495571-1.0.1.1-3w_gpIywlycGC_pgxqesVRwX_TS25ufVXGbcgOwDPQTp18Jnw6eCNHeOBIvRavLfp_wWtWMobt1Od1O8OjeZovgK5Cs0D7wtn8mJ5adiJsUpbSyV5Eo53Jwqykhvi7nO; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.cloudflare.com; Expires=Mon, 14 Sep 2026 19:49:04 GMT
+        status: 200 OK
+        code: 200
+        duration: 421.136708ms

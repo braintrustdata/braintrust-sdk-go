@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/a2aproject/a2a-go/a2a"
@@ -12,6 +13,10 @@ import (
 	"github.com/a2aproject/a2a-go/a2asrv/eventqueue"
 	"github.com/anthropics/anthropic-sdk-go"
 	anthropicoption "github.com/anthropics/anthropic-sdk-go/option"
+	cf "github.com/cloudflare/cloudflare-go/v7"
+	cfai "github.com/cloudflare/cloudflare-go/v7/ai"
+	cfoption "github.com/cloudflare/cloudflare-go/v7/option"
+	cfshared "github.com/cloudflare/cloudflare-go/v7/shared"
 	"github.com/firebase/genkit/go/ai"
 	"github.com/firebase/genkit/go/genkit"
 	compatopenai "github.com/firebase/genkit/go/plugins/compat_oai/openai"
@@ -332,6 +337,55 @@ func TestGenAI(t *testing.T) {
 	require.True(t, found, "Expected generate_content span")
 }
 
+// TestCloudflare verifies that orchestrion auto-injects the Braintrust
+// tracing for the Cloudflare Go SDK (Workers AI). This test creates a
+// client WITHOUT manually adding middleware. If orchestrion is working, it
+// will inject the middleware at compile time, and spans will be created.
+func TestCloudflare(t *testing.T) {
+	exporter := setupOtel(t)
+
+	httpClient := vcr.NewHTTPClient(t)
+
+	// Create Cloudflare client WITHOUT middleware - orchestrion should inject it
+	client := cf.NewClient(
+		cfoption.WithAPIToken(envOrDefault("CLOUDFLARE_API_TOKEN", "dummy-key-for-vcr")),
+		cfoption.WithHTTPClient(httpClient),
+		// NOTE: No WithMiddleware here! Orchestrion should inject it.
+	)
+
+	_, err := client.AI.Run(context.Background(), "@cf/meta/llama-3.1-8b-instruct-fast", cfai.AIRunParams{
+		// Workers AI puts the account ID in the URL path, so VCR cassette
+		// matching needs this to be the same placeholder used when recording.
+		AccountID: cf.F(envOrDefault("CLOUDFLARE_ACCOUNT_ID", "dummy-account-id-for-replay")),
+		Body: cfai.AIRunParamsBodyTextGeneration{
+			Messages: cf.F([]cfai.AIRunParamsBodyTextGenerationMessage{
+				{
+					Role:    cf.F("user"),
+					Content: cf.F[cfai.AIRunParamsBodyTextGenerationMessagesContentUnion](cfshared.UnionString("Say hello")),
+				},
+			}),
+		},
+	})
+	require.NoError(t, err)
+
+	spans := exporter.Flush()
+	require.NotEmpty(t, spans, "No spans created - orchestrion did not inject middleware for Cloudflare")
+
+	t.Logf("SUCCESS: %d span(s) created for Cloudflare", len(spans))
+	for _, span := range spans {
+		t.Logf("  - %s", span.Name())
+	}
+
+	found := false
+	for _, span := range spans {
+		if span.Name() == "cloudflare.ai.text_generation" {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "Expected cloudflare.ai.text_generation span")
+}
+
 // TestLangChainGo verifies that orchestrion auto-injects the Braintrust callback
 // for LangChainGo's OpenAI client. This test creates the client WITHOUT manually
 // adding a callback. If orchestrion is working, it will inject the callback at
@@ -554,4 +608,16 @@ func setupOtel(t *testing.T) *oteltest.Exporter {
 	})
 
 	return exporter
+}
+
+// envOrDefault returns the named env var if set (needed to record a real
+// cassette), or fallback otherwise. Used for CLOUDFLARE_API_TOKEN and
+// CLOUDFLARE_ACCOUNT_ID: Workers AI puts the account ID in the URL path, so
+// VCR's URL-based matching needs the same value at record and replay time,
+// and the committed cassette was scrubbed to the placeholder fallback.
+func envOrDefault(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
 }

@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://datadoghq.dev/orchestrion/schema.json
+meta:
+  name: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudflare
+  description: Auto-instrumentation for the Cloudflare Go SDK (Workers AI) with Braintrust tracing
+
+aspects:
+  - id: cloudflare-newclient-middleware
+    join-point:
+      function-call: github.com/cloudflare/cloudflare-go/v7.NewClient
+    advice:
+      - append-args:
+          type: github.com/cloudflare/cloudflare-go/v7/option.RequestOption
+          values:
+            - imports:
+                bt: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudflare
+                option: github.com/cloudflare/cloudflare-go/v7/option
+              template: option.WithMiddleware(bt.NewMiddleware())

@@ -121,6 +121,17 @@ aspects:
               {{- end }}{{ end }}
               return bedrockruntime.NewFromConfig({{ $cfg }}, __opts...)
             }()
+  - id: cloudflare-newclient-middleware
+    join-point:
+      function-call: github.com/cloudflare/cloudflare-go/v7.NewClient
+    advice:
+      - append-args:
+          type: github.com/cloudflare/cloudflare-go/v7/option.RequestOption
+          values:
+            - imports:
+                bt: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudflare
+                option: github.com/cloudflare/cloudflare-go/v7/option
+              template: option.WithMiddleware(bt.NewMiddleware())
   - id: cloudwego-eino-append-global-handler
     join-point:
       function-call: github.com/cloudwego/eino/callbacks.AppendGlobalHandlers
