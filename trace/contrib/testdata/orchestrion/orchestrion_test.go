@@ -17,6 +17,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms"
 	langchainopenai "github.com/tmc/langchaingo/llms/openai"
+	together "github.com/togethercomputer/together-go"
+	togetheroption "github.com/togethercomputer/together-go/option"
 	"go.opentelemetry.io/otel"
 	"google.golang.org/genai"
 
@@ -254,6 +256,53 @@ func TestGenAI(t *testing.T) {
 		}
 	}
 	require.True(t, found, "Expected generate_content span")
+}
+
+// TestTogether verifies that orchestrion auto-injects the Braintrust
+// tracing for the Together AI Go SDK. This test creates a client WITHOUT
+// manually adding middleware. If orchestrion is working, it will inject
+// the middleware at compile time, and spans will be created.
+func TestTogether(t *testing.T) {
+	exporter := setupOtel(t)
+
+	httpClient := vcr.NewHTTPClient(t)
+
+	// Create Together client WITHOUT middleware - orchestrion should inject it
+	client := together.NewClient(
+		togetheroption.WithAPIKey("dummy-key-for-vcr"),
+		togetheroption.WithHTTPClient(httpClient),
+		// NOTE: No WithMiddleware here! Orchestrion should inject it.
+	)
+
+	_, err := client.Chat.Completions.New(context.Background(), together.ChatCompletionNewParams{
+		Model: "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+		Messages: []together.ChatCompletionNewParamsMessageUnion{{
+			OfChatCompletionNewsMessageChatCompletionUserMessageParam: &together.ChatCompletionNewParamsMessageChatCompletionUserMessageParam{
+				Role: "user",
+				Content: together.ChatCompletionNewParamsMessageChatCompletionUserMessageParamContentUnion{
+					OfString: together.String("Say hello"),
+				},
+			},
+		}},
+	})
+	require.NoError(t, err)
+
+	spans := exporter.Flush()
+	require.NotEmpty(t, spans, "No spans created - orchestrion did not inject middleware for Together")
+
+	t.Logf("SUCCESS: %d span(s) created for Together", len(spans))
+	for _, span := range spans {
+		t.Logf("  - %s", span.Name())
+	}
+
+	found := false
+	for _, span := range spans {
+		if span.Name() == "Chat Completion" {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "Expected Chat Completion span")
 }
 
 // TestLangChainGo verifies that orchestrion auto-injects the Braintrust callback

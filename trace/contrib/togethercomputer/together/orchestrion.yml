@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://datadoghq.dev/orchestrion/schema.json
+meta:
+  name: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/togethercomputer/together
+  description: Auto-instrumentation for Together AI Go SDK with Braintrust tracing
+
+aspects:
+  - id: together-newclient-middleware
+    join-point:
+      function-call: github.com/togethercomputer/together-go.NewClient
+    advice:
+      - append-args:
+          type: github.com/togethercomputer/together-go/option.RequestOption
+          values:
+            - imports:
+                bt: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/togethercomputer/together
+                option: github.com/togethercomputer/together-go/option
+              template: option.WithMiddleware(bt.NewMiddleware())

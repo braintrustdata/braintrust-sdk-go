@@ -53,6 +53,7 @@ func TestOrchestrionInjection(t *testing.T) {
 				"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai",
 				"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo",
 				"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai",
+				"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/togethercomputer/together",
 			},
 		},
 	}
@@ -176,6 +177,7 @@ func rewriteFixtureReplaceDirectives(t *testing.T, fixtureDir, repoRoot string) 
 		"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai": filepath.Join(repoRoot, "trace", "contrib", "github.com", "sashabaranov", "go-openai"),
 		"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo":                       filepath.Join(repoRoot, "trace", "contrib", "langchaingo"),
 		"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai":                            filepath.Join(repoRoot, "trace", "contrib", "openai"),
+		"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/togethercomputer/together":         filepath.Join(repoRoot, "trace", "contrib", "togethercomputer", "together"),
 	}
 
 	// Build one go mod edit call with all -replace flags to avoid 11 subprocess round-trips.

@@ -14,6 +14,7 @@ require (
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.13.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.13.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.13.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/togethercomputer/together v0.0.0
 )
 
 require (
@@ -74,6 +75,7 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/tmc/langchaingo v0.1.13 // indirect
+	github.com/togethercomputer/together-go v0.12.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
@@ -114,4 +116,5 @@ replace (
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai => ../github.com/sashabaranov/go-openai
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo => ../langchaingo
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai => ../openai
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/togethercomputer/together => ../togethercomputer/together
 )

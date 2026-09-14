@@ -14,6 +14,7 @@ require (
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.13.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.13.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.13.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/togethercomputer/together v0.0.0
 	github.com/cloudwego/eino v0.8.4
 	github.com/cloudwego/eino-ext/components/embedding/openai v0.0.0-20260416081055-0ebab92e14f2
 	github.com/cloudwego/eino-ext/components/model/claude v0.1.15
@@ -21,6 +22,7 @@ require (
 	github.com/firebase/genkit/go v1.5.0
 	github.com/openai/openai-go v1.12.0
 	github.com/sashabaranov/go-openai v1.41.2
+	github.com/togethercomputer/together-go v0.12.0
 	go.opentelemetry.io/otel v1.44.0
 	go.opentelemetry.io/otel/sdk v1.44.0
 	go.opentelemetry.io/otel/trace v1.44.0
@@ -127,4 +129,5 @@ require (
 replace (
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk => ../trace/contrib/adk
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo => ../trace/contrib/langchaingo
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/togethercomputer/together => ../trace/contrib/togethercomputer/together
 )

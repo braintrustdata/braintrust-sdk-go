@@ -230,3 +230,14 @@ aspects:
                 bt: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai
                 option: github.com/openai/openai-go/v2/option
               template: option.WithMiddleware(bt.NewMiddleware())
+  - id: together-newclient-middleware
+    join-point:
+      function-call: github.com/togethercomputer/together-go.NewClient
+    advice:
+      - append-args:
+          type: github.com/togethercomputer/together-go/option.RequestOption
+          values:
+            - imports:
+                bt: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/togethercomputer/together
+                option: github.com/togethercomputer/together-go/option
+              template: option.WithMiddleware(bt.NewMiddleware())

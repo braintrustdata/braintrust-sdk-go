@@ -42,6 +42,7 @@ func TestGenerate(t *testing.T) {
 		"sashabaranov-newclientwithconfig-wrap",
 		"genai-newclient-wrap",
 		"langchaingo-openai-newllm-callback",
+		"together-newclient-middleware",
 	}
 
 	for _, expected := range expectedAspects {
@@ -75,10 +76,10 @@ func TestGenerateExcludesAllDirectory(t *testing.T) {
 		t.Fatalf("Failed to parse generated YAML: %v", err)
 	}
 
-	// Count aspects - should be exactly 18 (one per provider, plus openai-v2, 4 for adk, 6 for genkit, 1 for cloudwego/eino, and 1 for bedrockruntime)
+	// Count aspects - should be exactly 19 (one per provider, plus openai-v2, 4 for adk, 6 for genkit, 1 for cloudwego/eino, 1 for bedrockruntime, and 1 for together)
 	// If it's more, we might be including duplicates from all/
-	if len(result.Aspects) != 18 {
-		t.Errorf("expected 18 aspects, got %d", len(result.Aspects))
+	if len(result.Aspects) != 19 {
+		t.Errorf("expected 19 aspects, got %d", len(result.Aspects))
 	}
 }
 
