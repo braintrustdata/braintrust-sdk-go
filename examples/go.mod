@@ -14,12 +14,14 @@ require (
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.13.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.13.0
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.13.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/pinecone v0.0.0
 	github.com/cloudwego/eino v0.8.4
 	github.com/cloudwego/eino-ext/components/embedding/openai v0.0.0-20260416081055-0ebab92e14f2
 	github.com/cloudwego/eino-ext/components/model/claude v0.1.15
 	github.com/cloudwego/eino-ext/components/model/openai v0.1.10
 	github.com/firebase/genkit/go v1.5.0
 	github.com/openai/openai-go v1.12.0
+	github.com/pinecone-io/go-pinecone/v6 v6.1.0
 	github.com/sashabaranov/go-openai v1.41.2
 	go.opentelemetry.io/otel v1.44.0
 	go.opentelemetry.io/otel/sdk v1.44.0
@@ -28,9 +30,14 @@ require (
 )
 
 require (
+	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/signin v1.0.9 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/oapi-codegen/runtime v1.6.0 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
+	github.com/stretchr/testify v1.11.1 // indirect
 )
 
 require (
@@ -127,4 +134,5 @@ require (
 replace (
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk => ../trace/contrib/adk
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo => ../trace/contrib/langchaingo
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/pinecone => ../trace/contrib/pinecone
 )

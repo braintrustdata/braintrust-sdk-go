@@ -13,6 +13,7 @@ import (
 	openaioption "github.com/openai/openai-go/option"
 	openaiv2 "github.com/openai/openai-go/v2"
 	openaiv2option "github.com/openai/openai-go/v2/option"
+	"github.com/pinecone-io/go-pinecone/v6/pinecone"
 	sashabaranovopenai "github.com/sashabaranov/go-openai"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms"
@@ -254,6 +255,50 @@ func TestGenAI(t *testing.T) {
 		}
 	}
 	require.True(t, found, "Expected generate_content span")
+}
+
+// TestPinecone verifies that orchestrion auto-injects the Braintrust tracing
+// for the Pinecone Go SDK. This test creates a client WITHOUT manually
+// wrapping RestClient. If orchestrion is working, it will wrap it at compile
+// time, and spans will be created.
+func TestPinecone(t *testing.T) {
+	exporter := setupOtel(t)
+
+	httpClient := vcr.NewHTTPClient(t)
+
+	// Create a Pinecone client with a VCR HTTPClient - orchestrion should wrap it.
+	// NOTE: No tracepinecone.WrapClient here! Orchestrion should inject it.
+	client, err := pinecone.NewClient(pinecone.NewClientParams{
+		ApiKey:     "dummy-key-for-vcr",
+		RestClient: httpClient,
+	})
+	require.NoError(t, err)
+
+	resp, err := client.Inference.Embed(context.Background(), &pinecone.EmbedRequest{
+		Model:      "multilingual-e5-large",
+		TextInputs: []string{"Say hello"},
+		Parameters: pinecone.EmbedParameters{"input_type": "passage"},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	// Verify spans were created - this proves RestClient was wrapped
+	spans := exporter.Flush()
+	require.NotEmpty(t, spans, "No spans created - orchestrion did not wrap RestClient for Pinecone")
+
+	t.Logf("SUCCESS: %d span(s) created for Pinecone", len(spans))
+	for _, span := range spans {
+		t.Logf("  - %s", span.Name())
+	}
+
+	found := false
+	for _, span := range spans {
+		if span.Name() == "pinecone.embed" {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "Expected pinecone.embed span")
 }
 
 // TestLangChainGo verifies that orchestrion auto-injects the Braintrust callback

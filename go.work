@@ -16,4 +16,5 @@ use (
 	./trace/contrib/github.com/sashabaranov/go-openai
 	./trace/contrib/langchaingo
 	./trace/contrib/openai
+	./trace/contrib/pinecone
 )

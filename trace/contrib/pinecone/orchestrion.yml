@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://datadoghq.dev/orchestrion/schema.json
+meta:
+  name: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/pinecone
+  description: Auto-instrumentation for the Pinecone Go SDK with Braintrust tracing
+
+aspects:
+  # Intercept pinecone.NewClient and wrap NewClientParams.RestClient
+  - id: pinecone-newclient-wrap
+    join-point:
+      function-call: github.com/pinecone-io/go-pinecone/v6/pinecone.NewClient
+    advice:
+      - wrap-expression:
+          imports:
+            tracepinecone: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/pinecone
+            pinecone: github.com/pinecone-io/go-pinecone/v6/pinecone
+          template: |-
+            func() (*pinecone.Client, error) {
+              {{- $in := index .AST.Args 0 }}
+              __in := {{ $in }}
+              __in.RestClient = tracepinecone.WrapClient(__in.RestClient)
+              return pinecone.NewClient(__in)
+            }()

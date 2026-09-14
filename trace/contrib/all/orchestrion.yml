@@ -230,3 +230,18 @@ aspects:
                 bt: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai
                 option: github.com/openai/openai-go/v2/option
               template: option.WithMiddleware(bt.NewMiddleware())
+  - id: pinecone-newclient-wrap
+    join-point:
+      function-call: github.com/pinecone-io/go-pinecone/v6/pinecone.NewClient
+    advice:
+      - wrap-expression:
+          imports:
+            tracepinecone: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/pinecone
+            pinecone: github.com/pinecone-io/go-pinecone/v6/pinecone
+          template: |-
+            func() (*pinecone.Client, error) {
+              {{- $in := index .AST.Args 0 }}
+              __in := {{ $in }}
+              __in.RestClient = tracepinecone.WrapClient(__in.RestClient)
+              return pinecone.NewClient(__in)
+            }()

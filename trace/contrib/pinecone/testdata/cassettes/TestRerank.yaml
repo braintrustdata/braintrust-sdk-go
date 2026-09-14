@@ -1,0 +1,60 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 352
+        transfer_encoding: []
+        trailer: {}
+        host: api.pinecone.io
+        remote_addr: ""
+        request_uri: ""
+        body: '{"documents":[{"id":"doc1","text":"Apple is a popular fruit known for its sweetness."},{"id":"doc2","text":"Many people enjoy eating apples as a healthy snack."},{"id":"doc3","text":"Apple Inc. has revolutionized the tech industry."}],"model":"bge-reranker-v2-m3","query":"i love to eat apples","rank_fields":["text"],"return_documents":true,"top_n":2}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - go-client/v6.1.0
+            X-Pinecone-Api-Version:
+                - 2026-04
+        url: https://api.pinecone.io/rerank
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 296
+        uncompressed: false
+        body: '{"model":"bge-reranker-v2-m3","data":[{"index":1,"document":{"id":"doc2","text":"Many people enjoy eating apples as a healthy snack."},"score":0.9497627},{"index":0,"document":{"id":"doc1","text":"Apple is a popular fruit known for its sweetness."},"score":0.6338636}],"usage":{"rerank_units":1}}'
+        headers:
+            Access-Control-Allow-Origin:
+                - '*'
+            Access-Control-Expose-Headers:
+                - '*'
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Length:
+                - "296"
+            Content-Type:
+                - application/json
+            Date:
+                - Sat, 12 Sep 2026 07:08:51 GMT
+            Server:
+                - Google Frontend
+            Vary:
+                - origin, access-control-request-method, access-control-request-headers
+            Via:
+                - 1.1 google
+            X-Cloud-Trace-Context:
+                - dc2b1326885e8587d634ac69b7fcab54
+            X-Pinecone-Api-Version:
+                - 2026-04
+        status: 200 OK
+        code: 200
+        duration: 415.10525ms

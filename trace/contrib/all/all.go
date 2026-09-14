@@ -25,6 +25,7 @@
 //   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit (Firebase Genkit)
 //   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino (CloudWeGo Eino)
 //   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo (LangChainGo)
+//   - github.com/braintrustdata/braintrust-sdk-go/trace/contrib/pinecone (Pinecone Inference API)
 package all
 
 import (
@@ -54,4 +55,7 @@ import (
 
 	// LangChainGo (github.com/tmc/langchaingo)
 	_ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo"
+
+	// Pinecone Inference API (github.com/pinecone-io/go-pinecone/v6/pinecone)
+	_ "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/pinecone"
 )
