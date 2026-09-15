@@ -197,3 +197,30 @@ func main() {
 
 For richer traces, use `NewHandlerWithOptions` with `TracerProvider`, `Model`, and `Provider` options.
 See [`examples/langchaingo`](../../examples/langchaingo/main.go) for complete examples.
+
+## Weaviate
+
+Only GraphQL `Get` queries that use `WithGenerativeSearch` are traced (server-side generative search / RAG). Plain vector search and CRUD calls produce no spans.
+
+```go
+import (
+    "os"
+
+    "github.com/weaviate/weaviate-go-client/v5/weaviate"
+    tracewaeviate "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/weaviate"
+)
+
+func main() {
+    client, _ := weaviate.NewClient(weaviate.Config{
+        Host:             "localhost:8080",
+        Scheme:           "http",
+        ConnectionClient: tracewaeviate.WrapClient(nil),
+        Headers:          map[string]string{"X-OpenAI-Api-Key": os.Getenv("OPENAI_API_KEY")},
+    })
+
+    // client.GraphQL().Get().WithGenerativeSearch(...).Do(ctx) is now traced.
+    _ = client
+}
+```
+
+See [`examples/internal/weaviate`](../../examples/internal/weaviate/main.go) for a complete example.

@@ -75,10 +75,10 @@ func TestGenerateExcludesAllDirectory(t *testing.T) {
 		t.Fatalf("Failed to parse generated YAML: %v", err)
 	}
 
-	// Count aspects - should be exactly 20 (one per provider, plus openai-v2, 4 for adk, 6 for genkit, 1 for cloudwego/eino, 1 for bedrockruntime, and 2 for a2a)
+	// Count aspects - should be exactly 21 (one per provider, plus openai-v2, 4 for adk, 6 for genkit, 1 for cloudwego/eino, 1 for bedrockruntime, 2 for a2a, and 1 for weaviate)
 	// If it's more, we might be including duplicates from all/
-	if len(result.Aspects) != 20 {
-		t.Errorf("expected 20 aspects, got %d", len(result.Aspects))
+	if len(result.Aspects) != 21 {
+		t.Errorf("expected 21 aspects, got %d", len(result.Aspects))
 	}
 }
 

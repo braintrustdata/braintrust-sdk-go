@@ -23,6 +23,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms"
 	langchainopenai "github.com/tmc/langchaingo/llms/openai"
+	"github.com/weaviate/weaviate-go-client/v5/weaviate"
+	"github.com/weaviate/weaviate-go-client/v5/weaviate/graphql"
 	"go.opentelemetry.io/otel"
 	"google.golang.org/genai"
 
@@ -330,6 +332,56 @@ func TestGenAI(t *testing.T) {
 		}
 	}
 	require.True(t, found, "Expected generate_content span")
+}
+
+// TestWeaviate verifies that orchestrion auto-injects the Braintrust tracing
+// for the Weaviate Go client. This test creates a client WITHOUT manually
+// wrapping ConnectionClient. If orchestrion is working, it will inject the
+// wrap at compile time, and a span will be created for the generative
+// search call.
+func TestWeaviate(t *testing.T) {
+	exporter := setupOtel(t)
+
+	httpClient := vcr.NewHTTPClient(t)
+
+	// Create Weaviate client WITHOUT wrapping ConnectionClient - orchestrion
+	// should inject the wrap.
+	client, err := weaviate.NewClient(weaviate.Config{
+		Host:             "localhost:8090",
+		Scheme:           "http",
+		ConnectionClient: httpClient,
+		Headers:          map[string]string{"X-OpenAI-Api-Key": "dummy-key-for-vcr"},
+	})
+	require.NoError(t, err)
+
+	nearVector := client.GraphQL().NearVectorArgBuilder().WithVector([]float32{0.1, 0.2, 0.3, 0.4, 0.5})
+	gs := graphql.NewGenerativeSearch().SingleResult("Summarize this in one sentence: {content}")
+
+	resp, err := client.GraphQL().Get().
+		WithClassName("Article").
+		WithFields(graphql.Field{Name: "title"}, graphql.Field{Name: "content"}).
+		WithNearVector(nearVector).
+		WithGenerativeSearch(gs).
+		Do(context.Background())
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	spans := exporter.Flush()
+	require.NotEmpty(t, spans, "No spans created - orchestrion did not inject the wrap for Weaviate")
+
+	t.Logf("SUCCESS: %d span(s) created for Weaviate", len(spans))
+	for _, span := range spans {
+		t.Logf("  - %s", span.Name())
+	}
+
+	found := false
+	for _, span := range spans {
+		if span.Name() == "weaviate.graphql.generate" {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "Expected weaviate.graphql.generate span")
 }
 
 // TestLangChainGo verifies that orchestrion auto-injects the Braintrust callback
