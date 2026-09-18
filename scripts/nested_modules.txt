@@ -9,4 +9,5 @@ trace/contrib/genkit
 trace/contrib/github.com/sashabaranov/go-openai
 trace/contrib/langchaingo
 trace/contrib/openai
+trace/contrib/weaviate
 trace/contrib/all

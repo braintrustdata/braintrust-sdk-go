@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://datadoghq.dev/orchestrion/schema.json
+meta:
+  name: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/weaviate
+  description: Auto-instrumentation for the Weaviate Go client with Braintrust tracing
+
+aspects:
+  # Intercept weaviate.NewClient and wrap config.ConnectionClient.
+  - id: weaviate-newclient-wrap
+    join-point:
+      function-call: github.com/weaviate/weaviate-go-client/v5/weaviate.NewClient
+    advice:
+      - wrap-expression:
+          imports:
+            tracewaeviate: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/weaviate
+            weaviate: github.com/weaviate/weaviate-go-client/v5/weaviate
+          template: |-
+            func() (*weaviate.Client, error) {
+              {{- $config := index .AST.Args 0 }}
+              __config := {{ $config }}
+              __config.ConnectionClient = tracewaeviate.WrapClient(__config.ConnectionClient)
+              return weaviate.NewClient(__config)
+            }()
