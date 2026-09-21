@@ -1,0 +1,70 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 52
+        transfer_encoding: []
+        trailer: {}
+        host: ""
+        remote_addr: ""
+        request_uri: ""
+        body: '{"messages":[{"content":"Say hello","role":"user"}]}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+            User-Agent:
+                - Cloudflare/Go 7.9.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 7.9.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.26.5
+        url: https://api.cloudflare.com/client/v4/accounts/dummy-account-id-for-replay/ai/run/@cf/meta/llama-3.1-8b-instruct-fast
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"result":{"choices":[{"finish_reason":"stop","index":0,"logprobs":null,"message":{"annotations":null,"audio":null,"content":"Hello! How can I assist you today?","function_call":null,"reasoning":null,"refusal":null,"role":"assistant"},"routed_experts":null,"stop_reason":null,"token_ids":null}],"created":1789413703,"ec_transfer_params":null,"id":"chatcmpl-6a4f0b51-5dc8-48fc-800c-03ba1b546b6a","kv_transfer_params":null,"metrics":null,"model":"@cf/meta/llama-3.1-8b-fast-v2","object":"chat.completion","prompt_logprobs":null,"prompt_text":null,"prompt_token_ids":null,"response":"Hello! How can I assist you today?","service_tier":null,"tool_calls":[],"usage":{"prompt_tokens":37,"completion_tokens":10,"total_tokens":47,"prompt_tokens_details":{"cached_tokens":0},"neurons":0.5010650753974915}},"success":true,"errors":[],"messages":[]}'
+        headers:
+            Api-Version:
+                - 2026-09-25.epoch
+            Cf-Ai-Neurons:
+                - "0.50"
+            Cf-Ai-Req-Id:
+                - 6a4f0b51-5dc8-48fc-800c-03ba1b546b6a
+            Cf-Auditlog-Id:
+                - 01a0a15e-3ccf-7044-b9cb-7bf53a9050ec
+            Cf-Ray:
+                - a3b1c19acac6419f-BOM
+            Content-Type:
+                - application/json
+            Date:
+                - Mon, 14 Sep 2026 19:21:43 GMT
+            Server:
+                - cloudflare
+            Set-Cookie:
+                - __cf_bm=5pKZpK7u3Y6Lf.0zQ3ftt2Uol1c8b32Gc5Azh3A97k4-1789413702.8510628-1.0.1.1-UgTotINjHPB9nGr.eBF72cJzqAvBCZj9EoQxJW8g_mJ1RAu7IIv05YJ40J4sf5vie47f4FI4sp92.mQs8mNUApcAfLwANrEqThmW7kg7jbk4tyl5nwxOJf0eEtbrII5D; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.cloudflare.com; Expires=Mon, 14 Sep 2026 19:51:43 GMT
+        status: 200 OK
+        code: 200
+        duration: 1.101076291s
