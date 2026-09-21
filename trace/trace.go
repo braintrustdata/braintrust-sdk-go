@@ -44,6 +44,7 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	oteltrace "go.opentelemetry.io/otel/trace"
 
+	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 	"github.com/braintrustdata/braintrust-sdk-go/trace/attachmentprocessor"
@@ -59,6 +60,9 @@ type Config struct {
 	FilterAISpans          bool
 	EnableBuiltinAdkTraces bool // if false (default), drop spans from Google ADK (gcp.vertex.agent) to avoid duplicates
 	SpanFilterFuncs        []SpanFilterFunc
+
+	// Ordered export hooks, snapshotted when the processor is created.
+	SpanCustomizers []config.SpanCustomizer
 
 	// Attachment processing
 	AutoConvertAIAttachments bool // scan spans for base64 attachments and upload them
@@ -123,6 +127,10 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 		exporter = newAPIKeyResolvingExporter(session, log)
 		log.Debug("created lazy OTLP HTTP exporter", "endpoint", apiInfo.APIURL)
 	}
+
+	// Customize before every transport path, including lazy authentication and
+	// injected exporters. A failed hook must not send any part of the batch.
+	exporter = newCustomizingExporter(exporter, cfg.SpanCustomizers, log)
 
 	// Wrap in batch processor
 	batchProcessor := sdktrace.NewBatchSpanProcessor(exporter)
