@@ -1,7 +1,11 @@
-.PHONY: help ci build clean test test-quiet test-vcr-off test-vcr-record test-vcr-verify cover cover-path lint fmt mod-verify fix godoc examples release generate check-nested-modules check-prepare-release local-braintrust-replaces
+.PHONY: help ci build clean test test-quiet test-vcr-off test-vcr-record test-vcr-verify cover cover-path lint fmt mod-verify fix godoc examples release generate check-nested-modules check-prepare-release local-braintrust-replaces test-orchestrion
 
 # Releasable nested modules, read from the manifest at make-time.
 NESTED_MODULE_DIRS := $(shell ./scripts/list_nested_modules.sh)
+
+# Extra flags passed to every `go test` in the test targets, e.g.
+# GO_TEST_FLAGS=-skip=TestOrchestrionInjection
+GO_TEST_FLAGS ?=
 
 help:
 	@echo "Available commands:"
@@ -9,6 +13,7 @@ help:
 	@echo "  build            - Build all packages"
 	@echo "  test             - Run all tests (VCR replay mode, fast)"
 	@echo "  test-quiet       - Run all tests (quiet - no 'ok' lines)"
+	@echo "  test-orchestrion - Run only the orchestrion injection test (slow)"
 	@echo "  test-vcr-off     - Run all tests without VCR (requires API keys)"
 	@echo "  test-vcr-record  - Record/update VCR cassettes (requires API keys)"
 	@echo "  test-vcr-verify  - Verify VCR cassettes work without API keys"
@@ -41,9 +46,15 @@ clean:
 	rm -rf coverage.out coverage.html dist
 
 test:
-	VCR_MODE=replay go test ./...
-	for dir in $(NESTED_MODULE_DIRS); do VCR_MODE=replay go test -C $$dir ./...; done
-	VCR_MODE=replay go test -C btx ./...
+	VCR_MODE=replay go test $(GO_TEST_FLAGS) ./...
+	for dir in $(NESTED_MODULE_DIRS); do VCR_MODE=replay go test -C $$dir $(GO_TEST_FLAGS) ./...; done
+	VCR_MODE=replay go test -C btx $(GO_TEST_FLAGS) ./...
+
+# The orchestrion injection test compiles a fully instrumented binary per
+# variant, which dominates test time. CI runs it in its own job, one variant per
+# runner. Narrow it with ORCHESTRION_VARIANT=all or ORCHESTRION_VARIANT=individual.
+test-orchestrion:
+	VCR_MODE=replay go test $(GO_TEST_FLAGS) -run '^TestOrchestrionInjection$$/$(ORCHESTRION_VARIANT)' ./trace/contrib/
 
 test-quiet:
 	VCR_MODE=replay go test ./... | grep -v -E "^ok|no test files|^\\?" || true

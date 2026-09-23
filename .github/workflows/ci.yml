@@ -14,6 +14,13 @@ jobs:
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version: 1.26.x
+          # Hash .golangci.yml alongside go.sum so this cache key differs from the
+          # test (1.26.x, ubuntu-latest) job's. They used to share a key, and
+          # whichever job saved first won, so the test job restored lint's much
+          # smaller cache.
+          cache-dependency-path: |
+            go.sum
+            .golangci.yml
       - name: Use local Braintrust modules
         run: ./scripts/apply_local_braintrust_replaces.sh
       - name: golangci-lint
@@ -41,10 +48,10 @@ jobs:
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version: ${{ matrix.go-version }}
-      - name: Install orchestrion
-        env:
-          GOTOOLCHAIN: local
-        run: go install github.com/DataDog/orchestrion@v1.12.1
+          # Key the cache on every module's go.sum, not just the root one. With
+          # only the root go.sum the key rarely changed, so the cache was never
+          # re-saved and fell behind the nested modules' dependencies.
+          cache-dependency-path: '**/go.sum'
       - name: Verify modules
         run: make mod-verify
         env:
@@ -52,13 +59,48 @@ jobs:
       - name: Use local Braintrust modules for test and build
         run: ./scripts/apply_local_braintrust_replaces.sh
       - name: Test
-        run: make test
+        # TestOrchestrionInjection runs in the orchestrion job below.
+        run: make test GO_TEST_FLAGS=-skip=TestOrchestrionInjection
         env:
           GOTOOLCHAIN: local
       - name: Build
         run: make build
         env:
           GOTOOLCHAIN: local
+
+  # TestOrchestrionInjection builds a fully orchestrion-instrumented binary for
+  # each variant. That takes minutes of CPU and cannot be cached usefully,
+  # because any change to an integration package changes orchestrion's
+  # toolchain ID and invalidates the whole instrumented build. It used to be
+  # the long pole of every test job, so it runs here instead: one variant per
+  # runner, on Linux only (orchestrion's injection is compile-time and doesn't
+  # depend on the OS). It still runs on every supported Go version.
+  orchestrion:
+    strategy:
+      fail-fast: false
+      matrix:
+        go-version: [1.25.x, 1.26.x, 1.27.x]
+        variant: [all, individual]
+    runs-on: ubuntu-latest
+    env:
+      CGO_ENABLED: 0
+      GOTOOLCHAIN: local
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up Go
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        with:
+          go-version: ${{ matrix.go-version }}
+          # The instrumented build is rebuilt from scratch whenever an
+          # integration changes, and the Actions cache is close to its size
+          # limit, so don't spend cache space on it.
+          cache: false
+      - name: Install orchestrion
+        run: go install github.com/DataDog/orchestrion@v1.12.1
+      - name: Use local Braintrust modules
+        run: ./scripts/apply_local_braintrust_replaces.sh
+      - name: Test orchestrion injection (${{ matrix.variant }})
+        run: make test-orchestrion ORCHESTRION_VARIANT='^${{ matrix.variant }}$$'
 
   # See scripts/check_prepare_release.sh.
   prepare-release-check:
@@ -77,7 +119,7 @@ jobs:
 
   ci-passed:
     name: ci-passed
-    needs: [lint, test, prepare-release-check]
+    needs: [lint, test, orchestrion, prepare-release-check]
     runs-on: ubuntu-latest
     steps:
       - name: Mark CI as passed
