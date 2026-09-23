@@ -6,7 +6,7 @@ toolchain go1.26.1
 
 require (
 	github.com/a2aproject/a2a-go v0.3.15
-	github.com/braintrustdata/braintrust-sdk-go v0.13.0
+	github.com/braintrustdata/braintrust-sdk-go v0.15.0
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/otel v1.44.0
 	go.opentelemetry.io/otel/trace v1.44.0
