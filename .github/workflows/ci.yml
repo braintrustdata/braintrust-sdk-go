@@ -65,7 +65,7 @@ jobs:
           GOTOOLCHAIN: local
 
   # Tidy output is the same on every supported Go version, so verify modules
-  # once, with the toolchain pinned in go.mod, instead of in every test job.
+  # once, with the minimum Go version from go.mod, instead of in every test job.
   mod-verify:
     runs-on: ubuntu-latest
     env:
