@@ -1,4 +1,4 @@
-.PHONY: help ci build clean test test-quiet test-vcr-off test-vcr-record test-vcr-verify cover cover-path lint fmt mod-verify fix godoc examples release generate check-nested-modules local-braintrust-replaces
+.PHONY: help ci build clean test test-quiet test-vcr-off test-vcr-record test-vcr-verify cover cover-path lint fmt mod-verify fix godoc examples release generate check-nested-modules check-prepare-release local-braintrust-replaces
 
 # Releasable nested modules, read from the manifest at make-time.
 NESTED_MODULE_DIRS := $(shell ./scripts/list_nested_modules.sh)
@@ -18,6 +18,7 @@ help:
 	@echo "  lint             - Run golangci-lint"
 	@echo "  fix              - Run golangci-lint with auto-fix"
 	@echo "  check-nested-modules - Verify releasable nested module manifest"
+	@echo "  check-prepare-release - Dry-run release prep against untagged versions"
 	@echo "  godoc            - Start godoc server"
 	@echo "  examples         - Run all examples"
 	@echo "  generate         - Generate combined orchestrion.yml"
@@ -25,7 +26,7 @@ help:
 	@echo "  precommit        - Run fmt then ci"
 	@echo "  release          - Publish release with goreleaser"
 
-ci: clean lint mod-verify local-braintrust-replaces test build
+ci: clean lint mod-verify check-prepare-release local-braintrust-replaces test build
 
 local-braintrust-replaces:
 	./scripts/apply_local_braintrust_replaces.sh
@@ -102,6 +103,9 @@ mod-verify:
 check-nested-modules:
 	./scripts/check_nested_modules.sh
 	./scripts/check_release_coverage.sh
+
+check-prepare-release:
+	./scripts/check_prepare_release.sh
 
 fix: fmt
 	golangci-lint run --fix

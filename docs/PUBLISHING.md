@@ -56,6 +56,8 @@ If a new releasable Go module is added under `trace/contrib/`:
    ```
    This is **required**. Without it, `prepare_release.sh` can introduce `go.mod` diffs at CI time that break `mod-verify`. If the new module also depends on other nested Braintrust modules (like `trace/contrib/all` does), add `replace` directives for those too, pointing to their sibling directories.
 3. The `check-nested-modules` Make target (also run as part of `mod-verify`) will fail if the manifest is out of sync with the actual `go.mod` files under `trace/contrib/` or if a nested module is missing the required root `replace` directive.
+4. If other modules or examples import it (for example through `trace/contrib/all`), add a local `replace` for it there too, matching the replaces they already have for sibling contribs.
+5. Run `make check-prepare-release` (also run by CI and `make ci`) to dry-run release prep against untagged versions.
 
 ## Re-running a failed publish
 

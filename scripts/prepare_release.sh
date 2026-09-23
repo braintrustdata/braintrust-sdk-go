@@ -25,6 +25,7 @@ NESTED_MODULES=()
 while IFS= read -r module; do
     NESTED_MODULES+=("$module")
 done < <("$SCRIPT_DIR/list_nested_modules.sh")
+BRAINTRUST_MODULES=("${ROOT_MODULE}" "${NESTED_MODULES[@]/#/${ROOT_MODULE}/}")
 
 # Modules that depend on Braintrust SDK modules but are not themselves released
 # via tags. We still pin their Braintrust dependencies so they stay in sync with
@@ -40,46 +41,47 @@ done < "$SCRIPT_DIR/pinned_unreleased_modules.txt"
 pin_braintrust_versions() {
     local module_dir="$1"
     local gomod="${module_dir}/go.mod"
-    local -a pinned_modules=()
-    local -a temporary_replace_modules=()
+    local module_path
+    module_path=$(awk '$1 == "module" { print $2; exit }' "${gomod}")
+    local -a edit_args=()
+    local -a drop_args=()
 
-    # Match module path followed by a version (works for both single-line and
-    # multi-line require blocks).
-    if grep -q "${ROOT_MODULE} v" "${gomod}"; then
-        GOWORK=off go mod edit -require="${ROOT_MODULE}@${VERSION}" "${gomod}"
-        pinned_modules+=("${ROOT_MODULE}")
+    for braintrust_module in "${BRAINTRUST_MODULES[@]}"; do
+        [[ "${braintrust_module}" == "${module_path}" ]] && continue
+
+        # Match module path followed by a version (works for both single-line
+        # and multi-line require blocks).
+        if grep -q "${braintrust_module} v" "${gomod}"; then
+            edit_args+=(-require="${braintrust_module}@${VERSION}")
+        fi
+
+        # Release PRs are opened before the new tags exist. Add temporary local
+        # replacements so tidy can resolve Braintrust modules at the new
+        # version, then drop only the replacements that this script added.
+        # Pre-existing example replacements are kept because examples are
+        # intended to run from checkout. Every Braintrust module is replaced,
+        # not just the pinned ones, because an untagged module can be reached
+        # transitively (e.g. via trace/contrib/all); tidy ignores unused ones.
+        #
+        # Match both single-line (`replace foo => bar`) and block-form
+        # (`replace (\n    foo => bar\n)`) replace directives so we don't
+        # append a duplicate when the module already has a committed local
+        # replacement.
+        if ! grep -q "^replace ${braintrust_module} =>" "${gomod}" && \
+           ! grep -q "^[[:space:]]*${braintrust_module} =>" "${gomod}"; then
+            edit_args+=(-replace="${braintrust_module}=${REPO_ROOT}${braintrust_module#${ROOT_MODULE}}")
+            drop_args+=(-dropreplace="${braintrust_module}")
+        fi
+    done
+
+    if (( ${#edit_args[@]} > 0 )); then
+        GOWORK=off go mod edit "${edit_args[@]}" "${gomod}"
     fi
-
-    for other in "${NESTED_MODULES[@]}"; do
-        if grep -q "${ROOT_MODULE}/${other} v" "${gomod}"; then
-            GOWORK=off go mod edit -require="${ROOT_MODULE}/${other}@${VERSION}" "${gomod}"
-            pinned_modules+=("${ROOT_MODULE}/${other}")
-        fi
-    done
-
-    # Release PRs are opened before the new tags exist. Add temporary local
-    # replacements so tidy can resolve the just-pinned Braintrust modules, then
-    # drop only the replacements that this script added. Pre-existing example
-    # replacements are kept because examples are intended to run from checkout.
-    #
-    # Match both single-line (`replace foo => bar`) and block-form
-    # (`replace (\n    foo => bar\n)`) replace directives so we don't append a
-    # duplicate when the module already has a committed local replacement.
-    for pinned_module in "${pinned_modules[@]}"; do
-        if ! grep -q "^replace ${pinned_module} =>" "${gomod}" && \
-           ! grep -q "^[[:space:]]*${pinned_module} =>" "${gomod}"; then
-            local replacement="${REPO_ROOT}${pinned_module#${ROOT_MODULE}}"
-            GOWORK=off go mod edit -replace="${pinned_module}=${replacement}" "${gomod}"
-            temporary_replace_modules+=("${pinned_module}")
-        fi
-    done
 
     GOWORK=off go mod tidy -C "${module_dir}"
 
-    if (( ${#temporary_replace_modules[@]} > 0 )); then
-        for pinned_module in "${temporary_replace_modules[@]}"; do
-            GOWORK=off go mod edit -dropreplace="${pinned_module}" "${gomod}"
-        done
+    if (( ${#drop_args[@]} > 0 )); then
+        GOWORK=off go mod edit "${drop_args[@]}" "${gomod}"
     fi
 }
 

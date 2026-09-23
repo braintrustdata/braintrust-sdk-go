@@ -40,6 +40,7 @@ require (
 	github.com/DataDog/go-tuf v1.1.1-0.5.2 // indirect
 	github.com/DataDog/sketches-go v1.4.8 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
+	github.com/a2aproject/a2a-go v0.3.15 // indirect
 	github.com/antithesishq/antithesis-sdk-go v0.7.2 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.41.5 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.8 // indirect
@@ -50,6 +51,7 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/a2a v0.0.0 // indirect
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk v0.14.0 // indirect
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.14.0 // indirect
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime v0.14.0 // indirect
@@ -222,3 +224,5 @@ replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sas
 replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo => ../../../trace/contrib/langchaingo
 
 replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai => ../../../trace/contrib/openai
+
+replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/a2a => ../../../trace/contrib/a2a
