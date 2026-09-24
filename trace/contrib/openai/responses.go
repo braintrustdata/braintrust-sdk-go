@@ -72,6 +72,7 @@ func (rt *responsesTracer) StartSpan(ctx context.Context, t time.Time, request i
 		"reasoning",
 		"text",
 		"context_management",
+		"conversation",
 	}
 
 	// handle simple fields here.
@@ -205,6 +206,7 @@ func (rt *responsesTracer) handleResponseCompletedMessage(span trace.Span, rawMs
 		"usage",
 		"incomplete_details",
 		"error",
+		"conversation",
 	}
 
 	for _, field := range metadataFields {

@@ -283,6 +283,38 @@ func TestOpenAIResponsesContextManagement(t *testing.T) {
 	)
 }
 
+func TestOpenAIResponsesConversation(t *testing.T) {
+	client, _, exporter := setUpTest(t)
+	assert := assert.New(t)
+	require := require.New(t)
+
+	var conversation struct {
+		ID string `json:"id"`
+	}
+	require.NoError(client.Post(context.Background(), "/conversations", struct{}{}, &conversation))
+	require.NotEmpty(conversation.ID)
+
+	params := responses.ResponseNewParams{
+		Input: responses.ResponseNewParamsInputUnion{OfString: openai.String("Say hi in 3 words.")},
+		Model: testModel,
+	}
+
+	timer := oteltest.NewTimer()
+	resp, err := client.Responses.New(context.Background(), params, option.WithJSONSet("conversation", conversation.ID))
+	timeRange := timer.Tick()
+	require.NoError(err)
+	require.NotNil(resp)
+
+	ts := exporter.FlushOne()
+	assertSpanValid(t, ts, timeRange)
+
+	metadata := ts.Metadata()
+	// The response echoes conversation back as {"id": ...}, which supersedes
+	// the request's plain string form, matching how this tracer already lets
+	// response fields (e.g. "text", "reasoning") take precedence.
+	assert.Equal(map[string]any{"id": conversation.ID}, metadata["conversation"], "conversation should be captured in metadata")
+}
+
 func TestOpenAIResponsesStreamingClose(t *testing.T) {
 	client, _, exporter := setUpTest(t)
 	require := require.New(t)
