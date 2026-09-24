@@ -132,6 +132,16 @@ func WithSpanFilterFuncs(filterFuncs ...config.SpanFilterFunc) Option {
 	}
 }
 
+// WithSpanCustomizers appends export customizers in execution order. The option
+// snapshots the supplied list; constructing the exporter snapshots it again.
+// Callback closure state remains the caller's responsibility.
+func WithSpanCustomizers(customizers ...config.SpanCustomizer) Option {
+	snapshot := append([]config.SpanCustomizer(nil), customizers...)
+	return func(c *config.Config) {
+		c.SpanCustomizers = append(c.SpanCustomizers, snapshot...)
+	}
+}
+
 // WithAutoConvertAIAttachments controls whether the SDK automatically scans
 // spans for base64 LLM attachments and replaces them with uploaded
 // references. Defaults to true.

@@ -131,6 +131,99 @@ That's it! Your LLM client calls are now automatically traced. No middleware or 
 
 If you prefer explicit control, you can add tracing middleware manually to your LLM clients. See the [Manual Instrumentation Guide](./trace/contrib/README.md) for detailed examples with OpenAI, Anthropic, Google Gemini, and other providers.
 
+### Span customizers
+
+Register ordered, synchronous export hooks with `braintrust.WithSpanCustomizers`.
+Each `config.SpanCustomizer` has an optional `OnSpanExport` hook; an omitted hook
+is a no-op. Hooks receive completed OpenTelemetry `sdktrace.ReadOnlySpan` export
+snapshots, not live spans or provider responses. Embed the snapshot and override
+the fields you want to export, for example:
+
+```go
+package main
+
+import (
+    "context"
+    "log"
+
+    braintrust "github.com/braintrustdata/braintrust-sdk-go"
+    "github.com/braintrustdata/braintrust-sdk-go/config"
+    "go.opentelemetry.io/otel/attribute"
+    sdktrace "go.opentelemetry.io/otel/sdk/trace"
+)
+
+type redactedSpan struct {
+    sdktrace.ReadOnlySpan
+    attrs []attribute.KeyValue
+}
+
+func (s redactedSpan) Attributes() []attribute.KeyValue { return s.attrs }
+
+func redact(span sdktrace.ReadOnlySpan) (sdktrace.ReadOnlySpan, error) {
+    attrs := make([]attribute.KeyValue, 0, len(span.Attributes()))
+    for _, attr := range span.Attributes() {
+        if attr.Key != "braintrust.input_json" && attr.Key != "braintrust.output_json" {
+            attrs = append(attrs, attr)
+        }
+    }
+    return redactedSpan{ReadOnlySpan: span, attrs: attrs}, nil
+}
+
+func main() {
+    tp := sdktrace.NewTracerProvider()
+    defer tp.Shutdown(context.Background())
+    client, err := braintrust.New(tp,
+        braintrust.WithSpanCustomizers(config.SpanCustomizer{OnSpanExport: redact}),
+    )
+    if err != nil {
+        log.Fatal(err)
+    }
+    _, span := client.Tracer("example").Start(context.Background(), "redacted")
+    span.SetAttributes(attribute.String("braintrust.input_json", `"private"`))
+    span.End()
+}
+```
+
+- Repeated options append in execution order. Each hook receives its predecessor's
+  result. Registration copies the list and hook functions; exporter construction
+  takes another snapshot. Changes to caller-owned slices do not change existing
+  exporters. Mutable state captured by callbacks is still your responsibility.
+  There is no environment-variable registration.
+- Hooks apply to **all spans reaching the Braintrust exporter**, including manual
+  and instrumented spans, after filtering, span-origin metadata, and attachment
+  processing. Attachment uploads may therefore already have happened. Hooks run
+  before OTLP serialization, including when authentication is resolved lazily or
+  a custom exporter is supplied. Other span processors and application-visible
+  values are unchanged. Separately enabled trace-console logging is not customized.
+- Return the original snapshot or a valid replacement. Replacements are not merged;
+  retain all fields you want to export. Returning `nil` (including a typed nil)
+  is an error, not a way to drop spans. Attribute removal removes it from this
+  completed export, not from any data previously exported.
+- The trace ID, span ID, parent trace ID, and parent span ID must remain identical,
+  including zero/invalid IDs for root spans. They are checked after **each** hook.
+  Context flags and trace state are not protected IDs. Routing attributes such as
+  `braintrust.parent` may be changed.
+- Errors, panics (recovered as errors), nil results, or changed IDs **fail closed**:
+  the exporter logs and returns an error and sends none of that batch. It does not
+  export originals as a fallback or mutate the caller's batch. This does not roll
+  back arbitrary external side effects performed by hooks.
+- Hooks run synchronously on the export path, often on a background goroutine.
+  Keep them fast, avoid blocking I/O, and make shared state concurrency-safe.
+  Do not retain or asynchronously mutate the supplied or returned span.
+  Submitting the batch to the exporter again runs hooks again; retries inside
+  the OTLP transport reuse the already transformed payload. With no hooks,
+  the existing export path is unchanged.
+
+Run the [complete redaction example](./examples/internal/span-customizers/main.go)
+with `BRAINTRUST_API_KEY` set:
+
+```bash
+go run ./examples/internal/span-customizers/main.go
+```
+
+The example prints a Braintrust link. The exported span's input is `"[redacted]"`,
+its output is absent, and its `redacted` attribute is `true`.
+
 ## Evaluations
 
 Run [evals](https://www.braintrust.dev/docs/guides/evals) with custom test cases and scoring functions.

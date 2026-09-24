@@ -37,6 +37,7 @@ type Config struct {
 	EnableTraceConsoleLog    bool // log traces to stdout for debugging
 	AutoConvertAIAttachments bool // scan spans for base64 attachments and upload them (default: true)
 	SpanFilterFuncs          []SpanFilterFunc
+	SpanCustomizers          []SpanCustomizer
 	Exporter                 trace.SpanExporter
 	Environment              *Environment
 
@@ -53,6 +54,25 @@ type Environment struct {
 // SpanFilterFunc is a function that decides which spans to send to Braintrust.
 // Return >0 to keep the span, <0 to drop the span, or 0 to not influence the decision.
 type SpanFilterFunc func(span trace.ReadOnlySpan) int
+
+// SpanCustomizer transforms outgoing telemetry without changing application spans.
+// Hooks are optional; a zero-value customizer is a no-op. Use keyed struct literals
+// so future optional hooks can be added without changing existing registrations.
+type SpanCustomizer struct {
+	// OnSpanExport synchronously transforms a completed export snapshot. Return the
+	// original span or a replacement embedding sdktrace.ReadOnlySpan; nil (including
+	// typed nil) is not a way to drop spans. Trace/span IDs and parent trace/span IDs
+	// must be preserved. Attributes, including braintrust.parent routing, may change.
+	//
+	// Hooks run in registration order for every span reaching the Braintrust exporter,
+	// after filtering and attachment processing, before serialization. Errors, panics,
+	// nil results, or changed IDs fail the entire batch before any spans are sent.
+	// Submitting a batch again invokes hooks again; transport retries do not.
+	//
+	// Hooks may run on background goroutines and should be fast and concurrency-safe.
+	// Do not retain or asynchronously mutate the supplied span or returned replacement.
+	OnSpanExport func(span trace.ReadOnlySpan) (trace.ReadOnlySpan, error)
+}
 
 // FromEnv loads configuration from environment variables with defaults. If
 // BRAINTRUST_API_KEY is unset or blank, API key discovery can fall back to the
