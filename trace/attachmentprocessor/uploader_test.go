@@ -1,6 +1,7 @@
 package attachmentprocessor
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -163,6 +164,170 @@ func TestS3UploaderEnqueueDuringShutdown(t *testing.T) {
 	}()
 	wg.Wait()
 	assert.True(t, u.IsShutdown())
+}
+
+// Queue backpressure needs a controllably stalled upload, which a recorded
+// server response cannot provide.
+func newBlockedUploader(t *testing.T, fail bool, queueSize int) (*S3Uploader, <-chan struct{}, func(), *atomic.Int32) {
+	t.Helper()
+	started := make(chan struct{})
+	release := make(chan struct{})
+	var releaseOnce sync.Once
+	unblock := func() { releaseOnce.Do(func() { close(release) }) }
+	var uploads atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/attachment":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"signedUrl":"http://` + r.Host + `/upload","headers":{}}`))
+		case "/upload":
+			if uploads.Add(1) == 1 {
+				close(started)
+				<-release
+				if fail {
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
+			}
+			w.WriteHeader(http.StatusOK)
+		default:
+			w.WriteHeader(http.StatusOK)
+		}
+	}))
+	u := NewS3Uploader(UploaderConfig{
+		APIURL: server.URL, APIKey: "key", OrgID: "org", HTTPClient: server.Client(),
+		QueueSize: queueSize, MaxRetries: 1, ShutdownTimeout: 100 * time.Millisecond,
+	})
+	t.Cleanup(func() {
+		unblock()
+		u.Shutdown()
+		assert.True(t, u.ForceFlush(5*time.Second))
+		server.Close()
+	})
+	return u, started, unblock, &uploads
+}
+
+func enqueueOne(ctx context.Context, u *S3Uploader, data string) bool {
+	return u.enqueueAllContext(ctx, []uploadJob{{ref: NewReference("image/png"), data: []byte(data)}})
+}
+
+func TestS3UploaderEnqueueAllContextAdmitsWholeGroup(t *testing.T) {
+	u, started, release, uploads := newBlockedUploader(t, false, 2)
+	require.True(t, u.Enqueue(NewReference("image/png"), []byte("first")))
+	select {
+	case <-started:
+	case <-time.After(5 * time.Second):
+		t.Fatal("first upload did not start")
+	}
+	require.True(t, u.Enqueue(NewReference("image/png"), []byte("queued")))
+	group := func(n int) []uploadJob {
+		jobs := make([]uploadJob, n)
+		for i := range jobs {
+			jobs[i] = uploadJob{ref: NewReference("image/png"), data: []byte("group")}
+		}
+		return jobs
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer cancel()
+	assert.False(t, u.enqueueAllContext(ctx, group(2)), "a group must not be admitted partially")
+	assert.False(t, u.enqueueAllContext(context.Background(), group(3)), "a group larger than the queue never fits")
+	assert.True(t, u.enqueueAllContext(ctx, group(1)), "an expired wait still admits a group that fits")
+	release()
+	require.True(t, u.ForceFlush(5*time.Second))
+	assert.Equal(t, int32(3), uploads.Load())
+}
+
+func TestS3UploaderEnqueueAllContextBackpressure(t *testing.T) {
+	u, started, release, uploads := newBlockedUploader(t, false, 1)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	require.True(t, u.Enqueue(NewReference("image/png"), []byte("first")))
+	select {
+	case <-started:
+	case <-ctx.Done():
+		t.Fatal("first upload did not start")
+	}
+	require.True(t, u.Enqueue(NewReference("image/png"), []byte("queued")))
+	require.False(t, u.Enqueue(NewReference("image/png"), []byte("nonblocking")),
+		"existing Enqueue callers must still reject a full queue")
+
+	const waiters = 8
+	results := make(chan bool, waiters)
+	for range waiters {
+		go func() {
+			results <- enqueueOne(ctx, u, "waiting")
+		}()
+	}
+	select {
+	case <-results:
+		t.Fatal("enqueue returned while the queue was full")
+	case <-time.After(20 * time.Millisecond):
+	}
+	assert.False(t, u.ForceFlush(time.Millisecond), "queued uploads are still pending")
+	release()
+	for range waiters {
+		select {
+		case ok := <-results:
+			require.True(t, ok)
+		case <-ctx.Done():
+			t.Fatal("enqueue did not resume after queue space became available")
+		}
+	}
+	require.True(t, u.ForceFlush(5*time.Second))
+	assert.Equal(t, int32(2+waiters), uploads.Load())
+}
+
+func TestS3UploaderEnqueueAllContextInterrupted(t *testing.T) {
+	for _, mode := range []string{"cancel", "shutdown", "upload-failure"} {
+		t.Run(mode, func(t *testing.T) {
+			u, started, release, uploads := newBlockedUploader(t, mode == "upload-failure", 1)
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			require.True(t, u.Enqueue(NewReference("image/png"), []byte("first")))
+			select {
+			case <-started:
+			case <-ctx.Done():
+				t.Fatal("first upload did not start")
+			}
+			require.True(t, u.Enqueue(NewReference("image/png"), []byte("queued")))
+			result := make(chan bool, 1)
+			go func() {
+				result <- enqueueOne(ctx, u, "rejected")
+			}()
+			select {
+			case <-result:
+				t.Fatal("enqueue returned while the queue was full")
+			case <-time.After(20 * time.Millisecond):
+			}
+			switch mode {
+			case "cancel":
+				cancel()
+			case "shutdown":
+				// Shutdown must acquire its lock and return even while the
+				// worker is stuck and an enqueue is waiting for space.
+				u.Shutdown()
+			case "upload-failure":
+				release()
+			}
+			select {
+			case ok := <-result:
+				require.False(t, ok)
+			case <-time.After(5 * time.Second):
+				t.Fatal("enqueue did not stop")
+			}
+			release()
+			require.True(t, u.ForceFlush(5*time.Second))
+			assert.Equal(t, int32(2), uploads.Load(), "only previously accepted jobs may upload")
+			if mode == "cancel" {
+				assert.False(t, u.IsShutdown(), "caller cancellation must not disable the uploader")
+				require.True(t, enqueueOne(context.Background(), u, "later"))
+				require.True(t, u.ForceFlush(5*time.Second))
+				assert.Equal(t, int32(3), uploads.Load())
+			} else {
+				assert.True(t, u.IsShutdown())
+			}
+		})
+	}
 }
 
 func TestS3UploaderDoubleShutdown(t *testing.T) {

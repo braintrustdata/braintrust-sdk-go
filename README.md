@@ -190,11 +190,13 @@ func main() {
   exporters. Mutable state captured by callbacks is still your responsibility.
   There is no environment-variable registration.
 - Hooks apply to **all spans reaching the Braintrust exporter**, including manual
-  and instrumented spans, after filtering, span-origin metadata, and attachment
-  processing. Attachment uploads may therefore already have happened. Hooks run
-  before OTLP serialization, including when authentication is resolved lazily or
-  a custom exporter is supplied. Other span processors and application-visible
-  values are unchanged. Separately enabled trace-console logging is not customized.
+  and instrumented spans, after filtering and span-origin metadata, but before
+  automatic attachment conversion/uploads and OTLP serialization. Customizers see
+  inline attachment data; removing or redacting it prevents its upload. Only
+  attachments remaining after every hook succeeds for the entire batch are
+  processed. This also applies with lazy authentication or a custom exporter.
+  Other span processors and application-visible values are unchanged. Separately
+  enabled trace-console logging is not customized.
 - Return the original snapshot or a valid replacement. Replacements are not merged;
   retain all fields you want to export. Returning `nil` (including a typed nil)
   is an error, not a way to drop spans. Attribute removal removes it from this
@@ -204,15 +206,21 @@ func main() {
   Context flags and trace state are not protected IDs. Routing attributes such as
   `braintrust.parent` may be changed.
 - Errors, panics (recovered as errors), nil results, or changed IDs **fail closed**:
-  the exporter logs and returns an error and sends none of that batch. It does not
-  export originals as a fallback or mutate the caller's batch. This does not roll
-  back arbitrary external side effects performed by hooks.
+  the exporter logs and returns an error and sends none of that batch or its
+  attachments. It never exports originals as a fallback or mutates the caller's
+  batch. This does not roll back external side effects performed by hooks.
 - Hooks run synchronously on the export path, often on a background goroutine.
   Keep them fast, avoid blocking I/O, and make shared state concurrency-safe.
   Do not retain or asynchronously mutate the supplied or returned span.
   Submitting the batch to the exporter again runs hooks again; retries inside
   the OTLP transport reuse the already transformed payload. With no hooks,
-  the existing export path is unchanged.
+  export skips customization and still performs configured attachment processing.
+- With the built-in uploader, a temporarily full upload queue briefly delays
+  export, within part of the exporter's timeout, while waiting for capacity.
+  If capacity does not free up in time, the span is exported with its
+  (customized) attachment data inline rather than dropped, and none of that
+  span's attachments are uploaded. Uploader failure or shutdown also falls back
+  to inline data.
 
 Run the [complete redaction example](./examples/internal/span-customizers/main.go)
 with `BRAINTRUST_API_KEY` set:

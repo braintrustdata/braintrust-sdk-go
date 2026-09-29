@@ -65,8 +65,9 @@ type SpanCustomizer struct {
 	// must be preserved. Attributes, including braintrust.parent routing, may change.
 	//
 	// Hooks run in registration order for every span reaching the Braintrust exporter,
-	// after filtering and attachment processing, before serialization. Errors, panics,
-	// nil results, or changed IDs fail the entire batch before any spans are sent.
+	// after filtering, before automatic attachment processing/uploads and serialization.
+	// Remove or redact inline attachments here to prevent their upload. Errors, panics,
+	// nil results, or changed IDs fail the entire batch before any spans or attachments are sent.
 	// Submitting a batch again invokes hooks again; transport retries do not.
 	//
 	// Hooks may run on background goroutines and should be fast and concurrency-safe.

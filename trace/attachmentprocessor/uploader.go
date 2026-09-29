@@ -88,6 +88,7 @@ type S3Uploader struct {
 	mu            sync.Mutex
 	rejectNewJobs bool
 	workerStarted bool
+	queueSpace    chan struct{} // lazily created; closed when space or rejection becomes available
 
 	// orgID resolution: orgIDOnce ensures resolveOrgID runs at most once,
 	// even if multiple goroutines call getOrgID concurrently (defensive
@@ -123,8 +124,52 @@ func NewS3Uploader(cfg UploaderConfig) *S3Uploader {
 // Enqueue adds an upload job. Returns false if the uploader is shut down or the queue is full.
 func (u *S3Uploader) Enqueue(ref Reference, data []byte) bool {
 	u.mu.Lock()
-	if u.rejectNewJobs {
+	defer u.mu.Unlock()
+	return u.enqueueLocked(ref, data)
+}
+
+// enqueueAllContext admits jobs as one group, waiting for enough queue space
+// until ctx is done. Space is checked before ctx so an expired wait still
+// accepts a group that fits. It never admits part of a group, so callers can
+// fall back to inline data without orphan uploads. Groups larger than the
+// queue can never fit and are rejected immediately.
+func (u *S3Uploader) enqueueAllContext(ctx context.Context, jobs []uploadJob) bool {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+	if len(jobs) > cap(u.queue) {
+		return false
+	}
+	for {
+		if u.rejectNewJobs {
+			return false
+		}
+		// Only enqueuers holding mu add jobs, so free space cannot shrink
+		// before every send below succeeds.
+		if cap(u.queue)-len(u.queue) >= len(jobs) {
+			for _, job := range jobs {
+				u.enqueueLocked(job.ref, job.data)
+			}
+			return true
+		}
+		if ctx.Err() != nil {
+			return false
+		}
+		if u.queueSpace == nil {
+			u.queueSpace = make(chan struct{})
+		}
+		space := u.queueSpace
 		u.mu.Unlock()
+		select {
+		case <-ctx.Done():
+		case <-space:
+		}
+		u.mu.Lock()
+	}
+}
+
+// enqueueLocked holds mu across admission so shutdown cannot race a send.
+func (u *S3Uploader) enqueueLocked(ref Reference, data []byte) bool {
+	if u.rejectNewJobs {
 		return false
 	}
 	u.ensureWorkerStartedLocked()
@@ -145,16 +190,23 @@ func (u *S3Uploader) Enqueue(ref Reference, data []byte) bool {
 	// that touch both locks must follow this order to avoid deadlock.
 	select {
 	case u.queue <- uploadJob{ref: ref, data: data}:
-		u.mu.Unlock()
 		return true
 	default:
-		u.mu.Unlock()
 		// Queue full — undo the inflight bump.
 		u.idleMu.Lock()
 		u.inflight--
 		u.idleMu.Unlock()
 		u.idleCond.Broadcast()
 		return false
+	}
+}
+
+// wakeEnqueuersLocked broadcasts without holding mu while any caller waits.
+// Allocate a channel only when a caller actually encounters a full queue.
+func (u *S3Uploader) wakeEnqueuersLocked() {
+	if u.queueSpace != nil {
+		close(u.queueSpace)
+		u.queueSpace = nil
 	}
 }
 
@@ -198,6 +250,7 @@ func (u *S3Uploader) Shutdown() {
 	u.shutdownOnce.Do(func() {
 		u.mu.Lock()
 		u.rejectNewJobs = true
+		u.wakeEnqueuersLocked()
 		started := u.workerStarted
 		u.mu.Unlock()
 
@@ -264,6 +317,10 @@ func (u *S3Uploader) workerLoop() {
 // goroutine permanently while leaving workerStarted=true and rejectNewJobs=false —
 // silently wedging the uploader.
 func (u *S3Uploader) processJob(job uploadJob) {
+	u.mu.Lock()
+	u.wakeEnqueuersLocked()
+	u.mu.Unlock()
+
 	defer func() {
 		if r := recover(); r != nil {
 			u.log.Error("attachment upload panicked", "key", job.ref.Key, "panic", r)
@@ -309,6 +366,7 @@ func (u *S3Uploader) upload(job uploadJob) {
 func (u *S3Uploader) failAndReject() {
 	u.mu.Lock()
 	u.rejectNewJobs = true
+	u.wakeEnqueuersLocked()
 	u.mu.Unlock()
 }
 

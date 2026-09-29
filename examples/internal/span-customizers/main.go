@@ -37,7 +37,8 @@ func main() {
 					case "braintrust.input_json":
 						attrs = append(attrs, attribute.String("braintrust.input_json", `"[redacted]"`))
 					case "braintrust.output_json":
-						// Omit the output attribute entirely.
+						// Omit the output before automatic attachment processing,
+						// so any inline images or audio in it are never uploaded.
 					default:
 						attrs = append(attrs, attr)
 					}
@@ -53,7 +54,7 @@ func main() {
 	_, span := client.Tracer("span-customizers-example").Start(ctx, "redacted-operation")
 	span.SetAttributes(
 		attribute.String("braintrust.input_json", `{"email":"private@example.com"}`),
-		attribute.String("braintrust.output_json", `"private response"`),
+		attribute.String("braintrust.output_json", `{"type":"base64_attachment","content":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg=="}`),
 	)
 	link := client.Permalink(span)
 	span.End()

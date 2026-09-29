@@ -32,6 +32,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -128,13 +129,6 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 		log.Debug("created lazy OTLP HTTP exporter", "endpoint", apiInfo.APIURL)
 	}
 
-	// Customize before every transport path, including lazy authentication and
-	// injected exporters. A failed hook must not send any part of the batch.
-	exporter = newCustomizingExporter(exporter, cfg.SpanCustomizers, log)
-
-	// Wrap in batch processor
-	batchProcessor := sdktrace.NewBatchSpanProcessor(exporter)
-
 	// Get default parent from config
 	parent := getParent(cfg)
 	log.Debug("using default parent", "parent", parent.String())
@@ -153,7 +147,6 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 	}
 
 	// Set up attachment processor if enabled.
-	var ap *attachmentprocessor.Processor
 	var uploader attachmentprocessor.Uploader
 	if cfg.AutoConvertAIAttachments {
 		if cfg.AttachmentUploader != nil {
@@ -166,9 +159,17 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 				Logger:   log,
 			})
 		}
-		ap = attachmentprocessor.NewProcessor(uploader, log)
+		exporter = &attachmentExporter{
+			SpanExporter: exporter,
+			processor:    attachmentprocessor.NewProcessor(uploader, log),
+		}
 		log.Debug("attachment processing enabled")
 	}
+
+	// Customize the entire batch before attachment uploads or any transport path,
+	// including lazy authentication and injected exporters.
+	exporter = newCustomizingExporter(exporter, cfg.SpanCustomizers, log)
+	batchProcessor := sdktrace.NewBatchSpanProcessor(exporter)
 
 	// Wrap with Braintrust span processor (adds parent labels, filtering, etc.)
 	// The processor will get endpoints and org name from session dynamically
@@ -179,7 +180,6 @@ func GetSpanProcessor(session *auth.Session, cfg Config) (sdktrace.SpanProcessor
 		rootFilters,
 		session,
 		log,
-		ap,
 		uploader,
 		resolveEnvironment(cfg.Environment),
 	)
@@ -491,15 +491,14 @@ const (
 )
 
 type spanProcessor struct {
-	wrapped             sdktrace.SpanProcessor
-	filters             []SpanFilterFunc
-	rootFilters         []SpanFilterFunc
-	otelAttrs           *otelAttrs
-	session             *auth.Session // Session provides endpoints and org name
-	logger              logger.Logger
-	attachmentProcessor *attachmentprocessor.Processor // nil when attachment processing is disabled
-	attachmentUploader  attachmentprocessor.Uploader   // nil when attachment processing is disabled
-	environment         *SpanOriginEnvironment
+	wrapped            sdktrace.SpanProcessor
+	filters            []SpanFilterFunc
+	rootFilters        []SpanFilterFunc
+	otelAttrs          *otelAttrs
+	session            *auth.Session // Session provides endpoints and org name
+	logger             logger.Logger
+	attachmentUploader attachmentprocessor.Uploader // nil when attachment processing is disabled
+	environment        *SpanOriginEnvironment
 }
 
 // newSpanProcessor creates a new span processor that wraps another processor and adds parent labeling.
@@ -510,7 +509,6 @@ func newSpanProcessor(
 	rootFilters []SpanFilterFunc,
 	session *auth.Session,
 	log logger.Logger,
-	ap *attachmentprocessor.Processor,
 	uploader attachmentprocessor.Uploader,
 	environment *SpanOriginEnvironment,
 ) (*spanProcessor, error) {
@@ -521,15 +519,14 @@ func newSpanProcessor(
 	attrs := newOtelAttrs(defaultParent, "", appURL)
 
 	sp := &spanProcessor{
-		wrapped:             proc,
-		filters:             filters,
-		rootFilters:         rootFilters,
-		otelAttrs:           attrs,
-		session:             session,
-		logger:              log,
-		attachmentProcessor: ap,
-		attachmentUploader:  uploader,
-		environment:         environment,
+		wrapped:            proc,
+		filters:            filters,
+		rootFilters:        rootFilters,
+		otelAttrs:          attrs,
+		session:            session,
+		logger:             log,
+		attachmentUploader: uploader,
+		environment:        environment,
 	}
 
 	return sp, nil
@@ -746,10 +743,6 @@ func (sp *spanProcessor) OnEnd(span sdktrace.ReadOnlySpan) {
 		return
 	}
 
-	// Process attachments if enabled.
-	if sp.attachmentProcessor != nil {
-		span = sp.processAttachments(span)
-	}
 	span = sp.addSpanOrigin(span)
 
 	sp.wrapped.OnEnd(span)
@@ -761,9 +754,58 @@ func (sp *spanProcessor) addSpanOrigin(span sdktrace.ReadOnlySpan) sdktrace.Read
 	return attachmentprocessor.NewTransformedSpan(span, overrides)
 }
 
+// attachmentExporter only sees batches whose customizers have all succeeded.
+// Keep upload lifecycle management on spanProcessor so flush/shutdown first
+// drains the batch processor, then waits for the newly enqueued uploads.
+type attachmentExporter struct {
+	sdktrace.SpanExporter
+	processor *attachmentprocessor.Processor
+}
+
+// maxAttachmentWait bounds upload backpressure for exports without a deadline.
+const maxAttachmentWait = 10 * time.Second
+
+// ExportSpans waits for upload queue space for at most half of the remaining
+// export deadline, shared by the whole batch, so the downstream send keeps the
+// rest. Once the wait expires, spans whose attachments do not fit keep their
+// (customized) inline data and the batch is still exported. Only the caller's
+// context aborts the export; uploads already accepted for earlier spans are
+// independent of delivery, as with any downstream export failure.
+func (e *attachmentExporter) ExportSpans(ctx context.Context, spans []sdktrace.ReadOnlySpan) error {
+	wait := maxAttachmentWait
+	if deadline, ok := ctx.Deadline(); ok {
+		wait = time.Until(deadline) / 2
+	}
+	waitCtx, cancel := context.WithTimeout(ctx, wait)
+	defer cancel()
+	var outgoing []sdktrace.ReadOnlySpan
+	for i, span := range spans {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		processed, changed := e.processAttachments(waitCtx, span)
+		if changed {
+			if outgoing == nil {
+				// Preserve the caller's batch and avoid a copy when nothing changes.
+				outgoing = slices.Clone(spans)
+			}
+			outgoing[i] = processed
+		}
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if outgoing == nil {
+		outgoing = spans
+	}
+	return e.SpanExporter.ExportSpans(ctx, outgoing)
+}
+
 // processAttachments scans input_json and output_json for base64 attachments,
 // uploads them, and returns a transformed span with replacement references.
-func (sp *spanProcessor) processAttachments(span sdktrace.ReadOnlySpan) sdktrace.ReadOnlySpan {
+// A span's attachments are enqueued all-or-nothing, so it is never partially
+// converted.
+func (e *attachmentExporter) processAttachments(ctx context.Context, span sdktrace.ReadOnlySpan) (sdktrace.ReadOnlySpan, bool) {
 	var inputJSON, outputJSON string
 	for _, a := range span.Attributes() {
 		switch a.Key {
@@ -774,11 +816,11 @@ func (sp *spanProcessor) processAttachments(span sdktrace.ReadOnlySpan) sdktrace
 		}
 	}
 
-	newInputJSON := sp.attachmentProcessor.ProcessAndUpload(inputJSON)
-	newOutputJSON := sp.attachmentProcessor.ProcessAndUpload(outputJSON)
+	converted := e.processor.ProcessAndUploadAllContext(ctx, []string{inputJSON, outputJSON})
+	newInputJSON, newOutputJSON := converted[0], converted[1]
 
 	if newInputJSON == inputJSON && newOutputJSON == outputJSON {
-		return span
+		return span, false
 	}
 
 	overrides := make(map[attribute.Key]string)
@@ -788,7 +830,7 @@ func (sp *spanProcessor) processAttachments(span sdktrace.ReadOnlySpan) sdktrace
 	if newOutputJSON != outputJSON {
 		overrides[outputJSONAttrKey] = newOutputJSON
 	}
-	return attachmentprocessor.NewTransformedSpan(span, overrides)
+	return attachmentprocessor.NewTransformedSpan(span, overrides), true
 }
 
 // shouldForwardSpan applies filter functions to determine if a span should be forwarded.
@@ -860,6 +902,9 @@ func (sp *spanProcessor) ForceFlush(ctx context.Context) error {
 // timeoutFromContext returns the time remaining until ctx's deadline, or
 // fallback if ctx has no deadline.
 func timeoutFromContext(ctx context.Context, fallback time.Duration) time.Duration {
+	if ctx.Err() != nil {
+		return 0
+	}
 	if deadline, ok := ctx.Deadline(); ok {
 		if remaining := time.Until(deadline); remaining > 0 {
 			return remaining

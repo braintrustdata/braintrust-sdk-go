@@ -38,6 +38,8 @@ func (e *customizingExporter) ExportSpans(ctx context.Context, spans []sdktrace.
 	for i, span := range spans {
 		customized, err := e.customize(span)
 		if err != nil {
+			// err identifies only the hook and failure kind; hook error text may
+			// contain span data and also reaches OTel's global error handler.
 			err = fmt.Errorf("span customization failed for batch span %d: %w", i, err)
 			e.logger.Error("span customization failed; batch not exported", "error", err)
 			return err
@@ -70,7 +72,8 @@ func (e *customizingExporter) customize(span sdktrace.ReadOnlySpan) (result sdkt
 		hookIndex = i
 		next, err := customizer.OnSpanExport(current)
 		if err != nil {
-			return nil, fmt.Errorf("span customizer %d: %w", i, err)
+			// Do not wrap: hook errors may contain span payloads.
+			return nil, fmt.Errorf("span customizer %d returned an error", i)
 		}
 		if nilSpan(next) {
 			return nil, fmt.Errorf("span customizer %d returned a nil span", i)

@@ -1,6 +1,7 @@
 package attachmentprocessor
 
 import (
+	"context"
 	"encoding/json"
 	"regexp"
 
@@ -45,6 +46,51 @@ func NewProcessorWithFormats(uploader Uploader, log logger.Logger, formats []For
 // upload failures (network errors, auth errors, etc.), which causes all
 // future calls to bail out via IsShutdown().
 func (p *Processor) ProcessAndUpload(jsonStr string) string {
+	return p.processAndUpload(jsonStr, p.uploader.Enqueue)
+}
+
+// ProcessAndUploadAllContext converts values (for example, one span's input and
+// output) together and enqueues their attachments as a single group: either
+// every attachment is accepted and the converted values are returned, or the
+// original values are returned unchanged. The built-in uploader waits for
+// enough queue space until ctx is done and never admits part of a group, so a
+// fallback to inline data leaves no orphan uploads. Other uploaders are called
+// without waiting and cannot retract jobs accepted before a later rejection.
+func (p *Processor) ProcessAndUploadAllContext(ctx context.Context, values []string) []string {
+	var jobs []uploadJob
+	collect := func(ref Reference, data []byte) bool {
+		jobs = append(jobs, uploadJob{ref: ref, data: data})
+		return true
+	}
+	converted := make([]string, len(values))
+	for i, value := range values {
+		converted[i] = p.processAndUpload(value, collect)
+	}
+	if len(jobs) == 0 {
+		return values
+	}
+	if !p.enqueueAll(ctx, jobs) {
+		p.log.Debug("attachment upload queue unavailable; keeping inline data", "attachments", len(jobs))
+		return values
+	}
+	return converted
+}
+
+func (p *Processor) enqueueAll(ctx context.Context, jobs []uploadJob) bool {
+	if uploader, ok := p.uploader.(interface {
+		enqueueAllContext(context.Context, []uploadJob) bool
+	}); ok {
+		return uploader.enqueueAllContext(ctx, jobs)
+	}
+	for _, job := range jobs {
+		if !p.uploader.Enqueue(job.ref, job.data) {
+			return false
+		}
+	}
+	return true
+}
+
+func (p *Processor) processAndUpload(jsonStr string, enqueue func(Reference, []byte) bool) string {
 	if jsonStr == "" || p.uploader.IsShutdown() {
 		return jsonStr
 	}
@@ -53,7 +99,7 @@ func (p *Processor) ProcessAndUpload(jsonStr string) string {
 		return jsonStr
 	}
 
-	result, err := p.processJSON(jsonStr)
+	result, err := p.processJSON(jsonStr, enqueue)
 	if err != nil {
 		// Per-span errors (malformed JSON, etc.) — skip this span, don't
 		// kill the processor. Upload failures are handled by the uploader
@@ -69,7 +115,7 @@ func (p *Processor) ProcessAndUpload(jsonStr string) string {
 // depth to avoid crashing the process on pathological input.
 const maxWalkDepth = 128
 
-func (p *Processor) processJSON(jsonStr string) (string, error) {
+func (p *Processor) processJSON(jsonStr string, enqueue func(Reference, []byte) bool) (string, error) {
 	var root any
 	if err := json.Unmarshal([]byte(jsonStr), &root); err != nil {
 		return "", err
@@ -77,7 +123,7 @@ func (p *Processor) processJSON(jsonStr string) (string, error) {
 
 	modified := false
 	failed := false
-	result, _ := p.walkAndReplace(root, "", &modified, &failed, 0)
+	result, _ := p.walkAndReplace(root, "", &modified, &failed, 0, enqueue)
 	if failed || !modified {
 		return jsonStr, nil
 	}
@@ -99,13 +145,13 @@ func (p *Processor) processJSON(jsonStr string) (string, error) {
 // If an enqueue fails mid-walk, *failed is set to true. The caller should
 // discard the partially-rewritten tree and return the original JSON to avoid
 // a mix of replaced references and inline base64 data.
-func (p *Processor) walkAndReplace(node any, parentKey string, modified *bool, failed *bool, depth int) (any, bool) {
+func (p *Processor) walkAndReplace(node any, parentKey string, modified *bool, failed *bool, depth int, enqueue func(Reference, []byte) bool) (any, bool) {
 	if depth >= maxWalkDepth || *failed {
 		return node, false
 	}
 
 	uploadFn := func(ref Reference, data []byte) bool {
-		ok := p.uploader.Enqueue(ref, data)
+		ok := enqueue(ref, data)
 		if !ok {
 			*failed = true
 		}
@@ -129,7 +175,7 @@ func (p *Processor) walkAndReplace(node any, parentKey string, modified *bool, f
 	case map[string]any:
 		var result map[string]any
 		for k, child := range v {
-			newChild, changed := p.walkAndReplace(child, k, modified, failed, depth+1)
+			newChild, changed := p.walkAndReplace(child, k, modified, failed, depth+1, enqueue)
 			if *failed {
 				return node, false
 			}
@@ -150,7 +196,7 @@ func (p *Processor) walkAndReplace(node any, parentKey string, modified *bool, f
 	case []any:
 		var result []any
 		for i, child := range v {
-			newChild, changed := p.walkAndReplace(child, "", modified, failed, depth+1)
+			newChild, changed := p.walkAndReplace(child, "", modified, failed, depth+1, enqueue)
 			if *failed {
 				return node, false
 			}
