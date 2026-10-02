@@ -5,8 +5,8 @@ go 1.25.0
 toolchain go1.26.1
 
 require (
-	github.com/braintrustdata/braintrust-sdk-go v0.16.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk v0.16.0
+	github.com/braintrustdata/braintrust-sdk-go v0.17.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk v0.17.0
 	go.opentelemetry.io/otel v1.45.0
 	go.opentelemetry.io/otel/sdk v1.45.0
 	google.golang.org/adk v0.4.0
