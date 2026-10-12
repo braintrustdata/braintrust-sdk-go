@@ -111,7 +111,20 @@ jobs:
           # limit, so don't spend cache space on it.
           cache: false
       - name: Install orchestrion
+        if: matrix.go-version != '1.27.x'
         run: go install github.com/DataDog/orchestrion@v1.12.1
+      - name: Install orchestrion with Go 1.27 export-data support
+        if: matrix.go-version == '1.27.x'
+        # Orchestrion's pinned x/tools v0.49.0 cannot read Go 1.27's v5
+        # export data. v0.50.0 supports it but requires Go 1.26+, so keep
+        # the original tool build for the older compiler jobs.
+        run: |
+          tool_dir=$(mktemp -d)
+          trap 'rm -rf "$tool_dir"' EXIT
+          cd "$tool_dir"
+          go mod init braintrust-orchestrion-ci
+          go get github.com/DataDog/orchestrion@v1.12.1 golang.org/x/tools@v0.50.0
+          go install github.com/DataDog/orchestrion
       - name: Use local Braintrust modules
         run: ./scripts/apply_local_braintrust_replaces.sh
       - name: Test orchestrion injection (${{ matrix.variant }})

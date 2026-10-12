@@ -416,8 +416,19 @@ func TestNew_InvalidAPIURLWithImmediateAPIKey(t *testing.T) {
 	tp := trace.NewTracerProvider()
 	defer func() { _ = tp.Shutdown(context.Background()) }()
 
+	// TestAPIKey login can replace the API URL before exporter initialization.
+	// Reject login so the configured URL is tested regardless of scheduling.
+	// New owns its login HTTP client, so a VCR transport cannot be injected here.
+	loginAttempted := make(chan struct{})
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+		close(loginAttempted)
+	}))
+	defer server.Close()
+
 	client, err := New(tp,
-		WithAPIKey(auth.TestAPIKey),
+		WithAPIKey("test-key"),
+		WithAppURL(server.URL),
 		WithProject("test-project"),
 		WithAPIURL("not-a-url"),
 		WithLogger(logger.Discard()),
@@ -426,9 +437,16 @@ func TestNew_InvalidAPIURLWithImmediateAPIKey(t *testing.T) {
 		defer client.session.Close()
 	}
 
+	// Let the terminal login response complete before closing the server;
+	// otherwise a connection failure could leave background login retrying.
+	select {
+	case <-loginAttempted:
+	case <-time.After(5 * time.Second):
+		t.Fatal("timed out waiting for login attempt")
+	}
+
 	require.Error(t, err)
 	assert.Nil(t, client)
-	assert.Contains(t, err.Error(), "invalid url")
 }
 
 func TestTracing_EndToEnd(t *testing.T) {

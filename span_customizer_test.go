@@ -15,9 +15,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
+	oteltrace "go.opentelemetry.io/otel/trace"
 	collectortrace "go.opentelemetry.io/proto/otlp/collector/trace/v1"
+	tracepb "go.opentelemetry.io/proto/otlp/trace/v1"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/braintrustdata/braintrust-sdk-go/config"
@@ -67,19 +70,22 @@ func (r customizerKeyResolver) APIKey(ctx context.Context) (string, bool) {
 func TestSpanCustomizersOTLPExport(t *testing.T) {
 	// The wire payload contains generated span IDs/timestamps and binary gzip
 	// protobuf. A local OTLP receiver, rather than a VCR cassette, lets us inspect
-	// the actual serialization and prove a rejected batch sends zero requests.
+	// the actual serialization, stripping, routing and transport retries.
 	for _, lazy := range []bool{false, true} {
 		t.Run(fmt.Sprintf("lazy=%t", lazy), func(t *testing.T) {
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
-			var requests atomic.Int32
-			payloads := make(chan *collectortrace.ExportTraceServiceRequest, 1)
+			var requests, attachmentRequests, hookCalls atomic.Int32
+			payloads := make(chan *collectortrace.ExportTraceServiceRequest, 3)
 			var server *httptest.Server
 			server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.URL.Path == "/api/apikey/login" {
 					w.Header().Set("Content-Type", "application/json")
 					_, _ = fmt.Fprintf(w, `{"org_info":[{"id":"test-org-id","name":"test-org","api_url":%q,"proxy_url":%q}]}`, server.URL, server.URL)
 					return
+				}
+				if r.URL.Path == "/attachment" {
+					attachmentRequests.Add(1)
 				}
 				if r.URL.Path != "/otel/v1/traces" {
 					http.NotFound(w, r)
@@ -107,10 +113,14 @@ func TestSpanCustomizersOTLPExport(t *testing.T) {
 					return
 				}
 				payloads <- message
-				w.WriteHeader(http.StatusOK)
+				if requests.Load() == 2 {
+					w.WriteHeader(http.StatusServiceUnavailable)
+				} else {
+					w.WriteHeader(http.StatusOK)
+				}
 			}))
 			defer server.Close()
-			tp := sdktrace.NewTracerProvider()
+			tp := sdktrace.NewTracerProvider(sdktrace.WithResource(resource.NewSchemaless(attribute.String("private.resource", "secret"))))
 			defer func() { require.NoError(t, tp.Shutdown(ctx)) }()
 			ready := make(chan struct{})
 			keyOption := WithAPIKey("immediate-key")
@@ -121,8 +131,9 @@ func TestSpanCustomizersOTLPExport(t *testing.T) {
 				}
 			}
 			client, err := New(tp, keyOption, WithAPIURL(server.URL), WithAppURL(server.URL),
-				WithLogger(logger.Discard()), WithAutoConvertAIAttachments(false),
+				WithLogger(logger.Discard()), WithProject("original"), WithAutoConvertAIAttachments(true),
 				WithSpanCustomizers(config.SpanCustomizer{OnSpanExport: func(span sdktrace.ReadOnlySpan) (sdktrace.ReadOnlySpan, error) {
+					hookCalls.Add(1)
 					if span.Name() == "reject" {
 						return nil, errors.New("cannot redact")
 					}
@@ -133,7 +144,7 @@ func TestSpanCustomizersOTLPExport(t *testing.T) {
 			require.NoError(t, err)
 			close(ready) // Keep APIInfo empty until the lazy exporter is installed.
 			tracer := client.Tracer("customizer-transport")
-			_, span := tracer.Start(ctx, "export")
+			parentCtx, span := tracer.Start(ctx, "export")
 			span.SetAttributes(attribute.String("braintrust.input_json", `"secret"`))
 			span.End()
 			require.NoError(t, tp.ForceFlush(ctx))
@@ -149,10 +160,76 @@ func TestSpanCustomizersOTLPExport(t *testing.T) {
 			case <-ctx.Done():
 				t.Fatal("timed out waiting for OTLP payload")
 			}
-			_, second := tracer.Start(ctx, "reject")
-			second.End()
-			require.Error(t, tp.ForceFlush(ctx))
-			assert.Equal(t, int32(1), requests.Load(), "failed batch must not reach OTLP transport")
+			start := time.Unix(100, 0)
+			_, second := tracer.Start(parentCtx, "reject", oteltrace.WithTimestamp(start))
+			second.SetAttributes(
+				attribute.String("braintrust.context_json", `{"private":"secret"}`),
+				attribute.String("braintrust.input_json", `{"type":"base64_attachment","content":"data:image/png;base64,c2VjcmV0"}`),
+			)
+			second.RecordError(errors.New("private exception"))
+			second.End(oteltrace.WithTimestamp(start.Add(time.Second)))
+			_, third := tracer.Start(ctx, "unrelated")
+			third.End()
+			require.NoError(t, tp.ForceFlush(ctx))
+			var retried *collectortrace.ExportTraceServiceRequest
+			for range 2 {
+				select {
+				case message := <-payloads:
+					if retried != nil {
+						assert.True(t, proto.Equal(retried, message), "transport retry reuses the stripped payload")
+					}
+					retried = message
+					var stripped, unrelated *tracepb.Span
+					for _, group := range message.ResourceSpans {
+						for _, scope := range group.ScopeSpans {
+							for _, exported := range scope.Spans {
+								switch exported.Name {
+								case "":
+									stripped = exported
+									assert.Empty(t, group.Resource.Attributes)
+									assert.Empty(t, group.SchemaUrl)
+									assert.Empty(t, scope.GetScope().GetName())
+									assert.Empty(t, scope.GetScope().GetVersion())
+									assert.Empty(t, scope.GetScope().GetAttributes())
+									assert.Empty(t, scope.SchemaUrl)
+								case "unrelated":
+									unrelated = exported
+								default:
+									t.Errorf("unexpected span: %q", exported.Name)
+								}
+							}
+						}
+					}
+					require.NotNil(t, stripped)
+					require.NotNil(t, unrelated)
+					identity, parent := second.SpanContext(), span.SpanContext()
+					traceID, spanID, parentID := identity.TraceID(), identity.SpanID(), parent.SpanID()
+					assert.Equal(t, traceID[:], stripped.TraceId)
+					assert.Equal(t, spanID[:], stripped.SpanId)
+					assert.Equal(t, parentID[:], stripped.ParentSpanId)
+					assert.Equal(t, uint64(start.UnixNano()), stripped.StartTimeUnixNano)
+					assert.Equal(t, uint64(start.Add(time.Second).UnixNano()), stripped.EndTimeUnixNano)
+					assert.Empty(t, stripped.Events)
+					assert.Empty(t, stripped.Links)
+					assert.Empty(t, stripped.TraceState)
+					assert.Empty(t, stripped.GetStatus().GetMessage())
+					assert.Equal(t, tracepb.Status_STATUS_CODE_UNSET, stripped.GetStatus().GetCode())
+					require.Len(t, stripped.Attributes, 2)
+					attrs := map[string]string{}
+					for _, attr := range stripped.Attributes {
+						attrs[attr.Key] = attr.Value.GetStringValue()
+					}
+					assert.Equal(t, map[string]string{
+						"braintrust.parent":       "project_name:original",
+						"braintrust.context_json": `{"customizer_error":true}`,
+					}, attrs)
+				case <-ctx.Done():
+					t.Fatal("timed out waiting for stripped OTLP payload")
+				}
+			}
+			assert.Equal(t, int32(3), requests.Load())
+			assert.Zero(t, attachmentRequests.Load(), "stripped attachments must never reach the uploader")
+			assert.Equal(t, int32(3), hookCalls.Load(), "transport retry must not invoke hooks again")
 		})
 	}
 }

@@ -754,7 +754,7 @@ func (sp *spanProcessor) addSpanOrigin(span sdktrace.ReadOnlySpan) sdktrace.Read
 	return attachmentprocessor.NewTransformedSpan(span, overrides)
 }
 
-// attachmentExporter only sees batches whose customizers have all succeeded.
+// attachmentExporter only sees customized spans or stripped hook-failure records.
 // Keep upload lifecycle management on spanProcessor so flush/shutdown first
 // drains the batch processor, then waits for the newly enqueued uploads.
 type attachmentExporter struct {
