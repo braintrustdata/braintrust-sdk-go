@@ -118,7 +118,22 @@ func TestOpenAIResponsesRequiredParams(t *testing.T) {
 	ts := exporter.FlushOne()
 	assertSpanValid(t, ts, timeRange)
 
-	_ = ts.Input()
+	// Responses must use the JSON attributes for proper UI display (issue #33).
+	ts.AssertJSONAttrEquals("braintrust.input_json", "What is 13+4?")
+	assert.Contains(ts.Attr("braintrust.output_json").String(), "17")
+
+	metadata := ts.Metadata()
+	assert.Equal("completed", metadata["status"])
+	usage, ok := metadata["usage"].(map[string]interface{})
+	require.True(ok, "usage should be present in metadata")
+	assert.Greater(usage["input_tokens"].(float64), float64(0))
+	assert.Greater(usage["output_tokens"].(float64), float64(0))
+	assert.Greater(usage["total_tokens"].(float64), float64(0))
+
+	metrics := ts.Metrics()
+	assert.Equal(usage["input_tokens"], metrics["prompt_tokens"])
+	assert.Equal(usage["output_tokens"], metrics["completion_tokens"])
+	assert.Equal(usage["total_tokens"], metrics["tokens"])
 	outputRaw := ts.Output()
 	outputJSON, err := json.Marshal(outputRaw)
 	require.NoError(err)
@@ -413,37 +428,6 @@ func TestOpenAIResponsesStreaming(t *testing.T) {
 	assert.GreaterOrEqual(ttft, 0.0, "time_to_first_token should be >= 0")
 }
 
-// TestOpenAIResponsesCompletedUsage verifies that a completed response records
-// status "completed" and usage (input/output/total tokens) in metadata.
-func TestOpenAIResponsesCompletedUsage(t *testing.T) {
-	client, _, exporter := setUpTest(t)
-	assert := assert.New(t)
-	require := require.New(t)
-
-	resp, err := client.Responses.New(context.Background(), responses.ResponseNewParams{
-		Input: responses.ResponseNewParamsInputUnion{OfString: openai.String("What is the capital of France?")},
-		Model: openai.ChatModelGPT4oMini,
-	})
-	require.NoError(err)
-	assert.Contains(resp.OutputText(), "Paris")
-
-	ts := exporter.FlushOne()
-
-	metadata := ts.Metadata()
-	assert.Equal("completed", metadata["status"])
-
-	usage, ok := metadata["usage"].(map[string]interface{})
-	require.True(ok, "usage should be present in metadata")
-	assert.Greater(usage["input_tokens"].(float64), float64(0))
-	assert.Greater(usage["output_tokens"].(float64), float64(0))
-	assert.Greater(usage["total_tokens"].(float64), float64(0))
-
-	metrics := ts.Metrics()
-	assert.Greater(metrics["tokens"], float64(0))
-	assert.Greater(metrics["prompt_tokens"], float64(0))
-	assert.Greater(metrics["completion_tokens"], float64(0))
-}
-
 // TestOpenAIResponsesStreamingIncomplete verifies that a streaming response truncated
 // by max_output_tokens is recorded with status "incomplete" and usage in metadata.
 func TestOpenAIResponsesStreamingIncomplete(t *testing.T) {
@@ -525,6 +509,10 @@ func TestOpenAIResponsesWithListInput(t *testing.T) {
 	ts := exporter.FlushOne()
 
 	assertSpanValid(t, ts, timeRange)
+	// Array input must also use the JSON attributes (issue #33).
+	assert.Contains(ts.Attr("braintrust.input_json").String(), "2+2")
+	assert.Contains(ts.Attr("braintrust.input_json").String(), "3+125")
+	assert.Contains(ts.Attr("braintrust.output_json").String(), "128")
 
 	inputRaw := ts.Input()
 	inputJSON, err := json.Marshal(inputRaw)
@@ -611,24 +599,6 @@ func assertSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.TimeRa
 	assert.NotNil(span.Output())
 }
 
-func TestTestOTelTracer(t *testing.T) {
-	_, tp, exporter := setUpTest(t)
-	assert := assert.New(t)
-
-	// crudely check we can create and test spans
-	spans := exporter.Flush()
-	assert.Empty(spans)
-
-	tracer := tp.Tracer("test")
-	_, span := tracer.Start(context.Background(), "test")
-	span.End()
-
-	spans = exporter.Flush()
-	assert.NotEmpty(spans)
-	spans = exporter.Flush()
-	assert.Empty(spans)
-}
-
 func TestParseUsageTokens(t *testing.T) {
 	t.Run("basic_tokens", func(t *testing.T) {
 		usage := map[string]interface{}{
@@ -699,74 +669,6 @@ func TestTranslateMetricPrefix(t *testing.T) {
 			assert.Equal(t, test.expected, result)
 		})
 	}
-}
-
-// TestResponsesAPIUsesCorrectAttributes verifies that the Responses API uses
-// braintrust.input_json and braintrust.output_json for proper UI display (issue #33)
-func TestResponsesAPIUsesCorrectAttributes(t *testing.T) {
-	client, _, exporter := setUpTest(t)
-	require := require.New(t)
-	assert := assert.New(t)
-
-	// Test with list input (array)
-	inputMessages := []responses.ResponseInputItemUnionParam{
-		responses.ResponseInputItemParamOfMessage("What is 2+2?", "user"),
-		responses.ResponseInputItemParamOfMessage("4", "assistant"),
-		responses.ResponseInputItemParamOfMessage("What is 3+5?", "user"),
-	}
-
-	params := responses.ResponseNewParams{
-		Input: responses.ResponseNewParamsInputUnion{
-			OfInputItemList: inputMessages,
-		},
-		Model: testModel,
-	}
-
-	resp, err := client.Responses.New(context.Background(), params)
-	require.NoError(err)
-	require.NotNil(resp)
-
-	ts := exporter.FlushOne()
-
-	// Verify we're using braintrust.input_json (not braintrust.input)
-	inputAttr := ts.Attr("braintrust.input_json")
-	require.NotNil(inputAttr, "should use braintrust.input_json for array input")
-	assert.Contains(inputAttr.String(), "2+2")
-	assert.Contains(inputAttr.String(), "3+5")
-
-	// Verify we're using braintrust.output_json (not braintrust.output)
-	outputAttr := ts.Attr("braintrust.output_json")
-	require.NotNil(outputAttr, "should use braintrust.output_json for output")
-	assert.Contains(outputAttr.String(), "8")
-}
-
-// TestResponsesAPIWithStringInput verifies that string inputs also work with _json attributes
-func TestResponsesAPIWithStringInput(t *testing.T) {
-	client, _, exporter := setUpTest(t)
-	require := require.New(t)
-	assert := assert.New(t)
-
-	// Test with string input
-	params := responses.ResponseNewParams{
-		Input: responses.ResponseNewParamsInputUnion{OfString: openai.String("What is 7+6?")},
-		Model: testModel,
-	}
-
-	resp, err := client.Responses.New(context.Background(), params)
-	require.NoError(err)
-	require.NotNil(resp)
-
-	ts := exporter.FlushOne()
-
-	// Verify string inputs also use braintrust.input_json
-	inputAttr := ts.Attr("braintrust.input_json")
-	require.NotNil(inputAttr, "should use braintrust.input_json even for string input")
-	assert.Contains(inputAttr.String(), "7+6")
-
-	// Verify output uses braintrust.output_json
-	outputAttr := ts.Attr("braintrust.output_json")
-	require.NotNil(outputAttr, "should use braintrust.output_json for output")
-	assert.Contains(outputAttr.String(), "13")
 }
 
 // TestResponsesAPIWithReasoning verifies that reasoning parameters are captured in metadata

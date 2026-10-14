@@ -11,9 +11,9 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// TestContextIdentity verifies that LangChainGo passes the same context pointer
-// to both Start and End callbacks. This is critical for our span tracking approach.
-func TestContextIdentity(t *testing.T) {
+// TestContextIdentityOnTransportError verifies the actual LangChainGo callback
+// contract when a request fails before receiving a response.
+func TestContextIdentityOnTransportError(t *testing.T) {
 	var startCtx, endCtx context.Context
 
 	// Create a custom handler that captures context pointers
@@ -36,11 +36,14 @@ func TestContextIdentity(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Make a call (will fail but that's OK, we just need to trigger callbacks)
+	// A transport failure triggers Start but no End or Error callback in LangChainGo.
 	messages := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeHuman, "test"),
 	}
-	_, _ = llm.GenerateContent(ctx, messages)
+	_, err = llm.GenerateContent(ctx, messages)
+	if err == nil {
+		t.Fatal("Expected transport failure")
+	}
 
 	// Verify the same context pointer was used
 	if startCtx == nil {
@@ -48,17 +51,16 @@ func TestContextIdentity(t *testing.T) {
 	}
 
 	if startCtx != ctx {
-		t.Logf("WARNING: Start context (%p) differs from original (%p)", startCtx, ctx)
+		t.Errorf("Start context differs from original: got %p, want %p", startCtx, ctx)
 	}
-
-	if endCtx != nil && endCtx != startCtx {
-		t.Errorf("PROBLEM: End context (%p) differs from start context (%p)", endCtx, startCtx)
-		t.Error("Our span tracking approach will not work if LangChainGo creates derived contexts")
+	if endCtx != nil {
+		t.Error("Unexpected End or Error callback after transport failure")
 	}
 }
 
 // errorTransport is an http.RoundTripper that immediately returns an error,
-// used to avoid real network calls in tests that only care about callback behavior.
+// used to test the dependency's transport-failure callback contract. VCR records
+// HTTP responses and cannot reproduce a failure before any response exists.
 type errorTransport struct{}
 
 func (e *errorTransport) RoundTrip(*http.Request) (*http.Response, error) {

@@ -103,38 +103,6 @@ func TestChatCompletions(t *testing.T) {
 	assert.Greater(t, metrics["tokens"], float64(0))
 }
 
-func TestWrapClient(t *testing.T) {
-	client, exporter := setUpTest(t)
-
-	// Make a chat completion request
-	timer := oteltest.NewTimer()
-	resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-		Model: testModel,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: "Say hello",
-			},
-		},
-	})
-	timeRange := timer.Tick()
-
-	require.NoError(t, err)
-	require.NotEmpty(t, resp.ID)
-
-	// Wait for spans to be exported
-	ts := exporter.FlushOne()
-
-	// Validate span
-	ts.AssertInTimeRange(timeRange)
-	ts.AssertNameIs("Chat Completion")
-
-	// Check metadata
-	metadata := ts.Metadata()
-	assert.Equal(t, "openai", metadata["provider"])
-	assert.Equal(t, "/v1/chat/completions", metadata["endpoint"])
-}
-
 func TestStreamingChatCompletions(t *testing.T) {
 	client, exporter := setUpTest(t)
 

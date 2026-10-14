@@ -20,76 +20,6 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 )
 
-func TestMiddleware(t *testing.T) {
-	// Set up test tracer provider
-	_, _ = oteltest.Setup(t)
-
-	// Create a test request with a Messages API call
-	requestBody := `{
-		"model": "claude-3-haiku-20240307",
-		"max_tokens": 1024,
-		"messages": [
-			{
-				"role": "user",
-				"content": "Hello, Claude!"
-			}
-		]
-	}`
-
-	req := httptest.NewRequest("POST", "/v1/messages", strings.NewReader(requestBody))
-	req.Header.Set("Content-Type", "application/json")
-
-	// Create a mock response
-	responseBody := `{
-		"id": "msg_01Aq9w938a90dw8q",
-		"type": "message",
-		"role": "assistant",
-		"content": [
-			{
-				"type": "text",
-				"text": "Hello! How can I help you today?"
-			}
-		],
-		"model": "claude-3-haiku-20240307",
-		"stop_reason": "end_turn",
-		"stop_sequence": null,
-		"usage": {
-			"input_tokens": 12,
-			"output_tokens": 9
-		}
-	}`
-
-	// Create a mock next middleware
-	next := func(req *http.Request) (*http.Response, error) {
-		resp := &http.Response{
-			StatusCode: 200,
-			Header:     make(http.Header),
-			Body:       io.NopCloser(strings.NewReader(responseBody)),
-		}
-		resp.Header.Set("Content-Type", "application/json")
-		return resp, nil
-	}
-
-	// Call the middleware - uses global TracerProvider by default
-	middleware := NewMiddleware() //nolint:bodyclose // false positive - NewMiddleware returns middleware func
-	resp, err := middleware(req, next)
-	require.NoError(t, err)
-	require.NotNil(t, resp)
-
-	// Verify response
-	assert.Equal(t, 200, resp.StatusCode)
-	assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
-
-	// Read the response body to trigger the tracer
-	body, err := io.ReadAll(resp.Body)
-	require.NoError(t, err)
-	assert.Contains(t, string(body), "Hello! How can I help you today?")
-
-	// Close the response body to trigger completion
-	err = resp.Body.Close()
-	require.NoError(t, err)
-}
-
 func TestMiddlewareMatchesProxyPrefixedMessagesPath(t *testing.T) {
 	tp, exporter := oteltest.Setup(t)
 
@@ -149,75 +79,6 @@ func TestMiddlewareMatchesProxyPrefixedMessagesPath(t *testing.T) {
 	assert.NotContains(t, span.Metadata(), "endpoint")
 }
 
-func TestMessagesTracer(t *testing.T) {
-	tp, _ := oteltest.Setup(t)
-	cfg := &middlewareConfig{tracerProvider: tp}
-	tracer := newMessagesTracer(cfg)
-	assert.NotNil(t, tracer)
-	assert.False(t, tracer.streaming)
-	assert.Equal(t, "anthropic", tracer.metadata["provider"])
-	assert.NotContains(t, tracer.metadata, "endpoint")
-
-	// Test StartSpan
-	requestBody := `{
-		"model": "claude-3-haiku-20240307",
-		"max_tokens": 1024,
-		"messages": [
-			{
-				"role": "user",
-				"content": "Hello, Claude!"
-			}
-		],
-		"stream": false
-	}`
-
-	ctx := context.Background()
-	start := time.Now()
-	reader := strings.NewReader(requestBody)
-
-	newCtx, span, err := tracer.StartSpan(ctx, start, reader)
-	require.NoError(t, err)
-	require.NotNil(t, span)
-	require.NotNil(t, newCtx)
-
-	// Verify metadata was parsed
-	assert.Equal(t, "claude-3-haiku-20240307", tracer.metadata["model"])
-	assert.Equal(t, float64(1024), tracer.metadata["max_tokens"])
-	assert.Equal(t, false, tracer.metadata["stream"])
-	assert.False(t, tracer.streaming)
-}
-
-func TestMessagesTracerStreaming(t *testing.T) {
-	tp, _ := oteltest.Setup(t)
-	cfg := &middlewareConfig{tracerProvider: tp}
-	tracer := newMessagesTracer(cfg)
-
-	// Test streaming request
-	requestBody := `{
-		"model": "claude-3-haiku-20240307",
-		"max_tokens": 1024,
-		"messages": [
-			{
-				"role": "user",
-				"content": "Hello, Claude!"
-			}
-		],
-		"stream": true
-	}`
-
-	ctx := context.Background()
-	start := time.Now()
-	reader := strings.NewReader(requestBody)
-
-	_, span, err := tracer.StartSpan(ctx, start, reader)
-	require.NoError(t, err)
-	require.NotNil(t, span)
-
-	// Verify streaming was detected
-	assert.True(t, tracer.streaming)
-	assert.Equal(t, true, tracer.metadata["stream"])
-}
-
 func TestParseUsageTokens(t *testing.T) {
 	usage := map[string]interface{}{
 		"input_tokens":  float64(12),
@@ -266,8 +127,6 @@ func TestParseUsageTokensWithCacheTTLs(t *testing.T) {
 }
 
 func TestMessagesTracerCapturesRequestMetadata(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	tracer := newMessagesTracer(&middlewareConfig{tracerProvider: tp})
 	requestBody := `{
 		"model":"claude-haiku-4-5",
 		"max_tokens":128,
@@ -288,43 +147,62 @@ func TestMessagesTracerCapturesRequestMetadata(t *testing.T) {
 		"tool_choice":{"type":"any","disable_parallel_tool_use":true}
 	}`
 
-	_, span, err := tracer.StartSpan(t.Context(), time.Now(), strings.NewReader(requestBody))
-	require.NoError(t, err)
-	span.End()
+	for _, tc := range []struct {
+		name      string
+		streaming bool
+	}{
+		{name: "non_streaming"},
+		{name: "streaming", streaming: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			tp, exporter := oteltest.Setup(t)
+			tracer := newMessagesTracer(&middlewareConfig{tracerProvider: tp})
+			requestBody := requestBody
+			if tc.streaming {
+				requestBody = strings.Replace(requestBody, `"stream":false`, `"stream":true`, 1)
+			}
+			newCtx, span, err := tracer.StartSpan(t.Context(), time.Now(), strings.NewReader(requestBody))
+			require.NoError(t, err)
+			require.NotNil(t, newCtx)
+			require.NotNil(t, span)
+			assert.Equal(t, tc.streaming, tracer.streaming)
+			span.End()
 
-	exported := exporter.FlushOne()
-	metadata := exported.Metadata()
-	assert.Equal(t, map[string]any{
-		"provider":       "anthropic",
-		"model":          "claude-haiku-4-5",
-		"max_tokens":     float64(128),
-		"temperature":    float64(0),
-		"top_p":          float64(0.9),
-		"top_k":          float64(10),
-		"stop_sequences": []any{"END"},
-		"stream":         false,
-		"metadata":       map[string]any{"user_id": "private"},
-		"thinking": map[string]any{
-			"type":          "enabled",
-			"budget_tokens": float64(1024),
-		},
-		// Native shape: the UI's Anthropic normalizer converts it for display.
-		"tools": []any{map[string]any{
-			"name":        "get_weather",
-			"description": "Get the weather",
-			"input_schema": map[string]any{
-				"type": "object",
-				"properties": map[string]any{
-					"city": map[string]any{"type": "string"},
+			exported := exporter.FlushOne()
+			metadata := exported.Metadata()
+			assert.Equal(t, map[string]any{
+				"provider":       "anthropic",
+				"model":          "claude-haiku-4-5",
+				"max_tokens":     float64(128),
+				"temperature":    float64(0),
+				"top_p":          float64(0.9),
+				"top_k":          float64(10),
+				"stop_sequences": []any{"END"},
+				"stream":         tc.streaming,
+				"metadata":       map[string]any{"user_id": "private"},
+				"thinking": map[string]any{
+					"type":          "enabled",
+					"budget_tokens": float64(1024),
 				},
-			},
-			"strict": true,
-		}},
-		"tool_choice": map[string]any{
-			"type":                      "any",
-			"disable_parallel_tool_use": true,
-		},
-	}, metadata)
+				// Native shape: the UI's Anthropic normalizer converts it for display.
+				"tools": []any{map[string]any{
+					"name":        "get_weather",
+					"description": "Get the weather",
+					"input_schema": map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"city": map[string]any{"type": "string"},
+						},
+					},
+					"strict": true,
+				}},
+				"tool_choice": map[string]any{
+					"type":                      "any",
+					"disable_parallel_tool_use": true,
+				},
+			}, metadata)
+		})
+	}
 }
 
 func TestMessagesTracerCapturesNativeResponse(t *testing.T) {

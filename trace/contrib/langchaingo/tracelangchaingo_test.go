@@ -13,138 +13,83 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 )
 
-func TestHandleLLMGenerateContentStart(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	tracer := tp.Tracer(t.Name())
-
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	// Create a parent span
-	ctx, parentSpan := tracer.Start(context.Background(), "test-parent")
-
-	// Call HandleLLMGenerateContentStart
-	messages := []llms.MessageContent{
+func TestHandleLLMGenerateContentLifecycle(t *testing.T) {
+	for _, tt := range []struct {
+		name                                        string
+		generationInfo                              map[string]any
+		stopReason                                  string
+		promptTokens, completionTokens, totalTokens float64
+	}{
 		{
-			Role: llms.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{
-				llms.TextContent{Text: "Hello!"},
-			},
+			name: "nested usage",
+			generationInfo: map[string]any{"usage": map[string]any{
+				"prompt_tokens": float64(10), "completion_tokens": float64(5), "total_tokens": float64(15),
+			}},
+			stopReason: "stop", promptTokens: 10, completionTokens: 5, totalTokens: 15,
 		},
-	}
-	handler.HandleLLMGenerateContentStart(ctx, messages)
-
-	// End the LLM span with a dummy response
-	handler.HandleLLMGenerateContentEnd(ctx, &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{{Content: "dummy"}},
-	})
-
-	// End the parent span to flush traces
-	parentSpan.End()
-
-	// Check that a span was created
-	spans := exporter.Flush()
-	require.Len(t, spans, 2) // parent + LLM span
-
-	// Find the LLM span (not the parent)
-	var llmSpan oteltest.Span
-	for _, span := range spans {
-		if span.Name() == "langchain.llm.generate_content" {
-			llmSpan = span
-			break
-		}
-	}
-	require.NotNil(t, llmSpan, "LLM span not found")
-
-	// Verify span name
-	llmSpan.AssertNameIs("langchain.llm.generate_content")
-
-	// Verify input is captured
-	input := llmSpan.Input()
-	require.NotNil(t, input)
-
-	inputSlice, ok := input.([]interface{})
-	require.True(t, ok, "input should be a slice")
-	require.Len(t, inputSlice, 1)
-
-	message, ok := inputSlice[0].(map[string]interface{})
-	require.True(t, ok)
-	// Role should be mapped to OpenAI standard ("user" not "human")
-	assert.Equal(t, "user", message["role"])
-}
-
-func TestHandleLLMGenerateContentEnd(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	tracer := tp.Tracer(t.Name())
-
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	// Create a parent span
-	ctx, parentSpan := tracer.Start(context.Background(), "test-parent")
-
-	// Start an LLM call
-	messages := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeHuman, "Hello!"),
-	}
-	handler.HandleLLMGenerateContentStart(ctx, messages)
-
-	// End the LLM call with a response
-	response := &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
-			{
-				Content:    "Hi there!",
-				StopReason: "stop",
-				GenerationInfo: map[string]any{
-					"usage": map[string]any{
-						"prompt_tokens":     float64(10),
-						"completion_tokens": float64(5),
-						"total_tokens":      float64(15),
-					},
-				},
-			},
+		{
+			name:           "PascalCase tokens",
+			generationInfo: map[string]any{"PromptTokens": 10, "CompletionTokens": 5, "TotalTokens": 15},
+			stopReason:     "stop", promptTokens: 10, completionTokens: 5, totalTokens: 15,
 		},
+		{
+			// LangChainGo does not expose Anthropic usage in callbacks yet, so
+			// this case exercises the supported token shape directly.
+			name:           "Anthropic tokens",
+			generationInfo: map[string]any{"InputTokens": 17, "OutputTokens": 4},
+			stopReason:     "end_turn", promptTokens: 17, completionTokens: 4, totalTokens: 21,
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			tp, exporter := oteltest.Setup(t)
+			handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
+			ctx, parentSpan := tp.Tracer(t.Name()).Start(context.Background(), "test-parent")
+			handler.HandleLLMGenerateContentStart(ctx, []llms.MessageContent{
+				llms.TextParts(llms.ChatMessageTypeHuman, "Hello!"),
+			})
+			handler.HandleLLMGenerateContentEnd(ctx, &llms.ContentResponse{
+				Choices: []*llms.ContentChoice{{
+					Content: "Hi there!", StopReason: tt.stopReason, GenerationInfo: tt.generationInfo,
+				}},
+			})
+			parentSpan.End()
+
+			spans := exporter.Flush()
+			require.Len(t, spans, 2)
+			var llmSpan oteltest.Span
+			for _, span := range spans {
+				if span.Name() == "langchain.llm.generate_content" {
+					llmSpan = span
+					break
+				}
+			}
+			require.NotNil(t, llmSpan, "LLM span not found")
+			llmSpan.AssertNameIs("langchain.llm.generate_content")
+			assert.Equal(t, parentSpan.SpanContext().SpanID(), llmSpan.Stub.Parent.SpanID())
+			input, ok := llmSpan.Input().([]any)
+			require.True(t, ok)
+			require.Len(t, input, 1)
+			message, ok := input[0].(map[string]any)
+			require.True(t, ok)
+			assert.Equal(t, "user", message["role"])
+			assert.Equal(t, "Hello!", message["content"])
+
+			output, ok := llmSpan.Output().([]any)
+			require.True(t, ok)
+			require.Len(t, output, 1)
+			choice, ok := output[0].(map[string]any)
+			require.True(t, ok)
+			message, ok = choice["message"].(map[string]any)
+			require.True(t, ok)
+			assert.Equal(t, "Hi there!", message["content"])
+			assert.Equal(t, "assistant", message["role"])
+			assert.Equal(t, tt.stopReason, choice["stop_reason"])
+			metrics := llmSpan.Metrics()
+			assert.Equal(t, tt.promptTokens, metrics["prompt_tokens"])
+			assert.Equal(t, tt.completionTokens, metrics["completion_tokens"])
+			assert.Equal(t, tt.totalTokens, metrics["tokens"])
+		})
 	}
-	handler.HandleLLMGenerateContentEnd(ctx, response)
-
-	// End the parent span to flush traces
-	parentSpan.End()
-
-	// Check spans
-	spans := exporter.Flush()
-	require.Len(t, spans, 2)
-
-	// Find the LLM span
-	var llmSpan oteltest.Span
-	for _, span := range spans {
-		if span.Name() == "langchain.llm.generate_content" {
-			llmSpan = span
-			break
-		}
-	}
-	require.NotNil(t, llmSpan, "LLM span not found")
-
-	// Verify output is captured
-	output := llmSpan.Output()
-	require.NotNil(t, output)
-
-	outputSlice, ok := output.([]interface{})
-	require.True(t, ok, "output should be a slice")
-	require.Len(t, outputSlice, 1)
-
-	choice, ok := outputSlice[0].(map[string]interface{})
-	require.True(t, ok)
-
-	// Check OpenAI-style format: message is nested
-	message, ok := choice["message"].(map[string]interface{})
-	require.True(t, ok, "choice should contain a message object")
-	assert.Equal(t, "Hi there!", message["content"])
-	assert.Equal(t, "assistant", message["role"])
-	assert.Equal(t, "stop", choice["stop_reason"])
-
-	// Verify metrics are captured
-	metrics := llmSpan.Metrics()
-	assert.Equal(t, float64(10), metrics["prompt_tokens"])
-	assert.Equal(t, float64(5), metrics["completion_tokens"])
-	assert.Equal(t, float64(15), metrics["tokens"])
 }
 
 func TestHandleLLMError(t *testing.T) {
@@ -243,53 +188,31 @@ func TestHandleLLMStart(t *testing.T) {
 	assert.Equal(t, "Tell me a joke", inputSlice[1])
 }
 
-func TestHandleLLMGenerateContentEndWithoutStart(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	tracer := tp.Tracer(t.Name())
+func TestHandleLLMCompletionWithoutStart(t *testing.T) {
+	for _, tt := range []struct {
+		name     string
+		complete func(*Handler, context.Context)
+	}{
+		{"end", func(h *Handler, ctx context.Context) {
+			h.HandleLLMGenerateContentEnd(ctx, &llms.ContentResponse{Choices: []*llms.ContentChoice{{Content: "Hi there!"}}})
+		}},
+		{"error", func(h *Handler, ctx context.Context) {
+			h.HandleLLMError(ctx, errors.New("test-error"))
+		}},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			tp, exporter := oteltest.Setup(t)
+			handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
+			ctx, parentSpan := tp.Tracer(t.Name()).Start(context.Background(), "test-parent")
+			tt.complete(handler, ctx)
+			parentSpan.End()
 
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	// Create a parent span
-	ctx, parentSpan := tracer.Start(context.Background(), "test-parent")
-
-	// Call End without Start - should not crash
-	response := &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
-			{Content: "Hi there!"},
-		},
+			span := exporter.FlushOne()
+			span.AssertNameIs("test-parent")
+			assert.NotEqual(t, codes.Error, span.Status().Code)
+			assert.Empty(t, span.Events(), "completion must not attach events to the parent")
+		})
 	}
-	handler.HandleLLMGenerateContentEnd(ctx, response)
-
-	// End the parent span to flush traces
-	parentSpan.End()
-
-	// Should only have the parent span
-	spans := exporter.Flush()
-	assert.Len(t, spans, 1)
-	assert.Equal(t, "test-parent", spans[0].Name())
-}
-
-func TestHandleLLMErrorWithoutStart(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	tracer := tp.Tracer(t.Name())
-
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	// Create a parent span
-	ctx, parentSpan := tracer.Start(context.Background(), "test-parent")
-
-	// Call Error without Start - should not crash
-	testErr := errors.New("test-error")
-	handler.HandleLLMError(ctx, testErr)
-
-	// End the parent span to flush traces
-	parentSpan.End()
-
-	// Should only have the parent span (no error recorded on non-existent span)
-	spans := exporter.Flush()
-	assert.Len(t, spans, 1)
-	assert.Equal(t, "test-parent", spans[0].Name())
-	assert.NotEqual(t, codes.Error, spans[0].Status().Code)
 }
 
 func TestHandleLLMGenerateContentWithToolCalls(t *testing.T) {
@@ -362,119 +285,4 @@ func TestHandleLLMGenerateContentWithToolCalls(t *testing.T) {
 	assert.Equal(t, "", message["content"]) // Content is empty when tool calls are present
 	assert.Equal(t, "assistant", message["role"])
 	assert.Equal(t, "tool_calls", choice["stop_reason"])
-}
-
-func TestHandleLLMGenerateContentWithPascalCaseTokens(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	tracer := tp.Tracer(t.Name())
-
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	// Create a parent span
-	ctx, parentSpan := tracer.Start(context.Background(), "test-parent")
-
-	// Start an LLM call
-	messages := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeHuman, "Hello!"),
-	}
-	handler.HandleLLMGenerateContentStart(ctx, messages)
-
-	// End with response containing PascalCase token fields (like LangChainGo OpenAI)
-	response := &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
-			{
-				Content:    "Hi there!",
-				StopReason: "stop",
-				GenerationInfo: map[string]any{
-					// PascalCase fields (LangChainGo OpenAI format)
-					"CompletionTokens": 5,
-					"PromptTokens":     10,
-					"TotalTokens":      15,
-				},
-			},
-		},
-	}
-	handler.HandleLLMGenerateContentEnd(ctx, response)
-
-	// End the parent span to flush traces
-	parentSpan.End()
-
-	// Check spans
-	spans := exporter.Flush()
-	require.Len(t, spans, 2)
-
-	// Find the LLM span
-	var llmSpan oteltest.Span
-	for _, span := range spans {
-		if span.Name() == "langchain.llm.generate_content" {
-			llmSpan = span
-			break
-		}
-	}
-	require.NotNil(t, llmSpan, "LLM span not found")
-
-	// Verify metrics are extracted from PascalCase fields
-	metrics := llmSpan.Metrics()
-	assert.Equal(t, float64(10), metrics["prompt_tokens"], "Should extract PromptTokens")
-	assert.Equal(t, float64(5), metrics["completion_tokens"], "Should extract CompletionTokens")
-	assert.Equal(t, float64(15), metrics["tokens"], "Should extract TotalTokens")
-}
-
-func TestHandleLLMGenerateContentWithAnthropicTokens(t *testing.T) {
-	// NOTE: This test uses hacked data because Anthropic token data in GenerationInfo
-	// is not supported in the official langchaingo client yet. Once Anthropic callback
-	// support is merged upstream, this test can be replaced with real data from actual
-	// Anthropic responses.
-	tp, exporter := oteltest.Setup(t)
-	tracer := tp.Tracer(t.Name())
-
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	// Create a parent span
-	ctx, parentSpan := tracer.Start(context.Background(), "test-parent")
-
-	// Start an LLM call
-	messages := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeHuman, "Hello!"),
-	}
-	handler.HandleLLMGenerateContentStart(ctx, messages)
-
-	// End with response containing Anthropic's InputTokens/OutputTokens format
-	response := &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
-			{
-				Content:    "Hi there!",
-				StopReason: "end_turn",
-				GenerationInfo: map[string]any{
-					// Anthropic format (InputTokens/OutputTokens)
-					"InputTokens":  17,
-					"OutputTokens": 4,
-				},
-			},
-		},
-	}
-	handler.HandleLLMGenerateContentEnd(ctx, response)
-
-	// End the parent span to flush traces
-	parentSpan.End()
-
-	// Check spans
-	spans := exporter.Flush()
-	require.Len(t, spans, 2)
-
-	// Find the LLM span
-	var llmSpan oteltest.Span
-	for _, span := range spans {
-		if span.Name() == "langchain.llm.generate_content" {
-			llmSpan = span
-			break
-		}
-	}
-	require.NotNil(t, llmSpan, "LLM span not found")
-
-	// Verify metrics are extracted from Anthropic's InputTokens/OutputTokens fields
-	metrics := llmSpan.Metrics()
-	assert.Equal(t, float64(17), metrics["prompt_tokens"], "Should extract InputTokens as prompt_tokens")
-	assert.Equal(t, float64(4), metrics["completion_tokens"], "Should extract OutputTokens as completion_tokens")
-	assert.Equal(t, float64(21), metrics["tokens"], "Should calculate total tokens")
 }

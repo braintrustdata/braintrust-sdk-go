@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -70,10 +68,10 @@ func TestOpenAIChatCompletions(t *testing.T) {
 	assert.Equal("Chat Completion", ts.Name())
 
 	// Check input field
-	inputRaw := ts.Input()
-	inputJSON, err := json.Marshal(inputRaw)
-	require.NoError(err)
-	assert.Contains(string(inputJSON), "What is 2+2?")
+	assert.Equal([]interface{}{map[string]interface{}{
+		"role": "user", "content": "What is 2+2?",
+	}}, ts.Input())
+	ts.AssertJSONAttrEquals("braintrust.span_attributes", map[string]interface{}{"type": "llm"})
 
 	// Check output field
 	output := ts.Output()
@@ -81,13 +79,16 @@ func TestOpenAIChatCompletions(t *testing.T) {
 	// The output should contain choices array
 	choices, ok := output.([]interface{})
 	require.True(ok, "output should be an array of choices")
-	require.Greater(len(choices), 0, "should have at least one choice")
+	require.Len(choices, 1, "should have exactly one choice")
 
 	// Check first choice has message with content
 	firstChoice, ok := choices[0].(map[string]interface{})
 	require.True(ok, "first choice should be a map")
+	assert.Equal(0.0, firstChoice["index"])
+	assert.Equal("stop", firstChoice["finish_reason"])
 	message, ok := firstChoice["message"].(map[string]interface{})
 	require.True(ok, "choice should have a message")
+	assert.Equal("assistant", message["role"])
 	content, ok := message["content"].(string)
 	require.True(ok, "message should have content string")
 	assert.Contains(content, "4")
@@ -185,6 +186,11 @@ func TestOpenAIChatCompletionsStreaming(t *testing.T) {
 	// Check metadata indicates streaming
 	metadata := ts.Metadata()
 	assert.Equal(true, metadata["stream"])
+	assert.Equal(finalChunk.ID, metadata["id"])
+	assert.Equal("chat.completion.chunk", metadata["object"])
+	assert.Equal(float64(finalChunk.Created), metadata["created"])
+	assert.Equal(finalChunk.SystemFingerprint, metadata["system_fingerprint"])
+	assert.NotEmpty(metadata["system_fingerprint"])
 }
 
 func TestOpenAIChatCompletionsStreamingMultipleChoices(t *testing.T) {
@@ -226,32 +232,6 @@ func TestOpenAIChatCompletionsStreamingMultipleChoices(t *testing.T) {
 		assert.NotEmpty(content)
 	}
 	assert.Equal(map[float64]bool{0: true, 1: true}, seenIndexes, "content from each choice must stay separate, not merged")
-}
-
-func TestOpenAIChatCompletionsStreamingResponseMetadata(t *testing.T) {
-	client, _, exporter := setUpTest(t)
-	assert := assert.New(t)
-	require := require.New(t)
-
-	params := openai.ChatCompletionNewParams{
-		Messages: []openai.ChatCompletionMessageParamUnion{
-			openai.UserMessage("Say hi"),
-		},
-		Model:     testModel,
-		MaxTokens: openai.Int(10),
-	}
-
-	stream := client.Chat.Completions.NewStreaming(context.Background(), params)
-	for stream.Next() {
-	}
-	require.NoError(stream.Err())
-
-	ts := exporter.FlushOne()
-	metadata := ts.Metadata()
-	assert.NotEmpty(metadata["id"])
-	assert.Equal("chat.completion.chunk", metadata["object"])
-	assert.NotEmpty(metadata["created"])
-	assert.NotEmpty(metadata["system_fingerprint"])
 }
 
 func TestOpenAIChatCompletionsStreamingLogprobs(t *testing.T) {
@@ -539,20 +519,54 @@ func TestOpenAIChatCompletionsStreamingToolCalls(t *testing.T) {
 	message, ok := firstChoice["message"].(map[string]interface{})
 	require.True(ok, "choice should have a message")
 
-	// Role should be set (not nil/null)
-	role := message["role"]
-	assert.NotNil(role, "role should be set for tool calls")
-	if role != nil {
-		if roleStr, ok := role.(string); ok {
-			assert.Equal("assistant", roleStr)
-		}
-	}
+	assert.Equal("assistant", message["role"])
+	assert.Equal("tool_calls", firstChoice["finish_reason"])
+	_, ok = message["content"].(string)
+	require.True(ok, "message content should be a string")
+	toolCalls, ok := message["tool_calls"].([]interface{})
+	require.True(ok, "message should have tool calls array")
+	require.Len(toolCalls, 1)
+	toolCall, ok := toolCalls[0].(map[string]interface{})
+	require.True(ok)
+	assert.Equal("function", toolCall["type"])
+	assert.NotEmpty(toolCall["id"])
+	function, ok := toolCall["function"].(map[string]interface{})
+	require.True(ok)
+	assert.Equal("get_weather", function["name"])
+	var arguments map[string]interface{}
+	argumentsJSON, ok := function["arguments"].(string)
+	require.True(ok, "tool arguments should be a JSON string")
+	require.NoError(json.Unmarshal([]byte(argumentsJSON), &arguments))
+	assert.Equal("San Francisco, CA", arguments["location"])
+
+	assert.Equal([]interface{}{map[string]interface{}{
+		"role": "user", "content": "What's the weather in San Francisco?",
+	}}, ts.Input())
+	ts.AssertJSONAttrEquals("braintrust.span_attributes", map[string]interface{}{"type": "llm"})
 
 	// Check metadata contains tools
 	metadata := ts.Metadata()
 	tools, ok := metadata["tools"].([]interface{})
 	require.True(ok, "metadata should contain tools array")
-	assert.Len(tools, 1)
+	require.Len(tools, 1)
+	tool, ok := tools[0].(map[string]interface{})
+	require.True(ok)
+	assert.Equal("function", tool["type"])
+	toolFunction, ok := tool["function"].(map[string]interface{})
+	require.True(ok)
+	assert.Equal("get_weather", toolFunction["name"])
+	assert.Equal("Get weather for a location", toolFunction["description"])
+	assert.Equal(map[string]interface{}{
+		"type": "object",
+		"properties": map[string]interface{}{
+			"location": map[string]interface{}{"type": "string", "description": "The city and state"},
+		},
+		"required": []interface{}{"location"},
+	}, toolFunction["parameters"])
+	metrics := ts.Metrics()
+	assert.Greater(metrics["prompt_tokens"], float64(0))
+	assert.Greater(metrics["completion_tokens"], float64(0))
+	assert.Greater(metrics["tokens"], float64(0))
 }
 
 func TestStreamingToolCallsPostprocessing(t *testing.T) {
@@ -870,357 +884,6 @@ func TestStreamingRefusal(t *testing.T) {
 	require.NotEmpty(refusal)
 }
 
-func TestChatCompletionsStructuredAssertions(t *testing.T) {
-	client, _, exporter := setUpTest(t)
-	require := require.New(t)
-
-	// Test simple chat completion with structured assertions
-	params := openai.ChatCompletionNewParams{
-		Messages: []openai.ChatCompletionMessageParamUnion{
-			openai.UserMessage("What is 2 + 2?"),
-		},
-		Model:       testModel,
-		Temperature: openai.Float(0.5),
-		MaxTokens:   openai.Int(50),
-	}
-
-	resp, err := client.Chat.Completions.New(context.Background(), params)
-	require.NoError(err)
-	require.NotNil(resp)
-
-	// Wait for spans to be exported
-	ts := exporter.FlushOne()
-
-	// Convert span to structured format for assertion
-	spanData := map[string]interface{}{
-		"span_attributes": map[string]interface{}{
-			"name": ts.Name(),
-			"type": "llm",
-		},
-		"input":    ts.Input(),
-		"output":   ts.Output(),
-		"metadata": ts.Metadata(),
-		"metrics":  ts.Metrics(),
-	}
-
-	// Assert the entire structure at once
-	AssertMatchesObject(t, spanData, map[string]interface{}{
-		"span_attributes": map[string]interface{}{
-			"name": "Chat Completion",
-			"type": "llm",
-		},
-		"input": []interface{}{
-			map[string]interface{}{
-				"role":    "user",
-				"content": "What is 2 + 2?",
-			},
-		},
-		"output": []interface{}{
-			map[string]interface{}{
-				"index":         AnyNum(),
-				"message":       AnyObj(),
-				"finish_reason": AnyStr(),
-			},
-		},
-		"metadata": map[string]interface{}{
-			"provider":    "openai",
-			"endpoint":    "/v1/chat/completions",
-			"model":       StrContains(testModel),
-			"temperature": 0.5,
-			"max_tokens":  50.0, // JSON numbers are floats
-		},
-		"metrics": map[string]interface{}{
-			"prompt_tokens":     NumGT(0),
-			"completion_tokens": NumGT(0),
-			"tokens":            NumGT(0),
-		},
-	})
-}
-
-func TestToolCallsStructuredAssertions(t *testing.T) {
-	client, _, exporter := setUpTest(t)
-	require := require.New(t)
-
-	// Test streaming tool calls with structured assertions
-	params := openai.ChatCompletionNewParams{
-		Messages: []openai.ChatCompletionMessageParamUnion{
-			openai.UserMessage("What's the weather in San Francisco?"),
-		},
-		Model: testModel,
-		Tools: []openai.ChatCompletionToolParam{
-			{
-				Type: "function",
-				Function: openai.FunctionDefinitionParam{
-					Name:        "get_weather",
-					Description: openai.String("Get weather for a location"),
-					Parameters: openai.FunctionParameters{
-						"type": "object",
-						"properties": map[string]interface{}{
-							"location": map[string]interface{}{
-								"type":        "string",
-								"description": "The city and state",
-							},
-						},
-						"required": []string{"location"},
-					},
-				},
-			},
-		},
-		StreamOptions: openai.ChatCompletionStreamOptionsParam{
-			IncludeUsage: openai.Bool(true),
-		},
-	}
-
-	stream := client.Chat.Completions.NewStreaming(context.Background(), params)
-	for stream.Next() {
-		// Just consume the stream
-	}
-	require.NoError(stream.Err())
-
-	// Wait for spans to be exported
-	ts := exporter.FlushOne()
-
-	// Convert span to structured format for assertion
-	spanData := map[string]interface{}{
-		"span_attributes": map[string]interface{}{
-			"name": ts.Name(),
-			"type": "llm",
-		},
-		"input":    ts.Input(),
-		"output":   ts.Output(),
-		"metadata": ts.Metadata(),
-		"metrics":  ts.Metrics(),
-	}
-
-	// Assert the entire tool calls structure at once
-	AssertMatchesObject(t, spanData, map[string]interface{}{
-		"span_attributes": map[string]interface{}{
-			"name": "Chat Completion",
-			"type": "llm",
-		},
-		"input": []interface{}{
-			map[string]interface{}{
-				"role":    "user",
-				"content": "What's the weather in San Francisco?",
-			},
-		},
-		"output": []interface{}{
-			map[string]interface{}{
-				"index": 0.0, // JSON numbers are floats
-				"message": map[string]interface{}{
-					"role":       "assistant",
-					"content":    AnyStr(), // Could be empty for tool calls
-					"tool_calls": AnyArr(), // Should have tool calls array
-				},
-				"finish_reason": AnyStr(),
-			},
-		},
-		"metadata": map[string]interface{}{
-			"provider": "openai",
-			"endpoint": "/v1/chat/completions",
-			"model":    StrContains(testModel),
-			"tools": []interface{}{
-				map[string]interface{}{
-					"type": "function",
-					"function": map[string]interface{}{
-						"name":        "get_weather",
-						"description": "Get weather for a location",
-						"parameters":  AnyObj(),
-					},
-				},
-			},
-		},
-		"metrics": map[string]interface{}{
-			"prompt_tokens":     NumGT(0),
-			"completion_tokens": NumGT(0),
-			"tokens":            NumGT(0),
-		},
-	})
-}
-
-// Matcher interface for flexible value matching
-type Matcher interface {
-	Matches(value interface{}) bool
-	String() string
-}
-
-// AnyString matches any string value
-type AnyString struct{}
-
-func (m AnyString) Matches(value interface{}) bool {
-	_, ok := value.(string)
-	return ok
-}
-
-func (m AnyString) String() string { return "any(string)" }
-
-// AnyNumber matches any numeric value (int, float, etc.)
-type AnyNumber struct{}
-
-func (m AnyNumber) Matches(value interface{}) bool {
-	switch value.(type) {
-	case int, int32, int64, float32, float64:
-		return true
-	default:
-		return false
-	}
-}
-
-func (m AnyNumber) String() string { return "any(number)" }
-
-// AnyArray matches any array/slice
-type AnyArray struct{}
-
-func (m AnyArray) Matches(value interface{}) bool {
-	v := reflect.ValueOf(value)
-	return v.Kind() == reflect.Slice || v.Kind() == reflect.Array
-}
-
-func (m AnyArray) String() string { return "any(array)" }
-
-// AnyObject matches any map/object
-type AnyObject struct{}
-
-func (m AnyObject) Matches(value interface{}) bool {
-	v := reflect.ValueOf(value)
-	return v.Kind() == reflect.Map
-}
-
-func (m AnyObject) String() string { return "any(object)" }
-
-// StringContaining matches strings that contain a substring
-type StringContaining struct {
-	Substring string
-}
-
-func (m StringContaining) Matches(value interface{}) bool {
-	if str, ok := value.(string); ok {
-		return strings.Contains(str, m.Substring)
-	}
-	return false
-}
-
-func (m StringContaining) String() string { return fmt.Sprintf("string_containing(%q)", m.Substring) }
-
-// NumberGreaterThan matches numbers greater than a threshold
-type NumberGreaterThan struct {
-	Threshold float64
-}
-
-func (m NumberGreaterThan) Matches(value interface{}) bool {
-	switch v := value.(type) {
-	case int:
-		return float64(v) > m.Threshold
-	case int32:
-		return float64(v) > m.Threshold
-	case int64:
-		return float64(v) > m.Threshold
-	case float32:
-		return float64(v) > m.Threshold
-	case float64:
-		return v > m.Threshold
-	default:
-		return false
-	}
-}
-
-func (m NumberGreaterThan) String() string { return fmt.Sprintf("number_gt(%.2f)", m.Threshold) }
-
-// AssertMatchesObject asserts that actual matches the expected structure
-// Similar to Python's assert_matches_object and TypeScript's toMatchObject
-func AssertMatchesObject(t *testing.T, actual interface{}, expected interface{}) {
-	t.Helper()
-	if !matchesObject(actual, expected, "") {
-		t.Errorf("Object does not match expected structure")
-	}
-}
-
-func matchesObject(actual, expected interface{}, path string) bool {
-	// Handle matchers
-	if matcher, ok := expected.(Matcher); ok {
-		if !matcher.Matches(actual) {
-			fmt.Printf("MISMATCH at %s: expected %s, got %v (%T)\n", path, matcher.String(), actual, actual)
-			return false
-		}
-		return true
-	}
-
-	// Handle exact values
-	if reflect.DeepEqual(actual, expected) {
-		return true
-	}
-
-	// Handle maps/objects - support both map[string]interface{} and map[string]float64
-	expectedMap, expectedIsMap := expected.(map[string]interface{})
-
-	var actualMap map[string]interface{}
-	var actualIsMap bool
-
-	// Handle different map types
-	switch v := actual.(type) {
-	case map[string]interface{}:
-		actualMap = v
-		actualIsMap = true
-	case map[string]float64:
-		// Convert map[string]float64 to map[string]interface{}
-		actualMap = make(map[string]interface{})
-		for key, val := range v {
-			actualMap[key] = val
-		}
-		actualIsMap = true
-	}
-
-	if expectedIsMap && actualIsMap {
-		// Partial matching: check that all expected keys exist and match
-		// (actual map can have additional keys not specified in expected)
-		for key, expectedValue := range expectedMap {
-			actualValue, exists := actualMap[key]
-			if !exists {
-				fmt.Printf("MISMATCH at %s.%s: key missing in actual\n", path, key)
-				return false
-			}
-			keyPath := path + "." + key
-			if path == "" {
-				keyPath = key
-			}
-			if !matchesObject(actualValue, expectedValue, keyPath) {
-				return false
-			}
-		}
-		return true
-	}
-
-	// Handle arrays/slices
-	expectedSlice := reflect.ValueOf(expected)
-	actualSlice := reflect.ValueOf(actual)
-
-	if expectedSlice.Kind() == reflect.Slice && actualSlice.Kind() == reflect.Slice {
-		if expectedSlice.Len() != actualSlice.Len() {
-			fmt.Printf("MISMATCH at %s: slice length differs, expected %d, got %d\n", path, expectedSlice.Len(), actualSlice.Len())
-			return false
-		}
-
-		for i := 0; i < expectedSlice.Len(); i++ {
-			indexPath := fmt.Sprintf("%s[%d]", path, i)
-			if !matchesObject(actualSlice.Index(i).Interface(), expectedSlice.Index(i).Interface(), indexPath) {
-				return false
-			}
-		}
-		return true
-	}
-
-	fmt.Printf("MISMATCH at %s: expected %v (%T), got %v (%T)\n", path, expected, expected, actual, actual)
-	return false
-}
-
-// Convenience matcher constructors
-func AnyStr() Matcher              { return AnyString{} }
-func AnyNum() Matcher              { return AnyNumber{} }
-func AnyArr() Matcher              { return AnyArray{} }
-func AnyObj() Matcher              { return AnyObject{} }
-func StrContains(s string) Matcher { return StringContaining{s} }
-func NumGT(n float64) Matcher      { return NumberGreaterThan{n} }
-
 // assertChatSpanValid asserts all the common properties of a chat completion span are valid.
 func assertChatSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.TimeRange) {
 	t.Helper()
@@ -1233,7 +896,7 @@ func assertChatSpanValid(t *testing.T, span oteltest.Span, timeRange oteltest.Ti
 	metadata := span.Metadata()
 	assert.Equal("openai", metadata["provider"])
 	assert.Equal("/v1/chat/completions", metadata["endpoint"])
-	assert.Contains(testModel, metadata["model"])
+	assert.Equal(testModel, metadata["model"])
 
 	// validate metrics
 	metrics := span.Metrics()
