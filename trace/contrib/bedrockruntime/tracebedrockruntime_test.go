@@ -444,64 +444,60 @@ func makeRedPNG(t *testing.T, w, h int) []byte {
 }
 
 func TestConverseReasoningOutput(t *testing.T) {
-	client, exporter := setUpTest(t)
+	for _, tc := range []struct {
+		name      string
+		streaming bool
+		spanName  string
+	}{
+		{name: "non_streaming", spanName: "bedrock.converse"},
+		{name: "streaming", streaming: true, spanName: "bedrock.converse-stream"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			client, exporter := setUpTest(t)
+			messages := []types.Message{{
+				Role:    types.ConversationRoleUser,
+				Content: []types.ContentBlock{&types.ContentBlockMemberText{Value: "What is 27 * 453?"}},
+			}}
+			inference := &types.InferenceConfiguration{
+				MaxTokens:   aws.Int32(4000),
+				Temperature: aws.Float32(1.0),
+			}
+			thinking := document.NewLazyDocument(map[string]any{
+				"thinking": map[string]any{"type": "enabled", "budget_tokens": 2000},
+			})
+			timer := oteltest.NewTimer()
+			if tc.streaming {
+				out, err := client.ConverseStream(context.Background(), &bedrockruntime.ConverseStreamInput{
+					ModelId:                      aws.String(testModelID),
+					Messages:                     messages,
+					InferenceConfig:              inference,
+					AdditionalModelRequestFields: thinking,
+				})
+				require.NoError(t, err)
+				for range out.GetStream().Events() { //nolint:revive
+					// Drain the response so the reasoning output is finalized.
+				}
+				require.NoError(t, out.GetStream().Err())
+				require.NoError(t, out.GetStream().Close())
+			} else {
+				_, err := client.Converse(context.Background(), &bedrockruntime.ConverseInput{
+					ModelId:                      aws.String(testModelID),
+					Messages:                     messages,
+					InferenceConfig:              inference,
+					AdditionalModelRequestFields: thinking,
+				})
+				require.NoError(t, err)
+			}
 
-	_, err := client.Converse(context.Background(), &bedrockruntime.ConverseInput{
-		ModelId: aws.String(testModelID),
-		Messages: []types.Message{{
-			Role:    types.ConversationRoleUser,
-			Content: []types.ContentBlock{&types.ContentBlockMemberText{Value: "What is 27 * 453?"}},
-		}},
-		InferenceConfig: &types.InferenceConfiguration{
-			MaxTokens:   aws.Int32(4000),
-			Temperature: aws.Float32(1.0),
-		},
-		AdditionalModelRequestFields: document.NewLazyDocument(map[string]any{
-			"thinking": map[string]any{"type": "enabled", "budget_tokens": 2000},
-		}),
-	})
-	require.NoError(t, err)
-
-	span := exporter.FlushOne()
-	assert.NotContains(t, span.Metadata(), "additional_model_request_fields")
-	output := span.Attr("braintrust.output_json").String()
-	// Claude with thinking enabled returns a reasoningContent block and a text
-	// answer. The model may format 12231 with or without a thousands separator,
-	// so check for the distinctive "231" tail.
-	assert.Contains(t, output, `"type":"reasoning"`)
-	assert.Contains(t, output, `"type":"text"`)
-	assert.Regexp(t, `12[,]?231`, output)
-}
-
-func TestConverseStreamReasoning(t *testing.T) {
-	client, exporter := setUpTest(t)
-
-	out, err := client.ConverseStream(context.Background(), &bedrockruntime.ConverseStreamInput{
-		ModelId: aws.String(testModelID),
-		Messages: []types.Message{{
-			Role:    types.ConversationRoleUser,
-			Content: []types.ContentBlock{&types.ContentBlockMemberText{Value: "What is 27 * 453?"}},
-		}},
-		InferenceConfig: &types.InferenceConfiguration{
-			MaxTokens:   aws.Int32(4000),
-			Temperature: aws.Float32(1.0),
-		},
-		AdditionalModelRequestFields: document.NewLazyDocument(map[string]any{
-			"thinking": map[string]any{"type": "enabled", "budget_tokens": 2000},
-		}),
-	})
-	require.NoError(t, err)
-
-	for range out.GetStream().Events() { //nolint:revive
-		// drain
+			span := exporter.FlushOne()
+			assertSpanValid(t, span, timer.Tick(), tc.spanName, tc.streaming)
+			assert.NotContains(t, span.Metadata(), "additional_model_request_fields")
+			output := span.Attr("braintrust.output_json").String()
+			assert.Contains(t, output, `"type":"reasoning"`)
+			assert.Contains(t, output, `"type":"text"`)
+			assert.Regexp(t, `12[,]?231`, output)
+		})
 	}
-	require.NoError(t, out.GetStream().Close())
-
-	span := exporter.FlushOne()
-	output := span.Attr("braintrust.output_json").String()
-	assert.Contains(t, output, `"type":"reasoning"`)
-	assert.Contains(t, output, `"type":"text"`)
-	assert.Regexp(t, `12[,]?231`, output)
 }
 
 func TestInvokeModelClaude(t *testing.T) {

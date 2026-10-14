@@ -14,101 +14,73 @@ import (
 
 const testEmbeddingModel = "gemini-embedding-001"
 
-func TestEmbedContentSingle(t *testing.T) {
-	client, exporter := setUpTest(t)
-
-	timer := oteltest.NewTimer()
-	resp, err := client.Models.EmbedContent(
-		context.Background(),
-		testEmbeddingModel,
-		genai.Text("The quick brown fox jumps over the lazy dog"),
-		nil,
-	)
-	timeRange := timer.Tick()
-	require.NoError(t, err)
-	require.NotNil(t, resp)
-	require.NotEmpty(t, resp.Embeddings)
-
-	ts := exporter.FlushOne()
-	ts.AssertInTimeRange(timeRange)
-	ts.AssertNameIs("embed_content")
-	assert.Equal(t, codes.Unset, ts.Stub.Status.Code)
-
-	ts.AssertJSONAttrEquals("braintrust.span_attributes", map[string]any{"type": "llm"})
-
-	assert.Equal(t, map[string]any{
-		"inputs": []any{
-			map[string]any{"content": "The quick brown fox jumps over the lazy dog"},
-		},
-	}, ts.Input())
-	assert.Equal(t, map[string]any{"count": float64(1)}, ts.Output())
-
-	metadata := ts.Metadata()
-	assert.Equal(t, "google", metadata["provider"])
-	assert.Equal(t, testEmbeddingModel, metadata["model"])
-}
-
-func TestEmbedContentBatch(t *testing.T) {
-	client, exporter := setUpTest(t)
-
-	contents := []*genai.Content{
-		{Parts: []*genai.Part{{Text: "hello world"}}},
-		{Parts: []*genai.Part{{Text: "goodbye world"}}},
-		{Parts: []*genai.Part{{Text: "braintrust tracing"}}},
-	}
-
-	resp, err := client.Models.EmbedContent(
-		context.Background(),
-		testEmbeddingModel,
-		contents,
-		nil,
-	)
-	require.NoError(t, err)
-	require.NotNil(t, resp)
-	require.Len(t, resp.Embeddings, 3)
-
-	ts := exporter.FlushOne()
-	ts.AssertNameIs("embed_content")
-
-	assert.Equal(t, map[string]any{
-		"inputs": []any{
-			map[string]any{"content": "hello world"},
-			map[string]any{"content": "goodbye world"},
-			map[string]any{"content": "braintrust tracing"},
-		},
-	}, ts.Input())
-	assert.Equal(t, map[string]any{"count": float64(3)}, ts.Output())
-}
-
-func TestEmbedContentWithTaskType(t *testing.T) {
-	client, exporter := setUpTest(t)
-
+func TestEmbedContent(t *testing.T) {
 	outputDimensions := int32(256)
-	resp, err := client.Models.EmbedContent(
-		context.Background(),
-		testEmbeddingModel,
-		genai.Text("What is the capital of France?"),
-		&genai.EmbedContentConfig{
-			TaskType:             "RETRIEVAL_QUERY",
-			OutputDimensionality: &outputDimensions,
+	for _, tc := range []struct {
+		name      string
+		contents  []*genai.Content
+		config    *genai.EmbedContentConfig
+		wantInput map[string]any
+		wantCount int
+	}{
+		{
+			name:     "single",
+			contents: genai.Text("The quick brown fox jumps over the lazy dog"),
+			wantInput: map[string]any{"inputs": []any{
+				map[string]any{"content": "The quick brown fox jumps over the lazy dog"},
+			}},
+			wantCount: 1,
 		},
-	)
-	require.NoError(t, err)
-	require.NotNil(t, resp)
-
-	ts := exporter.FlushOne()
-	assert.Equal(t, map[string]any{
-		"inputs": []any{
-			map[string]any{"content": "What is the capital of France?"},
+		{
+			name: "batch",
+			contents: []*genai.Content{
+				{Parts: []*genai.Part{{Text: "hello world"}}},
+				{Parts: []*genai.Part{{Text: "goodbye world"}}},
+				{Parts: []*genai.Part{{Text: "braintrust tracing"}}},
+			},
+			wantInput: map[string]any{"inputs": []any{
+				map[string]any{"content": "hello world"},
+				map[string]any{"content": "goodbye world"},
+				map[string]any{"content": "braintrust tracing"},
+			}},
+			wantCount: 3,
 		},
-		"output_dimensions": float64(256),
-	}, ts.Input())
+		{
+			name:     "task_type_and_dimensions",
+			contents: genai.Text("What is the capital of France?"),
+			config: &genai.EmbedContentConfig{
+				TaskType:             "RETRIEVAL_QUERY",
+				OutputDimensionality: &outputDimensions,
+			},
+			wantInput: map[string]any{
+				"inputs":            []any{map[string]any{"content": "What is the capital of France?"}},
+				"output_dimensions": float64(256),
+			},
+			wantCount: 1,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			client, exporter := setUpTest(t)
+			timer := oteltest.NewTimer()
+			resp, err := client.Models.EmbedContent(context.Background(), testEmbeddingModel, tc.contents, tc.config)
+			timeRange := timer.Tick()
+			require.NoError(t, err)
+			require.NotNil(t, resp)
+			require.Len(t, resp.Embeddings, tc.wantCount)
 
-	metadata := ts.Metadata()
-	assert.Equal(t, map[string]any{
-		"provider": "google",
-		"model":    testEmbeddingModel,
-	}, metadata)
+			span := exporter.FlushOne()
+			span.AssertInTimeRange(timeRange)
+			span.AssertNameIs("embed_content")
+			assert.Equal(t, codes.Unset, span.Status().Code)
+			span.AssertJSONAttrEquals("braintrust.span_attributes", map[string]any{"type": "llm"})
+			assert.Equal(t, tc.wantInput, span.Input())
+			assert.Equal(t, map[string]any{"count": float64(tc.wantCount)}, span.Output())
+			assert.Equal(t, map[string]any{
+				"provider": "google",
+				"model":    testEmbeddingModel,
+			}, span.Metadata())
+		})
+	}
 }
 
 func TestCanonicalEmbeddingInput(t *testing.T) {

@@ -6,53 +6,9 @@ import (
 	"testing"
 
 	"github.com/tmc/langchaingo/llms"
-	"go.opentelemetry.io/otel/trace"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 )
-
-// TestContextAnalysis inspects what's in the context during callbacks
-func TestContextAnalysis(t *testing.T) {
-	tp, _ := oteltest.Setup(t)
-	tracer := tp.Tracer(t.Name())
-
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	// Create a parent span
-	ctx := context.Background()
-	ctx, parentSpan := tracer.Start(ctx, "test-parent")
-	defer parentSpan.End()
-
-	fmt.Printf("Parent span ID: %s\n", parentSpan.SpanContext().SpanID().String())
-	fmt.Printf("Parent trace ID: %s\n", parentSpan.SpanContext().TraceID().String())
-
-	// Start a chain
-	handler.HandleChainStart(ctx, map[string]any{"test": "chain"})
-
-	// Check what span is in the context
-	spanFromCtx := trace.SpanFromContext(ctx)
-	fmt.Printf("Span from ctx after chain start: %s (parent? %v)\n",
-		spanFromCtx.SpanContext().SpanID().String(),
-		spanFromCtx.SpanContext().SpanID() == parentSpan.SpanContext().SpanID())
-
-	// Now start an LLM call with the same context
-	messages := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeHuman, "Hello!"),
-	}
-	handler.HandleLLMGenerateContentStart(ctx, messages)
-
-	// Check what span is in the context now
-	spanFromCtx2 := trace.SpanFromContext(ctx)
-	fmt.Printf("Span from ctx after LLM start: %s (same as before? %v)\n",
-		spanFromCtx2.SpanContext().SpanID().String(),
-		spanFromCtx2.SpanContext().SpanID() == spanFromCtx.SpanContext().SpanID())
-
-	// Clean up
-	handler.HandleLLMGenerateContentEnd(ctx, &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{{Content: "Hi"}},
-	})
-	handler.HandleChainEnd(ctx, map[string]any{"result": "done"})
-}
 
 // TestNestedCalls tests that nested calls (chain → llm) work correctly
 func TestNestedCalls(t *testing.T) {

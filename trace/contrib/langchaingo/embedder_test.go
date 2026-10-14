@@ -109,31 +109,28 @@ func TestWrapEmbedderEmbedQuery(t *testing.T) {
 	assert.Equal(t, "langchain", metadata["provider"])
 }
 
-func TestWrapEmbedderEmbedDocumentsError(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
+func TestWrapEmbedderErrors(t *testing.T) {
+	for _, method := range []string{"embed_documents", "embed_query"} {
+		t.Run(method, func(t *testing.T) {
+			tp, exporter := oteltest.Setup(t)
+			wantErr := errors.New("embedding failed")
+			wrapped := WrapEmbedder(&fakeEmbedder{callErr: wantErr}, WithEmbedderTracerProvider(tp))
 
-	wantErr := errors.New("rate limit exceeded")
-	wrapped := WrapEmbedder(&fakeEmbedder{callErr: wantErr}, WithEmbedderTracerProvider(tp))
+			var err error
+			if method == "embed_documents" {
+				_, err = wrapped.EmbedDocuments(context.Background(), []string{"x"})
+			} else {
+				_, err = wrapped.EmbedQuery(context.Background(), "q")
+			}
+			require.ErrorIs(t, err, wantErr)
 
-	_, err := wrapped.EmbedDocuments(context.Background(), []string{"x"})
-	require.Error(t, err)
-	assert.Equal(t, wantErr, err)
-
-	span := exporter.FlushOne()
-	span.AssertNameIs("langchain.embedder.embed_documents")
-	assert.Equal(t, codes.Error, span.Stub.Status.Code)
-}
-
-func TestWrapEmbedderEmbedQueryError(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-
-	wantErr := errors.New("server error")
-	wrapped := WrapEmbedder(&fakeEmbedder{callErr: wantErr}, WithEmbedderTracerProvider(tp))
-
-	_, err := wrapped.EmbedQuery(context.Background(), "q")
-	require.Error(t, err)
-
-	span := exporter.FlushOne()
-	span.AssertNameIs("langchain.embedder.embed_query")
-	assert.Equal(t, codes.Error, span.Stub.Status.Code)
+			span := exporter.FlushOne()
+			span.AssertNameIs("langchain.embedder." + method)
+			assert.Equal(t, codes.Error, span.Status().Code)
+			assert.Equal(t, wantErr.Error(), span.Status().Description)
+			events := span.Events()
+			require.Len(t, events, 1)
+			assert.Equal(t, "exception", events[0].Name)
+		})
+	}
 }

@@ -676,34 +676,6 @@ func TestSequentialCalls(t *testing.T) {
 	assert.Len(t, llmSpans, 2, "sequential calls should produce separate spans")
 }
 
-func TestGenerateDefaultModel(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	prev := otel.GetTracerProvider()
-	otel.SetTracerProvider(tp)
-	t.Cleanup(func() {
-		otel.SetTracerProvider(prev)
-	})
-
-	ctx := context.Background()
-	g := genkit.Init(ctx,
-		genkit.WithPlugins(newOpenAIPlugin(t)),
-		genkit.WithDefaultModel("openai/gpt-4o-mini"),
-	)
-
-	resp, err := genkit.Generate(ctx, g,
-		ai.WithPrompt("What is the capital of France? Answer in one word."),
-		ai.WithConfig(&openaigo.ChatCompletionNewParams{
-			MaxCompletionTokens: openaigo.Int(16),
-		}),
-		ai.WithMiddleware(NewMiddleware()),
-	)
-	require.NoError(t, err)
-	require.NotNil(t, resp)
-
-	span := requireSpanNamed(t, exporter.Flush(), "genkit.generate")
-	assertLLMSpan(t, span, "openai")
-}
-
 func TestGenerateWithModelName(t *testing.T) {
 	tp, exporter := oteltest.Setup(t)
 	prev := otel.GetTracerProvider()

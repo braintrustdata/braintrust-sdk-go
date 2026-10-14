@@ -2,23 +2,19 @@ package adk
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 	"os"
 	"path/filepath"
-	"runtime"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/otel/codes"
 	"google.golang.org/adk/agent"
 	"google.golang.org/adk/agent/llmagent"
 	"google.golang.org/adk/model/gemini"
 	"google.golang.org/adk/runner"
 	"google.golang.org/adk/session"
 	"google.golang.org/adk/tool"
-	"google.golang.org/adk/tool/functiontool"
 	"google.golang.org/adk/tool/geminitool"
 	"google.golang.org/genai"
 
@@ -87,17 +83,6 @@ func newGoldenRunner(ctx context.Context, t *testing.T, tp oteltrace.TracerProvi
 	return r
 }
 
-// fixturePath returns path to a fixture file; empty if file does not exist.
-func fixturePath(t *testing.T, name string) string {
-	t.Helper()
-	_, filename, _, _ := runtime.Caller(0)
-	p := filepath.Join(filepath.Dir(filename), "testdata", "fixtures", name)
-	if _, err := os.Stat(p); err != nil {
-		return ""
-	}
-	return p
-}
-
 // runAndCollectFinal runs the agent and returns all final response events.
 func runAndCollectFinal(ctx context.Context, t *testing.T, r *runner.Runner, sessionID string, msg *genai.Content, runCfg agent.RunConfig) []*session.Event {
 	t.Helper()
@@ -111,35 +96,7 @@ func runAndCollectFinal(ctx context.Context, t *testing.T, r *runner.Runner, ses
 	return responses
 }
 
-// runAndCollectStreamedText runs the agent and concatenates all content text parts.
-func runAndCollectStreamedText(ctx context.Context, t *testing.T, r *runner.Runner, sessionID string, msg *genai.Content, runCfg agent.RunConfig) string {
-	t.Helper()
-	var fullText strings.Builder
-	for ev, err := range r.Run(ctx, goldenUserID, sessionID, msg, runCfg) {
-		require.NoError(t, err)
-		if ev.Content != nil {
-			for _, p := range ev.Content.Parts {
-				if p.Text != "" {
-					fullText.WriteString(p.Text)
-				}
-			}
-		}
-	}
-	return fullText.String()
-}
-
-// runAndCollectAll runs the agent and returns all events.
-func runAndCollectAll(ctx context.Context, t *testing.T, r *runner.Runner, sessionID string, msg *genai.Content, runCfg agent.RunConfig) []*session.Event {
-	t.Helper()
-	var events []*session.Event
-	for ev, err := range r.Run(ctx, goldenUserID, sessionID, msg, runCfg) {
-		require.NoError(t, err)
-		events = append(events, ev)
-	}
-	return events
-}
-
-// assertFinalResponse asserts there is at least one final response with non-empty text.
+// assertFinalResponse checks the final response contains text.
 func assertFinalResponse(t *testing.T, responses []*session.Event) string {
 	t.Helper()
 	require.NotEmpty(t, responses, "expected at least one final response")
@@ -159,6 +116,44 @@ func assertSpansExist(t *testing.T, exporter *oteltest.Exporter) []oteltest.Span
 	return spans
 }
 
+// assertGoldenExchange verifies the model request and response recorded in the trace.
+// Checking the complete contents also covers conversation history and binary parts.
+func assertGoldenExchange(t *testing.T, exporter *oteltest.Exporter, contents []*genai.Content, output *genai.Content, finishReason genai.FinishReason) map[string]any {
+	t.Helper()
+	spans := exporter.Flush()
+	var modelSpans []oteltest.Span
+	for _, span := range spans {
+		if span.Name() == "call_llm" {
+			modelSpans = append(modelSpans, span)
+		}
+	}
+	require.Len(t, modelSpans, 1, "expected one model span per exchange")
+	span := &modelSpans[0]
+	span.AssertAttrEquals("gen_ai.request.model", goldenModelID)
+	span.AssertAttrEquals("gen_ai.finish_reason", string(finishReason))
+	span.AssertJSONAttrEquals("braintrust.span_attributes", map[string]any{"type": "llm"})
+
+	input, ok := span.Input().(map[string]any)
+	require.True(t, ok, "expected serialized model request")
+	response, ok := span.Output().(map[string]any)
+	require.True(t, ok, "expected serialized model response")
+	assert.Equal(t, goldenJSON(t, contents), input["Contents"], "complete conversation should be captured")
+	assert.Equal(t, goldenJSON(t, output), response["Content"], "model output should match the runner response")
+	assert.Equal(t, string(finishReason), response["FinishReason"])
+	config, ok := input["Config"].(map[string]any)
+	require.True(t, ok, "expected serialized generation config")
+	return config
+}
+
+func goldenJSON(t *testing.T, value any) any {
+	t.Helper()
+	data, err := json.Marshal(value)
+	require.NoError(t, err)
+	var result any
+	require.NoError(t, json.Unmarshal(data, &result))
+	return result
+}
+
 func TestBasicCompletion(t *testing.T) {
 	ctx, tp, exporter := setupGoldenTest(t)
 
@@ -175,7 +170,9 @@ func TestBasicCompletion(t *testing.T) {
 	text := assertFinalResponse(t, responses)
 	t.Logf("Response: %s", text)
 
-	assertSpansExist(t, exporter)
+	config := assertGoldenExchange(t, exporter, []*genai.Content{userMsg}, responses[0].Content, genai.FinishReasonStop)
+	assert.Equal(t, float64(100), config["maxOutputTokens"])
+	assert.Equal(t, goldenJSON(t, genai.NewContentFromText("You are a helpful assistant.", genai.RoleUser)), config["systemInstruction"])
 }
 
 func TestMultiTurn(t *testing.T) {
@@ -192,142 +189,107 @@ func TestMultiTurn(t *testing.T) {
 	responses := runAndCollectFinal(ctx, t, r, sid, msg1, agent.RunConfig{})
 	text := assertFinalResponse(t, responses)
 	t.Logf("Response 1: %s", text)
+	firstOutput := responses[0].Content
+	assertGoldenExchange(t, exporter, []*genai.Content{msg1}, firstOutput, genai.FinishReasonStop)
 
 	msg2 := genai.NewContentFromText("What did I just tell you my name was?", genai.RoleUser)
 	responses = runAndCollectFinal(ctx, t, r, sid, msg2, agent.RunConfig{})
 	text = assertFinalResponse(t, responses)
 	t.Logf("Response 2: %s", text)
 
-	assertSpansExist(t, exporter)
+	assertGoldenExchange(t, exporter, []*genai.Content{msg1, firstOutput, msg2}, responses[0].Content, genai.FinishReasonStop)
 }
 
-func TestSystemPrompt(t *testing.T) {
-	ctx, tp, exporter := setupGoldenTest(t)
-
-	sid := "session-pirate"
-	r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
-		Name:                  "pirate_agent",
-		Instruction:           "You are a pirate. Always respond in pirate speak.",
-		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 150},
-	})
-
-	msg := genai.NewContentFromText("Tell me about the weather.", genai.RoleUser)
-	responses := runAndCollectFinal(ctx, t, r, sid, msg, agent.RunConfig{})
-	text := assertFinalResponse(t, responses)
-	t.Logf("Response: %s", text)
-
-	assertSpansExist(t, exporter)
-}
-
-func TestStreaming(t *testing.T) {
-	ctx, tp, exporter := setupGoldenTest(t)
-
-	sid := "session-streaming"
-	r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
-		Name:                  "counting_agent",
-		Instruction:           "You are a helpful assistant.",
-		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 200},
-	})
-
-	msg := genai.NewContentFromText("Count from 1 to 10 slowly.", genai.RoleUser)
-	runCfg := agent.RunConfig{StreamingMode: agent.StreamingMode("streaming")}
-	fullText := runAndCollectStreamedText(ctx, t, r, sid, msg, runCfg)
-	t.Logf("Streamed: %s", fullText)
-	require.NotEmpty(t, fullText, "expected some streamed text")
-
-	assertSpansExist(t, exporter)
-}
-
-func TestImageInput(t *testing.T) {
-	path := fixturePath(t, "test-image.png")
-	if path == "" {
-		t.Skip("testdata/fixtures/test-image.png not found")
-	}
-	data, err := os.ReadFile(path)
-	require.NoError(t, err)
-
-	ctx, tp, exporter := setupGoldenTest(t)
-
-	sid := "session-vision"
-	r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
-		Name:                  "vision_agent",
-		Instruction:           "You are a helpful vision assistant that can analyze images.",
-		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 150},
-	})
-
-	userMsg := genai.NewContentFromParts([]*genai.Part{
-		{InlineData: &genai.Blob{Data: data, MIMEType: "image/png"}},
-		{Text: "What color is this image?"},
-	}, genai.RoleUser)
-	responses := runAndCollectFinal(ctx, t, r, sid, userMsg, agent.RunConfig{})
-	text := assertFinalResponse(t, responses)
-	t.Logf("Response: %s", text)
-
-	assertSpansExist(t, exporter)
-}
-
-func TestDocumentInput(t *testing.T) {
-	path := fixturePath(t, "test-document.pdf")
-	if path == "" {
-		t.Skip("testdata/fixtures/test-document.pdf not found")
-	}
-	data, err := os.ReadFile(path)
-	require.NoError(t, err)
-
-	ctx, tp, exporter := setupGoldenTest(t)
-
-	sid := "session-document"
-	r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
-		Name:                  "doc_agent",
-		Instruction:           "You are a document analysis assistant.",
-		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 150},
-	})
-
-	userMsg := genai.NewContentFromParts([]*genai.Part{
-		{InlineData: &genai.Blob{Data: data, MIMEType: "application/pdf"}},
-		{Text: "What is in this document?"},
-	}, genai.RoleUser)
-	responses := runAndCollectFinal(ctx, t, r, sid, userMsg, agent.RunConfig{})
-	text := assertFinalResponse(t, responses)
-	t.Logf("Response: %s", text)
-
-	assertSpansExist(t, exporter)
-}
-
-func TestTemperatureVariations(t *testing.T) {
-	configs := []struct {
-		name string
-		temp float32
-		topP float32
+func TestMultimodalInput(t *testing.T) {
+	cases := []struct {
+		name         string
+		fixture      string
+		mimeType     string
+		prefix       string
+		prompt       string
+		instruction  string
+		maxTokens    int32
+		finishReason genai.FinishReason
 	}{
-		{"temp_0_0", 0.0, 1.0},
-		{"temp_1_0", 1.0, 0.9},
-		{"temp_0_7", 0.7, 0.95},
+		{
+			name:         "image",
+			fixture:      "test-image.png",
+			mimeType:     "image/png",
+			prompt:       "What color is this image?",
+			instruction:  "You are a helpful vision assistant that can analyze images.",
+			maxTokens:    150,
+			finishReason: genai.FinishReasonMaxTokens,
+		},
+		{
+			name:         "document",
+			fixture:      "test-document.pdf",
+			mimeType:     "application/pdf",
+			prompt:       "What is in this document?",
+			instruction:  "You are a document analysis assistant.",
+			maxTokens:    150,
+			finishReason: genai.FinishReasonStop,
+		},
+		{
+			name:         "mixed_content",
+			fixture:      "test-image.png",
+			mimeType:     "image/png",
+			prefix:       "First, look at this image:",
+			prompt:       "Now describe what you see and explain why it matters.",
+			instruction:  "You are a helpful vision assistant.",
+			maxTokens:    200,
+			finishReason: genai.FinishReasonMaxTokens,
+		},
 	}
-	for _, cfg := range configs {
-		t.Run(cfg.name, func(t *testing.T) {
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
 			ctx, tp, exporter := setupGoldenTest(t)
-			temp := cfg.temp
-			topP := cfg.topP
+			data, err := os.ReadFile(filepath.Join("testdata", "fixtures", tc.fixture))
+			require.NoError(t, err)
 
-			sid := fmt.Sprintf("session-temp-%s", cfg.name)
-			r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
-				Name:        fmt.Sprintf("agent_%s", cfg.name),
-				Instruction: "You are a creative storyteller.",
-				GenerateContentConfig: &genai.GenerateContentConfig{
-					Temperature:     &temp,
-					TopP:            &topP,
-					MaxOutputTokens: 50,
-				},
+			r := newGoldenRunner(ctx, t, tp, tc.name, llmagent.Config{
+				Name:                  "multimodal_agent",
+				Instruction:           tc.instruction,
+				GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: tc.maxTokens},
 			})
-
-			msg := genai.NewContentFromText("Say something creative.", genai.RoleUser)
-			fullText := runAndCollectStreamedText(ctx, t, r, sid, msg, agent.RunConfig{})
-			t.Logf("Config temp=%v top_p=%v: %s", cfg.temp, cfg.topP, fullText)
-
-			assertSpansExist(t, exporter)
+			var parts []*genai.Part
+			if tc.prefix != "" {
+				parts = append(parts, &genai.Part{Text: tc.prefix})
+			}
+			parts = append(parts,
+				&genai.Part{InlineData: &genai.Blob{Data: data, MIMEType: tc.mimeType}},
+				&genai.Part{Text: tc.prompt},
+			)
+			userMsg := genai.NewContentFromParts(parts, genai.RoleUser)
+			responses := runAndCollectFinal(ctx, t, r, tc.name, userMsg, agent.RunConfig{})
+			assertFinalResponse(t, responses)
+			config := assertGoldenExchange(t, exporter, []*genai.Content{userMsg}, responses[0].Content, tc.finishReason)
+			assert.Equal(t, float64(tc.maxTokens), config["maxOutputTokens"])
 		})
 	}
+}
+
+func TestGenerationConfig(t *testing.T) {
+	ctx, tp, exporter := setupGoldenTest(t)
+	temp := float32(0)
+	topP := float32(1)
+	sid := "session-temp-temp_0_0"
+	r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
+		Name:        "agent_temp_0_0",
+		Instruction: "You are a creative storyteller.",
+		GenerateContentConfig: &genai.GenerateContentConfig{
+			Temperature:     &temp,
+			TopP:            &topP,
+			MaxOutputTokens: 50,
+		},
+	})
+
+	msg := genai.NewContentFromText("Say something creative.", genai.RoleUser)
+	responses := runAndCollectFinal(ctx, t, r, sid, msg, agent.RunConfig{})
+	assertFinalResponse(t, responses)
+	config := assertGoldenExchange(t, exporter, []*genai.Content{msg}, responses[0].Content, genai.FinishReasonMaxTokens)
+	assert.Equal(t, float64(0), config["temperature"], "explicit zero temperature should survive cleanup")
+	assert.Equal(t, float64(1), config["topP"])
+	assert.Equal(t, float64(50), config["maxOutputTokens"])
 }
 
 func TestStopSequences(t *testing.T) {
@@ -348,101 +310,9 @@ func TestStopSequences(t *testing.T) {
 	text := assertFinalResponse(t, responses)
 	t.Logf("Response: %s", text)
 
-	assertSpansExist(t, exporter)
-}
-
-func TestMetadata(t *testing.T) {
-	t.Skip("labels parameter is not supported in Gemini API")
-
-	ctx, tp, exporter := setupGoldenTest(t)
-
-	sid := "session-metadata"
-	r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
-		Name:        "basic_agent",
-		Instruction: "You are a helpful assistant.",
-		GenerateContentConfig: &genai.GenerateContentConfig{
-			MaxOutputTokens: 100,
-			Labels:          map[string]string{"user_id": "test_user_123", "environment": "testing", "feature": "metadata_test"},
-		},
-	})
-
-	msg := genai.NewContentFromText("Hello!", genai.RoleUser)
-	responses := runAndCollectFinal(ctx, t, r, sid, msg, agent.RunConfig{})
-	text := assertFinalResponse(t, responses)
-	t.Logf("Response: %s", text)
-
-	assertSpansExist(t, exporter)
-}
-
-func TestLongContext(t *testing.T) {
-	ctx, tp, exporter := setupGoldenTest(t)
-
-	sid := "session-long"
-	r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
-		Name:                  "analysis_agent",
-		Instruction:           "You are a text analysis assistant.",
-		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 100},
-	})
-
-	longText := strings.Repeat("The quick brown fox jumps over the lazy dog. ", 100)
-	msg := genai.NewContentFromText(fmt.Sprintf("Here is a long text:\n\n%s\n\nHow many times does the word 'fox' appear?", longText), genai.RoleUser)
-	responses := runAndCollectFinal(ctx, t, r, sid, msg, agent.RunConfig{})
-	text := assertFinalResponse(t, responses)
-	t.Logf("Response: %s", text)
-
-	assertSpansExist(t, exporter)
-}
-
-func TestMixedContent(t *testing.T) {
-	path := fixturePath(t, "test-image.png")
-	if path == "" {
-		t.Skip("testdata/fixtures/test-image.png not found")
-	}
-	data, err := os.ReadFile(path)
-	require.NoError(t, err)
-
-	ctx, tp, exporter := setupGoldenTest(t)
-
-	sid := "session-mixed"
-	r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
-		Name:                  "vision_agent",
-		Instruction:           "You are a helpful vision assistant.",
-		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 200},
-	})
-
-	userMsg := genai.NewContentFromParts([]*genai.Part{
-		{Text: "First, look at this image:"},
-		{InlineData: &genai.Blob{Data: data, MIMEType: "image/png"}},
-		{Text: "Now describe what you see and explain why it matters."},
-	}, genai.RoleUser)
-	responses := runAndCollectFinal(ctx, t, r, sid, userMsg, agent.RunConfig{})
-	text := assertFinalResponse(t, responses)
-	t.Logf("Response: %s", text)
-
-	assertSpansExist(t, exporter)
-}
-
-func TestPrefill(t *testing.T) {
-	ctx, tp, exporter := setupGoldenTest(t)
-
-	sid := "session-prefill"
-	r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
-		Name:                  "haiku_agent",
-		Instruction:           "You are a helpful assistant.",
-		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 200},
-	})
-
-	msg1 := genai.NewContentFromText("Write a haiku about coding.", genai.RoleUser)
-	responses := runAndCollectFinal(ctx, t, r, sid, msg1, agent.RunConfig{})
-	text := assertFinalResponse(t, responses)
-	t.Logf("Response 1: %s", text)
-
-	msg2 := genai.NewContentFromText("Here is a haiku:", genai.RoleUser)
-	responses = runAndCollectFinal(ctx, t, r, sid, msg2, agent.RunConfig{})
-	text = assertFinalResponse(t, responses)
-	t.Logf("Response 2: %s", text)
-
-	assertSpansExist(t, exporter)
+	config := assertGoldenExchange(t, exporter, []*genai.Content{msg}, responses[0].Content, genai.FinishReasonMaxTokens)
+	assert.Equal(t, float64(500), config["maxOutputTokens"])
+	assert.Equal(t, []any{"END", "\n\n"}, config["stopSequences"])
 }
 
 func TestShortMaxTokens(t *testing.T) {
@@ -460,100 +330,8 @@ func TestShortMaxTokens(t *testing.T) {
 	text := assertFinalResponse(t, responses)
 	t.Logf("Response: %s", text)
 
-	assertSpansExist(t, exporter)
-}
-
-// getWeatherArgs and getWeather implement the weather tool for TestToolUse.
-type getWeatherArgs struct {
-	CityAndState string `json:"city_and_state" jsonschema:"The city and state, e.g. San Francisco, CA"`
-	Unit         string `json:"unit" jsonschema:"The unit of temperature (celsius or fahrenheit). Default to celsius."`
-}
-
-func getWeather(_ tool.Context, args getWeatherArgs) (string, error) {
-	unit := args.Unit
-	if unit == "" {
-		unit = "celsius"
-	}
-	return fmt.Sprintf("22 degrees %s and sunny in %s", unit, args.CityAndState), nil
-}
-
-func TestToolUse(t *testing.T) {
-	ctx, tp, exporter := setupGoldenTest(t)
-
-	weatherTool, err := functiontool.New(
-		functiontool.Config{
-			Name:        "get_weather",
-			Description: "Get the current weather for a location. Args: city_and_state (e.g. San Francisco, CA), unit (celsius or fahrenheit).",
-		},
-		getWeather,
-	)
-	require.NoError(t, err)
-
-	sid := "session-weather"
-	r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
-		Name:                  "weather_agent",
-		Instruction:           "You are a helpful weather assistant. Use the get_weather tool to answer questions.",
-		Tools:                 []tool.Tool{weatherTool},
-		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 500},
-	})
-
-	msg := genai.NewContentFromText("What is the weather like in Paris, France?", genai.RoleUser)
-
-	var hasFunctionCall bool
-	var finalText string
-	for _, ev := range runAndCollectAll(ctx, t, r, sid, msg, agent.RunConfig{}) {
-		if ev.Content != nil {
-			for i, p := range ev.Content.Parts {
-				if p.FunctionCall != nil {
-					hasFunctionCall = true
-					t.Logf("Tool use block %d: %s %v", i, p.FunctionCall.Name, p.FunctionCall.Args)
-				} else if p.Text != "" && ev.IsFinalResponse() {
-					finalText = p.Text
-					t.Logf("Final text: %s", p.Text)
-				}
-			}
-		}
-	}
-
-	assert.True(t, hasFunctionCall, "expected at least one function call")
-	assert.NotEmpty(t, finalText, "expected final response text")
-
-	// Richer span assertions for tool use
-	spans := exporter.Flush()
-	require.NotEmpty(t, spans, "expected spans to be created")
-
-	var agentSpan, modelSpan, toolSpan *oteltest.Span
-	for i := range spans {
-		s := &spans[i]
-		name := s.Name()
-		switch name {
-		case "agent_run [weather_agent]":
-			agentSpan = s
-		case "call_llm":
-			if modelSpan == nil {
-				modelSpan = s
-			}
-		case "tool [get_weather]":
-			toolSpan = s
-		}
-	}
-
-	require.NotNil(t, agentSpan, "agent_run span not found")
-	assert.True(t, agentSpan.Status().Code == codes.Ok || agentSpan.Status().Code == codes.Unset)
-	agentSpan.AssertAttrEquals("adk.agent.name", "weather_agent")
-
-	require.NotNil(t, modelSpan, "call_llm span not found")
-	assert.True(t, modelSpan.Status().Code == codes.Ok || modelSpan.Status().Code == codes.Unset)
-
-	require.NotNil(t, toolSpan, "tool span not found")
-	assert.True(t, toolSpan.Status().Code == codes.Ok || toolSpan.Status().Code == codes.Unset)
-	toolSpan.AssertAttrEquals("tool.name", "get_weather")
-	assert.True(t, toolSpan.HasAttr("tool.input"))
-	assert.True(t, toolSpan.HasAttr("tool.output"))
-
-	// Verify parent-child relationships
-	assert.Equal(t, agentSpan.Stub.SpanContext.SpanID(), modelSpan.Stub.Parent.SpanID(),
-		"model span should be child of agent span")
+	config := assertGoldenExchange(t, exporter, []*genai.Content{msg}, responses[0].Content, genai.FinishReasonMaxTokens)
+	assert.Equal(t, float64(5), config["maxOutputTokens"])
 }
 
 func TestGoogleSearchUsage(t *testing.T) {

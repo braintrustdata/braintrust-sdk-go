@@ -49,86 +49,51 @@ func requireOutputMessage(t *testing.T, output any) (map[string]any, map[string]
 	return choice, message
 }
 
-func TestOnStart(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
+func TestChatModelLifecycle(t *testing.T) {
+	for _, tt := range []struct {
+		name     string
+		info     *callbacks.RunInfo
+		spanName string
+	}{
+		{"named model", makeRunInfo("my-llm", "OpenAI"), "eino.my-llm"},
+		{"type fallback", makeRunInfo("", "Anthropic"), "eino.Anthropic"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			tp, exporter := oteltest.Setup(t)
+			handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
+			input := &model.CallbackInput{
+				Messages: []*schema.Message{{Role: schema.User, Content: "Hello!"}},
+				Config:   &model.Config{Model: "gpt-4o-mini"},
+			}
+			output := &model.CallbackOutput{
+				Message: &schema.Message{
+					Role: schema.Assistant, Content: "Hello there!",
+					ResponseMeta: &schema.ResponseMeta{FinishReason: "stop"},
+				},
+				TokenUsage: &model.TokenUsage{PromptTokens: 10, CompletionTokens: 5, TotalTokens: 15},
+			}
+			invokeChatModel(context.Background(), handler, tt.info, input, output)
 
-	ctx := context.Background()
-	info := makeRunInfo("my-llm", "OpenAI")
-
-	input := &model.CallbackInput{
-		Messages: []*schema.Message{
-			{Role: schema.User, Content: "Hello!"},
-		},
-		Config: &model.Config{
-			Model: "gpt-4o",
-		},
+			span := exporter.FlushOne()
+			span.AssertNameIs(tt.spanName)
+			assert.Equal(t, oteltrace.SpanKindClient, span.Stub.SpanKind)
+			span.AssertJSONAttrEquals("braintrust.input_json", []any{map[string]any{"role": "user", "content": "Hello!"}})
+			choice, message := requireOutputMessage(t, span.Output())
+			assert.Equal(t, "stop", choice["finish_reason"])
+			assert.Equal(t, "assistant", message["role"])
+			assert.Equal(t, "Hello there!", message["content"])
+			metrics := span.Metrics()
+			assert.Equal(t, float64(10), metrics["prompt_tokens"])
+			assert.Equal(t, float64(5), metrics["completion_tokens"])
+			assert.Equal(t, float64(15), metrics["tokens"])
+			attrMap := make(map[string]any)
+			for _, a := range span.Stub.Attributes {
+				attrMap[string(a.Key)] = a.Value.AsInterface()
+			}
+			assert.Equal(t, "gpt-4o-mini", attrMap["gen_ai.request.model"])
+			assert.Equal(t, "stop", attrMap["gen_ai.finish_reason"])
+		})
 	}
-
-	ctx2 := handler.OnStart(ctx, info, input)
-	handler.OnEnd(ctx2, info, &model.CallbackOutput{
-		Message: &schema.Message{Role: schema.Assistant, Content: "Hi!"},
-	})
-
-	spans := exporter.Flush()
-	require.Len(t, spans, 1)
-
-	span := spans[0]
-	span.AssertNameIs("eino.my-llm")
-
-	inp := span.Input()
-	require.NotNil(t, inp)
-	msgs, ok := inp.([]interface{})
-	require.True(t, ok)
-	require.Len(t, msgs, 1)
-	msg, ok2 := msgs[0].(map[string]interface{})
-	require.True(t, ok2)
-	assert.Equal(t, "user", msg["role"])
-	assert.Equal(t, "Hello!", msg["content"])
-}
-
-func TestOnEnd_WithTokenUsage(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	ctx := context.Background()
-	info := makeRunInfo("", "Anthropic")
-
-	input := &model.CallbackInput{
-		Messages: []*schema.Message{
-			{Role: schema.User, Content: "Say hi"},
-		},
-	}
-	output := &model.CallbackOutput{
-		Message: &schema.Message{Role: schema.Assistant, Content: "Hello there!"},
-		TokenUsage: &model.TokenUsage{
-			PromptTokens:     10,
-			CompletionTokens: 5,
-			TotalTokens:      15,
-		},
-	}
-
-	invokeChatModel(ctx, handler, info, input, output)
-
-	spans := exporter.Flush()
-	require.Len(t, spans, 1)
-	span := spans[0]
-
-	// span name falls back to type
-	span.AssertNameIs("eino.Anthropic")
-
-	out := span.Output()
-	require.NotNil(t, out)
-	choice, message := requireOutputMessage(t, out)
-	assert.Equal(t, "stop", choice["finish_reason"])
-	assert.Equal(t, "assistant", message["role"])
-	assert.Equal(t, "Hello there!", message["content"])
-
-	metrics := span.Metrics()
-	require.NotNil(t, metrics)
-	assert.Equal(t, float64(10), metrics["prompt_tokens"])
-	assert.Equal(t, float64(5), metrics["completion_tokens"])
-	assert.Equal(t, float64(15), metrics["tokens"])
 }
 
 func TestOnError(t *testing.T) {
@@ -173,9 +138,11 @@ func TestOnEndWithStreamOutput(t *testing.T) {
 		{Role: schema.Assistant, Content: " 3", ResponseMeta: &schema.ResponseMeta{
 			FinishReason: "stop",
 			Usage: &schema.TokenUsage{
-				PromptTokens:     8,
-				CompletionTokens: 6,
-				TotalTokens:      14,
+				PromptTokens:            8,
+				CompletionTokens:        6,
+				TotalTokens:             14,
+				PromptTokenDetails:      schema.PromptTokenDetails{CachedTokens: 5},
+				CompletionTokensDetails: schema.CompletionTokensDetails{ReasoningTokens: 3},
 			},
 		}},
 	}
@@ -205,32 +172,11 @@ func TestOnEndWithStreamOutput(t *testing.T) {
 	assert.Equal(t, float64(8), metrics["prompt_tokens"])
 	assert.Equal(t, float64(6), metrics["completion_tokens"])
 	assert.Equal(t, float64(14), metrics["tokens"])
-}
-
-func TestOnEndWithStreamOutput_EarlyClose(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	ctx := context.Background()
-	info := makeRunInfo("", "")
-	input := &model.CallbackInput{
-		Messages: []*schema.Message{{Role: schema.User, Content: "hi"}},
-	}
-
-	ctx2 := handler.OnStart(ctx, info, input)
-
-	sr, sw := schema.Pipe[callbacks.CallbackOutput](10)
-	sw.Send(&model.CallbackOutput{Message: &schema.Message{Role: schema.Assistant, Content: "chunk1"}}, nil)
-	// close stream early before all data is sent
-	sw.Close()
-
-	handler.OnEndWithStreamOutput(ctx2, info, sr)
-	handler.Wait()
-
-	spans := exporter.Flush()
-	require.Len(t, spans, 1)
-	// span was ended (no panic or leak)
-	_ = spans[0]
+	assert.Equal(t, float64(5), metrics["prompt_cached_tokens"])
+	assert.Equal(t, float64(3), metrics["completion_reasoning_tokens"])
+	ttft, ok := metrics["time_to_first_token"]
+	require.True(t, ok, "metrics should contain time_to_first_token")
+	assert.Greater(t, ttft, float64(0), "time_to_first_token should be positive")
 }
 
 func TestOnStartWithStreamInput_ModelInput(t *testing.T) {
@@ -307,48 +253,52 @@ func TestOnStartWithStreamInput_ToolInput(t *testing.T) {
 	assert.Equal(t, "72F", out)
 }
 
-func TestOnStartWithStreamInput_TaskPreservesAllChunks(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-	info := &callbacks.RunInfo{Component: compose.ComponentOfGraph}
+func TestTaskStreamPreservesGenericChunks(t *testing.T) {
+	for _, streamingOutput := range []bool{false, true} {
+		name := "collected output"
+		if streamingOutput {
+			name = "streamed output"
+		}
+		t.Run(name, func(t *testing.T) {
+			tp, exporter := oteltest.Setup(t)
+			handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
+			info := &callbacks.RunInfo{Component: compose.ComponentOfGraph}
+			var wantInput any = map[string]any{"input": true}
+			ctx := context.Background()
+			if streamingOutput {
+				ctx = handler.OnStart(ctx, info, wantInput)
+			} else {
+				input, inputWriter := schema.Pipe[callbacks.CallbackInput](3)
+				for _, chunk := range []int{1, 2, 3} {
+					inputWriter.Send(map[string]any{"chunk": chunk}, nil)
+				}
+				inputWriter.Close()
+				ctx = handler.OnStartWithStreamInput(ctx, info, input)
+				wantInput = []any{
+					map[string]any{"chunk": float64(1)},
+					map[string]any{"chunk": float64(2)},
+					map[string]any{"chunk": float64(3)},
+				}
+			}
 
-	sr, sw := schema.Pipe[callbacks.CallbackInput](3)
-	sw.Send(map[string]any{"chunk": 1}, nil)
-	sw.Send(map[string]any{"chunk": 2}, nil)
-	sw.Send(map[string]any{"chunk": 3}, nil)
-	sw.Close()
+			var wantOutput any = map[string]any{"done": true}
+			if streamingOutput {
+				output, outputWriter := schema.Pipe[callbacks.CallbackOutput](2)
+				outputWriter.Send(map[string]any{"chunk": 1}, nil)
+				outputWriter.Send(map[string]any{"chunk": 2}, nil)
+				outputWriter.Close()
+				handler.OnEndWithStreamOutput(ctx, info, output)
+				handler.Wait()
+				wantOutput = []any{map[string]any{"chunk": float64(1)}, map[string]any{"chunk": float64(2)}}
+			} else {
+				handler.OnEnd(ctx, info, wantOutput)
+			}
 
-	ctx := handler.OnStartWithStreamInput(context.Background(), info, sr)
-	handler.OnEnd(ctx, info, map[string]any{"done": true})
-
-	span := exporter.FlushOne()
-	inputs, ok := span.Input().([]any)
-	require.True(t, ok)
-	require.Len(t, inputs, 3)
-	assert.Equal(t, float64(1), inputs[0].(map[string]any)["chunk"])
-	assert.Equal(t, float64(3), inputs[2].(map[string]any)["chunk"])
-}
-
-func TestOnEndWithStreamOutput_TaskPreservesGenericChunks(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-	info := &callbacks.RunInfo{Component: compose.ComponentOfGraph}
-	ctx := handler.OnStart(context.Background(), info, map[string]any{"input": true})
-
-	sr, sw := schema.Pipe[callbacks.CallbackOutput](2)
-	sw.Send(map[string]any{"chunk": 1}, nil)
-	sw.Send(map[string]any{"chunk": 2}, nil)
-	sw.Close()
-
-	handler.OnEndWithStreamOutput(ctx, info, sr)
-	handler.Wait()
-
-	span := exporter.FlushOne()
-	outputs, ok := span.Output().([]any)
-	require.True(t, ok)
-	require.Len(t, outputs, 2)
-	assert.Equal(t, float64(1), outputs[0].(map[string]any)["chunk"])
-	assert.Equal(t, float64(2), outputs[1].(map[string]any)["chunk"])
+			span := exporter.FlushOne()
+			assert.Equal(t, wantInput, span.Input())
+			assert.Equal(t, wantOutput, span.Output())
+		})
+	}
 }
 
 func TestOnEndWithStreamOutput_Tool(t *testing.T) {
@@ -367,24 +317,33 @@ func TestOnEndWithStreamOutput_Tool(t *testing.T) {
 	assert.Equal(t, "hello world", span.Output())
 }
 
-func TestOnStartWithStreamInput_UnrecognizedInput(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	ctx := context.Background()
-	info := makeRunInfo("retriever", "")
-
+func TestUnrecognizedInputIgnored(t *testing.T) {
 	type customInput struct{ Query string }
-	sr, sw := schema.Pipe[callbacks.CallbackInput](2)
-	sw.Send(&customInput{Query: "docs"}, nil)
-	sw.Close()
-
-	// Unrecognized input should not create a span.
-	ctx2 := handler.OnStartWithStreamInput(ctx, info, sr)
-	assert.Equal(t, ctx, ctx2)
-
-	spans := exporter.Flush()
-	assert.Len(t, spans, 0)
+	for _, streamingInput := range []bool{false, true} {
+		name := "direct input"
+		if streamingInput {
+			name = "streamed input"
+		}
+		t.Run(name, func(t *testing.T) {
+			tp, exporter := oteltest.Setup(t)
+			handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
+			ctx := context.Background()
+			info := makeRunInfo("retriever", "VectorStore")
+			input := &customInput{Query: "docs"}
+			var ctx2 context.Context
+			if streamingInput {
+				reader, writer := schema.Pipe[callbacks.CallbackInput](1)
+				writer.Send(input, nil)
+				writer.Close()
+				ctx2 = handler.OnStartWithStreamInput(ctx, info, reader)
+			} else {
+				ctx2 = handler.OnStart(ctx, info, input)
+			}
+			assert.Equal(t, ctx, ctx2, "unrecognized input should not create a span")
+			handler.OnEnd(ctx2, info, input)
+			assert.Empty(t, exporter.Flush())
+		})
+	}
 }
 
 func TestNeeded(t *testing.T) {
@@ -545,6 +504,7 @@ func TestToolSpan(t *testing.T) {
 	span := spans[0]
 
 	span.AssertNameIs("eino.get_weather")
+	assert.Equal(t, oteltrace.SpanKindInternal, span.Stub.SpanKind)
 
 	// span type should be "tool"
 	attrs := span.Stub.Attributes
@@ -637,44 +597,6 @@ func TestStructuredToolOutputRejectsMalformedParts(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestToolOutputPlainString(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	ctx := context.Background()
-	info := makeRunInfo("greet", "")
-
-	input := &tool.CallbackInput{ArgumentsInJSON: `{}`}
-	output := &tool.CallbackOutput{Response: "hello world"}
-
-	ctx2 := handler.OnStart(ctx, info, input)
-	handler.OnEnd(ctx2, info, output)
-
-	spans := exporter.Flush()
-	require.Len(t, spans, 1)
-
-	out := spans[0].Output()
-	require.NotNil(t, out)
-	// Plain string output should still be retrievable.
-	assert.Equal(t, "hello world", out)
-}
-
-func TestUnrecognizedInput_StillIgnored(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	ctx := context.Background()
-	info := makeRunInfo("retriever", "VectorStore")
-
-	// An arbitrary struct type — not model, tool, or string CallbackInput
-	type customInput struct{ Query string }
-	ctx2 := handler.OnStart(ctx, info, &customInput{Query: "docs"})
-	handler.OnEnd(ctx2, info, &customInput{Query: "docs"})
-
-	spans := exporter.Flush()
-	assert.Len(t, spans, 0)
-}
-
 func TestOnEndWithStreamOutput_ConcatError(t *testing.T) {
 	tp, exporter := oteltest.Setup(t)
 	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
@@ -700,171 +622,6 @@ func TestOnEndWithStreamOutput_ConcatError(t *testing.T) {
 	require.Len(t, spans, 1)
 	// If ConcatMessages fails, the error should be recorded on the span
 	assert.Equal(t, codes.Error, spans[0].Stub.Status.Code)
-}
-
-func TestStreamingCachedTokens(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	ctx := context.Background()
-	info := makeRunInfo("", "")
-	input := &model.CallbackInput{
-		Messages: []*schema.Message{{Role: schema.User, Content: "hi"}},
-	}
-
-	ctx2 := handler.OnStart(ctx, info, input)
-
-	sr, sw := schema.Pipe[callbacks.CallbackOutput](1)
-	sw.Send(&model.CallbackOutput{Message: &schema.Message{
-		Role:    schema.Assistant,
-		Content: "cached response",
-		ResponseMeta: &schema.ResponseMeta{
-			FinishReason: "stop",
-			Usage: &schema.TokenUsage{
-				PromptTokens:     20,
-				CompletionTokens: 5,
-				TotalTokens:      25,
-				PromptTokenDetails: schema.PromptTokenDetails{
-					CachedTokens: 15,
-				},
-				CompletionTokensDetails: schema.CompletionTokensDetails{
-					ReasoningTokens: 3,
-				},
-			},
-		},
-	}}, nil)
-	sw.Close()
-
-	handler.OnEndWithStreamOutput(ctx2, info, sr)
-	handler.Wait()
-
-	spans := exporter.Flush()
-	require.Len(t, spans, 1)
-
-	metrics := spans[0].Metrics()
-	require.NotNil(t, metrics)
-	assert.Equal(t, float64(20), metrics["prompt_tokens"])
-	assert.Equal(t, float64(5), metrics["completion_tokens"])
-	assert.Equal(t, float64(25), metrics["tokens"])
-	assert.Equal(t, float64(15), metrics["prompt_cached_tokens"])
-	assert.Equal(t, float64(3), metrics["completion_reasoning_tokens"])
-}
-
-func TestModelSpanKindClient(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	ctx := context.Background()
-	info := makeRunInfo("my-llm", "OpenAI")
-	input := &model.CallbackInput{
-		Messages: []*schema.Message{{Role: schema.User, Content: "hi"}},
-	}
-
-	ctx2 := handler.OnStart(ctx, info, input)
-	handler.OnEnd(ctx2, info, &model.CallbackOutput{
-		Message: &schema.Message{Role: schema.Assistant, Content: "hello"},
-	})
-
-	spans := exporter.Flush()
-	require.Len(t, spans, 1)
-	assert.Equal(t, oteltrace.SpanKindClient, spans[0].Stub.SpanKind,
-		"model spans should be SpanKindClient (outbound call to LLM service)")
-}
-
-func TestOTelSemanticAttributes(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	ctx := context.Background()
-	info := makeRunInfo("my-llm", "OpenAI")
-	input := &model.CallbackInput{
-		Messages: []*schema.Message{{Role: schema.User, Content: "hi"}},
-		Config:   &model.Config{Model: "gpt-4o-mini"},
-	}
-	output := &model.CallbackOutput{
-		Message: &schema.Message{
-			Role:    schema.Assistant,
-			Content: "hello",
-			ResponseMeta: &schema.ResponseMeta{
-				FinishReason: "stop",
-			},
-		},
-		TokenUsage: &model.TokenUsage{
-			PromptTokens:     10,
-			CompletionTokens: 5,
-			TotalTokens:      15,
-		},
-	}
-
-	invokeChatModel(ctx, handler, info, input, output)
-
-	spans := exporter.Flush()
-	require.Len(t, spans, 1)
-	span := spans[0]
-
-	// Check gen_ai.* OTel semantic convention attributes
-	attrMap := make(map[string]any)
-	for _, a := range span.Stub.Attributes {
-		attrMap[string(a.Key)] = a.Value.AsInterface()
-	}
-	assert.Equal(t, "gpt-4o-mini", attrMap["gen_ai.request.model"])
-	assert.Equal(t, "stop", attrMap["gen_ai.finish_reason"])
-}
-
-func TestToolSpanKindInternal(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	ctx := context.Background()
-	info := makeRunInfo("get_weather", "")
-	input := &tool.CallbackInput{ArgumentsInJSON: `{}`}
-
-	ctx2 := handler.OnStart(ctx, info, input)
-	handler.OnEnd(ctx2, info, &tool.CallbackOutput{Response: "ok"})
-
-	spans := exporter.Flush()
-	require.Len(t, spans, 1)
-	assert.Equal(t, oteltrace.SpanKindInternal, spans[0].Stub.SpanKind,
-		"tool spans should remain SpanKindInternal")
-}
-
-func TestStreamingTimeToFirstToken(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	ctx := context.Background()
-	info := makeRunInfo("stream-model", "")
-	input := &model.CallbackInput{
-		Messages: []*schema.Message{{Role: schema.User, Content: "hi"}},
-	}
-
-	ctx2 := handler.OnStart(ctx, info, input)
-
-	sr, sw := schema.Pipe[callbacks.CallbackOutput](2)
-	sw.Send(&model.CallbackOutput{Message: &schema.Message{
-		Role: schema.Assistant, Content: "hello",
-		ResponseMeta: &schema.ResponseMeta{
-			FinishReason: "stop",
-			Usage: &schema.TokenUsage{
-				PromptTokens:     5,
-				CompletionTokens: 3,
-				TotalTokens:      8,
-			},
-		},
-	}}, nil)
-	sw.Close()
-
-	handler.OnEndWithStreamOutput(ctx2, info, sr)
-	handler.Wait()
-
-	spans := exporter.Flush()
-	require.Len(t, spans, 1)
-
-	metrics := spans[0].Metrics()
-	require.NotNil(t, metrics)
-	ttft, ok := metrics["time_to_first_token"]
-	require.True(t, ok, "metrics should contain time_to_first_token")
-	assert.Greater(t, ttft, float64(0), "time_to_first_token should be positive")
 }
 
 func TestDefaultHandler(t *testing.T) {

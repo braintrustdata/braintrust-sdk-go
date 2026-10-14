@@ -237,7 +237,11 @@ func TestInstrumentClient_SendStreamingMessage_MultiEvent(t *testing.T) {
 			continue
 		}
 		require.IsType(t, &a2a.TaskArtifactUpdateEvent{}, event)
-		require.Empty(t, exporter.Flush(), "span must not be exported after a non-terminal event")
+		// The server may finish sending before the client consumes its first
+		// event. Only the client span must remain open until the terminal event.
+		for _, span := range exporter.InMemoryExporter().GetSpans() {
+			require.NotEqual(t, "a2a.SendStreamingMessage", span.Name, "client span must not be exported after a non-terminal event")
+		}
 	}
 	require.Equal(t, 3, eventCount)
 
@@ -417,13 +421,16 @@ func TestInstrumentClient_StreamAbandonedOnContextCancel(t *testing.T) {
 	}
 	require.True(t, gotFirstEvent)
 
-	var spans []oteltest.Span
 	require.Eventually(t, func() bool {
-		spans = exporter.Flush()
-		return len(spans) > 0
-	}, time.Second, 10*time.Millisecond, "span must eventually end once the call context is canceled")
+		for _, span := range exporter.InMemoryExporter().GetSpans() {
+			if span.Name == "a2a.SendStreamingMessage" {
+				return true
+			}
+		}
+		return false
+	}, time.Second, 10*time.Millisecond, "client span must eventually end once the call context is canceled")
 
-	clientSpan := findSpanWithRole(t, spans, "a2a.SendStreamingMessage", "client")
+	clientSpan := findSpanWithRole(t, exporter.Flush(), "a2a.SendStreamingMessage", "client")
 	assert.Equal(t, codes.Error, clientSpan.Status().Code)
 	assert.Contains(t, clientSpan.Status().Description, "abandoned")
 }
