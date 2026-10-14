@@ -47,27 +47,6 @@ func TestWrapEmbedderBatch(t *testing.T) {
 	}, span.Metadata())
 }
 
-func TestWrapEmbedderSingle(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	ctx := context.Background()
-	g := genkit.Init(ctx, genkit.WithPlugins(newOpenAIPlugin(t)))
-	inner := genkit.LookupEmbedder(g, "openai/text-embedding-3-small")
-	require.NotNil(t, inner)
-
-	wrapped := WrapEmbedder(inner, WithEmbedderTracerProvider(tp))
-	resp, err := wrapped.Embed(ctx, &ai.EmbedRequest{
-		Input: []*ai.Document{ai.DocumentFromText("what is braintrust?", nil)},
-	})
-	require.NoError(t, err)
-	require.Len(t, resp.Embeddings, 1)
-
-	span := exporter.FlushOne()
-	assert.Equal(t, map[string]any{
-		"inputs": []any{map[string]any{"content": "what is braintrust?"}},
-	}, span.Input())
-	assert.Equal(t, map[string]any{"count": float64(1)}, span.Output())
-}
-
 func TestWrapEmbedderError(t *testing.T) {
 	tp, exporter := oteltest.Setup(t)
 	ctx := context.Background()

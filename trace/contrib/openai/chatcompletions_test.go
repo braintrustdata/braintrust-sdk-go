@@ -570,269 +570,77 @@ func TestOpenAIChatCompletionsStreamingToolCalls(t *testing.T) {
 }
 
 func TestStreamingToolCallsPostprocessing(t *testing.T) {
-	assert := assert.New(t)
-	require := require.New(t)
-
-	ct := newChatCompletionsTracer(&middlewareConfig{})
-
-	t.Run("EmptyResults", func(t *testing.T) {
-		result := ct.postprocessStreamingResults([]map[string]any{})
-		assert.Empty(result)
-	})
-
-	t.Run("SingleToolCall", func(t *testing.T) {
-		// Simulate a streaming response with a single tool call
-		results := []map[string]any{
-			{
-				"choices": []interface{}{
-					map[string]any{
-						"index": 0,
-						"delta": map[string]any{
-							"role": "assistant",
-						},
-					},
-				},
-			},
-			{
-				"choices": []interface{}{
-					map[string]any{
-						"index": 0,
-						"delta": map[string]any{
-							"tool_calls": []interface{}{
-								map[string]any{
-									"id":   "call_123",
-									"type": "function",
-									"function": map[string]any{
-										"name":      "get_weather",
-										"arguments": `{"location":"`,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			{
-				"choices": []interface{}{
-					map[string]any{
-						"index": 0,
-						"delta": map[string]any{
-							"tool_calls": []interface{}{
-								map[string]any{
-									"function": map[string]any{
-										"arguments": `San Francisco"}`,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			{
-				"choices": []interface{}{
-					map[string]any{
-						"index":         0,
-						"finish_reason": "tool_calls",
-						"delta":         map[string]any{},
-					},
-				},
-			},
+	toolCall := func(id, name, arguments string) map[string]any {
+		return map[string]any{
+			"id": id, "type": "function",
+			"function": map[string]any{"name": name, "arguments": arguments},
 		}
-
-		result := ct.postprocessStreamingResults(results)
-		require.Len(result, 1)
-
-		choice := result[0]
-		message, ok := choice["message"].(map[string]interface{})
-		require.True(ok)
-
-		assert.Equal("assistant", message["role"])
-		assert.Equal("", message["content"])
-		assert.Equal("tool_calls", choice["finish_reason"])
-
-		toolCalls, ok := message["tool_calls"].([]interface{})
-		require.True(ok, "should have tool_calls")
-		require.Len(toolCalls, 1)
-
-		toolCall, ok := toolCalls[0].(map[string]interface{})
-		require.True(ok)
-		assert.Equal("call_123", toolCall["id"])
-		assert.Equal("function", toolCall["type"])
-
-		function, ok := toolCall["function"].(map[string]interface{})
-		require.True(ok)
-		assert.Equal("get_weather", function["name"])
-		assert.Equal(`{"location":"San Francisco"}`, function["arguments"])
-	})
-
-	t.Run("MultipleToolCalls", func(t *testing.T) {
-		// Simulate a streaming response with multiple tool calls
-		results := []map[string]any{
-			{
-				"choices": []interface{}{
-					map[string]any{
-						"index": 0,
-						"delta": map[string]any{
-							"role": "assistant",
-							"tool_calls": []interface{}{
-								map[string]any{
-									"id":   "call_1",
-									"type": "function",
-									"function": map[string]any{
-										"name":      "get_weather",
-										"arguments": `{"location":"SF"}`,
-									},
-								},
-							},
-						},
-					},
-				},
+	}
+	for _, tc := range []struct {
+		name         string
+		deltas       []map[string]any
+		content      string
+		toolCalls    []any
+		finishReason any
+	}{
+		{name: "EmptyResults"},
+		{
+			name: "SingleToolCall",
+			deltas: []map[string]any{
+				{"role": "assistant"},
+				{"tool_calls": []any{toolCall("call_123", "get_weather", `{"location":"`)}},
+				{"tool_calls": []any{map[string]any{"function": map[string]any{"arguments": `San Francisco"}`}}}},
 			},
-			{
-				"choices": []interface{}{
-					map[string]any{
-						"index": 0,
-						"delta": map[string]any{
-							"tool_calls": []interface{}{
-								map[string]any{
-									"id":   "call_2",
-									"type": "function",
-									"function": map[string]any{
-										"name":      "get_time",
-										"arguments": `{"timezone":"EST"}`,
-									},
-								},
-							},
-						},
-					},
-				},
+			toolCalls:    []any{toolCall("call_123", "get_weather", `{"location":"San Francisco"}`)},
+			finishReason: "tool_calls",
+		},
+		{
+			name: "MultipleToolCalls",
+			deltas: []map[string]any{
+				{"role": "assistant", "tool_calls": []any{toolCall("call_1", "get_weather", `{"location":"SF"}`)}},
+				{"tool_calls": []any{toolCall("call_2", "get_time", `{"timezone":"EST"}`)}},
 			},
-		}
-
-		result := ct.postprocessStreamingResults(results)
-		require.Len(result, 1)
-
-		choice := result[0]
-		message, ok := choice["message"].(map[string]interface{})
-		require.True(ok)
-
-		toolCalls, ok := message["tool_calls"].([]interface{})
-		require.True(ok, "should have tool_calls")
-		require.Len(toolCalls, 2)
-
-		// Check first tool call
-		toolCall1, ok := toolCalls[0].(map[string]interface{})
-		require.True(ok)
-		assert.Equal("call_1", toolCall1["id"])
-		function1, ok := toolCall1["function"].(map[string]interface{})
-		require.True(ok)
-		assert.Equal("get_weather", function1["name"])
-
-		// Check second tool call
-		toolCall2, ok := toolCalls[1].(map[string]interface{})
-		require.True(ok)
-		assert.Equal("call_2", toolCall2["id"])
-		function2, ok := toolCall2["function"].(map[string]interface{})
-		require.True(ok)
-		assert.Equal("get_time", function2["name"])
-	})
-
-	t.Run("ContentAndToolCalls", func(t *testing.T) {
-		// Test mixed content and tool calls
-		results := []map[string]any{
-			{
-				"choices": []interface{}{
-					map[string]any{
-						"index": 0,
-						"delta": map[string]any{
-							"role":    "assistant",
-							"content": "I'll help you with that. ",
-						},
-					},
-				},
+			toolCalls: []any{
+				toolCall("call_1", "get_weather", `{"location":"SF"}`),
+				toolCall("call_2", "get_time", `{"timezone":"EST"}`),
 			},
-			{
-				"choices": []interface{}{
-					map[string]any{
-						"index": 0,
-						"delta": map[string]any{
-							"content": "Let me check the weather.",
-						},
-					},
-				},
+		},
+		{
+			name: "ContentAndToolCalls",
+			deltas: []map[string]any{
+				{"role": "assistant", "content": "I'll help you with that. "},
+				{"content": "Let me check the weather."},
+				{"tool_calls": []any{toolCall("call_weather", "get_weather", `{"location":"NYC"}`)}},
 			},
-			{
-				"choices": []interface{}{
-					map[string]any{
-						"index": 0,
-						"delta": map[string]any{
-							"tool_calls": []interface{}{
-								map[string]any{
-									"id":   "call_weather",
-									"type": "function",
-									"function": map[string]any{
-										"name":      "get_weather",
-										"arguments": `{"location":"NYC"}`,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		result := ct.postprocessStreamingResults(results)
-		require.Len(result, 1)
-
-		choice := result[0]
-		message, ok := choice["message"].(map[string]interface{})
-		require.True(ok)
-
-		assert.Equal("assistant", message["role"])
-		assert.Equal("I'll help you with that. Let me check the weather.", message["content"])
-
-		toolCalls, ok := message["tool_calls"].([]interface{})
-		require.True(ok)
-		require.Len(toolCalls, 1)
-	})
-
-	t.Run("EmptyToolCallsArray", func(t *testing.T) {
-		// Test the edge case that caused the original bug
-		results := []map[string]any{
-			{
-				"choices": []interface{}{
-					map[string]any{
-						"index": 0,
-						"delta": map[string]any{
-							"role": "assistant",
-							"tool_calls": []interface{}{
-								map[string]any{
-									"id":   "call_first",
-									"type": "function",
-									"function": map[string]any{
-										"name":      "test_function",
-										"arguments": `{"param":"value"}`,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		// This should not panic (the bug we fixed)
-		result := ct.postprocessStreamingResults(results)
-		require.Len(result, 1)
-
-		choice := result[0]
-		message, ok := choice["message"].(map[string]interface{})
-		require.True(ok)
-		toolCalls, ok := message["tool_calls"].([]interface{})
-		require.True(ok)
-		require.Len(toolCalls, 1)
-	})
+			content:   "I'll help you with that. Let me check the weather.",
+			toolCalls: []any{toolCall("call_weather", "get_weather", `{"location":"NYC"}`)},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var chunks []map[string]any
+			for _, delta := range tc.deltas {
+				chunks = append(chunks, map[string]any{"choices": []any{map[string]any{"index": 0, "delta": delta}}})
+			}
+			if tc.finishReason != nil {
+				chunks = append(chunks, map[string]any{"choices": []any{map[string]any{
+					"index": 0, "delta": map[string]any{}, "finish_reason": tc.finishReason,
+				}}})
+			}
+			tracer := newChatCompletionsTracer(&middlewareConfig{})
+			result := tracer.postprocessStreamingResults(chunks)
+			if len(tc.deltas) == 0 {
+				require.Empty(t, result)
+				return
+			}
+			require.Len(t, result, 1)
+			message, ok := result[0]["message"].(map[string]any)
+			require.True(t, ok, "choice should contain a message")
+			assert.Equal(t, "assistant", message["role"])
+			assert.Equal(t, tc.content, message["content"])
+			assert.Equal(t, tc.toolCalls, message["tool_calls"])
+			assert.Equal(t, tc.finishReason, result[0]["finish_reason"])
+		})
+	}
 }
 
 // TestStreamingRefusal uses gpt-4o, not testModel: the dedicated refusal

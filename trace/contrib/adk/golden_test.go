@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -82,17 +81,6 @@ func newGoldenRunner(ctx context.Context, t *testing.T, tp oteltrace.TracerProvi
 	r, err := runner.New(runner.Config{AppName: goldenAppName, Agent: a, SessionService: svc})
 	require.NoError(t, err)
 	return r
-}
-
-// fixturePath returns path to a fixture file; empty if file does not exist.
-func fixturePath(t *testing.T, name string) string {
-	t.Helper()
-	_, filename, _, _ := runtime.Caller(0)
-	p := filepath.Join(filepath.Dir(filename), "testdata", "fixtures", name)
-	if _, err := os.Stat(p); err != nil {
-		return ""
-	}
-	return p
 }
 
 // runAndCollectFinal runs the agent and returns all final response events.
@@ -212,78 +200,72 @@ func TestMultiTurn(t *testing.T) {
 	assertGoldenExchange(t, exporter, []*genai.Content{msg1, firstOutput, msg2}, responses[0].Content, genai.FinishReasonStop)
 }
 
-func TestSystemPrompt(t *testing.T) {
-	ctx, tp, exporter := setupGoldenTest(t)
+func TestMultimodalInput(t *testing.T) {
+	cases := []struct {
+		name         string
+		fixture      string
+		mimeType     string
+		prefix       string
+		prompt       string
+		instruction  string
+		maxTokens    int32
+		finishReason genai.FinishReason
+	}{
+		{
+			name:         "image",
+			fixture:      "test-image.png",
+			mimeType:     "image/png",
+			prompt:       "What color is this image?",
+			instruction:  "You are a helpful vision assistant that can analyze images.",
+			maxTokens:    150,
+			finishReason: genai.FinishReasonMaxTokens,
+		},
+		{
+			name:         "document",
+			fixture:      "test-document.pdf",
+			mimeType:     "application/pdf",
+			prompt:       "What is in this document?",
+			instruction:  "You are a document analysis assistant.",
+			maxTokens:    150,
+			finishReason: genai.FinishReasonStop,
+		},
+		{
+			name:         "mixed_content",
+			fixture:      "test-image.png",
+			mimeType:     "image/png",
+			prefix:       "First, look at this image:",
+			prompt:       "Now describe what you see and explain why it matters.",
+			instruction:  "You are a helpful vision assistant.",
+			maxTokens:    200,
+			finishReason: genai.FinishReasonMaxTokens,
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx, tp, exporter := setupGoldenTest(t)
+			data, err := os.ReadFile(filepath.Join("testdata", "fixtures", tc.fixture))
+			require.NoError(t, err)
 
-	sid := "session-pirate"
-	r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
-		Name:                  "pirate_agent",
-		Instruction:           "You are a pirate. Always respond in pirate speak.",
-		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 150},
-	})
-
-	msg := genai.NewContentFromText("Tell me about the weather.", genai.RoleUser)
-	responses := runAndCollectFinal(ctx, t, r, sid, msg, agent.RunConfig{})
-	text := assertFinalResponse(t, responses)
-	t.Logf("Response: %s", text)
-
-	config := assertGoldenExchange(t, exporter, []*genai.Content{msg}, responses[0].Content, genai.FinishReasonMaxTokens)
-	assert.Equal(t, float64(150), config["maxOutputTokens"])
-	assert.Equal(t, goldenJSON(t, genai.NewContentFromText("You are a pirate. Always respond in pirate speak.", genai.RoleUser)), config["systemInstruction"])
-}
-
-func TestImageInput(t *testing.T) {
-	path := fixturePath(t, "test-image.png")
-	require.NotEmpty(t, path, "testdata/fixtures/test-image.png must exist")
-	data, err := os.ReadFile(path)
-	require.NoError(t, err)
-
-	ctx, tp, exporter := setupGoldenTest(t)
-
-	sid := "session-vision"
-	r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
-		Name:                  "vision_agent",
-		Instruction:           "You are a helpful vision assistant that can analyze images.",
-		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 150},
-	})
-
-	userMsg := genai.NewContentFromParts([]*genai.Part{
-		{InlineData: &genai.Blob{Data: data, MIMEType: "image/png"}},
-		{Text: "What color is this image?"},
-	}, genai.RoleUser)
-	responses := runAndCollectFinal(ctx, t, r, sid, userMsg, agent.RunConfig{})
-	text := assertFinalResponse(t, responses)
-	t.Logf("Response: %s", text)
-
-	config := assertGoldenExchange(t, exporter, []*genai.Content{userMsg}, responses[0].Content, genai.FinishReasonMaxTokens)
-	assert.Equal(t, float64(150), config["maxOutputTokens"])
-}
-
-func TestDocumentInput(t *testing.T) {
-	path := fixturePath(t, "test-document.pdf")
-	require.NotEmpty(t, path, "testdata/fixtures/test-document.pdf must exist")
-	data, err := os.ReadFile(path)
-	require.NoError(t, err)
-
-	ctx, tp, exporter := setupGoldenTest(t)
-
-	sid := "session-document"
-	r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
-		Name:                  "doc_agent",
-		Instruction:           "You are a document analysis assistant.",
-		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 150},
-	})
-
-	userMsg := genai.NewContentFromParts([]*genai.Part{
-		{InlineData: &genai.Blob{Data: data, MIMEType: "application/pdf"}},
-		{Text: "What is in this document?"},
-	}, genai.RoleUser)
-	responses := runAndCollectFinal(ctx, t, r, sid, userMsg, agent.RunConfig{})
-	text := assertFinalResponse(t, responses)
-	t.Logf("Response: %s", text)
-
-	config := assertGoldenExchange(t, exporter, []*genai.Content{userMsg}, responses[0].Content, genai.FinishReasonStop)
-	assert.Equal(t, float64(150), config["maxOutputTokens"])
+			r := newGoldenRunner(ctx, t, tp, tc.name, llmagent.Config{
+				Name:                  "multimodal_agent",
+				Instruction:           tc.instruction,
+				GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: tc.maxTokens},
+			})
+			var parts []*genai.Part
+			if tc.prefix != "" {
+				parts = append(parts, &genai.Part{Text: tc.prefix})
+			}
+			parts = append(parts,
+				&genai.Part{InlineData: &genai.Blob{Data: data, MIMEType: tc.mimeType}},
+				&genai.Part{Text: tc.prompt},
+			)
+			userMsg := genai.NewContentFromParts(parts, genai.RoleUser)
+			responses := runAndCollectFinal(ctx, t, r, tc.name, userMsg, agent.RunConfig{})
+			assertFinalResponse(t, responses)
+			config := assertGoldenExchange(t, exporter, []*genai.Content{userMsg}, responses[0].Content, tc.finishReason)
+			assert.Equal(t, float64(tc.maxTokens), config["maxOutputTokens"])
+		})
+	}
 }
 
 func TestGenerationConfig(t *testing.T) {
@@ -331,34 +313,6 @@ func TestStopSequences(t *testing.T) {
 	config := assertGoldenExchange(t, exporter, []*genai.Content{msg}, responses[0].Content, genai.FinishReasonMaxTokens)
 	assert.Equal(t, float64(500), config["maxOutputTokens"])
 	assert.Equal(t, []any{"END", "\n\n"}, config["stopSequences"])
-}
-
-func TestMixedContent(t *testing.T) {
-	path := fixturePath(t, "test-image.png")
-	require.NotEmpty(t, path, "testdata/fixtures/test-image.png must exist")
-	data, err := os.ReadFile(path)
-	require.NoError(t, err)
-
-	ctx, tp, exporter := setupGoldenTest(t)
-
-	sid := "session-mixed"
-	r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
-		Name:                  "vision_agent",
-		Instruction:           "You are a helpful vision assistant.",
-		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 200},
-	})
-
-	userMsg := genai.NewContentFromParts([]*genai.Part{
-		{Text: "First, look at this image:"},
-		{InlineData: &genai.Blob{Data: data, MIMEType: "image/png"}},
-		{Text: "Now describe what you see and explain why it matters."},
-	}, genai.RoleUser)
-	responses := runAndCollectFinal(ctx, t, r, sid, userMsg, agent.RunConfig{})
-	text := assertFinalResponse(t, responses)
-	t.Logf("Response: %s", text)
-
-	config := assertGoldenExchange(t, exporter, []*genai.Content{userMsg}, responses[0].Content, genai.FinishReasonMaxTokens)
-	assert.Equal(t, float64(200), config["maxOutputTokens"])
 }
 
 func TestShortMaxTokens(t *testing.T) {

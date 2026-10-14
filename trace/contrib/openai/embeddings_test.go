@@ -16,111 +16,71 @@ import (
 const testEmbeddingModel = "text-embedding-3-small"
 
 func TestOpenAIEmbeddings(t *testing.T) {
-	client, _, exporter := setUpTest(t)
-	assert := assert.New(t)
-	require := require.New(t)
-
-	timer := oteltest.NewTimer()
-	resp, err := client.Embeddings.New(context.Background(), openai.EmbeddingNewParams{
-		Input: openai.EmbeddingNewParamsInputUnion{
-			OfString: openai.String("The quick brown fox jumps over the lazy dog"),
+	for _, tc := range []struct {
+		name       string
+		input      openai.EmbeddingNewParamsInputUnion
+		wantInput  any
+		count      int
+		dimensions int64
+	}{
+		{
+			name:       "with_dimensions",
+			input:      openai.EmbeddingNewParamsInputUnion{OfString: openai.String("dimensionality test")},
+			wantInput:  "dimensionality test",
+			count:      1,
+			dimensions: 256,
 		},
-		Model: testEmbeddingModel,
-	})
-	timeRange := timer.Tick()
-	require.NoError(err)
-	require.NotNil(resp)
-	require.NotEmpty(resp.Data)
-	assert.NotEmpty(resp.Data[0].Embedding, "response should include embedding vector")
-
-	ts := exporter.FlushOne()
-	ts.AssertInTimeRange(timeRange)
-	ts.AssertNameIs("openai.embeddings.create")
-	assert.Equal(codes.Unset, ts.Stub.Status.Code)
-
-	ts.AssertJSONAttrEquals("braintrust.span_attributes", map[string]any{"type": "llm"})
-
-	inputAttr := ts.Attr("braintrust.input_json")
-	require.NotNil(inputAttr, "should set braintrust.input_json")
-	assert.Contains(inputAttr.String(), "quick brown fox")
-
-	output := ts.Output()
-	outputMap, ok := output.(map[string]interface{})
-	require.True(ok, "output should be a map")
-	embLen, ok := outputMap["embedding_length"].(float64)
-	require.True(ok, "output should include embedding_length")
-	assert.Greater(embLen, float64(0))
-
-	metadata := ts.Metadata()
-	assert.Equal("openai", metadata["provider"])
-	assert.Equal("/v1/embeddings", metadata["endpoint"])
-	assert.Contains(metadata["model"], testEmbeddingModel)
-
-	metrics := ts.Metrics()
-	assert.Greater(metrics["prompt_tokens"], float64(0), "should have prompt_tokens")
-	assert.Greater(metrics["tokens"], float64(0), "should have tokens (total_tokens)")
-	_, hasCompletion := metrics["completion_tokens"]
-	assert.False(hasCompletion, "embeddings do not have completion_tokens")
-}
-
-func TestOpenAIEmbeddingsBatch(t *testing.T) {
-	client, _, exporter := setUpTest(t)
-	assert := assert.New(t)
-	require := require.New(t)
-
-	inputs := []string{"hello world", "goodbye world", "braintrust tracing"}
-	resp, err := client.Embeddings.New(context.Background(), openai.EmbeddingNewParams{
-		Input: openai.EmbeddingNewParamsInputUnion{
-			OfArrayOfStrings: inputs,
+		{
+			name:      "batch",
+			input:     openai.EmbeddingNewParamsInputUnion{OfArrayOfStrings: []string{"hello world", "goodbye world", "braintrust tracing"}},
+			wantInput: []any{"hello world", "goodbye world", "braintrust tracing"},
+			count:     3,
 		},
-		Model: testEmbeddingModel,
-	})
-	require.NoError(err)
-	require.NotNil(resp)
-	require.Len(resp.Data, len(inputs))
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			client, _, exporter := setUpTest(t)
+			params := openai.EmbeddingNewParams{Input: tc.input, Model: testEmbeddingModel}
+			if tc.dimensions > 0 {
+				params.Dimensions = openai.Int(tc.dimensions)
+			}
+			timer := oteltest.NewTimer()
+			resp, err := client.Embeddings.New(context.Background(), params)
+			timeRange := timer.Tick()
+			require.NoError(t, err)
+			require.NotNil(t, resp)
+			require.Len(t, resp.Data, tc.count)
+			for _, embedding := range resp.Data {
+				assert.NotEmpty(t, embedding.Embedding)
+				if tc.dimensions > 0 {
+					assert.Len(t, embedding.Embedding, int(tc.dimensions))
+				}
+			}
 
-	ts := exporter.FlushOne()
+			span := exporter.FlushOne()
+			span.AssertInTimeRange(timeRange)
+			span.AssertNameIs("openai.embeddings.create")
+			assert.Equal(t, codes.Unset, span.Status().Code)
+			span.AssertJSONAttrEquals("braintrust.span_attributes", map[string]any{"type": "llm"})
+			span.AssertJSONAttrEquals("braintrust.input_json", tc.wantInput)
+			assert.Equal(t, map[string]any{"embedding_length": float64(len(resp.Data[0].Embedding))}, span.Output())
 
-	inputAttr := ts.Attr("braintrust.input_json")
-	require.NotNil(inputAttr)
-	for _, s := range inputs {
-		assert.Contains(inputAttr.String(), s)
+			metadata := span.Metadata()
+			assert.Equal(t, "openai", metadata["provider"])
+			assert.Equal(t, "/v1/embeddings", metadata["endpoint"])
+			assert.Contains(t, metadata["model"], testEmbeddingModel)
+			if tc.dimensions > 0 {
+				assert.Equal(t, float64(tc.dimensions), metadata["dimensions"])
+			} else {
+				assert.NotContains(t, metadata, "dimensions", "default dimensions should stay absent from metadata")
+			}
+
+			metrics := span.Metrics()
+			assert.Greater(t, metrics["prompt_tokens"], float64(0))
+			assert.Equal(t, float64(resp.Usage.PromptTokens), metrics["prompt_tokens"])
+			assert.Equal(t, float64(resp.Usage.TotalTokens), metrics["tokens"])
+			assert.NotContains(t, metrics, "completion_tokens", "embeddings do not have completion_tokens")
+		})
 	}
-
-	output := ts.Output()
-	outputMap, ok := output.(map[string]interface{})
-	require.True(ok)
-	embLen, ok := outputMap["embedding_length"].(float64)
-	require.True(ok)
-	assert.Greater(embLen, float64(0))
-}
-
-func TestOpenAIEmbeddingsWithDimensions(t *testing.T) {
-	client, _, exporter := setUpTest(t)
-	assert := assert.New(t)
-	require := require.New(t)
-
-	dims := int64(256)
-	resp, err := client.Embeddings.New(context.Background(), openai.EmbeddingNewParams{
-		Input: openai.EmbeddingNewParamsInputUnion{
-			OfString: openai.String("dimensionality test"),
-		},
-		Model:      testEmbeddingModel,
-		Dimensions: openai.Int(dims),
-	})
-	require.NoError(err)
-	require.NotNil(resp)
-
-	ts := exporter.FlushOne()
-	metadata := ts.Metadata()
-	dimsMeta, ok := metadata["dimensions"].(float64)
-	require.True(ok, "dimensions should be in metadata")
-	assert.Equal(float64(dims), dimsMeta)
-
-	output := ts.Output()
-	outputMap, ok := output.(map[string]interface{})
-	require.True(ok)
-	assert.Equal(float64(dims), outputMap["embedding_length"])
 }
 
 func TestEmbeddingsPathRouting(t *testing.T) {

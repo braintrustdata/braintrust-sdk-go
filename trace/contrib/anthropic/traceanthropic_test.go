@@ -80,50 +80,60 @@ func TestMiddlewareMatchesProxyPrefixedMessagesPath(t *testing.T) {
 }
 
 func TestParseUsageTokens(t *testing.T) {
-	usage := map[string]interface{}{
-		"input_tokens":  float64(12),
-		"output_tokens": float64(9),
-		"service_tier":  float64(42),
-	}
-
-	metrics := parseUsageTokens(usage)
-
-	assert.Equal(t, map[string]int64{
-		"prompt_tokens":     12,
-		"completion_tokens": 9,
-		"tokens":            21,
-	}, metrics)
-}
-
-func TestParseUsageTokensOmitsMissingAndInvalidMetrics(t *testing.T) {
-	assert.Empty(t, parseUsageTokens(nil))
-	assert.Empty(t, parseUsageTokens(map[string]interface{}{}))
-	assert.Empty(t, parseUsageTokens(map[string]interface{}{
-		"input_tokens":  float64(-1),
-		"output_tokens": "unknown",
-	}))
-}
-
-func TestParseUsageTokensWithCacheTTLs(t *testing.T) {
-	metrics := parseUsageTokens(map[string]interface{}{
-		"input_tokens":                float64(10),
-		"output_tokens":               float64(5),
-		"cache_creation_input_tokens": float64(100),
-		"cache_read_input_tokens":     float64(25),
-		"cache_creation": map[string]interface{}{
-			"ephemeral_5m_input_tokens": float64(40),
-			"ephemeral_1h_input_tokens": float64(60),
+	for _, tc := range []struct {
+		name  string
+		usage map[string]any
+		want  map[string]int64
+	}{
+		{
+			name:  "basic tokens and unknown fields",
+			usage: map[string]any{"input_tokens": float64(12), "output_tokens": float64(9), "service_tier": float64(42)},
+			want:  map[string]int64{"prompt_tokens": 12, "completion_tokens": 9, "tokens": 21},
 		},
-	})
-
-	assert.Equal(t, map[string]int64{
-		"prompt_tokens":                   135,
-		"completion_tokens":               5,
-		"tokens":                          140,
-		"prompt_cached_tokens":            25,
-		"prompt_cache_creation_5m_tokens": 40,
-		"prompt_cache_creation_1h_tokens": 60,
-	}, metrics)
+		{name: "nil usage", want: map[string]int64{}},
+		{name: "empty usage", usage: map[string]any{}, want: map[string]int64{}},
+		{
+			name:  "invalid tokens",
+			usage: map[string]any{"input_tokens": float64(-1), "output_tokens": "unknown"},
+			want:  map[string]int64{},
+		},
+		{
+			name:  "cache creation tokens",
+			usage: map[string]any{"input_tokens": float64(10), "output_tokens": float64(5), "cache_creation_input_tokens": float64(100)},
+			want:  map[string]int64{"prompt_tokens": 110, "completion_tokens": 5, "tokens": 115, "prompt_cache_creation_tokens": 100},
+		},
+		{
+			name:  "cache read tokens",
+			usage: map[string]any{"input_tokens": float64(8), "output_tokens": float64(12), "cache_read_input_tokens": float64(50)},
+			want:  map[string]int64{"prompt_tokens": 58, "completion_tokens": 12, "tokens": 70, "prompt_cached_tokens": 50},
+		},
+		{
+			name:  "both cache token types",
+			usage: map[string]any{"input_tokens": float64(15), "output_tokens": float64(20), "cache_creation_input_tokens": float64(200), "cache_read_input_tokens": float64(75)},
+			want:  map[string]int64{"prompt_tokens": 290, "completion_tokens": 20, "tokens": 310, "prompt_cache_creation_tokens": 200, "prompt_cached_tokens": 75},
+		},
+		{
+			name:  "cache tokens without input tokens",
+			usage: map[string]any{"output_tokens": float64(10), "cache_creation_input_tokens": float64(150), "cache_read_input_tokens": float64(25)},
+			want:  map[string]int64{"prompt_tokens": 175, "completion_tokens": 10, "tokens": 185, "prompt_cache_creation_tokens": 150, "prompt_cached_tokens": 25},
+		},
+		{
+			name: "cache TTL details",
+			usage: map[string]any{
+				"input_tokens": float64(10), "output_tokens": float64(5),
+				"cache_creation_input_tokens": float64(100), "cache_read_input_tokens": float64(25),
+				"cache_creation": map[string]any{"ephemeral_5m_input_tokens": float64(40), "ephemeral_1h_input_tokens": float64(60)},
+			},
+			want: map[string]int64{
+				"prompt_tokens": 135, "completion_tokens": 5, "tokens": 140, "prompt_cached_tokens": 25,
+				"prompt_cache_creation_5m_tokens": 40, "prompt_cache_creation_1h_tokens": 60,
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, parseUsageTokens(tc.usage))
+		})
+	}
 }
 
 func TestMessagesTracerCapturesRequestMetadata(t *testing.T) {
@@ -237,71 +247,6 @@ func TestMessagesTracerCapturesNativeResponse(t *testing.T) {
 	}, exported.Output())
 	assert.Equal(t, "claude-haiku-4-5-20251001", exported.Metadata()["model"])
 	assert.NotContains(t, exported.Metrics(), "time_to_first_token")
-}
-
-func TestParseUsageTokensWithCache(t *testing.T) {
-	t.Run("cache_creation_input_tokens", func(t *testing.T) {
-		usage := map[string]interface{}{
-			"input_tokens":                float64(10),
-			"output_tokens":               float64(5),
-			"cache_creation_input_tokens": float64(100),
-		}
-
-		metrics := parseUsageTokens(usage)
-
-		// Should include cache creation tokens in the total
-		assert.Equal(t, int64(110), metrics["prompt_tokens"]) // 10 + 100
-		assert.Equal(t, int64(5), metrics["completion_tokens"])
-		assert.Equal(t, int64(100), metrics["prompt_cache_creation_tokens"])
-	})
-
-	t.Run("cache_read_input_tokens", func(t *testing.T) {
-		usage := map[string]interface{}{
-			"input_tokens":            float64(8),
-			"output_tokens":           float64(12),
-			"cache_read_input_tokens": float64(50),
-		}
-
-		metrics := parseUsageTokens(usage)
-
-		// Should include cache read tokens in the total
-		assert.Equal(t, int64(58), metrics["prompt_tokens"]) // 8 + 50
-		assert.Equal(t, int64(12), metrics["completion_tokens"])
-		assert.Equal(t, int64(50), metrics["prompt_cached_tokens"])
-	})
-
-	t.Run("both_cache_tokens", func(t *testing.T) {
-		usage := map[string]interface{}{
-			"input_tokens":                float64(15),
-			"output_tokens":               float64(20),
-			"cache_creation_input_tokens": float64(200),
-			"cache_read_input_tokens":     float64(75),
-		}
-
-		metrics := parseUsageTokens(usage)
-
-		// Should include both cache tokens in the total
-		assert.Equal(t, int64(290), metrics["prompt_tokens"]) // 15 + 200 + 75
-		assert.Equal(t, int64(20), metrics["completion_tokens"])
-		assert.Equal(t, int64(200), metrics["prompt_cache_creation_tokens"])
-		assert.Equal(t, int64(75), metrics["prompt_cached_tokens"])
-	})
-
-	t.Run("cache_tokens_without_input_tokens", func(t *testing.T) {
-		usage := map[string]interface{}{
-			"output_tokens":               float64(10),
-			"cache_creation_input_tokens": float64(150),
-			"cache_read_input_tokens":     float64(25),
-		}
-
-		metrics := parseUsageTokens(usage)
-
-		// Should still account for cache tokens even without explicit input_tokens
-		assert.Equal(t, int64(175), metrics["prompt_tokens"]) // 150 + 25
-		assert.Equal(t, int64(10), metrics["completion_tokens"])
-		assert.Equal(t, int64(150), metrics["prompt_cache_creation_tokens"])
-		assert.Equal(t, int64(25), metrics["prompt_cached_tokens"])
-	})
 }
 
 // TestMiddlewareIntegration tests the middleware with real Anthropic API calls

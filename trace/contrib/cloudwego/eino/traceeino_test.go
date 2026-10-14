@@ -253,48 +253,52 @@ func TestOnStartWithStreamInput_ToolInput(t *testing.T) {
 	assert.Equal(t, "72F", out)
 }
 
-func TestOnStartWithStreamInput_TaskPreservesAllChunks(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-	info := &callbacks.RunInfo{Component: compose.ComponentOfGraph}
+func TestTaskStreamPreservesGenericChunks(t *testing.T) {
+	for _, streamingOutput := range []bool{false, true} {
+		name := "collected output"
+		if streamingOutput {
+			name = "streamed output"
+		}
+		t.Run(name, func(t *testing.T) {
+			tp, exporter := oteltest.Setup(t)
+			handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
+			info := &callbacks.RunInfo{Component: compose.ComponentOfGraph}
+			var wantInput any = map[string]any{"input": true}
+			ctx := context.Background()
+			if streamingOutput {
+				ctx = handler.OnStart(ctx, info, wantInput)
+			} else {
+				input, inputWriter := schema.Pipe[callbacks.CallbackInput](3)
+				for _, chunk := range []int{1, 2, 3} {
+					inputWriter.Send(map[string]any{"chunk": chunk}, nil)
+				}
+				inputWriter.Close()
+				ctx = handler.OnStartWithStreamInput(ctx, info, input)
+				wantInput = []any{
+					map[string]any{"chunk": float64(1)},
+					map[string]any{"chunk": float64(2)},
+					map[string]any{"chunk": float64(3)},
+				}
+			}
 
-	sr, sw := schema.Pipe[callbacks.CallbackInput](3)
-	sw.Send(map[string]any{"chunk": 1}, nil)
-	sw.Send(map[string]any{"chunk": 2}, nil)
-	sw.Send(map[string]any{"chunk": 3}, nil)
-	sw.Close()
+			var wantOutput any = map[string]any{"done": true}
+			if streamingOutput {
+				output, outputWriter := schema.Pipe[callbacks.CallbackOutput](2)
+				outputWriter.Send(map[string]any{"chunk": 1}, nil)
+				outputWriter.Send(map[string]any{"chunk": 2}, nil)
+				outputWriter.Close()
+				handler.OnEndWithStreamOutput(ctx, info, output)
+				handler.Wait()
+				wantOutput = []any{map[string]any{"chunk": float64(1)}, map[string]any{"chunk": float64(2)}}
+			} else {
+				handler.OnEnd(ctx, info, wantOutput)
+			}
 
-	ctx := handler.OnStartWithStreamInput(context.Background(), info, sr)
-	handler.OnEnd(ctx, info, map[string]any{"done": true})
-
-	span := exporter.FlushOne()
-	inputs, ok := span.Input().([]any)
-	require.True(t, ok)
-	require.Len(t, inputs, 3)
-	assert.Equal(t, float64(1), inputs[0].(map[string]any)["chunk"])
-	assert.Equal(t, float64(3), inputs[2].(map[string]any)["chunk"])
-}
-
-func TestOnEndWithStreamOutput_TaskPreservesGenericChunks(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-	info := &callbacks.RunInfo{Component: compose.ComponentOfGraph}
-	ctx := handler.OnStart(context.Background(), info, map[string]any{"input": true})
-
-	sr, sw := schema.Pipe[callbacks.CallbackOutput](2)
-	sw.Send(map[string]any{"chunk": 1}, nil)
-	sw.Send(map[string]any{"chunk": 2}, nil)
-	sw.Close()
-
-	handler.OnEndWithStreamOutput(ctx, info, sr)
-	handler.Wait()
-
-	span := exporter.FlushOne()
-	outputs, ok := span.Output().([]any)
-	require.True(t, ok)
-	require.Len(t, outputs, 2)
-	assert.Equal(t, float64(1), outputs[0].(map[string]any)["chunk"])
-	assert.Equal(t, float64(2), outputs[1].(map[string]any)["chunk"])
+			span := exporter.FlushOne()
+			assert.Equal(t, wantInput, span.Input())
+			assert.Equal(t, wantOutput, span.Output())
+		})
+	}
 }
 
 func TestOnEndWithStreamOutput_Tool(t *testing.T) {
@@ -313,24 +317,33 @@ func TestOnEndWithStreamOutput_Tool(t *testing.T) {
 	assert.Equal(t, "hello world", span.Output())
 }
 
-func TestOnStartWithStreamInput_UnrecognizedInput(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	ctx := context.Background()
-	info := makeRunInfo("retriever", "")
-
+func TestUnrecognizedInputIgnored(t *testing.T) {
 	type customInput struct{ Query string }
-	sr, sw := schema.Pipe[callbacks.CallbackInput](2)
-	sw.Send(&customInput{Query: "docs"}, nil)
-	sw.Close()
-
-	// Unrecognized input should not create a span.
-	ctx2 := handler.OnStartWithStreamInput(ctx, info, sr)
-	assert.Equal(t, ctx, ctx2)
-
-	spans := exporter.Flush()
-	assert.Len(t, spans, 0)
+	for _, streamingInput := range []bool{false, true} {
+		name := "direct input"
+		if streamingInput {
+			name = "streamed input"
+		}
+		t.Run(name, func(t *testing.T) {
+			tp, exporter := oteltest.Setup(t)
+			handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
+			ctx := context.Background()
+			info := makeRunInfo("retriever", "VectorStore")
+			input := &customInput{Query: "docs"}
+			var ctx2 context.Context
+			if streamingInput {
+				reader, writer := schema.Pipe[callbacks.CallbackInput](1)
+				writer.Send(input, nil)
+				writer.Close()
+				ctx2 = handler.OnStartWithStreamInput(ctx, info, reader)
+			} else {
+				ctx2 = handler.OnStart(ctx, info, input)
+			}
+			assert.Equal(t, ctx, ctx2, "unrecognized input should not create a span")
+			handler.OnEnd(ctx2, info, input)
+			assert.Empty(t, exporter.Flush())
+		})
+	}
 }
 
 func TestNeeded(t *testing.T) {
@@ -582,22 +595,6 @@ func TestStructuredToolOutputRejectsMalformedParts(t *testing.T) {
 		Type: schema.ToolPartTypeImage,
 	}}})
 	require.Error(t, err)
-}
-
-func TestUnrecognizedInput_StillIgnored(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-	handler := NewHandlerWithOptions(HandlerOptions{TracerProvider: tp})
-
-	ctx := context.Background()
-	info := makeRunInfo("retriever", "VectorStore")
-
-	// An arbitrary struct type — not model, tool, or string CallbackInput
-	type customInput struct{ Query string }
-	ctx2 := handler.OnStart(ctx, info, &customInput{Query: "docs"})
-	handler.OnEnd(ctx2, info, &customInput{Query: "docs"})
-
-	spans := exporter.Flush()
-	assert.Len(t, spans, 0)
 }
 
 func TestOnEndWithStreamOutput_ConcatError(t *testing.T) {
