@@ -17,6 +17,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/sdk/instrumentation"
+	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	oteltrace "go.opentelemetry.io/otel/trace"
@@ -111,7 +114,7 @@ func (l *recordingLogger) String() string {
 	return strings.Join(l.lines, "\n")
 }
 
-func TestSpanCustomizersFailEntireBatch(t *testing.T) {
+func TestSpanCustomizersStripFailedSpan(t *testing.T) {
 	failure := errors.New("redaction failed: secret payload")
 	for _, tc := range []struct {
 		name string
@@ -133,11 +136,32 @@ func TestSpanCustomizersFailEntireBatch(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			sink := tracetest.NewInMemoryExporter()
-			log := &recordingLogger{}
 			laterCalls := 0
+			original := tracetest.SpanStubFromReadOnlySpan(customizerTestSpan("second"))
+			original.StartTime = time.Unix(100, 0)
+			original.EndTime = time.Unix(105, 0)
+			original.Attributes = append(original.Attributes,
+				attribute.String(ParentOtelAttrKey, "experiment_id:original"),
+				attribute.String("braintrust.context_json", `{"secret":"context"}`),
+				attribute.String("braintrust.output_json", `"secret"`),
+				attribute.String("braintrust.metadata", "secret"),
+				attribute.String("braintrust.tags", "secret"),
+				attribute.Int("braintrust.metrics.tokens", 99))
+			original.Status = sdktrace.Status{Code: codes.Error, Description: "secret"}
+			original.Resource = resource.NewSchemaless(attribute.String("secret", "resource"))
+			original.InstrumentationScope = instrumentation.Scope{Name: "secret", Version: "secret", SchemaURL: "secret"}
+			original.DroppedAttributes, original.DroppedEvents, original.DroppedLinks, original.ChildSpanCount = 1, 2, 3, 4
 			exporter := newCustomizingExporter(sink, []config.SpanCustomizer{
 				{OnSpanExport: func(span sdktrace.ReadOnlySpan) (sdktrace.ReadOnlySpan, error) {
-					span.Attributes()[0] = attribute.String("braintrust.input_json", `"redacted"`)
+					changed := tracetest.SpanStubFromReadOnlySpan(span)
+					changed.StartTime, changed.EndTime = time.Unix(200, 0), time.Unix(900, 0)
+					changed.Attributes = []attribute.KeyValue{
+						attribute.String(ParentOtelAttrKey, "project_name:mutated"),
+						attribute.String("braintrust.context_json", `{"partial":"secret"}`),
+					}
+					return changed.Snapshot(), nil
+				}},
+				{OnSpanExport: func(span sdktrace.ReadOnlySpan) (sdktrace.ReadOnlySpan, error) {
 					if span.Name() == "second" {
 						return tc.hook(span)
 					}
@@ -147,23 +171,141 @@ func TestSpanCustomizersFailEntireBatch(t *testing.T) {
 					laterCalls++
 					return span, nil
 				}},
-			}, log)
-			batch := []sdktrace.ReadOnlySpan{customizerTestSpan("first"), customizerTestSpan("second")}
-			err := exporter.ExportSpans(context.Background(), batch)
-			require.Error(t, err)
-			// Diagnostics identify the hook and failure kind, never hook-provided text.
-			assert.Contains(t, err.Error(), "span customizer 0 ")
-			assert.NotErrorIs(t, err, failure)
-			assert.NotContains(t, err.Error(), "secret")
-			assert.Contains(t, log.String(), "span customization failed")
-			assert.NotContains(t, log.String(), "secret")
-			assert.Empty(t, sink.GetSpans())
-			assert.Equal(t, 1, laterCalls)
-			for _, span := range batch {
-				assert.Equal(t, `"secret"`, span.Attributes()[0].Value.AsString())
-			}
+			}, logger.Discard())
+			batch := []sdktrace.ReadOnlySpan{customizerTestSpan("first"), original.Snapshot(), customizerTestSpan("third")}
+			before := tracetest.SpanStubFromReadOnlySpan(batch[1])
+			require.NoError(t, exporter.ExportSpans(context.Background(), batch))
+			exported := sink.GetSpans()
+			require.Len(t, exported, 3)
+			assert.Equal(t, "first", exported[0].Name)
+			assert.Equal(t, "third", exported[2].Name)
+			assert.Equal(t, 2, laterCalls)
+			assert.Equal(t, tracetest.SpanStub{
+				SpanContext: original.SpanContext,
+				Parent:      original.Parent,
+				StartTime:   original.StartTime,
+				EndTime:     original.EndTime,
+				Resource:    resource.Empty(),
+				Attributes: []attribute.KeyValue{
+					attribute.String(ParentOtelAttrKey, "experiment_id:original"),
+					attribute.String("braintrust.context_json", `{"customizer_error":true}`),
+				},
+			}, exported[1])
+			assert.Equal(t, before, tracetest.SpanStubFromReadOnlySpan(batch[1]))
 		})
 	}
+}
+
+func TestSpanCustomizerFailureLoggingOncePerProcess(t *testing.T) {
+	// No tests in this package run in parallel; isolate the process-wide budget.
+	customizerFailureLogOnce = sync.Once{}
+	log := &recordingLogger{}
+	var calls atomic.Int32
+	sink := tracetest.NewInMemoryExporter()
+	customizers := []config.SpanCustomizer{
+		{OnSpanExport: func(sdktrace.ReadOnlySpan) (sdktrace.ReadOnlySpan, error) {
+			calls.Add(1)
+			panic("private exception message and stack")
+		}},
+	}
+	first := newCustomizingExporter(sink, customizers, log)
+	second := newCustomizingExporter(sink, []config.SpanCustomizer{{OnSpanExport: func(sdktrace.ReadOnlySpan) (sdktrace.ReadOnlySpan, error) {
+		calls.Add(1)
+		return nil, errors.New("private hook error")
+	}}}, log)
+	batch := []sdktrace.ReadOnlySpan{customizerTestSpan("private span"), customizerTestSpan("private span")}
+	var workers sync.WaitGroup
+	for i := range 20 {
+		workers.Go(func() {
+			exporter := first
+			if i%2 == 0 {
+				exporter = second
+			}
+			assert.NoError(t, exporter.ExportSpans(context.Background(), batch))
+		})
+	}
+	workers.Wait()
+	assert.Equal(t, int32(40), calls.Load(), "explicit resubmission invokes hooks again")
+	assert.Len(t, log.lines, 1)
+	assert.Contains(t, log.String(), "span customization failed")
+	assert.NotContains(t, log.String(), "private")
+	require.Len(t, sink.GetSpans(), 40)
+	for _, span := range sink.GetSpans() {
+		assert.Equal(t, []attribute.KeyValue{attribute.String("braintrust.context_json", `{"customizer_error":true}`)}, span.Attributes)
+	}
+}
+
+type panickingCustomizerSpan struct {
+	sdktrace.ReadOnlySpan
+}
+
+func (panickingCustomizerSpan) Attributes() []attribute.KeyValue { panic("secret payload") }
+
+func TestSpanCustomizersDropUnusableInputSpans(t *testing.T) {
+	var typedNil *mutableCustomizerSpan
+	for _, tc := range []struct {
+		name string
+		span sdktrace.ReadOnlySpan
+	}{
+		{"nil", nil},
+		{"typed nil", typedNil},
+		{"panicking accessor", panickingCustomizerSpan{customizerTestSpan("second")}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			sink := tracetest.NewInMemoryExporter()
+			hookCalls := 0
+			exporter := newCustomizingExporter(sink, []config.SpanCustomizer{{OnSpanExport: func(span sdktrace.ReadOnlySpan) (sdktrace.ReadOnlySpan, error) {
+				hookCalls++
+				return span, nil
+			}}}, logger.Discard())
+			// Without a usable identity there is no safe stripped record to send.
+			batch := []sdktrace.ReadOnlySpan{customizerTestSpan("first"), tc.span, customizerTestSpan("third")}
+			require.NoError(t, exporter.ExportSpans(context.Background(), batch))
+			exported := sink.GetSpans()
+			require.Len(t, exported, 2)
+			assert.Equal(t, "first", exported[0].Name)
+			assert.Equal(t, "third", exported[1].Name)
+			assert.Equal(t, 2, hookCalls)
+		})
+	}
+}
+
+type mutableCustomizerSpan struct {
+	sdktrace.ReadOnlySpan
+	identity, parent oteltrace.SpanContext
+	start, end       time.Time
+}
+
+func (s *mutableCustomizerSpan) SpanContext() oteltrace.SpanContext { return s.identity }
+func (s *mutableCustomizerSpan) Parent() oteltrace.SpanContext      { return s.parent }
+func (s *mutableCustomizerSpan) StartTime() time.Time               { return s.start }
+func (s *mutableCustomizerSpan) EndTime() time.Time                 { return s.end }
+
+func TestSpanCustomizerFailureRetainsPreHookValues(t *testing.T) {
+	state, err := oteltrace.ParseTraceState("private=secret")
+	require.NoError(t, err)
+	base := customizerTestSpan("private")
+	original := &mutableCustomizerSpan{
+		ReadOnlySpan: base,
+		identity:     base.SpanContext().WithTraceState(state),
+		parent:       base.Parent().WithTraceState(state),
+		start:        time.Unix(100, 0),
+		end:          time.Unix(102, 0),
+	}
+	sink := tracetest.NewInMemoryExporter()
+	exporter := newCustomizingExporter(sink, []config.SpanCustomizer{{OnSpanExport: func(sdktrace.ReadOnlySpan) (sdktrace.ReadOnlySpan, error) {
+		original.identity = original.identity.WithSpanID(oteltrace.SpanID{9})
+		original.parent = oteltrace.SpanContext{}
+		original.start, original.end = time.Unix(500, 0), time.Unix(999, 0)
+		return nil, errors.New("private")
+	}}}, logger.Discard())
+	require.NoError(t, exporter.ExportSpans(context.Background(), []sdktrace.ReadOnlySpan{original}))
+	exported := sink.GetSpans()
+	require.Len(t, exported, 1)
+	assert.Equal(t, base.SpanContext(), exported[0].SpanContext)
+	assert.Equal(t, base.Parent(), exported[0].Parent)
+	assert.Equal(t, time.Unix(100, 0), exported[0].StartTime)
+	assert.Equal(t, time.Unix(102, 0), exported[0].EndTime)
 }
 
 func TestSpanCustomizersProtectIdentityAfterEachHook(t *testing.T) {
@@ -199,9 +341,13 @@ func TestSpanCustomizersProtectIdentityAfterEachHook(t *testing.T) {
 					return original, nil // Restoring IDs later must not bypass validation.
 				}},
 			}, logger.Discard())
-			require.Error(t, exporter.ExportSpans(context.Background(), []sdktrace.ReadOnlySpan{original}))
+			require.NoError(t, exporter.ExportSpans(context.Background(), []sdktrace.ReadOnlySpan{original}))
 			assert.False(t, laterCalled)
-			assert.Empty(t, sink.GetSpans())
+			exported := sink.GetSpans()
+			require.Len(t, exported, 1)
+			assert.Equal(t, original.SpanContext(), exported[0].SpanContext)
+			assert.Equal(t, original.Parent(), exported[0].Parent)
+			assert.Equal(t, []attribute.KeyValue{attribute.String("braintrust.context_json", `{"customizer_error":true}`)}, exported[0].Attributes)
 		})
 	}
 }
@@ -270,7 +416,7 @@ func TestSpanCustomizersRunBeforeAttachments(t *testing.T) {
 		return `{"type":"base64_attachment","content":"data:image/png;base64,` +
 			base64.StdEncoding.EncodeToString([]byte(data)) + `"}`
 	}
-	for _, mode := range []string{"redact", "replace", "reject-batch"} {
+	for _, mode := range []string{"redact", "replace", "strip-failed"} {
 		t.Run(mode, func(t *testing.T) {
 			uploader := &customizerAttachmentUploader{}
 			sink := tracetest.NewInMemoryExporter()
@@ -289,7 +435,7 @@ func TestSpanCustomizersRunBeforeAttachments(t *testing.T) {
 							assert.Equal(t, attachmentJSON(privateData), attr.Value.AsString())
 						}
 					}
-					if mode == "reject-batch" {
+					if mode == "strip-failed" {
 						if span.Name() == "second" {
 							return nil, errors.New("cannot redact attachment")
 						}
@@ -317,10 +463,18 @@ func TestSpanCustomizersRunBeforeAttachments(t *testing.T) {
 			}
 			err := tp.ForceFlush(ctx)
 			assert.Equal(t, []string{"first", "second"}, seen)
-			if mode == "reject-batch" {
-				require.Error(t, err)
-				assert.Empty(t, uploader.data)
-				assert.Empty(t, sink.GetSpans())
+			if mode == "strip-failed" {
+				require.NoError(t, err)
+				assert.Equal(t, [][]byte{[]byte(privateData), []byte(privateData)}, uploader.data)
+				exported := sink.GetSpans()
+				require.Len(t, exported, 2)
+				assert.Equal(t, "first", exported[0].Name)
+				assert.Empty(t, exported[1].Name)
+				assert.Contains(t, exported[1].Attributes, attribute.String("braintrust.context_json", `{"customizer_error":true}`))
+				for _, attr := range exported[1].Attributes {
+					assert.NotEqual(t, inputJSONAttrKey, attr.Key)
+					assert.NotEqual(t, outputJSONAttrKey, attr.Key)
+				}
 				return
 			}
 			require.NoError(t, err)

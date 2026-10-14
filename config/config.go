@@ -67,8 +67,12 @@ type SpanCustomizer struct {
 	// Hooks run in registration order for every span reaching the Braintrust exporter,
 	// after filtering, before automatic attachment processing/uploads and serialization.
 	// Remove or redact inline attachments here to prevent their upload. Errors, panics,
-	// nil results, or changed IDs fail the entire batch before any spans or attachments are sent.
-	// Submitting a batch again invokes hooks again; transport retries do not.
+	// nil results, or changed IDs stop later hooks for that span and strip its content,
+	// retaining original IDs, timestamps, protocol flags, and braintrust.parent routing.
+	// braintrust.context_json is replaced with {"customizer_error":true}. Stripped spans
+	// upload no attachments; they and unrelated spans continue through export.
+	// Hook failures log at most once per process, without hook error text or payloads.
+	// Submitting a batch again invokes hooks again; transport retries reuse the result.
 	//
 	// Hooks may run on background goroutines and should be fast and concurrency-safe.
 	// Do not retain or asynchronously mutate the supplied span or returned replacement.

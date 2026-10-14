@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -31,6 +32,11 @@ func main() {
 		braintrust.WithBlockingLogin(true),
 		braintrust.WithSpanCustomizers(config.SpanCustomizer{
 			OnSpanExport: func(span sdktrace.ReadOnlySpan) (sdktrace.ReadOnlySpan, error) {
+				if span.Name() == "failed-redaction" {
+					// Failure strips content, keeps identity/timing/routing, and adds
+					// context.customizer_error=true. It does not reject other spans.
+					return nil, errors.New("redaction unavailable")
+				}
 				attrs := make([]attribute.KeyValue, 0, len(span.Attributes())+1)
 				for _, attr := range span.Attributes() {
 					switch attr.Key {
@@ -58,6 +64,10 @@ func main() {
 	)
 	link := client.Permalink(span)
 	span.End()
+	_, failed := client.Tracer("span-customizers-example").Start(ctx, "failed-redaction")
+	failed.SetAttributes(attribute.String("braintrust.input_json", `{"email":"private@example.com"}`))
+	failedLink := client.Permalink(failed)
+	failed.End()
 	if err := tp.ForceFlush(ctx); err != nil {
 		log.Fatal(err)
 	}
@@ -65,4 +75,5 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println("Exported redacted span:", link)
+	fmt.Println("Exported stripped span:", failedLink)
 }

@@ -192,9 +192,11 @@ func main() {
 - Hooks apply to **all spans reaching the Braintrust exporter**, including manual
   and instrumented spans, after filtering and span-origin metadata, but before
   automatic attachment conversion/uploads and OTLP serialization. Customizers see
-  inline attachment data; removing or redacting it prevents its upload. Only
-  attachments remaining after every hook succeeds for the entire batch are
-  processed. This also applies with lazy authentication or a custom exporter.
+  inline attachment data; removing or redacting it prevents its upload.
+  Customization finishes for the entire batch before attachment processing begins.
+  Only attachments remaining on successfully customized spans are processed;
+  stripped hook-failure records upload no attachments. This also applies with lazy
+  authentication or a custom exporter.
   Other span processors and application-visible values are unchanged. Separately
   enabled trace-console logging is not customized.
 - Return the original snapshot or a valid replacement. Replacements are not merged;
@@ -205,10 +207,16 @@ func main() {
   including zero/invalid IDs for root spans. They are checked after **each** hook.
   Context flags and trace state are not protected IDs. Routing attributes such as
   `braintrust.parent` may be changed.
-- Errors, panics (recovered as errors), nil results, or changed IDs **fail closed**:
-  the exporter logs and returns an error and sends none of that batch or its
-  attachments. It never exports originals as a fallback or mutates the caller's
-  batch. This does not roll back external side effects performed by hooks.
+- Errors, panics, nil results, or changed IDs **fail closed for the affected span**:
+  later hooks stop for that span and its content is stripped. The stripped record
+  retains the original IDs, timestamps, protocol flags, and `braintrust.parent`
+  routing; `braintrust.context_json` is replaced with `{"customizer_error":true}`.
+  The stripped record and unrelated spans continue through export. Hook failures
+  do not themselves cause an export or `ForceFlush` error, so a successful flush
+  does not imply every hook succeeded or that no data was exported.
+  Failures are logged at most once per process, without hook error/panic text or
+  payloads. Original content is never exported as a fallback, and the caller's
+  batch is not mutated. External side effects performed by hooks are not rolled back.
 - Hooks run synchronously on the export path, often on a background goroutine.
   Keep them fast, avoid blocking I/O, and make shared state concurrency-safe.
   Do not retain or asynchronously mutate the supplied or returned span.
@@ -229,8 +237,11 @@ with `BRAINTRUST_API_KEY` set:
 go run ./examples/internal/span-customizers/main.go
 ```
 
-The example prints a Braintrust link. The exported span's input is `"[redacted]"`,
-its output is absent, and its `redacted` attribute is `true`.
+The example prints Braintrust links for a redacted span and a stripped failure
+record. The redacted span's input is `"[redacted]"`, its output is absent, and its
+`redacted` attribute is `true`. The failure record has its content stripped and
+`context.customizer_error` set to `true`; it does not prevent the redacted span
+from being exported.
 
 ## Evaluations
 
