@@ -625,7 +625,8 @@ func (h *Handler) HandleToolError(ctx context.Context, err error) {
 
 // HandleAgentAction is called when an agent performs an action.
 func (h *Handler) HandleAgentAction(ctx context.Context, action schema.AgentAction) {
-	_, span := h.tracer().Start(ctx, "langchain.agent.action")
+	parentCtx := h.getParentContext(ctx)
+	_, span := h.tracer().Start(parentCtx, "langchain.agent.action")
 
 	actionData := map[string]interface{}{
 		"tool":       action.Tool,
@@ -643,7 +644,8 @@ func (h *Handler) HandleAgentAction(ctx context.Context, action schema.AgentActi
 
 // HandleAgentFinish is called when an agent finishes.
 func (h *Handler) HandleAgentFinish(ctx context.Context, finish schema.AgentFinish) {
-	_, span := h.tracer().Start(ctx, "langchain.agent.finish")
+	parentCtx := h.getParentContext(ctx)
+	_, span := h.tracer().Start(parentCtx, "langchain.agent.finish")
 
 	finishData := map[string]interface{}{
 		"return_values": finish.ReturnValues,

@@ -4,7 +4,7 @@
 // - Multi-turn conversations
 // - Chain executions
 // - Tool usage
-// - Agent actions
+// - Agent actions and finish nested under the executor chain
 // - Retriever operations
 // - Streaming chunks
 // - System prompts
@@ -92,10 +92,10 @@ func main() {
 	fmt.Println("-----------------------")
 	simulatedTool(ctx, tracer, handler)
 
-	// Example 5: Simulated agent actions
-	fmt.Println("\n5. Simulated Agent Actions")
+	// Example 5: Agent action/finish spans nested under the executor chain
+	fmt.Println("\n5. Agent Span Hierarchy")
 	fmt.Println("--------------------------")
-	simulatedAgent(ctx, tracer, handler, llm)
+	agentWorkflow(ctx, tracer, handler, llm)
 
 	// Example 6: Simulated retriever
 	fmt.Println("\n6. Simulated Retriever")
@@ -285,14 +285,16 @@ func simulatedTool(parentCtx context.Context, tracer oteltrace.Tracer, handler *
 	fmt.Printf("Output: %s\n", result)
 }
 
-// simulatedAgent demonstrates agent callback tracing using a real agent executor
-func simulatedAgent(parentCtx context.Context, tracer oteltrace.Tracer, handler *tracelangchaingo.Handler, llm *openai.LLM) {
+// agentWorkflow demonstrates a real agent's model → calculator → model turn.
+// Action, tool, and finish spans are children of the executor's langchain.chain;
+// each planning chain contains its own LLM span.
+func agentWorkflow(parentCtx context.Context, tracer oteltrace.Tracer, handler *tracelangchaingo.Handler, llm *openai.LLM) {
 	ctx, span := tracer.Start(parentCtx, "agent-workflow")
 	defer span.End()
 
 	// Create tools for the agent (Calculator)
 	agentTools := []tools.Tool{
-		tools.Calculator{},
+		tools.Calculator{CallbacksHandler: handler},
 	}
 
 	// Create a real agent executor with callback handler
@@ -308,7 +310,7 @@ func simulatedAgent(parentCtx context.Context, tracer oteltrace.Tracer, handler 
 	)
 
 	// Ask the agent a question that requires calculation
-	question := "What is 25 multiplied by 4?"
+	question := "Use the calculator tool to compute 25 * 4. After observing the result, give only the number as your final answer."
 	fmt.Printf("Question: %s\n", question)
 
 	result, err := chains.Call(ctx, executor, map[string]any{

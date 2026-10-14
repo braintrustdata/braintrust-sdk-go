@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
 )
 
 // TestContextIdentityOnTransportError verifies the actual LangChainGo callback
@@ -69,12 +69,11 @@ func (e *errorTransport) RoundTrip(*http.Request) (*http.Response, error) {
 
 // contextCapturingHandler implements callbacks.Handler but only tracks contexts
 type contextCapturingHandler struct {
+	callbacks.SimpleHandler
 	onStart func(context.Context)
 	onEnd   func(context.Context)
 }
 
-func (h *contextCapturingHandler) HandleText(ctx context.Context, text string)          {}
-func (h *contextCapturingHandler) HandleLLMStart(ctx context.Context, prompts []string) {}
 func (h *contextCapturingHandler) HandleLLMGenerateContentStart(ctx context.Context, ms []llms.MessageContent) {
 	if h.onStart != nil {
 		h.onStart(ctx)
@@ -90,15 +89,3 @@ func (h *contextCapturingHandler) HandleLLMError(ctx context.Context, err error)
 		h.onEnd(ctx)
 	}
 }
-func (h *contextCapturingHandler) HandleChainStart(ctx context.Context, inputs map[string]any)      {}
-func (h *contextCapturingHandler) HandleChainEnd(ctx context.Context, outputs map[string]any)       {}
-func (h *contextCapturingHandler) HandleChainError(ctx context.Context, err error)                  {}
-func (h *contextCapturingHandler) HandleToolStart(ctx context.Context, input string)                {}
-func (h *contextCapturingHandler) HandleToolEnd(ctx context.Context, output string)                 {}
-func (h *contextCapturingHandler) HandleToolError(ctx context.Context, err error)                   {}
-func (h *contextCapturingHandler) HandleAgentAction(ctx context.Context, action schema.AgentAction) {}
-func (h *contextCapturingHandler) HandleAgentFinish(ctx context.Context, finish schema.AgentFinish) {}
-func (h *contextCapturingHandler) HandleRetrieverStart(ctx context.Context, query string)           {}
-func (h *contextCapturingHandler) HandleRetrieverEnd(ctx context.Context, query string, documents []schema.Document) {
-}
-func (h *contextCapturingHandler) HandleStreamingFunc(ctx context.Context, chunk []byte) {}
