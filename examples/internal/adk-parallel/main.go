@@ -1,6 +1,7 @@
 // Package main demonstrates using Braintrust tracing with ADK parallel workflow agents.
 // This example creates a coordinator agent that asks two sub-agents (joke writer and philosopher)
-// to respond in parallel to a given topic.
+// to respond in parallel to a given topic. The joke writer is nested inside a
+// sequential workflow to demonstrate delegation across multiple levels.
 package main
 
 import (
@@ -14,6 +15,7 @@ import (
 	"google.golang.org/adk/agent"
 	"google.golang.org/adk/agent/llmagent"
 	"google.golang.org/adk/agent/workflowagents/parallelagent"
+	"google.golang.org/adk/agent/workflowagents/sequentialagent"
 	"google.golang.org/adk/model/gemini"
 	"google.golang.org/adk/runner"
 	"google.golang.org/adk/session"
@@ -75,12 +77,27 @@ func main() {
 		log.Fatalf("Failed to create philosopher agent: %v", err)
 	}
 
+	// Nest the joke writer in a sequential workflow. Its span should be a child
+	// of comedy_team, which is itself a child of dual_perspective_agent.
+	comedyCfg := sequentialagent.Config{
+		AgentConfig: agent.Config{
+			Name:        "comedy_team",
+			Description: "A team that writes a humorous perspective on the topic.",
+			SubAgents:   []agent.Agent{jokeAgent},
+		},
+	}
+	traceadk.AddAgentCallbacks(&comedyCfg.AgentConfig)
+	comedyAgent, err := sequentialagent.New(comedyCfg)
+	if err != nil {
+		log.Fatalf("Failed to create comedy team: %v", err)
+	}
+
 	// Create parallel agent that runs both sub-agents concurrently
 	parallelCfg := parallelagent.Config{
 		AgentConfig: agent.Config{
 			Name:        "dual_perspective_agent",
 			Description: "An agent that provides both humorous and philosophical perspectives on topics by running two sub-agents in parallel.",
-			SubAgents:   []agent.Agent{jokeAgent, philosopherAgent},
+			SubAgents:   []agent.Agent{comedyAgent, philosopherAgent},
 		},
 	}
 	traceadk.AddAgentCallbacks(&parallelCfg.AgentConfig)

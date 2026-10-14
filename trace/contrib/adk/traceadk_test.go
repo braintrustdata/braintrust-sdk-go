@@ -1,8 +1,6 @@
 package adk
 
 import (
-	"context"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,15 +8,11 @@ import (
 	"go.opentelemetry.io/otel/codes"
 	"google.golang.org/adk/agent"
 	"google.golang.org/adk/agent/llmagent"
-	"google.golang.org/adk/model/gemini"
-	"google.golang.org/adk/runner"
-	"google.golang.org/adk/session"
 	"google.golang.org/adk/tool"
 	"google.golang.org/adk/tool/functiontool"
 	"google.golang.org/genai"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
-	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
 
@@ -146,34 +140,7 @@ func calculator(ctx tool.Context, args calculatorArgs) (float64, error) {
 
 // TestAgentIntegration tests the ADK tracing with a real agent using VCR
 func TestAgentIntegration(t *testing.T) {
-	t.Parallel()
-	ctx := context.Background()
-
-	// Set up test tracer and VCR
-	tp, exporter := oteltest.Setup(t)
-
-	mode := vcr.GetVCRMode()
-
-	// Get API key or use dummy for replay mode
-	apiKey := os.Getenv("GOOGLE_API_KEY")
-	if mode != vcr.ModeReplay && apiKey == "" {
-		t.Fatal("GOOGLE_API_KEY not set (required in record/off mode)")
-	}
-	if apiKey == "" {
-		apiKey = "dummy-google-key-for-replay"
-	}
-
-	// Create HTTP client with VCR
-	httpClient := vcr.NewHTTPClient(t)
-
-	// Create Gemini model with VCR
-	// Note: Tracing is handled by ADK callbacks, not by wrapping the HTTP client
-	model, err := gemini.NewModel(ctx, "gemini-2.0-flash-exp", &genai.ClientConfig{
-		HTTPClient: httpClient,
-		APIKey:     apiKey,
-		Backend:    genai.BackendGeminiAPI,
-	})
-	require.NoError(t, err)
+	ctx, tp, exporter := setupGoldenTest(t)
 
 	// Create calculator tool
 	calcTool, err := functiontool.New(
@@ -185,13 +152,10 @@ func TestAgentIntegration(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	// Create callbacks with tracing
-	callbacks := NewCallbacks(WithTracerProvider(tp))
-
 	// Create LLM agent with tool
 	cfg := llmagent.Config{
 		Name:        "math_agent",
-		Model:       model,
+		Model:       newTestModel(ctx, t, "gemini-2.0-flash-exp"),
 		Description: "A helpful math assistant",
 		Instruction: "You are a helpful math assistant. Use the calculator tool to perform calculations.",
 		Tools:       []tool.Tool{calcTool},
@@ -199,49 +163,13 @@ func TestAgentIntegration(t *testing.T) {
 			MaxOutputTokens: 500,
 		},
 	}
-	AddLLMAgentCallbacks(&cfg, WithCallback(callbacks))
-	a, err := llmagent.New(cfg)
-	require.NoError(t, err)
-
-	// Create in-memory session service
-	sessionService := session.InMemoryService()
 	sessionID := "test-session-integration"
-	userID := "test-user"
-	appName := "test-app"
+	r := newGoldenRunner(ctx, t, tp, sessionID, cfg)
+	responses := runAndCollectFinal(ctx, t, r, sessionID,
+		genai.NewContentFromText("What is 127 multiplied by 49?", genai.RoleUser), agent.RunConfig{})
+	assertFinalResponse(t, responses)
 
-	_, err = sessionService.Create(ctx, &session.CreateRequest{
-		AppName:   appName,
-		UserID:    userID,
-		SessionID: sessionID,
-	})
-	require.NoError(t, err)
-
-	// Create runner
-	r, err := runner.New(runner.Config{
-		AppName:        appName,
-		Agent:          a,
-		SessionService: sessionService,
-	})
-	require.NoError(t, err)
-
-	// Run the agent with a calculation request
-	userMsg := genai.NewContentFromText("What is 127 multiplied by 49?", genai.RoleUser)
-
-	var finalResponse *session.Event
-	for ev, runErr := range r.Run(ctx, userID, sessionID, userMsg, agent.RunConfig{}) {
-		require.NoError(t, runErr)
-		if ev.IsFinalResponse() {
-			finalResponse = ev
-		}
-	}
-
-	// Verify we got a response
-	require.NotNil(t, finalResponse)
-	require.NotNil(t, finalResponse.Content)
-
-	// Verify spans were created
 	spans := exporter.Flush()
-	require.NotEmpty(t, spans, "Expected spans to be created")
 
 	// Find agent, model, and tool spans
 	// Note: There may be multiple call_llm spans, we want the one that's a child of the agent
@@ -301,12 +229,6 @@ func TestAgentIntegration(t *testing.T) {
 		t.Fatalf("unexpected output type: %T", output)
 	}
 
-	// Verify parent-child relationships
-	// Model span should be a child of agent span
-	assert.Equal(t, agentSpan.Stub.SpanContext.SpanID(), modelSpan.Stub.Parent.SpanID(),
-		"model span should be child of agent span")
-
-	// Tool span should be a child of model span
-	assert.Equal(t, modelSpan.Stub.SpanContext.SpanID(), toolSpan.Stub.Parent.SpanID(),
-		"tool span should be child of model span")
+	modelSpan.AssertChildOf(agentSpan)
+	toolSpan.AssertChildOf(modelSpan)
 }

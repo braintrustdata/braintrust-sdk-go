@@ -1,0 +1,747 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 189
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"}],"generationConfig":{"maxOutputTokens":100},"systemInstruction":{"parts":[{"text":"Reply with one short greeting."}],"role":"user"}}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-adk/0.3.0 gl-go/1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Goog-Api-Client:
+                - google-adk/0.3.0 gl-go/1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "Hi."
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "STOP",
+                  "index": 0
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 9,
+                "candidatesTokenCount": 2,
+                "totalTokenCount": 34,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 9
+                  }
+                ],
+                "thoughtsTokenCount": 23,
+                "serviceTier": "standard"
+              },
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "evnPatifOq_QjrEPw4iRoQ0"
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Type:
+                - application/json; charset=UTF-8
+            Date:
+                - Wed, 14 Oct 2026 21:51:55 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=534
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Gemini-Service-Tier:
+                - standard
+            X-Xss-Protection:
+                - "0"
+        status: 200 OK
+        code: 200
+        duration: 550.779291ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 378
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"Hi."}],"role":"model"},{"parts":[{"text":"Continue processing previous requests as instructed. Exit or provide a summary if no more outputs are needed."}],"role":"user"}],"generationConfig":{"maxOutputTokens":100},"systemInstruction":{"parts":[{"text":"Reply with one short greeting."}],"role":"user"}}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-adk/0.3.0 gl-go/1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Goog-Api-Client:
+                - google-adk/0.3.0 gl-go/1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "Exiting."
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "STOP",
+                  "index": 0
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 32,
+                "candidatesTokenCount": 3,
+                "totalTokenCount": 122,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 32
+                  }
+                ],
+                "thoughtsTokenCount": 87,
+                "serviceTier": "standard"
+              },
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "e_nPapX7HfnG-8YPobrUoQI"
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Type:
+                - application/json; charset=UTF-8
+            Date:
+                - Wed, 14 Oct 2026 21:51:56 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=750
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Gemini-Service-Tier:
+                - standard
+            X-Xss-Protection:
+                - "0"
+        status: 200 OK
+        code: 200
+        duration: 833.507291ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 425
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"Hi."}],"role":"model"},{"parts":[{"text":"Exiting."}],"role":"model"},{"parts":[{"text":"Continue processing previous requests as instructed. Exit or provide a summary if no more outputs are needed."}],"role":"user"}],"generationConfig":{"maxOutputTokens":100},"systemInstruction":{"parts":[{"text":"Reply with one short greeting."}],"role":"user"}}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-adk/0.3.0 gl-go/1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Goog-Api-Client:
+                - google-adk/0.3.0 gl-go/1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "I've fulfilled"
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "MAX_TOKENS",
+                  "index": 0
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 36,
+                "candidatesTokenCount": 4,
+                "totalTokenCount": 132,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 36
+                  }
+                ],
+                "thoughtsTokenCount": 92,
+                "serviceTier": "standard"
+              },
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "fPnPavCXFKivjrEP2oKKoQE"
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Type:
+                - application/json; charset=UTF-8
+            Date:
+                - Wed, 14 Oct 2026 21:51:57 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=827
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Gemini-Service-Tier:
+                - standard
+            X-Xss-Protection:
+                - "0"
+        status: 200 OK
+        code: 200
+        duration: 851.194958ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 478
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"Hi."}],"role":"model"},{"parts":[{"text":"Exiting."}],"role":"model"},{"parts":[{"text":"I've fulfilled"}],"role":"model"},{"parts":[{"text":"Continue processing previous requests as instructed. Exit or provide a summary if no more outputs are needed."}],"role":"user"}],"generationConfig":{"maxOutputTokens":100},"systemInstruction":{"parts":[{"text":"Reply with one short greeting."}],"role":"user"}}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-adk/0.3.0 gl-go/1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Goog-Api-Client:
+                - google-adk/0.3.0 gl-go/1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "Okay,"
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "MAX_TOKENS",
+                  "index": 0
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 41,
+                "candidatesTokenCount": 2,
+                "totalTokenCount": 137,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 41
+                  }
+                ],
+                "thoughtsTokenCount": 94,
+                "serviceTier": "standard"
+              },
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "ffnPatC0CovI-8YP_sOSwQU"
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Type:
+                - application/json; charset=UTF-8
+            Date:
+                - Wed, 14 Oct 2026 21:51:58 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=917
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Gemini-Service-Tier:
+                - standard
+            X-Xss-Protection:
+                - "0"
+        status: 200 OK
+        code: 200
+        duration: 933.597834ms
+    - id: 4
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 418
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"Hi."}],"role":"model"},{"parts":[{"text":"Exiting."}],"role":"model"},{"parts":[{"text":"I've fulfilled"}],"role":"model"},{"parts":[{"text":"Okay,"}],"role":"model"},{"parts":[{"text":"Hello"}],"role":"user"}],"generationConfig":{"maxOutputTokens":100},"systemInstruction":{"parts":[{"text":"Reply with one short greeting."}],"role":"user"}}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-adk/0.3.0 gl-go/1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Goog-Api-Client:
+                - google-adk/0.3.0 gl-go/1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "Hello."
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "STOP",
+                  "index": 0
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 26,
+                "candidatesTokenCount": 2,
+                "totalTokenCount": 59,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 26
+                  }
+                ],
+                "thoughtsTokenCount": 31,
+                "serviceTier": "standard"
+              },
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "fvnPaqDfB-GS-8YPv5uC0AE"
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Type:
+                - application/json; charset=UTF-8
+            Date:
+                - Wed, 14 Oct 2026 21:51:58 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=509
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Gemini-Service-Tier:
+                - standard
+            X-Xss-Protection:
+                - "0"
+        status: 200 OK
+        code: 200
+        duration: 555.124083ms
+    - id: 5
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 610
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"Hi."}],"role":"model"},{"parts":[{"text":"Exiting."}],"role":"model"},{"parts":[{"text":"I've fulfilled"}],"role":"model"},{"parts":[{"text":"Okay,"}],"role":"model"},{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"Hello."}],"role":"model"},{"parts":[{"text":"Continue processing previous requests as instructed. Exit or provide a summary if no more outputs are needed."}],"role":"user"}],"generationConfig":{"maxOutputTokens":100},"systemInstruction":{"parts":[{"text":"Reply with one short greeting."}],"role":"user"}}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-adk/0.3.0 gl-go/1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Goog-Api-Client:
+                - google-adk/0.3.0 gl-go/1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "Okay"
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "MAX_TOKENS",
+                  "index": 0
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 49,
+                "candidatesTokenCount": 1,
+                "totalTokenCount": 145,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 49
+                  }
+                ],
+                "thoughtsTokenCount": 95,
+                "serviceTier": "standard"
+              },
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "fvnPaq7HJ6aa-8YPqfeJmAI"
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Type:
+                - application/json; charset=UTF-8
+            Date:
+                - Wed, 14 Oct 2026 21:51:59 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=782
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Gemini-Service-Tier:
+                - standard
+            X-Xss-Protection:
+                - "0"
+        status: 200 OK
+        code: 200
+        duration: 868.887541ms
+    - id: 6
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 653
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"Hi."}],"role":"model"},{"parts":[{"text":"Exiting."}],"role":"model"},{"parts":[{"text":"I've fulfilled"}],"role":"model"},{"parts":[{"text":"Okay,"}],"role":"model"},{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"Hello."}],"role":"model"},{"parts":[{"text":"Okay"}],"role":"model"},{"parts":[{"text":"Continue processing previous requests as instructed. Exit or provide a summary if no more outputs are needed."}],"role":"user"}],"generationConfig":{"maxOutputTokens":100},"systemInstruction":{"parts":[{"text":"Reply with one short greeting."}],"role":"user"}}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-adk/0.3.0 gl-go/1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Goog-Api-Client:
+                - google-adk/0.3.0 gl-go/1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "I have no"
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "MAX_TOKENS",
+                  "index": 0
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 51,
+                "candidatesTokenCount": 3,
+                "totalTokenCount": 147,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 51
+                  }
+                ],
+                "thoughtsTokenCount": 93,
+                "serviceTier": "standard"
+              },
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "f_nPasyrIeaNjrEP-Kv08Qo"
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Type:
+                - application/json; charset=UTF-8
+            Date:
+                - Wed, 14 Oct 2026 21:52:00 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=874
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Gemini-Service-Tier:
+                - standard
+            X-Xss-Protection:
+                - "0"
+        status: 200 OK
+        code: 200
+        duration: 976.04825ms
+    - id: 7
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 701
+        transfer_encoding: []
+        trailer: {}
+        host: generativelanguage.googleapis.com
+        remote_addr: ""
+        request_uri: ""
+        body: |
+            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"Hi."}],"role":"model"},{"parts":[{"text":"Exiting."}],"role":"model"},{"parts":[{"text":"I've fulfilled"}],"role":"model"},{"parts":[{"text":"Okay,"}],"role":"model"},{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"Hello."}],"role":"model"},{"parts":[{"text":"Okay"}],"role":"model"},{"parts":[{"text":"I have no"}],"role":"model"},{"parts":[{"text":"Continue processing previous requests as instructed. Exit or provide a summary if no more outputs are needed."}],"role":"user"}],"generationConfig":{"maxOutputTokens":100},"systemInstruction":{"parts":[{"text":"Reply with one short greeting."}],"role":"user"}}
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-adk/0.3.0 gl-go/1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Goog-Api-Client:
+                - google-adk/0.3.0 gl-go/1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "There are no pending"
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "MAX_TOKENS",
+                  "index": 0
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 55,
+                "candidatesTokenCount": 4,
+                "totalTokenCount": 151,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 55
+                  }
+                ],
+                "thoughtsTokenCount": 92,
+                "serviceTier": "standard"
+              },
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "gPnPatGaIIKxsOIPktzq8Qo"
+            }
+        headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Type:
+                - application/json; charset=UTF-8
+            Date:
+                - Wed, 14 Oct 2026 21:52:01 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=915
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Gemini-Service-Tier:
+                - standard
+            X-Xss-Protection:
+                - "0"
+        status: 200 OK
+        code: 200
+        duration: 936.008375ms

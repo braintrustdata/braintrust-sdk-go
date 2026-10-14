@@ -6,24 +6,24 @@ interactions:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 232
+        content_length: 263
         transfer_encoding: []
         trailer: {}
         host: generativelanguage.googleapis.com
         remote_addr: ""
         request_uri: ""
         body: |
-            {"contents":[{"parts":[{"text":"Say something creative."}],"role":"user"}],"generationConfig":{"maxOutputTokens":50,"temperature":0,"topP":1},"systemInstruction":{"parts":[{"text":"You are a creative storyteller."}],"role":"user"}}
+            {"contents":[{"parts":[{"text":"Say something creative."}],"role":"user"}],"generationConfig":{"maxOutputTokens":50,"stopSequences":["END","\n\n"],"temperature":0,"topP":1},"systemInstruction":{"parts":[{"text":"You are a creative storyteller."}],"role":"user"}}
         form: {}
         headers:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-adk/0.3.0 gl-go/1.24.11
-                - google-genai-sdk/1.40.0 gl-go/go1.24.11
+                - google-adk/0.3.0 gl-go/1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
             X-Goog-Api-Client:
-                - google-adk/0.3.0 gl-go/1.24.11
-                - google-genai-sdk/1.40.0 gl-go/go1.24.11
+                - google-adk/0.3.0 gl-go/1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.5
             X-Server-Timeout:
                 - "30"
         url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
@@ -41,11 +41,6 @@ interactions:
               "candidates": [
                 {
                   "content": {
-                    "parts": [
-                      {
-                        "text": "The"
-                      }
-                    ],
                     "role": "model"
                   },
                   "finishReason": "MAX_TOKENS",
@@ -54,7 +49,6 @@ interactions:
               ],
               "usageMetadata": {
                 "promptTokenCount": 12,
-                "candidatesTokenCount": 1,
                 "totalTokenCount": 58,
                 "promptTokensDetails": [
                   {
@@ -62,10 +56,11 @@ interactions:
                     "tokenCount": 12
                   }
                 ],
-                "thoughtsTokenCount": 45
+                "thoughtsTokenCount": 46,
+                "serviceTier": "standard"
               },
               "modelVersion": "gemini-2.5-flash",
-              "responseId": "B9GoaaDYGdqGqtsPv-_coQM"
+              "responseId": "HP7PaseXEunN_PUP3uzS-Aw"
             }
         headers:
             Alt-Svc:
@@ -73,11 +68,11 @@ interactions:
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Thu, 05 Mar 2026 00:40:40 GMT
+                - Wed, 14 Oct 2026 22:11:40 GMT
             Server:
                 - scaffolding on HTTPServer2
             Server-Timing:
-                - gfet4t7; dur=870
+                - gfet4t7; dur=590
             Vary:
                 - Origin
                 - X-Origin
@@ -86,8 +81,10 @@ interactions:
                 - nosniff
             X-Frame-Options:
                 - SAMEORIGIN
+            X-Gemini-Service-Tier:
+                - standard
             X-Xss-Protection:
                 - "0"
         status: 200 OK
         code: 200
-        duration: 949.231041ms
+        duration: 760.751542ms

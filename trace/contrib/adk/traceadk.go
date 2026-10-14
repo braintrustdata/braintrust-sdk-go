@@ -30,6 +30,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 	"sync"
 
@@ -143,24 +144,35 @@ type callbacksImpl struct {
 	logger logger.Logger
 	tracer trace.Tracer
 
-	// spans stores active spans keyed by session ID and span type
-	// Note: We use SessionID instead of InvocationID because ADK uses different
-	// invocation IDs for agent vs model callbacks
-	spans map[string]map[string]trace.Span
-	lock  sync.Mutex
+	// spans stores active spans keyed by session ID and call identity.
+	// Parallel agents use different invocation IDs from their parents.
+	spans     map[string]map[string]trace.Span
+	agentRuns map[string][]agentRun
+	lock      sync.Mutex
+}
+
+// agentRun tracks an active call in start order. Sequential calls share a branch;
+// parallel calls have distinct branches, so the list can identify each caller.
+type agentRun struct {
+	key    string
+	span   trace.Span
+	name   string
+	branch string
 }
 
 // NewCallbacks creates a new set of tracing callbacks for ADK agents.
 // By default, it uses the global TracerProvider. You can customize this with options.
+// Reuse the callbacks across an agent tree to preserve nesting between runs.
 //
 // Example:
 //
 //	callbacks := adk.NewCallbacks()
 func NewCallbacks(opts ...CallbacksOption) Callbacks {
 	cb := &callbacksImpl{
-		logger: logger.Discard(),
-		tracer: otel.GetTracerProvider().Tracer("braintrust"),
-		spans:  make(map[string]map[string]trace.Span),
+		logger:    logger.Discard(),
+		tracer:    otel.GetTracerProvider().Tracer("braintrust"),
+		spans:     make(map[string]map[string]trace.Span),
+		agentRuns: make(map[string][]agentRun),
 	}
 	for _, opt := range opts {
 		opt(cb)
@@ -177,12 +189,14 @@ func setSpanAttributes(span trace.Span, ctx agent.CallbackContext) {
 
 const rootSpanKey = "root"
 
-func getAgentSpanKey(invocationID string) string {
-	return fmt.Sprintf("agent:%s", invocationID)
+func getAgentSpanKey(ctx agent.CallbackContext) string {
+	// Sequential agents share an invocation ID; parallel agents have distinct
+	// branches. Include both the agent and branch to keep their spans separate.
+	return fmt.Sprintf("agent:%q:%q:%q", ctx.InvocationID(), ctx.Branch(), ctx.AgentName())
 }
 
 func getModelSpanKey(ctx agent.CallbackContext) string {
-	return fmt.Sprintf("model:%s", ctx.InvocationID())
+	return "model:" + getAgentSpanKey(ctx)
 }
 
 func getToolSpanKey(ctx tool.Context) string {
@@ -228,17 +242,59 @@ func (c *callbacksImpl) deleteSpan(sessionID string, spanKey string) {
 	spans, ok := c.spans[sessionID]
 	if ok {
 		delete(spans, spanKey)
-
-		// To make sure we eventually clean up sessions and that the map doesn't
-		// grow indefinitely, clean up the session if there are no more agent
-		// spans
-		for spanKey := range spans {
-			if strings.HasPrefix(spanKey, "agent:") {
-				return
+		if strings.HasPrefix(spanKey, "agent:") {
+			runs := c.agentRuns[sessionID]
+			for i := len(runs) - 1; i >= 0; i-- {
+				if runs[i].key == spanKey {
+					c.agentRuns[sessionID] = slices.Delete(runs, i, i+1)
+					break
+				}
 			}
 		}
+
+		// Release model and tool references when the last agent finishes.
+		if len(c.agentRuns[sessionID]) > 0 {
+			return
+		}
 		delete(c.spans, sessionID)
+		delete(c.agentRuns, sessionID)
 	}
+}
+
+// retrieveParentAgentSpan finds the latest active caller in this branch's ancestry.
+// ADK runs sequential children and LLM transfers synchronously, while parallel
+// children receive separate branches. Configured parents can differ from callers
+// when an agent transfers to a peer.
+func (c *callbacksImpl) retrieveParentAgentSpan(ctx agent.CallbackContext) (trace.Span, bool) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	runs := c.agentRuns[ctx.SessionID()]
+	for i := len(runs) - 1; i >= 0; i-- {
+		run := runs[i]
+		if run.branch == "" || ctx.Branch() == run.branch || strings.HasPrefix(ctx.Branch(), run.branch+".") {
+			return run.span, true
+		}
+	}
+	return nil, false
+}
+
+// retrieveAgentSpan also handles LLM callbacks, whose invocation ID differs
+// from the enclosing agent callback in ADK v0.4.
+func (c *callbacksImpl) retrieveAgentSpan(ctx agent.CallbackContext) (trace.Span, bool) {
+	if span, ok := c.retrieveSpan(ctx.SessionID(), getAgentSpanKey(ctx)); ok {
+		return span, true
+	}
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	runs := c.agentRuns[ctx.SessionID()]
+	for i := len(runs) - 1; i >= 0; i-- {
+		run := runs[i]
+		if run.name == ctx.AgentName() && run.branch == ctx.Branch() {
+			return run.span, true
+		}
+	}
+	return nil, false
 }
 
 // BeforeAgent is called before the agent starts its run.
@@ -252,12 +308,11 @@ func (c *callbacksImpl) BeforeAgent(ctx agent.CallbackContext) (*genai.Content, 
 		"branch", ctx.Branch(),
 	)
 
-	// Fall back to the root span as a parent, if there is one.
-	// TODO: Unfortunately, ADK doesn't provide a great way to trace
-	// parent/child agent relationships. We could parse branch, but that only
-	// works if agent names are unique.
 	var spanCtx context.Context = ctx
-	parentSpan, hasParent := c.retrieveRootSpan(ctx.SessionID())
+	parentSpan, hasParent := c.retrieveParentAgentSpan(ctx)
+	if !hasParent {
+		parentSpan, hasParent = c.retrieveRootSpan(ctx.SessionID())
+	}
 	if hasParent {
 		spanCtx = trace.ContextWithSpan(ctx, parentSpan)
 	}
@@ -267,7 +322,13 @@ func (c *callbacksImpl) BeforeAgent(ctx agent.CallbackContext) (*genai.Content, 
 		trace.WithSpanKind(trace.SpanKindInternal))
 	setSpanAttributes(span, ctx)
 
-	c.storeSpan(ctx.SessionID(), getAgentSpanKey(ctx.InvocationID()), span)
+	spanKey := getAgentSpanKey(ctx)
+	c.storeSpan(ctx.SessionID(), spanKey, span)
+	c.lock.Lock()
+	c.agentRuns[ctx.SessionID()] = append(c.agentRuns[ctx.SessionID()], agentRun{
+		key: spanKey, span: span, name: ctx.AgentName(), branch: ctx.Branch(),
+	})
+	c.lock.Unlock()
 
 	return nil, nil
 }
@@ -283,11 +344,11 @@ func (c *callbacksImpl) AfterAgent(ctx agent.CallbackContext) (*genai.Content, e
 	)
 
 	// Retrieve and end the agent span using agent name
-	span, ok := c.retrieveSpan(ctx.SessionID(), getAgentSpanKey(ctx.InvocationID()))
+	span, ok := c.retrieveSpan(ctx.SessionID(), getAgentSpanKey(ctx))
 	if ok {
 		defer span.End()
 		// Delete this agent's span
-		c.deleteSpan(ctx.SessionID(), getAgentSpanKey(ctx.InvocationID()))
+		c.deleteSpan(ctx.SessionID(), getAgentSpanKey(ctx))
 	}
 
 	// Don't modify the response
@@ -307,7 +368,7 @@ func (c *callbacksImpl) BeforeModel(ctx agent.CallbackContext, req *model.LLMReq
 
 	// Create a span for the model call, using the agent span context as parent
 	var spanCtx context.Context = ctx
-	parentSpan, hasParent := c.retrieveSpan(ctx.SessionID(), getAgentSpanKey(ctx.InvocationID()))
+	parentSpan, hasParent := c.retrieveAgentSpan(ctx)
 	if !hasParent {
 		// Fallback: look up root span
 		parentSpan, hasParent = c.retrieveRootSpan(ctx.SessionID())
