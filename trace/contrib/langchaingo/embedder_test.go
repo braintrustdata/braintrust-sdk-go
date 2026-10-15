@@ -2,6 +2,7 @@ package langchaingo
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"testing"
 
@@ -44,69 +45,58 @@ func (f *fakeEmbedder) EmbedQuery(_ context.Context, _ string) ([]float32, error
 	return v, nil
 }
 
-func TestWrapEmbedderEmbedDocuments(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
+func TestWrapEmbedderSuccess(t *testing.T) {
+	for _, tt := range []struct {
+		method   string
+		dim      int
+		input    any
+		output   map[string]any
+		metadata map[string]any
+	}{
+		{
+			method: "embed_documents", dim: 8,
+			input:    []string{"hello world", "braintrust tracing", "go sdk"},
+			output:   map[string]any{"embedding_length": float64(8), "embeddings_count": float64(3)},
+			metadata: map[string]any{"provider": "openai", "model": "text-embedding-3-small"},
+		},
+		{
+			method: "embed_query", dim: 16,
+			input:    "what is braintrust?",
+			output:   map[string]any{"embedding_length": float64(16)},
+			metadata: map[string]any{"provider": "langchain"},
+		},
+	} {
+		t.Run(tt.method, func(t *testing.T) {
+			tp, exporter := oteltest.Setup(t)
+			opts := []EmbedderOption{WithEmbedderTracerProvider(tp)}
+			if tt.method == "embed_documents" {
+				opts = append(opts, WithEmbedderModel("text-embedding-3-small"), WithEmbedderProvider("openai"))
+			}
+			wrapped := WrapEmbedder(&fakeEmbedder{dim: tt.dim}, opts...)
+			switch input := tt.input.(type) {
+			case []string:
+				vectors, err := wrapped.EmbedDocuments(context.Background(), input)
+				require.NoError(t, err)
+				require.Len(t, vectors, len(input))
+				assert.Len(t, vectors[0], tt.dim)
+			case string:
+				vector, err := wrapped.EmbedQuery(context.Background(), input)
+				require.NoError(t, err)
+				require.Len(t, vector, tt.dim)
+			default:
+				t.Fatalf("unsupported test input: %T", input)
+			}
 
-	texts := []string{"hello world", "braintrust tracing", "go sdk"}
-	inner := &fakeEmbedder{dim: 8}
-	wrapped := WrapEmbedder(inner,
-		WithEmbedderTracerProvider(tp),
-		WithEmbedderModel("text-embedding-3-small"),
-		WithEmbedderProvider("openai"),
-	)
-
-	vectors, err := wrapped.EmbedDocuments(context.Background(), texts)
-	require.NoError(t, err)
-	require.Len(t, vectors, 3)
-	assert.Len(t, vectors[0], 8)
-
-	span := exporter.FlushOne()
-	span.AssertNameIs("langchain.embedder.embed_documents")
-	span.AssertJSONAttrEquals("braintrust.span_attributes", map[string]any{"type": "llm"})
-
-	inp := span.Input()
-	arr, ok := inp.([]interface{})
-	require.True(t, ok)
-	require.Len(t, arr, 3)
-	assert.Equal(t, "hello world", arr[0])
-
-	out := span.Output()
-	outMap, ok := out.(map[string]interface{})
-	require.True(t, ok)
-	assert.Equal(t, float64(8), outMap["embedding_length"])
-	assert.Equal(t, float64(3), outMap["embeddings_count"])
-
-	metadata := span.Metadata()
-	assert.Equal(t, "openai", metadata["provider"])
-	assert.Equal(t, "text-embedding-3-small", metadata["model"])
-}
-
-func TestWrapEmbedderEmbedQuery(t *testing.T) {
-	tp, exporter := oteltest.Setup(t)
-
-	inner := &fakeEmbedder{dim: 16}
-	wrapped := WrapEmbedder(inner, WithEmbedderTracerProvider(tp))
-
-	vector, err := wrapped.EmbedQuery(context.Background(), "what is braintrust?")
-	require.NoError(t, err)
-	require.Len(t, vector, 16)
-
-	span := exporter.FlushOne()
-	span.AssertNameIs("langchain.embedder.embed_query")
-	span.AssertJSONAttrEquals("braintrust.span_attributes", map[string]any{"type": "llm"})
-
-	inp := span.Input()
-	assert.Equal(t, "what is braintrust?", inp)
-
-	out := span.Output()
-	outMap, ok := out.(map[string]interface{})
-	require.True(t, ok)
-	assert.Equal(t, float64(16), outMap["embedding_length"])
-	_, hasCount := outMap["embeddings_count"]
-	assert.False(t, hasCount, "EmbedQuery output should omit embeddings_count")
-
-	metadata := span.Metadata()
-	assert.Equal(t, "langchain", metadata["provider"])
+			span := exporter.FlushOne()
+			span.AssertNameIs("langchain.embedder." + tt.method)
+			span.AssertJSONAttrEquals("braintrust.span_attributes", map[string]any{"type": "llm"})
+			inputJSON, err := json.Marshal(tt.input)
+			require.NoError(t, err)
+			assert.JSONEq(t, string(inputJSON), span.Attr("braintrust.input_json").String())
+			assert.Equal(t, tt.output, span.Output())
+			assert.Equal(t, tt.metadata, span.Metadata())
+		})
+	}
 }
 
 func TestWrapEmbedderErrors(t *testing.T) {
