@@ -6,6 +6,8 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"strings"
 	"time"
@@ -121,6 +123,7 @@ func (rt *responsesTracer) parseStreamingResponse(span trace.Span, body io.Reade
 	scanner := bufio.NewScanner(body)
 	var timeToFirstToken time.Duration
 	var completedMsg map[string]any
+	var streamErr error
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -132,7 +135,7 @@ func (rt *responsesTracer) parseStreamingResponse(span trace.Span, body io.Reade
 		var envelope map[string]any
 		err := json.Unmarshal([]byte(line), &envelope)
 		if err != nil {
-			return err
+			return errors.Join(streamErr, err)
 		}
 
 		// Track time to first token on first data chunk
@@ -142,6 +145,10 @@ func (rt *responsesTracer) parseStreamingResponse(span trace.Span, body io.Reade
 
 		if msgType, ok := envelope["type"].(string); ok {
 			switch msgType {
+			case "error":
+				// Preserve the full event: OpenAI supports both flat and nested
+				// error objects, and both contain useful diagnostic fields.
+				streamErr = fmt.Errorf("OpenAI Responses stream error: %s", line)
 			case "response.completed", "response.failed", "response.incomplete":
 				if msg, ok := envelope["response"].(map[string]any); ok {
 					// For streaming responses, copy extra fields from the envelope
@@ -157,18 +164,13 @@ func (rt *responsesTracer) parseStreamingResponse(span trace.Span, body io.Reade
 		}
 	}
 
-	if err := scanner.Err(); err != nil {
-		return err
-	}
-
 	// Process completed message and add time_to_first_token metric
+	var responseErr error
 	if completedMsg != nil {
-		if err := rt.handleResponseCompletedMessage(span, completedMsg, timeToFirstToken); err != nil {
-			return err
-		}
+		responseErr = rt.handleResponseCompletedMessage(span, completedMsg, timeToFirstToken)
 	}
 
-	return nil
+	return errors.Join(streamErr, scanner.Err(), responseErr)
 }
 
 func (rt *responsesTracer) parseResponse(span trace.Span, body io.Reader) error {
@@ -240,6 +242,17 @@ func (rt *responsesTracer) handleResponseCompletedMessage(span trace.Span, rawMs
 	}
 
 	span.SetAttributes(attrs...)
+
+	if rawMsg["status"] == "failed" {
+		if apiError := rawMsg["error"]; apiError != nil {
+			details, err := json.Marshal(apiError)
+			if err != nil {
+				return err
+			}
+			return fmt.Errorf("OpenAI Responses response failed: %s", details)
+		}
+		return fmt.Errorf("OpenAI Responses response failed")
+	}
 
 	return nil
 }

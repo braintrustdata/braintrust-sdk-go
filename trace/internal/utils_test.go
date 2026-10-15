@@ -21,7 +21,8 @@ func TestBufferedReader(t *testing.T) {
 	src := io.NopCloser(strings.NewReader(content))
 
 	var capturedContent string
-	onDone := func(r io.Reader) {
+	onDone := func(r io.Reader, err error) {
+		require.NoError(t, err)
 		data, _ := io.ReadAll(r)
 		capturedContent = string(data)
 	}
