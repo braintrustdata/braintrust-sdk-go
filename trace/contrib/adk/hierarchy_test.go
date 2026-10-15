@@ -2,6 +2,7 @@ package adk
 
 import (
 	"fmt"
+	"sync/atomic"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,11 +11,13 @@ import (
 	"google.golang.org/adk/agent/llmagent"
 	"google.golang.org/adk/agent/workflowagents/loopagent"
 	"google.golang.org/adk/agent/workflowagents/parallelagent"
+	"google.golang.org/adk/model"
 	"google.golang.org/adk/runner"
 	"google.golang.org/adk/session"
 	"google.golang.org/genai"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
+	tracegenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"
 )
 
 // TestSubAgentHierarchy records real Gemini requests for child and peer
@@ -26,12 +29,18 @@ func TestSubAgentHierarchy(t *testing.T) {
 			// parallel tree mixes helper and manual callbacks to cover both
 			// installation APIs without duplicating the workflow.
 			manualCallbacks := func(name string) bool {
-				return workflow == "loop" || (workflow == "parallel" && name != "middle" && name != "leaf")
+				return workflow == "loop" || (workflow == "parallel" && (name == "root" || name == "sibling_middle"))
 			}
 			tp, exporter := oteltest.Setup(t)
 			ctx, outer := tp.Tracer("test").Start(t.Context(), "caller")
-			llm := newTestModel(ctx, t, goldenModelID)
+			var providerOpts []tracegenai.Option
+			if workflow != "loop" {
+				providerOpts = append(providerOpts, tracegenai.WithTracerProvider(tp))
+			}
+			llm := newTestModel(ctx, t, goldenModelID, providerOpts...)
 			cb := NewCallbacks(WithTracerProvider(tp))
+			var parallelModels atomic.Int32
+			var parallelReady chan struct{}
 			newLeaf := func(name string) agent.Agent {
 				cfg := llmagent.Config{
 					Name: name, Model: llm, Instruction: "Reply with one short greeting.",
@@ -45,6 +54,22 @@ func TestSubAgentHierarchy(t *testing.T) {
 					cfg.AfterModelCallbacks = []llmagent.AfterModelCallback{cb.AfterModel}
 				} else {
 					AddLLMAgentCallbacks(&cfg, WithCallback(cb))
+				}
+				if workflow == "parallel" {
+					// Keep both model spans active before either response arrives.
+					// This also avoids ADK v0.4's session event read/write race
+					// between request preprocessing and response persistence.
+					cfg.BeforeModelCallbacks = append(cfg.BeforeModelCallbacks, func(ctx agent.CallbackContext, _ *model.LLMRequest) (*model.LLMResponse, error) {
+						if parallelModels.Add(-1) == 0 {
+							close(parallelReady)
+						}
+						select {
+						case <-parallelReady:
+							return nil, nil
+						case <-ctx.Done():
+							return nil, ctx.Err()
+						}
+					})
 				}
 				leaf, err := llmagent.New(cfg)
 				require.NoError(t, err)
@@ -115,8 +140,15 @@ func TestSubAgentHierarchy(t *testing.T) {
 
 			// Run twice in the same session to verify cleanup and fresh root parenting.
 			for range 2 {
+				if workflow == "parallel" {
+					parallelModels.Store(2)
+					parallelReady = make(chan struct{})
+				}
 				runAndCollectFinal(ctx, t, r, "hierarchy", genai.NewContentFromText("Hello", genai.RoleUser), agent.RunConfig{})
 				spans := exporter.Flush()
+				if workflow != "loop" {
+					assertModelSpanHierarchy(t, spans)
+				}
 				agents := map[string][]oteltest.Span{}
 				var models []oteltest.Span
 				for _, span := range spans {

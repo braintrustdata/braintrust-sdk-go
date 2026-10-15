@@ -14,6 +14,7 @@ import (
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
+	tracegenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"
 )
 
 func TestUsageMetrics(t *testing.T) {
@@ -155,7 +156,7 @@ func TestAgentIntegration(t *testing.T) {
 	// Create LLM agent with tool
 	cfg := llmagent.Config{
 		Name:        "math_agent",
-		Model:       newTestModel(ctx, t, "gemini-2.0-flash-exp"),
+		Model:       newTestModel(ctx, t, "gemini-2.0-flash-exp", tracegenai.WithTracerProvider(tp)),
 		Description: "A helpful math assistant",
 		Instruction: "You are a helpful math assistant. Use the calculator tool to perform calculations.",
 		Tools:       []tool.Tool{calcTool},
@@ -170,6 +171,7 @@ func TestAgentIntegration(t *testing.T) {
 	assertFinalResponse(t, responses)
 
 	spans := exporter.Flush()
+	assertModelSpanHierarchy(t, spans)
 
 	// Find agent, model, and tool spans
 	// Note: There may be multiple call_llm spans, we want the one that's a child of the agent
@@ -231,4 +233,5 @@ func TestAgentIntegration(t *testing.T) {
 
 	modelSpan.AssertChildOf(agentSpan)
 	toolSpan.AssertChildOf(modelSpan)
+	assert.False(t, modelSpan.Stub.EndTime.After(toolSpan.Stub.StartTime), "model duration must exclude tool execution")
 }

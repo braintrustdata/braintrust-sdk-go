@@ -190,9 +190,13 @@ func setSpanAttributes(span trace.Span, ctx agent.CallbackContext) {
 const rootSpanKey = "root"
 
 func getAgentSpanKey(ctx agent.CallbackContext) string {
+	return agentSpanKey(ctx.InvocationID(), ctx.Branch(), ctx.AgentName())
+}
+
+func agentSpanKey(invocationID, branch, name string) string {
 	// Sequential agents share an invocation ID; parallel agents have distinct
 	// branches. Include both the agent and branch to keep their spans separate.
-	return fmt.Sprintf("agent:%q:%q:%q", ctx.InvocationID(), ctx.Branch(), ctx.AgentName())
+	return fmt.Sprintf("agent:%q:%q:%q", invocationID, branch, name)
 }
 
 func getModelSpanKey(ctx agent.CallbackContext) string {
@@ -398,13 +402,14 @@ func (c *callbacksImpl) BeforeModel(ctx agent.CallbackContext, req *model.LLMReq
 		}
 	}
 
-	c.storeSpan(ctx.SessionID(), getModelSpanKey(ctx), span)
+	c.storeSpan(ctx.SessionID(), getModelSpanKey(ctx), &modelSpan{Span: span})
 
 	return nil, nil
 }
 
 // AfterModel is called after receiving a response from the LLM model.
-// It completes the span created by BeforeModel and records the response.
+// It records the response and ends the span created by BeforeModel, unless
+// the model wrapper is still consuming a stream.
 func (c *callbacksImpl) AfterModel(ctx agent.CallbackContext, resp *model.LLMResponse, err error) (*model.LLMResponse, error) {
 	c.logger.Debug(
 		"AfterModel callback",
@@ -422,7 +427,9 @@ func (c *callbacksImpl) AfterModel(ctx agent.CallbackContext, resp *model.LLMRes
 		return nil, nil
 	}
 	// Do not delete the span, tool calls may want to use it as a parent
-	defer span.End()
+	if s, ok := span.(*modelSpan); !ok || !s.managed.Load() {
+		defer span.End()
+	}
 
 	if err != nil {
 		span.RecordError(err)
@@ -580,6 +587,8 @@ func WithCallback(c Callbacks) Option {
 
 // AddLLMAgentCallbacks modifies a llmagent.Config with Braintrust tracing callbacks.
 // It automatically adds all tracing callbacks (BeforeAgent, AfterAgent, BeforeModel, AfterModel, BeforeTool, AfterTool).
+// With callbacks from NewCallbacks, it also wraps the model to propagate the
+// call_llm span to provider instrumentation, including streaming requests.
 // If an input callbacks object is passed in, that is used, otherwise we fallback to the global instance.
 //
 // Example:
@@ -596,6 +605,9 @@ func AddLLMAgentCallbacks(config *llmagent.Config, opts ...Option) {
 	cb := globalCallbacks
 	for _, opt := range opts {
 		cb = opt()
+	}
+	if callbacks, ok := cb.(*callbacksImpl); ok && config.Model != nil {
+		config.Model = &tracedModel{LLM: config.Model, callbacks: callbacks}
 	}
 	config.BeforeAgentCallbacks = append(config.BeforeAgentCallbacks, cb.BeforeAgent)
 	config.AfterAgentCallbacks = append(config.AfterAgentCallbacks, cb.AfterAgent)

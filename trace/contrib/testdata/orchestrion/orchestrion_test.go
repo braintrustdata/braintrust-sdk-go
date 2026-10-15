@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/a2aproject/a2a-go/a2a"
@@ -24,11 +25,71 @@ import (
 	"github.com/tmc/langchaingo/llms"
 	langchainopenai "github.com/tmc/langchaingo/llms/openai"
 	"go.opentelemetry.io/otel"
+	"google.golang.org/adk/agent"
+	"google.golang.org/adk/agent/llmagent"
+	"google.golang.org/adk/model/gemini"
+	"google.golang.org/adk/runner"
+	"google.golang.org/adk/session"
 	"google.golang.org/genai"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 )
+
+// TestADK verifies both callback injection and context propagation to the genai
+// HTTP middleware, without installing either integration manually.
+func TestADK(t *testing.T) {
+	exporter := setupOtel(t)
+	ctx, outer := otel.Tracer("test").Start(t.Context(), "caller")
+	defer outer.End()
+	apiKey := os.Getenv("GOOGLE_API_KEY")
+	if vcr.GetVCRMode() != vcr.ModeReplay {
+		require.NotEmpty(t, apiKey, "GOOGLE_API_KEY is required to record")
+	}
+	if apiKey == "" {
+		apiKey = "dummy-key-for-vcr"
+	}
+	llm, err := gemini.NewModel(ctx, "gemini-2.5-flash", &genai.ClientConfig{
+		APIKey: apiKey, Backend: genai.BackendGeminiAPI, HTTPClient: vcr.NewHTTPClient(t),
+	})
+	require.NoError(t, err)
+	a, err := llmagent.New(llmagent.Config{
+		Name: "greeter", Model: llm, Instruction: "Reply with one short greeting.",
+		GenerateContentConfig: &genai.GenerateContentConfig{
+			MaxOutputTokens: 100,
+			ThinkingConfig:  &genai.ThinkingConfig{ThinkingBudget: genai.Ptr(int32(0))},
+		},
+	})
+	require.NoError(t, err)
+	svc := session.InMemoryService()
+	_, err = svc.Create(ctx, &session.CreateRequest{AppName: "test", UserID: "user", SessionID: "session"})
+	require.NoError(t, err)
+	r, err := runner.New(runner.Config{AppName: "test", Agent: a, SessionService: svc})
+	require.NoError(t, err)
+	for _, err := range r.Run(ctx, "user", "session", genai.NewContentFromText("Hello", genai.RoleUser), agent.RunConfig{}) {
+		require.NoError(t, err)
+	}
+	spans := exporter.Flush()
+	byName := map[string]oteltest.Span{}
+	spanCount := 0
+	for _, span := range spans {
+		// ADK also emits native spans, including another call_llm span.
+		if span.Stub.InstrumentationScope.Name == "braintrust" {
+			spanCount++
+			byName[span.Name()] = span
+		}
+	}
+	require.Equal(t, 3, spanCount, "expected exactly one agent, model, and provider span")
+	agentSpan, ok := byName["agent_run [greeter]"]
+	require.True(t, ok)
+	modelSpan, ok := byName["call_llm"]
+	require.True(t, ok)
+	providerSpan, ok := byName["generate_content"]
+	require.True(t, ok)
+	require.Equal(t, outer.SpanContext().SpanID(), agentSpan.Stub.Parent.SpanID())
+	modelSpan.AssertChildOf(&agentSpan)
+	providerSpan.AssertChildOf(&modelSpan)
+}
 
 // TestOpenAI verifies that orchestrion auto-injects the Braintrust middleware
 // for the official OpenAI Go SDK. This test creates an OpenAI client WITHOUT

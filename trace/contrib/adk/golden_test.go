@@ -23,6 +23,7 @@ import (
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
+	tracegenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai"
 )
 
 const (
@@ -56,10 +57,14 @@ func goldenAPIKey(t *testing.T) string {
 }
 
 // newTestModel creates a Gemini model backed by the test's real VCR recording.
-func newTestModel(ctx context.Context, t *testing.T, modelID string) model.LLM {
+func newTestModel(ctx context.Context, t *testing.T, modelID string, opts ...tracegenai.Option) model.LLM {
 	t.Helper()
+	httpClient := vcr.NewHTTPClient(t)
+	if len(opts) > 0 {
+		httpClient = tracegenai.WrapClient(httpClient, opts...)
+	}
 	llm, err := gemini.NewModel(ctx, modelID, &genai.ClientConfig{
-		HTTPClient: vcr.NewHTTPClient(t),
+		HTTPClient: httpClient,
 		APIKey:     goldenAPIKey(t),
 		Backend:    genai.BackendGeminiAPI,
 	})

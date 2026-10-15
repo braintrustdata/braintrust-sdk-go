@@ -6,6 +6,7 @@ toolchain go1.26.1
 
 require (
 	github.com/braintrustdata/braintrust-sdk-go v0.17.1
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.17.1
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/otel v1.45.0
 	go.opentelemetry.io/otel/trace v1.45.0
@@ -50,3 +51,5 @@ require (
 )
 
 replace github.com/braintrustdata/braintrust-sdk-go => ../../..
+
+replace github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai => ../genai
