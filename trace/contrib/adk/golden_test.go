@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/adk/agent"
 	"google.golang.org/adk/agent/llmagent"
+	"google.golang.org/adk/model"
 	"google.golang.org/adk/model/gemini"
 	"google.golang.org/adk/runner"
 	"google.golang.org/adk/session"
@@ -54,21 +55,24 @@ func goldenAPIKey(t *testing.T) string {
 	return apiKey
 }
 
-// newGoldenRunner creates a VCR-wrapped Gemini agent and runner.
-func newGoldenRunner(ctx context.Context, t *testing.T, tp oteltrace.TracerProvider, sessionID string, cfg llmagent.Config) *runner.Runner {
+// newTestModel creates a Gemini model backed by the test's real VCR recording.
+func newTestModel(ctx context.Context, t *testing.T, modelID string) model.LLM {
 	t.Helper()
-
-	httpClient := vcr.NewHTTPClient(t)
-	apiKey := goldenAPIKey(t)
-
-	llm, err := gemini.NewModel(ctx, goldenModelID, &genai.ClientConfig{
-		HTTPClient: httpClient,
-		APIKey:     apiKey,
+	llm, err := gemini.NewModel(ctx, modelID, &genai.ClientConfig{
+		HTTPClient: vcr.NewHTTPClient(t),
+		APIKey:     goldenAPIKey(t),
 		Backend:    genai.BackendGeminiAPI,
 	})
 	require.NoError(t, err)
-	cfg.Model = llm
+	return llm
+}
 
+// newGoldenRunner creates a traced agent and runner, using Gemini by default.
+func newGoldenRunner(ctx context.Context, t *testing.T, tp oteltrace.TracerProvider, sessionID string, cfg llmagent.Config) *runner.Runner {
+	t.Helper()
+	if cfg.Model == nil {
+		cfg.Model = newTestModel(ctx, t, goldenModelID)
+	}
 	cb := NewCallbacks(WithTracerProvider(tp))
 	AddLLMAgentCallbacks(&cfg, WithCallback(cb))
 	a, err := llmagent.New(cfg)
@@ -97,28 +101,18 @@ func runAndCollectFinal(ctx context.Context, t *testing.T, r *runner.Runner, ses
 }
 
 // assertFinalResponse checks the final response contains text.
-func assertFinalResponse(t *testing.T, responses []*session.Event) string {
+func assertFinalResponse(t *testing.T, responses []*session.Event) {
 	t.Helper()
 	require.NotEmpty(t, responses, "expected at least one final response")
 	content := responses[0].Content
 	require.NotNil(t, content, "expected response content")
 	require.NotEmpty(t, content.Parts, "expected response content with parts")
-	text := content.Parts[0].Text
-	require.NotEmpty(t, text, "expected non-empty text in response")
-	return text
-}
-
-// assertSpansExist verifies that at least one span was produced.
-func assertSpansExist(t *testing.T, exporter *oteltest.Exporter) []oteltest.Span {
-	t.Helper()
-	spans := exporter.Flush()
-	assert.NotEmpty(t, spans, "expected spans to be created")
-	return spans
+	require.NotEmpty(t, content.Parts[0].Text, "expected non-empty text in response")
 }
 
 // assertGoldenExchange verifies the model request and response recorded in the trace.
 // Checking the complete contents also covers conversation history and binary parts.
-func assertGoldenExchange(t *testing.T, exporter *oteltest.Exporter, contents []*genai.Content, output *genai.Content, finishReason genai.FinishReason) map[string]any {
+func assertGoldenExchange(t *testing.T, exporter *oteltest.Exporter, contents []*genai.Content, output *genai.Content, finishReason genai.FinishReason) (*oteltest.Span, map[string]any) {
 	t.Helper()
 	spans := exporter.Flush()
 	var modelSpans []oteltest.Span
@@ -142,7 +136,7 @@ func assertGoldenExchange(t *testing.T, exporter *oteltest.Exporter, contents []
 	assert.Equal(t, string(finishReason), response["FinishReason"])
 	config, ok := input["Config"].(map[string]any)
 	require.True(t, ok, "expected serialized generation config")
-	return config
+	return span, config
 }
 
 func goldenJSON(t *testing.T, value any) any {
@@ -152,52 +146,6 @@ func goldenJSON(t *testing.T, value any) any {
 	var result any
 	require.NoError(t, json.Unmarshal(data, &result))
 	return result
-}
-
-func TestBasicCompletion(t *testing.T) {
-	ctx, tp, exporter := setupGoldenTest(t)
-
-	r := newGoldenRunner(ctx, t, tp, "session-basic", llmagent.Config{
-		Name:        "basic_agent",
-		Instruction: "You are a helpful assistant.",
-		GenerateContentConfig: &genai.GenerateContentConfig{
-			MaxOutputTokens: 100,
-		},
-	})
-
-	userMsg := genai.NewContentFromText("What is the capital of France?", genai.RoleUser)
-	responses := runAndCollectFinal(ctx, t, r, "session-basic", userMsg, agent.RunConfig{})
-	text := assertFinalResponse(t, responses)
-	t.Logf("Response: %s", text)
-
-	config := assertGoldenExchange(t, exporter, []*genai.Content{userMsg}, responses[0].Content, genai.FinishReasonStop)
-	assert.Equal(t, float64(100), config["maxOutputTokens"])
-	assert.Equal(t, goldenJSON(t, genai.NewContentFromText("You are a helpful assistant.", genai.RoleUser)), config["systemInstruction"])
-}
-
-func TestMultiTurn(t *testing.T) {
-	ctx, tp, exporter := setupGoldenTest(t)
-
-	sid := "session-multi-turn"
-	r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
-		Name:                  "conversation_agent",
-		Instruction:           "You are a helpful assistant with good memory.",
-		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 200},
-	})
-
-	msg1 := genai.NewContentFromText("Hi, my name is Alice.", genai.RoleUser)
-	responses := runAndCollectFinal(ctx, t, r, sid, msg1, agent.RunConfig{})
-	text := assertFinalResponse(t, responses)
-	t.Logf("Response 1: %s", text)
-	firstOutput := responses[0].Content
-	assertGoldenExchange(t, exporter, []*genai.Content{msg1}, firstOutput, genai.FinishReasonStop)
-
-	msg2 := genai.NewContentFromText("What did I just tell you my name was?", genai.RoleUser)
-	responses = runAndCollectFinal(ctx, t, r, sid, msg2, agent.RunConfig{})
-	text = assertFinalResponse(t, responses)
-	t.Logf("Response 2: %s", text)
-
-	assertGoldenExchange(t, exporter, []*genai.Content{msg1, firstOutput, msg2}, responses[0].Content, genai.FinishReasonStop)
 }
 
 func TestMultimodalInput(t *testing.T) {
@@ -211,15 +159,6 @@ func TestMultimodalInput(t *testing.T) {
 		maxTokens    int32
 		finishReason genai.FinishReason
 	}{
-		{
-			name:         "image",
-			fixture:      "test-image.png",
-			mimeType:     "image/png",
-			prompt:       "What color is this image?",
-			instruction:  "You are a helpful vision assistant that can analyze images.",
-			maxTokens:    150,
-			finishReason: genai.FinishReasonMaxTokens,
-		},
 		{
 			name:         "document",
 			fixture:      "test-document.pdf",
@@ -262,7 +201,7 @@ func TestMultimodalInput(t *testing.T) {
 			userMsg := genai.NewContentFromParts(parts, genai.RoleUser)
 			responses := runAndCollectFinal(ctx, t, r, tc.name, userMsg, agent.RunConfig{})
 			assertFinalResponse(t, responses)
-			config := assertGoldenExchange(t, exporter, []*genai.Content{userMsg}, responses[0].Content, tc.finishReason)
+			_, config := assertGoldenExchange(t, exporter, []*genai.Content{userMsg}, responses[0].Content, tc.finishReason)
 			assert.Equal(t, float64(tc.maxTokens), config["maxOutputTokens"])
 		})
 	}
@@ -280,58 +219,19 @@ func TestGenerationConfig(t *testing.T) {
 			Temperature:     &temp,
 			TopP:            &topP,
 			MaxOutputTokens: 50,
+			StopSequences:   []string{"END", "\n\n"},
 		},
 	})
 
 	msg := genai.NewContentFromText("Say something creative.", genai.RoleUser)
 	responses := runAndCollectFinal(ctx, t, r, sid, msg, agent.RunConfig{})
-	assertFinalResponse(t, responses)
-	config := assertGoldenExchange(t, exporter, []*genai.Content{msg}, responses[0].Content, genai.FinishReasonMaxTokens)
+	// A tight budget can be exhausted by reasoning before any text is emitted.
+	require.Len(t, responses, 1)
+	_, config := assertGoldenExchange(t, exporter, []*genai.Content{msg}, responses[0].Content, genai.FinishReasonMaxTokens)
 	assert.Equal(t, float64(0), config["temperature"], "explicit zero temperature should survive cleanup")
 	assert.Equal(t, float64(1), config["topP"])
 	assert.Equal(t, float64(50), config["maxOutputTokens"])
-}
-
-func TestStopSequences(t *testing.T) {
-	ctx, tp, exporter := setupGoldenTest(t)
-
-	sid := "session-stop"
-	r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
-		Name:        "story_agent",
-		Instruction: "You are a creative writer.",
-		GenerateContentConfig: &genai.GenerateContentConfig{
-			MaxOutputTokens: 500,
-			StopSequences:   []string{"END", "\n\n"},
-		},
-	})
-
-	msg := genai.NewContentFromText("Write a short story about a robot.", genai.RoleUser)
-	responses := runAndCollectFinal(ctx, t, r, sid, msg, agent.RunConfig{})
-	text := assertFinalResponse(t, responses)
-	t.Logf("Response: %s", text)
-
-	config := assertGoldenExchange(t, exporter, []*genai.Content{msg}, responses[0].Content, genai.FinishReasonMaxTokens)
-	assert.Equal(t, float64(500), config["maxOutputTokens"])
 	assert.Equal(t, []any{"END", "\n\n"}, config["stopSequences"])
-}
-
-func TestShortMaxTokens(t *testing.T) {
-	ctx, tp, exporter := setupGoldenTest(t)
-
-	sid := "session-brief"
-	r := newGoldenRunner(ctx, t, tp, sid, llmagent.Config{
-		Name:                  "brief_agent",
-		Instruction:           "You are a helpful assistant.",
-		GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 5},
-	})
-
-	msg := genai.NewContentFromText("What is AI?", genai.RoleUser)
-	responses := runAndCollectFinal(ctx, t, r, sid, msg, agent.RunConfig{})
-	text := assertFinalResponse(t, responses)
-	t.Logf("Response: %s", text)
-
-	config := assertGoldenExchange(t, exporter, []*genai.Content{msg}, responses[0].Content, genai.FinishReasonMaxTokens)
-	assert.Equal(t, float64(5), config["maxOutputTokens"])
 }
 
 func TestGoogleSearchUsage(t *testing.T) {
@@ -347,26 +247,15 @@ func TestGoogleSearchUsage(t *testing.T) {
 
 	msg := genai.NewContentFromText("Search the web for the current stable Go release and name its major and minor version.", genai.RoleUser)
 	responses := runAndCollectFinal(ctx, t, r, sid, msg, agent.RunConfig{})
-	text := assertFinalResponse(t, responses)
-	t.Logf("Response: %s", text)
+	assertFinalResponse(t, responses)
 
-	spans := assertSpansExist(t, exporter)
-	var modelSpan *oteltest.Span
-	for i := range spans {
-		if spans[i].Name() == "call_llm" {
-			modelSpan = &spans[i]
-			break
-		}
-	}
-	require.NotNil(t, modelSpan)
-
-	metrics := modelSpan.Metrics()
-	assert.Equal(t, float64(157), metrics["prompt_tokens"])
-	assert.Equal(t, float64(295), metrics["completion_tokens"])
-	assert.Equal(t, float64(239), metrics["completion_reasoning_tokens"])
-	assert.Equal(t, float64(452), metrics["tokens"])
-	assert.Equal(t, metrics["tokens"], metrics["prompt_tokens"]+metrics["completion_tokens"])
-	assert.NotContains(t, metrics, "tool_use_prompt_token_count")
+	modelSpan, _ := assertGoldenExchange(t, exporter, []*genai.Content{msg}, responses[0].Content, genai.FinishReasonStop)
+	assert.Equal(t, map[string]float64{
+		"prompt_tokens":               157,
+		"completion_tokens":           295,
+		"completion_reasoning_tokens": 239,
+		"tokens":                      452,
+	}, modelSpan.Metrics())
 }
 
 func TestReasoning(t *testing.T) {
@@ -385,36 +274,29 @@ func TestReasoning(t *testing.T) {
 
 	msg1 := genai.NewContentFromText("Look at this sequence: 2, 6, 12, 20, 30. What is the pattern and what would be the formula for the nth term?", genai.RoleUser)
 	responses := runAndCollectFinal(ctx, t, r, sid, msg1, agent.RunConfig{})
-	text := assertFinalResponse(t, responses)
-	t.Logf("First response: %s", text)
+	assertFinalResponse(t, responses)
+	firstOutput := responses[0].Content
+	firstSpan, config := assertGoldenExchange(t, exporter, []*genai.Content{msg1}, firstOutput, genai.FinishReasonStop)
+	assert.Equal(t, float64(2048), config["maxOutputTokens"])
+	assert.Equal(t, goldenJSON(t, genai.NewContentFromText("You are a mathematical reasoning assistant.", genai.RoleUser)), config["systemInstruction"])
+	assert.Equal(t, map[string]any{"includeThoughts": true, "thinkingBudget": float64(1024)}, config["thinkingConfig"])
 
 	msg2 := genai.NewContentFromText("Using the pattern you discovered, what would be the 10th term? And can you find the sum of the first 10 terms?", genai.RoleUser)
 	responses = runAndCollectFinal(ctx, t, r, sid, msg2, agent.RunConfig{})
-	text = assertFinalResponse(t, responses)
-	t.Logf("Follow-up response: %s", text)
+	assertFinalResponse(t, responses)
+	secondSpan, _ := assertGoldenExchange(t, exporter, []*genai.Content{msg1, firstOutput, msg2}, responses[0].Content, genai.FinishReasonStop)
 
-	spans := assertSpansExist(t, exporter)
-	var modelSpans []*oteltest.Span
-	for i := range spans {
-		if spans[i].Name() == "call_llm" {
-			modelSpans = append(modelSpans, &spans[i])
-		}
-	}
-	require.Len(t, modelSpans, 2)
-
-	firstMetrics := modelSpans[0].Metrics()
-	assert.Equal(t, float64(47), firstMetrics["prompt_tokens"])
-	assert.Equal(t, float64(1608), firstMetrics["completion_tokens"])
-	assert.Equal(t, float64(765), firstMetrics["completion_reasoning_tokens"])
-	assert.Equal(t, float64(1655), firstMetrics["tokens"])
-	assert.Equal(t, firstMetrics["tokens"], firstMetrics["prompt_tokens"]+firstMetrics["completion_tokens"])
-	assert.NotContains(t, firstMetrics, "tool_use_prompt_token_count")
-	assert.False(t, modelSpans[0].HasAttr("gen_ai.usage.prompt_tokens"))
-
-	secondMetrics := modelSpans[1].Metrics()
-	assert.Equal(t, float64(1475), secondMetrics["prompt_tokens"])
-	assert.Equal(t, float64(1627), secondMetrics["completion_tokens"])
-	assert.Equal(t, float64(900), secondMetrics["completion_reasoning_tokens"])
-	assert.Equal(t, float64(3102), secondMetrics["tokens"])
-	assert.Equal(t, secondMetrics["tokens"], secondMetrics["prompt_tokens"]+secondMetrics["completion_tokens"])
+	assert.Equal(t, map[string]float64{
+		"prompt_tokens":               47,
+		"completion_tokens":           1608,
+		"completion_reasoning_tokens": 765,
+		"tokens":                      1655,
+	}, firstSpan.Metrics())
+	assert.False(t, firstSpan.HasAttr("gen_ai.usage.prompt_tokens"))
+	assert.Equal(t, map[string]float64{
+		"prompt_tokens":               1475,
+		"completion_tokens":           1627,
+		"completion_reasoning_tokens": 900,
+		"tokens":                      3102,
+	}, secondSpan.Metrics())
 }
