@@ -21,7 +21,8 @@ type tracedModel struct {
 
 type modelSpan struct {
 	trace.Span
-	managed atomic.Bool
+	managed         atomic.Bool
+	responseHandled atomic.Bool
 }
 
 func (m *tracedModel) GenerateContent(ctx context.Context, req *model.LLMRequest, stream bool) iter.Seq2[*model.LLMResponse, error] {
@@ -45,12 +46,15 @@ func (m *tracedModel) GenerateContent(ctx context.Context, req *model.LLMRequest
 			span.End()
 		}()
 		for response, err := range m.LLM.GenerateContent(trace.ContextWithSpan(ctx, span), req, stream) {
-			// ADK skips AfterModel when the provider returns an error.
-			if err != nil {
+			span.responseHandled.Store(false)
+			continued := yield(response, err)
+			// ADK may recover the provider error before running AfterModel.
+			// Only record errors that bypass those callbacks as unhandled.
+			if err != nil && !span.responseHandled.Load() {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, err.Error())
 			}
-			if !yield(response, err) {
+			if !continued {
 				return
 			}
 		}

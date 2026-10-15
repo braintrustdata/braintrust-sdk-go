@@ -427,7 +427,11 @@ func (c *callbacksImpl) AfterModel(ctx agent.CallbackContext, resp *model.LLMRes
 		return nil, nil
 	}
 	// Do not delete the span, tool calls may want to use it as a parent
-	if s, ok := span.(*modelSpan); !ok || !s.managed.Load() {
+	s, wrapped := span.(*modelSpan)
+	if wrapped {
+		s.responseHandled.Store(true)
+	}
+	if !wrapped || !s.managed.Load() {
 		defer span.End()
 	}
 
