@@ -48,6 +48,7 @@ func TestOrchestrionInjection(t *testing.T) {
 			imports: []string{
 				"github.com/DataDog/orchestrion",
 				"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/a2a",
+				"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk",
 				"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic",
 				"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai",
 				"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit",
