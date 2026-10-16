@@ -24,7 +24,6 @@ import (
 // WorkflowEval defines a durable evaluation. Keep the definition (including
 // scorer names/order) unchanged while runs are active. Serialize calls advancing
 // the same run, including across processes. Provider callbacks may run concurrently.
-// Experimental: this API may change in non-major releases.
 type WorkflowEval[I, R any] struct {
 	Name            string
 	Store           WorkflowEvalStore

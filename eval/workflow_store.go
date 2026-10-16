@@ -11,7 +11,6 @@ import (
 // spaces. Implementations must copy bytes and retain sets as long as records.
 // Callers must serialize advancement of a run across processes; these primitives
 // do not provide a distributed execution lock.
-// Experimental: this API may change in non-major releases.
 type WorkflowEvalStore interface {
 	Read(context.Context, string) ([]byte, error)
 	Write(context.Context, string, []byte) error
