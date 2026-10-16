@@ -17,13 +17,13 @@ import (
 type BufferedReader struct {
 	src    io.ReadCloser
 	buf    *bytes.Buffer
-	onDone func(io.Reader) // called once when fully read or closed
+	onDone func(io.Reader, error) // called once when fully read, failed, or closed
 	once   sync.Once
 	closed bool
 }
 
-// NewBufferedReader creates a new buffered reader that calls onDone when fully read or closed.
-func NewBufferedReader(src io.ReadCloser, onDone func(io.Reader)) *BufferedReader {
+// NewBufferedReader calls onDone with buffered data and any read error when fully read, failed, or closed.
+func NewBufferedReader(src io.ReadCloser, onDone func(io.Reader, error)) *BufferedReader {
 	return &BufferedReader{
 		src:    src,
 		buf:    &bytes.Buffer{},
@@ -37,7 +37,9 @@ func (r *BufferedReader) Read(p []byte) (int, error) {
 		_, _ = r.buf.Write(p[:n])
 	}
 	if err == io.EOF {
-		r.trigger()
+		r.trigger(nil)
+	} else if err != nil {
+		r.trigger(err)
 	}
 	return n, err
 }
@@ -45,15 +47,15 @@ func (r *BufferedReader) Read(p []byte) (int, error) {
 // Close closes the underlying reader and triggers the onDone callback.
 func (r *BufferedReader) Close() error {
 	r.closed = true
-	r.trigger()
+	r.trigger(nil)
 	return r.src.Close()
 }
 
 // trigger ensures onDone is only called once
-func (r *BufferedReader) trigger() {
+func (r *BufferedReader) trigger(err error) {
 	r.once.Do(func() {
 		if r.onDone != nil {
-			r.onDone(r.buf)
+			r.onDone(r.buf, err)
 		}
 	})
 }

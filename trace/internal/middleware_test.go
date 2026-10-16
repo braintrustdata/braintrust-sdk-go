@@ -7,10 +7,12 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"testing/iotest"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
@@ -36,6 +38,38 @@ func (nt *noopTracer) StartSpan(ctx context.Context, start time.Time, _ io.Reade
 
 func (nt *noopTracer) TagSpan(_ trace.Span, _ io.Reader) error {
 	return nil
+}
+
+func TestMiddlewareRecordsResponseReadError(t *testing.T) {
+	// VCR records response bytes, not failures while reading the body. Inject
+	// a read failure here to exercise the mid-stream network error path.
+	tp, exporter := oteltest.Setup(t)
+	tracer := &noopTracer{cfg: &config{tracer: tp.Tracer("test")}}
+	mw := Middleware(func(_ string) MiddlewareTracer { return tracer }, nil) //nolint:bodyclose // returns middleware func
+	req := httptest.NewRequest("POST", "/v1/whatever", strings.NewReader(`{}`))
+	resp, err := mw(req, func(_ *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Body: io.NopCloser(io.MultiReader(
+				strings.NewReader("partial response"), iotest.ErrReader(io.ErrUnexpectedEOF),
+			)),
+		}, nil
+	})
+	require.NoError(t, err)
+	t.Cleanup(func() { require.NoError(t, resp.Body.Close()) })
+	data, err := io.ReadAll(resp.Body)
+	require.ErrorIs(t, err, io.ErrUnexpectedEOF)
+	assert.Equal(t, "partial response", string(data))
+
+	// The span should end as soon as reading fails, even before Close.
+	span := exporter.FlushOne()
+	assert.Equal(t, codes.Error, span.Status().Code)
+	assert.Contains(t, span.Status().Description, io.ErrUnexpectedEOF.Error())
+	events := span.Events()
+	require.Len(t, events, 1)
+	assert.Contains(t, events[0].Attributes, attribute.String("exception.message", io.ErrUnexpectedEOF.Error()))
+	require.NoError(t, resp.Body.Close())
+	assert.Empty(t, exporter.Flush(), "closing a failed stream must not end the span again")
 }
 
 func TestMiddlewareMarksHTTPErrorStatusAsError(t *testing.T) {

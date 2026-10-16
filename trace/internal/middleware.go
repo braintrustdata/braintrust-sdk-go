@@ -4,6 +4,7 @@ package internal
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"net/http"
 	"time"
@@ -94,12 +95,14 @@ func Middleware(getMiddlewareTracer TracerRouter, log logger.Logger) func(*http.
 		//
 		// It's critical that we don't try to parse the whole response body here because
 		// we don't want to block clients waiting for streaming responses.
-		onResponseDone := func(r io.Reader) {
+		onResponseDone := func(r io.Reader, readErr error) {
 			// NOTE: this could be done in a goroutine so we don't add any extra
 			// latency to the response.
 			now := time.Now()
-			if err := mt.TagSpan(span, r); err != nil {
+			if err := errors.Join(readErr, mt.TagSpan(span, r)); err != nil {
 				log.Warn("Error tagging span", "error", err)
+				span.RecordError(err)
+				span.SetStatus(codes.Error, err.Error())
 			}
 			span.End(trace.WithTimestamp(now))
 		}
