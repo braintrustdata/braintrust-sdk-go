@@ -113,11 +113,20 @@ Record the real Braintrust row-update and provider-batch tests:
 
 ```sh
 VCR_MODE=record go test ./eval -run '^TestWorkflowExperimentIntegration$' -count=1
-VCR_MODE=record go test ./examples/internal/workflow-eval -run '^TestWorkflowOpenAIBatches$' -timeout 30m -count=1
+VCR_MODE=record go test ./examples/internal/workflow-eval -run '^TestWorkflowOpenAIBatches$' -timeout 50h -count=1
 ```
 
-Provider completion can exceed the test window; rerun with a longer timeout and
-adjust the test's context deadline if needed. The Braintrust integration has a
-recorded cassette and runs in replay mode without credentials. The OpenAI test
-skips replay until its genuine cassette exists; it must be recorded and replayed
-before release. A local pass with that skip is not provider validation.
+OpenAI gives each batch a 24-hour completion window. This test runs a task batch
+and then a scorer batch, so live recording allows 50 hours for both stages. The
+test follows `go test -timeout` and stops one minute early to save the VCR recording;
+`-timeout 0` disables the deadline. Live polling runs once per minute; replay does
+not sleep. The devbox must remain running for the live test.
+
+Both the Braintrust and OpenAI integration tests include genuine recorded
+cassettes and replay without credentials. The provider test covers task submission,
+polling, result collection, scorer submission, and final scores for two cases.
+`make test` includes the provider replay test. To run it separately:
+
+```sh
+VCR_MODE=replay go test ./examples/internal/workflow-eval -run '^TestWorkflowOpenAIBatches$' -count=1
+```

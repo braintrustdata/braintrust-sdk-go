@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -21,11 +20,7 @@ import (
 // Exercise the actual provider batch API. Replay requires a genuine recording;
 // no fake HTTP responses are used when API credentials are unavailable.
 func TestWorkflowOpenAIBatches(t *testing.T) {
-	if vcr.GetVCRMode() == vcr.ModeReplay {
-		if _, err := os.Stat(filepath.Join("testdata", "cassettes", t.Name()+".yaml")); os.IsNotExist(err) {
-			t.Skip("record with OPENAI_API_KEY and VCR_MODE=record before release")
-		}
-	} else if os.Getenv("OPENAI_API_KEY") == "" {
+	if vcr.GetVCRMode() != vcr.ModeReplay && os.Getenv("OPENAI_API_KEY") == "" {
 		t.Skip("OPENAI_API_KEY is required to record provider batches")
 	}
 	// Stable custom IDs let recorded provider responses correlate to replayed cases.
@@ -42,16 +37,23 @@ func TestWorkflowOpenAIBatches(t *testing.T) {
 	definition := func() *eval.WorkflowEval[string, string] {
 		return &eval.WorkflowEval[string, string]{Name: "provider-batches", Store: store, Task: task, WorkflowScorers: []eval.WorkflowScorerDefinition[string, string]{scorer}}
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Minute)
+	// Follow go test -timeout, leaving time for VCR to save the recording.
+	// With -timeout 0, the caller is responsible for stopping the live test.
+	ctx := context.Background()
+	cancel := func() {}
+	if deadline, ok := t.Deadline(); ok {
+		ctx, cancel = context.WithDeadline(ctx, deadline.Add(-time.Minute))
+	}
 	defer cancel()
 	result, err := definition().Start(ctx, eval.WorkflowStartOpts[string, string]{NoSendLogs: true, Dataset: eval.NewDataset([]eval.Case[string, string]{{Input: "What is 2 + 2? Reply with the number only.", Expected: "4"}, {Input: "What is 3 + 3? Reply with the number only.", Expected: "6"}})})
 	require.NoError(t, err)
+	t.Logf("Started workflow %s; waiting for task and scorer batches", result.RunID)
 	for result.Status != "completed" {
 		if vcr.GetVCRMode() != vcr.ModeReplay {
 			select {
 			case <-ctx.Done():
 				t.Fatal(ctx.Err())
-			case <-time.After(10 * time.Second):
+			case <-time.After(time.Minute):
 			}
 		}
 		result, err = definition().Poll(ctx, result.RunID)
