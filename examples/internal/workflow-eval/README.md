@@ -1,6 +1,6 @@
 # Workflow and batch evaluations
 
-Experimental Go APIs for SDK-297. Tasks/scorers submit provider work, persist JSON
+Workflow and batch evaluation APIs for Go. Tasks/scorers submit provider work, persist JSON
 handles, and collect results after polling or an application-verified webhook.
 
 Run the ordinary task/scorer/classifier example without credentials:

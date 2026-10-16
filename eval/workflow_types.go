@@ -86,7 +86,6 @@ type WorkflowBatchResult[T any] struct {
 }
 
 // WorkflowTaskDefinition accepts a TaskFunc, WorkflowTask, or WorkflowBatchTask.
-// Experimental: workflow APIs may change in non-major releases.
 type WorkflowTaskDefinition[I, R any] interface{ workflowTask() workflowStage[I, R] }
 
 // WorkflowScorerDefinition accepts a WorkflowScorer or WorkflowBatchScorer.

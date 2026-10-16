@@ -224,7 +224,6 @@ func NewEvaluator[I, R any](client *Client) *eval.Evaluator[I, R] {
 }
 
 // NewWorkflowEval attaches the client to a durable workflow evaluation.
-// Experimental: this API may change in non-major releases.
 func NewWorkflowEval[I, R any](client *Client, definition *eval.WorkflowEval[I, R]) *eval.WorkflowEval[I, R] {
 	return eval.NewWorkflowEval(NewEvaluator[I, R](client), definition)
 }
