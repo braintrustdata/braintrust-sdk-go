@@ -117,6 +117,7 @@ VCR_MODE=record go test ./examples/internal/workflow-eval -run '^TestWorkflowOpe
 ```
 
 Provider completion can exceed the test window; rerun with a longer timeout and
-adjust the test's context deadline if needed. The new integration tests explicitly
-skip replay until genuine cassettes exist. Recording and replaying both tests is
-required before release; a local pass with those skips is not external validation.
+adjust the test's context deadline if needed. The Braintrust integration has a
+recorded cassette and runs in replay mode without credentials. The OpenAI test
+skips replay until its genuine cassette exists; it must be recorded and replayed
+before release. A local pass with that skip is not provider validation.
