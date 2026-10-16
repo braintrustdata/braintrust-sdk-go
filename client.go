@@ -223,6 +223,12 @@ func NewEvaluator[I, R any](client *Client) *eval.Evaluator[I, R] {
 	return eval.NewEvaluator[I, R](client.session, client.tracerProvider, client.API(), client.config.DefaultProjectName)
 }
 
+// NewWorkflowEval attaches the client to a durable workflow evaluation.
+// Experimental: this API may change in non-major releases.
+func NewWorkflowEval[I, R any](client *Client, definition *eval.WorkflowEval[I, R]) *eval.WorkflowEval[I, R] {
+	return eval.NewWorkflowEval(NewEvaluator[I, R](client), definition)
+}
+
 // API returns an API client for making direct calls to the Braintrust API.
 // This provides low-level access to projects, datasets, experiments, and other resources.
 //
