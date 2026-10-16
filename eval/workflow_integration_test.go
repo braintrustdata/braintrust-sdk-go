@@ -1,0 +1,71 @@
+package eval
+
+import (
+	"context"
+	"encoding/json"
+	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
+)
+
+// Records the real Braintrust insert/fetch lifecycle. This test intentionally
+// does not substitute a fake HTTP server when credentials/cassettes are absent.
+func TestWorkflowExperimentIntegration(t *testing.T) {
+	ctx := context.Background()
+	httpClient := vcr.GetHTTPSClient(t)
+	apiClient := api.NewWithHTTPSClient(httpClient)
+	evaluator := NewEvaluator[string, string](nil, nil, apiClient, integrationTestProject)
+	store := NewWorkflowEvalMemoryStore()
+	makeDefinition := func() *WorkflowEval[string, string] {
+		return NewWorkflowEval(evaluator, &WorkflowEval[string, string]{Name: t.Name(), Store: store,
+			Task: WorkflowTask[string, string]{
+				Submit: func(ctx context.Context, item WorkflowTaskItem[string, string], info WorkflowSubmissionContext) (json.RawMessage, error) {
+					return json.Marshal(item.Input)
+				},
+				Completion: WorkflowCompletion{GetExternalID: func(json.RawMessage) (string, error) { return "workflow-integration-completion", nil }},
+				Collect: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (WorkflowTaskResult[string], error) {
+					var input string
+					err := json.Unmarshal(data, &input)
+					return WorkflowTaskResult[string]{Output: input + "!"}, err
+				},
+			}, Scorers: []Scorer[string, string]{NewScorer("correct", func(ctx context.Context, r TaskResult[string, string]) (Scores, error) {
+				require.Equal(t, "hello!", r.Output)
+				return S(1), nil
+			})},
+		})
+	}
+	w := makeDefinition()
+	result, err := w.Start(ctx, WorkflowStartOpts[string, string]{Dataset: NewDataset([]Case[string, string]{{Input: "hello", Expected: "hello!"}})})
+	require.NoError(t, err)
+	t.Cleanup(func() { require.NoError(t, apiClient.Experiments().Delete(ctx, result.ExperimentID)) })
+	fetch := func() []map[string]any {
+		t.Helper()
+		resp, err := httpClient.POST(ctx, "/v1/experiment/"+result.ExperimentID+"/fetch", map[string]any{"limit": 100})
+		require.NoError(t, err)
+		defer func() { require.NoError(t, resp.Body.Close()) }()
+		var body struct {
+			Events []map[string]any `json:"events"`
+		}
+		require.NoError(t, json.NewDecoder(resp.Body).Decode(&body))
+		return body.Events
+	}
+	initial := fetch()
+	require.Len(t, initial, 1)
+	w = makeDefinition()
+	result, err = w.ProcessSubmissionResult(ctx, WorkflowSubmissionResult{ExternalID: "workflow-integration-completion"})
+	require.NoError(t, err)
+	require.Equal(t, "completed", result.Status)
+	_, err = w.ProcessSubmissionResult(ctx, WorkflowSubmissionResult{ExternalID: "workflow-integration-completion"})
+	require.NoError(t, err)
+	final := fetch()
+	require.Len(t, final, 1)
+	require.Equal(t, initial[0]["id"], final[0]["id"])
+	require.Equal(t, initial[0]["span_id"], final[0]["span_id"])
+	require.Equal(t, "hello!", final[0]["output"])
+	scores, ok := final[0]["scores"].(map[string]any)
+	require.True(t, ok)
+	require.Equal(t, 1.0, scores["correct"])
+}
