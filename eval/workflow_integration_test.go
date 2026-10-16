@@ -3,8 +3,6 @@ package eval
 import (
 	"context"
 	"encoding/json"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -16,11 +14,6 @@ import (
 // Records the real Braintrust insert/fetch lifecycle. This test intentionally
 // does not substitute a fake HTTP server when credentials/cassettes are absent.
 func TestWorkflowExperimentIntegration(t *testing.T) {
-	if vcr.GetVCRMode() == vcr.ModeReplay {
-		if _, err := os.Stat(filepath.Join("testdata", "cassettes", t.Name()+".yaml")); os.IsNotExist(err) {
-			t.Skip("record this new integration cassette with BRAINTRUST_API_KEY and VCR_MODE=record before release")
-		}
-	}
 	ctx := context.Background()
 	httpClient := vcr.GetHTTPSClient(t)
 	apiClient := api.NewWithHTTPSClient(httpClient)
