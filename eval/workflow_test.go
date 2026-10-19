@@ -27,7 +27,7 @@ func TestWorkflowBatchResume(t *testing.T) {
 			batches = append(batches, items)
 			return json.Marshal(info.SubmissionID)
 		},
-		Completion: WorkflowCompletion{GetExternalID: func(data json.RawMessage) (string, error) {
+		Completion: WorkflowCompletion{GetExternalID: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (string, error) {
 			var id string
 			err := json.Unmarshal(data, &id)
 			return id, err
@@ -170,7 +170,7 @@ func TestWorkflowMixedScorerBatches(t *testing.T) {
 						batches[info.SubmissionID] = items
 						return json.Marshal(info.SubmissionID)
 					},
-					Completion: WorkflowCompletion{GetExternalID: func(data json.RawMessage) (string, error) {
+					Completion: WorkflowCompletion{GetExternalID: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (string, error) {
 						var id string
 						err := json.Unmarshal(data, &id)
 						return id, err
@@ -240,7 +240,9 @@ func TestWorkflowSharedExternalID(t *testing.T) {
 		Submit: func(context.Context, WorkflowTaskItem[int, int], WorkflowSubmissionContext) (json.RawMessage, error) {
 			return json.RawMessage(`{}`), nil
 		},
-		Completion: WorkflowCompletion{GetExternalID: func(json.RawMessage) (string, error) { return "shared", nil }},
+		Completion: WorkflowCompletion{GetExternalID: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (string, error) {
+			return "shared", nil
+		}},
 		Collect: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowTaskResult[int], error) {
 			return WorkflowTaskResult[int]{Output: 2}, nil
 		},
@@ -425,4 +427,30 @@ func TestWorkflowPartialBatchWaitAfterFullBatch(t *testing.T) {
 	run.Cases[0].ReadyAt = time.Now().Add(-2 * time.Hour)
 	require.NoError(t, w.advance(ctx, run, stages))
 	require.Equal(t, 1, submitted, "oldest item of the consumed batch must not flush the younger remainder")
+}
+
+func TestWorkflowExternalIDReceivesContext(t *testing.T) {
+	type ctxKey struct{}
+	ctx := context.WithValue(context.Background(), ctxKey{}, "caller")
+	var got WorkflowSubmissionContext
+	w := WorkflowEval[int, int]{Name: "external-context", Store: NewWorkflowEvalMemoryStore(), Task: WorkflowTask[int, int]{
+		Submit: func(context.Context, WorkflowTaskItem[int, int], WorkflowSubmissionContext) (json.RawMessage, error) {
+			return json.RawMessage(`{}`), nil
+		},
+		Completion: WorkflowCompletion{GetExternalID: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (string, error) {
+			require.Equal(t, "caller", ctx.Value(ctxKey{}))
+			got = info
+			return "external-" + info.SubmissionID, nil
+		}},
+		Collect: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowTaskResult[int], error) {
+			return WorkflowTaskResult[int]{Output: 2}, nil
+		},
+	}}
+	r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}})})
+	require.NoError(t, err)
+	require.Equal(t, r.RunID, got.RunID)
+	require.NotEmpty(t, got.SubmissionID)
+	r, err = w.ProcessSubmissionResult(ctx, WorkflowSubmissionResult{ExternalID: "external-" + got.SubmissionID})
+	require.NoError(t, err)
+	require.Equal(t, "completed", r.Status)
 }

@@ -36,7 +36,7 @@ type WorkflowPollResult struct {
 // provider; GetExternalID extracts the ID delivered by a verified webhook.
 type WorkflowCompletion struct {
 	Poll          func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowPollResult, error)
-	GetExternalID func(json.RawMessage) (string, error)
+	GetExternalID func(context.Context, json.RawMessage, WorkflowSubmissionContext) (string, error)
 }
 
 // WorkflowBatching controls provider batch sizes. MaxWait flushes partial scorer

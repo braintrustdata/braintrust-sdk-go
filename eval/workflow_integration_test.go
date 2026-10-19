@@ -25,7 +25,9 @@ func TestWorkflowExperimentIntegration(t *testing.T) {
 				Submit: func(ctx context.Context, item WorkflowTaskItem[string, string], info WorkflowSubmissionContext) (json.RawMessage, error) {
 					return json.Marshal(item.Input)
 				},
-				Completion: WorkflowCompletion{GetExternalID: func(json.RawMessage) (string, error) { return "workflow-integration-completion", nil }},
+				Completion: WorkflowCompletion{GetExternalID: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (string, error) {
+					return "workflow-integration-completion", nil
+				}},
 				Collect: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (WorkflowTaskResult[string], error) {
 					var input string
 					err := json.Unmarshal(data, &input)

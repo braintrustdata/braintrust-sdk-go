@@ -481,7 +481,7 @@ func (w *WorkflowEval[I, R]) submitPending(ctx context.Context, run *workflowRun
 		if sub.Done || len(sub.Data) == 0 || stage.completion.GetExternalID == nil {
 			continue
 		}
-		id, e := stage.completion.GetExternalID(sub.Data)
+		id, e := stage.completion.GetExternalID(ctx, sub.Data, WorkflowSubmissionContext{RunID: run.ID, SubmissionID: sub.ID})
 		if e != nil {
 			return errors.Join(err, e)
 		}

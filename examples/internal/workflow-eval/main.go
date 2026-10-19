@@ -186,7 +186,9 @@ func batchID(data json.RawMessage) (string, error) {
 }
 func completion(client openai.Client, webhook bool) eval.WorkflowCompletion {
 	if webhook {
-		return eval.WorkflowCompletion{GetExternalID: batchID}
+		return eval.WorkflowCompletion{GetExternalID: func(_ context.Context, data json.RawMessage, _ eval.WorkflowSubmissionContext) (string, error) {
+			return batchID(data)
+		}}
 	}
 	return eval.WorkflowCompletion{Poll: func(ctx context.Context, data json.RawMessage, info eval.WorkflowSubmissionContext) (eval.WorkflowPollResult, error) {
 		id, err := batchID(data)
