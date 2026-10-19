@@ -38,6 +38,9 @@ type evalRunConfig struct {
 	// before the run starts so a bad value is reported without creating
 	// anything in Braintrust.
 	parameters eval.Parameters
+	// noSendLogs keeps the run local (`bt eval --no-send-logs`): session is
+	// nil, no experiment is created and no spans are exported.
+	noSendLogs bool
 }
 
 // RegisterEval adds an eval definition to the runner. The type parameters I and
@@ -113,9 +116,12 @@ func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) 
 			_ = tp.Shutdown(shutdownCtx)
 		}()
 
-		traceCfg := bttrace.Config{DefaultProjectName: r.projectName()}
-		if err := bttrace.AddSpanProcessor(tp, cfg.session.session, traceCfg); err != nil {
-			return fmt.Errorf("failed to setup tracing: %w", err)
+		// A --no-send-logs run gets no exporter: its spans stay in-process.
+		if !cfg.noSendLogs {
+			traceCfg := bttrace.Config{DefaultProjectName: r.projectName()}
+			if err := bttrace.AddSpanProcessor(tp, cfg.session.session, traceCfg); err != nil {
+				return fmt.Errorf("failed to setup tracing: %w", err)
+			}
 		}
 	}
 
@@ -189,7 +195,7 @@ func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) 
 	// Build a per-run evaluator with the caller's session rather than whatever
 	// the Eval was constructed with, so traces are attributed to the user who
 	// triggered this request.
-	evaluator := eval.NewEvaluator[I, R](cfg.session.session, tp, cfg.session.api, r.projectName())
+	evaluator := eval.NewEvaluator[I, R](cfg.session.authSession(), tp, cfg.session.apiClient(), r.projectName())
 	e := eval.NewEval(evaluator, r.def)
 	result, evalErr := e.Run(evalCtx, eval.RunOpts[I, R]{
 		Experiment:  experimentName,
@@ -205,6 +211,7 @@ func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) 
 		SpanParent: spanParent,
 		Generation: generation,
 		Parameters: cfg.parameters,
+		NoSendLogs: cfg.noSendLogs,
 	})
 
 	// Flush before the summary so the UI can poll for scores the moment it

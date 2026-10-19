@@ -115,6 +115,15 @@ cd examples
 bt eval ./internal/eval-runner
 ```
 
+To run locally without sending anything to Braintrust — no login, no experiment, no uploaded
+spans — add `--no-send-logs`. This needs no `BRAINTRUST_API_KEY` (the `summarizer` eval still
+needs `OPENAI_API_KEY`):
+
+```bash
+cd examples
+bt eval --no-send-logs ./internal/eval-runner
+```
+
 ### Without `bt` at all
 
 Running the binary directly prints what is registered and exits, without contacting Braintrust —

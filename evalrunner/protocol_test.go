@@ -501,6 +501,12 @@ func registerFoodClassifier(r *Runner) {
 		Name:        "food-classifier",
 		Task:        classify,
 		ProjectName: "go-sdk-tests",
+		// Only batch runs read this; playground requests bring their own data.
+		// The default "rule-based" model matches one of the two.
+		Dataset: eval.NewDataset([]eval.Case[string, string]{
+			{Input: "apple", Expected: "fruit"},
+			{Input: "carrot", Expected: "fruit"},
+		}),
 		ParameterSchema: eval.ParameterSchema{
 			"model": {Type: "model", Default: "rule-based"},
 		},

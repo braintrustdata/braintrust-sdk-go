@@ -42,7 +42,7 @@ func (r *Runner) runEval(ctx context.Context) error {
 		return r.reportError(sink, 400, err)
 	}
 
-	session, err := r.newSession(ctx)
+	session, err := r.openSession(ctx)
 	if err != nil {
 		return r.reportError(sink, 401, err)
 	}
@@ -54,6 +54,7 @@ func (r *Runner) runEval(ctx context.Context) error {
 		sink:           sink,
 		tracerProvider: r.tracerProvider,
 		parameters:     parameters,
+		noSendLogs:     r.env.NoSendLogs,
 	}); err != nil {
 		return r.reportError(sink, 500, err)
 	}
@@ -89,7 +90,7 @@ func (r *Runner) runBatch(ctx context.Context) error {
 		return nil
 	}
 
-	session, err := r.newSession(ctx)
+	session, err := r.openSession(ctx)
 	if err != nil {
 		return err
 	}
@@ -104,6 +105,7 @@ func (r *Runner) runBatch(ctx context.Context) error {
 				sink:           sink,
 				tracerProvider: r.tracerProvider,
 				parameters:     parameters,
+				noSendLogs:     r.env.NoSendLogs,
 			})
 		}
 		if err != nil {
@@ -119,6 +121,15 @@ func (r *Runner) runBatch(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+// openSession logs in to Braintrust, unless bt asked for --no-send-logs: then
+// the run is local, needs no credentials, and the session is nil.
+func (r *Runner) openSession(ctx context.Context) (*session, error) {
+	if r.env.NoSendLogs {
+		return nil, nil
+	}
+	return r.newSession(ctx)
 }
 
 // reportError sends an error frame and logs it, without failing the process.
