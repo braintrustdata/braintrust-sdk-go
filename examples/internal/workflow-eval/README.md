@@ -9,6 +9,9 @@ Run the ordinary task/scorer/classifier example without credentials:
 go run ./examples/internal/workflow-eval -local
 ```
 
+Experiments are retained for inspection. Use `-project SDK-297-TESTING` to select
+a project (default: `go-sdk-examples`); use the same project when resuming.
+
 Run OpenAI batch tasks and batch scorers with `OPENAI_API_KEY` and
 `BRAINTRUST_API_KEY` set:
 
@@ -130,3 +133,37 @@ polling, result collection, scorer submission, and final scores for two cases.
 ```sh
 VCR_MODE=replay go test ./examples/internal/workflow-eval -run '^TestWorkflowOpenAIBatches$' -count=1
 ```
+
+## TypeScript behavior reference
+
+The workflow API was compared with TypeScript commit
+[`b94cd07`](https://github.com/braintrustdata/braintrust-sdk-javascript/blob/b94cd07cfeb2977d6d9bba9a7a4f3ce491c6d637/js/src/workflow-eval.ts)
+(the merge of batch workflow PR #2548).
+
+| Behavior | Go implementation and verification |
+| --- | --- |
+| Single-item and batch task/scorer lifecycle | `WorkflowTask`, `WorkflowScorer`, `WorkflowBatchTask`, `WorkflowBatchScorer`; single-scorer/retry and real OpenAI batch tests |
+| Polling and external-ID completion | `Poll`, `ProcessSubmissionResult`; batch-resume, shared-external-ID, and provider tests |
+| Full, final, and elapsed-wait scorer batching | `WorkflowBatching`; mixed-scorer and partial-batch-wait tests |
+| Out-of-order results, partial failures, missing/duplicate IDs | Stable `CustomID` mapping; batch-resume, collection-checkpoint, and duplicate-result tests |
+| Interrupted collection and write retry | Per-item checkpoints; collection-checkpoint and checkpoint-write-failure tests |
+| Memory/Redis continuation | Versioned JSON state; real Redis operations and separate-process restart tests |
+| Ordinary stages, trials, parameters, classifications | Existing Go eval types; local-trials/failures and mixed-scorer tests |
+| Experiment updates without backend changes | Existing experiment insert API; real Braintrust row-identity/score-update recording |
+
+Go-specific API choices:
+
+- Input and result generics follow the existing Go evaluator; expected and output
+  values share the result type. Ordinary and deferred scorers use separate fields.
+- Submission handles use `json.RawMessage`, and batch collection uses a `yield`
+  callback instead of a JavaScript iterable. Each yielded item is checkpointed.
+- `MaxWait == 0` means full/final-only batching, corresponding to an omitted
+  TypeScript `maxWaitMs`; use a positive duration for elapsed-wait flushing.
+- Case/trial IDs are generated and persisted for the run. The TypeScript custom
+  `caseId` callback is not exposed. Treat provider `CustomID` values as opaque.
+- `Status` returns progress and locally aggregated scores, rather than the
+  TypeScript server experiment summary. Persistence formats are not interchangeable.
+- Go logs stable case roots and ordinary callback spans. It does not reproduce
+  TypeScript's internal span-resumption implementation or synthesize deferred-stage
+  child spans. Scheduling, webhook verification, and per-run serialization remain
+  application responsibilities as described above.

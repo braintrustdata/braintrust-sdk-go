@@ -25,6 +25,7 @@ import (
 )
 
 func main() {
+	project := flag.String("project", "go-sdk-examples", "Braintrust project for retained experiments")
 	local := flag.Bool("local", false, "run an ordinary task/scorer locally without API credentials")
 	runID := flag.String("run", "", "resume a persisted run")
 	external := flag.String("external", "", "process a verified provider completion ID")
@@ -32,12 +33,12 @@ func main() {
 	socket := flag.String("redis-socket", "", "Redis Unix socket (requires redis-cli); use for restart")
 	single := flag.Bool("single", false, "use one submission per case instead of batch stages")
 	flag.Parse()
-	if err := run(context.Background(), *local, *runID, *external, *webhook, *socket, *single); err != nil {
+	if err := run(context.Background(), *local, *runID, *external, *webhook, *socket, *single, *project); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func run(ctx context.Context, local bool, runID, external string, webhook bool, socket string, single bool) error {
+func run(ctx context.Context, local bool, runID, external string, webhook bool, socket string, single bool, project string) error {
 	var store eval.WorkflowEvalStore = eval.NewWorkflowEvalMemoryStore()
 	if socket != "" {
 		var err error
@@ -75,7 +76,7 @@ func run(ctx context.Context, local bool, runID, external string, webhook bool, 
 		}
 		tp := trace.NewTracerProvider()
 		defer func() { _ = tp.Shutdown(ctx) }()
-		bt, err := braintrust.New(tp, braintrust.WithProject("go-sdk-examples"), braintrust.WithBlockingLogin(true))
+		bt, err := braintrust.New(tp, braintrust.WithProject(project), braintrust.WithBlockingLogin(true))
 		if err != nil {
 			return err
 		}
