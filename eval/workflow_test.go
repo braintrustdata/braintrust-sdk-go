@@ -454,3 +454,20 @@ func TestWorkflowExternalIDReceivesContext(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, WorkflowRunCompleted, r.Status)
 }
+
+func TestWorkflowBatchTaskRejectsMaxWait(t *testing.T) {
+	w := WorkflowEval[int, int]{Name: "task-wait", Store: NewWorkflowEvalMemoryStore(), Task: WorkflowBatchTask[int, int]{
+		Batching: WorkflowBatching{MaxSize: 2, MaxWait: time.Second},
+		Submit: func(context.Context, []WorkflowBatchItem[WorkflowTaskItem[int, int]], WorkflowSubmissionContext) (json.RawMessage, error) {
+			return json.RawMessage(`{}`), nil
+		},
+		Completion: WorkflowCompletion{Poll: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowPollResult, error) {
+			return WorkflowPollResult{Status: WorkflowComplete}, nil
+		}},
+		Collect: func(context.Context, json.RawMessage, WorkflowSubmissionContext, func(WorkflowBatchResult[WorkflowTaskResult[int]]) error) error {
+			return nil
+		},
+	}}
+	_, err := w.Start(context.Background(), WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}})})
+	require.ErrorContains(t, err, "MaxWait")
+}

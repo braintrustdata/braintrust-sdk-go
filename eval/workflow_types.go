@@ -3,6 +3,7 @@ package eval
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -39,8 +40,10 @@ type WorkflowCompletion struct {
 	GetExternalID func(context.Context, json.RawMessage, WorkflowSubmissionContext) (string, error)
 }
 
-// WorkflowBatching controls provider batch sizes. MaxWait flushes partial scorer
-// batches during advancement; zero waits until full or no more items can arrive.
+// WorkflowBatching controls provider batch sizes. MaxWait applies only to
+// scorers: it flushes partial batches during advancement, and zero waits until
+// full or no more items can arrive. Task batches are submitted immediately, so
+// a batch task rejects a nonzero MaxWait.
 type WorkflowBatching struct {
 	MaxSize int
 	MaxWait time.Duration
@@ -218,6 +221,9 @@ func (s workflowStage[I, R]) validate() error {
 	}
 	if s.batching.MaxSize < 1 || s.batching.MaxWait < 0 {
 		return fmt.Errorf("workflow %q: batch size must be positive and wait nonnegative", s.name)
+	}
+	if s.name == "task" && s.batching.MaxWait != 0 {
+		return errors.New(`workflow "task": MaxWait applies only to batch scorers`)
 	}
 	if (s.completion.Poll == nil) == (s.completion.GetExternalID == nil) {
 		return fmt.Errorf("workflow %q: choose exactly one completion mode", s.name)
