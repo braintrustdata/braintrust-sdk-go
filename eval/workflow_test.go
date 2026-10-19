@@ -472,3 +472,38 @@ func TestWorkflowBatchTaskRejectsMaxWait(t *testing.T) {
 	_, err := w.Start(context.Background(), WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}})})
 	require.ErrorContains(t, err, "MaxWait")
 }
+
+func TestWorkflowScorerItemTags(t *testing.T) {
+	ctx := context.Background()
+	got := map[int][]string{}
+	w := WorkflowEval[int, int]{Name: "scorer-tags", Store: NewWorkflowEvalMemoryStore(), MaxConcurrency: 1,
+		Task: WorkflowTask[int, int]{
+			Submit: func(context.Context, WorkflowTaskItem[int, int], WorkflowSubmissionContext) (json.RawMessage, error) {
+				return json.RawMessage(`{}`), nil
+			},
+			Completion: WorkflowCompletion{Poll: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowPollResult, error) {
+				return WorkflowPollResult{Status: WorkflowComplete}, nil
+			}},
+			Collect: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowTaskResult[int], error) {
+				return WorkflowTaskResult[int]{Output: 1, Tags: []string{"collected"}}, nil
+			},
+		},
+		WorkflowScorers: []WorkflowScorerDefinition[int, int]{WorkflowScorer[int, int]{Name: "judge",
+			Submit: func(ctx context.Context, item WorkflowScorerItem[int, int], info WorkflowSubmissionContext) (json.RawMessage, error) {
+				got[item.Input] = item.Tags
+				return json.RawMessage(`{}`), nil
+			},
+			Completion: WorkflowCompletion{Poll: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowPollResult, error) {
+				return WorkflowPollResult{Status: WorkflowComplete}, nil
+			}},
+			Collect: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (Scores, error) { return S(1), nil },
+		}}}
+	r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1, Tags: []string{"case"}}})})
+	require.NoError(t, err)
+	r, err = w.Poll(ctx, r.RunID)
+	require.NoError(t, err)
+	r, err = w.Poll(ctx, r.RunID)
+	require.NoError(t, err)
+	require.Equal(t, WorkflowRunCompleted, r.Status)
+	require.Equal(t, []string{"collected"}, got[1], "scorers see tags after the task replaces them")
+}

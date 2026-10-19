@@ -67,10 +67,12 @@ type WorkflowTaskResult[R any] struct {
 	Tags     []string
 }
 
-// WorkflowScorerItem is a completed task passed to a deferred scorer.
+// WorkflowScorerItem is a completed task passed to a deferred scorer. Tags
+// reflect any replacement returned by the task.
 type WorkflowScorerItem[I, R any] struct {
 	TaskResult[I, R]
 	ID         string
+	Tags       []string
 	TrialIndex int
 }
 

@@ -129,7 +129,7 @@ type workflowCase[I, R any] struct {
 }
 
 func (c workflowCase[I, R]) scorerItem() WorkflowScorerItem[I, R] {
-	return WorkflowScorerItem[I, R]{ID: c.Item.ID, TrialIndex: c.Item.TrialIndex, TaskResult: TaskResult[I, R]{Input: c.Item.Input, Expected: c.Item.Expected, Output: c.Output, Metadata: c.Item.Metadata}}
+	return WorkflowScorerItem[I, R]{ID: c.Item.ID, Tags: slices.Clone(c.Item.Tags), TrialIndex: c.Item.TrialIndex, TaskResult: TaskResult[I, R]{Input: c.Item.Input, Expected: c.Item.Expected, Output: c.Output, Metadata: c.Item.Metadata}}
 }
 
 func workflowKey(parts ...string) string { return "workflow/v1/" + stringsJoin(parts) }
