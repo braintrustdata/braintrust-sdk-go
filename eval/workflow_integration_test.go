@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/logger"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 )
 
@@ -17,7 +19,8 @@ func TestWorkflowExperimentIntegration(t *testing.T) {
 	ctx := context.Background()
 	httpClient := vcr.GetHTTPSClient(t)
 	apiClient := api.NewWithHTTPSClient(httpClient)
-	evaluator := NewEvaluator[string, string](nil, nil, apiClient, integrationTestProject)
+	session := auth.NewTestSession(auth.TestAPIKey, "org-test", "Test Org", "https://api.braintrust.dev", "https://www.braintrust.dev", "https://www.braintrust.dev", logger.NewFailTestLogger(t))
+	evaluator := NewEvaluator[string, string](session, nil, apiClient, integrationTestProject)
 	store := NewWorkflowEvalMemoryStore()
 	makeDefinition := func() *WorkflowEval[string, string] {
 		return NewWorkflowEval(evaluator, &WorkflowEval[string, string]{Name: t.Name(), Store: store,
@@ -60,6 +63,7 @@ func TestWorkflowExperimentIntegration(t *testing.T) {
 	result, err = w.ProcessSubmissionResult(ctx, WorkflowSubmissionResult{ExternalID: "workflow-integration-completion"})
 	require.NoError(t, err)
 	require.Equal(t, WorkflowRunCompleted, result.Status)
+	require.Equal(t, "https://www.braintrust.dev/app/Test%20Org/object?object_type=experiment&object_id="+result.ExperimentID, result.Permalink)
 	_, err = w.ProcessSubmissionResult(ctx, WorkflowSubmissionResult{ExternalID: "workflow-integration-completion"})
 	require.NoError(t, err)
 	final := fetch()

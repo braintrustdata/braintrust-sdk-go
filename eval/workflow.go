@@ -77,10 +77,12 @@ const (
 
 // WorkflowResult reports progress. Completed counts terminal cases, including
 // failures. Failed counts cases with any failed task, scorer, or classifier.
-// Scores averages successful values by score name.
+// Scores averages successful values by score name. Permalink links to the
+// experiment and is empty for NoSendLogs runs.
 type WorkflowResult struct {
 	RunID          string
 	ExperimentID   string
+	Permalink      string
 	Status         WorkflowRunStatus
 	Completed      int
 	Failed         int
@@ -827,6 +829,9 @@ func (w *WorkflowEval[I, R]) caseDone(c *workflowCase[I, R]) bool {
 
 func (w *WorkflowEval[I, R]) result(run *workflowRun[I, R]) *WorkflowResult {
 	r := &WorkflowResult{RunID: run.ID, ExperimentID: run.ExperimentID, Status: WorkflowRunWaiting, Scores: map[string]float64{}}
+	if w.evaluator != nil {
+		r.Permalink = experimentPermalink(w.evaluator.session, run.ExperimentID)
+	}
 	counts := map[string]int{}
 	for i := range run.Cases {
 		c := &run.Cases[i]

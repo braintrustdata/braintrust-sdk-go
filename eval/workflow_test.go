@@ -281,6 +281,7 @@ func TestWorkflowLocalTracing(t *testing.T) {
 	result, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 2}})})
 	require.NoError(t, err)
 	require.Equal(t, WorkflowRunCompleted, result.Status)
+	require.Empty(t, result.Permalink, "NoSendLogs runs have no experiment to link")
 	spans := exporter.GetSpans()
 	require.Len(t, spans, 3)
 	var task, child, scorer sdktrace.ReadOnlySpan
