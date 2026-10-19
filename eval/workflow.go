@@ -103,7 +103,6 @@ type workflowCase[I, R any] struct {
 	Item             WorkflowTaskItem[I, R]
 	DatasetID        string
 	DatasetRecordID  string
-	DatasetVersion   string
 	Output           R
 	TaskError        string
 	Done             map[string]bool
@@ -222,7 +221,7 @@ func (w *WorkflowEval[I, R]) Start(ctx context.Context, opts WorkflowStartOpts[I
 		}
 		for trial := 0; trial < count; trial++ {
 			id := uuid.NewString()
-			record := workflowCase[I, R]{Item: WorkflowTaskItem[I, R]{ID: id, Input: c.Input, Expected: c.Expected, Metadata: maps.Clone(c.Metadata), Tags: slices.Clone(c.Tags), Parameters: params, TrialIndex: trial}, DatasetID: opts.Dataset.ID(), DatasetRecordID: c.ID, DatasetVersion: opts.Dataset.Version(), Done: map[string]bool{}, Scores: map[string]Scores{}, Errors: map[string]string{}, Classifications: map[string][]map[string]any{}, ClassifierErrors: map[string]string{}, StartedAt: time.Now().UTC()}
+			record := workflowCase[I, R]{Item: WorkflowTaskItem[I, R]{ID: id, Input: c.Input, Expected: c.Expected, Metadata: maps.Clone(c.Metadata), Tags: slices.Clone(c.Tags), Parameters: params, TrialIndex: trial}, DatasetID: opts.Dataset.ID(), DatasetRecordID: c.ID, Done: map[string]bool{}, Scores: map[string]Scores{}, Errors: map[string]string{}, Classifications: map[string][]map[string]any{}, ClassifierErrors: map[string]string{}, StartedAt: time.Now().UTC()}
 			if err := w.saveCase(ctx, run.ID, &record); err != nil {
 				return nil, err
 			}
