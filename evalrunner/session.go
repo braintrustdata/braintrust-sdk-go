@@ -68,6 +68,22 @@ func newSessionFromEnv(ctx context.Context, log logger.Logger) (*session, error)
 	return newSession(ctx, cfg.APIKey, appURL, cfg.APIURL, cfg.OrgName, log)
 }
 
+// authSession and apiClient tolerate a nil session, which is what a
+// --no-send-logs run has.
+func (s *session) authSession() *auth.Session {
+	if s == nil {
+		return nil
+	}
+	return s.session
+}
+
+func (s *session) apiClient() *api.API {
+	if s == nil {
+		return nil
+	}
+	return s.api
+}
+
 func (s *session) Close() {
 	if s != nil && s.session != nil {
 		s.session.Close()

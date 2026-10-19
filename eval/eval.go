@@ -108,6 +108,11 @@ type Opts[I, R any] struct {
 	// via [TaskHooks.Parameters]. Callers going through [Eval.Run] get this from
 	// [ParameterSchema.Resolve]; setting it directly bypasses the schema.
 	Parameters Parameters
+
+	// NoSendLogs runs the eval entirely locally: no experiment is registered
+	// and no eval spans are sent to Braintrust. Cases still run and are scored.
+	// The evaluator's session and API client are not used, so they may be nil.
+	NoSendLogs bool
 }
 
 // Eval defines an evaluation: the task to run and the scorers to apply.
@@ -220,6 +225,11 @@ type RunOpts[I, R any] struct {
 	// playground request; most direct runs leave it empty and get the declared
 	// defaults.
 	Parameters Parameters
+
+	// NoSendLogs runs the eval entirely locally: no experiment is registered
+	// and no eval spans are sent to Braintrust. Cases still run and are scored.
+	// The result has no experiment ID or permalink.
+	NoSendLogs bool
 }
 
 // mergeOpts combines an Eval definition with RunOpts into an Opts for
@@ -263,6 +273,7 @@ func mergeOpts[I, R any](ev *Eval[I, R], ro RunOpts[I, R]) (Opts[I, R], error) {
 		SpanParent:  ro.SpanParent,
 		Generation:  ro.Generation,
 		Parameters:  parameters,
+		NoSendLogs:  ro.NoSendLogs,
 	}, nil
 }
 
@@ -517,35 +528,39 @@ func newEvalOpts[I, R any](ctx context.Context, s *auth.Session, tp *trace.Trace
 		projectName = project
 	}
 
-	// Register/get experiment. registerExperiment validates that it has either a
-	// project ID or a non-empty project name.
-	exp, err := registerExperiment(ctx, apiClient, opts.Experiment, projectName, opts.ProjectID, opts.Tags, opts.Metadata, opts.Update, opts.Dataset)
-	if err != nil {
-		return nil, fmt.Errorf("failed to register experiment: %w", err)
-	}
-
-	// Get project ID from the experiment (it already has the project ID)
-	projectID := exp.ProjectID
-
-	// When the caller named the project by ID, report the project the
-	// experiment actually landed in rather than whatever name the eval happened
-	// to declare. Best-effort: a failed lookup is only a labelling problem and
-	// must not fail the run.
-	if opts.ProjectID != "" {
-		if project, err := apiClient.Projects().Get(ctx, projectID); err == nil && project.Name != "" {
-			projectName = project.Name
+	// A NoSendLogs run registers no experiment and records no spans, so it
+	// never touches the API client and needs no session.
+	experimentID, experimentName, projectID := "", opts.Experiment, opts.ProjectID
+	tracer := localTracer
+	if !opts.NoSendLogs {
+		// Register/get experiment. registerExperiment validates that it has either a
+		// project ID or a non-empty project name.
+		exp, err := registerExperiment(ctx, apiClient, opts.Experiment, projectName, opts.ProjectID, opts.Tags, opts.Metadata, opts.Update, opts.Dataset)
+		if err != nil {
+			return nil, fmt.Errorf("failed to register experiment: %w", err)
 		}
-	}
+		experimentID, experimentName, projectID = exp.ID, exp.Name, exp.ProjectID
 
-	// Create tracer from injected TracerProvider (instead of global)
-	tracer := tp.Tracer("braintrust.eval")
+		// When the caller named the project by ID, report the project the
+		// experiment actually landed in rather than whatever name the eval happened
+		// to declare. Best-effort: a failed lookup is only a labelling problem and
+		// must not fail the run.
+		if opts.ProjectID != "" {
+			if project, err := apiClient.Projects().Get(ctx, projectID); err == nil && project.Name != "" {
+				projectName = project.Name
+			}
+		}
+
+		// Create tracer from injected TracerProvider (instead of global)
+		tracer = tp.Tracer("braintrust.eval")
+	}
 
 	// Call low-level newEval with concrete parameters
 	return newEval(
 		s,
 		tracer,
-		exp.ID,
-		exp.Name,
+		experimentID,
+		experimentName,
 		projectID,
 		projectName,
 		opts.Dataset,
@@ -562,6 +577,10 @@ func newEvalOpts[I, R any](ctx context.Context, s *auth.Session, tp *trace.Trace
 	), nil
 }
 
+// localTracer records nothing: a NoSendLogs run's spans have nowhere to go.
+// Unsampled spans still get IDs, which the hooks report per case.
+var localTracer = trace.NewTracerProvider(trace.WithSampler(trace.NeverSample())).Tracer("braintrust.eval")
+
 // spanAttrs builds span_attributes for the given span type, injecting
 // generation when set (used by the remote eval server).
 func (e *eval[I, R]) spanAttrs(spanType string) map[string]any {
@@ -574,11 +593,10 @@ func (e *eval[I, R]) spanAttrs(spanType string) map[string]any {
 
 func (e *eval[I, R]) run(ctx context.Context) (*Result, error) {
 	start := time.Now()
-	if e.experimentID == "" {
-		return nil, fmt.Errorf("%w: experiment ID is required", errEval)
+	// A NoSendLogs run has no experiment for spans to belong to.
+	if e.experimentID != "" {
+		ctx = bttrace.SetParent(ctx, e.parent)
 	}
-
-	ctx = bttrace.SetParent(ctx, e.parent)
 
 	// Scale buffer size with parallelism to avoid blocking, but cap at 100
 	bufferSize := minInt(e.goroutines*2, 100)
@@ -1077,6 +1095,10 @@ func (e *eval[I, R]) runClassifier(ctx context.Context, spanName string, classif
 
 // permalink generates a URL to view the eval in Braintrust UI.
 func (e *eval[I, R]) permalink() string {
+	if e.session == nil {
+		return ""
+	}
+
 	appURL := e.session.AppPublicURL()
 	orgName := e.session.OrgName()
 
@@ -1115,6 +1137,10 @@ func run[I, R any](ctx context.Context, opts Opts[I, R], s *auth.Session, tp *tr
 		return nil, err
 	}
 
+	if opts.NoSendLogs {
+		return e.run(ctx)
+	}
+
 	// The experiment now exists. This is the first point where its identity and
 	// permalink are both known, and the last point before cases start running,
 	// so it is where an observer can be told which experiment to link to.
@@ -1142,6 +1168,10 @@ func setJSONAttrs(span oteltrace.Span, attrs map[string]any) error {
 }
 
 func setJSONAttr(span oteltrace.Span, key string, value any) error {
+	// Skip the marshal for spans nothing will read, such as a NoSendLogs run's.
+	if !span.IsRecording() {
+		return nil
+	}
 	b, err := json.Marshal(value)
 	if err != nil {
 		return err
