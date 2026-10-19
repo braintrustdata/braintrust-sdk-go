@@ -62,3 +62,30 @@ type ListParams struct {
 type ListResponse struct {
 	Objects []Experiment `json:"objects"`
 }
+
+// Event is an experiment row to insert. Set IsMerge to update fields of an
+// existing row with the same ID instead of replacing it.
+type Event struct {
+	ID              string                      `json:"id,omitempty"`
+	Input           any                         `json:"input,omitempty"`
+	Output          any                         `json:"output,omitempty"`
+	Expected        any                         `json:"expected,omitempty"`
+	Error           any                         `json:"error,omitempty"`
+	Scores          map[string]float64          `json:"scores,omitempty"`
+	Metadata        map[string]any              `json:"metadata,omitempty"`
+	Tags            []string                    `json:"tags,omitempty"`
+	Metrics         map[string]float64          `json:"metrics,omitempty"`
+	Classifications map[string][]map[string]any `json:"classifications,omitempty"`
+	DatasetID       string                      `json:"dataset_id,omitempty"`
+	DatasetRecordID string                      `json:"dataset_record_id,omitempty"`
+
+	// Tracing fields
+	SpanID         string         `json:"span_id,omitempty"`
+	RootSpanID     string         `json:"root_span_id,omitempty"`
+	SpanParents    []string       `json:"span_parents,omitempty"`
+	SpanAttributes map[string]any `json:"span_attributes,omitempty"`
+
+	// Merge controls
+	IsMerge    *bool      `json:"_is_merge,omitempty"`
+	MergePaths [][]string `json:"_merge_paths,omitempty"`
+}

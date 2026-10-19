@@ -10,9 +10,9 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 )
 
-// InsertEvents inserts or merges experiment rows. Set id to a stable row ID and
-// _is_merge to true when updating an existing row across process boundaries.
-func (a *API) InsertEvents(ctx context.Context, experimentID string, events []map[string]any) error {
+// InsertEvents inserts or merges experiment rows. Set ID to a stable row ID and
+// IsMerge to true when updating an existing row across process boundaries.
+func (a *API) InsertEvents(ctx context.Context, experimentID string, events []Event) error {
 	if experimentID == "" {
 		return fmt.Errorf("experiment ID is required")
 	}

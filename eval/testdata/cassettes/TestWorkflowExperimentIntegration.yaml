@@ -27,20 +27,20 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"95a2ade3-ecac-4729-ba96-25d67d548cfa","org_id":"29bd8276-80fc-4c70-a288-fc5ac901e5ef","name":"go-sdk-tests","description":null,"created":"2026-10-16T13:21:15.523Z","deleted_at":null,"user_id":"850a0f75-8b5e-40c0-9a85-4ccb91553533","settings":null}'
+        body: '{"id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","name":"go-sdk-tests","description":null,"created":"2026-10-19T23:49:12.896Z","deleted_at":null,"user_id":"c1f71e19-b3ce-4f59-89a9-055901f7755b","settings":null}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
             Cache-Control:
                 - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 16 Oct 2026 13:21:15 GMT
+                - Mon, 19 Oct 2026 23:49:21 GMT
             Etag:
-                - W/"fe-Kjlh7l8o8F0zRkYSF7AbBdq0O4o"
+                - W/"fe-7iaq6aBQFNs98OpqCWtmRX1e6fw"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -50,16 +50,18 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 4cb5283de5c1c41f2c08a8c2d91b5a54.cloudfront.net (CloudFront)
+                - 1.1 459b85c545909b647abc5dea4320a0da.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - tgORPX2l5ftxt1ABYt-W1CWUPzwMSQQ-yPr616BwQCrH7UbGAF0FQw==
+                - PQIIPz8NLKp-wElYx7c2FHvC5jKjFJ-pUc2msgtr9oI6lEy2CW52VA==
             X-Amz-Cf-Pop:
-                - CMH68-P5
+                - SFO53-P1
+            X-Bt-Found-Existing:
+                - "true"
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 165.910034ms
+        duration: 183.060875ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -71,7 +73,7 @@ interactions:
         host: api.braintrust.dev
         remote_addr: ""
         request_uri: ""
-        body: '{"project_id":"95a2ade3-ecac-4729-ba96-25d67d548cfa","name":"TestWorkflowExperimentIntegration","ensure_new":true}'
+        body: '{"project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"TestWorkflowExperimentIntegration","ensure_new":true}'
         form: {}
         headers:
             Content-Type:
@@ -86,20 +88,20 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"e1590370-1c99-4fc5-9dc7-ae350c20cbaa","project_id":"95a2ade3-ecac-4729-ba96-25d67d548cfa","name":"TestWorkflowExperimentIntegration","description":null,"created":"2026-10-16T13:21:15.696Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"850a0f75-8b5e-40c0-9a85-4ccb91553533","metadata":null,"tags":null}'
+        body: '{"id":"664671be-01b3-47e7-989b-a4cbbfacc441","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"TestWorkflowExperimentIntegration","description":null,"created":"2026-10-19T23:49:21.178Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"c1f71e19-b3ce-4f59-89a9-055901f7755b","metadata":null,"tags":null}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
             Cache-Control:
                 - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 16 Oct 2026 13:21:15 GMT
+                - Mon, 19 Oct 2026 23:49:21 GMT
             Etag:
-                - W/"1d5-qdSLLQph9OJ2QHnSGU92KIE5ZxI"
+                - W/"1d5-PhYccSxwZi54f3KgCXSmy45KJN0"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -109,33 +111,33 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 4cb5283de5c1c41f2c08a8c2d91b5a54.cloudfront.net (CloudFront)
+                - 1.1 459b85c545909b647abc5dea4320a0da.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - Rw6NqzZ8M5oMTSIow4CJO9UFxw0TO9jkXX7unqufFP77kviExsr9pw==
+                - ukWhgOUxdXAD-gNMtLSRCO-moDEuuHnM8lD7CjgJibJNLwTV75W6uA==
             X-Amz-Cf-Pop:
-                - CMH68-P5
+                - SFO53-P1
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 175.302881ms
+        duration: 187.261625ms
     - id: 2
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 432
+        content_length: 420
         transfer_encoding: []
         trailer: {}
         host: api.braintrust.dev
         remote_addr: ""
         request_uri: ""
-        body: '{"events":[{"_is_merge":true,"expected":"hello!","id":"1685f196-00a5-4446-99f6-6c10dc459b1c","input":"hello","metadata":{"workflow_eval":{"case_id":"1685f196-00a5-4446-99f6-6c10dc459b1c","run_id":"bb07e88a-f763-4186-beeb-7bd1b60157a2","trial_index":0}},"metrics":{"start":1792156875.406604},"root_span_id":"cf26010d5a5bbf0b2119202f5ebf485e","span_attributes":{"name":"eval","type":"eval"},"span_id":"bb00e0fdf020392a","tags":null}]}'
+        body: '{"events":[{"id":"24a332aa-16a0-44c0-9c30-245f090153bd","input":"hello","expected":"hello!","metadata":{"workflow_eval":{"case_id":"24a332aa-16a0-44c0-9c30-245f090153bd","run_id":"84d1167c-31ba-4907-92cd-fb8033698ac7","trial_index":0}},"metrics":{"start":1792453760.853318},"span_id":"464c0e475b11f15d","root_span_id":"be733f18b497399d13f8b5bb238eecdb","span_attributes":{"name":"eval","type":"eval"},"_is_merge":true}]}'
         form: {}
         headers:
             Content-Type:
                 - application/json
-        url: https://api.braintrust.dev/v1/experiment/e1590370-1c99-4fc5-9dc7-ae350c20cbaa/insert
+        url: https://api.braintrust.dev/v1/experiment/664671be-01b3-47e7-989b-a4cbbfacc441/insert
         method: POST
       response:
         proto: HTTP/2.0
@@ -145,20 +147,20 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"row_ids":["1685f196-00a5-4446-99f6-6c10dc459b1c"]}'
+        body: '{"row_ids":["24a332aa-16a0-44c0-9c30-245f090153bd"]}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
             Cache-Control:
                 - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 16 Oct 2026 13:21:16 GMT
+                - Mon, 19 Oct 2026 23:49:21 GMT
             Etag:
-                - W/"34-cWVMy57oJdZ1Lrg/oReeWoIASBU"
+                - W/"34-N1MJHakiaaUgxupxSPJLWmjSSZE"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -168,16 +170,16 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 4cb5283de5c1c41f2c08a8c2d91b5a54.cloudfront.net (CloudFront)
+                - 1.1 459b85c545909b647abc5dea4320a0da.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - ylrC70nwdbmRp4lM6X7ckPvYh22g_QiXuD9Ys-AhTqjMgTOGf7Opxg==
+                - zze4xtY8bcGKLbQhh7jeHfR4Y83QqBQ7TJM_BACQuerQ8W901zI_3w==
             X-Amz-Cf-Pop:
-                - CMH68-P5
+                - SFO53-P1
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 360.627261ms
+        duration: 390.960375ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -194,7 +196,7 @@ interactions:
         headers:
             Content-Type:
                 - application/json
-        url: https://api.braintrust.dev/v1/experiment/e1590370-1c99-4fc5-9dc7-ae350c20cbaa/fetch
+        url: https://api.braintrust.dev/v1/experiment/664671be-01b3-47e7-989b-a4cbbfacc441/fetch
         method: POST
       response:
         proto: HTTP/2.0
@@ -204,18 +206,18 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"events":[{"_pagination_key":"p07697255167772655616","_xact_id":"1000198043045926049","audit_data":[{"_xact_id":"1000198043045926049","audit_data":{"action":"merge","from":null,"path":["expected"],"to":"hello!"},"metadata":{},"source":"api"}],"classifications":null,"comments":null,"context":null,"created":"2026-10-16T13:21:15.817Z","error":null,"expected":"hello!","experiment_id":"e1590370-1c99-4fc5-9dc7-ae350c20cbaa","facets":null,"id":"1685f196-00a5-4446-99f6-6c10dc459b1c","input":"hello","is_root":true,"metadata":{"workflow_eval":{"case_id":"1685f196-00a5-4446-99f6-6c10dc459b1c","run_id":"bb07e88a-f763-4186-beeb-7bd1b60157a2","trial_index":0}},"metrics":{"start":1792156875.406604},"origin":null,"output":null,"project_id":"95a2ade3-ecac-4729-ba96-25d67d548cfa","root_span_id":"cf26010d5a5bbf0b2119202f5ebf485e","scores":null,"span_attributes":{"name":"eval","type":"eval"},"span_id":"bb00e0fdf020392a","span_parents":null,"tags":null}],"cursor":"atIkyxShAAA"}'
+        body: '{"events":[{"_pagination_key":"p07698530283200184320","_xact_id":"1000198062502643388","audit_data":[{"_xact_id":"1000198062502643388","audit_data":{"action":"merge","from":null,"path":["expected"],"to":"hello!"},"metadata":{},"source":"api"}],"classifications":null,"comments":null,"context":null,"created":"2026-10-19T23:49:21.289Z","error":null,"expected":"hello!","experiment_id":"664671be-01b3-47e7-989b-a4cbbfacc441","facets":null,"id":"24a332aa-16a0-44c0-9c30-245f090153bd","input":"hello","is_root":true,"metadata":{"workflow_eval":{"case_id":"24a332aa-16a0-44c0-9c30-245f090153bd","run_id":"84d1167c-31ba-4907-92cd-fb8033698ac7","trial_index":0}},"metrics":{"start":1792453760.853318},"origin":null,"output":null,"project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","root_span_id":"be733f18b497399d13f8b5bb238eecdb","scores":null,"span_attributes":{"name":"eval","type":"eval"},"span_id":"464c0e475b11f15d","span_parents":null,"tags":null}],"cursor":"atasgQa8AAA"}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
             Cache-Control:
                 - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json
             Date:
-                - Fri, 16 Oct 2026 13:21:16 GMT
+                - Mon, 19 Oct 2026 23:49:21 GMT
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -225,41 +227,43 @@ interactions:
             Vary:
                 - Origin
             Via:
-                - 1.1 4cb5283de5c1c41f2c08a8c2d91b5a54.cloudfront.net (CloudFront)
+                - 1.1 459b85c545909b647abc5dea4320a0da.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - jbr5ONhnIs58KiH8q5CAecHy_ClQbXh4058jMoN7usjNOFiRBPA7Tg==
+                - LZCFJfHEZn0S2il0kvXIWRENxM0X-KIavQdQEBava_nqr6p5-QfpUw==
             X-Amz-Cf-Pop:
-                - CMH68-P5
+                - SFO53-P1
             X-Bt-Api-Duration-Ms:
-                - "134"
+                - "133"
             X-Bt-Brainstore-Duration-Ms:
-                - "87"
+                - "76"
+            X-Bt-Count:
+                - "1"
             X-Bt-Cursor:
-                - atIkyxShAAA
+                - atasgQa8AAA
             X-Bt-Internal-Trace-Id:
-                - 9ab1349c9ed89038882bc518d14add8f
+                - b0f5ae05882562ea4d126aebf6b3cc67
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 152.994917ms
+        duration: 216.186625ms
     - id: 4
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 498
+        content_length: 485
         transfer_encoding: []
         trailer: {}
         host: api.braintrust.dev
         remote_addr: ""
         request_uri: ""
-        body: '{"events":[{"_is_merge":true,"expected":"hello!","id":"1685f196-00a5-4446-99f6-6c10dc459b1c","input":"hello","metadata":{"workflow_eval":{"case_id":"1685f196-00a5-4446-99f6-6c10dc459b1c","run_id":"bb07e88a-f763-4186-beeb-7bd1b60157a2","trial_index":0}},"metrics":{"end":1792156876.2683997,"start":1792156875.406604},"output":"hello!","root_span_id":"cf26010d5a5bbf0b2119202f5ebf485e","scores":{"correct":1},"span_attributes":{"name":"eval","type":"eval"},"span_id":"bb00e0fdf020392a","tags":null}]}'
+        body: '{"events":[{"id":"24a332aa-16a0-44c0-9c30-245f090153bd","input":"hello","output":"hello!","expected":"hello!","scores":{"correct":1},"metadata":{"workflow_eval":{"case_id":"24a332aa-16a0-44c0-9c30-245f090153bd","run_id":"84d1167c-31ba-4907-92cd-fb8033698ac7","trial_index":0}},"metrics":{"end":1792453761.833846,"start":1792453760.853318},"span_id":"464c0e475b11f15d","root_span_id":"be733f18b497399d13f8b5bb238eecdb","span_attributes":{"name":"eval","type":"eval"},"_is_merge":true}]}'
         form: {}
         headers:
             Content-Type:
                 - application/json
-        url: https://api.braintrust.dev/v1/experiment/e1590370-1c99-4fc5-9dc7-ae350c20cbaa/insert
+        url: https://api.braintrust.dev/v1/experiment/664671be-01b3-47e7-989b-a4cbbfacc441/insert
         method: POST
       response:
         proto: HTTP/2.0
@@ -269,20 +273,20 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"row_ids":["1685f196-00a5-4446-99f6-6c10dc459b1c"]}'
+        body: '{"row_ids":["24a332aa-16a0-44c0-9c30-245f090153bd"]}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
             Cache-Control:
                 - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 16 Oct 2026 13:21:16 GMT
+                - Mon, 19 Oct 2026 23:49:21 GMT
             Etag:
-                - W/"34-cWVMy57oJdZ1Lrg/oReeWoIASBU"
+                - W/"34-N1MJHakiaaUgxupxSPJLWmjSSZE"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -292,33 +296,33 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 4cb5283de5c1c41f2c08a8c2d91b5a54.cloudfront.net (CloudFront)
+                - 1.1 459b85c545909b647abc5dea4320a0da.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - uH1mT7DVHIckyiTDwYu2xtdLGMbvctcKMIQ_NdmZk4-6yEq9UCxUoA==
+                - 1xQpSAT1L12UgC2AerurxMQPd6hba9WT5caj2xU1Ud4ARvcZLB1aFg==
             X-Amz-Cf-Pop:
-                - CMH68-P5
+                - SFO53-P1
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 174.865766ms
+        duration: 218.971625ms
     - id: 5
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 498
+        content_length: 485
         transfer_encoding: []
         trailer: {}
         host: api.braintrust.dev
         remote_addr: ""
         request_uri: ""
-        body: '{"events":[{"_is_merge":true,"expected":"hello!","id":"1685f196-00a5-4446-99f6-6c10dc459b1c","input":"hello","metadata":{"workflow_eval":{"case_id":"1685f196-00a5-4446-99f6-6c10dc459b1c","run_id":"bb07e88a-f763-4186-beeb-7bd1b60157a2","trial_index":0}},"metrics":{"end":1792156876.2683997,"start":1792156875.406604},"output":"hello!","root_span_id":"cf26010d5a5bbf0b2119202f5ebf485e","scores":{"correct":1},"span_attributes":{"name":"eval","type":"eval"},"span_id":"bb00e0fdf020392a","tags":null}]}'
+        body: '{"events":[{"id":"24a332aa-16a0-44c0-9c30-245f090153bd","input":"hello","output":"hello!","expected":"hello!","scores":{"correct":1},"metadata":{"workflow_eval":{"case_id":"24a332aa-16a0-44c0-9c30-245f090153bd","run_id":"84d1167c-31ba-4907-92cd-fb8033698ac7","trial_index":0}},"metrics":{"end":1792453761.833846,"start":1792453760.853318},"span_id":"464c0e475b11f15d","root_span_id":"be733f18b497399d13f8b5bb238eecdb","span_attributes":{"name":"eval","type":"eval"},"_is_merge":true}]}'
         form: {}
         headers:
             Content-Type:
                 - application/json
-        url: https://api.braintrust.dev/v1/experiment/e1590370-1c99-4fc5-9dc7-ae350c20cbaa/insert
+        url: https://api.braintrust.dev/v1/experiment/664671be-01b3-47e7-989b-a4cbbfacc441/insert
         method: POST
       response:
         proto: HTTP/2.0
@@ -328,20 +332,20 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"row_ids":["1685f196-00a5-4446-99f6-6c10dc459b1c"]}'
+        body: '{"row_ids":["24a332aa-16a0-44c0-9c30-245f090153bd"]}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
             Cache-Control:
                 - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 16 Oct 2026 13:21:16 GMT
+                - Mon, 19 Oct 2026 23:49:22 GMT
             Etag:
-                - W/"34-cWVMy57oJdZ1Lrg/oReeWoIASBU"
+                - W/"34-N1MJHakiaaUgxupxSPJLWmjSSZE"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -351,16 +355,16 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 4cb5283de5c1c41f2c08a8c2d91b5a54.cloudfront.net (CloudFront)
+                - 1.1 459b85c545909b647abc5dea4320a0da.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - oqdIQxysryxBy4IRmQ-0Y5Gq7CmPcsm-vfaBwUr4QmlHFYrWeWzT0g==
+                - AsIbl9AvdQIqSD8mUnV3mcIaDvkUo6h63FybfNxJ3AQsl6cLpxG8bw==
             X-Amz-Cf-Pop:
-                - CMH68-P5
+                - SFO53-P1
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 115.966872ms
+        duration: 172.964208ms
     - id: 6
       request:
         proto: HTTP/1.1
@@ -377,7 +381,7 @@ interactions:
         headers:
             Content-Type:
                 - application/json
-        url: https://api.braintrust.dev/v1/experiment/e1590370-1c99-4fc5-9dc7-ae350c20cbaa/fetch
+        url: https://api.braintrust.dev/v1/experiment/664671be-01b3-47e7-989b-a4cbbfacc441/fetch
         method: POST
       response:
         proto: HTTP/2.0
@@ -387,18 +391,18 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"events":[{"_pagination_key":"p07697255167772655616","_xact_id":"1000198043045988955","audit_data":[{"_xact_id":"1000198043045926049","audit_data":{"action":"merge","from":null,"path":["expected"],"to":"hello!"},"metadata":{},"source":"api"},{"_xact_id":"1000198043045988051","audit_data":{"action":"merge","from":null,"path":["expected"],"to":"hello!"},"metadata":{},"source":"api"},{"_xact_id":"1000198043045988955","audit_data":{"action":"merge","from":null,"path":["expected"],"to":"hello!"},"metadata":{},"source":"api"}],"classifications":null,"comments":null,"context":null,"created":"2026-10-16T13:21:15.817Z","error":null,"expected":"hello!","experiment_id":"e1590370-1c99-4fc5-9dc7-ae350c20cbaa","facets":null,"id":"1685f196-00a5-4446-99f6-6c10dc459b1c","input":"hello","is_root":true,"metadata":{"workflow_eval":{"case_id":"1685f196-00a5-4446-99f6-6c10dc459b1c","run_id":"bb07e88a-f763-4186-beeb-7bd1b60157a2","trial_index":0}},"metrics":{"duration":0.8617956638336182,"end":1792156876.2683997,"start":1792156875.406604},"origin":null,"output":"hello!","project_id":"95a2ade3-ecac-4729-ba96-25d67d548cfa","root_span_id":"cf26010d5a5bbf0b2119202f5ebf485e","scores":{"correct":1},"span_attributes":{"name":"eval","type":"eval"},"span_id":"bb00e0fdf020392a","span_parents":null,"tags":null}],"cursor":"atIkyxShAAA"}'
+        body: '{"events":[{"_pagination_key":"p07698530283200184320","_xact_id":"1000198062502707651","audit_data":[{"_xact_id":"1000198062502643388","audit_data":{"action":"merge","from":null,"path":["expected"],"to":"hello!"},"metadata":{},"source":"api"},{"_xact_id":"1000198062502645499","audit_data":{"action":"merge","from":null,"path":["output"],"to":"hello!"},"metadata":{},"source":"api"},{"_xact_id":"1000198062502707651","audit_data":{"action":"merge","from":null,"path":["output"],"to":"hello!"},"metadata":{},"source":"api"}],"classifications":null,"comments":null,"context":null,"created":"2026-10-19T23:49:21.289Z","error":null,"expected":"hello!","experiment_id":"664671be-01b3-47e7-989b-a4cbbfacc441","facets":null,"id":"24a332aa-16a0-44c0-9c30-245f090153bd","input":"hello","is_root":true,"metadata":{"workflow_eval":{"case_id":"24a332aa-16a0-44c0-9c30-245f090153bd","run_id":"84d1167c-31ba-4907-92cd-fb8033698ac7","trial_index":0}},"metrics":{"duration":0.9805281162261963,"end":1792453761.833846,"start":1792453760.853318},"origin":null,"output":"hello!","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","root_span_id":"be733f18b497399d13f8b5bb238eecdb","scores":{"correct":1},"span_attributes":{"name":"eval","type":"eval"},"span_id":"464c0e475b11f15d","span_parents":null,"tags":null}],"cursor":"atasgQa8AAA"}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
             Cache-Control:
                 - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json
             Date:
-                - Fri, 16 Oct 2026 13:21:16 GMT
+                - Mon, 19 Oct 2026 23:49:22 GMT
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -408,24 +412,26 @@ interactions:
             Vary:
                 - Origin
             Via:
-                - 1.1 4cb5283de5c1c41f2c08a8c2d91b5a54.cloudfront.net (CloudFront)
+                - 1.1 459b85c545909b647abc5dea4320a0da.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - bLmBR0uJipdzqGlZrcLW59XzhtN0klROaYuNTV_k9VaRXDEV9RmHng==
+                - 9N8WYm-QxMOX-CTcad5b1dAG8GsTrBrAOEDNHcIf0pu-S989DNUSfw==
             X-Amz-Cf-Pop:
-                - CMH68-P5
+                - SFO53-P1
             X-Bt-Api-Duration-Ms:
-                - "84"
+                - "115"
             X-Bt-Brainstore-Duration-Ms:
-                - "79"
+                - "110"
+            X-Bt-Count:
+                - "1"
             X-Bt-Cursor:
-                - atIkyxShAAA
+                - atasgQa8AAA
             X-Bt-Internal-Trace-Id:
-                - 0721b0a4b285cd4339f3cd186e0663ca
+                - 8d20ee5823bb3f1589dbb04efaf9b8a1
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 104.204874ms
+        duration: 203.564333ms
     - id: 7
       request:
         proto: HTTP/1.1
@@ -440,7 +446,7 @@ interactions:
         body: ""
         form: {}
         headers: {}
-        url: https://api.braintrust.dev/v1/experiment/e1590370-1c99-4fc5-9dc7-ae350c20cbaa
+        url: https://api.braintrust.dev/v1/experiment/664671be-01b3-47e7-989b-a4cbbfacc441
         method: DELETE
       response:
         proto: HTTP/2.0
@@ -450,20 +456,20 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"e1590370-1c99-4fc5-9dc7-ae350c20cbaa","project_id":"95a2ade3-ecac-4729-ba96-25d67d548cfa","name":"TestWorkflowExperimentIntegration","description":null,"created":"2026-10-16T13:21:15.696Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":"2026-10-16T13:21:16.716Z","dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"850a0f75-8b5e-40c0-9a85-4ccb91553533","metadata":null,"tags":null}'
+        body: '{"id":"664671be-01b3-47e7-989b-a4cbbfacc441","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"TestWorkflowExperimentIntegration","description":null,"created":"2026-10-19T23:49:21.178Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":"2026-10-19T23:49:22.540Z","dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"c1f71e19-b3ce-4f59-89a9-055901f7755b","metadata":null,"tags":null}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
             Cache-Control:
                 - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 16 Oct 2026 13:21:16 GMT
+                - Mon, 19 Oct 2026 23:49:22 GMT
             Etag:
-                - W/"1eb-GH4yoCI6NhHQqGo60pODq5LC6Bk"
+                - W/"1eb-GVG1cq4ZrlBHrlRjosgsPEfxTeQ"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -473,13 +479,13 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 4cb5283de5c1c41f2c08a8c2d91b5a54.cloudfront.net (CloudFront)
+                - 1.1 459b85c545909b647abc5dea4320a0da.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - IXmgCAPRJU_iswkUOcBEP3XIt-yz4jwk3ugYtR2fdyBHZ2SgnKlJXw==
+                - mt7RtB3nqhJN-Kq5JoC3oHIlTzht2Zi7y6uJBUCkcOcPjGhqR_3Hwg==
             X-Amz-Cf-Pop:
-                - CMH68-P5
+                - SFO53-P1
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 95.707735ms
+        duration: 151.482208ms

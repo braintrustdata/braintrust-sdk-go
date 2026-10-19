@@ -6,6 +6,8 @@ import (
 	"maps"
 
 	oteltrace "go.opentelemetry.io/otel/trace"
+
+	"github.com/braintrustdata/braintrust-sdk-go/api/experiments"
 )
 
 func (w *WorkflowEval[I, R]) logRun(ctx context.Context, run *workflowRun[I, R]) error {
@@ -13,7 +15,7 @@ func (w *WorkflowEval[I, R]) logRun(ctx context.Context, run *workflowRun[I, R])
 		return errors.New("resuming a logged workflow requires a Braintrust evaluator")
 	}
 	// Bound request size, including when a large batch completes at once.
-	events := make([]map[string]any, 0, 100)
+	events := make([]experiments.Event, 0, 100)
 	flush := func() error {
 		if len(events) == 0 {
 			return nil
@@ -22,6 +24,7 @@ func (w *WorkflowEval[I, R]) logRun(ctx context.Context, run *workflowRun[I, R])
 		events = events[:0]
 		return err
 	}
+	merge := true
 	for i := range run.Cases {
 		c := &run.Cases[i]
 		traceID, spanID := workflowTraceIDs(c.Item.ID)
@@ -40,28 +43,21 @@ func (w *WorkflowEval[I, R]) logRun(ctx context.Context, run *workflowRun[I, R])
 		if len(c.ClassifierErrors) > 0 {
 			metadata["classifier_errors"] = c.ClassifierErrors
 		}
-		metrics := map[string]any{"start": float64(c.StartedAt.UnixNano()) / 1e9}
+		metrics := map[string]float64{"start": float64(c.StartedAt.UnixNano()) / 1e9}
 		if !c.FinishedAt.IsZero() {
 			metrics["end"] = float64(c.FinishedAt.UnixNano()) / 1e9
 		}
-		event := map[string]any{"id": c.Item.ID, "_is_merge": true, "span_id": spanID.String(), "root_span_id": traceID.String(), "span_attributes": map[string]any{"name": "eval", "type": "eval"}, "input": c.Item.Input, "expected": c.Item.Expected, "metadata": metadata, "tags": c.Item.Tags, "metrics": metrics}
+		event := experiments.Event{ID: c.Item.ID, IsMerge: &merge, SpanID: spanID.String(), RootSpanID: traceID.String(), SpanAttributes: map[string]any{"name": "eval", "type": "eval"}, Input: c.Item.Input, Expected: c.Item.Expected, Metadata: metadata, Tags: c.Item.Tags, Metrics: metrics, Scores: w.caseScores(c), Classifications: c.Classifications}
 		if c.DatasetID != "" {
-			event["dataset_record_id"] = c.DatasetRecordID
-			event["dataset_id"] = c.DatasetID
+			event.DatasetRecordID = c.DatasetRecordID
+			event.DatasetID = c.DatasetID
 		}
 		if c.Done["task"] {
 			if c.TaskError != "" {
-				event["error"] = c.TaskError
+				event.Error = c.TaskError
 			} else {
-				event["output"] = c.Output
+				event.Output = c.Output
 			}
-		}
-		scores := w.caseScores(c)
-		if len(scores) > 0 {
-			event["scores"] = scores
-		}
-		if len(c.Classifications) > 0 {
-			event["classifications"] = c.Classifications
 		}
 		events = append(events, event)
 		if len(events) >= 100 {

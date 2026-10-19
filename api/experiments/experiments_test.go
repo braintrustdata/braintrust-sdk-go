@@ -353,3 +353,44 @@ func TestExperiments_EnsureNew(t *testing.T) {
 	// Names should start with the same prefix (API may append suffix to avoid conflicts)
 	assert.Contains(t, second.Name, "ensure-new-test", "EnsureNew experiment name should contain original name")
 }
+
+// TestExperiments_InsertEvents_Integration tests inserting and merging rows
+func TestExperiments_InsertEvents_Integration(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+
+	client := vcr.GetHTTPSClient(t)
+	api := New(client)
+
+	project := createTestProject(t, client)
+	experiment, err := api.Create(ctx, CreateParams{ProjectID: project.ID, Name: "test-insert-events", EnsureNew: true})
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = api.Delete(context.Background(), experiment.ID) })
+
+	merge := true
+	require.NoError(t, api.InsertEvents(ctx, experiment.ID, []Event{{
+		ID:       "row-1",
+		Input:    "What is 2+2?",
+		Expected: "4",
+		Metadata: map[string]any{"source": "test"},
+		Tags:     []string{"math"},
+		Metrics:  map[string]float64{"start": 1},
+	}}))
+	require.NoError(t, api.InsertEvents(ctx, experiment.ID, []Event{{
+		ID:      "row-1",
+		IsMerge: &merge,
+		Output:  "4",
+		Scores:  map[string]float64{"correct": 1},
+	}}))
+}
+
+// TestExperiments_InsertEvents_Validation tests InsertEvents parameter validation
+func TestExperiments_InsertEvents_Validation(t *testing.T) {
+	t.Parallel()
+
+	api := New(vcr.GetHTTPSClient(t))
+	err := api.InsertEvents(context.Background(), "", []Event{{ID: "row"}})
+	require.ErrorContains(t, err, "required")
+	require.NoError(t, api.InsertEvents(context.Background(), "experiment", nil))
+}
