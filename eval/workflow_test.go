@@ -55,7 +55,7 @@ func TestWorkflowBatchResume(t *testing.T) {
 	result, err := definition.Start(ctx, WorkflowStartOpts[string, string]{NoSendLogs: true, Dataset: NewDataset([]Case[string, string]{{Input: "a"}, {Input: "b"}, {Input: "c"}})})
 	require.NoError(t, err)
 	require.Equal(t, 2, submits)
-	require.Equal(t, "waiting", result.Status)
+	require.Equal(t, WorkflowRunWaiting, result.Status)
 	// Reconstruct the definition: no execution state lives on the evaluator.
 	resumed := definition
 	for _, batch := range batches {
@@ -65,7 +65,7 @@ func TestWorkflowBatchResume(t *testing.T) {
 		_, err = resumed.ProcessSubmissionResult(ctx, WorkflowSubmissionResult{ExternalID: id})
 		require.NoError(t, err)
 	}
-	require.Equal(t, "completed", result.Status)
+	require.Equal(t, WorkflowRunCompleted, result.Status)
 	require.Equal(t, 3, result.Completed)
 	require.Equal(t, 1.0, result.Scores["correct"])
 	require.Equal(t, 2, submits)
@@ -101,7 +101,7 @@ func TestWorkflowCollectionCheckpoint(t *testing.T) {
 	interrupted = false
 	r, err = w.Poll(ctx, r.RunID)
 	require.NoError(t, err)
-	require.Equal(t, "completed", r.Status)
+	require.Equal(t, WorkflowRunCompleted, r.Status)
 	require.Equal(t, 2, r.Failed)
 	require.Equal(t, 3, r.Completed)
 }
@@ -210,7 +210,7 @@ func TestWorkflowMixedScorerBatches(t *testing.T) {
 				r, err = w.ProcessSubmissionResult(ctx, WorkflowSubmissionResult{ExternalID: id})
 				require.NoError(t, err)
 			}
-			require.Equal(t, "completed", r.Status)
+			require.Equal(t, WorkflowRunCompleted, r.Status)
 			require.Equal(t, 0, r.Failed)
 			require.Equal(t, 0.5, r.Scores["batch"])
 			require.Equal(t, 1.0, r.Scores["local"])
@@ -228,7 +228,7 @@ func TestWorkflowLocalTrialsAndFailures(t *testing.T) {
 	}), Scorers: []Scorer[int, int]{NewScorer("bad", func(context.Context, TaskResult[int, int]) (Scores, error) { return nil, errors.New("bad scorer") }), NewScorer("good", func(context.Context, TaskResult[int, int]) (Scores, error) { return S(1), nil })}}
 	r, err := w.Start(context.Background(), WorkflowStartOpts[int, int]{NoSendLogs: true, TrialCount: 2, Dataset: NewDataset([]Case[int, int]{{Input: 1}, {Input: -1, TrialCount: 1}})})
 	require.NoError(t, err)
-	require.Equal(t, "completed", r.Status)
+	require.Equal(t, WorkflowRunCompleted, r.Status)
 	require.Equal(t, 3, r.Completed)
 	require.Equal(t, 3, r.Failed)
 	require.Equal(t, 1.0, r.Scores["good"])
@@ -256,7 +256,7 @@ func TestWorkflowSharedExternalID(t *testing.T) {
 	for _, id := range []string{a.RunID, b.RunID} {
 		r, err := w.ProcessSubmissionResult(ctx, WorkflowSubmissionResult{RunID: id, ExternalID: "shared"})
 		require.NoError(t, err)
-		require.Equal(t, "completed", r.Status)
+		require.Equal(t, WorkflowRunCompleted, r.Status)
 	}
 }
 
@@ -280,7 +280,7 @@ func TestWorkflowLocalTracing(t *testing.T) {
 	})
 	result, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 2}})})
 	require.NoError(t, err)
-	require.Equal(t, "completed", result.Status)
+	require.Equal(t, WorkflowRunCompleted, result.Status)
 	spans := exporter.GetSpans()
 	require.Len(t, spans, 3)
 	var task, child, scorer sdktrace.ReadOnlySpan
@@ -339,7 +339,7 @@ func TestWorkflowCheckpointWriteFailure(t *testing.T) {
 	fail = false
 	r, err = w.Poll(ctx, r.RunID)
 	require.NoError(t, err)
-	require.Equal(t, "completed", r.Status)
+	require.Equal(t, WorkflowRunCompleted, r.Status)
 }
 
 func TestWorkflowSingleScorerAndRetry(t *testing.T) {
@@ -366,12 +366,12 @@ func TestWorkflowSingleScorerAndRetry(t *testing.T) {
 	require.NotEmpty(t, r.RunID)
 	r, err = w.Poll(ctx, r.RunID)
 	require.NoError(t, err)
-	require.Equal(t, "completed", r.Status)
+	require.Equal(t, WorkflowRunCompleted, r.Status)
 	require.Equal(t, 1.0, r.Scores["judge"])
 	require.Equal(t, 2, calls)
 	r, err = w.Poll(ctx, r.RunID)
 	require.NoError(t, err)
-	require.Equal(t, "completed", r.Status)
+	require.Equal(t, WorkflowRunCompleted, r.Status)
 	require.Equal(t, 2, calls)
 }
 
@@ -452,5 +452,5 @@ func TestWorkflowExternalIDReceivesContext(t *testing.T) {
 	require.NotEmpty(t, got.SubmissionID)
 	r, err = w.ProcessSubmissionResult(ctx, WorkflowSubmissionResult{ExternalID: "external-" + got.SubmissionID})
 	require.NoError(t, err)
-	require.Equal(t, "completed", r.Status)
+	require.Equal(t, WorkflowRunCompleted, r.Status)
 }

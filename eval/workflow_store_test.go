@@ -142,19 +142,19 @@ func TestWorkflowRedisProcessRestart(t *testing.T) {
 	if runID != "" {
 		r, err := w.Poll(ctx, runID)
 		require.NoError(t, err)
-		require.Equal(t, "completed", r.Status)
+		require.Equal(t, WorkflowRunCompleted, r.Status)
 		return
 	}
 	r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 2}, {Input: 3}})})
 	require.NoError(t, err)
-	require.Equal(t, "waiting", r.Status)
+	require.Equal(t, WorkflowRunWaiting, r.Status)
 	commandLine := exec.Command(os.Args[0], "-test.run=^TestWorkflowRedisProcessRestart$")
 	commandLine.Env = append(os.Environ(), "WORKFLOW_TEST_RUN="+r.RunID)
 	output, err := commandLine.CombinedOutput()
 	require.NoError(t, err, string(output))
 	r, err = w.Status(ctx, r.RunID)
 	require.NoError(t, err)
-	require.Equal(t, "completed", r.Status)
+	require.Equal(t, WorkflowRunCompleted, r.Status)
 	require.Equal(t, 1.0, r.Scores["correct"])
 }
 

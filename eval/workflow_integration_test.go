@@ -59,7 +59,7 @@ func TestWorkflowExperimentIntegration(t *testing.T) {
 	w = makeDefinition()
 	result, err = w.ProcessSubmissionResult(ctx, WorkflowSubmissionResult{ExternalID: "workflow-integration-completion"})
 	require.NoError(t, err)
-	require.Equal(t, "completed", result.Status)
+	require.Equal(t, WorkflowRunCompleted, result.Status)
 	_, err = w.ProcessSubmissionResult(ctx, WorkflowSubmissionResult{ExternalID: "workflow-integration-completion"})
 	require.NoError(t, err)
 	final := fetch()

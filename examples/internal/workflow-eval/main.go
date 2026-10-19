@@ -102,7 +102,7 @@ func run(ctx context.Context, local bool, runID, external string, webhook bool, 
 	if socket != "" || webhook {
 		return nil
 	}
-	for result.Status != "completed" {
+	for result.Status != eval.WorkflowRunCompleted {
 		timer := time.NewTimer(10 * time.Second)
 		select {
 		case <-ctx.Done():

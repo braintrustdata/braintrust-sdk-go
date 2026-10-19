@@ -65,13 +65,23 @@ type WorkflowSubmissionResult struct {
 	ExternalID   string
 }
 
+// WorkflowRunStatus is the overall state of a workflow run.
+type WorkflowRunStatus string
+
+const (
+	// WorkflowRunWaiting means cases or provider submissions are outstanding.
+	WorkflowRunWaiting WorkflowRunStatus = "waiting"
+	// WorkflowRunCompleted means every case has finished, including failures.
+	WorkflowRunCompleted WorkflowRunStatus = "completed"
+)
+
 // WorkflowResult reports progress. Completed counts terminal cases, including
 // failures. Failed counts cases with any failed task, scorer, or classifier.
 // Scores averages successful values by score name.
 type WorkflowResult struct {
 	RunID          string
 	ExperimentID   string
-	Status         string
+	Status         WorkflowRunStatus
 	Completed      int
 	Failed         int
 	PendingPoll    int
@@ -816,7 +826,7 @@ func (w *WorkflowEval[I, R]) caseDone(c *workflowCase[I, R]) bool {
 }
 
 func (w *WorkflowEval[I, R]) result(run *workflowRun[I, R]) *WorkflowResult {
-	r := &WorkflowResult{RunID: run.ID, ExperimentID: run.ExperimentID, Status: "waiting", Scores: map[string]float64{}}
+	r := &WorkflowResult{RunID: run.ID, ExperimentID: run.ExperimentID, Status: WorkflowRunWaiting, Scores: map[string]float64{}}
 	counts := map[string]int{}
 	for i := range run.Cases {
 		c := &run.Cases[i]
@@ -850,7 +860,7 @@ func (w *WorkflowEval[I, R]) result(run *workflowRun[I, R]) *WorkflowResult {
 		}
 	}
 	if r.Completed == len(run.Cases) && r.PendingPoll == 0 && r.PendingWebhook == 0 {
-		r.Status = "completed"
+		r.Status = WorkflowRunCompleted
 	}
 	return r
 }

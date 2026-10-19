@@ -48,7 +48,7 @@ func TestWorkflowOpenAIBatches(t *testing.T) {
 	result, err := definition().Start(ctx, eval.WorkflowStartOpts[string, string]{NoSendLogs: true, Dataset: eval.NewDataset([]eval.Case[string, string]{{Input: "What is 2 + 2? Reply with the number only.", Expected: "4"}, {Input: "What is 3 + 3? Reply with the number only.", Expected: "6"}})})
 	require.NoError(t, err)
 	t.Logf("Started workflow %s; waiting for task and scorer batches", result.RunID)
-	for result.Status != "completed" {
+	for result.Status != eval.WorkflowRunCompleted {
 		if vcr.GetVCRMode() != vcr.ModeReplay {
 			select {
 			case <-ctx.Done():
