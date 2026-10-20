@@ -215,6 +215,22 @@ func (w *WorkflowEval[I, R]) Start(ctx context.Context, opts WorkflowStartOpts[I
 		return nil, err
 	}
 	run := &workflowRun[I, R]{Version: 1, ID: uuid.NewString(), Definition: w.definition(stages), NoSendLogs: opts.NoSendLogs}
+	// Register before writing cases so a failed registration leaves no state.
+	if !run.NoSendLogs {
+		name := opts.Experiment
+		if name == "" {
+			name = w.Name
+		}
+		project := w.ProjectName
+		if project == "" {
+			project = w.evaluator.defaultProjectName
+		}
+		experiment, err := registerExperiment(ctx, w.evaluator.api, name, project, opts.ProjectID, opts.Tags, opts.Metadata, false, opts.Dataset)
+		if err != nil {
+			return nil, err
+		}
+		run.ExperimentID = experiment.ID
+	}
 	trials := max(1, opts.TrialCount)
 	runUUID := uuid.MustParse(run.ID)
 	for caseIndex := 0; ; caseIndex++ {
@@ -247,21 +263,6 @@ func (w *WorkflowEval[I, R]) Start(ctx context.Context, opts WorkflowStartOpts[I
 			run.CaseIDs = append(run.CaseIDs, id)
 			run.Cases = append(run.Cases, record)
 		}
-	}
-	if !run.NoSendLogs {
-		name := opts.Experiment
-		if name == "" {
-			name = w.Name
-		}
-		project := w.ProjectName
-		if project == "" {
-			project = w.evaluator.defaultProjectName
-		}
-		experiment, err := registerExperiment(ctx, w.evaluator.api, name, project, opts.ProjectID, opts.Tags, opts.Metadata, false, opts.Dataset)
-		if err != nil {
-			return nil, err
-		}
-		run.ExperimentID = experiment.ID
 	}
 	if err := w.saveRun(ctx, run); err != nil {
 		return nil, err

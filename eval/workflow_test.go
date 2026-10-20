@@ -12,6 +12,8 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	oteltrace "go.opentelemetry.io/otel/trace"
+
+	"github.com/braintrustdata/braintrust-sdk-go/api"
 )
 
 // These tests exercise the orchestration state machine with local callbacks;
@@ -684,4 +686,15 @@ func TestWorkflowRegistrationErrorsAreIndependent(t *testing.T) {
 	require.ErrorContains(t, err, "invalid request")
 	require.NotContains(t, err.Error(), "unknown workflow external ID", "one bad registration must not skip the others")
 	require.Equal(t, 1, r.Completed)
+}
+
+func TestWorkflowStartRegistersExperimentBeforeWritingCases(t *testing.T) {
+	ctx := context.Background()
+	store := NewWorkflowEvalMemoryStore()
+	// No project name: experiment registration fails before any HTTP request.
+	evaluator := NewEvaluator[int, int](nil, nil, api.NewClient("unused"), "")
+	w := NewWorkflowEval(evaluator, &WorkflowEval[int, int]{Name: "register-first", Store: store, Task: T(func(ctx context.Context, input int) (int, error) { return input, nil })})
+	_, err := w.Start(ctx, WorkflowStartOpts[int, int]{Dataset: NewDataset([]Case[int, int]{{Input: 1}, {Input: 2}})})
+	require.ErrorContains(t, err, "project name is required")
+	require.Zero(t, len(store.values), "a failed registration must not leave orphaned case records")
 }
