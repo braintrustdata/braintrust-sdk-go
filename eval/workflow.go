@@ -521,7 +521,7 @@ func (w *WorkflowEval[I, R]) submitPending(ctx context.Context, run *workflowRun
 	errs := []error{err}
 	for _, sub := range run.Submissions {
 		stage := stages[sub.Stage]
-		if sub.Done || len(sub.Data) == 0 || stage.completion.GetExternalID == nil {
+		if sub.Done || len(sub.Data) == 0 || sub.ExternalID != "" || stage.completion.GetExternalID == nil {
 			continue
 		}
 		if e := w.registerExternalID(ctx, run, sub, stage); e != nil {

@@ -776,3 +776,25 @@ func TestWorkflowCaseStoreAccessIsConcurrent(t *testing.T) {
 	require.Equal(t, 3, r.PendingPoll)
 	require.True(t, store.overlap, "loading a run must read cases concurrently")
 }
+
+func TestWorkflowRegistersExternalIDOnce(t *testing.T) {
+	ctx := context.Background()
+	calls := 0
+	w := WorkflowEval[int, int]{Name: "register-once", Store: NewWorkflowEvalMemoryStore(), Task: WorkflowTask[int, int]{
+		Submit: func(context.Context, WorkflowTaskItem[int, int], WorkflowSubmissionContext) (json.RawMessage, error) {
+			return json.RawMessage(`{}`), nil
+		},
+		Completion: WorkflowCompletion{GetExternalID: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (string, error) {
+			calls++
+			return "external", nil
+		}},
+		Collect: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowTaskResult[int], error) {
+			return WorkflowTaskResult[int]{Output: 2}, nil
+		},
+	}}
+	r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}})})
+	require.NoError(t, err)
+	_, err = w.Poll(ctx, r.RunID)
+	require.NoError(t, err)
+	require.Equal(t, 1, calls, "a registered submission must not be registered again")
+}
