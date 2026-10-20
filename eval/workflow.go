@@ -129,7 +129,7 @@ type workflowCase[I, R any] struct {
 }
 
 func (c workflowCase[I, R]) scorerItem() WorkflowScorerItem[I, R] {
-	return WorkflowScorerItem[I, R]{ID: c.Item.ID, Tags: slices.Clone(c.Item.Tags), TrialIndex: c.Item.TrialIndex, TaskResult: TaskResult[I, R]{Input: c.Item.Input, Expected: c.Item.Expected, Output: c.Output, Metadata: c.Item.Metadata}}
+	return WorkflowScorerItem[I, R]{ID: c.Item.ID, CaseID: c.Item.CaseID, Tags: slices.Clone(c.Item.Tags), TrialIndex: c.Item.TrialIndex, TaskResult: TaskResult[I, R]{Input: c.Item.Input, Expected: c.Item.Expected, Output: c.Output, Metadata: c.Item.Metadata}}
 }
 
 func workflowKey(parts ...string) string { return "workflow/v1/" + stringsJoin(parts) }
@@ -216,7 +216,8 @@ func (w *WorkflowEval[I, R]) Start(ctx context.Context, opts WorkflowStartOpts[I
 	}
 	run := &workflowRun[I, R]{Version: 1, ID: uuid.NewString(), Definition: w.definition(stages), NoSendLogs: opts.NoSendLogs}
 	trials := max(1, opts.TrialCount)
-	for {
+	runUUID := uuid.MustParse(run.ID)
+	for caseIndex := 0; ; caseIndex++ {
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
@@ -231,9 +232,15 @@ func (w *WorkflowEval[I, R]) Start(ctx context.Context, opts WorkflowStartOpts[I
 		if c.TrialCount > 0 {
 			count = c.TrialCount
 		}
+		caseID := c.ID
+		if caseID == "" {
+			// Derive rather than draw a UUID: unique per run and case, and it
+			// leaves the random sequence used for trial and submission IDs intact.
+			caseID = uuid.NewSHA1(runUUID, []byte(strconv.Itoa(caseIndex))).String()
+		}
 		for trial := 0; trial < count; trial++ {
 			id := uuid.NewString()
-			record := workflowCase[I, R]{Item: WorkflowTaskItem[I, R]{ID: id, Input: c.Input, Expected: c.Expected, Metadata: maps.Clone(c.Metadata), Tags: slices.Clone(c.Tags), Parameters: params, TrialIndex: trial}, DatasetID: opts.Dataset.ID(), DatasetRecordID: c.ID, Done: map[string]bool{}, Scores: map[string]Scores{}, Errors: map[string]string{}, Classifications: map[string][]map[string]any{}, ClassifierErrors: map[string]string{}, StartedAt: time.Now().UTC()}
+			record := workflowCase[I, R]{Item: WorkflowTaskItem[I, R]{ID: id, CaseID: caseID, Input: c.Input, Expected: c.Expected, Metadata: maps.Clone(c.Metadata), Tags: slices.Clone(c.Tags), Parameters: params, TrialIndex: trial}, DatasetID: opts.Dataset.ID(), DatasetRecordID: c.ID, Done: map[string]bool{}, Scores: map[string]Scores{}, Errors: map[string]string{}, Classifications: map[string][]map[string]any{}, ClassifierErrors: map[string]string{}, StartedAt: time.Now().UTC()}
 			if err := w.saveCase(ctx, run.ID, &record); err != nil {
 				return nil, err
 			}

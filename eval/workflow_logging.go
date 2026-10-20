@@ -32,7 +32,7 @@ func (w *WorkflowEval[I, R]) logRun(ctx context.Context, run *workflowRun[I, R])
 		if metadata == nil {
 			metadata = Metadata{}
 		}
-		workflow := map[string]any{"run_id": run.ID, "case_id": c.Item.ID, "trial_index": c.Item.TrialIndex}
+		workflow := map[string]any{"run_id": run.ID, "case_id": c.Item.CaseID, "trial_index": c.Item.TrialIndex}
 		if c.BatchID != "" {
 			workflow["batch_submission_id"] = c.BatchID
 		}

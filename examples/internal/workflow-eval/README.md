@@ -85,6 +85,9 @@ worker; this CLI is not a webhook verification server.
   survive process exit.
 - `MaxWait` (scorer batches only) flushes partial batches only when the workflow advances, with no
   background timer. Zero waits for a full batch or the final remaining items.
+- Each trial gets its own row `ID`. `CaseID` groups trials of one case and is
+  logged as `workflow_eval.case_id`: it is `Case.ID` when set (for example, a
+  Braintrust dataset record), otherwise generated once per case at `Start`.
 - `Status` reads progress without advancing it. Completed includes failed cases;
   Failed counts cases with any stage failure. A completed run can have failures.
 - A run's case records are loaded into memory when it advances. Collection saves

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strconv"
 	"testing"
 	"time"
 
@@ -540,5 +541,65 @@ func TestWorkflowFailedPollBlocksCompletion(t *testing.T) {
 		require.Equal(t, 0, r.Failed)
 		require.Equal(t, 1, r.PendingPoll)
 		require.Equal(t, attempt, failedPolls)
+	}
+}
+
+func TestWorkflowCaseIDs(t *testing.T) {
+	ctx := context.Background()
+	var items []WorkflowTaskItem[int, int]
+	var scored []WorkflowScorerItem[int, int]
+	w := WorkflowEval[int, int]{Name: "case-ids", Store: NewWorkflowEvalMemoryStore(), MaxConcurrency: 1,
+		Task: WorkflowBatchTask[int, int]{Batching: WorkflowBatching{MaxSize: 10},
+			Submit: func(ctx context.Context, batch []WorkflowBatchItem[WorkflowTaskItem[int, int]], info WorkflowSubmissionContext) (json.RawMessage, error) {
+				for _, item := range batch {
+					items = append(items, item.Item)
+				}
+				return json.RawMessage(`{}`), nil
+			},
+			Completion: WorkflowCompletion{Poll: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowPollResult, error) {
+				return WorkflowPollResult{Status: WorkflowComplete}, nil
+			}},
+			Collect: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext, yield func(WorkflowBatchResult[WorkflowTaskResult[int]]) error) error {
+				for i := range items {
+					if err := yield(WorkflowBatchResult[WorkflowTaskResult[int]]{CustomID: info.SubmissionID + "_" + strconv.Itoa(i), Result: WorkflowTaskResult[int]{Output: 1}}); err != nil {
+						return err
+					}
+				}
+				return nil
+			},
+		},
+		WorkflowScorers: []WorkflowScorerDefinition[int, int]{WorkflowScorer[int, int]{Name: "judge",
+			Submit: func(ctx context.Context, item WorkflowScorerItem[int, int], info WorkflowSubmissionContext) (json.RawMessage, error) {
+				scored = append(scored, item)
+				return json.RawMessage(`{}`), nil
+			},
+			Completion: WorkflowCompletion{Poll: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowPollResult, error) {
+				return WorkflowPollResult{Status: WorkflowComplete}, nil
+			}},
+			Collect: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (Scores, error) { return S(1), nil },
+		}}}
+	r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, TrialCount: 2, Dataset: NewDataset([]Case[int, int]{{ID: "q1", Input: 1}, {Input: 2}})})
+	require.NoError(t, err)
+	require.Len(t, items, 4)
+	// Trials share their case ID: the dataset ID when present, otherwise one
+	// generated per case. Each trial keeps a distinct row ID.
+	require.Equal(t, "q1", items[0].CaseID)
+	require.Equal(t, "q1", items[1].CaseID)
+	require.NotEmpty(t, items[2].CaseID)
+	require.NotEqual(t, "q1", items[2].CaseID)
+	require.Equal(t, items[2].CaseID, items[3].CaseID)
+	rowIDs := map[string]bool{}
+	for _, item := range items {
+		require.NotEqual(t, item.CaseID, item.ID)
+		rowIDs[item.ID] = true
+	}
+	require.Len(t, rowIDs, 4)
+	r, err = w.Poll(ctx, r.RunID)
+	require.NoError(t, err)
+	require.Equal(t, 4, r.PendingPoll, "one scorer submission per trial remains")
+	require.Len(t, scored, 4)
+	for _, item := range scored {
+		require.NotEmpty(t, item.CaseID)
+		require.True(t, rowIDs[item.ID])
 	}
 }

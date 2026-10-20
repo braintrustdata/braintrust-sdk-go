@@ -43,7 +43,7 @@ func TestWorkflowExperimentIntegration(t *testing.T) {
 		})
 	}
 	w := makeDefinition()
-	result, err := w.Start(ctx, WorkflowStartOpts[string, string]{Dataset: NewDataset([]Case[string, string]{{Input: "hello", Expected: "hello!"}})})
+	result, err := w.Start(ctx, WorkflowStartOpts[string, string]{Dataset: NewDataset([]Case[string, string]{{ID: "greeting", Input: "hello", Expected: "hello!"}})})
 	require.NoError(t, err)
 	t.Cleanup(func() { require.NoError(t, apiClient.Experiments().Delete(ctx, result.ExperimentID)) })
 	fetch := func() []map[string]any {
@@ -71,6 +71,12 @@ func TestWorkflowExperimentIntegration(t *testing.T) {
 	require.Equal(t, initial[0]["id"], final[0]["id"])
 	require.Equal(t, initial[0]["span_id"], final[0]["span_id"])
 	require.Equal(t, "hello!", final[0]["output"])
+	metadata, ok := final[0]["metadata"].(map[string]any)
+	require.True(t, ok)
+	workflow, ok := metadata["workflow_eval"].(map[string]any)
+	require.True(t, ok)
+	require.Equal(t, "greeting", workflow["case_id"])
+	require.NotEqual(t, "greeting", final[0]["id"], "rows are keyed per trial")
 	scores, ok := final[0]["scores"].(map[string]any)
 	require.True(t, ok)
 	require.Equal(t, 1.0, scores["correct"])

@@ -53,9 +53,12 @@ type WorkflowBatching struct {
 	MaxWait time.Duration
 }
 
-// WorkflowTaskItem is a persisted case/trial passed to a workflow task.
+// WorkflowTaskItem is a persisted case/trial passed to a workflow task. ID is
+// unique per trial. CaseID is shared by a case's trials: the dataset Case.ID
+// when set, otherwise generated when the run starts.
 type WorkflowTaskItem[I, R any] struct {
 	ID         string
+	CaseID     string
 	Input      I
 	Expected   R
 	Metadata   Metadata
@@ -76,6 +79,7 @@ type WorkflowTaskResult[R any] struct {
 type WorkflowScorerItem[I, R any] struct {
 	TaskResult[I, R]
 	ID         string
+	CaseID     string
 	Tags       []string
 	TrialIndex int
 }
