@@ -14,19 +14,34 @@ func (w *WorkflowEval[I, R]) logRun(ctx context.Context, run *workflowRun[I, R])
 	if w.evaluator == nil || w.evaluator.api == nil {
 		return errors.New("resuming a logged workflow requires a Braintrust evaluator")
 	}
-	// Bound request size, including when a large batch completes at once.
+	// Upload only changed rows. Bound request size, including when a large
+	// batch completes at once.
 	events := make([]experiments.Event, 0, 100)
+	logged := make([]int, 0, 100)
 	flush := func() error {
 		if len(events) == 0 {
 			return nil
 		}
-		err := w.evaluator.api.Experiments().InsertEvents(ctx, run.ExperimentID, events)
-		events = events[:0]
-		return err
+		if err := w.evaluator.api.Experiments().InsertEvents(ctx, run.ExperimentID, events); err != nil {
+			return err
+		}
+		for _, i := range logged {
+			c := &run.Cases[i]
+			c.LogPending = false
+			if err := w.saveCase(ctx, run.ID, c); err != nil {
+				// The row stays pending in the store; re-uploading merges harmlessly.
+				return err
+			}
+		}
+		events, logged = events[:0], logged[:0]
+		return nil
 	}
 	merge := true
 	for i := range run.Cases {
 		c := &run.Cases[i]
+		if !c.LogPending {
+			continue
+		}
 		traceID, spanID := workflowTraceIDs(c.Item.ID)
 		metadata := maps.Clone(c.Item.Metadata)
 		if metadata == nil {
@@ -60,6 +75,7 @@ func (w *WorkflowEval[I, R]) logRun(ctx context.Context, run *workflowRun[I, R])
 			}
 		}
 		events = append(events, event)
+		logged = append(logged, i)
 		if len(events) >= 100 {
 			if err := flush(); err != nil {
 				return err

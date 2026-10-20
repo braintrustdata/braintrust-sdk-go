@@ -64,6 +64,8 @@ func TestWorkflowExperimentIntegration(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, WorkflowRunCompleted, result.Status)
 	require.Equal(t, "https://www.braintrust.dev/app/Test%20Org/object?object_type=experiment&object_id="+result.ExperimentID, result.Permalink)
+	// A repeated notification changes no rows, so it uploads nothing. The
+	// cassette records no insert for it, so replay fails if one is sent.
 	_, err = w.ProcessSubmissionResult(ctx, WorkflowSubmissionResult{ExternalID: "workflow-integration-completion"})
 	require.NoError(t, err)
 	final := fetch()

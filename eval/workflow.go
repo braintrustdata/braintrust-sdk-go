@@ -126,6 +126,9 @@ type workflowCase[I, R any] struct {
 	StartedAt        time.Time
 	FinishedAt       time.Time
 	BatchID          string
+	// LogPending persists until the row is uploaded, so a failed upload is
+	// retried by a later call, even from another process.
+	LogPending bool
 }
 
 func (c workflowCase[I, R]) scorerItem() WorkflowScorerItem[I, R] {
@@ -256,7 +259,7 @@ func (w *WorkflowEval[I, R]) Start(ctx context.Context, opts WorkflowStartOpts[I
 		}
 		for trial := 0; trial < count; trial++ {
 			id := uuid.NewString()
-			record := workflowCase[I, R]{Item: WorkflowTaskItem[I, R]{ID: id, CaseID: caseID, Input: c.Input, Expected: c.Expected, Metadata: maps.Clone(c.Metadata), Tags: slices.Clone(c.Tags), Parameters: params, TrialIndex: trial}, DatasetID: opts.Dataset.ID(), DatasetRecordID: c.ID, Done: map[string]bool{}, Scores: map[string]Scores{}, Errors: map[string]string{}, Classifications: map[string][]map[string]any{}, ClassifierErrors: map[string]string{}, StartedAt: time.Now().UTC()}
+			record := workflowCase[I, R]{Item: WorkflowTaskItem[I, R]{ID: id, CaseID: caseID, Input: c.Input, Expected: c.Expected, Metadata: maps.Clone(c.Metadata), Tags: slices.Clone(c.Tags), Parameters: params, TrialIndex: trial}, DatasetID: opts.Dataset.ID(), DatasetRecordID: c.ID, Done: map[string]bool{}, Scores: map[string]Scores{}, Errors: map[string]string{}, Classifications: map[string][]map[string]any{}, ClassifierErrors: map[string]string{}, StartedAt: time.Now().UTC(), LogPending: true}
 			if err := w.saveCase(ctx, run.ID, &record); err != nil {
 				return nil, err
 			}
@@ -720,6 +723,7 @@ func (w *WorkflowEval[I, R]) apply(ctx context.Context, run *workflowRun[I, R], 
 	if w.caseDone(c) {
 		c.FinishedAt = time.Now().UTC()
 	}
+	c.LogPending = true
 	if err := w.saveCase(ctx, run.ID, c); err != nil {
 		return err
 	}
@@ -817,6 +821,7 @@ func (w *WorkflowEval[I, R]) localScores(ctx context.Context, run *workflowRun[I
 		if w.caseDone(c) {
 			c.FinishedAt = time.Now().UTC()
 		}
+		c.LogPending = true
 		if err = w.saveCase(ctx, run.ID, c); err != nil {
 			return err
 		}
