@@ -108,9 +108,42 @@ func TestWorkflowCollectionCheckpoint(t *testing.T) {
 }
 
 func TestWorkflowValidation(t *testing.T) {
-	w := WorkflowEval[int, int]{Name: "bad", Store: NewWorkflowEvalMemoryStore(), Task: WorkflowBatchTask[int, int]{Batching: WorkflowBatching{MaxSize: 0, MaxWait: -time.Second}}}
-	_, err := w.Start(context.Background(), WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}})})
-	require.Error(t, err)
+	for _, tc := range []struct {
+		name            string
+		batching        WorkflowBatching
+		missingCallback string
+		wantError       string
+	}{
+		{name: "missing submit", batching: WorkflowBatching{MaxSize: 1}, missingCallback: "submit", wantError: "submit and collect callbacks are required"},
+		{name: "missing collect", batching: WorkflowBatching{MaxSize: 1}, missingCallback: "collect", wantError: "submit and collect callbacks are required"},
+		{name: "zero batch size", batching: WorkflowBatching{MaxSize: 0}, wantError: "batch size must be positive"},
+		{name: "negative wait", batching: WorkflowBatching{MaxSize: 1, MaxWait: -time.Second}, wantError: "wait nonnegative"},
+		{name: "task max wait", batching: WorkflowBatching{MaxSize: 2, MaxWait: time.Second}, wantError: "MaxWait applies only to batch scorers"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			task := WorkflowBatchTask[int, int]{
+				Batching: tc.batching,
+				Submit: func(context.Context, []WorkflowBatchItem[WorkflowTaskItem[int, int]], WorkflowSubmissionContext) (json.RawMessage, error) {
+					return json.RawMessage(`{}`), nil
+				},
+				Completion: WorkflowCompletion{Poll: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowPollResult, error) {
+					return WorkflowPollResult{Status: WorkflowComplete}, nil
+				}},
+				Collect: func(context.Context, json.RawMessage, WorkflowSubmissionContext, func(WorkflowBatchResult[WorkflowTaskResult[int]]) error) error {
+					return nil
+				},
+			}
+			switch tc.missingCallback {
+			case "submit":
+				task.Submit = nil
+			case "collect":
+				task.Collect = nil
+			}
+			w := WorkflowEval[int, int]{Name: "validation", Store: NewWorkflowEvalMemoryStore(), Task: task}
+			_, err := w.Start(context.Background(), WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}})})
+			require.ErrorContains(t, err, tc.wantError)
+		})
+	}
 }
 
 func TestWorkflowDuplicateResults(t *testing.T) {
@@ -236,12 +269,16 @@ func TestWorkflowLocalTrialsAndFailures(t *testing.T) {
 }
 
 func TestWorkflowSharedExternalID(t *testing.T) {
-	ctx := context.Background()
+	type ctxKey struct{}
+	ctx := context.WithValue(context.Background(), ctxKey{}, "caller")
+	var submissions []WorkflowSubmissionContext
 	w := WorkflowEval[int, int]{Name: "external", Store: NewWorkflowEvalMemoryStore(), Task: WorkflowTask[int, int]{
 		Submit: func(context.Context, WorkflowTaskItem[int, int], WorkflowSubmissionContext) (json.RawMessage, error) {
 			return json.RawMessage(`{}`), nil
 		},
-		Completion: WorkflowCompletion{GetExternalID: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (string, error) {
+		Completion: WorkflowCompletion{GetExternalID: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (string, error) {
+			require.Equal(t, "caller", ctx.Value(ctxKey{}))
+			submissions = append(submissions, info)
 			return "shared", nil
 		}},
 		Collect: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowTaskResult[int], error) {
@@ -252,6 +289,12 @@ func TestWorkflowSharedExternalID(t *testing.T) {
 	require.NoError(t, err)
 	b, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}})})
 	require.NoError(t, err)
+	require.Len(t, submissions, 2)
+	require.Equal(t, a.RunID, submissions[0].RunID)
+	require.Equal(t, b.RunID, submissions[1].RunID)
+	require.NotEmpty(t, submissions[0].SubmissionID)
+	require.NotEmpty(t, submissions[1].SubmissionID)
+	require.NotEqual(t, submissions[0].SubmissionID, submissions[1].SubmissionID)
 	_, err = w.ProcessSubmissionResult(ctx, WorkflowSubmissionResult{ExternalID: "shared"})
 	require.ErrorContains(t, err, "run ID")
 	for _, id := range []string{a.RunID, b.RunID} {
@@ -431,84 +474,6 @@ func TestWorkflowPartialBatchWaitAfterFullBatch(t *testing.T) {
 	require.Equal(t, 1, submitted, "oldest item of the consumed batch must not flush the younger remainder")
 }
 
-func TestWorkflowExternalIDReceivesContext(t *testing.T) {
-	type ctxKey struct{}
-	ctx := context.WithValue(context.Background(), ctxKey{}, "caller")
-	var got WorkflowSubmissionContext
-	w := WorkflowEval[int, int]{Name: "external-context", Store: NewWorkflowEvalMemoryStore(), Task: WorkflowTask[int, int]{
-		Submit: func(context.Context, WorkflowTaskItem[int, int], WorkflowSubmissionContext) (json.RawMessage, error) {
-			return json.RawMessage(`{}`), nil
-		},
-		Completion: WorkflowCompletion{GetExternalID: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (string, error) {
-			require.Equal(t, "caller", ctx.Value(ctxKey{}))
-			got = info
-			return "external-" + info.SubmissionID, nil
-		}},
-		Collect: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowTaskResult[int], error) {
-			return WorkflowTaskResult[int]{Output: 2}, nil
-		},
-	}}
-	r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}})})
-	require.NoError(t, err)
-	require.Equal(t, r.RunID, got.RunID)
-	require.NotEmpty(t, got.SubmissionID)
-	r, err = w.ProcessSubmissionResult(ctx, WorkflowSubmissionResult{ExternalID: "external-" + got.SubmissionID})
-	require.NoError(t, err)
-	require.Equal(t, WorkflowRunCompleted, r.Status)
-}
-
-func TestWorkflowBatchTaskRejectsMaxWait(t *testing.T) {
-	w := WorkflowEval[int, int]{Name: "task-wait", Store: NewWorkflowEvalMemoryStore(), Task: WorkflowBatchTask[int, int]{
-		Batching: WorkflowBatching{MaxSize: 2, MaxWait: time.Second},
-		Submit: func(context.Context, []WorkflowBatchItem[WorkflowTaskItem[int, int]], WorkflowSubmissionContext) (json.RawMessage, error) {
-			return json.RawMessage(`{}`), nil
-		},
-		Completion: WorkflowCompletion{Poll: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowPollResult, error) {
-			return WorkflowPollResult{Status: WorkflowComplete}, nil
-		}},
-		Collect: func(context.Context, json.RawMessage, WorkflowSubmissionContext, func(WorkflowBatchResult[WorkflowTaskResult[int]]) error) error {
-			return nil
-		},
-	}}
-	_, err := w.Start(context.Background(), WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}})})
-	require.ErrorContains(t, err, "MaxWait")
-}
-
-func TestWorkflowScorerItemTags(t *testing.T) {
-	ctx := context.Background()
-	got := map[int][]string{}
-	w := WorkflowEval[int, int]{Name: "scorer-tags", Store: NewWorkflowEvalMemoryStore(), MaxConcurrency: 1,
-		Task: WorkflowTask[int, int]{
-			Submit: func(context.Context, WorkflowTaskItem[int, int], WorkflowSubmissionContext) (json.RawMessage, error) {
-				return json.RawMessage(`{}`), nil
-			},
-			Completion: WorkflowCompletion{Poll: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowPollResult, error) {
-				return WorkflowPollResult{Status: WorkflowComplete}, nil
-			}},
-			Collect: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowTaskResult[int], error) {
-				return WorkflowTaskResult[int]{Output: 1, Tags: []string{"collected"}}, nil
-			},
-		},
-		WorkflowScorers: []WorkflowScorerDefinition[int, int]{WorkflowScorer[int, int]{Name: "judge",
-			Submit: func(ctx context.Context, item WorkflowScorerItem[int, int], info WorkflowSubmissionContext) (json.RawMessage, error) {
-				got[item.Input] = item.Tags
-				return json.RawMessage(`{}`), nil
-			},
-			Completion: WorkflowCompletion{Poll: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowPollResult, error) {
-				return WorkflowPollResult{Status: WorkflowComplete}, nil
-			}},
-			Collect: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (Scores, error) { return S(1), nil },
-		}}}
-	r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1, Tags: []string{"case"}}})})
-	require.NoError(t, err)
-	r, err = w.Poll(ctx, r.RunID)
-	require.NoError(t, err)
-	r, err = w.Poll(ctx, r.RunID)
-	require.NoError(t, err)
-	require.Equal(t, WorkflowRunCompleted, r.Status)
-	require.Equal(t, []string{"collected"}, got[1], "scorers see tags after the task replaces them")
-}
-
 func TestWorkflowFailedPollBlocksCompletion(t *testing.T) {
 	ctx := context.Background()
 	failedPolls := 0
@@ -544,7 +509,7 @@ func TestWorkflowFailedPollBlocksCompletion(t *testing.T) {
 	}
 }
 
-func TestWorkflowCaseIDs(t *testing.T) {
+func TestWorkflowScorerItems(t *testing.T) {
 	ctx := context.Background()
 	var items []WorkflowTaskItem[int, int]
 	var scored []WorkflowScorerItem[int, int]
@@ -561,7 +526,7 @@ func TestWorkflowCaseIDs(t *testing.T) {
 			}},
 			Collect: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext, yield func(WorkflowBatchResult[WorkflowTaskResult[int]]) error) error {
 				for i := range items {
-					if err := yield(WorkflowBatchResult[WorkflowTaskResult[int]]{CustomID: info.SubmissionID + "_" + strconv.Itoa(i), Result: WorkflowTaskResult[int]{Output: 1}}); err != nil {
+					if err := yield(WorkflowBatchResult[WorkflowTaskResult[int]]{CustomID: info.SubmissionID + "_" + strconv.Itoa(i), Result: WorkflowTaskResult[int]{Output: 1, Tags: []string{"collected"}}}); err != nil {
 						return err
 					}
 				}
@@ -578,7 +543,7 @@ func TestWorkflowCaseIDs(t *testing.T) {
 			}},
 			Collect: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (Scores, error) { return S(1), nil },
 		}}}
-	r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, TrialCount: 2, Dataset: NewDataset([]Case[int, int]{{ID: "q1", Input: 1}, {Input: 2}})})
+	r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, TrialCount: 2, Dataset: NewDataset([]Case[int, int]{{ID: "q1", Input: 1, Tags: []string{"case"}}, {Input: 2, Tags: []string{"case"}}})})
 	require.NoError(t, err)
 	require.Len(t, items, 4)
 	// Trials share their case ID: the dataset ID when present, otherwise one
@@ -601,5 +566,9 @@ func TestWorkflowCaseIDs(t *testing.T) {
 	for _, item := range scored {
 		require.NotEmpty(t, item.CaseID)
 		require.True(t, rowIDs[item.ID])
+		require.Equal(t, []string{"collected"}, item.Tags, "scorers see tags after the task replaces them")
 	}
+	r, err = w.Poll(ctx, r.RunID)
+	require.NoError(t, err)
+	require.Equal(t, WorkflowRunCompleted, r.Status)
 }

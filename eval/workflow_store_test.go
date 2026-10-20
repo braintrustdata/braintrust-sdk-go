@@ -55,52 +55,51 @@ func TestWorkflowMemoryStore(t *testing.T) {
 func TestWorkflowRedisStore(t *testing.T) {
 	ctx := context.Background()
 	command := startWorkflowRedis(t)
-	s, err := NewWorkflowEvalRedisStore(command, "test:", time.Hour)
-	require.NoError(t, err)
-	value, err := s.Read(ctx, "missing")
-	require.NoError(t, err)
-	require.Nil(t, value)
-	bytes := []byte{0, 1, 255, 2}
-	value, created, err := s.GetOrSet(ctx, "key", bytes)
-	require.NoError(t, err)
-	require.True(t, created)
-	require.Equal(t, bytes, value)
-	var wg sync.WaitGroup
-	for range 10 {
-		wg.Go(func() {
-			_, created, err := s.GetOrSet(ctx, "key", []byte("other"))
-			require.NoError(t, err)
-			require.False(t, created)
-			require.NoError(t, s.AddToSet(ctx, "key", "member"))
-		})
-	}
-	wg.Wait()
-	size, err := s.GetSetSize(ctx, "key")
-	require.NoError(t, err)
-	require.Equal(t, 1, size)
-	require.NoError(t, s.Write(ctx, "key", []byte("replacement")))
-	other, err := NewWorkflowEvalRedisStore(command, "test:", time.Hour)
-	require.NoError(t, err)
-	value, err = other.Read(ctx, "key")
-	require.NoError(t, err)
-	require.Equal(t, "replacement", string(value))
-}
-
-func TestWorkflowRedisDefaultPrefix(t *testing.T) {
-	ctx := context.Background()
-	command := startWorkflowRedis(t)
-	s, err := NewWorkflowEvalRedisStore(command, "", 0)
-	require.NoError(t, err)
-	require.NoError(t, s.Write(ctx, "key", []byte("value")))
-	// The default matches the Python and JS stores.
-	raw, err := command(ctx, "GET", "braintrust-eval:record:key")
-	require.NoError(t, err)
-	require.NotNil(t, raw)
-	ttl, err := command(ctx, "PTTL", "braintrust-eval:record:key")
-	require.NoError(t, err)
-	ms, err := workflowRedisInt(ttl)
-	require.NoError(t, err)
-	require.Greater(t, ms, int((6 * 24 * time.Hour).Milliseconds()))
+	t.Run("contract", func(t *testing.T) {
+		s, err := NewWorkflowEvalRedisStore(command, "test:", time.Hour)
+		require.NoError(t, err)
+		value, err := s.Read(ctx, "missing")
+		require.NoError(t, err)
+		require.Nil(t, value)
+		bytes := []byte{0, 1, 255, 2}
+		value, created, err := s.GetOrSet(ctx, "key", bytes)
+		require.NoError(t, err)
+		require.True(t, created)
+		require.Equal(t, bytes, value)
+		var wg sync.WaitGroup
+		for range 10 {
+			wg.Go(func() {
+				_, created, err := s.GetOrSet(ctx, "key", []byte("other"))
+				require.NoError(t, err)
+				require.False(t, created)
+				require.NoError(t, s.AddToSet(ctx, "key", "member"))
+			})
+		}
+		wg.Wait()
+		size, err := s.GetSetSize(ctx, "key")
+		require.NoError(t, err)
+		require.Equal(t, 1, size)
+		require.NoError(t, s.Write(ctx, "key", []byte("replacement")))
+		other, err := NewWorkflowEvalRedisStore(command, "test:", time.Hour)
+		require.NoError(t, err)
+		value, err = other.Read(ctx, "key")
+		require.NoError(t, err)
+		require.Equal(t, "replacement", string(value))
+	})
+	t.Run("defaults", func(t *testing.T) {
+		s, err := NewWorkflowEvalRedisStore(command, "", 0)
+		require.NoError(t, err)
+		require.NoError(t, s.Write(ctx, "key", []byte("value")))
+		// The default matches the Python and JS stores.
+		raw, err := command(ctx, "GET", "braintrust-eval:record:key")
+		require.NoError(t, err)
+		require.NotNil(t, raw)
+		ttl, err := command(ctx, "PTTL", "braintrust-eval:record:key")
+		require.NoError(t, err)
+		ms, err := workflowRedisInt(ttl)
+		require.NoError(t, err)
+		require.Greater(t, ms, int((6 * 24 * time.Hour).Milliseconds()))
+	})
 }
 
 // Use real Redis. No fake server or provider responses are involved.
