@@ -1095,19 +1095,24 @@ func (e *eval[I, R]) runClassifier(ctx context.Context, spanName string, classif
 
 // permalink generates a URL to view the eval in Braintrust UI.
 func (e *eval[I, R]) permalink() string {
-	if e.session == nil {
+	return experimentPermalink(e.session, e.experimentID)
+}
+
+// experimentPermalink returns a URL to an experiment in the Braintrust UI, or
+// an empty string when the session or experiment is unknown.
+func experimentPermalink(session *auth.Session, experimentID string) string {
+	if session == nil || experimentID == "" {
 		return ""
 	}
-
-	appURL := e.session.AppPublicURL()
-	orgName := e.session.OrgName()
+	appURL := session.AppPublicURL()
+	orgName := session.OrgName()
 
 	if appURL == "" {
 		appURL = "https://www.braintrust.dev"
 	}
 
-	if orgName != "" && e.experimentID != "" {
-		return fmt.Sprintf("%s/app/%s/object?object_type=experiment&object_id=%s", appURL, url.PathEscape(orgName), e.experimentID)
+	if orgName != "" {
+		return fmt.Sprintf("%s/app/%s/object?object_type=experiment&object_id=%s", appURL, url.PathEscape(orgName), experimentID)
 	}
 
 	return ""

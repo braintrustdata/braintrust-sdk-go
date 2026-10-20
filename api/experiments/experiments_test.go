@@ -353,3 +353,13 @@ func TestExperiments_EnsureNew(t *testing.T) {
 	// Names should start with the same prefix (API may append suffix to avoid conflicts)
 	assert.Contains(t, second.Name, "ensure-new-test", "EnsureNew experiment name should contain original name")
 }
+
+// TestExperiments_InsertEvents_Validation tests InsertEvents parameter validation
+func TestExperiments_InsertEvents_Validation(t *testing.T) {
+	t.Parallel()
+
+	api := New(vcr.GetHTTPSClient(t))
+	err := api.InsertEvents(context.Background(), "", []Event{{ID: "row"}})
+	require.ErrorContains(t, err, "required")
+	require.NoError(t, api.InsertEvents(context.Background(), "experiment", nil))
+}

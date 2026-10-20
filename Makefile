@@ -47,6 +47,7 @@ clean:
 
 test:
 	VCR_MODE=replay go test $(GO_TEST_FLAGS) ./...
+	VCR_MODE=replay go test $(GO_TEST_FLAGS) ./examples/internal/workflow-eval
 	for dir in $(NESTED_MODULE_DIRS); do VCR_MODE=replay go test -C $$dir $(GO_TEST_FLAGS) ./...; done
 	VCR_MODE=replay go test -C btx $(GO_TEST_FLAGS) ./...
 

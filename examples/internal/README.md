@@ -25,6 +25,8 @@ Comprehensive examples testing all features for each AI provider:
 
 ### Specialized Testing
 
+- **[workflow-eval/](workflow-eval/)** - Durable workflow tasks/scorers, provider batching, polling, webhook completion, and Redis restart
+
 - **[langchaingo-anthropic/](langchaingo-anthropic/)** - LangChainGo with Anthropic provider (uses forked langchaingo)
 - **[functions/](functions/)** - Functions API usage (loading tasks/scorers with FunctionOpts)
 - **[braintrust-json/](braintrust-json/)** - Braintrust API key discovery from environment or `.braintrust.json`

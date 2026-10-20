@@ -4,10 +4,28 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"strconv"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 )
+
+// InsertEvents inserts or merges experiment rows. Set ID to a stable row ID and
+// IsMerge to true when updating an existing row across process boundaries.
+func (a *API) InsertEvents(ctx context.Context, experimentID string, events []Event) error {
+	if experimentID == "" {
+		return fmt.Errorf("experiment ID is required")
+	}
+	if len(events) == 0 {
+		return nil
+	}
+	resp, err := a.client.POST(ctx, "/v1/experiment/"+url.PathEscape(experimentID)+"/insert", map[string]any{"events": events})
+	if err != nil {
+		return err
+	}
+	defer func() { _ = resp.Body.Close() }()
+	return nil
+}
 
 // New creates a new Experiments API client
 func New(client *https.Client) *API {
