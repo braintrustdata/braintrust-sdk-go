@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -127,4 +128,63 @@ func TestExitCode_BatchFailuresExitNonZero(t *testing.T) {
 	assert.Equal(t, 0, r.exitCode())
 	r.allPassed = false
 	assert.Equal(t, 1, r.exitCode())
+}
+
+func TestBatchMode_MaxConcurrencyRunsEvaluatorsInParallel(t *testing.T) {
+	r, _ := newTestRunner(t, map[string]string{
+		"BT_EVAL_NO_SEND_LOGS":    "1",
+		"BT_EVAL_MAX_CONCURRENCY": "2",
+	})
+	started := make(chan string, 3)
+	release := make(chan struct{})
+	for _, name := range []string{"one", "two", "three"} {
+		r.order = append(r.order, name)
+		r.evaluators[name] = &concurrencyTestEval{started: started, release: release}
+	}
+
+	done := make(chan error, 1)
+	go func() { done <- r.runBatch(context.Background()) }()
+
+	// Two evaluators must start while the first is still blocked. The old
+	// sequential loop times out here, which demonstrates the flag had no effect.
+	for i := 0; i < 2; i++ {
+		select {
+		case <-started:
+		case <-time.After(500 * time.Millisecond):
+			close(release)
+			require.FailNow(t, "expected two evaluators to run concurrently")
+		}
+	}
+
+	select {
+	case name := <-started:
+		t.Fatalf("evaluator %q started before a worker was released", name)
+	default:
+	}
+
+	close(release)
+	select {
+	case err := <-done:
+		require.NoError(t, err)
+	case <-time.After(2 * time.Second):
+		t.Fatal("batch run did not finish")
+	}
+	assert.Len(t, started, 1, "the third evaluator should start after a worker is released")
+}
+
+type concurrencyTestEval struct {
+	started chan<- string
+	release <-chan struct{}
+}
+
+func (e *concurrencyTestEval) scorerNames() []string                 { return nil }
+func (e *concurrencyTestEval) parameterSchema() eval.ParameterSchema { return nil }
+func (e *concurrencyTestEval) resolveParams(map[string]any) (eval.Parameters, error) {
+	return nil, nil
+}
+func (e *concurrencyTestEval) projectName() string { return "" }
+func (e *concurrencyTestEval) run(_ context.Context, cfg *evalRunConfig) error {
+	e.started <- cfg.req.Name
+	<-e.release
+	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 )
 
 // runEval handles one playground request: the eval to run, its data and its
@@ -96,29 +97,63 @@ func (r *Runner) runBatch(ctx context.Context) error {
 	}
 	defer session.Close()
 
-	for _, name := range selected {
-		parameters, err := r.evaluators[name].resolveParams(nil)
-		if err == nil {
-			err = r.evaluators[name].run(ctx, &evalRunConfig{
-				req:            &EvalRequest{Name: name},
-				session:        session,
-				sink:           sink,
-				tracerProvider: r.tracerProvider,
-				parameters:     parameters,
-				noSendLogs:     r.env.NoSendLogs,
-			})
-		}
-		if err != nil {
-			r.allPassed = false
-			r.logger.Error("eval failed", "eval", name, "error", err)
-			if err := sink.send("error", errorEvent{Message: err.Error(), Status: 500}); err != nil {
-				r.logger.Warn("could not report eval failure", "error", err)
-			}
-			if r.env.TerminateOnFailure {
-				return nil
-			}
-		}
+	concurrency := r.env.MaxConcurrency
+	if concurrency < 1 {
+		concurrency = 1
 	}
+	if concurrency > len(selected) {
+		concurrency = len(selected)
+	}
+
+	// Workers claim evals only when ready, so terminate-on-failure prevents
+	// additional evals from starting once a failure is observed. Evals already
+	// running at that point are allowed to finish.
+	var mu sync.Mutex
+	next := 0
+	stopped := false
+	var workers sync.WaitGroup
+	workers.Add(concurrency)
+	for i := 0; i < concurrency; i++ {
+		go func() {
+			defer workers.Done()
+			for {
+				mu.Lock()
+				if stopped || next >= len(selected) {
+					mu.Unlock()
+					return
+				}
+				name := selected[next]
+				next++
+				mu.Unlock()
+
+				parameters, err := r.evaluators[name].resolveParams(nil)
+				if err == nil {
+					err = r.evaluators[name].run(ctx, &evalRunConfig{
+						req:            &EvalRequest{Name: name},
+						session:        session,
+						sink:           sink,
+						tracerProvider: r.tracerProvider,
+						parameters:     parameters,
+						noSendLogs:     r.env.NoSendLogs,
+					})
+				}
+				if err != nil {
+					mu.Lock()
+					r.allPassed = false
+					if r.env.TerminateOnFailure {
+						stopped = true
+					}
+					mu.Unlock()
+
+					r.logger.Error("eval failed", "eval", name, "error", err)
+					if err := sink.send("error", errorEvent{Message: err.Error(), Status: 500}); err != nil {
+						r.logger.Warn("could not report eval failure", "error", err)
+					}
+				}
+			}
+		}()
+	}
+	workers.Wait()
 
 	return nil
 }
