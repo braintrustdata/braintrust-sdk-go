@@ -572,3 +572,37 @@ func TestWorkflowScorerItems(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, WorkflowRunCompleted, r.Status)
 }
+
+func TestWorkflowSubmitIsolatesCaseState(t *testing.T) {
+	ctx := context.Background()
+	scorer := func(name string, check func(WorkflowScorerItem[int, int])) WorkflowScorer[int, int] {
+		return WorkflowScorer[int, int]{Name: name,
+			Submit: func(ctx context.Context, item WorkflowScorerItem[int, int], info WorkflowSubmissionContext) (json.RawMessage, error) {
+				check(item)
+				return json.RawMessage(`{}`), nil
+			},
+			Completion: WorkflowCompletion{Poll: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowPollResult, error) {
+				return WorkflowPollResult{Status: WorkflowComplete}, nil
+			}},
+			Collect: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (Scores, error) { return S(1), nil },
+		}
+	}
+	// Sequential callbacks make the leak deterministic; with concurrency the same
+	// sharing is a concurrent map write.
+	w := WorkflowEval[int, int]{Name: "isolation", Store: NewWorkflowEvalMemoryStore(), MaxConcurrency: 1,
+		Task: T(func(ctx context.Context, input int) (int, error) { return input, nil }),
+		WorkflowScorers: []WorkflowScorerDefinition[int, int]{
+			scorer("first", func(item WorkflowScorerItem[int, int]) { item.Metadata["leaked"] = true }),
+			scorer("second", func(item WorkflowScorerItem[int, int]) {
+				require.NotContains(t, item.Metadata, "leaked", "a callback's mutation reached another stage")
+			}),
+		}}
+	r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1, Metadata: Metadata{"source": "dataset"}}})})
+	require.NoError(t, err)
+	r, err = w.Poll(ctx, r.RunID)
+	require.NoError(t, err)
+	require.Equal(t, WorkflowRunCompleted, r.Status)
+	run, _, err := w.load(ctx, r.RunID)
+	require.NoError(t, err)
+	require.Equal(t, Metadata{"source": "dataset"}, run.Cases[0].Item.Metadata)
+}

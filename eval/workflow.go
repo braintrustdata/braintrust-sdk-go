@@ -477,10 +477,12 @@ func (w *WorkflowEval[I, R]) submitPending(ctx context.Context, run *workflowRun
 			items[j] = WorkflowBatchItem[workflowCase[I, R]]{CustomID: sub.ID + "_" + strconv.Itoa(j), Item: run.Cases[index]}
 		}
 		// Callbacks own their arguments, including maps. Isolate concurrent stages.
+		// Decode into a fresh slice: decoding reuses the shared maps in items.
 		encoded, e := json.Marshal(items)
 		if e != nil {
 			return e
 		}
+		items = nil
 		if e = json.Unmarshal(encoded, &items); e != nil {
 			return e
 		}
