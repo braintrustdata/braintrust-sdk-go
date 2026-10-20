@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
+	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -697,4 +699,80 @@ func TestWorkflowStartRegistersExperimentBeforeWritingCases(t *testing.T) {
 	_, err := w.Start(ctx, WorkflowStartOpts[int, int]{Dataset: NewDataset([]Case[int, int]{{Input: 1}, {Input: 2}})})
 	require.ErrorContains(t, err, "project name is required")
 	require.Zero(t, len(store.values), "a failed registration must not leave orphaned case records")
+}
+
+// overlapStore wraps the memory store and records whether two case reads or
+// writes were in flight at once. Each waits briefly for a second to arrive.
+type overlapStore struct {
+	*WorkflowEvalMemoryStore
+	prefix   string
+	mu       sync.Mutex
+	inFlight int
+	arrived  chan struct{}
+	overlap  bool
+}
+
+func newOverlapStore(name string) *overlapStore {
+	return &overlapStore{WorkflowEvalMemoryStore: NewWorkflowEvalMemoryStore(), prefix: workflowKey(name, "case"), arrived: make(chan struct{})}
+}
+
+func (s *overlapStore) wait(key string) {
+	if !strings.HasPrefix(key, s.prefix) {
+		return
+	}
+	s.mu.Lock()
+	s.inFlight++
+	if s.inFlight == 2 {
+		s.overlap = true
+		close(s.arrived)
+	}
+	arrived := s.arrived
+	s.mu.Unlock()
+	select {
+	case <-arrived:
+	case <-time.After(time.Second):
+	}
+	s.mu.Lock()
+	s.inFlight--
+	s.mu.Unlock()
+}
+
+func (s *overlapStore) reset() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.overlap, s.arrived = false, make(chan struct{})
+}
+
+func (s *overlapStore) Read(ctx context.Context, key string) ([]byte, error) {
+	s.wait(key)
+	return s.WorkflowEvalMemoryStore.Read(ctx, key)
+}
+
+func (s *overlapStore) Write(ctx context.Context, key string, value []byte) error {
+	s.wait(key)
+	return s.WorkflowEvalMemoryStore.Write(ctx, key, value)
+}
+
+func TestWorkflowCaseStoreAccessIsConcurrent(t *testing.T) {
+	ctx := context.Background()
+	store := newOverlapStore("concurrent-io")
+	w := WorkflowEval[int, int]{Name: "concurrent-io", Store: store, Task: WorkflowTask[int, int]{
+		Submit: func(context.Context, WorkflowTaskItem[int, int], WorkflowSubmissionContext) (json.RawMessage, error) {
+			return json.RawMessage(`{}`), nil
+		},
+		Completion: WorkflowCompletion{Poll: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowPollResult, error) {
+			return WorkflowPollResult{Status: WorkflowPending}, nil
+		}},
+		Collect: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowTaskResult[int], error) {
+			return WorkflowTaskResult[int]{}, nil
+		},
+	}}
+	r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}, {Input: 2}, {Input: 3}})})
+	require.NoError(t, err)
+	require.True(t, store.overlap, "Start must write cases concurrently")
+	store.reset()
+	r, err = w.Status(ctx, r.RunID)
+	require.NoError(t, err)
+	require.Equal(t, 3, r.PendingPoll)
+	require.True(t, store.overlap, "loading a run must read cases concurrently")
 }

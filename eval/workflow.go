@@ -260,12 +260,12 @@ func (w *WorkflowEval[I, R]) Start(ctx context.Context, opts WorkflowStartOpts[I
 		for trial := 0; trial < count; trial++ {
 			id := uuid.NewString()
 			record := workflowCase[I, R]{Item: WorkflowTaskItem[I, R]{ID: id, CaseID: caseID, Input: c.Input, Expected: c.Expected, Metadata: maps.Clone(c.Metadata), Tags: slices.Clone(c.Tags), Parameters: params, TrialIndex: trial}, DatasetID: opts.Dataset.ID(), DatasetRecordID: c.ID, Done: map[string]bool{}, Scores: map[string]Scores{}, Errors: map[string]string{}, Classifications: map[string][]map[string]any{}, ClassifierErrors: map[string]string{}, StartedAt: time.Now().UTC(), LogPending: true}
-			if err := w.saveCase(ctx, run.ID, &record); err != nil {
-				return nil, err
-			}
 			run.CaseIDs = append(run.CaseIDs, id)
 			run.Cases = append(run.Cases, record)
 		}
+	}
+	if err := w.parallel(ctx, len(run.Cases), func(i int) error { return w.saveCase(ctx, run.ID, &run.Cases[i]) }); err != nil {
+		return nil, err
 	}
 	if err := w.saveRun(ctx, run); err != nil {
 		return nil, err
@@ -426,19 +426,24 @@ func (w *WorkflowEval[I, R]) load(ctx context.Context, id string) (*workflowRun[
 	if run.Version != 1 || run.Definition != w.definition(stages) {
 		return nil, nil, errors.New("workflow definition or state version changed")
 	}
-	for _, id := range run.CaseIDs {
-		data, err = w.Store.Read(ctx, workflowKey(w.Name, "case", run.ID, id))
-		if err != nil {
-			return nil, nil, err
+	// Report the first failure: expiry typically affects every case at once.
+	run.Cases = make([]workflowCase[I, R], len(run.CaseIDs))
+	errs := make([]error, len(run.CaseIDs))
+	err = w.parallel(ctx, len(run.CaseIDs), func(i int) error {
+		data, err := w.Store.Read(ctx, workflowKey(w.Name, "case", run.ID, run.CaseIDs[i]))
+		if err == nil && data == nil {
+			err = errors.New("workflow case state expired")
 		}
-		if data == nil {
-			return nil, nil, errors.New("workflow case state expired")
+		if err == nil {
+			err = json.Unmarshal(data, &run.Cases[i])
 		}
-		var c workflowCase[I, R]
-		if err = json.Unmarshal(data, &c); err != nil {
-			return nil, nil, err
+		errs[i] = err
+		return nil
+	})
+	for _, e := range append([]error{err}, errs...) {
+		if e != nil {
+			return nil, nil, e
 		}
-		run.Cases = append(run.Cases, c)
 	}
 	return run, stages, nil
 }
