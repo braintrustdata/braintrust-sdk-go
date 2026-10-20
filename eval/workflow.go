@@ -282,25 +282,30 @@ func (w *WorkflowEval[I, R]) Poll(ctx context.Context, runID string) (*WorkflowR
 		return w.finish(ctx, run, err)
 	}
 	results := make([]WorkflowPollResult, len(run.Submissions))
+	pollErrs := make([]error, len(run.Submissions))
 	err = w.parallel(ctx, len(run.Submissions), func(i int) error {
 		sub := run.Submissions[i]
 		stage := stages[sub.Stage]
 		if sub.Done || stage.completion.Poll == nil {
 			return nil
 		}
-		result, err := stage.completion.Poll(ctx, sub.Data, WorkflowSubmissionContext{RunID: run.ID, SubmissionID: sub.ID})
-		results[i] = result
-		return err
+		results[i], pollErrs[i] = stage.completion.Poll(ctx, sub.Data, WorkflowSubmissionContext{RunID: run.ID, SubmissionID: sub.ID})
+		return nil
 	})
 	if err != nil {
 		return w.finish(ctx, run, err)
 	}
 	// A failed submission stays outstanding, so every later poll reports it
 	// again and the run cannot complete, matching the Python and JS SDKs.
-	// Independent submissions still advance before the failure is returned.
+	// Independent submissions still advance before the failure is returned,
+	// including when a Poll callback itself errors.
 	var failures []error
 	for i, sub := range run.Submissions {
 		if sub.Done || stages[sub.Stage].completion.Poll == nil {
+			continue
+		}
+		if pollErrs[i] != nil {
+			failures = append(failures, fmt.Errorf("workflow submission %s: %w", sub.ID, pollErrs[i]))
 			continue
 		}
 		switch results[i].Status {

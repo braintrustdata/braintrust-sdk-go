@@ -606,3 +606,27 @@ func TestWorkflowSubmitIsolatesCaseState(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, Metadata{"source": "dataset"}, run.Cases[0].Item.Metadata)
 }
+
+func TestWorkflowPollErrorDoesNotBlockOtherSubmissions(t *testing.T) {
+	ctx := context.Background()
+	w := WorkflowEval[int, int]{Name: "poll-error", Store: NewWorkflowEvalMemoryStore(), Task: WorkflowTask[int, int]{
+		Submit: func(ctx context.Context, item WorkflowTaskItem[int, int], info WorkflowSubmissionContext) (json.RawMessage, error) {
+			return json.Marshal(item.Input)
+		},
+		Completion: WorkflowCompletion{Poll: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (WorkflowPollResult, error) {
+			if string(data) == "1" {
+				return WorkflowPollResult{}, errors.New("network timeout")
+			}
+			return WorkflowPollResult{Status: WorkflowComplete}, nil
+		}},
+		Collect: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (WorkflowTaskResult[int], error) {
+			return WorkflowTaskResult[int]{Output: 2}, nil
+		},
+	}}
+	r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}, {Input: 2}})})
+	require.NoError(t, err)
+	r, err = w.Poll(ctx, r.RunID)
+	require.ErrorContains(t, err, "network timeout")
+	require.Equal(t, 1, r.Completed, "a poll error for one submission must not block the others")
+	require.Equal(t, 1, r.PendingPoll)
+}
