@@ -3,6 +3,7 @@ package evalrunner
 import (
 	"encoding/json"
 	"regexp"
+	"strconv"
 
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 )
@@ -53,6 +54,7 @@ type env struct {
 	JSONL              bool // BT_EVAL_JSONL: one JSON summary per eval on stdout
 	NoSendLogs         bool // BT_EVAL_LOCAL or BT_EVAL_NO_SEND_LOGS
 	TerminateOnFailure bool // BT_EVAL_TERMINATE_ON_FAILURE: stop at the first failing eval
+	MaxConcurrency     int  // BT_EVAL_MAX_CONCURRENCY: registered evals to run at once
 
 	// Filters comes from BT_EVAL_FILTER_PARSED (bt's --filter flags).
 	Filters []evalFilter
@@ -70,8 +72,17 @@ func readEnv(lookup func(string) string) env {
 		JSONL:              envFlag(lookup, "BT_EVAL_JSONL"),
 		NoSendLogs:         envFlag(lookup, "BT_EVAL_LOCAL") || envFlag(lookup, "BT_EVAL_NO_SEND_LOGS"),
 		TerminateOnFailure: envFlag(lookup, "BT_EVAL_TERMINATE_ON_FAILURE"),
+		MaxConcurrency:     envPositiveInt(lookup, "BT_EVAL_MAX_CONCURRENCY", 1),
 		Filters:            parseFilters(lookup("BT_EVAL_FILTER_PARSED"), nil),
 	}
+}
+
+func envPositiveInt(lookup func(string) string, name string, fallback int) int {
+	value, err := strconv.Atoi(lookup(name))
+	if err != nil || value <= 0 {
+		return fallback
+	}
+	return value
 }
 
 // Mode reports what this process should do.
