@@ -722,7 +722,7 @@ func (s *overlapStore) wait(key string) {
 	}
 	s.mu.Lock()
 	s.inFlight++
-	if s.inFlight == 2 {
+	if s.inFlight == 2 && !s.overlap {
 		s.overlap = true
 		close(s.arrived)
 	}
