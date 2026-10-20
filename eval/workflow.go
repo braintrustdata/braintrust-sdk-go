@@ -507,38 +507,48 @@ func (w *WorkflowEval[I, R]) submitPending(ctx context.Context, run *workflowRun
 	if saveErr := w.saveRun(ctx, run); saveErr != nil {
 		return errors.Join(err, saveErr)
 	}
+	// Register each webhook submission independently so one failure neither
+	// hides another error nor leaves later submissions unregistered.
+	errs := []error{err}
 	for _, sub := range run.Submissions {
 		stage := stages[sub.Stage]
 		if sub.Done || len(sub.Data) == 0 || stage.completion.GetExternalID == nil {
 			continue
 		}
-		id, e := stage.completion.GetExternalID(ctx, sub.Data, WorkflowSubmissionContext{RunID: run.ID, SubmissionID: sub.ID})
-		if e != nil {
-			return errors.Join(err, e)
+		if e := w.registerExternalID(ctx, run, sub, stage); e != nil {
+			errs = append(errs, fmt.Errorf("workflow submission %s: %w", sub.ID, e))
 		}
-		if id == "" {
-			return errors.New("empty provider external ID")
-		}
-		ref, _ := json.Marshal(WorkflowSubmissionResult{RunID: run.ID, SubmissionID: sub.ID})
-		stored, _, e := w.Store.GetOrSet(ctx, workflowKey(w.Name, "external-run", run.ID, id), ref)
-		if e != nil {
-			return errors.Join(err, e)
-		}
-		if string(stored) != string(ref) {
-			return errors.New("external ID identifies multiple submissions in the same run")
-		}
-		stored, _, e = w.Store.GetOrSet(ctx, workflowKey(w.Name, "external", id), ref)
-		if e != nil {
-			return errors.Join(err, e)
-		}
-		if string(stored) != string(ref) {
-			if e = w.Store.Write(ctx, workflowKey(w.Name, "external", id), []byte(`{}`)); e != nil {
-				return errors.Join(err, e)
-			}
-		}
-		sub.ExternalID = id
 	}
-	return errors.Join(err, w.saveRun(ctx, run))
+	return errors.Join(append(errs, w.saveRun(ctx, run))...)
+}
+
+func (w *WorkflowEval[I, R]) registerExternalID(ctx context.Context, run *workflowRun[I, R], sub *workflowSubmission, stage workflowStage[I, R]) error {
+	id, err := stage.completion.GetExternalID(ctx, sub.Data, WorkflowSubmissionContext{RunID: run.ID, SubmissionID: sub.ID})
+	if err != nil {
+		return err
+	}
+	if id == "" {
+		return errors.New("empty provider external ID")
+	}
+	ref, _ := json.Marshal(WorkflowSubmissionResult{RunID: run.ID, SubmissionID: sub.ID})
+	stored, _, err := w.Store.GetOrSet(ctx, workflowKey(w.Name, "external-run", run.ID, id), ref)
+	if err != nil {
+		return err
+	}
+	if string(stored) != string(ref) {
+		return errors.New("external ID identifies multiple submissions in the same run")
+	}
+	stored, _, err = w.Store.GetOrSet(ctx, workflowKey(w.Name, "external", id), ref)
+	if err != nil {
+		return err
+	}
+	if string(stored) != string(ref) {
+		if err = w.Store.Write(ctx, workflowKey(w.Name, "external", id), []byte(`{}`)); err != nil {
+			return err
+		}
+	}
+	sub.ExternalID = id
+	return nil
 }
 
 func (w *WorkflowEval[I, R]) advance(ctx context.Context, run *workflowRun[I, R], stages []workflowStage[I, R]) error {

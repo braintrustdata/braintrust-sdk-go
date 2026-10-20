@@ -655,3 +655,33 @@ func TestWorkflowSubmitErrorDoesNotBlockPolling(t *testing.T) {
 	require.Equal(t, 1, r.Completed, "a failing Submit must not block polling submitted work")
 	require.Equal(t, WorkflowRunWaiting, r.Status)
 }
+
+func TestWorkflowRegistrationErrorsAreIndependent(t *testing.T) {
+	ctx := context.Background()
+	w := WorkflowEval[int, int]{Name: "registration", Store: NewWorkflowEvalMemoryStore(), MaxConcurrency: 1, Task: WorkflowTask[int, int]{
+		Submit: func(ctx context.Context, item WorkflowTaskItem[int, int], info WorkflowSubmissionContext) (json.RawMessage, error) {
+			if item.Input == 3 {
+				return nil, errors.New("invalid request")
+			}
+			return json.Marshal(item.Input)
+		},
+		Completion: WorkflowCompletion{GetExternalID: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (string, error) {
+			if string(data) == "1" {
+				return "", nil
+			}
+			return "external-" + string(data), nil
+		}},
+		Collect: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (WorkflowTaskResult[int], error) {
+			return WorkflowTaskResult[int]{Output: 4}, nil
+		},
+	}}
+	_, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}, {Input: 2}, {Input: 3}})})
+	require.ErrorContains(t, err, "empty provider external ID")
+	require.ErrorContains(t, err, "invalid request", "registration errors must not hide submit errors")
+	// The broken submissions are retried and still fail, but the registered one
+	// is found and collected.
+	r, err := w.ProcessSubmissionResult(ctx, WorkflowSubmissionResult{ExternalID: "external-2"})
+	require.ErrorContains(t, err, "invalid request")
+	require.NotContains(t, err.Error(), "unknown workflow external ID", "one bad registration must not skip the others")
+	require.Equal(t, 1, r.Completed)
+}
