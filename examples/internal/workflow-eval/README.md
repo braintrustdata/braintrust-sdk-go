@@ -68,6 +68,10 @@ worker; this CLI is not a webhook verification server.
   Duplicate IDs within one collection and unknown IDs are errors. Missing results
   at successful collection completion fail those items. Scorer failures preserve
   healthy scores, and failed tasks skip their scoring/classification stages.
+- A poll returning `WorkflowFailed` makes `Poll` return that error on every
+  later call, and the run never completes, matching Python and JS. Start a new
+  run to recover. This example reports failed, expired, and cancelled OpenAI
+  batches as complete instead, so requests without results are recorded as failed.
 - A collection callback can be invoked more than once; avoid non-idempotent side
   effects. Successful ordinary stages are also checkpointed, but can repeat after
   a crash before persistence.
@@ -79,7 +83,7 @@ worker; this CLI is not a webhook verification server.
 - Configure Redis retention to exceed the entire run and webhook retry window.
   Missing/expired state cannot be recovered by the SDK. Memory stores do not
   survive process exit.
-- `MaxWait` flushes scorer batches only when the workflow advances, with no
+- `MaxWait` (scorer batches only) flushes partial batches only when the workflow advances, with no
   background timer. Zero waits for a full batch or the final remaining items.
 - `Status` reads progress without advancing it. Completed includes failed cases;
   Failed counts cases with any stage failure. A completed run can have failures.

@@ -200,10 +200,11 @@ func completion(client openai.Client, webhook bool) eval.WorkflowCompletion {
 			return eval.WorkflowPollResult{}, err
 		}
 		switch batch.Status {
-		case "completed":
+		// Report terminal batches as complete so collection records requests
+		// without results as failed and the run finishes. WorkflowFailed would
+		// make every later Poll return an error and block completion.
+		case "completed", "failed", "expired", "cancelled":
 			return eval.WorkflowPollResult{Status: eval.WorkflowComplete}, nil
-		case "failed", "expired", "cancelled":
-			return eval.WorkflowPollResult{Status: eval.WorkflowFailed, Error: fmt.Errorf("batch %s: %s", id, batch.Status)}, nil
 		default:
 			return eval.WorkflowPollResult{Status: eval.WorkflowPending}, nil
 		}

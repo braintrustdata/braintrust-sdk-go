@@ -23,7 +23,11 @@ const (
 	WorkflowPending WorkflowPollStatus = "pending"
 	// WorkflowComplete means results can be collected.
 	WorkflowComplete WorkflowPollStatus = "complete"
-	// WorkflowFailed means the entire provider submission failed.
+	// WorkflowFailed means the entire provider submission failed. Poll returns
+	// the error and rechecks the submission on every later call, so a permanent
+	// failure blocks completion; start a new run to recover. To finish a run
+	// despite a failed provider batch, report WorkflowComplete and let Collect
+	// omit the results so those items are recorded as failed.
 	WorkflowFailed WorkflowPollStatus = "failed"
 )
 

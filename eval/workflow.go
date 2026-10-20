@@ -264,7 +264,8 @@ func (w *WorkflowEval[I, R]) Start(ctx context.Context, opts WorkflowStartOpts[I
 }
 
 // Poll checks pending poll-mode submissions once and advances ready stages.
-// It also retries incomplete submissions and collection checkpoints.
+// It also retries incomplete submissions and collection checkpoints. Submissions
+// reporting WorkflowFailed stay pending and are returned as errors.
 func (w *WorkflowEval[I, R]) Poll(ctx context.Context, runID string) (*WorkflowResult, error) {
 	run, stages, err := w.load(ctx, runID)
 	if err != nil {
@@ -287,6 +288,10 @@ func (w *WorkflowEval[I, R]) Poll(ctx context.Context, runID string) (*WorkflowR
 	if err != nil {
 		return w.finish(ctx, run, err)
 	}
+	// A failed submission stays outstanding, so every later poll reports it
+	// again and the run cannot complete, matching the Python and JS SDKs.
+	// Independent submissions still advance before the failure is returned.
+	var failures []error
 	for i, sub := range run.Submissions {
 		if sub.Done || stages[sub.Stage].completion.Poll == nil {
 			continue
@@ -294,22 +299,22 @@ func (w *WorkflowEval[I, R]) Poll(ctx context.Context, runID string) (*WorkflowR
 		switch results[i].Status {
 		case WorkflowPending:
 		case WorkflowComplete:
-			err = w.collect(ctx, run, sub, stages[sub.Stage], nil)
+			err = w.collect(ctx, run, sub, stages[sub.Stage])
 		case WorkflowFailed:
 			failure := results[i].Error
 			if failure == nil {
 				failure = errors.New("provider submission failed")
 			}
-			err = w.collect(ctx, run, sub, stages[sub.Stage], failure)
+			failures = append(failures, fmt.Errorf("workflow submission %s: %w", sub.ID, failure))
 		default:
 			err = fmt.Errorf("invalid provider poll status %q", results[i].Status)
 		}
 		if err != nil {
-			return w.finish(ctx, run, err)
+			return w.finish(ctx, run, errors.Join(append(failures, err)...))
 		}
 	}
 	err = w.advance(ctx, run, stages)
-	return w.finish(ctx, run, err)
+	return w.finish(ctx, run, errors.Join(append(failures, err)...))
 }
 
 // ProcessSubmissionResult collects a completed provider operation and advances
@@ -354,7 +359,7 @@ func (w *WorkflowEval[I, R]) ProcessSubmissionResult(ctx context.Context, ref Wo
 			if len(sub.Data) == 0 {
 				return w.finish(ctx, run, errors.New("provider submission has not been persisted"))
 			}
-			if err = w.collect(ctx, run, sub, stages[sub.Stage], nil); err == nil {
+			if err = w.collect(ctx, run, sub, stages[sub.Stage]); err == nil {
 				err = w.advance(ctx, run, stages)
 			}
 			return w.finish(ctx, run, err)
@@ -602,7 +607,7 @@ func (w *WorkflowEval[I, R]) advance(ctx context.Context, run *workflowRun[I, R]
 	return w.submitPending(ctx, run, stages)
 }
 
-func (w *WorkflowEval[I, R]) collect(ctx context.Context, run *workflowRun[I, R], sub *workflowSubmission, stage workflowStage[I, R], failure error) error {
+func (w *WorkflowEval[I, R]) collect(ctx context.Context, run *workflowRun[I, R], sub *workflowSubmission, stage workflowStage[I, R]) error {
 	if sub.Done {
 		return nil
 	}
@@ -610,40 +615,34 @@ func (w *WorkflowEval[I, R]) collect(ctx context.Context, run *workflowRun[I, R]
 	for i, index := range sub.Cases {
 		indexes[sub.ID+"_"+strconv.Itoa(i)] = index
 	}
-	if failure == nil {
-		seen := make(map[string]bool, len(indexes))
-		err := stage.collect(ctx, sub.Data, WorkflowSubmissionContext{RunID: run.ID, SubmissionID: sub.ID}, func(id string, value workflowValue[R], itemErr error) error {
-			index, ok := indexes[id]
-			if !ok {
-				return fmt.Errorf("unknown workflow custom ID %q", id)
-			}
-			if seen[id] {
-				return fmt.Errorf("duplicate workflow custom ID %q", id)
-			}
-			seen[id] = true
-			c := &run.Cases[index]
-			if c.Done[stage.name] {
-				return nil
-			}
-			if err := ctx.Err(); err != nil {
-				return err
-			}
-			return w.apply(ctx, run, c, stage, value, itemErr, sub.ID)
-		})
-		if err != nil {
+	seen := make(map[string]bool, len(indexes))
+	err := stage.collect(ctx, sub.Data, WorkflowSubmissionContext{RunID: run.ID, SubmissionID: sub.ID}, func(id string, value workflowValue[R], itemErr error) error {
+		index, ok := indexes[id]
+		if !ok {
+			return fmt.Errorf("unknown workflow custom ID %q", id)
+		}
+		if seen[id] {
+			return fmt.Errorf("duplicate workflow custom ID %q", id)
+		}
+		seen[id] = true
+		c := &run.Cases[index]
+		if c.Done[stage.name] {
+			return nil
+		}
+		if err := ctx.Err(); err != nil {
 			return err
 		}
+		return w.apply(ctx, run, c, stage, value, itemErr, sub.ID)
+	})
+	if err != nil {
+		return err
 	}
 	for _, index := range sub.Cases {
 		c := &run.Cases[index]
 		if c.Done[stage.name] {
 			continue
 		}
-		itemErr := failure
-		if itemErr == nil {
-			itemErr = errors.New("missing result in provider batch")
-		}
-		if err := w.apply(ctx, run, c, stage, workflowValue[R]{}, itemErr, sub.ID); err != nil {
+		if err := w.apply(ctx, run, c, stage, workflowValue[R]{}, errors.New("missing result in provider batch"), sub.ID); err != nil {
 			return err
 		}
 	}

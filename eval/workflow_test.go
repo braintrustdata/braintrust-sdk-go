@@ -507,3 +507,38 @@ func TestWorkflowScorerItemTags(t *testing.T) {
 	require.Equal(t, WorkflowRunCompleted, r.Status)
 	require.Equal(t, []string{"collected"}, got[1], "scorers see tags after the task replaces them")
 }
+
+func TestWorkflowFailedPollBlocksCompletion(t *testing.T) {
+	ctx := context.Background()
+	failedPolls := 0
+	w := WorkflowEval[int, int]{Name: "failed-poll", Store: NewWorkflowEvalMemoryStore(), Task: WorkflowTask[int, int]{
+		Submit: func(ctx context.Context, item WorkflowTaskItem[int, int], info WorkflowSubmissionContext) (json.RawMessage, error) {
+			return json.Marshal(item.Input)
+		},
+		Completion: WorkflowCompletion{Poll: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (WorkflowPollResult, error) {
+			if string(data) == "1" {
+				failedPolls++
+				return WorkflowPollResult{Status: WorkflowFailed, Error: errors.New("batch expired")}, nil
+			}
+			return WorkflowPollResult{Status: WorkflowComplete}, nil
+		}},
+		Collect: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (WorkflowTaskResult[int], error) {
+			var input int
+			err := json.Unmarshal(data, &input)
+			return WorkflowTaskResult[int]{Output: input * 2}, err
+		},
+	}}
+	r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}, {Input: 2}})})
+	require.NoError(t, err)
+	// As in Python and JS, a failed submission raises on every poll and the run
+	// never completes, while independent submissions still advance.
+	for attempt := 1; attempt <= 2; attempt++ {
+		r, err = w.Poll(ctx, r.RunID)
+		require.ErrorContains(t, err, "batch expired")
+		require.Equal(t, WorkflowRunWaiting, r.Status)
+		require.Equal(t, 1, r.Completed)
+		require.Equal(t, 0, r.Failed)
+		require.Equal(t, 1, r.PendingPoll)
+		require.Equal(t, attempt, failedPolls)
+	}
+}
