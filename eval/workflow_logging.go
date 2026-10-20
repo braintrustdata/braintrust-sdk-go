@@ -10,7 +10,7 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/api/experiments"
 )
 
-func (w *WorkflowEval[I, R]) logRun(ctx context.Context, run *workflowRun[I, R]) error {
+func (w *WorkflowEval[I, R]) logRun(ctx context.Context, run *workflowRun[I, R], stages []workflowStage[I, R]) error {
 	if w.evaluator == nil || w.evaluator.api == nil {
 		return errors.New("resuming a logged workflow requires a Braintrust evaluator")
 	}
@@ -62,7 +62,7 @@ func (w *WorkflowEval[I, R]) logRun(ctx context.Context, run *workflowRun[I, R])
 		if !c.FinishedAt.IsZero() {
 			metrics["end"] = float64(c.FinishedAt.UnixNano()) / 1e9
 		}
-		event := experiments.Event{ID: c.Item.ID, IsMerge: &merge, SpanID: spanID.String(), RootSpanID: traceID.String(), SpanAttributes: map[string]any{"name": "eval", "type": "eval"}, Input: c.Item.Input, Expected: c.Item.Expected, Metadata: metadata, Tags: c.Item.Tags, Metrics: metrics, Scores: w.caseScores(c), Classifications: c.Classifications}
+		event := experiments.Event{ID: c.Item.ID, IsMerge: &merge, SpanID: spanID.String(), RootSpanID: traceID.String(), SpanAttributes: map[string]any{"name": "eval", "type": "eval"}, Input: c.Item.Input, Expected: c.Item.Expected, Metadata: metadata, Tags: c.Item.Tags, Metrics: metrics, Scores: w.caseScores(c, stages), Classifications: c.Classifications}
 		if c.DatasetID != "" {
 			event.DatasetRecordID = c.DatasetRecordID
 			event.DatasetID = c.DatasetID

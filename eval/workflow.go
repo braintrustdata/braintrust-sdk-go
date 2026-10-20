@@ -271,7 +271,7 @@ func (w *WorkflowEval[I, R]) Start(ctx context.Context, opts WorkflowStartOpts[I
 		return nil, err
 	}
 	err = w.advance(ctx, run, stages)
-	return w.finish(ctx, run, err)
+	return w.finish(ctx, run, stages, err)
 }
 
 // Poll checks pending poll-mode submissions once and advances ready stages.
@@ -297,7 +297,7 @@ func (w *WorkflowEval[I, R]) Poll(ctx context.Context, runID string) (*WorkflowR
 		return nil
 	})
 	if err != nil {
-		return w.finish(ctx, run, errors.Join(submitErr, err))
+		return w.finish(ctx, run, stages, errors.Join(submitErr, err))
 	}
 	// A failed submission stays outstanding, so every later poll reports it
 	// again and the run cannot complete, matching the Python and JS SDKs.
@@ -315,7 +315,7 @@ func (w *WorkflowEval[I, R]) Poll(ctx context.Context, runID string) (*WorkflowR
 		switch results[i].Status {
 		case WorkflowPending:
 		case WorkflowComplete:
-			err = w.collect(ctx, run, sub, stages[sub.Stage])
+			err = w.collect(ctx, run, stages, sub)
 		case WorkflowFailed:
 			failure := results[i].Error
 			if failure == nil {
@@ -326,11 +326,11 @@ func (w *WorkflowEval[I, R]) Poll(ctx context.Context, runID string) (*WorkflowR
 			err = fmt.Errorf("invalid provider poll status %q", results[i].Status)
 		}
 		if err != nil {
-			return w.finish(ctx, run, errors.Join(append(failures, submitErr, err)...))
+			return w.finish(ctx, run, stages, errors.Join(append(failures, submitErr, err)...))
 		}
 	}
 	err = w.advance(ctx, run, stages)
-	return w.finish(ctx, run, errors.Join(append(failures, err)...))
+	return w.finish(ctx, run, stages, errors.Join(append(failures, err)...))
 }
 
 // ProcessSubmissionResult collects a completed provider operation and advances
@@ -373,12 +373,12 @@ func (w *WorkflowEval[I, R]) ProcessSubmissionResult(ctx context.Context, ref Wo
 	for _, sub := range run.Submissions {
 		if sub.ID == ref.SubmissionID {
 			if len(sub.Data) == 0 {
-				return w.finish(ctx, run, errors.New("provider submission has not been persisted"))
+				return w.finish(ctx, run, stages, errors.New("provider submission has not been persisted"))
 			}
-			if err = w.collect(ctx, run, sub, stages[sub.Stage]); err == nil {
+			if err = w.collect(ctx, run, stages, sub); err == nil {
 				err = w.advance(ctx, run, stages)
 			}
-			return w.finish(ctx, run, err)
+			return w.finish(ctx, run, stages, err)
 		}
 	}
 	return nil, errors.New("unknown workflow submission")
@@ -386,11 +386,11 @@ func (w *WorkflowEval[I, R]) ProcessSubmissionResult(ctx context.Context, ref Wo
 
 // Status reads persisted progress without submitting, polling, or collecting.
 func (w *WorkflowEval[I, R]) Status(ctx context.Context, runID string) (*WorkflowResult, error) {
-	run, _, err := w.load(ctx, runID)
+	run, stages, err := w.load(ctx, runID)
 	if err != nil {
 		return nil, err
 	}
-	return w.result(run), nil
+	return w.result(run, stages), nil
 }
 
 func (w *WorkflowEval[I, R]) saveRun(ctx context.Context, run *workflowRun[I, R]) error {
@@ -581,14 +581,14 @@ func (w *WorkflowEval[I, R]) advance(ctx context.Context, run *workflowRun[I, R]
 			if output.UserData != nil {
 				e = errors.New("workflow tasks cannot persist TaskOutput.UserData; use JSON metadata")
 			}
-			return w.apply(ctx, run, c, stages[0], workflowValue[R]{Task: WorkflowTaskResult[R]{Output: output.Value}}, e, "")
+			return w.apply(ctx, run, stages, c, stages[0], workflowValue[R]{Task: WorkflowTaskResult[R]{Output: output.Value}}, e, "")
 		})
 		if err != nil {
 			return err
 		}
 	}
 	// Run ordinary scoring/classification once per case, checkpointing each stage.
-	if err := w.parallel(ctx, len(run.Cases), func(i int) error { return w.localScores(ctx, run, &run.Cases[i]) }); err != nil {
+	if err := w.parallel(ctx, len(run.Cases), func(i int) error { return w.localScores(ctx, run, stages, &run.Cases[i]) }); err != nil {
 		return err
 	}
 	for stageIndex, stage := range stages {
@@ -640,10 +640,11 @@ func (w *WorkflowEval[I, R]) advance(ctx context.Context, run *workflowRun[I, R]
 	return w.submitPending(ctx, run, stages)
 }
 
-func (w *WorkflowEval[I, R]) collect(ctx context.Context, run *workflowRun[I, R], sub *workflowSubmission, stage workflowStage[I, R]) error {
+func (w *WorkflowEval[I, R]) collect(ctx context.Context, run *workflowRun[I, R], stages []workflowStage[I, R], sub *workflowSubmission) error {
 	if sub.Done {
 		return nil
 	}
+	stage := stages[sub.Stage]
 	indexes := make(map[string]int, len(sub.Cases))
 	for i, index := range sub.Cases {
 		indexes[sub.ID+"_"+strconv.Itoa(i)] = index
@@ -665,7 +666,7 @@ func (w *WorkflowEval[I, R]) collect(ctx context.Context, run *workflowRun[I, R]
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-		return w.apply(ctx, run, c, stage, value, itemErr, sub.ID)
+		return w.apply(ctx, run, stages, c, stage, value, itemErr, sub.ID)
 	})
 	if err != nil {
 		return err
@@ -675,7 +676,7 @@ func (w *WorkflowEval[I, R]) collect(ctx context.Context, run *workflowRun[I, R]
 		if c.Done[stage.name] {
 			continue
 		}
-		if err := w.apply(ctx, run, c, stage, workflowValue[R]{}, errors.New("missing result in provider batch"), sub.ID); err != nil {
+		if err := w.apply(ctx, run, stages, c, stage, workflowValue[R]{}, errors.New("missing result in provider batch"), sub.ID); err != nil {
 			return err
 		}
 	}
@@ -687,7 +688,7 @@ func (w *WorkflowEval[I, R]) collect(ctx context.Context, run *workflowRun[I, R]
 	return nil
 }
 
-func (w *WorkflowEval[I, R]) apply(ctx context.Context, run *workflowRun[I, R], c *workflowCase[I, R], stage workflowStage[I, R], value workflowValue[R], itemErr error, submissionID string) error {
+func (w *WorkflowEval[I, R]) apply(ctx context.Context, run *workflowRun[I, R], stages []workflowStage[I, R], c *workflowCase[I, R], stage workflowStage[I, R], value workflowValue[R], itemErr error, submissionID string) error {
 	// Publish progress only after its checkpoint succeeds. Clone maps before
 	// modification so an unavailable store cannot expose uncommitted results.
 	original := c
@@ -725,7 +726,7 @@ func (w *WorkflowEval[I, R]) apply(ctx context.Context, run *workflowRun[I, R], 
 		}
 	}
 	c.Done[stage.name] = true
-	if w.caseDone(c) {
+	if w.caseDone(c, stages) {
 		c.FinishedAt = time.Now().UTC()
 	}
 	c.LogPending = true
@@ -748,7 +749,7 @@ func normalizeWorkflowScores(scores Scores, name string) error {
 	return nil
 }
 
-func (w *WorkflowEval[I, R]) localScores(ctx context.Context, run *workflowRun[I, R], c *workflowCase[I, R]) error {
+func (w *WorkflowEval[I, R]) localScores(ctx context.Context, run *workflowRun[I, R], stages []workflowStage[I, R], c *workflowCase[I, R]) error {
 	if !c.Done["task"] || c.TaskError != "" {
 		return nil
 	}
@@ -766,7 +767,7 @@ func (w *WorkflowEval[I, R]) localScores(ctx context.Context, run *workflowRun[I
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
-		if err = w.apply(ctx, run, c, workflowStage[I, R]{name: s.Name()}, workflowValue[R]{Scores: scores}, err, ""); err != nil {
+		if err = w.apply(ctx, run, stages, c, workflowStage[I, R]{name: s.Name()}, workflowValue[R]{Scores: scores}, err, ""); err != nil {
 			return err
 		}
 	}
@@ -823,7 +824,7 @@ func (w *WorkflowEval[I, R]) localScores(ctx context.Context, run *workflowRun[I
 			}
 		}
 		c.Done[name] = true
-		if w.caseDone(c) {
+		if w.caseDone(c, stages) {
 			c.FinishedAt = time.Now().UTC()
 		}
 		c.LogPending = true
@@ -836,15 +837,15 @@ func (w *WorkflowEval[I, R]) localScores(ctx context.Context, run *workflowRun[I
 	return nil
 }
 
-func (w *WorkflowEval[I, R]) caseDone(c *workflowCase[I, R]) bool {
+func (w *WorkflowEval[I, R]) caseDone(c *workflowCase[I, R], stages []workflowStage[I, R]) bool {
 	if !c.Done["task"] {
 		return false
 	}
 	if c.TaskError != "" {
 		return true
 	}
-	for _, s := range w.WorkflowScorers {
-		if !c.Done[s.workflowScorer().name] {
+	for _, s := range stages[1:] {
+		if !c.Done[s.name] {
 			return false
 		}
 	}
@@ -861,7 +862,7 @@ func (w *WorkflowEval[I, R]) caseDone(c *workflowCase[I, R]) bool {
 	return true
 }
 
-func (w *WorkflowEval[I, R]) result(run *workflowRun[I, R]) *WorkflowResult {
+func (w *WorkflowEval[I, R]) result(run *workflowRun[I, R], stages []workflowStage[I, R]) *WorkflowResult {
 	r := &WorkflowResult{RunID: run.ID, ExperimentID: run.ExperimentID, Status: WorkflowRunWaiting, Scores: map[string]float64{}}
 	if w.evaluator != nil {
 		r.Permalink = experimentPermalink(w.evaluator.session, run.ExperimentID)
@@ -869,14 +870,14 @@ func (w *WorkflowEval[I, R]) result(run *workflowRun[I, R]) *WorkflowResult {
 	counts := map[string]int{}
 	for i := range run.Cases {
 		c := &run.Cases[i]
-		if w.caseDone(c) {
+		if w.caseDone(c, stages) {
 			r.Completed++
 		}
 		if c.TaskError != "" || len(c.Errors) > 0 || len(c.ClassifierErrors) > 0 {
 			r.Failed++
 		}
 		// Match experiment rows: each score name contributes once per case.
-		row := w.caseScores(c)
+		row := w.caseScores(c, stages)
 		for k, v := range row {
 			r.Scores[k] += v
 			counts[k]++
@@ -887,11 +888,7 @@ func (w *WorkflowEval[I, R]) result(run *workflowRun[I, R]) *WorkflowResult {
 	}
 	for _, sub := range run.Submissions {
 		if !sub.Done {
-			stage := w.Task.workflowTask()
-			if sub.Stage > 0 {
-				stage = w.WorkflowScorers[sub.Stage-1].workflowScorer()
-			}
-			if stage.completion.GetExternalID != nil {
+			if stages[sub.Stage].completion.GetExternalID != nil {
 				r.PendingWebhook++
 			} else {
 				r.PendingPoll++
@@ -904,11 +901,11 @@ func (w *WorkflowEval[I, R]) result(run *workflowRun[I, R]) *WorkflowResult {
 	return r
 }
 
-func (w *WorkflowEval[I, R]) finish(ctx context.Context, run *workflowRun[I, R], err error) (*WorkflowResult, error) {
-	result := w.result(run)
+func (w *WorkflowEval[I, R]) finish(ctx context.Context, run *workflowRun[I, R], stages []workflowStage[I, R], err error) (*WorkflowResult, error) {
+	result := w.result(run, stages)
 	// A known run ID is returned even on callback failures, so callers can resume.
 	if !run.NoSendLogs {
-		err = errors.Join(err, w.logRun(ctx, run))
+		err = errors.Join(err, w.logRun(ctx, run, stages))
 	}
 	return result, err
 }
@@ -931,7 +928,7 @@ func workflowTraceIDs(id string) (oteltrace.TraceID, oteltrace.SpanID) {
 	return traceID, spanID
 }
 
-func (w *WorkflowEval[I, R]) caseScores(c *workflowCase[I, R]) map[string]float64 {
+func (w *WorkflowEval[I, R]) caseScores(c *workflowCase[I, R], stages []workflowStage[I, R]) map[string]float64 {
 	result := map[string]float64{}
 	add := func(name string) {
 		for _, score := range c.Scores[name] {
@@ -942,8 +939,8 @@ func (w *WorkflowEval[I, R]) caseScores(c *workflowCase[I, R]) map[string]float6
 	for _, s := range w.Scorers {
 		add(s.Name())
 	}
-	for _, s := range w.WorkflowScorers {
-		add(s.workflowScorer().name)
+	for _, s := range stages[1:] {
+		add(s.name)
 	}
 	return result
 }
