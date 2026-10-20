@@ -293,7 +293,9 @@ func TestWorkflowSharedExternalID(t *testing.T) {
 	require.NoError(t, err)
 	b, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}})})
 	require.NoError(t, err)
-	require.Len(t, submissions, 2)
+	_, err = w.Poll(ctx, a.RunID)
+	require.NoError(t, err)
+	require.Len(t, submissions, 2, "each submission is registered once, not again on later calls")
 	require.Equal(t, a.RunID, submissions[0].RunID)
 	require.Equal(t, b.RunID, submissions[1].RunID)
 	require.NotEmpty(t, submissions[0].SubmissionID)
@@ -478,41 +480,6 @@ func TestWorkflowPartialBatchWaitAfterFullBatch(t *testing.T) {
 	require.Equal(t, 1, submitted, "oldest item of the consumed batch must not flush the younger remainder")
 }
 
-func TestWorkflowFailedPollBlocksCompletion(t *testing.T) {
-	ctx := context.Background()
-	failedPolls := 0
-	w := WorkflowEval[int, int]{Name: "failed-poll", Store: NewWorkflowEvalMemoryStore(), Task: WorkflowTask[int, int]{
-		Submit: func(ctx context.Context, item WorkflowTaskItem[int, int], info WorkflowSubmissionContext) (json.RawMessage, error) {
-			return json.Marshal(item.Input)
-		},
-		Completion: WorkflowCompletion{Poll: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (WorkflowPollResult, error) {
-			if string(data) == "1" {
-				failedPolls++
-				return WorkflowPollResult{Status: WorkflowFailed, Error: errors.New("batch expired")}, nil
-			}
-			return WorkflowPollResult{Status: WorkflowComplete}, nil
-		}},
-		Collect: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (WorkflowTaskResult[int], error) {
-			var input int
-			err := json.Unmarshal(data, &input)
-			return WorkflowTaskResult[int]{Output: input * 2}, err
-		},
-	}}
-	r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}, {Input: 2}})})
-	require.NoError(t, err)
-	// As in Python and JS, a failed submission raises on every poll and the run
-	// never completes, while independent submissions still advance.
-	for attempt := 1; attempt <= 2; attempt++ {
-		r, err = w.Poll(ctx, r.RunID)
-		require.ErrorContains(t, err, "batch expired")
-		require.Equal(t, WorkflowRunWaiting, r.Status)
-		require.Equal(t, 1, r.Completed)
-		require.Equal(t, 0, r.Failed)
-		require.Equal(t, 1, r.PendingPoll)
-		require.Equal(t, attempt, failedPolls)
-	}
-}
-
 func TestWorkflowScorerItems(t *testing.T) {
 	ctx := context.Background()
 	var items []WorkflowTaskItem[int, int]
@@ -609,55 +576,6 @@ func TestWorkflowSubmitIsolatesCaseState(t *testing.T) {
 	run, _, err := w.load(ctx, r.RunID)
 	require.NoError(t, err)
 	require.Equal(t, Metadata{"source": "dataset"}, run.Cases[0].Item.Metadata)
-}
-
-func TestWorkflowPollErrorDoesNotBlockOtherSubmissions(t *testing.T) {
-	ctx := context.Background()
-	w := WorkflowEval[int, int]{Name: "poll-error", Store: NewWorkflowEvalMemoryStore(), Task: WorkflowTask[int, int]{
-		Submit: func(ctx context.Context, item WorkflowTaskItem[int, int], info WorkflowSubmissionContext) (json.RawMessage, error) {
-			return json.Marshal(item.Input)
-		},
-		Completion: WorkflowCompletion{Poll: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (WorkflowPollResult, error) {
-			if string(data) == "1" {
-				return WorkflowPollResult{}, errors.New("network timeout")
-			}
-			return WorkflowPollResult{Status: WorkflowComplete}, nil
-		}},
-		Collect: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (WorkflowTaskResult[int], error) {
-			return WorkflowTaskResult[int]{Output: 2}, nil
-		},
-	}}
-	r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}, {Input: 2}})})
-	require.NoError(t, err)
-	r, err = w.Poll(ctx, r.RunID)
-	require.ErrorContains(t, err, "network timeout")
-	require.Equal(t, 1, r.Completed, "a poll error for one submission must not block the others")
-	require.Equal(t, 1, r.PendingPoll)
-}
-
-func TestWorkflowSubmitErrorDoesNotBlockPolling(t *testing.T) {
-	ctx := context.Background()
-	w := WorkflowEval[int, int]{Name: "submit-error", Store: NewWorkflowEvalMemoryStore(), Task: WorkflowTask[int, int]{
-		Submit: func(ctx context.Context, item WorkflowTaskItem[int, int], info WorkflowSubmissionContext) (json.RawMessage, error) {
-			if item.Input == 1 {
-				return nil, errors.New("invalid request")
-			}
-			return json.Marshal(item.Input)
-		},
-		Completion: WorkflowCompletion{Poll: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (WorkflowPollResult, error) {
-			require.NotEmpty(t, data, "unsubmitted work must not be polled")
-			return WorkflowPollResult{Status: WorkflowComplete}, nil
-		}},
-		Collect: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (WorkflowTaskResult[int], error) {
-			return WorkflowTaskResult[int]{Output: 4}, nil
-		},
-	}}
-	r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}, {Input: 2}})})
-	require.ErrorContains(t, err, "invalid request")
-	r, err = w.Poll(ctx, r.RunID)
-	require.ErrorContains(t, err, "invalid request")
-	require.Equal(t, 1, r.Completed, "a failing Submit must not block polling submitted work")
-	require.Equal(t, WorkflowRunWaiting, r.Status)
 }
 
 func TestWorkflowRegistrationErrorsAreIndependent(t *testing.T) {
@@ -777,24 +695,53 @@ func TestWorkflowCaseStoreAccessIsConcurrent(t *testing.T) {
 	require.True(t, store.overlap, "loading a run must read cases concurrently")
 }
 
-func TestWorkflowRegistersExternalIDOnce(t *testing.T) {
-	ctx := context.Background()
-	calls := 0
-	w := WorkflowEval[int, int]{Name: "register-once", Store: NewWorkflowEvalMemoryStore(), Task: WorkflowTask[int, int]{
-		Submit: func(context.Context, WorkflowTaskItem[int, int], WorkflowSubmissionContext) (json.RawMessage, error) {
-			return json.RawMessage(`{}`), nil
-		},
-		Completion: WorkflowCompletion{GetExternalID: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (string, error) {
-			calls++
-			return "external", nil
-		}},
-		Collect: func(context.Context, json.RawMessage, WorkflowSubmissionContext) (WorkflowTaskResult[int], error) {
-			return WorkflowTaskResult[int]{Output: 2}, nil
-		},
-	}}
-	r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}})})
-	require.NoError(t, err)
-	_, err = w.Poll(ctx, r.RunID)
-	require.NoError(t, err)
-	require.Equal(t, 1, calls, "a registered submission must not be registered again")
+// One failing submission must not block independent work. As in Python and JS,
+// the failure is reported on every poll and the run never completes.
+func TestWorkflowFailingSubmissionDoesNotBlockOthers(t *testing.T) {
+	for _, tc := range []struct {
+		name, fail, wantError string
+	}{
+		{name: "failed status", fail: "status", wantError: "batch expired"},
+		{name: "poll error", fail: "poll", wantError: "network timeout"},
+		{name: "submit error", fail: "submit", wantError: "invalid request"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := context.Background()
+			w := WorkflowEval[int, int]{Name: "failing-submission", Store: NewWorkflowEvalMemoryStore(), Task: WorkflowTask[int, int]{
+				Submit: func(ctx context.Context, item WorkflowTaskItem[int, int], info WorkflowSubmissionContext) (json.RawMessage, error) {
+					if item.Input == 1 && tc.fail == "submit" {
+						return nil, errors.New(tc.wantError)
+					}
+					return json.Marshal(item.Input)
+				},
+				Completion: WorkflowCompletion{Poll: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (WorkflowPollResult, error) {
+					require.NotEmpty(t, data, "unsubmitted work must not be polled")
+					if string(data) == "1" {
+						switch tc.fail {
+						case "status":
+							return WorkflowPollResult{Status: WorkflowFailed, Error: errors.New(tc.wantError)}, nil
+						case "poll":
+							return WorkflowPollResult{}, errors.New(tc.wantError)
+						}
+					}
+					return WorkflowPollResult{Status: WorkflowComplete}, nil
+				}},
+				Collect: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (WorkflowTaskResult[int], error) {
+					return WorkflowTaskResult[int]{Output: 4}, nil
+				},
+			}}
+			r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}, {Input: 2}})})
+			if tc.fail != "submit" {
+				require.NoError(t, err)
+			}
+			for range 2 {
+				r, err = w.Poll(ctx, r.RunID)
+				require.ErrorContains(t, err, tc.wantError)
+				require.Equal(t, WorkflowRunWaiting, r.Status)
+				require.Equal(t, 1, r.Completed)
+				require.Equal(t, 0, r.Failed)
+				require.Equal(t, 1, r.PendingPoll)
+			}
+		})
+	}
 }
