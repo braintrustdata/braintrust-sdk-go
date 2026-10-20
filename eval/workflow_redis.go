@@ -25,7 +25,7 @@ type WorkflowEvalRedisStore struct {
 }
 
 // NewWorkflowEvalRedisStore creates a Redis store. An empty prefix defaults to
-// braintrust-workflow:, and a zero TTL defaults to seven days.
+// braintrust-eval:, and a zero TTL defaults to seven days.
 func NewWorkflowEvalRedisStore(command WorkflowRedisCommand, prefix string, ttl time.Duration) (*WorkflowEvalRedisStore, error) {
 	if command == nil {
 		return nil, fmt.Errorf("redis command function is required")
@@ -37,7 +37,7 @@ func NewWorkflowEvalRedisStore(command WorkflowRedisCommand, prefix string, ttl 
 		return nil, fmt.Errorf("redis TTL must be at least one millisecond")
 	}
 	if prefix == "" {
-		prefix = "braintrust-workflow:"
+		prefix = "braintrust-eval:"
 	}
 	return &WorkflowEvalRedisStore{command: command, prefix: prefix, ttl: ttl.Milliseconds()}, nil
 }
