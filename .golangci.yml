@@ -20,6 +20,11 @@ linters:
           path: examples/
         - linters: [forcetypeassert]
           path: _test\.go
+        # These files deliberately exercise deprecated public entry points.
+        # Keep deprecation diagnostics enabled for all other SDK code and tests.
+        - linters: [staticcheck]
+          text: "^SA1019:"
+          path: ^(api|eval|prompt)/compat_test\.go$
 
 
 

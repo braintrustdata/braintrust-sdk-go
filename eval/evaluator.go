@@ -5,8 +5,8 @@ import (
 
 	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
+	"github.com/braintrustdata/braintrust-sdk-go/openapi"
 )
 
 // Evaluator provides a reusable way to run multiple evaluations with the same
@@ -17,13 +17,13 @@ type Evaluator[I, R any] struct {
 	session            *auth.Session
 	defaultProjectName string
 	tracerProvider     *trace.TracerProvider
-	api                *api.API
+	api                *openapi.Client
 }
 
-// NewEvaluator creates a new evaluator with explicit dependencies.
+// NewEvaluatorWithClient creates a new evaluator with explicit dependencies.
 // The type parameters I (input) and R (result/output) must be specified explicitly.
 // Users create Evaluators with braintrust.NewEvaluator.
-func NewEvaluator[I, R any](s *auth.Session, tp *trace.TracerProvider, api *api.API, project string) *Evaluator[I, R] {
+func NewEvaluatorWithClient[I, R any](s *auth.Session, tp *trace.TracerProvider, api *openapi.Client, project string) *Evaluator[I, R] {
 	return &Evaluator[I, R]{
 		session:            s,
 		defaultProjectName: project,

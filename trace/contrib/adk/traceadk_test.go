@@ -156,7 +156,7 @@ func TestAgentIntegration(t *testing.T) {
 	// Create LLM agent with tool
 	cfg := llmagent.Config{
 		Name:        "math_agent",
-		Model:       newTestModel(ctx, t, "gemini-2.0-flash-exp", tracegenai.WithTracerProvider(tp)),
+		Model:       newTestModel(ctx, t, goldenModelID, tracegenai.WithTracerProvider(tp)),
 		Description: "A helpful math assistant",
 		Instruction: "You are a helpful math assistant. Use the calculator tool to perform calculations.",
 		Tools:       []tool.Tool{calcTool},
@@ -200,7 +200,7 @@ func TestAgentIntegration(t *testing.T) {
 	// Verify model span exists
 	require.NotNil(t, modelSpan, "call_llm span not found")
 	assert.True(t, modelSpan.Status().Code == codes.Ok || modelSpan.Status().Code == codes.Unset)
-	modelSpan.AssertAttrEquals("gen_ai.request.model", "gemini-2.0-flash-exp")
+	modelSpan.AssertAttrEquals("gen_ai.request.model", goldenModelID)
 
 	// Verify tool span exists
 	require.NotNil(t, toolSpan, "tool span not found")

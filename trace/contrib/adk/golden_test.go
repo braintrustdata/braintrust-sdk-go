@@ -117,7 +117,7 @@ func assertFinalResponse(t *testing.T, responses []*session.Event) {
 
 // assertGoldenExchange verifies the model request and response recorded in the trace.
 // Checking the complete contents also covers conversation history and binary parts.
-func assertGoldenExchange(t *testing.T, exporter *oteltest.Exporter, contents []*genai.Content, output *genai.Content, finishReason genai.FinishReason) (*oteltest.Span, map[string]any) {
+func assertGoldenExchange(t *testing.T, exporter *oteltest.Exporter, contents []*genai.Content, result *model.LLMResponse) (*oteltest.Span, map[string]any) {
 	t.Helper()
 	spans := exporter.Flush()
 	var modelSpans []oteltest.Span
@@ -129,7 +129,7 @@ func assertGoldenExchange(t *testing.T, exporter *oteltest.Exporter, contents []
 	require.Len(t, modelSpans, 1, "expected one model span per exchange")
 	span := &modelSpans[0]
 	span.AssertAttrEquals("gen_ai.request.model", goldenModelID)
-	span.AssertAttrEquals("gen_ai.finish_reason", string(finishReason))
+	span.AssertAttrEquals("gen_ai.finish_reason", string(result.FinishReason))
 	span.AssertJSONAttrEquals("braintrust.span_attributes", map[string]any{"type": "llm"})
 
 	input, ok := span.Input().(map[string]any)
@@ -137,8 +137,16 @@ func assertGoldenExchange(t *testing.T, exporter *oteltest.Exporter, contents []
 	response, ok := span.Output().(map[string]any)
 	require.True(t, ok, "expected serialized model response")
 	assert.Equal(t, goldenJSON(t, contents), input["Contents"], "complete conversation should be captured")
-	assert.Equal(t, goldenJSON(t, output), response["Content"], "model output should match the runner response")
-	assert.Equal(t, string(finishReason), response["FinishReason"])
+	assert.Equal(t, goldenJSON(t, result.Content), response["Content"], "model output should match the runner response")
+	assert.Equal(t, string(result.FinishReason), response["FinishReason"])
+	// Token counts vary on every live run; verify the trace against that response.
+	usage := result.UsageMetadata
+	require.NotNil(t, usage)
+	metrics := span.Metrics()
+	assert.Equal(t, float64(usage.PromptTokenCount+usage.ToolUsePromptTokenCount), metrics["prompt_tokens"])
+	assert.Equal(t, float64(usage.CandidatesTokenCount+usage.ThoughtsTokenCount), metrics["completion_tokens"])
+	assert.Equal(t, float64(usage.TotalTokenCount), metrics["tokens"])
+	assert.Equal(t, float64(usage.ThoughtsTokenCount), metrics["completion_reasoning_tokens"])
 	config, ok := input["Config"].(map[string]any)
 	require.True(t, ok, "expected serialized generation config")
 	return span, config
@@ -155,33 +163,30 @@ func goldenJSON(t *testing.T, value any) any {
 
 func TestMultimodalInput(t *testing.T) {
 	cases := []struct {
-		name         string
-		fixture      string
-		mimeType     string
-		prefix       string
-		prompt       string
-		instruction  string
-		maxTokens    int32
-		finishReason genai.FinishReason
+		name        string
+		fixture     string
+		mimeType    string
+		prefix      string
+		prompt      string
+		instruction string
+		maxTokens   int32
 	}{
 		{
-			name:         "document",
-			fixture:      "test-document.pdf",
-			mimeType:     "application/pdf",
-			prompt:       "What is in this document?",
-			instruction:  "You are a document analysis assistant.",
-			maxTokens:    150,
-			finishReason: genai.FinishReasonStop,
+			name:        "document",
+			fixture:     "test-document.pdf",
+			mimeType:    "application/pdf",
+			prompt:      "What is in this document?",
+			instruction: "You are a document analysis assistant.",
+			maxTokens:   150,
 		},
 		{
-			name:         "mixed_content",
-			fixture:      "test-image.png",
-			mimeType:     "image/png",
-			prefix:       "First, look at this image:",
-			prompt:       "Now describe what you see and explain why it matters.",
-			instruction:  "You are a helpful vision assistant.",
-			maxTokens:    200,
-			finishReason: genai.FinishReasonMaxTokens,
+			name:        "mixed_content",
+			fixture:     "test-image.png",
+			mimeType:    "image/png",
+			prefix:      "First, look at this image:",
+			prompt:      "Now describe what you see and explain why it matters.",
+			instruction: "You are a helpful vision assistant.",
+			maxTokens:   200,
 		},
 	}
 	for _, tc := range cases {
@@ -206,7 +211,7 @@ func TestMultimodalInput(t *testing.T) {
 			userMsg := genai.NewContentFromParts(parts, genai.RoleUser)
 			responses := runAndCollectFinal(ctx, t, r, tc.name, userMsg, agent.RunConfig{})
 			assertFinalResponse(t, responses)
-			_, config := assertGoldenExchange(t, exporter, []*genai.Content{userMsg}, responses[0].Content, tc.finishReason)
+			_, config := assertGoldenExchange(t, exporter, []*genai.Content{userMsg}, &responses[0].LLMResponse)
 			assert.Equal(t, float64(tc.maxTokens), config["maxOutputTokens"])
 		})
 	}
@@ -232,7 +237,7 @@ func TestGenerationConfig(t *testing.T) {
 	responses := runAndCollectFinal(ctx, t, r, sid, msg, agent.RunConfig{})
 	// A tight budget can be exhausted by reasoning before any text is emitted.
 	require.Len(t, responses, 1)
-	_, config := assertGoldenExchange(t, exporter, []*genai.Content{msg}, responses[0].Content, genai.FinishReasonMaxTokens)
+	_, config := assertGoldenExchange(t, exporter, []*genai.Content{msg}, &responses[0].LLMResponse)
 	assert.Equal(t, float64(0), config["temperature"], "explicit zero temperature should survive cleanup")
 	assert.Equal(t, float64(1), config["topP"])
 	assert.Equal(t, float64(50), config["maxOutputTokens"])
@@ -254,13 +259,7 @@ func TestGoogleSearchUsage(t *testing.T) {
 	responses := runAndCollectFinal(ctx, t, r, sid, msg, agent.RunConfig{})
 	assertFinalResponse(t, responses)
 
-	modelSpan, _ := assertGoldenExchange(t, exporter, []*genai.Content{msg}, responses[0].Content, genai.FinishReasonStop)
-	assert.Equal(t, map[string]float64{
-		"prompt_tokens":               157,
-		"completion_tokens":           295,
-		"completion_reasoning_tokens": 239,
-		"tokens":                      452,
-	}, modelSpan.Metrics())
+	assertGoldenExchange(t, exporter, []*genai.Content{msg}, &responses[0].LLMResponse)
 }
 
 func TestReasoning(t *testing.T) {
@@ -281,7 +280,7 @@ func TestReasoning(t *testing.T) {
 	responses := runAndCollectFinal(ctx, t, r, sid, msg1, agent.RunConfig{})
 	assertFinalResponse(t, responses)
 	firstOutput := responses[0].Content
-	firstSpan, config := assertGoldenExchange(t, exporter, []*genai.Content{msg1}, firstOutput, genai.FinishReasonStop)
+	firstSpan, config := assertGoldenExchange(t, exporter, []*genai.Content{msg1}, &responses[0].LLMResponse)
 	assert.Equal(t, float64(2048), config["maxOutputTokens"])
 	assert.Equal(t, goldenJSON(t, genai.NewContentFromText("You are a mathematical reasoning assistant.", genai.RoleUser)), config["systemInstruction"])
 	assert.Equal(t, map[string]any{"includeThoughts": true, "thinkingBudget": float64(1024)}, config["thinkingConfig"])
@@ -289,19 +288,7 @@ func TestReasoning(t *testing.T) {
 	msg2 := genai.NewContentFromText("Using the pattern you discovered, what would be the 10th term? And can you find the sum of the first 10 terms?", genai.RoleUser)
 	responses = runAndCollectFinal(ctx, t, r, sid, msg2, agent.RunConfig{})
 	assertFinalResponse(t, responses)
-	secondSpan, _ := assertGoldenExchange(t, exporter, []*genai.Content{msg1, firstOutput, msg2}, responses[0].Content, genai.FinishReasonStop)
+	assertGoldenExchange(t, exporter, []*genai.Content{msg1, firstOutput, msg2}, &responses[0].LLMResponse)
 
-	assert.Equal(t, map[string]float64{
-		"prompt_tokens":               47,
-		"completion_tokens":           1608,
-		"completion_reasoning_tokens": 765,
-		"tokens":                      1655,
-	}, firstSpan.Metrics())
 	assert.False(t, firstSpan.HasAttr("gen_ai.usage.prompt_tokens"))
-	assert.Equal(t, map[string]float64{
-		"prompt_tokens":               1475,
-		"completion_tokens":           1627,
-		"completion_reasoning_tokens": 900,
-		"tokens":                      3102,
-	}, secondSpan.Metrics())
 }

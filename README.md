@@ -318,6 +318,7 @@ Complete working examples are available in [`examples/`](./examples/):
 - **[anthropic](./examples/anthropic/main.go)** - Anthropic tracing
 - **[genai](./examples/genai/main.go)** - Google Gemini tracing
 - **[genkit](./examples/genkit/main.go)** - Firebase Genkit middleware tracing
+- **[api-client](./examples/api-client/main.go)** - Generated REST client: read-only browsing, with opt-in dataset-row and paused project-automation CRUD
 
 **Evaluations:**
 - **[evals](./examples/evals/evals.go)** - Evaluations with custom scorers
@@ -352,6 +353,7 @@ Complete working examples are available in [`examples/`](./examples/):
 
 - [Braintrust Documentation](https://www.braintrust.dev/docs)
 - [API Reference](https://pkg.go.dev/github.com/braintrustdata/braintrust-sdk-go)
+- [HTTP API client guide](./docs/api-client.md) - Public generated client, configuration, models, and a runnable example
 
 ## Contributing
 

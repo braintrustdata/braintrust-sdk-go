@@ -235,8 +235,23 @@ func TestOpenAIResponsesPromptCacheAndSafetyFields(t *testing.T) {
 	assert.Equal("user-456", metadata["safety_identifier"], "safety_identifier should be captured in metadata")
 }
 
+func setUpStatefulTest(t *testing.T) (openai.Client, oteltrace.TracerProvider, *oteltest.Exporter) {
+	t.Helper()
+	// Stateful Responses are unavailable to Zero Data Retention organizations.
+	// Keep genuine recordings unless a suitable recording key is supplied.
+	if vcr.GetVCRMode() != vcr.ModeReplay {
+		if key := os.Getenv("OPENAI_NON_ZDR_API_KEY"); key != "" {
+			t.Setenv("OPENAI_API_KEY", key)
+		} else {
+			t.Log("replaying stateful coverage; OPENAI_NON_ZDR_API_KEY is required to re-record it")
+			t.Setenv("VCR_MODE", "replay")
+		}
+	}
+	return setUpTest(t)
+}
+
 func TestOpenAIResponsesPreviousResponseIDAndInclude(t *testing.T) {
-	client, _, exporter := setUpTest(t)
+	client, _, exporter := setUpStatefulTest(t)
 	assert := assert.New(t)
 	require := require.New(t)
 
@@ -299,7 +314,7 @@ func TestOpenAIResponsesContextManagement(t *testing.T) {
 }
 
 func TestOpenAIResponsesConversation(t *testing.T) {
-	client, _, exporter := setUpTest(t)
+	client, _, exporter := setUpStatefulTest(t)
 	assert := assert.New(t)
 	require := require.New(t)
 
@@ -331,7 +346,7 @@ func TestOpenAIResponsesConversation(t *testing.T) {
 }
 
 func TestOpenAIResponsesBackground(t *testing.T) {
-	client, _, exporter := setUpTest(t)
+	client, _, exporter := setUpStatefulTest(t)
 	assert := assert.New(t)
 	require := require.New(t)
 

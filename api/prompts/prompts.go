@@ -1,4 +1,7 @@
 // Package prompts provides read access to the prompts stored in Braintrust.
+//
+// New integrations should use github.com/braintrustdata/braintrust-sdk-go/openapi for REST
+// operations, or braintrust.Client.LoadPrompt for renderable prompts.
 package prompts
 
 import (
@@ -7,16 +10,21 @@ import (
 	"fmt"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
+	"github.com/braintrustdata/braintrust-sdk-go/openapi"
 )
 
 // API provides methods for reading prompts.
+//
+// Deprecated: Use [openapi.Client] or [openapi.ClientWithResponses].
 type API struct {
-	client *https.Client
+	client *https.OpenAPIClient
 }
 
 // New creates a new prompts API client.
+//
+// Deprecated: Use [openapi.NewClientWithResponses].
 func New(client *https.Client) *API {
-	return &API{client: client}
+	return &API{client: https.NewOpenAPIClient(client)}
 }
 
 // Prompt is a prompt row as Braintrust stores it.
@@ -61,30 +69,23 @@ type queryResponse struct {
 }
 
 // Query searches for prompts matching params.
+//
+// Deprecated: Use [openapi.ClientWithResponses.GetPromptWithResponse], or
+// braintrust.Client.LoadPrompt to fetch and render a prompt.
 func (a *API) Query(ctx context.Context, params QueryParams) ([]Prompt, error) {
-	query := make(map[string]string)
-
-	if params.ProjectName != "" {
-		query["project_name"] = params.ProjectName
+	query := &openapi.GetPromptParams{
+		ProjectName: https.String(params.ProjectName),
+		ProjectId:   https.String(params.ProjectID),
+		Slug:        https.String(params.Slug),
+		Version:     https.String(params.Version),
+		Limit:       https.Positive(params.Limit),
 	}
-	if params.ProjectID != "" {
-		query["project_id"] = params.ProjectID
-	}
-	if params.Slug != "" {
-		query["slug"] = params.Slug
-	}
-	if params.Version != "" {
-		query["version"] = params.Version
-	} else if params.Environment != "" {
-		// version and environment are mutually exclusive; a pinned version wins,
-		// matching the other SDKs.
-		query["environment"] = params.Environment
-	}
-	if params.Limit > 0 {
-		query["limit"] = fmt.Sprintf("%d", params.Limit)
+	if params.Version == "" {
+		// A pinned version takes precedence over the environment.
+		query.Environment = https.String(params.Environment)
 	}
 
-	resp, err := a.client.GET(ctx, "/v1/prompt", query)
+	resp, err := a.client.GetPrompt(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -100,19 +101,22 @@ func (a *API) Query(ctx context.Context, params QueryParams) ([]Prompt, error) {
 
 // Get returns a single prompt by ID. Version and Environment are optional; a
 // pinned version wins over an environment.
+//
+// Deprecated: Use [openapi.ClientWithResponses.GetPromptIdWithResponse], or
+// braintrust.Client.LoadPrompt to fetch and render a prompt.
 func (a *API) Get(ctx context.Context, id string, params QueryParams) (*Prompt, error) {
 	if id == "" {
 		return nil, fmt.Errorf("prompt ID is required")
 	}
 
-	query := make(map[string]string)
-	if params.Version != "" {
-		query["version"] = params.Version
-	} else if params.Environment != "" {
-		query["environment"] = params.Environment
+	query := &openapi.GetPromptIdParams{
+		Version: https.String(params.Version),
+	}
+	if params.Version == "" {
+		query.Environment = https.String(params.Environment)
 	}
 
-	resp, err := a.client.GET(ctx, "/v1/prompt/"+id, query)
+	resp, err := a.client.GetPromptId(ctx, id, query)
 	if err != nil {
 		return nil, err
 	}

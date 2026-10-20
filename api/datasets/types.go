@@ -7,8 +7,10 @@ import (
 )
 
 // API provides methods for interacting with datasets.
+//
+// Deprecated: Use the openapi package's Client or ClientWithResponses.
 type API struct {
-	client *https.Client
+	client *https.OpenAPIClient
 }
 
 // Dataset represents a dataset resource from the Braintrust API.

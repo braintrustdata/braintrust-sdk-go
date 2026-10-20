@@ -12,9 +12,13 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 )
 
+// OpenAI retired all legacy completion models on 2026-09-28. Preserve real
+// historical recordings to cover this endpoint without making unavailable calls.
+// https://developers.openai.com/api/docs/deprecations#2025-09-26-legacy-gpt-model-snapshots
 const legacyCompletionModel = "gpt-3.5-turbo-instruct"
 
 func TestOpenAICompletions(t *testing.T) {
+	t.Setenv("VCR_MODE", "replay")
 	client, _, exporter := setUpTest(t)
 	assert := assert.New(t)
 	require := require.New(t)
@@ -34,7 +38,6 @@ func TestOpenAICompletions(t *testing.T) {
 	require.NotNil(resp)
 
 	require.NotEmpty(resp.Choices, "response should have at least one choice")
-	assert.Contains(resp.Choices[0].Text, "4")
 
 	ts := exporter.FlushOne()
 	ts.AssertInTimeRange(timeRange)
@@ -51,7 +54,7 @@ func TestOpenAICompletions(t *testing.T) {
 	require.NotEmpty(choices)
 	firstChoice, ok := choices[0].(map[string]interface{})
 	require.True(ok)
-	assert.Contains(firstChoice["text"], "4")
+	assert.Equal(resp.Choices[0].Text, firstChoice["text"])
 
 	metadata := ts.Metadata()
 	assert.Equal("openai", metadata["provider"])
@@ -65,6 +68,7 @@ func TestOpenAICompletions(t *testing.T) {
 }
 
 func TestOpenAICompletionsStreaming(t *testing.T) {
+	t.Setenv("VCR_MODE", "replay")
 	client, _, exporter := setUpTest(t)
 	assert := assert.New(t)
 	require := require.New(t)

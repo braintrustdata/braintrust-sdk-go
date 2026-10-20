@@ -1,0 +1,60 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/prompt/00000000-0000-0000-0000-000000000000
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"Code":"BadRequestError","Message":"Prompt does not exist or you do not have access [user_email=andrew@braintrustdata.com] [user_org=Braintrust SDKs] [timestamp=1792536877.731]"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Tue, 20 Oct 2026 22:54:37 GMT
+            Etag:
+                - W/"b3-9DDm1Ildx+DS0CamOUKrJM3T8Pk"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 566cc276dff9847158a5a9854be4df42.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - 5Ibn4Cz89Jaha3aLE05WIY7mAioCzAZC-eoNOzXPJ2Etl5arec8QRQ==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Error from cloudfront
+        status: 400 Bad Request
+        code: 400
+        duration: 279.3425ms

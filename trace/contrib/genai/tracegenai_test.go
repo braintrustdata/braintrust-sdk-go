@@ -2,6 +2,7 @@ package genai
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"testing"
 
@@ -79,7 +80,7 @@ func TestBasicGenerateContent(t *testing.T) {
 	timer := oteltest.NewTimer()
 	resp, err := client.Models.GenerateContent(
 		context.Background(),
-		"gemini-2.0-flash-exp",
+		"gemini-2.5-flash",
 		genai.Text("What is 2+2? Answer with just the number."),
 		nil,
 	)
@@ -101,11 +102,11 @@ func TestBasicGenerateContent(t *testing.T) {
 	// Verify metadata
 	metadata := ts.Metadata()
 	assert.Equal("google", metadata["provider"])
-	assert.Equal("gemini-2.0-flash-exp", metadata["model"])
+	assert.Equal("gemini-2.5-flash", metadata["model"])
 
 	// Verify the provider-native input excludes request configuration.
 	assert.Equal(map[string]any{
-		"model": "gemini-2.0-flash-exp",
+		"model": "gemini-2.5-flash",
 		"contents": []any{
 			map[string]any{
 				"parts": []any{map[string]any{"text": "What is 2+2? Answer with just the number."}},
@@ -136,7 +137,7 @@ func TestStreamingGenerateContent(t *testing.T) {
 	timer := oteltest.NewTimer()
 	iter := client.Models.GenerateContentStream(
 		context.Background(),
-		"gemini-2.0-flash-exp",
+		"gemini-2.5-flash",
 		genai.Text("Count from 1 to 3. Output only the numbers."),
 		nil,
 	)
@@ -161,7 +162,7 @@ func TestStreamingGenerateContent(t *testing.T) {
 	// Verify metadata
 	metadata := ts.Metadata()
 	assert.Equal("google", metadata["provider"])
-	assert.Equal("gemini-2.0-flash-exp", metadata["model"])
+	assert.Equal("gemini-2.5-flash", metadata["model"])
 
 	// Verify input
 	input := ts.Input()
@@ -318,11 +319,7 @@ func TestGenerateContentWithThinking(t *testing.T) {
 	assert.NotEmpty(thought["text"])
 
 	metrics := ts.Metrics()
-	assert.Equal(float64(47), metrics["prompt_tokens"])
-	assert.Equal(float64(1711), metrics["completion_tokens"])
-	assert.Equal(float64(874), metrics["completion_reasoning_tokens"])
-	assert.Equal(float64(1758), metrics["tokens"])
-	assert.Equal(metrics["tokens"], metrics["prompt_tokens"]+metrics["completion_tokens"])
+	assertResponseUsage(t, metrics, resp.UsageMetadata)
 	assert.NotContains(metrics, "thoughts_token_count")
 }
 
@@ -400,8 +397,8 @@ func TestGenerateContentWithFunctionCall(t *testing.T) {
 	part, ok := parts[0].(map[string]any)
 	require.True(t, ok)
 	assert.Equal(t, map[string]any{
-		"name": "get_weather",
-		"args": map[string]any{"location": "Paris, France"},
+		"name": resp.FunctionCalls()[0].Name,
+		"args": resp.FunctionCalls()[0].Args,
 	}, part["functionCall"])
 }
 
@@ -430,11 +427,7 @@ func TestGenerateContentWithCodeExecution(t *testing.T) {
 	assert.Equal(t, []any{map[string]any{"codeExecution": map[string]any{}}}, metadata["tools"])
 
 	metrics := ts.Metrics()
-	assert.Equal(t, float64(265), metrics["prompt_tokens"])
-	assert.Equal(t, float64(280), metrics["completion_tokens"])
-	assert.Equal(t, float64(159), metrics["completion_reasoning_tokens"])
-	assert.Equal(t, float64(545), metrics["tokens"])
-	assert.Equal(t, metrics["tokens"], metrics["prompt_tokens"]+metrics["completion_tokens"])
+	assertResponseUsage(t, metrics, resp.UsageMetadata)
 	assert.NotContains(t, metrics, "tool_use_prompt_token_count")
 }
 
@@ -451,38 +444,81 @@ func TestStreamingGenerateContentWithCodeExecution(t *testing.T) {
 	)
 
 	var fullText string
+	var usage *genai.GenerateContentResponseUsageMetadata
+	var expectedCodes []*genai.ExecutableCode
+	var results []*genai.CodeExecutionResult
 	for resp, err := range iter {
 		require.NoError(t, err)
 		fullText += resp.Text()
+		if resp.UsageMetadata != nil {
+			usage = resp.UsageMetadata
+		}
+		for _, candidate := range resp.Candidates {
+			for _, part := range candidate.Content.Parts {
+				if part.ExecutableCode != nil {
+					expectedCodes = append(expectedCodes, part.ExecutableCode)
+				}
+				if part.CodeExecutionResult != nil {
+					results = append(results, part.CodeExecutionResult)
+				}
+			}
+		}
 	}
-	assert.Contains(t, fullText, "56,088")
+	assert.Regexp(t, `56[,]?088`, fullText)
 
 	ts := exporter.FlushOne()
 	ts.AssertNameIs("generate_content")
 	assert.Equal(t, codes.Unset, ts.Status().Code)
 
 	parts := candidateParts(t, ts.Output(), 0)
-	require.Len(t, parts, 3)
-	assert.Contains(t, parts[0], "executableCode")
-	assert.Contains(t, parts[1], "codeExecutionResult")
-	assert.Equal(t, map[string]any{
-		"text": "The product of 123 multiplied by 456 is 56,088. This means that if you have 123 groups of 456 items, or vice versa, the total number of items is 56,088.",
-	}, parts[2])
+	var tracedText string
+	var tracedCodes, tracedResults []any
+	for _, rawPart := range parts {
+		part, ok := rawPart.(map[string]any)
+		require.True(t, ok)
+		if code, ok := part["executableCode"]; ok {
+			tracedCodes = append(tracedCodes, code)
+		}
+		if result, ok := part["codeExecutionResult"]; ok {
+			tracedResults = append(tracedResults, result)
+		}
+		if text, ok := part["text"].(string); ok {
+			tracedText += text
+		}
+	}
+	require.NotEmpty(t, expectedCodes, "expected the model to execute Python")
+	require.NotEmpty(t, results, "expected code execution results")
+	assertJSONValue(t, expectedCodes, tracedCodes)
+	assertJSONValue(t, results, tracedResults)
+	assert.Equal(t, fullText, tracedText)
 
-	metadata := ts.Metadata()
-	assert.Equal(t, map[string]any{
-		"tool_use_prompt_tokens_details": []any{
-			map[string]any{"modality": "TEXT", "tokenCount": float64(85)},
-		},
-	}, metadata["usage_by_modality"])
+	require.NotNil(t, usage)
+	require.NotEmpty(t, usage.ToolUsePromptTokensDetails, "expected tool-use modality details")
+	assertJSONValue(t, map[string]any{
+		"tool_use_prompt_tokens_details": usage.ToolUsePromptTokensDetails,
+	}, ts.Metadata()["usage_by_modality"])
 
 	metrics := ts.Metrics()
-	assert.Equal(t, float64(105), metrics["prompt_tokens"])
-	assert.Equal(t, float64(114), metrics["completion_tokens"])
-	assert.Equal(t, float64(37), metrics["completion_reasoning_tokens"])
-	assert.Equal(t, float64(219), metrics["tokens"])
-	assert.Equal(t, metrics["tokens"], metrics["prompt_tokens"]+metrics["completion_tokens"])
+	assertResponseUsage(t, metrics, usage)
 	assert.NotContains(t, metrics, "tool_use_prompt_token_count")
+}
+
+func assertResponseUsage(t *testing.T, metrics map[string]float64, usage *genai.GenerateContentResponseUsageMetadata) {
+	t.Helper()
+	require.NotNil(t, usage)
+	assert.Equal(t, float64(usage.PromptTokenCount+usage.ToolUsePromptTokenCount), metrics["prompt_tokens"])
+	assert.Equal(t, float64(usage.CandidatesTokenCount+usage.ThoughtsTokenCount), metrics["completion_tokens"])
+	assert.Equal(t, float64(usage.ThoughtsTokenCount), metrics["completion_reasoning_tokens"])
+	assert.Equal(t, float64(usage.TotalTokenCount), metrics["tokens"])
+}
+
+func assertJSONValue(t *testing.T, expected, actual any) {
+	t.Helper()
+	expectedJSON, err := json.Marshal(expected)
+	require.NoError(t, err)
+	actualJSON, err := json.Marshal(actual)
+	require.NoError(t, err)
+	assert.JSONEq(t, string(expectedJSON), string(actualJSON))
 }
 
 func TestParseUsageTokens(t *testing.T) {

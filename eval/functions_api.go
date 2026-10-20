@@ -1,18 +1,22 @@
 package eval
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"reflect"
 
-	"github.com/braintrustdata/braintrust-sdk-go/api"
-	functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+
+	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
+	"github.com/braintrustdata/braintrust-sdk-go/openapi"
 )
 
 // FunctionsAPI provides access for executing tasks and scorers hosted at braintrust.dev.
 type FunctionsAPI[I, R any] struct {
-	api         *api.API
+	api         *openapi.Client
 	projectName string
 }
 
@@ -44,28 +48,20 @@ func (f *FunctionsAPI[I, R]) Task(ctx context.Context, opts FunctionOpts) (TaskF
 		projectName = opts.Project
 	}
 
-	// Query for the function/prompt
-	functions, err := f.api.Functions().Query(ctx, functionsapi.QueryParams{
-		ProjectName: projectName,
-		Slug:        opts.Slug,
-		Version:     opts.Version,
-		Environment: opts.Environment,
-		Limit:       1,
-	})
+	functions, err := f.queryFunctions(ctx, projectName, opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query function: %w", err)
+		return nil, err
 	}
-
-	if len(functions) == 0 {
+	if len(functions.Objects) == 0 {
 		return nil, fmt.Errorf("function not found: project=%s slug=%s", projectName, opts.Slug)
 	}
 
-	function := functions[0]
+	function := functions.Objects[0]
 
 	// Return a TaskFunc that invokes the function
 	return func(ctx context.Context, input I, hooks *TaskHooks) (TaskOutput[R], error) {
 		// Invoke the function
-		output, err := f.api.Functions().Invoke(ctx, function.ID, input)
+		output, err := invokeFunction(ctx, f.api, function.ID, input)
 		if err != nil {
 			return TaskOutput[R]{}, fmt.Errorf("failed to invoke function: %w", err)
 		}
@@ -95,23 +91,15 @@ func (f *FunctionsAPI[I, R]) Scorer(ctx context.Context, opts FunctionOpts) (Sco
 		projectName = opts.Project
 	}
 
-	// Query for the function/scorer
-	functions, err := f.api.Functions().Query(ctx, functionsapi.QueryParams{
-		ProjectName: projectName,
-		Slug:        opts.Slug,
-		Version:     opts.Version,
-		Environment: opts.Environment,
-		Limit:       1,
-	})
+	functions, err := f.queryFunctions(ctx, projectName, opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query function: %w", err)
+		return nil, err
 	}
-
-	if len(functions) == 0 {
+	if len(functions.Objects) == 0 {
 		return nil, fmt.Errorf("scorer not found: project=%s slug=%s", projectName, opts.Slug)
 	}
 
-	function := functions[0]
+	function := functions.Objects[0]
 
 	// Create a scorer that invokes the function
 	scorerFunc := func(ctx context.Context, result TaskResult[I, R]) (Scores, error) {
@@ -123,41 +111,92 @@ func (f *FunctionsAPI[I, R]) Scorer(ctx context.Context, opts FunctionOpts) (Sco
 		}
 
 		// Invoke the scorer function
-		output, err := f.api.Functions().Invoke(ctx, function.ID, scorerInput)
+		output, err := invokeFunction(ctx, f.api, function.ID, scorerInput)
 		if err != nil {
 			return nil, fmt.Errorf("failed to invoke scorer: %w", err)
 		}
 
-		// Convert result to Scores
-		// The scorer should return a score (number) or a struct with name/score
-		if output == nil {
+		if bytes.Equal(output, []byte("null")) {
 			return nil, fmt.Errorf("scorer returned nil")
 		}
 
-		// Try to parse as map first (most common case)
-		if resultMap, ok := output.(map[string]any); ok {
+		// Decode scores directly, without converting arbitrary metadata through
+		// generated float32/any fields.
+		if len(output) > 0 && output[0] == '{' {
+			var fields map[string]json.RawMessage
+			if err := json.Unmarshal(output, &fields); err != nil {
+				return nil, fmt.Errorf("failed to decode scorer output: %w", err)
+			}
 			score := Score{}
-			if name, ok := resultMap["name"].(string); ok {
-				score.Name = name
-			}
-			if scoreVal, ok := resultMap["score"].(float64); ok {
-				score.Score = scoreVal
-			}
-			if metadata, ok := resultMap["metadata"].(map[string]any); ok {
-				score.Metadata = metadata
-			}
+			// As before, unrecognized field types leave the corresponding
+			// score field at its zero value.
+			_ = json.Unmarshal(fields["name"], &score.Name)
+			_ = json.Unmarshal(fields["score"], &score.Score)
+			_ = json.Unmarshal(fields["metadata"], &score.Metadata)
 			return Scores{score}, nil
 		}
 
-		// Try to parse as a number (simple score)
-		if scoreVal, ok := output.(float64); ok {
-			return Scores{{Score: scoreVal}}, nil
+		var score float64
+		if err := json.Unmarshal(output, &score); err == nil {
+			return Scores{{Score: score}}, nil
 		}
-
-		return nil, fmt.Errorf("scorer output type mismatch: expected map or number, got %T", output)
+		return nil, fmt.Errorf("scorer output type mismatch: expected map or number, got %s", output)
 	}
 
 	return NewScorer(function.Name, scorerFunc), nil
+}
+
+// functionList decodes only the hosted function metadata used by tasks and scorers.
+type functionList struct {
+	Objects []struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+	} `json:"objects"`
+}
+
+func (f *FunctionsAPI[I, R]) queryFunctions(ctx context.Context, projectName string, opts FunctionOpts) (functionList, error) {
+	functions, err := https.DecodeJSON[functionList](f.api.GetFunction(ctx, &openapi.GetFunctionParams{ //nolint:bodyclose // false positive: DecodeJSON closes the body
+		ProjectName: https.String(projectName),
+		Slug:        https.String(opts.Slug),
+		Version:     https.String(opts.Version),
+		Environment: https.String(opts.Environment),
+		Limit:       https.Positive(1),
+	}))
+	if err != nil {
+		return functionList{}, fmt.Errorf("failed to query function: %w", err)
+	}
+	return functions, nil
+}
+
+// invokeFunction keeps SDK tracing and output-envelope semantics above the
+// generated operation. Raw JSON allows the caller to decode its own numeric types.
+func invokeFunction(ctx context.Context, client *openapi.Client, functionID string, input any) (json.RawMessage, error) {
+	ctx, span := otel.Tracer("braintrust-functions").Start(ctx, "function.invoke")
+	defer span.End()
+	span.SetAttributes(attribute.String("function.id", functionID))
+	if functionID == "" {
+		return nil, fmt.Errorf("function ID is required")
+	}
+	body, err := json.Marshal(struct {
+		Input any `json:"input"`
+	}{Input: input})
+	if err != nil {
+		return nil, fmt.Errorf("failed to encode function input: %w", err)
+	}
+	output, err := https.DecodeJSON[json.RawMessage](client.PostFunctionIdInvokeWithBody(ctx, functionID, "application/json", bytes.NewReader(body))) //nolint:bodyclose // false positive: DecodeJSON closes the body
+	if err != nil {
+		return nil, err
+	}
+	if len(output) > 0 && output[0] == '{' {
+		var envelope map[string]json.RawMessage
+		if err := json.Unmarshal(output, &envelope); err != nil {
+			return nil, fmt.Errorf("failed to decode response: %w", err)
+		}
+		if value, ok := envelope["output"]; ok {
+			return value, nil
+		}
+	}
+	return output, nil
 }
 
 // convertToType converts the function output to the expected type R.
@@ -170,6 +209,22 @@ func convertToType[R any](output any) (R, error) {
 	var zero R
 
 	if output == nil {
+		return zero, nil
+	}
+
+	if raw, ok := output.(json.RawMessage); ok {
+		// Strings may themselves contain JSON from an LLM. Keep the existing
+		// string conversion rules, while decoding all other values directly.
+		if len(raw) > 0 && raw[0] == '"' {
+			var text string
+			if err := json.Unmarshal(raw, &text); err != nil {
+				return zero, fmt.Errorf("failed to decode function output: %w", err)
+			}
+			return convertToType[R](text)
+		}
+		if err := json.Unmarshal(raw, &zero); err != nil {
+			return zero, fmt.Errorf("failed to unmarshal result to type %T: %w", zero, err)
+		}
 		return zero, nil
 	}
 

@@ -16,9 +16,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/eval"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
 	"github.com/braintrustdata/braintrust-sdk-go/prompt"
@@ -175,7 +175,7 @@ func vcrSession(t *testing.T) func(context.Context) (*session, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &session{session: authSession, api: api.NewWithHTTPSClient(httpsClient)}, nil
+		return &session{session: authSession, api: https.NewGenerated(httpsClient)}, nil
 	}
 }
 

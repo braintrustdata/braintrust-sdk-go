@@ -4,15 +4,16 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
+	"os"
 
 	"go.opentelemetry.io/otel/sdk/trace"
 
+	"github.com/oapi-codegen/nullable"
+
 	"github.com/braintrustdata/braintrust-sdk-go"
-	"github.com/braintrustdata/braintrust-sdk-go/api"
-	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
-	functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
-	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/eval"
+	"github.com/braintrustdata/braintrust-sdk-go/openapi"
 )
 
 // SentimentInput represents input for sentiment analysis
@@ -44,7 +45,23 @@ func main() {
 		log.Fatalf("Failed to create client: %v", err)
 	}
 
-	apiClient := client.API()
+	apiKey := os.Getenv("BRAINTRUST_API_KEY")
+	if apiKey == "" {
+		log.Fatal("BRAINTRUST_API_KEY is required")
+	}
+	baseURL := os.Getenv("BRAINTRUST_API_URL")
+	if baseURL == "" {
+		baseURL = "https://api.braintrust.dev"
+	}
+	apiClient, err := openapi.NewClientWithResponses(baseURL,
+		openapi.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
+			req.Header.Set("Authorization", "Bearer "+apiKey)
+			return nil
+		}),
+	)
+	if err != nil {
+		log.Fatalf("Failed to create REST client: %v", err)
+	}
 
 	// Step 1: Create a dataset with sentiment analysis test cases
 	fmt.Println("=== Step 1: Creating dataset ===")
@@ -159,197 +176,210 @@ func main() {
 }
 
 // createSentimentDataset creates a dataset with sentiment analysis test cases
-func createSentimentDataset(ctx context.Context, apiClient *api.API) (string, error) {
-	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{
+func createSentimentDataset(ctx context.Context, apiClient *openapi.ClientWithResponses) (string, error) {
+	project, err := apiClient.PostProjectWithResponse(ctx, openapi.CreateProject{
 		Name: "go-sdk-examples",
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to create project: %w", err)
 	}
+	if project.StatusCode() != http.StatusOK || project.JSON200 == nil {
+		return "", fmt.Errorf("failed to create project: HTTP %d: %s", project.StatusCode(), project.Body)
+	}
 
-	dataset, err := apiClient.Datasets().Create(ctx, datasets.CreateParams{
-		ProjectID:   project.ID,
+	dataset, err := apiClient.PostDatasetWithResponse(ctx, openapi.CreateDataset{
+		ProjectId:   project.JSON200.Id,
 		Name:        "sentiment-test-dataset",
-		Description: "Test dataset for sentiment analysis with Functions() API example",
+		Description: nullable.NewNullableWithValue("Test dataset for sentiment analysis with Functions() API example"),
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to create dataset: %w", err)
 	}
+	if dataset.StatusCode() != http.StatusOK || dataset.JSON200 == nil {
+		return "", fmt.Errorf("failed to create dataset: HTTP %d: %s", dataset.StatusCode(), dataset.Body)
+	}
 
 	// Insert test cases with various sentiments
-	events := []datasets.Event{
+	events := []openapi.InsertDatasetEvent{
 		{
-			Input:    SentimentInput{Text: "I love this product! It's amazing!"},
-			Expected: SentimentOutput{Sentiment: "positive"},
+			Input:    nullable.NewNullableWithValue[any](SentimentInput{Text: "I love this product! It's amazing!"}),
+			Expected: nullable.NewNullableWithValue[any](SentimentOutput{Sentiment: "positive"}),
 		},
 		{
-			Input:    SentimentInput{Text: "This is terrible. Very disappointed."},
-			Expected: SentimentOutput{Sentiment: "negative"},
+			Input:    nullable.NewNullableWithValue[any](SentimentInput{Text: "This is terrible. Very disappointed."}),
+			Expected: nullable.NewNullableWithValue[any](SentimentOutput{Sentiment: "negative"}),
 		},
 		{
-			Input:    SentimentInput{Text: "It's okay, nothing special."},
-			Expected: SentimentOutput{Sentiment: "neutral"},
+			Input:    nullable.NewNullableWithValue[any](SentimentInput{Text: "It's okay, nothing special."}),
+			Expected: nullable.NewNullableWithValue[any](SentimentOutput{Sentiment: "neutral"}),
 		},
 		{
-			Input:    SentimentInput{Text: "Absolutely wonderful experience!"},
-			Expected: SentimentOutput{Sentiment: "positive"},
+			Input:    nullable.NewNullableWithValue[any](SentimentInput{Text: "Absolutely wonderful experience!"}),
+			Expected: nullable.NewNullableWithValue[any](SentimentOutput{Sentiment: "positive"}),
 		},
 		{
-			Input:    SentimentInput{Text: "Worst purchase ever."},
-			Expected: SentimentOutput{Sentiment: "negative"},
+			Input:    nullable.NewNullableWithValue[any](SentimentInput{Text: "Worst purchase ever."}),
+			Expected: nullable.NewNullableWithValue[any](SentimentOutput{Sentiment: "negative"}),
 		},
 	}
 
-	if err := apiClient.Datasets().InsertEvents(ctx, dataset.ID, events); err != nil {
+	inserted, err := apiClient.PostDatasetIdInsertWithResponse(ctx, dataset.JSON200.Id.String(), openapi.InsertDatasetEventRequest{Events: events})
+	if err != nil {
 		return "", fmt.Errorf("failed to insert events: %w", err)
 	}
+	if inserted.StatusCode() != http.StatusOK || inserted.JSON200 == nil {
+		return "", fmt.Errorf("failed to insert events: HTTP %d: %s", inserted.StatusCode(), inserted.Body)
+	}
 
-	return dataset.ID, nil
+	return dataset.JSON200.Id.String(), nil
 }
 
 // createSentimentTask creates a prompt function for sentiment classification
-func createSentimentTask(ctx context.Context, apiClient *api.API, slug string) error {
-	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{
-		Name: "go-sdk-examples",
-	})
+func createSentimentTask(ctx context.Context, apiClient *openapi.ClientWithResponses, slug string) error {
+	promptData, err := sentimentPromptData(
+		"You are a sentiment analyzer. Classify the sentiment of the given text as 'positive', 'negative', or 'neutral'. Respond with valid JSON in the format: {\"sentiment\": \"<classification>\"}",
+		"{{input.text}}", 20,
+	)
 	if err != nil {
-		return fmt.Errorf("failed to create project: %w", err)
+		return err
 	}
-
-	// Delete existing function if it exists
-	functions := apiClient.Functions()
-	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
-		ProjectName: "go-sdk-examples",
-		Slug:        slug,
-		Limit:       1,
-	}); len(existing) > 0 {
-		_ = functions.Delete(ctx, existing[0].ID)
-	}
-
-	// Create sentiment classification prompt
-	_, err = functions.Create(ctx, functionsapi.CreateParams{
-		ProjectID:    project.ID,
+	return createSentimentPrompt(ctx, apiClient, openapi.CreateFunction{
 		Name:         "Sentiment Classifier",
 		Slug:         slug,
-		FunctionType: "task",
-		FunctionData: map[string]any{
-			"type": "prompt",
-		},
-		PromptData: map[string]any{
-			"prompt": map[string]any{
-				"type": "chat",
-				"messages": []map[string]any{
-					{
-						"role":    "system",
-						"content": "You are a sentiment analyzer. Classify the sentiment of the given text as 'positive', 'negative', or 'neutral'. Respond with valid JSON in the format: {\"sentiment\": \"<classification>\"}",
-					},
-					{
-						"role":    "user",
-						"content": "{{input.text}}",
-					},
-				},
-			},
-			"options": map[string]any{
-				"model": "gpt-4o-mini",
-				"params": map[string]any{
-					"temperature":     0,
-					"max_tokens":      20,
-					"response_format": map[string]any{"type": "json_object"},
-				},
-			},
-		},
+		FunctionType: nullable.NewNullableWithValue(openapi.FunctionTypeEnumNullishTask),
+		PromptData:   nullable.NewNullableWithValue(promptData),
 	})
-	if err != nil {
-		return fmt.Errorf("failed to create task: %w", err)
-	}
-
-	return nil
 }
 
-// createSentimentScorer creates a scorer function to evaluate sentiment accuracy
-func createSentimentScorer(ctx context.Context, apiClient *api.API, slug string) error {
-	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{
-		Name: "go-sdk-examples",
+// createSentimentScorer creates a scorer function to evaluate sentiment accuracy.
+func createSentimentScorer(ctx context.Context, apiClient *openapi.ClientWithResponses, slug string) error {
+	promptData, err := sentimentPromptData(
+		"You are an evaluator that checks if sentiment classifications are correct. Return a score of 1 if the output sentiment matches the expected sentiment, 0 otherwise. Respond with valid JSON in the format: {\"score\": <0 or 1>, \"name\": \"sentiment_match\"}",
+		"Expected sentiment: {{expected.sentiment}}\nActual sentiment: {{output.sentiment}}", 50,
+	)
+	if err != nil {
+		return err
+	}
+	return createSentimentPrompt(ctx, apiClient, openapi.CreateFunction{
+		Name:         "Sentiment Accuracy Scorer",
+		Slug:         slug,
+		FunctionType: nullable.NewNullableWithValue(openapi.FunctionTypeEnumNullishScorer),
+		PromptData:   nullable.NewNullableWithValue(promptData),
 	})
+}
+
+// sentimentPromptData builds the chat prompt shared by this example's task and scorer.
+func sentimentPromptData(system, user string, maxTokens float32) (openapi.PromptDataNullish, error) {
+	var systemContent openapi.ChatCompletionMessageParam_0_Content
+	if err := systemContent.FromChatCompletionMessageParam0Content0(system); err != nil {
+		return openapi.PromptDataNullish{}, err
+	}
+	var userContent openapi.ChatCompletionMessageParam_1_Content
+	if err := userContent.FromChatCompletionMessageParam1Content0(user); err != nil {
+		return openapi.PromptDataNullish{}, err
+	}
+	var systemMessage, userMessage openapi.ChatCompletionMessageParam
+	if err := systemMessage.FromChatCompletionMessageParam0(openapi.ChatCompletionMessageParam0{
+		Role: openapi.ChatCompletionMessageParam0RoleSystem, Content: &systemContent,
+	}); err != nil {
+		return openapi.PromptDataNullish{}, err
+	}
+	if err := userMessage.FromChatCompletionMessageParam1(openapi.ChatCompletionMessageParam1{
+		Role: openapi.ChatCompletionMessageParam1RoleUser, Content: &userContent,
+	}); err != nil {
+		return openapi.PromptDataNullish{}, err
+	}
+	var prompt openapi.PromptBlockDataNullish
+	if err := prompt.FromPromptBlockDataNullish0(openapi.PromptBlockDataNullish0{
+		Type:     openapi.PromptBlockDataNullish0TypeChat,
+		Messages: []openapi.ChatCompletionMessageParam{systemMessage, userMessage},
+	}); err != nil {
+		return openapi.PromptDataNullish{}, err
+	}
+	var responseFormat openapi.ResponseFormatNullish
+	if err := responseFormat.FromResponseFormatNullish0(openapi.ResponseFormatNullish0{
+		Type: openapi.ResponseFormatNullish0TypeJsonObject,
+	}); err != nil {
+		return openapi.PromptDataNullish{}, err
+	}
+	var params openapi.ModelParams
+	temperature := float32(0)
+	if err := params.FromModelParams0(openapi.ModelParams0{
+		Temperature:    &temperature,
+		MaxTokens:      &maxTokens,
+		ResponseFormat: nullable.NewNullableWithValue(responseFormat),
+	}); err != nil {
+		return openapi.PromptDataNullish{}, err
+	}
+	model := "gpt-4o-mini"
+	return openapi.PromptDataNullish{
+		Prompt:  nullable.NewNullableWithValue(prompt),
+		Options: nullable.NewNullableWithValue(openapi.PromptOptionsNullish{Model: &model, Params: &params}),
+	}, nil
+}
+
+func createSentimentPrompt(ctx context.Context, apiClient *openapi.ClientWithResponses, body openapi.CreateFunction) error {
+	project, err := apiClient.PostProjectWithResponse(ctx, openapi.CreateProject{Name: "go-sdk-examples"})
 	if err != nil {
 		return fmt.Errorf("failed to create project: %w", err)
 	}
-
-	// Delete existing function if it exists
-	functions := apiClient.Functions()
-	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
-		ProjectName: "go-sdk-examples",
-		Slug:        slug,
-		Limit:       1,
-	}); len(existing) > 0 {
-		_ = functions.Delete(ctx, existing[0].ID)
+	if project.StatusCode() != http.StatusOK || project.JSON200 == nil {
+		return fmt.Errorf("failed to create project: HTTP %d: %s", project.StatusCode(), project.Body)
 	}
-
-	// Create scorer prompt that checks if sentiment matches expected
-	_, err = functions.Create(ctx, functionsapi.CreateParams{
-		ProjectID:    project.ID,
-		Name:         "Sentiment Accuracy Scorer",
-		Slug:         slug,
-		FunctionType: "scorer",
-		FunctionData: map[string]any{
-			"type": "prompt",
-		},
-		PromptData: map[string]any{
-			"prompt": map[string]any{
-				"type": "chat",
-				"messages": []map[string]any{
-					{
-						"role":    "system",
-						"content": "You are an evaluator that checks if sentiment classifications are correct. Return a score of 1 if the output sentiment matches the expected sentiment, 0 otherwise. Respond with valid JSON in the format: {\"score\": <0 or 1>, \"name\": \"sentiment_match\"}",
-					},
-					{
-						"role":    "user",
-						"content": "Expected sentiment: {{expected.sentiment}}\nActual sentiment: {{output.sentiment}}",
-					},
-				},
-			},
-			"options": map[string]any{
-				"model": "gpt-4o-mini",
-				"params": map[string]any{
-					"temperature":     0,
-					"max_tokens":      50,
-					"response_format": map[string]any{"type": "json_object"},
-				},
-			},
-		},
-	})
+	body.ProjectId = project.JSON200.Id
+	if err := deleteSentimentFunction(ctx, apiClient, body.Slug); err != nil {
+		return err
+	}
+	if err := body.FunctionData.FromFunctionData0(openapi.FunctionData0{Type: openapi.FunctionData0TypePrompt}); err != nil {
+		return err
+	}
+	created, err := apiClient.PostFunctionWithResponse(ctx, body)
 	if err != nil {
-		return fmt.Errorf("failed to create scorer: %w", err)
+		return fmt.Errorf("failed to create %s: %w", body.Name, err)
 	}
-
+	if created.StatusCode() != http.StatusOK || created.JSON200 == nil {
+		return fmt.Errorf("failed to create %s: HTTP %d: %s", body.Name, created.StatusCode(), created.Body)
+	}
 	return nil
 }
 
-// cleanup removes test resources
-func cleanup(ctx context.Context, apiClient *api.API, datasetID, taskSlug, scorerSlug string) error {
-	// Delete dataset
-	if err := apiClient.Datasets().Delete(ctx, datasetID); err != nil {
-		return fmt.Errorf("dataset cleanup skipped (this is normal): %w", err)
+func deleteSentimentFunction(ctx context.Context, apiClient *openapi.ClientWithResponses, slug string) error {
+	projectName, limit := "go-sdk-examples", 1
+	existing, err := apiClient.GetFunctionWithResponse(ctx, &openapi.GetFunctionParams{
+		ProjectName: &projectName,
+		Slug:        &slug,
+		Limit:       &limit,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to query %s: %w", slug, err)
 	}
-
-	// Delete task function
-	functions := apiClient.Functions()
-	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
-		ProjectName: "go-sdk-examples",
-		Slug:        taskSlug,
-		Limit:       1,
-	}); len(existing) > 0 {
-		_ = functions.Delete(ctx, existing[0].ID)
+	if existing.StatusCode() != http.StatusOK || existing.JSON200 == nil {
+		return fmt.Errorf("failed to query %s: HTTP %d: %s", slug, existing.StatusCode(), existing.Body)
 	}
-
-	// Delete scorer function
-	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
-		ProjectName: "go-sdk-examples",
-		Slug:        scorerSlug,
-		Limit:       1,
-	}); len(existing) > 0 {
-		_ = functions.Delete(ctx, existing[0].ID)
+	if len(existing.JSON200.Objects) == 0 {
+		return nil
 	}
-
+	deleted, err := apiClient.DeleteFunctionIdWithResponse(ctx, existing.JSON200.Objects[0].Id.String())
+	if err != nil {
+		return fmt.Errorf("failed to delete %s: %w", slug, err)
+	}
+	if deleted.StatusCode() != http.StatusOK || deleted.JSON200 == nil {
+		return fmt.Errorf("failed to delete %s: HTTP %d: %s", slug, deleted.StatusCode(), deleted.Body)
+	}
 	return nil
+}
+
+// cleanup removes test resources.
+func cleanup(ctx context.Context, apiClient *openapi.ClientWithResponses, datasetID, taskSlug, scorerSlug string) error {
+	deleted, err := apiClient.DeleteDatasetIdWithResponse(ctx, datasetID)
+	if err != nil {
+		return fmt.Errorf("dataset cleanup skipped: %w", err)
+	}
+	if deleted.StatusCode() != http.StatusOK || deleted.JSON200 == nil {
+		return fmt.Errorf("dataset cleanup skipped: HTTP %d: %s", deleted.StatusCode(), deleted.Body)
+	}
+	if err := deleteSentimentFunction(ctx, apiClient, taskSlug); err != nil {
+		return err
+	}
+	return deleteSentimentFunction(ctx, apiClient, scorerSlug)
 }

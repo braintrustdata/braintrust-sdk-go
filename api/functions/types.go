@@ -1,4 +1,6 @@
 // Package functions provides operations for managing Braintrust functions (prompts, tools, scorers).
+//
+// New REST integrations should use github.com/braintrustdata/braintrust-sdk-go/openapi instead.
 package functions
 
 import (
@@ -6,8 +8,11 @@ import (
 )
 
 // API provides methods for interacting with functions.
+//
+// Deprecated: Use the openapi package's Client or ClientWithResponses.
 type API struct {
-	client *https.Client
+	client       *https.OpenAPIClient
+	invokeClient *https.Client
 }
 
 // Function represents a Braintrust function (prompt, tool, or scorer).

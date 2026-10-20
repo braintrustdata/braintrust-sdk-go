@@ -535,7 +535,11 @@ func TestInvokeModelClaude(t *testing.T) {
 	metadata := span.Metadata()
 	assert.Equal(t, "bedrock", metadata["provider"])
 	assert.Equal(t, "invoke_model", metadata["endpoint"])
-	assert.Equal(t, "claude-haiku-4-5-20251001", metadata["model"])
+	var response struct {
+		Model string `json:"model"`
+	}
+	require.NoError(t, json.Unmarshal(out.Body, &response))
+	assert.Equal(t, response.Model, metadata["model"])
 	assert.Equal(t, float64(50), metadata["max_tokens"])
 
 	input := span.Attr("braintrust.input_json").String()

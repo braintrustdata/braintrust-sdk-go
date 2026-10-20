@@ -42,13 +42,7 @@ func TestADK(t *testing.T) {
 	exporter := setupOtel(t)
 	ctx, outer := otel.Tracer("test").Start(t.Context(), "caller")
 	defer outer.End()
-	apiKey := os.Getenv("GOOGLE_API_KEY")
-	if vcr.GetVCRMode() != vcr.ModeReplay {
-		require.NotEmpty(t, apiKey, "GOOGLE_API_KEY is required to record")
-	}
-	if apiKey == "" {
-		apiKey = "dummy-key-for-vcr"
-	}
+	apiKey := providerAPIKey(t, "GOOGLE_API_KEY")
 	llm, err := gemini.NewModel(ctx, "gemini-2.5-flash", &genai.ClientConfig{
 		APIKey: apiKey, Backend: genai.BackendGeminiAPI, HTTPClient: vcr.NewHTTPClient(t),
 	})
@@ -102,7 +96,7 @@ func TestOpenAI(t *testing.T) {
 
 	// Create OpenAI client WITHOUT middleware - orchestrion should inject it
 	client := openai.NewClient(
-		openaioption.WithAPIKey("dummy-key-for-vcr"),
+		openaioption.WithAPIKey(providerAPIKey(t, "OPENAI_API_KEY")),
 		openaioption.WithHTTPClient(httpClient),
 		// NOTE: No WithMiddleware here! Orchestrion should inject it.
 	)
@@ -147,7 +141,7 @@ func TestOpenAIV2(t *testing.T) {
 
 	// Create OpenAI v2 client WITHOUT middleware - orchestrion should inject it
 	client := openaiv2.NewClient(
-		openaiv2option.WithAPIKey("dummy-key-for-vcr"),
+		openaiv2option.WithAPIKey(providerAPIKey(t, "OPENAI_API_KEY")),
 		openaiv2option.WithHTTPClient(httpClient),
 		// NOTE: No WithMiddleware here! Orchestrion should inject it.
 	)
@@ -262,14 +256,14 @@ func TestAnthropic(t *testing.T) {
 
 	// Create Anthropic client WITHOUT middleware - orchestrion should inject it
 	client := anthropic.NewClient(
-		anthropicoption.WithAPIKey("dummy-key-for-vcr"),
+		anthropicoption.WithAPIKey(providerAPIKey(t, "ANTHROPIC_API_KEY")),
 		anthropicoption.WithHTTPClient(httpClient),
 		// NOTE: No WithMiddleware here! Orchestrion should inject it.
 	)
 
 	// Make a messages request
 	_, err := client.Messages.New(context.Background(), anthropic.MessageNewParams{
-		Model:     "claude-3-haiku-20240307",
+		Model:     "claude-haiku-4-5-20251001",
 		MaxTokens: 1024,
 		Messages: []anthropic.MessageParam{
 			anthropic.NewUserMessage(anthropic.NewTextBlock("Say hello")),
@@ -307,7 +301,7 @@ func TestSashabaranovOpenAI(t *testing.T) {
 	httpClient := vcr.NewHTTPClient(t)
 
 	// Create config with VCR HTTPClient - orchestrion should wrap it
-	config := sashabaranovopenai.DefaultConfig("dummy-key-for-vcr")
+	config := sashabaranovopenai.DefaultConfig(providerAPIKey(t, "OPENAI_API_KEY"))
 	config.HTTPClient = httpClient
 	// NOTE: No traceopenai.WrapClient here! Orchestrion should inject it.
 
@@ -358,7 +352,7 @@ func TestGenAI(t *testing.T) {
 	// NOTE: No tracegenai.WrapClient here! Orchestrion should inject it.
 	client, err := genai.NewClient(context.Background(), &genai.ClientConfig{
 		HTTPClient: httpClient,
-		APIKey:     "dummy-key-for-vcr",
+		APIKey:     providerAPIKey(t, "GOOGLE_API_KEY"),
 		Backend:    genai.BackendGeminiAPI,
 	})
 	require.NoError(t, err)
@@ -366,7 +360,7 @@ func TestGenAI(t *testing.T) {
 	// Make a generateContent request
 	resp, err := client.Models.GenerateContent(
 		context.Background(),
-		"gemini-2.0-flash-exp",
+		"gemini-2.5-flash",
 		genai.Text("Say hello"),
 		nil,
 	)
@@ -404,7 +398,7 @@ func TestLangChainGo(t *testing.T) {
 
 	// Create LangChainGo OpenAI client WITHOUT callback - orchestrion should inject it.
 	llm, err := langchainopenai.New(
-		langchainopenai.WithToken("dummy-key-for-vcr"),
+		langchainopenai.WithToken(providerAPIKey(t, "OPENAI_API_KEY")),
 		langchainopenai.WithModel("gpt-4o-mini"),
 		langchainopenai.WithHTTPClient(httpClient),
 		// NOTE: No WithCallback here! Orchestrion should inject it.
@@ -449,7 +443,7 @@ func TestGenkit(t *testing.T) {
 	ctx := context.Background()
 	g := genkit.Init(ctx,
 		genkit.WithPlugins(&compatopenai.OpenAI{
-			APIKey: "dummy-key-for-vcr",
+			APIKey: providerAPIKey(t, "OPENAI_API_KEY"),
 			Opts: []openaioption.RequestOption{
 				openaioption.WithHTTPClient(httpClient),
 			},
@@ -519,7 +513,7 @@ func TestMultipleIntegrations(t *testing.T) {
 	ctx, rootSpan := otel.Tracer("orchestrion-test").Start(context.Background(), "multi-integration-root")
 
 	openAIClient := openai.NewClient(
-		openaioption.WithAPIKey("dummy-key-for-vcr"),
+		openaioption.WithAPIKey(providerAPIKey(t, "OPENAI_API_KEY")),
 		openaioption.WithHTTPClient(httpClient),
 		// NOTE: No WithMiddleware here! Orchestrion should inject it.
 	)
@@ -532,12 +526,12 @@ func TestMultipleIntegrations(t *testing.T) {
 	require.NoError(t, err)
 
 	anthropicClient := anthropic.NewClient(
-		anthropicoption.WithAPIKey("dummy-key-for-vcr"),
+		anthropicoption.WithAPIKey(providerAPIKey(t, "ANTHROPIC_API_KEY")),
 		anthropicoption.WithHTTPClient(httpClient),
 		// NOTE: No WithMiddleware here! Orchestrion should inject it.
 	)
 	_, err = anthropicClient.Messages.New(ctx, anthropic.MessageNewParams{
-		Model:     "claude-3-haiku-20240307",
+		Model:     "claude-haiku-4-5-20251001",
 		MaxTokens: 1024,
 		Messages: []anthropic.MessageParam{
 			anthropic.NewUserMessage(anthropic.NewTextBlock("Say hello")),
@@ -547,13 +541,13 @@ func TestMultipleIntegrations(t *testing.T) {
 
 	genAIClient, err := genai.NewClient(ctx, &genai.ClientConfig{
 		HTTPClient: httpClient,
-		APIKey:     "dummy-key-for-vcr",
+		APIKey:     providerAPIKey(t, "GOOGLE_API_KEY"),
 		Backend:    genai.BackendGeminiAPI,
 	})
 	require.NoError(t, err)
 	resp, err := genAIClient.Models.GenerateContent(
 		ctx,
-		"gemini-2.0-flash-exp",
+		"gemini-2.5-flash",
 		genai.Text("Say hello"),
 		nil,
 	)
@@ -561,7 +555,7 @@ func TestMultipleIntegrations(t *testing.T) {
 	require.NotNil(t, resp)
 
 	langChainClient, err := langchainopenai.New(
-		langchainopenai.WithToken("dummy-key-for-vcr"),
+		langchainopenai.WithToken(providerAPIKey(t, "OPENAI_API_KEY")),
 		langchainopenai.WithModel("gpt-4o-mini"),
 		langchainopenai.WithHTTPClient(httpClient),
 		// NOTE: No WithCallback here! Orchestrion should inject it.
@@ -601,6 +595,16 @@ func TestMultipleIntegrations(t *testing.T) {
 		require.Equal(t, root.Stub.SpanContext.TraceID(), span.Stub.SpanContext.TraceID(), "span %q should share the root trace", span.Name())
 		require.Equal(t, root.Stub.SpanContext.SpanID(), span.Stub.Parent.SpanID(), "span %q should be a child of the root span", span.Name())
 	}
+}
+
+func providerAPIKey(t *testing.T, name string) string {
+	t.Helper()
+	if vcr.GetVCRMode() == vcr.ModeReplay {
+		return "dummy-key-for-vcr"
+	}
+	key := os.Getenv(name)
+	require.NotEmpty(t, key, "%s is required for live API calls", name)
+	return key
 }
 
 // setupOtel sets up OpenTelemetry with an in-memory exporter for testing

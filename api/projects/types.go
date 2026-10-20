@@ -1,4 +1,6 @@
 // Package projects provides operations for managing Braintrust projects.
+//
+// New REST integrations should use github.com/braintrustdata/braintrust-sdk-go/openapi instead.
 package projects
 
 // Project represents a project in Braintrust.

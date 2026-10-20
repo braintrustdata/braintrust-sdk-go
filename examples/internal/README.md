@@ -30,6 +30,7 @@ Comprehensive examples testing all features for each AI provider:
 - **[langchaingo-anthropic/](langchaingo-anthropic/)** - LangChainGo with Anthropic provider (uses forked langchaingo)
 - **[functions/](functions/)** - Functions API usage (loading tasks/scorers with FunctionOpts)
 - **[braintrust-json/](braintrust-json/)** - Braintrust API key discovery from environment or `.braintrust.json`
+- **[openapi/](openapi/)** - Direct use of the public generated `openapi` client. Run `go run ./examples/internal/openapi` offline, or add `-live` with `BRAINTRUST_API_KEY` set to list/get a project without modifying data. Add `-automation-id "<id>"` with `-live` to fetch an existing project automation. For opt-in CRUD lifecycles, see the [public API client example](../api-client/).
 - **[span-customizers/](span-customizers/)** - Completed-span export redaction using ordered customizer hooks; run `go run ./examples/internal/span-customizers/main.go` from the repository root with `BRAINTRUST_API_KEY` set.
 - **[rewrite/](rewrite/)** - Manual tracing and evaluator API testing
 - **[email-evals/](email-evals/)** - Realistic eval example with complex scoring

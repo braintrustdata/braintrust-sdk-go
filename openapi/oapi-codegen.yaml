@@ -1,0 +1,38 @@
+package: openapi
+generate:
+  models: true
+  client: true
+compatibility:
+  always-prefix-enum-values: true
+output-options:
+  nullable-type: true
+  resolve-type-name-collisions: true
+  # REST resources include function invocation. CORS/Other are preflight and
+  # diagnostics. CrossObject/Evals/Logs/Proxy retain specialized ingestion,
+  # execution, streaming, or proxy transports outside these REST bindings.
+  include-tags:
+    - Projects
+    - Experiments
+    - Datasets
+    - Prompts
+    - Functions
+    - Acls
+    - Agents
+    - AiSecrets
+    - ApiKeys
+    - DatasetSnapshots
+    - EnvVars
+    - Environments
+    - Groups
+    - McpServers
+    - OrgAutomations
+    - Organizations
+    - ProjectAutomations
+    - ProjectGroups
+    - ProjectScores
+    - ProjectTags
+    - Roles
+    - ServiceTokens
+    - SpanIframes
+    - Users
+    - Views

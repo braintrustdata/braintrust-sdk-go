@@ -1,13 +1,16 @@
 package eval
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"maps"
 
 	oteltrace "go.opentelemetry.io/otel/trace"
 
 	"github.com/braintrustdata/braintrust-sdk-go/api/experiments"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 )
 
 func (w *WorkflowEval[I, R]) logRun(ctx context.Context, run *workflowRun[I, R], stages []workflowStage[I, R]) error {
@@ -22,7 +25,16 @@ func (w *WorkflowEval[I, R]) logRun(ctx context.Context, run *workflowRun[I, R],
 		if len(events) == 0 {
 			return nil
 		}
-		if err := w.evaluator.api.Experiments().InsertEvents(ctx, run.ExperimentID, events); err != nil {
+		if run.ExperimentID == "" {
+			return errors.New("experiment ID is required")
+		}
+		body, err := json.Marshal(struct {
+			Events []experiments.Event `json:"events"`
+		}{Events: events})
+		if err != nil {
+			return err
+		}
+		if err := https.CheckAndClose(w.evaluator.api.PostExperimentIdInsertWithBody(ctx, run.ExperimentID, "application/json", bytes.NewReader(body))); err != nil { //nolint:bodyclose // false positive: CheckAndClose closes the body
 			return err
 		}
 		for _, i := range logged {

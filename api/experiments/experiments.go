@@ -4,14 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/url"
-	"strconv"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
+	"github.com/braintrustdata/braintrust-sdk-go/openapi"
 )
 
 // InsertEvents inserts or merges experiment rows. Set ID to a stable row ID and
 // IsMerge to true when updating an existing row across process boundaries.
+//
+// Deprecated: Use [openapi.ClientWithResponses.PostExperimentIdInsertWithResponse].
 func (a *API) InsertEvents(ctx context.Context, experimentID string, events []Event) error {
 	if experimentID == "" {
 		return fmt.Errorf("experiment ID is required")
@@ -19,7 +20,11 @@ func (a *API) InsertEvents(ctx context.Context, experimentID string, events []Ev
 	if len(events) == 0 {
 		return nil
 	}
-	resp, err := a.client.POST(ctx, "/v1/experiment/"+url.PathEscape(experimentID)+"/insert", map[string]any{"events": events})
+	body, err := a.client.JSONBody(map[string]any{"events": events})
+	if err != nil {
+		return err
+	}
+	resp, err := a.client.PostExperimentIdInsertWithBody(ctx, experimentID, "application/json", body)
 	if err != nil {
 		return err
 	}
@@ -28,19 +33,27 @@ func (a *API) InsertEvents(ctx context.Context, experimentID string, events []Ev
 }
 
 // New creates a new Experiments API client
+//
+// Deprecated: Use [openapi.NewClientWithResponses].
 func New(client *https.Client) *API {
-	return &API{client: client}
+	return &API{client: https.NewOpenAPIClient(client)}
 }
 
 // Create creates a new experiment. If there is an existing experiment in the project
 // with the same name as the one specified in the request, will return the existing
 // experiment unmodified (unless EnsureNew is true).
+//
+// Deprecated: Use [openapi.ClientWithResponses.PostExperimentWithResponse].
 func (a *API) Create(ctx context.Context, params CreateParams) (*Experiment, error) {
 	if params.ProjectID == "" {
 		return nil, fmt.Errorf("project ID is required")
 	}
 
-	resp, err := a.client.POST(ctx, "/v1/experiment", params)
+	body, err := a.client.JSONBody(params)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := a.client.PostExperimentWithBody(ctx, "application/json", body)
 	if err != nil {
 		return nil, err
 	}
@@ -58,6 +71,9 @@ func (a *API) Create(ctx context.Context, params CreateParams) (*Experiment, err
 // This is a convenience wrapper around Create for backward compatibility.
 // If an experiment with the given name already exists and Update is true, it returns that experiment.
 // If Update is false (or via EnsureNew), it creates a new experiment.
+//
+// Deprecated: Use [openapi.ClientWithResponses.PostExperimentWithResponse].
+// Set ensure_new to the inverse of opts.Update to preserve registration behavior.
 func (a *API) Register(ctx context.Context, name, projectID string, opts RegisterOpts) (*Experiment, error) {
 	if name == "" {
 		return nil, fmt.Errorf("experiment name is required")
@@ -78,23 +94,17 @@ func (a *API) Register(ctx context.Context, name, projectID string, opts Registe
 }
 
 // List returns a list of experiments filtered by the given parameters.
+//
+// Deprecated: Use [openapi.ClientWithResponses.GetExperimentWithResponse].
 func (a *API) List(ctx context.Context, params ListParams) (*ListResponse, error) {
-	queryParams := make(map[string]string)
-
-	if params.ProjectID != "" {
-		queryParams["project_id"] = params.ProjectID
-	}
-	if params.ExperimentName != "" {
-		queryParams["experiment_name"] = params.ExperimentName
-	}
-	if params.OrgName != "" {
-		queryParams["org_name"] = params.OrgName
-	}
-	if params.Limit > 0 {
-		queryParams["limit"] = strconv.Itoa(params.Limit)
+	queryParams := &openapi.GetExperimentParams{
+		ProjectId:      https.String(params.ProjectID),
+		ExperimentName: https.String(params.ExperimentName),
+		OrgName:        https.String(params.OrgName),
+		Limit:          https.Positive(params.Limit),
 	}
 
-	resp, err := a.client.GET(ctx, "/v1/experiment", queryParams)
+	resp, err := a.client.GetExperiment(ctx, queryParams)
 	if err != nil {
 		return nil, err
 	}
@@ -109,12 +119,14 @@ func (a *API) List(ctx context.Context, params ListParams) (*ListResponse, error
 }
 
 // Get retrieves an experiment by its ID.
+//
+// Deprecated: Use [openapi.ClientWithResponses.GetExperimentIdWithResponse].
 func (a *API) Get(ctx context.Context, experimentID string) (*Experiment, error) {
 	if experimentID == "" {
 		return nil, fmt.Errorf("experiment ID is required")
 	}
 
-	resp, err := a.client.GET(ctx, "/v1/experiment/"+experimentID, nil)
+	resp, err := a.client.GetExperimentId(ctx, experimentID)
 	if err != nil {
 		return nil, err
 	}
@@ -129,12 +141,14 @@ func (a *API) Get(ctx context.Context, experimentID string) (*Experiment, error)
 }
 
 // Delete deletes an experiment by its ID.
+//
+// Deprecated: Use [openapi.ClientWithResponses.DeleteExperimentIdWithResponse].
 func (a *API) Delete(ctx context.Context, experimentID string) error {
 	if experimentID == "" {
 		return fmt.Errorf("experiment ID is required")
 	}
 
-	resp, err := a.client.DELETE(ctx, "/v1/experiment/"+experimentID)
+	resp, err := a.client.DeleteExperimentId(ctx, experimentID)
 	if err != nil {
 		return err
 	}

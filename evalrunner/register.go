@@ -195,7 +195,7 @@ func (r *registeredEvalImpl[I, R]) run(ctx context.Context, cfg *evalRunConfig) 
 	// Build a per-run evaluator with the caller's session rather than whatever
 	// the Eval was constructed with, so traces are attributed to the user who
 	// triggered this request.
-	evaluator := eval.NewEvaluator[I, R](cfg.session.authSession(), tp, cfg.session.apiClient(), r.projectName())
+	evaluator := eval.NewEvaluatorWithClient[I, R](cfg.session.authSession(), tp, cfg.session.apiClient(), r.projectName())
 	e := eval.NewEval(evaluator, r.def)
 	result, evalErr := e.Run(evalCtx, eval.RunOpts[I, R]{
 		Experiment:  experimentName,
@@ -304,7 +304,7 @@ func (r *registeredEvalImpl[I, R]) resolveDataset(ctx context.Context, cfg *eval
 		return nil, fmt.Errorf("dataset resolution requires authentication")
 	}
 
-	evaluator := eval.NewEvaluator[I, R](cfg.session.session, nil, cfg.session.api, r.projectName())
+	evaluator := eval.NewEvaluatorWithClient[I, R](cfg.session.session, nil, cfg.session.api, r.projectName())
 	dsAPI := evaluator.Datasets()
 
 	if data.DatasetID != "" {

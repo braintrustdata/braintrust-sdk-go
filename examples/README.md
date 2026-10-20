@@ -20,6 +20,11 @@ Learn how to evaluate and improve your AI applications:
 - **[dataset-api/](dataset-api/)** - Complete workflow: create datasets, use prompts, run evals
 - **[scorers/](scorers/)** - Custom scoring with online and code-based scorers
 
+## HTTP API Client
+
+- **[api-client/](api-client/)** - Use the public generated `openapi` client to browse an existing project's experiments, prompts, and datasets without modifying state. Includes commented-out calls to full dataset-row and paused project-automation CRUD lifecycles with cleanup.
+- [HTTP API client guide](../docs/api-client.md) - Generated methods/models, authentication, HTTP status handling, and opt-in write lifecycles.
+
 ## Alternative Providers & Libraries
 
 Examples for other AI providers and client libraries:

@@ -21,12 +21,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/anthropics/anthropic-sdk-go"
 	anthropicoption "github.com/anthropics/anthropic-sdk-go/option"
+	"github.com/google/uuid"
+	"github.com/oapi-codegen/nullable"
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
 	"go.opentelemetry.io/otel"
@@ -35,10 +38,8 @@ import (
 	oteltrace "go.opentelemetry.io/otel/trace"
 
 	"github.com/braintrustdata/braintrust-sdk-go"
-	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
-	functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
-	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/eval"
+	"github.com/braintrustdata/braintrust-sdk-go/openapi"
 	"github.com/braintrustdata/braintrust-sdk-go/trace/attachment"
 	traceanthropic "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic"
 	traceopenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"
@@ -65,12 +66,25 @@ func main() {
 		log.Fatalf("Failed to initialize Braintrust: %v", err)
 	}
 
+	key := os.Getenv("BRAINTRUST_API_KEY")
+	baseURL := os.Getenv("BRAINTRUST_API_URL")
+	if baseURL == "" {
+		baseURL = "https://api.braintrust.dev"
+	}
+	api, err := openapi.NewClientWithResponses(baseURL, openapi.WithRequestEditorFn(func(_ context.Context, req *http.Request) error {
+		req.Header.Set("Authorization", "Bearer "+key)
+		return nil
+	}))
+	if err != nil {
+		log.Fatalf("Failed to initialize REST client: %v", err)
+	}
+
 	// Get or create project
-	project, err := getOrCreateProject(bt, "go-sdk-examples")
+	project, err := getOrCreateProject(api, "go-sdk-examples")
 	if err != nil {
 		log.Fatalf("Failed to get/create project: %v", err)
 	}
-	fmt.Printf("📁 Using project: %s (ID: %s)\n\n", project.Name, project.ID)
+	fmt.Printf("📁 Using project: %s (ID: %s)\n\n", project.Name, project.Id)
 
 	// Create tracer and main span
 	tracer := otel.Tracer("kitchensink-example")
@@ -92,7 +106,7 @@ func main() {
 
 	// === EVAL SECTION ===
 	fmt.Println("📊 Running evaluation demonstrations...")
-	runEvalDemos(bt, project.ID)
+	runEvalDemos(bt, api, project.Id)
 	fmt.Println()
 
 	// Force flush after evals to capture function.invoke spans
@@ -117,18 +131,15 @@ func validateEnv() error {
 	return nil
 }
 
-func getOrCreateProject(bt *braintrust.Client, name string) (*projects.Project, error) {
-	// Try to create the project; if it already exists, API will return existing one or error
-	project, err := bt.API().Projects().Create(context.Background(), projects.CreateParams{
-		Name: name,
-	})
+func getOrCreateProject(api *openapi.ClientWithResponses, name string) (*openapi.Project, error) {
+	response, err := api.PostProjectWithResponse(context.Background(), openapi.CreateProject{Name: name})
 	if err != nil {
-		// If creation failed, it might already exist
-		// For simplicity in this example, we'll just return the error
-		// In production, you'd want to list projects and find by name
-		return nil, fmt.Errorf("failed to create project: %v", err)
+		return nil, fmt.Errorf("failed to create project: %w", err)
 	}
-	return project, nil
+	if response.StatusCode() != http.StatusOK || response.JSON200 == nil {
+		return nil, fmt.Errorf("creating project: HTTP %d: %s", response.StatusCode(), response.Body)
+	}
+	return response.JSON200, nil
 }
 
 func runTracingDemos(ctx context.Context, tracer oteltrace.Tracer, tp *trace.TracerProvider) {
@@ -325,14 +336,14 @@ func runAttachmentDemos(ctx context.Context, tracer oteltrace.Tracer) {
 	}()
 }
 
-func runEvalDemos(bt *braintrust.Client, projectID string) {
+func runEvalDemos(bt *braintrust.Client, api *openapi.ClientWithResponses, projectID uuid.UUID) {
 	// 1. Eval with hardcoded dataset and local task/scorers
 	fmt.Println("  → Eval with hardcoded dataset and local task/scorers")
 	runHardcodedDatasetEval(bt)
 
 	// 2. Eval with API dataset and hosted task/scorer
 	fmt.Println("  → Eval with API dataset and hosted task/scorer")
-	runAPIDatasetWithHostedFunctions(bt, projectID)
+	runAPIDatasetWithHostedFunctions(bt, api, projectID)
 }
 
 func runHardcodedDatasetEval(bt *braintrust.Client) {
@@ -370,12 +381,12 @@ func runHardcodedDatasetEval(bt *braintrust.Client) {
 	}
 }
 
-func runAPIDatasetWithHostedFunctions(bt *braintrust.Client, projectID string) {
+func runAPIDatasetWithHostedFunctions(bt *braintrust.Client, api *openapi.ClientWithResponses, projectID uuid.UUID) {
 	ctx := context.Background()
 	evaluator := braintrust.NewEvaluator[string, string](bt)
 
 	// 1. Create API dataset
-	datasetID, err := getOrCreateGreeterDataset(bt, projectID)
+	datasetID, err := getOrCreateGreeterDataset(api, projectID)
 	if err != nil {
 		log.Fatalf("Failed to create dataset: %v", err)
 	}
@@ -386,9 +397,9 @@ func runAPIDatasetWithHostedFunctions(bt *braintrust.Client, projectID string) {
 		log.Fatalf("Failed to fetch dataset: %v", err)
 	}
 
-	// 3. Create hosted task prompt using bt.API().Functions()
+	// 3. Create hosted task prompt using the generated REST client
 	taskSlug := "sdk-greeter-prompt-195e"
-	if err := createOrGetPrompt(bt, projectID, taskSlug); err != nil {
+	if err := createOrGetPrompt(api, projectID, taskSlug); err != nil {
 		log.Fatalf("Failed to create/get prompt: %v", err)
 	}
 
@@ -400,9 +411,9 @@ func runAPIDatasetWithHostedFunctions(bt *braintrust.Client, projectID string) {
 		log.Fatalf("Failed to load hosted task: %v", err)
 	}
 
-	// 5. Create hosted scorer using bt.API().Functions()
+	// 5. Create hosted scorer using the generated REST client
 	scorerSlug := "fail-scorer-d879"
-	if err := createOrGetScorer(bt, projectID, scorerSlug); err != nil {
+	if err := createOrGetScorer(api, projectID, scorerSlug); err != nil {
 		log.Fatalf("Failed to create/get scorer: %v", err)
 	}
 
@@ -426,146 +437,128 @@ func runAPIDatasetWithHostedFunctions(bt *braintrust.Client, projectID string) {
 	}
 }
 
-func getOrCreateGreeterDataset(bt *braintrust.Client, projectID string) (string, error) {
-	// Create a new dataset with timestamp for greeter examples
+func getOrCreateGreeterDataset(api *openapi.ClientWithResponses, projectID uuid.UUID) (string, error) {
+	ctx := context.Background()
 	timestamp := fmt.Sprintf("%d", time.Now().Unix())
-	datasetInfo, err := bt.API().Datasets().Create(context.Background(), datasets.CreateParams{
-		ProjectID:   projectID,
+	dataset, err := api.PostDatasetWithResponse(ctx, openapi.CreateDataset{
+		ProjectId:   projectID,
 		Name:        "kitchensink-greeter-dataset-" + timestamp,
-		Description: "Kitchen sink greeter dataset for hosted function testing",
+		Description: nullable.NewNullableWithValue("Kitchen sink greeter dataset for hosted function testing"),
 	})
 	if err != nil {
 		return "", err
 	}
-
-	// Insert greeter test cases
-	events := []datasets.Event{
-		{
-			Input:    "Alice",
-			Expected: "Hello Alice",
-		},
-		{
-			Input:    "Bob",
-			Expected: "Hi Bob",
-		},
-		{
-			Input:    "Charlie",
-			Expected: "Hey Charlie",
-		},
+	if dataset.StatusCode() != http.StatusOK || dataset.JSON200 == nil {
+		return "", fmt.Errorf("creating dataset: HTTP %d: %s", dataset.StatusCode(), dataset.Body)
 	}
-
-	err = bt.API().Datasets().Insert(context.Background(), datasetInfo.ID, datasets.InsertParams{Events: events})
+	events := []openapi.InsertDatasetEvent{
+		{Input: nullable.NewNullableWithValue[any]("Alice"), Expected: nullable.NewNullableWithValue[any]("Hello Alice")},
+		{Input: nullable.NewNullableWithValue[any]("Bob"), Expected: nullable.NewNullableWithValue[any]("Hi Bob")},
+		{Input: nullable.NewNullableWithValue[any]("Charlie"), Expected: nullable.NewNullableWithValue[any]("Hey Charlie")},
+	}
+	id := dataset.JSON200.Id.String()
+	inserted, err := api.PostDatasetIdInsertWithResponse(ctx, id, openapi.InsertDatasetEventRequest{Events: events})
 	if err != nil {
 		return "", err
 	}
-
-	return datasetInfo.ID, nil
+	if inserted.StatusCode() != http.StatusOK || inserted.JSON200 == nil {
+		return "", fmt.Errorf("inserting dataset events: HTTP %d: %s", inserted.StatusCode(), inserted.Body)
+	}
+	return id, nil
 }
 
-func createOrGetPrompt(bt *braintrust.Client, projectID, slug string) error {
-	ctx := context.Background()
+func createOrGetPrompt(api *openapi.ClientWithResponses, projectID uuid.UUID, slug string) error {
+	return createOrGetHostedFunction(api, projectID, slug, false)
+}
 
-	// Check if prompt already exists
-	existing, err := bt.API().Functions().Query(ctx, functionsapi.QueryParams{
-		ProjectID: projectID,
-		Slug:      slug,
-		Limit:     1,
+func createOrGetScorer(api *openapi.ClientWithResponses, projectID uuid.UUID, slug string) error {
+	return createOrGetHostedFunction(api, projectID, slug, true)
+}
+
+// createOrGetHostedFunction prepares the two prompt-backed functions used by this eval.
+func createOrGetHostedFunction(api *openapi.ClientWithResponses, projectID uuid.UUID, slug string, scorer bool) error {
+	ctx := context.Background()
+	limit, project := 1, projectID.String()
+	existing, err := api.GetFunctionWithResponse(ctx, &openapi.GetFunctionParams{
+		ProjectId: &project, Slug: &slug, Limit: &limit,
 	})
-	if err == nil && len(existing) > 0 {
-		// Prompt already exists
+	if err != nil {
+		return err
+	}
+	if existing.StatusCode() != http.StatusOK || existing.JSON200 == nil {
+		return fmt.Errorf("querying function: HTTP %d: %s", existing.StatusCode(), existing.Body)
+	}
+	if len(existing.JSON200.Objects) > 0 {
 		return nil
 	}
 
-	// Create the prompt
-	_, err = bt.API().Functions().Create(ctx, functionsapi.CreateParams{
-		ProjectID: projectID,
-		Name:      "SDK Greeter Prompt",
-		Slug:      slug,
-		FunctionData: map[string]any{
-			"type": "prompt",
-		},
-		PromptData: map[string]any{
-			"prompt": map[string]any{
-				"type": "chat",
-				"messages": []map[string]any{
-					{
-						"role":    "system",
-						"content": "You are a friendly greeter. Respond with a greeting that includes the person's name.",
-					},
-					{
-						"role":    "user",
-						"content": "Greet {{input}}",
-					},
-				},
-			},
-			"options": map[string]any{
-				"model": "gpt-4o-mini",
-				"params": map[string]any{
-					"temperature": 0,
-					"max_tokens":  50,
-				},
-			},
-		},
-		Description: "A simple greeter prompt for testing",
-	})
-
-	return err
-}
-
-func createOrGetScorer(bt *braintrust.Client, projectID, slug string) error {
-	ctx := context.Background()
-
-	// Check if scorer already exists
-	existing, err := bt.API().Functions().Query(ctx, functionsapi.QueryParams{
-		ProjectID: projectID,
-		Slug:      slug,
-		Limit:     1,
-	})
-	if err == nil && len(existing) > 0 {
-		// Scorer already exists
-		return nil
+	name := "SDK Greeter Prompt"
+	description := "A simple greeter prompt for testing"
+	systemText := "You are a friendly greeter. Respond with a greeting that includes the person's name."
+	userText := "Greet {{input}}"
+	maxTokens := float32(50)
+	if scorer {
+		name = "Exact Match Scorer"
+		description = "A simple exact match scorer"
+		systemText = "You are a scorer that evaluates if the output matches the expected value."
+		userText = "Output: {{output}}\nExpected: {{expected}}\n\nChoose 'pass' if they match exactly, 'fail' otherwise."
+		maxTokens = 10
 	}
-
-	// Create the scorer (prompt-based scorer)
-	_, err = bt.API().Functions().Create(ctx, functionsapi.CreateParams{
-		ProjectID:    projectID,
-		Name:         "Exact Match Scorer",
-		Slug:         slug,
-		FunctionType: "scorer",
-		FunctionData: map[string]any{
-			"type": "prompt",
-		},
-		PromptData: map[string]any{
-			"parser": map[string]any{
-				"type":          "llm_classifier",
-				"use_cot":       false,
-				"choice_scores": map[string]any{"fail": 0.0, "pass": 1.0},
-			},
-			"prompt": map[string]any{
-				"type": "chat",
-				"messages": []map[string]any{
-					{
-						"role":    "system",
-						"content": "You are a scorer that evaluates if the output matches the expected value.",
-					},
-					{
-						"role":    "user",
-						"content": "Output: {{output}}\nExpected: {{expected}}\n\nChoose 'pass' if they match exactly, 'fail' otherwise.",
-					},
-				},
-			},
-			"options": map[string]any{
-				"model": "gpt-4o-mini",
-				"params": map[string]any{
-					"temperature": 0,
-					"max_tokens":  10,
-				},
-			},
-		},
-		Description: "A simple exact match scorer",
-	})
-
-	return err
+	var functionData openapi.FunctionData
+	if err := functionData.FromFunctionData0(openapi.FunctionData0{Type: "prompt"}); err != nil {
+		return err
+	}
+	var systemContent openapi.ChatCompletionMessageParam_0_Content
+	if err := systemContent.FromChatCompletionMessageParam0Content0(systemText); err != nil {
+		return err
+	}
+	var userContent openapi.ChatCompletionMessageParam_1_Content
+	if err := userContent.FromChatCompletionMessageParam1Content0(userText); err != nil {
+		return err
+	}
+	var system, user openapi.ChatCompletionMessageParam
+	if err := system.FromChatCompletionMessageParam0(openapi.ChatCompletionMessageParam0{Role: "system", Content: &systemContent}); err != nil {
+		return err
+	}
+	if err := user.FromChatCompletionMessageParam1(openapi.ChatCompletionMessageParam1{Role: "user", Content: &userContent}); err != nil {
+		return err
+	}
+	var block openapi.PromptBlockDataNullish
+	if err := block.FromPromptBlockDataNullish0(openapi.PromptBlockDataNullish0{
+		Type: "chat", Messages: []openapi.ChatCompletionMessageParam{system, user},
+	}); err != nil {
+		return err
+	}
+	model, temperature := "gpt-4o-mini", float32(0)
+	var params openapi.ModelParams
+	if err := params.FromModelParams0(openapi.ModelParams0{Temperature: &temperature, MaxTokens: &maxTokens}); err != nil {
+		return err
+	}
+	promptData := openapi.PromptDataNullish{
+		Prompt:  nullable.NewNullableWithValue(block),
+		Options: nullable.NewNullableWithValue(openapi.PromptOptionsNullish{Model: &model, Params: &params}),
+	}
+	body := openapi.CreateFunction{
+		ProjectId: projectID, Name: name, Slug: slug,
+		Description:  nullable.NewNullableWithValue(description),
+		FunctionData: functionData,
+	}
+	if scorer {
+		choices := map[string]float32{"fail": 0, "pass": 1}
+		promptData.Parser = nullable.NewNullableWithValue(openapi.PromptParserNullish{
+			Type: "llm_classifier", UseCot: false, ChoiceScores: &choices,
+		})
+		body.FunctionType = nullable.NewNullableWithValue(openapi.FunctionTypeEnumNullish("scorer"))
+	}
+	body.PromptData = nullable.NewNullableWithValue(promptData)
+	response, err := api.PostFunctionWithResponse(ctx, body)
+	if err != nil {
+		return err
+	}
+	if response.StatusCode() != http.StatusOK || response.JSON200 == nil {
+		return fmt.Errorf("creating function: HTTP %d: %s", response.StatusCode(), response.Body)
+	}
+	return nil
 }
 
 // Helper functions for test images

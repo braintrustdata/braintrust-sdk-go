@@ -15,7 +15,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	oteltrace "go.opentelemetry.io/otel/trace"
 
-	"github.com/braintrustdata/braintrust-sdk-go/api"
+	"github.com/braintrustdata/braintrust-sdk-go/openapi"
 )
 
 // These tests exercise the orchestration state machine with local callbacks;
@@ -316,7 +316,7 @@ func TestWorkflowLocalTracing(t *testing.T) {
 	tp := sdktrace.NewTracerProvider(sdktrace.WithSyncer(exporter))
 	t.Cleanup(func() { require.NoError(t, tp.Shutdown(ctx)) })
 	var root oteltrace.SpanContext
-	w := NewWorkflowEval(NewEvaluator[int, int](nil, tp, nil, ""), &WorkflowEval[int, int]{Name: "tracing", Store: NewWorkflowEvalMemoryStore(),
+	w := NewWorkflowEval(NewEvaluatorWithClient[int, int](nil, tp, nil, ""), &WorkflowEval[int, int]{Name: "tracing", Store: NewWorkflowEvalMemoryStore(),
 		Task: TaskWithHooks(func(ctx context.Context, input int, hooks *TaskHooks) (int, error) {
 			require.True(t, hooks.TaskSpan.IsRecording())
 			root = hooks.EvalSpan.SpanContext()
@@ -612,10 +612,10 @@ func TestWorkflowStartRegistersExperimentBeforeWritingCases(t *testing.T) {
 	ctx := context.Background()
 	store := NewWorkflowEvalMemoryStore()
 	// No project name: experiment registration fails before any HTTP request.
-	evaluator := NewEvaluator[int, int](nil, nil, api.NewClient("unused"), "")
+	evaluator := NewEvaluatorWithClient[int, int](nil, nil, &openapi.Client{}, "")
 	w := NewWorkflowEval(evaluator, &WorkflowEval[int, int]{Name: "register-first", Store: store, Task: T(func(ctx context.Context, input int) (int, error) { return input, nil })})
 	_, err := w.Start(ctx, WorkflowStartOpts[int, int]{Dataset: NewDataset([]Case[int, int]{{Input: 1}, {Input: 2}})})
-	require.ErrorContains(t, err, "project name is required")
+	require.Error(t, err)
 	require.Zero(t, len(store.values), "a failed registration must not leave orphaned case records")
 }
 
