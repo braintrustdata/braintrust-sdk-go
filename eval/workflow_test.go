@@ -630,3 +630,28 @@ func TestWorkflowPollErrorDoesNotBlockOtherSubmissions(t *testing.T) {
 	require.Equal(t, 1, r.Completed, "a poll error for one submission must not block the others")
 	require.Equal(t, 1, r.PendingPoll)
 }
+
+func TestWorkflowSubmitErrorDoesNotBlockPolling(t *testing.T) {
+	ctx := context.Background()
+	w := WorkflowEval[int, int]{Name: "submit-error", Store: NewWorkflowEvalMemoryStore(), Task: WorkflowTask[int, int]{
+		Submit: func(ctx context.Context, item WorkflowTaskItem[int, int], info WorkflowSubmissionContext) (json.RawMessage, error) {
+			if item.Input == 1 {
+				return nil, errors.New("invalid request")
+			}
+			return json.Marshal(item.Input)
+		},
+		Completion: WorkflowCompletion{Poll: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (WorkflowPollResult, error) {
+			require.NotEmpty(t, data, "unsubmitted work must not be polled")
+			return WorkflowPollResult{Status: WorkflowComplete}, nil
+		}},
+		Collect: func(ctx context.Context, data json.RawMessage, info WorkflowSubmissionContext) (WorkflowTaskResult[int], error) {
+			return WorkflowTaskResult[int]{Output: 4}, nil
+		},
+	}}
+	r, err := w.Start(ctx, WorkflowStartOpts[int, int]{NoSendLogs: true, Dataset: NewDataset([]Case[int, int]{{Input: 1}, {Input: 2}})})
+	require.ErrorContains(t, err, "invalid request")
+	r, err = w.Poll(ctx, r.RunID)
+	require.ErrorContains(t, err, "invalid request")
+	require.Equal(t, 1, r.Completed, "a failing Submit must not block polling submitted work")
+	require.Equal(t, WorkflowRunWaiting, r.Status)
+}

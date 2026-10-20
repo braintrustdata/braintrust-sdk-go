@@ -278,22 +278,22 @@ func (w *WorkflowEval[I, R]) Poll(ctx context.Context, runID string) (*WorkflowR
 	if err != nil {
 		return nil, err
 	}
-	if err = w.submitPending(ctx, run, stages); err != nil {
-		return w.finish(ctx, run, err)
-	}
+	// A failing Submit must not block polling work that already has a handle.
+	// The final advance retries it again and reports any error that remains.
+	submitErr := w.submitPending(ctx, run, stages)
 	results := make([]WorkflowPollResult, len(run.Submissions))
 	pollErrs := make([]error, len(run.Submissions))
 	err = w.parallel(ctx, len(run.Submissions), func(i int) error {
 		sub := run.Submissions[i]
 		stage := stages[sub.Stage]
-		if sub.Done || stage.completion.Poll == nil {
+		if sub.Done || len(sub.Data) == 0 || stage.completion.Poll == nil {
 			return nil
 		}
 		results[i], pollErrs[i] = stage.completion.Poll(ctx, sub.Data, WorkflowSubmissionContext{RunID: run.ID, SubmissionID: sub.ID})
 		return nil
 	})
 	if err != nil {
-		return w.finish(ctx, run, err)
+		return w.finish(ctx, run, errors.Join(submitErr, err))
 	}
 	// A failed submission stays outstanding, so every later poll reports it
 	// again and the run cannot complete, matching the Python and JS SDKs.
@@ -301,7 +301,7 @@ func (w *WorkflowEval[I, R]) Poll(ctx context.Context, runID string) (*WorkflowR
 	// including when a Poll callback itself errors.
 	var failures []error
 	for i, sub := range run.Submissions {
-		if sub.Done || stages[sub.Stage].completion.Poll == nil {
+		if sub.Done || len(sub.Data) == 0 || stages[sub.Stage].completion.Poll == nil {
 			continue
 		}
 		if pollErrs[i] != nil {
@@ -322,7 +322,7 @@ func (w *WorkflowEval[I, R]) Poll(ctx context.Context, runID string) (*WorkflowR
 			err = fmt.Errorf("invalid provider poll status %q", results[i].Status)
 		}
 		if err != nil {
-			return w.finish(ctx, run, errors.Join(append(failures, err)...))
+			return w.finish(ctx, run, errors.Join(append(failures, submitErr, err)...))
 		}
 	}
 	err = w.advance(ctx, run, stages)
