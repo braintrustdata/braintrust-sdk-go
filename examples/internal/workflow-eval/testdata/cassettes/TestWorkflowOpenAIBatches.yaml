@@ -12,21 +12,21 @@ interactions:
         host: ""
         remote_addr: ""
         request_uri: ""
-        body: "--8d574eba078ff105f0e3327969aa6d0282be95b329f02e643c151ea6bd43\r\nContent-Disposition: form-data; name=\"file\"; filename=\"workflow.jsonl\"\r\nContent-Type: application/jsonl\r\n\r\n{\"custom_id\":\"0b04e606-e1fa-4527-8fc8-59493326f9e8_0\",\"method\":\"POST\",\"url\":\"/v1/chat/completions\",\"body\":{\"messages\":[{\"content\":\"What is 2 + 2? Reply with the number only.\",\"role\":\"user\"}],\"model\":\"gpt-4o-mini\"}}\n{\"custom_id\":\"0b04e606-e1fa-4527-8fc8-59493326f9e8_1\",\"method\":\"POST\",\"url\":\"/v1/chat/completions\",\"body\":{\"messages\":[{\"content\":\"What is 3 + 3? Reply with the number only.\",\"role\":\"user\"}],\"model\":\"gpt-4o-mini\"}}\n\r\n--8d574eba078ff105f0e3327969aa6d0282be95b329f02e643c151ea6bd43\r\nContent-Disposition: form-data; name=\"purpose\"\r\n\r\nbatch\r\n--8d574eba078ff105f0e3327969aa6d0282be95b329f02e643c151ea6bd43--\r\n"
+        body: "--e333d8a93e72dcf6e48f9f5198faa10f912f54d81ae32d306e0c3061b833\r\nContent-Disposition: form-data; name=\"file\"; filename=\"workflow.jsonl\"\r\nContent-Type: application/jsonl\r\n\r\n{\"custom_id\":\"0b04e606-e1fa-4527-8fc8-59493326f9e8_0\",\"method\":\"POST\",\"url\":\"/v1/chat/completions\",\"body\":{\"messages\":[{\"content\":\"What is 2 + 2? Reply with the number only.\",\"role\":\"user\"}],\"model\":\"gpt-4o-mini\"}}\n{\"custom_id\":\"0b04e606-e1fa-4527-8fc8-59493326f9e8_1\",\"method\":\"POST\",\"url\":\"/v1/chat/completions\",\"body\":{\"messages\":[{\"content\":\"What is 3 + 3? Reply with the number only.\",\"role\":\"user\"}],\"model\":\"gpt-4o-mini\"}}\n\r\n--e333d8a93e72dcf6e48f9f5198faa10f912f54d81ae32d306e0c3061b833\r\nContent-Disposition: form-data; name=\"purpose\"\r\n\r\nbatch\r\n--e333d8a93e72dcf6e48f9f5198faa10f912f54d81ae32d306e0c3061b833--\r\n"
         form: {}
         headers:
             Accept:
                 - application/json
             Content-Type:
-                - multipart/form-data; boundary=8d574eba078ff105f0e3327969aa6d0282be95b329f02e643c151ea6bd43
+                - multipart/form-data; boundary=e333d8a93e72dcf6e48f9f5198faa10f912f54d81ae32d306e0c3061b833
             User-Agent:
                 - OpenAI/Go 1.12.0
             X-Stainless-Arch:
-                - x64
+                - arm64
             X-Stainless-Lang:
                 - go
             X-Stainless-Os:
-                - Linux
+                - MacOS
             X-Stainless-Package-Version:
                 - 1.12.0
             X-Stainless-Retry-Count:
@@ -34,7 +34,7 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.26.5
+                - go1.26.10
         url: https://api.openai.com/v1/files
         method: POST
       response:
@@ -48,12 +48,12 @@ interactions:
         body: |
             {
               "object": "file",
-              "id": "file-TsDXcrWbogYXJHBhT1wbDz",
+              "id": "file-NvMdHQYidBH8msEvs1wasR",
               "purpose": "batch",
               "filename": "workflow.jsonl",
               "bytes": 430,
-              "created_at": 1792164232,
-              "expires_at": 1794756232,
+              "created_at": 1792627332,
+              "expires_at": 1795219332,
               "status": "processed",
               "status_details": null
             }
@@ -67,15 +67,15 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - a4b8112e6b984c41-CMH
+                - a4e43b5779c7ec80-SEA
             Content-Type:
                 - application/json
             Date:
-                - Fri, 16 Oct 2026 15:23:52 GMT
+                - Thu, 22 Oct 2026 00:02:12 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "405"
+                - "167"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -83,7 +83,7 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=4tE5zjPEjeUhQK.bbeYDCDHGd8ZfEu9LxKNSr28IH8U-1792164231.423281-1.0.1.1-ALKg5li.JMZ0PinlcZdTR9oBFkOswCvJ7z2VJptsMnw.YzKol9eByF2aqj4pQKDeXt5M756UcxFpcg2_JQE02R1bPRuNvyCxwnaULseix4Cw8KSSrz05CmPOmwrbNWRs; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri, 16 Oct 2026 15:53:52 GMT
+                - __cf_bm=RkrywdCmbVJ6AmRZjRLng1F8zwPNMo1Vwde.HJcNkss-1792627331.7595491-1.0.1.1-QoIQwxPvIoGWzZp1bIxtyjqKYtY_dtxmQ.Wn_0nDYv9m3M1N4Fk9ysTL9cMawIUeWVkaNwByfjwfDXhC.VbZA3KOuE34_KmHUa4gADTl0pTPYsfWHoj9XCLznb2WVWtC; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:32:12 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
@@ -91,10 +91,10 @@ interactions:
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Request-Id:
-                - req_9948a6eacd2345fa83a30f6a1336f8d8
+                - req_0f14773b65224311a0fd9dfd1625261a
         status: 200 OK
         code: 200
-        duration: 1.104400675s
+        duration: 1.283269958s
     - id: 1
       request:
         proto: HTTP/1.1
@@ -106,7 +106,7 @@ interactions:
         host: ""
         remote_addr: ""
         request_uri: ""
-        body: '{"completion_window":"24h","endpoint":"/v1/chat/completions","input_file_id":"file-TsDXcrWbogYXJHBhT1wbDz","metadata":{"braintrust_run_id":"74947af5-8a7f-46f3-9e95-c9d4e6fd0b3d","braintrust_submission_id":"0b04e606-e1fa-4527-8fc8-59493326f9e8"}}'
+        body: '{"completion_window":"24h","endpoint":"/v1/chat/completions","input_file_id":"file-NvMdHQYidBH8msEvs1wasR","metadata":{"braintrust_run_id":"74947af5-8a7f-46f3-9e95-c9d4e6fd0b3d","braintrust_submission_id":"0b04e606-e1fa-4527-8fc8-59493326f9e8"}}'
         form: {}
         headers:
             Accept:
@@ -118,11 +118,11 @@ interactions:
             User-Agent:
                 - OpenAI/Go 1.12.0
             X-Stainless-Arch:
-                - x64
+                - arm64
             X-Stainless-Lang:
                 - go
             X-Stainless-Os:
-                - Linux
+                - MacOS
             X-Stainless-Package-Version:
                 - 1.12.0
             X-Stainless-Retry-Count:
@@ -130,7 +130,7 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.26.5
+                - go1.26.10
         url: https://api.openai.com/v1/batches
         method: POST
       response:
@@ -143,19 +143,19 @@ interactions:
         uncompressed: true
         body: |-
             {
-              "id": "batch_6ad24188a7f88190a2118fa73ba3ef73",
+              "id": "batch_6ad95285721481909752897bb9025e54",
               "object": "batch",
               "endpoint": "/v1/chat/completions",
               "model": null,
               "errors": null,
-              "input_file_id": "file-TsDXcrWbogYXJHBhT1wbDz",
+              "input_file_id": "file-NvMdHQYidBH8msEvs1wasR",
               "completion_window": "24h",
               "status": "validating",
               "output_file_id": null,
               "error_file_id": null,
-              "created_at": 1792164232,
+              "created_at": 1792627333,
               "in_progress_at": null,
-              "expires_at": 1792250632,
+              "expires_at": 1792713733,
               "finalizing_at": null,
               "completed_at": null,
               "failed_at": null,
@@ -192,15 +192,15 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - a4b811350c3f4c41-CMH
+                - a4e43b5e7962ec80-SEA
             Content-Type:
                 - application/json
             Date:
-                - Fri, 16 Oct 2026 15:23:52 GMT
+                - Thu, 22 Oct 2026 00:02:14 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "207"
+                - "678"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -208,7 +208,7 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=3ttb8mzN_yz5VoOXRyzUDbBd_l1ajz8waFGkTZS_3wY-1792164232.485243-1.0.1.1-zHS_dvHHlMxdiv2tb1.PKqFg0ju2N.NlLjmRVjtjRUkKpp1i02ouDEPpwDZXKy.Qr32T3TZ6d0F8LNiZjCrXgncjbduNfzh_oe8Qfq_uP.TsY6apQQBikZg4058my3Ar; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri, 16 Oct 2026 15:53:52 GMT
+                - __cf_bm=G1bEYdMfY1jKO1NA_0vfOhhzbhDS7.Vrx0_HbJgPAYs-1792627332.882647-1.0.1.1-yZKIGOKS.oT.jMsj7lk2xdNOsHs6Q2RhUDU9s0oPfoq8KwoytMa4QKgwEVbWrWW1S0i9UwyRSxpNvRoAYas0YK_8CmnIjLuqX_U9MtxHD3LCrLz2bYJbur_vIfq4QckZ; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:32:14 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
@@ -216,10 +216,10 @@ interactions:
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Request-Id:
-                - req_8adfba58e9804fd4be7950151b94d25d
+                - req_027023ca64d7481785c62dc246681190
         status: 200 OK
         code: 200
-        duration: 296.439532ms
+        duration: 1.3248395s
     - id: 2
       request:
         proto: HTTP/1.1
@@ -239,11 +239,11 @@ interactions:
             User-Agent:
                 - OpenAI/Go 1.12.0
             X-Stainless-Arch:
-                - x64
+                - arm64
             X-Stainless-Lang:
                 - go
             X-Stainless-Os:
-                - Linux
+                - MacOS
             X-Stainless-Package-Version:
                 - 1.12.0
             X-Stainless-Retry-Count:
@@ -251,8 +251,8 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.26.5
-        url: https://api.openai.com/v1/batches/batch_6ad24188a7f88190a2118fa73ba3ef73
+                - go1.26.10
+        url: https://api.openai.com/v1/batches/batch_6ad95285721481909752897bb9025e54
         method: GET
       response:
         proto: HTTP/2.0
@@ -264,19 +264,19 @@ interactions:
         uncompressed: true
         body: |-
             {
-              "id": "batch_6ad24188a7f88190a2118fa73ba3ef73",
+              "id": "batch_6ad95285721481909752897bb9025e54",
               "object": "batch",
               "endpoint": "/v1/chat/completions",
               "model": null,
               "errors": null,
-              "input_file_id": "file-TsDXcrWbogYXJHBhT1wbDz",
+              "input_file_id": "file-NvMdHQYidBH8msEvs1wasR",
               "completion_window": "24h",
               "status": "validating",
               "output_file_id": null,
               "error_file_id": null,
-              "created_at": 1792164232,
+              "created_at": 1792627333,
               "in_progress_at": null,
-              "expires_at": 1792250632,
+              "expires_at": 1792713733,
               "finalizing_at": null,
               "completed_at": null,
               "failed_at": null,
@@ -313,15 +313,15 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - a4b812adef7c4c41-CMH
+                - a4e43cddbfa3ec80-SEA
             Content-Type:
                 - application/json
             Date:
-                - Fri, 16 Oct 2026 15:24:52 GMT
+                - Thu, 22 Oct 2026 00:03:14 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "16"
+                - "22"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -329,7 +329,7 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=_U2_IURD.Vkz.gA4wWZht.PApKVxb6h6rnt.GjAolXc-1792164292.7838166-1.0.1.1-Qjc38w_oueL9K5XcGpzapBZt3UdLFlzYLflpECdFqnnaiCuHLpT5VleFra9uu5oIiODhiIQ1xMlxg4Qr0UhJL15ovmwWZ4A2UDO2iisPy6gYh6A.O7SBKauyPkHInVqT; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri, 16 Oct 2026 15:54:52 GMT
+                - __cf_bm=pIjK7FItoqTn2w6TUAx2KqDMeEzNRkJmsMu.ew0f48Y-1792627394.2022405-1.0.1.1-c0LHIht1k061yNBx1cUAzSVUNqslPJ3ikvBMwEhBinptvBB8nyvWR7yirlXyo0dRemZbSf1raLubfEU5Jm4DtK_qVHW2_UUsoS4GfLyH2v._CS4tynQOPxd5ZY4psuUC; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:33:14 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
@@ -337,10 +337,10 @@ interactions:
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Request-Id:
-                - req_25ad33594b6644ddaa8b660e1a414834
+                - req_fe254cded4e34c9b9b892089b8754891
         status: 200 OK
         code: 200
-        duration: 107.213348ms
+        duration: 188.66225ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -360,11 +360,11 @@ interactions:
             User-Agent:
                 - OpenAI/Go 1.12.0
             X-Stainless-Arch:
-                - x64
+                - arm64
             X-Stainless-Lang:
                 - go
             X-Stainless-Os:
-                - Linux
+                - MacOS
             X-Stainless-Package-Version:
                 - 1.12.0
             X-Stainless-Retry-Count:
@@ -372,8 +372,8 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.26.5
-        url: https://api.openai.com/v1/batches/batch_6ad24188a7f88190a2118fa73ba3ef73
+                - go1.26.10
+        url: https://api.openai.com/v1/batches/batch_6ad95285721481909752897bb9025e54
         method: GET
       response:
         proto: HTTP/2.0
@@ -385,21 +385,21 @@ interactions:
         uncompressed: true
         body: |-
             {
-              "id": "batch_6ad24188a7f88190a2118fa73ba3ef73",
+              "id": "batch_6ad95285721481909752897bb9025e54",
               "object": "batch",
               "endpoint": "/v1/chat/completions",
               "model": "gpt-4o-mini-2024-07-18",
               "errors": null,
-              "input_file_id": "file-TsDXcrWbogYXJHBhT1wbDz",
+              "input_file_id": "file-NvMdHQYidBH8msEvs1wasR",
               "completion_window": "24h",
               "status": "completed",
-              "output_file_id": "file-6FfRqd7ysuv64KvucT4QFa",
+              "output_file_id": "file-JywAaPqfuyBYq6863ShHT1",
               "error_file_id": null,
-              "created_at": 1792164232,
-              "in_progress_at": 1792164295,
-              "expires_at": 1792250632,
-              "finalizing_at": 1792164312,
-              "completed_at": 1792164314,
+              "created_at": 1792627333,
+              "in_progress_at": 1792627395,
+              "expires_at": 1792713733,
+              "finalizing_at": 1792627418,
+              "completed_at": 1792627419,
               "failed_at": null,
               "expired_at": null,
               "cancelling_at": null,
@@ -434,15 +434,15 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - a4b814259cc64c41-CMH
+                - a4e43e55fcb2ec80-SEA
             Content-Type:
                 - application/json
             Date:
-                - Fri, 16 Oct 2026 15:25:52 GMT
+                - Thu, 22 Oct 2026 00:04:14 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "22"
+                - "27"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -450,7 +450,7 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=wFme_9Q9jxH0qMix0X55Lax7tyxmyxaXHGnOBB.Z95E-1792164352.8954475-1.0.1.1-vME5_cgNRKTc40drx2AQwLTpgWG_fAZUKY5XJVtd2zeFuLrKdb1VbeNGlu2CdOUgZwpGoge0tPAPyYFim_W.w3lIF5jfoUmhXh7EBzIbgQckVcNATDG8HK4tdSwJ.MXS; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri, 16 Oct 2026 15:55:52 GMT
+                - __cf_bm=yxkDAy71eg2ggsZma9H9LG0j87kTZI5IaIw9F8BSygw-1792627454.3954754-1.0.1.1-dXq70o89RwYyowkc4FxbpHqxZwc7lUWqwRfNMs3wRN3EvALlcZYoubW4S_78n5Umrf.vdikegiAQmi5rhJ4LSpmyCZplLE35v.TJXpZMy1byWriZhuCnSsLlimKE6qhv; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:34:14 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
@@ -458,10 +458,10 @@ interactions:
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Request-Id:
-                - req_f9665422a14341c1a1ab749b83b7fc22
+                - req_4b98c6ade07f498ab0f2c1b1daf8392f
         status: 200 OK
         code: 200
-        duration: 106.748861ms
+        duration: 200.361625ms
     - id: 4
       request:
         proto: HTTP/1.1
@@ -481,11 +481,11 @@ interactions:
             User-Agent:
                 - OpenAI/Go 1.12.0
             X-Stainless-Arch:
-                - x64
+                - arm64
             X-Stainless-Lang:
                 - go
             X-Stainless-Os:
-                - Linux
+                - MacOS
             X-Stainless-Package-Version:
                 - 1.12.0
             X-Stainless-Retry-Count:
@@ -493,8 +493,8 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.26.5
-        url: https://api.openai.com/v1/batches/batch_6ad24188a7f88190a2118fa73ba3ef73
+                - go1.26.10
+        url: https://api.openai.com/v1/batches/batch_6ad95285721481909752897bb9025e54
         method: GET
       response:
         proto: HTTP/2.0
@@ -506,21 +506,21 @@ interactions:
         uncompressed: true
         body: |-
             {
-              "id": "batch_6ad24188a7f88190a2118fa73ba3ef73",
+              "id": "batch_6ad95285721481909752897bb9025e54",
               "object": "batch",
               "endpoint": "/v1/chat/completions",
               "model": "gpt-4o-mini-2024-07-18",
               "errors": null,
-              "input_file_id": "file-TsDXcrWbogYXJHBhT1wbDz",
+              "input_file_id": "file-NvMdHQYidBH8msEvs1wasR",
               "completion_window": "24h",
               "status": "completed",
-              "output_file_id": "file-6FfRqd7ysuv64KvucT4QFa",
+              "output_file_id": "file-JywAaPqfuyBYq6863ShHT1",
               "error_file_id": null,
-              "created_at": 1792164232,
-              "in_progress_at": 1792164295,
-              "expires_at": 1792250632,
-              "finalizing_at": 1792164312,
-              "completed_at": 1792164314,
+              "created_at": 1792627333,
+              "in_progress_at": 1792627395,
+              "expires_at": 1792713733,
+              "finalizing_at": 1792627418,
+              "completed_at": 1792627419,
               "failed_at": null,
               "expired_at": null,
               "cancelling_at": null,
@@ -555,15 +555,15 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - a4b814264e1b4c41-CMH
+                - a4e43e573e08ec80-SEA
             Content-Type:
                 - application/json
             Date:
-                - Fri, 16 Oct 2026 15:25:53 GMT
+                - Thu, 22 Oct 2026 00:04:14 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "15"
+                - "28"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -571,7 +571,7 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=0l.mdaade92ZKH.GsHpI96JnJSffWOVFHQXTDLmSwnU-1792164353.0030148-1.0.1.1-vNF2zrlfdzTeM_vXWz3k3Smu_AoXdjIzRoEoy2Qn0CCpo_OUO1ndVLH.rSjKzHJkX5ZqiPczDAyVN4gEUVjjMKE0ieyPV.7qa.EWA5dW4nDTDlJz4CyjoqbNTFXH_A41; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri, 16 Oct 2026 15:55:53 GMT
+                - __cf_bm=Lc0gQWvJDqeQhNb6mC18Cqz4FSUulmrHUYUyJmkdSUo-1792627454.596278-1.0.1.1-6QPd960MIs.QT_exozd_n.0hp5eiMy6Zzu2G.wqvtNjHzxm0Ju5AZxeKuqO7eWe5ATRMni7coYBQFoBewS1KM6ieowx7gs9LY6tWd9pGEDal7657pBdqSbD1KFUgAA4U; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:34:14 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
@@ -579,10 +579,10 @@ interactions:
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Request-Id:
-                - req_3707d9a5092d40beb6d8991747f11f03
+                - req_0dad741a21704d1b9b9f5039d1860d2b
         status: 200 OK
         code: 200
-        duration: 107.24597ms
+        duration: 154.450958ms
     - id: 5
       request:
         proto: HTTP/1.1
@@ -602,11 +602,11 @@ interactions:
             User-Agent:
                 - OpenAI/Go 1.12.0
             X-Stainless-Arch:
-                - x64
+                - arm64
             X-Stainless-Lang:
                 - go
             X-Stainless-Os:
-                - Linux
+                - MacOS
             X-Stainless-Package-Version:
                 - 1.12.0
             X-Stainless-Retry-Count:
@@ -614,8 +614,8 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.26.5
-        url: https://api.openai.com/v1/files/file-6FfRqd7ysuv64KvucT4QFa/content
+                - go1.26.10
+        url: https://api.openai.com/v1/files/file-JywAaPqfuyBYq6863ShHT1/content
         method: GET
       response:
         proto: HTTP/2.0
@@ -626,8 +626,8 @@ interactions:
         content_length: 1718
         uncompressed: false
         body: |
-            {"id": "batch_req_6ad241d99a1481909c6d4d64a34e5de8", "custom_id": "0b04e606-e1fa-4527-8fc8-59493326f9e8_0", "response": {"status_code": 200, "request_id": "2b99e6f5-6272-44dd-8b7a-fc62efddc466", "body": {"id": "chatcmpl-EZe5hZ48wLe1iYCdyaEk1raS5Mdm5", "object": "chat.completion", "created": 1792164297, "model": "gpt-4o-mini-2024-07-18", "choices": [{"index": 0, "message": {"role": "assistant", "content": "4", "refusal": null, "annotations": []}, "logprobs": null, "finish_reason": "stop"}], "usage": {"prompt_tokens": 21, "completion_tokens": 1, "total_tokens": 22, "prompt_tokens_details": {"cached_tokens": 0, "audio_tokens": 0}, "completion_tokens_details": {"reasoning_tokens": 0, "audio_tokens": 0, "accepted_prediction_tokens": 0, "rejected_prediction_tokens": 0}}, "service_tier": "default", "system_fingerprint": "fp_bef77fd4b6"}}, "error": null}
-            {"id": "batch_req_6ad241d9bbfc8190a11bca08e20247cb", "custom_id": "0b04e606-e1fa-4527-8fc8-59493326f9e8_1", "response": {"status_code": 200, "request_id": "0abde4c2-e455-4960-b67b-53903a11bdba", "body": {"id": "chatcmpl-EZe5oCHCcriO6S2zdcJKuHB8hTWRx", "object": "chat.completion", "created": 1792164304, "model": "gpt-4o-mini-2024-07-18", "choices": [{"index": 0, "message": {"role": "assistant", "content": "6", "refusal": null, "annotations": []}, "logprobs": null, "finish_reason": "stop"}], "usage": {"prompt_tokens": 21, "completion_tokens": 1, "total_tokens": 22, "prompt_tokens_details": {"cached_tokens": 0, "audio_tokens": 0}, "completion_tokens_details": {"reasoning_tokens": 0, "audio_tokens": 0, "accepted_prediction_tokens": 0, "rejected_prediction_tokens": 0}}, "service_tier": "default", "system_fingerprint": "fp_bef77fd4b6"}}, "error": null}
+            {"id": "batch_req_6ad952db36588190a243496a553f5600", "custom_id": "0b04e606-e1fa-4527-8fc8-59493326f9e8_0", "response": {"status_code": 200, "request_id": "e0597f01-e380-4fae-ab70-e47e8291cc42", "body": {"id": "chatcmpl-EbaZ9rL6AsOv1Xy5RrpDvBQ0IQ4hL", "object": "chat.completion", "created": 1792627403, "model": "gpt-4o-mini-2024-07-18", "choices": [{"index": 0, "message": {"role": "assistant", "content": "4", "refusal": null, "annotations": []}, "logprobs": null, "finish_reason": "stop"}], "usage": {"prompt_tokens": 21, "completion_tokens": 1, "total_tokens": 22, "prompt_tokens_details": {"cached_tokens": 0, "audio_tokens": 0}, "completion_tokens_details": {"reasoning_tokens": 0, "audio_tokens": 0, "accepted_prediction_tokens": 0, "rejected_prediction_tokens": 0}}, "service_tier": "default", "system_fingerprint": "fp_0f1d2628ac"}}, "error": null}
+            {"id": "batch_req_6ad952db393c8190ba0d1fe11559ccf8", "custom_id": "0b04e606-e1fa-4527-8fc8-59493326f9e8_1", "response": {"status_code": 200, "request_id": "9c987473-a5a2-4b21-8e01-f7bb4a4d5dd0", "body": {"id": "chatcmpl-EbaZ47cEiqC42WOlOu2kEl9IT1Ejg", "object": "chat.completion", "created": 1792627398, "model": "gpt-4o-mini-2024-07-18", "choices": [{"index": 0, "message": {"role": "assistant", "content": "6", "refusal": null, "annotations": []}, "logprobs": null, "finish_reason": "stop"}], "usage": {"prompt_tokens": 21, "completion_tokens": 1, "total_tokens": 22, "prompt_tokens_details": {"cached_tokens": 0, "audio_tokens": 0}, "completion_tokens_details": {"reasoning_tokens": 0, "audio_tokens": 0, "accepted_prediction_tokens": 0, "rejected_prediction_tokens": 0}}, "service_tier": "default", "system_fingerprint": "fp_b6ce7ad261"}}, "error": null}
         headers:
             Access-Control-Allow-Origin:
                 - '*'
@@ -638,19 +638,19 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - a4b81426ffc44c41-CMH
+                - a4e43e583ed2ec80-SEA
             Content-Disposition:
-                - attachment; filename="batch_6ad24188a7f88190a2118fa73ba3ef73_output.jsonl"
+                - attachment; filename="batch_6ad95285721481909752897bb9025e54_output.jsonl"
             Content-Length:
                 - "1718"
             Content-Type:
                 - application/octet-stream
             Date:
-                - Fri, 16 Oct 2026 15:25:53 GMT
+                - Thu, 22 Oct 2026 00:04:15 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "211"
+                - "220"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -658,7 +658,7 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=beAUhRo7_AJAK4y7lcrio7BPKh05uy4jI_wozochJKk-1792164353.1151912-1.0.1.1-_1iOZsglRlnpa3UDH2I3t6mw_ZQ04fz5Ao0Df64RQafmy7Uum9yqabrRyB3Pyrzm_Uk65toX03mHnuWanxU_NDt1IEtUt4bQGEVy2gKMvhwzkWvU_ULspVeKAYOjQ2UH; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri, 16 Oct 2026 15:55:53 GMT
+                - __cf_bm=2v8l226mF7hAGXNdYadcoYwwYpJbOqliIR2aRhye1JM-1792627454.7538795-1.0.1.1-hrB9Vkivzgc4SlDGFee0KP4_J_Qgv64tfwbB4IgBQuGo1J_nX3g0aAEghakRV7aNIcxgW7Pw5HTF.sqIB2Ai6wQz2ZdR3XrTNR8l14AmzxXnDgQyqk.wzUWt5Ecr9gzd; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:34:15 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
@@ -666,10 +666,10 @@ interactions:
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Request-Id:
-                - req_5d8d713d133a4eee9761d6522db33c1b
+                - req_7764445e16984b5387fb35bd04924f0b
         status: 200 OK
         code: 200
-        duration: 298.780614ms
+        duration: 346.988292ms
     - id: 6
       request:
         proto: HTTP/1.1
@@ -681,21 +681,21 @@ interactions:
         host: ""
         remote_addr: ""
         request_uri: ""
-        body: "--3467a58ef594f731c80f756b8a21039dc403e6b28b107c88aee7208406b2\r\nContent-Disposition: form-data; name=\"file\"; filename=\"workflow.jsonl\"\r\nContent-Type: application/jsonl\r\n\r\n{\"custom_id\":\"319bbef7-3f53-455a-8a9a-eefe9664d903_0\",\"method\":\"POST\",\"url\":\"/v1/chat/completions\",\"body\":{\"messages\":[{\"content\":\"Expected: 4\\nAnswer: 4\\nReply PASS if correct, otherwise FAIL.\",\"role\":\"user\"}],\"model\":\"gpt-4o-mini\"}}\n{\"custom_id\":\"319bbef7-3f53-455a-8a9a-eefe9664d903_1\",\"method\":\"POST\",\"url\":\"/v1/chat/completions\",\"body\":{\"messages\":[{\"content\":\"Expected: 6\\nAnswer: 6\\nReply PASS if correct, otherwise FAIL.\",\"role\":\"user\"}],\"model\":\"gpt-4o-mini\"}}\n\r\n--3467a58ef594f731c80f756b8a21039dc403e6b28b107c88aee7208406b2\r\nContent-Disposition: form-data; name=\"purpose\"\r\n\r\nbatch\r\n--3467a58ef594f731c80f756b8a21039dc403e6b28b107c88aee7208406b2--\r\n"
+        body: "--f899135b479714d51334572940cbd1d6d8a194023d817228d351b51132a9\r\nContent-Disposition: form-data; name=\"file\"; filename=\"workflow.jsonl\"\r\nContent-Type: application/jsonl\r\n\r\n{\"custom_id\":\"319bbef7-3f53-455a-8a9a-eefe9664d903_0\",\"method\":\"POST\",\"url\":\"/v1/chat/completions\",\"body\":{\"messages\":[{\"content\":\"Expected: 4\\nAnswer: 4\\nReply PASS if correct, otherwise FAIL.\",\"role\":\"user\"}],\"model\":\"gpt-4o-mini\"}}\n{\"custom_id\":\"319bbef7-3f53-455a-8a9a-eefe9664d903_1\",\"method\":\"POST\",\"url\":\"/v1/chat/completions\",\"body\":{\"messages\":[{\"content\":\"Expected: 6\\nAnswer: 6\\nReply PASS if correct, otherwise FAIL.\",\"role\":\"user\"}],\"model\":\"gpt-4o-mini\"}}\n\r\n--f899135b479714d51334572940cbd1d6d8a194023d817228d351b51132a9\r\nContent-Disposition: form-data; name=\"purpose\"\r\n\r\nbatch\r\n--f899135b479714d51334572940cbd1d6d8a194023d817228d351b51132a9--\r\n"
         form: {}
         headers:
             Accept:
                 - application/json
             Content-Type:
-                - multipart/form-data; boundary=3467a58ef594f731c80f756b8a21039dc403e6b28b107c88aee7208406b2
+                - multipart/form-data; boundary=f899135b479714d51334572940cbd1d6d8a194023d817228d351b51132a9
             User-Agent:
                 - OpenAI/Go 1.12.0
             X-Stainless-Arch:
-                - x64
+                - arm64
             X-Stainless-Lang:
                 - go
             X-Stainless-Os:
-                - Linux
+                - MacOS
             X-Stainless-Package-Version:
                 - 1.12.0
             X-Stainless-Retry-Count:
@@ -703,7 +703,7 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.26.5
+                - go1.26.10
         url: https://api.openai.com/v1/files
         method: POST
       response:
@@ -717,12 +717,12 @@ interactions:
         body: |
             {
               "object": "file",
-              "id": "file-FJHHafSRjV8Ph5CqDAFWaM",
+              "id": "file-DHeeBTVNVGzmCYs1pTWLPp",
               "purpose": "batch",
               "filename": "workflow.jsonl",
               "bytes": 470,
-              "created_at": 1792164353,
-              "expires_at": 1794756353,
+              "created_at": 1792627455,
+              "expires_at": 1795219455,
               "status": "processed",
               "status_details": null
             }
@@ -736,15 +736,15 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - a4b81428dbce4c41-CMH
+                - a4e43e5a68a9ec80-SEA
             Content-Type:
                 - application/json
             Date:
-                - Fri, 16 Oct 2026 15:25:53 GMT
+                - Thu, 22 Oct 2026 00:04:15 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "161"
+                - "589"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -752,7 +752,7 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=VDkLsiBwR.j9_Sa7kmPk6CC9JYUjwiArVIHFdgoqo1k-1792164353.4148386-1.0.1.1-39_CfpB6HIyejRofccBDJuTazQfYH9eF5tES8pyxOCT4EbGxhD63iRH2ps1fcfkn8CL4NRTKDhDDx63ahJiFxFmyVmgbP51f6hCeYE018QIlgb7OfvKSJLGcR94mTddE; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri, 16 Oct 2026 15:55:53 GMT
+                - __cf_bm=RvMuurRdvkgu4lwFKonvbjVVWHX7PVr..H3YMoP3oiU-1792627455.1051128-1.0.1.1-7aAO_cdenYOnPbRyb5XLyF38V9qyL1APsoYrbhscnv0XutFdzgAnUAZcfc4hGEWn.n1AphShPrVpyqU90F9Tg9Xbiaaj_5OY2cqRyOpB.7VqCgM2HLQzXwe_PRCP11vw; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:34:15 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
@@ -760,10 +760,10 @@ interactions:
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Request-Id:
-                - req_618eefc5a0bc478e99ddb8ce7de71801
+                - req_a2d77c126fa04d0cb2eda684ae7a4f89
         status: 200 OK
         code: 200
-        duration: 288.99404ms
+        duration: 959.181333ms
     - id: 7
       request:
         proto: HTTP/1.1
@@ -775,7 +775,7 @@ interactions:
         host: ""
         remote_addr: ""
         request_uri: ""
-        body: '{"completion_window":"24h","endpoint":"/v1/chat/completions","input_file_id":"file-FJHHafSRjV8Ph5CqDAFWaM","metadata":{"braintrust_run_id":"74947af5-8a7f-46f3-9e95-c9d4e6fd0b3d","braintrust_submission_id":"319bbef7-3f53-455a-8a9a-eefe9664d903"}}'
+        body: '{"completion_window":"24h","endpoint":"/v1/chat/completions","input_file_id":"file-DHeeBTVNVGzmCYs1pTWLPp","metadata":{"braintrust_run_id":"74947af5-8a7f-46f3-9e95-c9d4e6fd0b3d","braintrust_submission_id":"319bbef7-3f53-455a-8a9a-eefe9664d903"}}'
         form: {}
         headers:
             Accept:
@@ -787,11 +787,11 @@ interactions:
             User-Agent:
                 - OpenAI/Go 1.12.0
             X-Stainless-Arch:
-                - x64
+                - arm64
             X-Stainless-Lang:
                 - go
             X-Stainless-Os:
-                - Linux
+                - MacOS
             X-Stainless-Package-Version:
                 - 1.12.0
             X-Stainless-Retry-Count:
@@ -799,7 +799,7 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.26.5
+                - go1.26.10
         url: https://api.openai.com/v1/batches
         method: POST
       response:
@@ -812,19 +812,19 @@ interactions:
         uncompressed: true
         body: |-
             {
-              "id": "batch_6ad24201c9d881909cfe0fb8adabe5c6",
+              "id": "batch_6ad95300422c8190b5e162670505aafd",
               "object": "batch",
               "endpoint": "/v1/chat/completions",
               "model": null,
               "errors": null,
-              "input_file_id": "file-FJHHafSRjV8Ph5CqDAFWaM",
+              "input_file_id": "file-DHeeBTVNVGzmCYs1pTWLPp",
               "completion_window": "24h",
               "status": "validating",
               "output_file_id": null,
               "error_file_id": null,
-              "created_at": 1792164353,
+              "created_at": 1792627456,
               "in_progress_at": null,
-              "expires_at": 1792250753,
+              "expires_at": 1792713856,
               "finalizing_at": null,
               "completed_at": null,
               "failed_at": null,
@@ -861,15 +861,15 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - a4b8142aaff84c41-CMH
+                - a4e43e606deeec80-SEA
             Content-Type:
                 - application/json
             Date:
-                - Fri, 16 Oct 2026 15:25:53 GMT
+                - Thu, 22 Oct 2026 00:04:16 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "124"
+                - "236"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -877,7 +877,7 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=pzbd7wbCZDn4M2gzjuvGlfUgTEv4Su3ZwRqs7sFJVkA-1792164353.7045689-1.0.1.1-4_Aik11wIbW0P0aBS3hmNeIntQoXzA0p2zkk1l1L.Xek2BJwSd8lird0bDmcUGbS4yy7VZJ6qOTcIb76lDNq7kceoIIwnIUUwB_q9sdQnvl6pxz8VYSm1QweMJUmT6nS; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri, 16 Oct 2026 15:55:53 GMT
+                - __cf_bm=spCKQJZuL_bgzHMQJLeZQnpb.5V8J9gxM89tJ5wKVa0-1792627456.0650158-1.0.1.1-ZDHQsCEIMTV.XnNNrzDj7ymiUYk2dBP1xulz.8zJ2QeWDaUYJp1hhSeK6bX76m9rfp6pk5RBw0hAn5.EdqNCdQYEj3UIKPp6KTMeSKcAmWMJC9L90GWRQzamq4aHL9dJ; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:34:16 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
@@ -885,10 +885,10 @@ interactions:
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Request-Id:
-                - req_b2018ba43b154ef288d11d0194d189fa
+                - req_a720832c057b455a9b52b7c9654687f6
         status: 200 OK
         code: 200
-        duration: 211.050837ms
+        duration: 375.073292ms
     - id: 8
       request:
         proto: HTTP/1.1
@@ -908,11 +908,11 @@ interactions:
             User-Agent:
                 - OpenAI/Go 1.12.0
             X-Stainless-Arch:
-                - x64
+                - arm64
             X-Stainless-Lang:
                 - go
             X-Stainless-Os:
-                - Linux
+                - MacOS
             X-Stainless-Package-Version:
                 - 1.12.0
             X-Stainless-Retry-Count:
@@ -920,8 +920,8 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.26.5
-        url: https://api.openai.com/v1/batches/batch_6ad24201c9d881909cfe0fb8adabe5c6
+                - go1.26.10
+        url: https://api.openai.com/v1/batches/batch_6ad95300422c8190b5e162670505aafd
         method: GET
       response:
         proto: HTTP/2.0
@@ -933,34 +933,34 @@ interactions:
         uncompressed: true
         body: |-
             {
-              "id": "batch_6ad24201c9d881909cfe0fb8adabe5c6",
+              "id": "batch_6ad95300422c8190b5e162670505aafd",
               "object": "batch",
               "endpoint": "/v1/chat/completions",
               "model": "gpt-4o-mini-2024-07-18",
               "errors": null,
-              "input_file_id": "file-FJHHafSRjV8Ph5CqDAFWaM",
+              "input_file_id": "file-DHeeBTVNVGzmCYs1pTWLPp",
               "completion_window": "24h",
-              "status": "in_progress",
-              "output_file_id": null,
+              "status": "completed",
+              "output_file_id": "file-Sq9GAM28yWwc4uCbvwkx5Z",
               "error_file_id": null,
-              "created_at": 1792164353,
-              "in_progress_at": 1792164355,
-              "expires_at": 1792250753,
-              "finalizing_at": null,
-              "completed_at": null,
+              "created_at": 1792627456,
+              "in_progress_at": 1792627457,
+              "expires_at": 1792713856,
+              "finalizing_at": 1792627469,
+              "completed_at": 1792627470,
               "failed_at": null,
               "expired_at": null,
               "cancelling_at": null,
               "cancelled_at": null,
               "request_counts": {
                 "total": 2,
-                "completed": 1,
+                "completed": 2,
                 "failed": 0
               },
               "usage": {
-                "input_tokens": 0,
-                "output_tokens": 0,
-                "total_tokens": 0,
+                "input_tokens": 50,
+                "output_tokens": 2,
+                "total_tokens": 52,
                 "input_tokens_details": {
                   "cached_tokens": 0
                 },
@@ -982,15 +982,15 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - a4b815a3286e4c41-CMH
+                - a4e43fd9bdceec80-SEA
             Content-Type:
                 - application/json
             Date:
-                - Fri, 16 Oct 2026 15:26:54 GMT
+                - Thu, 22 Oct 2026 00:05:16 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "32"
+                - "23"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -998,7 +998,7 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=OX4xq.S2zJmxgTfgRB75Umt8nN.4mDPWOxv9H3NCxYc-1792164413.9470966-1.0.1.1-7aF5Za5GRNP14eNzHH0JFIkEIsXUWwDowIch5vep.tU8lHqNj6DyvHfKACH88lBxTFohVOyWd6bOMKc7jBOBpUyVQ8GkKOz62NPJsg7exu2QxgrENHnMBjOuMbYIir2r; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri, 16 Oct 2026 15:56:54 GMT
+                - __cf_bm=fUtlZPLbVvTTcuJaKe0b0Wf5U9DXIAwy7qw7V8.TzdA-1792627516.4393268-1.0.1.1-m0fqos3qC5Mn7E7POkVUKNrFwM94mx2ZmiF5.JhAbZRDysgDcErSnVQII._YUrHo4tA91Zkfp39UM5VzT0Nv111x8hrH1NqwfU2cZTtmDFqKV1UNTApCYMWqOlSkK7L9; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:35:16 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
@@ -1006,10 +1006,10 @@ interactions:
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Request-Id:
-                - req_3b07c34780cf4f0196981b8db25b6fe9
+                - req_253857fa689948bfaba7a9538c7cf3aa
         status: 200 OK
         code: 200
-        duration: 126.518602ms
+        duration: 173.003833ms
     - id: 9
       request:
         proto: HTTP/1.1
@@ -1029,11 +1029,11 @@ interactions:
             User-Agent:
                 - OpenAI/Go 1.12.0
             X-Stainless-Arch:
-                - x64
+                - arm64
             X-Stainless-Lang:
                 - go
             X-Stainless-Os:
-                - Linux
+                - MacOS
             X-Stainless-Package-Version:
                 - 1.12.0
             X-Stainless-Retry-Count:
@@ -1041,8 +1041,8 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.26.5
-        url: https://api.openai.com/v1/batches/batch_6ad24201c9d881909cfe0fb8adabe5c6
+                - go1.26.10
+        url: https://api.openai.com/v1/batches/batch_6ad95300422c8190b5e162670505aafd
         method: GET
       response:
         proto: HTTP/2.0
@@ -1054,21 +1054,21 @@ interactions:
         uncompressed: true
         body: |-
             {
-              "id": "batch_6ad24201c9d881909cfe0fb8adabe5c6",
+              "id": "batch_6ad95300422c8190b5e162670505aafd",
               "object": "batch",
               "endpoint": "/v1/chat/completions",
               "model": "gpt-4o-mini-2024-07-18",
               "errors": null,
-              "input_file_id": "file-FJHHafSRjV8Ph5CqDAFWaM",
+              "input_file_id": "file-DHeeBTVNVGzmCYs1pTWLPp",
               "completion_window": "24h",
               "status": "completed",
-              "output_file_id": "file-EsneVJJpoJmFQFx8mt5pes",
+              "output_file_id": "file-Sq9GAM28yWwc4uCbvwkx5Z",
               "error_file_id": null,
-              "created_at": 1792164353,
-              "in_progress_at": 1792164355,
-              "expires_at": 1792250753,
-              "finalizing_at": 1792164419,
-              "completed_at": 1792164420,
+              "created_at": 1792627456,
+              "in_progress_at": 1792627457,
+              "expires_at": 1792713856,
+              "finalizing_at": 1792627469,
+              "completed_at": 1792627470,
               "failed_at": null,
               "expired_at": null,
               "cancelling_at": null,
@@ -1103,15 +1103,15 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - a4b8171afd984c41-CMH
+                - a4e43fdadeb8ec80-SEA
             Content-Type:
                 - application/json
             Date:
-                - Fri, 16 Oct 2026 15:27:54 GMT
+                - Thu, 22 Oct 2026 00:05:16 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "24"
+                - "31"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -1119,7 +1119,7 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=M3T_i7BJD0m_n4EjikAvp4g.9iHTr91p9PtGt8DGxkE-1792164474.0758374-1.0.1.1-6SUm9iL0dtwTjl4yvqRfhJxtJ6FZVXb89lPJlHiHGlOwMo2CXAw9oDRV3_K2OotEyzX7CKQeT2mXNZHKw7bGNSW8AyT8Ql0F6UKGORwKxc3BsM.HD6ii6zIv5sUahl6Q; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri, 16 Oct 2026 15:57:54 GMT
+                - __cf_bm=nP3rMpU8wroy_W7gJO4NKoRTMxblxSeBj1S9ecvDgl8-1792627516.6191754-1.0.1.1-crPoRdpexYrEyoZx_BJtsqdp.tYnB_iypP4xdv.gO1Kj3IQIgcjrY0wxPHAZD8x4y6Lbxb4Pt026PbWEj3NmM4JMhyrIXE.VsYWbNt6u_G4IGZogRQx6seemC9PcT2vQ; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:35:16 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
@@ -1127,132 +1127,11 @@ interactions:
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Request-Id:
-                - req_5fc3fdcbcafd496ba8fc8e542244ba0f
+                - req_38f53667d73443d98cbff69a37d78d02
         status: 200 OK
         code: 200
-        duration: 101.156758ms
+        duration: 171.277125ms
     - id: 10
-      request:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: 0
-        transfer_encoding: []
-        trailer: {}
-        host: ""
-        remote_addr: ""
-        request_uri: ""
-        body: ""
-        form: {}
-        headers:
-            Accept:
-                - application/json
-            User-Agent:
-                - OpenAI/Go 1.12.0
-            X-Stainless-Arch:
-                - x64
-            X-Stainless-Lang:
-                - go
-            X-Stainless-Os:
-                - Linux
-            X-Stainless-Package-Version:
-                - 1.12.0
-            X-Stainless-Retry-Count:
-                - "0"
-            X-Stainless-Runtime:
-                - go
-            X-Stainless-Runtime-Version:
-                - go1.26.5
-        url: https://api.openai.com/v1/batches/batch_6ad24201c9d881909cfe0fb8adabe5c6
-        method: GET
-      response:
-        proto: HTTP/2.0
-        proto_major: 2
-        proto_minor: 0
-        transfer_encoding: []
-        trailer: {}
-        content_length: -1
-        uncompressed: true
-        body: |-
-            {
-              "id": "batch_6ad24201c9d881909cfe0fb8adabe5c6",
-              "object": "batch",
-              "endpoint": "/v1/chat/completions",
-              "model": "gpt-4o-mini-2024-07-18",
-              "errors": null,
-              "input_file_id": "file-FJHHafSRjV8Ph5CqDAFWaM",
-              "completion_window": "24h",
-              "status": "completed",
-              "output_file_id": "file-EsneVJJpoJmFQFx8mt5pes",
-              "error_file_id": null,
-              "created_at": 1792164353,
-              "in_progress_at": 1792164355,
-              "expires_at": 1792250753,
-              "finalizing_at": 1792164419,
-              "completed_at": 1792164420,
-              "failed_at": null,
-              "expired_at": null,
-              "cancelling_at": null,
-              "cancelled_at": null,
-              "request_counts": {
-                "total": 2,
-                "completed": 2,
-                "failed": 0
-              },
-              "usage": {
-                "input_tokens": 50,
-                "output_tokens": 2,
-                "total_tokens": 52,
-                "input_tokens_details": {
-                  "cached_tokens": 0
-                },
-                "output_tokens_details": {
-                  "reasoning_tokens": 0
-                }
-              },
-              "metadata": {
-                "braintrust_run_id": "74947af5-8a7f-46f3-9e95-c9d4e6fd0b3d",
-                "braintrust_submission_id": "319bbef7-3f53-455a-8a9a-eefe9664d903"
-              }
-            }
-        headers:
-            Access-Control-Expose-Headers:
-                - X-Request-ID
-                - CF-Ray
-            Alt-Svc:
-                - h3=":443"; ma=86400
-            Cf-Cache-Status:
-                - DYNAMIC
-            Cf-Ray:
-                - a4b8171b9efe4c41-CMH
-            Content-Type:
-                - application/json
-            Date:
-                - Fri, 16 Oct 2026 15:27:54 GMT
-            Openai-Organization:
-                - braintrust-data
-            Openai-Processing-Ms:
-                - "23"
-            Openai-Project:
-                - proj_vsCSXafhhByzWOThMrJcZiw9
-            Openai-Version:
-                - "2020-10-01"
-            Server:
-                - cloudflare
-            Set-Cookie:
-                - __cf_bm=LVCEoEa25nDEYhymyugFHaWYVsA.9w.B5gF6ObkIZ7o-1792164474.177673-1.0.1.1-_9nPgzl1FBnr6YgIPFAo30e_uiJCE1xF7dXqUsa4s9RqjBmVoG3mi7F4AUN5n9tIc4ryhA0iq4iJpBe.57RFPo75MtDFbOze6__4lp5bj.k22T1EUUZS3Zne6WkEZvUH; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri, 16 Oct 2026 15:57:54 GMT
-            Strict-Transport-Security:
-                - max-age=31536000; includeSubDomains; preload
-            X-Content-Type-Options:
-                - nosniff
-            X-Openai-Proxy-Wasm:
-                - v0.1
-            X-Request-Id:
-                - req_8f14909a127145e7893f9fdc7fb9f92f
-        status: 200 OK
-        code: 200
-        duration: 113.929157ms
-    - id: 11
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -1271,11 +1150,11 @@ interactions:
             User-Agent:
                 - OpenAI/Go 1.12.0
             X-Stainless-Arch:
-                - x64
+                - arm64
             X-Stainless-Lang:
                 - go
             X-Stainless-Os:
-                - Linux
+                - MacOS
             X-Stainless-Package-Version:
                 - 1.12.0
             X-Stainless-Retry-Count:
@@ -1283,8 +1162,8 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.26.5
-        url: https://api.openai.com/v1/files/file-EsneVJJpoJmFQFx8mt5pes/content
+                - go1.26.10
+        url: https://api.openai.com/v1/files/file-Sq9GAM28yWwc4uCbvwkx5Z/content
         method: GET
       response:
         proto: HTTP/2.0
@@ -1295,8 +1174,8 @@ interactions:
         content_length: 1724
         uncompressed: false
         body: |
-            {"id": "batch_req_6ad242447b88819096a02dc9c557f21b", "custom_id": "319bbef7-3f53-455a-8a9a-eefe9664d903_0", "response": {"status_code": 200, "request_id": "03f03adf-72ec-44a1-9179-30393e3182d8", "body": {"id": "chatcmpl-EZe6hl7jXDRXGS3XTWWnu5nPeUAM1", "object": "chat.completion", "created": 1792164359, "model": "gpt-4o-mini-2024-07-18", "choices": [{"index": 0, "message": {"role": "assistant", "content": "PASS", "refusal": null, "annotations": []}, "logprobs": null, "finish_reason": "stop"}], "usage": {"prompt_tokens": 25, "completion_tokens": 1, "total_tokens": 26, "prompt_tokens_details": {"cached_tokens": 0, "audio_tokens": 0}, "completion_tokens_details": {"reasoning_tokens": 0, "audio_tokens": 0, "accepted_prediction_tokens": 0, "rejected_prediction_tokens": 0}}, "service_tier": "default", "system_fingerprint": "fp_bef77fd4b6"}}, "error": null}
-            {"id": "batch_req_6ad2424472fc8190960dddb2fcda33b5", "custom_id": "319bbef7-3f53-455a-8a9a-eefe9664d903_1", "response": {"status_code": 200, "request_id": "16744f5a-2fd4-487a-a732-a07a55ca3aca", "body": {"id": "chatcmpl-EZe7e3JJ0Fj05vG2sxH2ZwYsANLL6", "object": "chat.completion", "created": 1792164418, "model": "gpt-4o-mini-2024-07-18", "choices": [{"index": 0, "message": {"role": "assistant", "content": "PASS", "refusal": null, "annotations": []}, "logprobs": null, "finish_reason": "stop"}], "usage": {"prompt_tokens": 25, "completion_tokens": 1, "total_tokens": 26, "prompt_tokens_details": {"cached_tokens": 0, "audio_tokens": 0}, "completion_tokens_details": {"reasoning_tokens": 0, "audio_tokens": 0, "accepted_prediction_tokens": 0, "rejected_prediction_tokens": 0}}, "service_tier": "default", "system_fingerprint": "fp_bef77fd4b6"}}, "error": null}
+            {"id": "batch_req_6ad9530ddc08819087e189dc83962a18", "custom_id": "319bbef7-3f53-455a-8a9a-eefe9664d903_0", "response": {"status_code": 200, "request_id": "05be43fa-4608-4a84-adae-e9ca06793cc4", "body": {"id": "chatcmpl-Ebaa69H5J3zudqfXsw7741Nub5NvW", "object": "chat.completion", "created": 1792627462, "model": "gpt-4o-mini-2024-07-18", "choices": [{"index": 0, "message": {"role": "assistant", "content": "PASS", "refusal": null, "annotations": []}, "logprobs": null, "finish_reason": "stop"}], "usage": {"prompt_tokens": 25, "completion_tokens": 1, "total_tokens": 26, "prompt_tokens_details": {"cached_tokens": 0, "audio_tokens": 0}, "completion_tokens_details": {"reasoning_tokens": 0, "audio_tokens": 0, "accepted_prediction_tokens": 0, "rejected_prediction_tokens": 0}}, "service_tier": "default", "system_fingerprint": "fp_0f1d2628ac"}}, "error": null}
+            {"id": "batch_req_6ad9530daf8c8190b10fc3658719820e", "custom_id": "319bbef7-3f53-455a-8a9a-eefe9664d903_1", "response": {"status_code": 200, "request_id": "a6a5e011-0e4c-4ba4-9ff8-8483055ab251", "body": {"id": "chatcmpl-Ebaa4bMvPgM1vOmIBELY2LfiY0Alr", "object": "chat.completion", "created": 1792627460, "model": "gpt-4o-mini-2024-07-18", "choices": [{"index": 0, "message": {"role": "assistant", "content": "PASS", "refusal": null, "annotations": []}, "logprobs": null, "finish_reason": "stop"}], "usage": {"prompt_tokens": 25, "completion_tokens": 1, "total_tokens": 26, "prompt_tokens_details": {"cached_tokens": 0, "audio_tokens": 0}, "completion_tokens_details": {"reasoning_tokens": 0, "audio_tokens": 0, "accepted_prediction_tokens": 0, "rejected_prediction_tokens": 0}}, "service_tier": "default", "system_fingerprint": "fp_dc5837e6d6"}}, "error": null}
         headers:
             Access-Control-Allow-Origin:
                 - '*'
@@ -1307,19 +1186,19 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - a4b8171c588c4c41-CMH
+                - a4e43fdbdf7fec80-SEA
             Content-Disposition:
-                - attachment; filename="batch_6ad24201c9d881909cfe0fb8adabe5c6_output.jsonl"
+                - attachment; filename="batch_6ad95300422c8190b5e162670505aafd_output.jsonl"
             Content-Length:
                 - "1724"
             Content-Type:
                 - application/octet-stream
             Date:
-                - Fri, 16 Oct 2026 15:27:54 GMT
+                - Thu, 22 Oct 2026 00:05:17 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "180"
+                - "245"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -1327,7 +1206,7 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=p9QqrRM7BHoKW7OTgEnNafO9cp7G6UdOlWX0nTfVjU8-1792164474.2927372-1.0.1.1-g7DoywYW_p7j6LxIl.UcrEhJ.ezWLYp5CT3HkhdrODotu57Nl.N.8YSD2.NFpnfbKIalEvfYnUWaiyN0O3oPqCEAGjc4P9yohUCZ5S1GnFRU8v18bpYd5Z96Pk0YqVRa; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Fri, 16 Oct 2026 15:57:54 GMT
+                - __cf_bm=M9fIVgSXOFH2ECa5T9FkDZkQD3ZityB7TFMh5rzQ_Bs-1792627516.7799184-1.0.1.1-BsexZspZ3kybD33OCiJ_3iZ22sZcyHJITSrKiuUEFifcc8Z7g96pbk39.kdO2nQEZ2HN.wDMEdrbEoOmTK.e7GVAar37xXjMWETElNQ_cUebhfGNCVvwNrrpmSOOteo5; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:35:17 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
@@ -1335,7 +1214,7 @@ interactions:
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Request-Id:
-                - req_aed6d6459806468b87b8871822b52661
+                - req_68e1cade10e0410cb5f6cc9d81a6f3a3
         status: 200 OK
         code: 200
-        duration: 290.121791ms
+        duration: 426.246416ms

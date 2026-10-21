@@ -6,25 +6,25 @@ interactions:
         proto: ""
         proto_major: 0
         proto_minor: 0
-        content_length: 156
+        content_length: 181
         transfer_encoding: []
         trailer: {}
         host: ""
         remote_addr: ""
         request_uri: ""
-        body: '{"inferenceConfig":{"maxTokens":64,"temperature":0.2},"messages":[{"content":[{"text":"What is the capital of France? Reply in one word."}],"role":"user"}]}'
+        body: '{"inferenceConfig":{"maxTokens":64,"stopSequences":["DONE"],"temperature":0.2},"messages":[{"content":[{"text":"What is the capital of France? Reply in one word."}],"role":"user"}]}'
         form: {}
         headers:
             Amz-Sdk-Invocation-Id:
-                - e48a29ab-d7fe-499b-bab5-9af61feb6f94
+                - d32bcd23-d4ff-4492-9d5d-0894054bd814
             Amz-Sdk-Request:
                 - attempt=1; max=3
             Content-Type:
                 - application/json
             User-Agent:
-                - aws-sdk-go-v2/1.41.5 ua/2.1 os/macos lang/go#1.26.2 md/GOOS#darwin md/GOARCH#arm64 api/bedrockruntime#1.50.4 m/E,g
+                - aws-sdk-go-v2/1.41.5 ua/2.1 os/macos lang/go#1.26.10 md/GOOS#darwin md/GOARCH#arm64 api/bedrockruntime#1.50.4 m/E,g
             X-Amz-Date:
-                - 20260417T175536Z
+                - 20261022T000614Z
         url: https://bedrock-runtime.us-east-2.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/converse
         method: POST
       response:
@@ -33,18 +33,18 @@ interactions:
         proto_minor: 0
         transfer_encoding: []
         trailer: {}
-        content_length: 317
+        content_length: 316
         uncompressed: false
-        body: '{"metrics":{"latencyMs":3676},"output":{"message":{"content":[{"text":"Paris"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":19,"outputTokens":4,"serverToolUsage":{},"totalTokens":23}}'
+        body: '{"metrics":{"latencyMs":460},"output":{"message":{"content":[{"text":"Paris"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":19,"outputTokens":4,"serverToolUsage":{},"totalTokens":23}}'
         headers:
             Content-Length:
-                - "317"
+                - "316"
             Content-Type:
                 - application/json
             Date:
-                - Fri, 17 Apr 2026 17:55:40 GMT
+                - Thu, 22 Oct 2026 00:06:15 GMT
             X-Amzn-Requestid:
-                - 1fc4b285-fb61-41bc-8d9c-40f6b3db248e
+                - 37970a03-5165-4d51-83e7-4a8cbffe24d1
         status: 200 OK
         code: 200
-        duration: 3.818187625s
+        duration: 778.846375ms

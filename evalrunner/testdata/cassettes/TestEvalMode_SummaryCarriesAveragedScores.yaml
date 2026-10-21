@@ -6,6 +6,67 @@ interactions:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
+        content_length: 23
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"go-sdk-tests"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","name":"go-sdk-tests","description":null,"created":"2026-10-19T23:49:12.896Z","deleted_at":null,"user_id":"c1f71e19-b3ce-4f59-89a9-055901f7755b","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:00:52 GMT
+            Etag:
+                - W/"fe-7iaq6aBQFNs98OpqCWtmRX1e6fw"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 4ac8d091dce10e726cfc5404bfed72b8.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - 44NiN6uKLplfu0zzloouTT6kNY17wDGgEjiTlnnVJ7W0Vm0IzjGFvg==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Bt-Found-Existing:
+                - "true"
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 103.287292ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
         content_length: 0
         transfer_encoding: []
         trailer: {}
@@ -30,109 +91,34 @@ interactions:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
             Cache-Control:
                 - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Thu, 13 Aug 2026 20:45:47 GMT
+                - Thu, 22 Oct 2026 00:00:52 GMT
             Etag:
                 - W/"178-kKbrsfThc+xXlggXc9RQYV+Gr9I"
             Expires:
                 - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
             Surrogate-Control:
                 - no-store
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 dc258c6be709f7f39799b8fc175687ec.cloudfront.net (CloudFront), 1.1 9b0436675c860f7dd8f83017e2edc338.cloudfront.net (CloudFront)
-            X-Amz-Apigw-Id:
-                - CDv3YGHxIAMEXgw=
+                - 1.1 4ac8d091dce10e726cfc5404bfed72b8.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - BP7UTsqtj5JrJFSdHFRoIHvsa-rKOFYJrDvkdnFfEBNbmQaZGA_oQQ==
+                - vDzfmk_lMxySQ0-2QwP3r0s4NmIf9amdkxmJPqkgQKD_HN-yrLOZ5g==
             X-Amz-Cf-Pop:
-                - CMH68-P3
-                - CMH68-P5
-            X-Amzn-Requestid:
-                - d4c503b1-3afc-4d90-8fad-35c4b57ca3f5
-            X-Amzn-Trace-Id:
-                - Root=1-6a7e2cfb-4a9339da4b6717916d888aef;Parent=6ab16661ff10076a;Sampled=0;Lineage=1:24be3d11:0
-            X-Bt-Internal-Trace-Id:
-                - 6a7e2cfb0000000027148dab80348cf0
+                - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 166.037493ms
-    - id: 1
-      request:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: 23
-        transfer_encoding: []
-        trailer: {}
-        host: api.braintrust.dev
-        remote_addr: ""
-        request_uri: ""
-        body: '{"name":"go-sdk-tests"}'
-        form: {}
-        headers:
-            Content-Type:
-                - application/json
-        url: https://api.braintrust.dev/v1/project
-        method: POST
-      response:
-        proto: HTTP/2.0
-        proto_major: 2
-        proto_minor: 0
-        transfer_encoding: []
-        trailer: {}
-        content_length: -1
-        uncompressed: true
-        body: '{"id":"7f591203-74a0-4126-9103-1fb905b32618","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","name":"go-sdk-tests","description":null,"created":"2026-08-13T20:45:31.574Z","deleted_at":null,"user_id":"c755328d-f64a-4737-a984-e83c088cd9f7","settings":null}'
-        headers:
-            Access-Control-Allow-Credentials:
-                - "true"
-            Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
-            Cache-Control:
-                - no-store, no-cache, must-revalidate, proxy-revalidate
-            Content-Type:
-                - application/json; charset=utf-8
-            Date:
-                - Thu, 13 Aug 2026 20:45:47 GMT
-            Etag:
-                - W/"fe-e5XSQJyAK+9rnBrPXkKT/jlKL04"
-            Expires:
-                - "0"
-            Surrogate-Control:
-                - no-store
-            Vary:
-                - Origin, Accept-Encoding
-            Via:
-                - 1.1 a2816c7c12a47a816d07cc417cb6675e.cloudfront.net (CloudFront), 1.1 9b0436675c860f7dd8f83017e2edc338.cloudfront.net (CloudFront)
-            X-Amz-Apigw-Id:
-                - CDv3YHGTIAMEc9w=
-            X-Amz-Cf-Id:
-                - CJgei9TqSOc_F2KcnKiV3WHLLcvtV8ddMB7vyZNZK0Ht7G1RyxKxdA==
-            X-Amz-Cf-Pop:
-                - CMH68-P3
-                - CMH68-P5
-            X-Amzn-Requestid:
-                - 56e305c7-cdc3-48a6-a328-cb93cb4d023b
-            X-Amzn-Trace-Id:
-                - Root=1-6a7e2cfb-0e14dfaa66127a9b7485fcf4;Parent=15aaaf239f52546a;Sampled=0;Lineage=1:24be3d11:0
-            X-Bt-Found-Existing:
-                - "true"
-            X-Bt-Internal-Trace-Id:
-                - 6a7e2cfb0000000078aedc4fe88f8399
-            X-Cache:
-                - Miss from cloudfront
-        status: 200 OK
-        code: 200
-        duration: 192.778ms
+        duration: 147.847417ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -144,7 +130,7 @@ interactions:
         host: api.braintrust.dev
         remote_addr: ""
         request_uri: ""
-        body: '{"project_id":"7f591203-74a0-4126-9103-1fb905b32618","name":"food-classifier"}'
+        body: '{"project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"food-classifier"}'
         form: {}
         headers:
             Content-Type:
@@ -159,43 +145,36 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"cd287789-7fe6-4ab6-ab71-9047bf601589","project_id":"7f591203-74a0-4126-9103-1fb905b32618","name":"food-classifier","description":null,"created":"2026-08-13T20:45:31.891Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"c755328d-f64a-4737-a984-e83c088cd9f7","metadata":null,"tags":null}'
+        body: '{"id":"7443f9b3-f0cd-4545-bb64-8f4ecaf7934b","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"food-classifier","description":null,"created":"2026-10-21T20:11:43.974Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
             Cache-Control:
                 - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Thu, 13 Aug 2026 20:45:48 GMT
+                - Thu, 22 Oct 2026 00:00:52 GMT
             Etag:
-                - W/"1c3-gvbfhkC1LClqA+o+BPGj3a1KF9o"
+                - W/"1c3-dDpBj+Jw6E/S5La1MTPuwVQ4+No"
             Expires:
                 - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
             Surrogate-Control:
                 - no-store
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 47214a5a56c101a011a23591db3cc7d8.cloudfront.net (CloudFront), 1.1 9b0436675c860f7dd8f83017e2edc338.cloudfront.net (CloudFront)
-            X-Amz-Apigw-Id:
-                - CDv3aHBBIAMEGNQ=
+                - 1.1 4ac8d091dce10e726cfc5404bfed72b8.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - HsGh8Pu0bvLnUHdDeRLtTHmHr3s00tWFDO-S03lrX2x4BHOMNwBGDw==
+                - -uWc-Fy2-LBUS6OYUDqo1cvPAQuYRvogWFTbAY7-qDUBKSKuojYPuA==
             X-Amz-Cf-Pop:
-                - CMH68-P3
-                - CMH68-P5
-            X-Amzn-Requestid:
-                - d88c7be2-d2c2-4ffe-84a0-ef75c9e3a251
-            X-Amzn-Trace-Id:
-                - Root=1-6a7e2cfb-3d2a7171749f45aa122aac8f;Parent=14223b2c097176e4;Sampled=0;Lineage=1:24be3d11:0
-            X-Bt-Internal-Trace-Id:
-                - 6a7e2cfb00000000658e34cf2119650a
+                - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 330.293711ms
+        duration: 161.326167ms

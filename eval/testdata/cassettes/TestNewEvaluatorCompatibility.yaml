@@ -1,0 +1,371 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 23
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"go-sdk-tests"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","name":"go-sdk-tests","description":null,"created":"2026-10-19T23:49:12.896Z","deleted_at":null,"user_id":"c1f71e19-b3ce-4f59-89a9-055901f7755b","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 21 Oct 2026 23:59:47 GMT
+            Etag:
+                - W/"fe-7iaq6aBQFNs98OpqCWtmRX1e6fw"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - I5Gpp4CYHQBT-SELHnv4dvNbLaTfMK3gtLEw9tQLxEzKRrgVQnW8dA==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Bt-Found-Existing:
+                - "true"
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 211.107084ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 95
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"test-new-evaluator-compatibility","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/dataset
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"199780e7-e29b-45fa-9537-4fe89230441c","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-new-evaluator-compatibility","description":null,"created":"2026-10-21T23:59:48.032Z","deleted_at":null,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","tags":null,"metadata":null,"url_slug":"test-new-evaluator-compatibility"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 21 Oct 2026 23:59:48 GMT
+            Etag:
+                - W/"150-HlRskkAbeTy6E0Sa19qOHH2ypgc"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - stZNLnJaaOvHJBzjlTTBk3jETNIHTwBF_4yaVt6Si6Ef_wEDZdpTLg==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 173.2765ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 162
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"events":[{"input":{"question":"What is 2+2?"},"expected":{"answer":"4"}},{"input":{"question":"What is the capital of France?"},"expected":{"answer":"Paris"}}]}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/dataset/199780e7-e29b-45fa-9537-4fe89230441c/insert
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"row_ids":["2b048a6a-bc8f-4e1d-8e24-2a3a0ea15136","75dfeeba-3c99-4d51-ae20-7b42e5260e57"]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 21 Oct 2026 23:59:48 GMT
+            Etag:
+                - W/"5b-eMn7CJC3jZU80aCqS3Kn3rID6WE"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - 8mbQHlbkxiv2UtTNjoCxm2Q4ISEJd6dUsEJ33heim_8SrfH8tRyuAQ==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 484.791208ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 13
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"limit":100}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/dataset/199780e7-e29b-45fa-9537-4fe89230441c/fetch
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"events":[{"_pagination_key":"p07699275146460725249","_xact_id":"1000198073868354761","audit_data":[{"_xact_id":"1000198073868354761","audit_data":{"action":"upsert"},"metadata":{},"source":"api"}],"classifications":null,"comments":null,"created":"2026-10-21T23:59:48.227Z","dataset_id":"199780e7-e29b-45fa-9537-4fe89230441c","expected":{"answer":"Paris"},"facets":null,"id":"75dfeeba-3c99-4d51-ae20-7b42e5260e57","input":{"question":"What is the capital of France?"},"is_root":true,"metadata":null,"origin":null,"project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","root_span_id":"ccdabeb0-86b2-4205-af5f-e776f53b4cde","span_id":"ccdabeb0-86b2-4205-af5f-e776f53b4cde","tags":null},{"_pagination_key":"p07699275146460725248","_xact_id":"1000198073868354761","audit_data":[{"_xact_id":"1000198073868354761","audit_data":{"action":"upsert"},"metadata":{},"source":"api"}],"classifications":null,"comments":null,"created":"2026-10-21T23:59:48.227Z","dataset_id":"199780e7-e29b-45fa-9537-4fe89230441c","expected":{"answer":"4"},"facets":null,"id":"2b048a6a-bc8f-4e1d-8e24-2a3a0ea15136","input":{"question":"What is 2+2?"},"is_root":true,"metadata":null,"origin":null,"project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","root_span_id":"1786b1f6-4ca5-4fb8-987b-2b0a4527fc17","span_id":"1786b1f6-4ca5-4fb8-987b-2b0a4527fc17","tags":null}],"cursor":"atlR9ATJAAA"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json
+            Date:
+                - Wed, 21 Oct 2026 23:59:48 GMT
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin
+            Via:
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - eOiYNYljo4xyV0KWCXKYEeHxoQQ6hxsEVEDwLkewJvs-6mYCc2_v7Q==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Bt-Api-Duration-Ms:
+                - "155"
+            X-Bt-Brainstore-Duration-Ms:
+                - "79"
+            X-Bt-Count:
+                - "2"
+            X-Bt-Cursor:
+                - atlR9ATJAAA
+            X-Bt-Internal-Trace-Id:
+                - 136864d1908eeac4c3e2b680b3f221c1
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 258.986333ms
+    - id: 4
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 36
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"cursor":"atlR9ATJAAA","limit":100}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/dataset/199780e7-e29b-45fa-9537-4fe89230441c/fetch
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"events":[]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json
+            Date:
+                - Wed, 21 Oct 2026 23:59:49 GMT
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin
+            Via:
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - MYKXLRvxOFKiOPAzhZNemuv32Bbb60ln8b4swXX81Y1s9RURkpcbXg==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Bt-Api-Duration-Ms:
+                - "134"
+            X-Bt-Brainstore-Duration-Ms:
+                - "127"
+            X-Bt-Count:
+                - "0"
+            X-Bt-Internal-Trace-Id:
+                - 6f6f66a35f096fced6779fcc15daf139
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 224.925ms
+    - id: 5
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/dataset/199780e7-e29b-45fa-9537-4fe89230441c
+        method: DELETE
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"199780e7-e29b-45fa-9537-4fe89230441c","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-new-evaluator-compatibility","description":null,"created":"2026-10-21T23:59:48.032Z","deleted_at":"2026-10-21T23:59:49.170Z","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","tags":null,"metadata":null,"url_slug":"test-new-evaluator-compatibility"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 21 Oct 2026 23:59:49 GMT
+            Etag:
+                - W/"166-UyF7C9qC18wqzQL6IPezHRJis+g"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - Pq6gYa4WMpfSYAwJNrmdu9wYS29kvt4JToBmDHqSd8JwxDWJqak4Vw==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 171.702375ms

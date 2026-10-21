@@ -16,15 +16,15 @@ interactions:
         form: {}
         headers:
             Amz-Sdk-Invocation-Id:
-                - 7e6aa255-b919-47a4-a05f-c23dc97cbc0b
+                - 5728b2ee-c5af-41cf-9608-ca8f7b0c92c1
             Amz-Sdk-Request:
                 - attempt=1; max=3
             Content-Type:
                 - application/json
             User-Agent:
-                - aws-sdk-go-v2/1.41.5 ua/2.1 os/macos lang/go#1.26.2 md/GOOS#darwin md/GOARCH#arm64 api/bedrockruntime#1.50.4 m/E,g
+                - aws-sdk-go-v2/1.41.5 ua/2.1 os/macos lang/go#1.26.10 md/GOOS#darwin md/GOARCH#arm64 api/bedrockruntime#1.50.4 m/E,g
             X-Amz-Date:
-                - 20260417T175542Z
+                - 20261022T000616Z
         url: https://bedrock-runtime.us-east-2.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/converse-stream
         method: POST
       response:
@@ -36,30 +36,32 @@ interactions:
         content_length: -1
         uncompressed: false
         body: !!binary |
-            AAAAlQAAAFL5oUfRCzpldmVudC10eXBlBwAMbWVzc2FnZVN0YXJ0DTpjb250ZW50LXR5cG
+            AAAAtQAAAFI4YGjVCzpldmVudC10eXBlBwAMbWVzc2FnZVN0YXJ0DTpjb250ZW50LXR5cG
             UHABBhcHBsaWNhdGlvbi9qc29uDTptZXNzYWdlLXR5cGUHAAVldmVudHsicCI6ImFiY2Rl
-            ZmdoaWprbG1ub3BxcnN0dXZ3eCIsInJvbGUiOiJhc3Npc3RhbnQiffvVpbAAAADIAAAAV0
-            lIuCQLOmV2ZW50LXR5cGUHABFjb250ZW50QmxvY2tEZWx0YQ06Y29udGVudC10eXBlBwAQ
-            YXBwbGljYXRpb24vanNvbg06bWVzc2FnZS10eXBlBwAFZXZlbnR7ImNvbnRlbnRCbG9ja0
-            luZGV4IjowLCJkZWx0YSI6eyJ0ZXh0IjoiUGFyaXMifSwicCI6ImFiY2RlZmdoaWprbG1u
-            b3BxcnN0dXZ3eHl6QUJDREVGR0hJSktMTU5PUCJ98RLYhQAAAKcAAABWJS1oLgs6ZXZlbn
-            QtdHlwZQcAEGNvbnRlbnRCbG9ja1N0b3ANOmNvbnRlbnQtdHlwZQcAEGFwcGxpY2F0aW9u
-            L2pzb24NOm1lc3NhZ2UtdHlwZQcABWV2ZW50eyJjb250ZW50QmxvY2tJbmRleCI6MCwicC
-            I6ImFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6QUJDREVGR0hJIn2xnHuWAAAAgwAAAFGP
-            CHRJCzpldmVudC10eXBlBwALbWVzc2FnZVN0b3ANOmNvbnRlbnQtdHlwZQcAEGFwcGxpY2
-            F0aW9uL2pzb24NOm1lc3NhZ2UtdHlwZQcABWV2ZW50eyJwIjoiYWIiLCJzdG9wUmVhc29u
-            IjoiZW5kX3R1cm4ifZBW6aQAAADnAAAATm6yqDELOmV2ZW50LXR5cGUHAAhtZXRhZGF0YQ
-            06Y29udGVudC10eXBlBwAQYXBwbGljYXRpb24vanNvbg06bWVzc2FnZS10eXBlBwAFZXZl
-            bnR7Im1ldHJpY3MiOnsibGF0ZW5jeU1zIjo4Mjd9LCJwIjoiYWJjZGVmZ2hpamtsbW5vcH
-            FycyIsInVzYWdlIjp7ImlucHV0VG9rZW5zIjoxOSwib3V0cHV0VG9rZW5zIjoxLCJzZXJ2
-            ZXJUb29sVXNhZ2UiOnt9LCJ0b3RhbFRva2VucyI6MjB9fYuHLV8=
+            ZmdoaWprbG1ub3BxcnN0dXZ3eHl6QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVowMTIzIi
+            wicm9sZSI6ImFzc2lzdGFudCJ9gnZ5VAAAALIAAABX+ipASgs6ZXZlbnQtdHlwZQcAEWNv
+            bnRlbnRCbG9ja0RlbHRhDTpjb250ZW50LXR5cGUHABBhcHBsaWNhdGlvbi9qc29uDTptZX
+            NzYWdlLXR5cGUHAAVldmVudHsiY29udGVudEJsb2NrSW5kZXgiOjAsImRlbHRhIjp7InRl
+            eHQiOiJQYXJpcyJ9LCJwIjoiYWJjZGVmZ2hpamtsbW5vcHFyc3QifXvkkPkAAAC3AAAAVk
+            XN/6wLOmV2ZW50LXR5cGUHABBjb250ZW50QmxvY2tTdG9wDTpjb250ZW50LXR5cGUHABBh
+            cHBsaWNhdGlvbi9qc29uDTptZXNzYWdlLXR5cGUHAAVldmVudHsiY29udGVudEJsb2NrSW
+            5kZXgiOjAsInAiOiJhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ekFCQ0RFRkdISUpLTE1O
+            T1BRUlNUVVZXWFkifUyx1JEAAACjAAAAUU7JW00LOmV2ZW50LXR5cGUHAAttZXNzYWdlU3
+            RvcA06Y29udGVudC10eXBlBwAQYXBwbGljYXRpb24vanNvbg06bWVzc2FnZS10eXBlBwAF
+            ZXZlbnR7InAiOiJhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ekFCQ0RFRkdIIiwic3RvcF
+            JlYXNvbiI6ImVuZF90dXJuIn3wGF+JAAAA/wAAAE4+InRyCzpldmVudC10eXBlBwAIbWV0
+            YWRhdGENOmNvbnRlbnQtdHlwZQcAEGFwcGxpY2F0aW9uL2pzb24NOm1lc3NhZ2UtdHlwZQ
+            cABWV2ZW50eyJtZXRyaWNzIjp7ImxhdGVuY3lNcyI6NDcyfSwicCI6ImFiY2RlZmdoaWpr
+            bG1ub3BxcnN0dXZ3eHl6QUJDREVGR0hJSktMTU5PUFEiLCJ1c2FnZSI6eyJpbnB1dFRva2
+            VucyI6MTksIm91dHB1dFRva2VucyI6NCwic2VydmVyVG9vbFVzYWdlIjp7fSwidG90YWxU
+            b2tlbnMiOjIzfX193jdJ
         headers:
             Content-Type:
                 - application/vnd.amazon.eventstream
             Date:
-                - Fri, 17 Apr 2026 17:55:42 GMT
+                - Thu, 22 Oct 2026 00:06:17 GMT
             X-Amzn-Requestid:
-                - 194939fb-b2ba-468d-aded-78412425b82d
+                - 2b432a42-610d-440c-a2ad-37ec80f620fa
         status: 200 OK
         code: 200
-        duration: 742.240209ms
+        duration: 642.63425ms

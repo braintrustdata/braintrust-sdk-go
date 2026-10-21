@@ -25,7 +25,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"Code":"BadRequestError","Message":"Prompt does not exist or you do not have access [user_email=andrew@braintrustdata.com] [user_org=Braintrust SDKs] [timestamp=1792536877.731]"}'
+        body: '{"Code":"BadRequestError","Message":"Prompt does not exist or you do not have access [user_email=user@example.com] [user_org=REDACTED] [timestamp=1792627287.37]"}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -36,9 +36,9 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Tue, 20 Oct 2026 22:54:37 GMT
+                - Thu, 22 Oct 2026 00:01:27 GMT
             Etag:
-                - W/"b3-9DDm1Ildx+DS0CamOUKrJM3T8Pk"
+                - W/"b2-o1uNK9AScad4C1KppXB0Cni/Lxw"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -48,13 +48,13 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 566cc276dff9847158a5a9854be4df42.cloudfront.net (CloudFront)
+                - 1.1 87247d9a9b2f9e51b0c72b364948aefa.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - 5Ibn4Cz89Jaha3aLE05WIY7mAioCzAZC-eoNOzXPJ2Etl5arec8QRQ==
+                - hDaNGcLKi_w4smuf2lAlAdvCMgPKvm3LL-Eua6eWXdOtYJwaTLymYA==
             X-Amz-Cf-Pop:
                 - SEA900-P10
             X-Cache:
                 - Error from cloudfront
         status: 400 Bad Request
         code: 400
-        duration: 279.3425ms
+        duration: 141.340209ms

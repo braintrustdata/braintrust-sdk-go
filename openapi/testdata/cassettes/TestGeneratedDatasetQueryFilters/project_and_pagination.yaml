@@ -1,0 +1,296 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 23
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"go-sdk-tests"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","name":"go-sdk-tests","description":null,"created":"2026-10-19T23:49:12.896Z","deleted_at":null,"user_id":"c1f71e19-b3ce-4f59-89a9-055901f7755b","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:16 GMT
+            Etag:
+                - W/"fe-7iaq6aBQFNs98OpqCWtmRX1e6fw"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - 7If4D5Zv4YbCYeXSXJeA0hZfWNd4wvqUR7pjL7YnC4qxPOBtmpw1Tw==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Bt-Found-Existing:
+                - "true"
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 95.337333ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 80
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"query-params-test","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/dataset
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"89700591-0d13-4516-bb64-d402ff0636e3","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"query-params-test","description":null,"created":"2026-10-21T21:43:55.418Z","deleted_at":null,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","tags":null,"metadata":null,"url_slug":"query-params-test"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:17 GMT
+            Etag:
+                - W/"132-Cl53I+PnqEkqncOeiizvQ4ylSco"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - RBzoaB1eTzL4VyuCvh2EbdjDMl5joZdcYWwlcVkjAqeCA_StLZ2Ivg==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Bt-Found-Existing:
+                - "true"
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 721.845042ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/dataset?limit=5&project_id=900b1ba7-5336-4a3f-8a6d-52e1a170bd78
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"objects":[{"id":"3e919c08-51f0-4342-8e09-46803da2b274","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-dataset-query","description":null,"created":"2026-10-22T00:01:16.703Z","deleted_at":null,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","tags":null,"metadata":null,"url_slug":"test-dataset-query"},{"id":"06850513-f449-4aa5-8ef4-df126d4a84f4","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-dataset-fields","description":null,"created":"2026-10-22T00:01:14.159Z","deleted_at":null,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","tags":null,"metadata":null,"url_slug":"test-dataset-fields"},{"id":"89700591-0d13-4516-bb64-d402ff0636e3","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"query-params-test","description":null,"created":"2026-10-21T21:43:55.418Z","deleted_at":null,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","tags":null,"metadata":null,"url_slug":"query-params-test"},{"id":"73e0a0d1-f9e6-4b26-bb60-afa9230d0115","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-dataset-modify","description":null,"created":"2026-10-21T21:43:54.410Z","deleted_at":null,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","tags":null,"metadata":null,"url_slug":"test-dataset-modify"},{"id":"77629658-117b-4fdd-af87-e7bf3c1719b9","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-dataset-pagination","description":null,"created":"2026-10-21T21:43:52.992Z","deleted_at":null,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","tags":null,"metadata":null,"url_slug":"test-dataset-pagination"}]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:17 GMT
+            Etag:
+                - W/"622-T0o/G25PS+f+0RHo3DzUdzq/xV0"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - cDsncqQ-18N4vH6Lzosjvl9G2Zgsc-z4MLGXFnhAByHoe-FPIAV5wA==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 159.321916ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/dataset?limit=5&starting_after=3e919c08-51f0-4342-8e09-46803da2b274&project_id=900b1ba7-5336-4a3f-8a6d-52e1a170bd78
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"objects":[{"id":"06850513-f449-4aa5-8ef4-df126d4a84f4","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-dataset-fields","description":null,"created":"2026-10-22T00:01:14.159Z","deleted_at":null,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","tags":null,"metadata":null,"url_slug":"test-dataset-fields"},{"id":"89700591-0d13-4516-bb64-d402ff0636e3","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"query-params-test","description":null,"created":"2026-10-21T21:43:55.418Z","deleted_at":null,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","tags":null,"metadata":null,"url_slug":"query-params-test"},{"id":"73e0a0d1-f9e6-4b26-bb60-afa9230d0115","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-dataset-modify","description":null,"created":"2026-10-21T21:43:54.410Z","deleted_at":null,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","tags":null,"metadata":null,"url_slug":"test-dataset-modify"},{"id":"77629658-117b-4fdd-af87-e7bf3c1719b9","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-dataset-pagination","description":null,"created":"2026-10-21T21:43:52.992Z","deleted_at":null,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","tags":null,"metadata":null,"url_slug":"test-dataset-pagination"}]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:18 GMT
+            Etag:
+                - W/"4ed-pOFqqmY3RuANbx6uYbFmdPqJ8Hw"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - ukJ3dPaxnU6MDj9S0rJs9DiqQvXgfKTCgtB0awGU6eb6dT_jKUlulg==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 254.061584ms
+    - id: 4
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/dataset?limit=1&dataset_name=query-params-test&project_id=900b1ba7-5336-4a3f-8a6d-52e1a170bd78
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"objects":[{"id":"89700591-0d13-4516-bb64-d402ff0636e3","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"query-params-test","description":null,"created":"2026-10-21T21:43:55.418Z","deleted_at":null,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","tags":null,"metadata":null,"url_slug":"query-params-test"}]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:18 GMT
+            Etag:
+                - W/"140-lqFXzsPXxHzYd/B3/+uvq/D/c8Y"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - R6JB305wXZPqYh9sQa6ma2hBvr-LAePZuFEu_04rsTJ0-IlUduvNgA==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 177.635125ms

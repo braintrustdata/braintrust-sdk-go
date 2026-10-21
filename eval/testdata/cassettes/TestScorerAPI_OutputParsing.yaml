@@ -27,25 +27,41 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"go-sdk-tests","created":"2025-11-04T13:38:56.532Z","deleted_at":null,"user_id":"855483c6-68f0-4df4-a147-df9b4ea32e0c","settings":null}'
+        body: '{"id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","name":"go-sdk-tests","description":null,"created":"2026-10-19T23:49:12.896Z","deleted_at":null,"user_id":"c1f71e19-b3ce-4f59-89a9-055901f7755b","settings":null}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Wed, 12 Nov 2025 14:55:10 GMT
+                - Thu, 22 Oct 2026 00:00:43 GMT
             Etag:
-                - W/"eb-poL8yUftdUFahhL/Peyi6gN8N/E"
+                - W/"fe-7iaq6aBQFNs98OpqCWtmRX1e6fw"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - zZFuep7OToKvBCwG5MZF6jTdHMOZ4D1wZ6CrG3NH9exgYmSfI_NJvQ==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
             X-Bt-Found-Existing:
                 - "true"
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 149.061458ms
+        duration: 97.459625ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -75,26 +91,46 @@ interactions:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:00:43 GMT
+            Etag:
+                - W/"e-xZKibKAiOxxBbzTm2byfFNRkvtA"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - 3Sb895JNNr3NX-IrwKlbdMk2HohOvyZleSNzkBQrzbFF25yrOP2j6A==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 163.317875ms
+        duration: 168.56725ms
     - id: 2
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 450
+        content_length: 530
         transfer_encoding: []
         trailer: {}
         host: api.braintrust.dev
         remote_addr: ""
         request_uri: ""
-        body: '{"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"Simple Scorer","slug":"TestScorerAPI_OutputParsing-slug","function_type":"scorer","function_data":{"type":"prompt"},"prompt_data":{"parser":{"type":"llm_classifier","use_cot":false,"choice_scores":{"bad":0,"good":1}},"prompt":{"type":"chat","messages":[{"role":"system","content":"You are a scorer."},{"role":"user","content":"Choose ''good'' if output matches expected, ''bad'' otherwise."}]},"options":{"model":"gpt-4o-mini","params":{"use_cache":true,"temperature":0}}}}'
+        body: '{"function_data":{"type":"prompt"},"function_type":"scorer","name":"Simple Scorer","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","prompt_data":{"options":{"model":"gpt-4o-mini","params":{"temperature":0,"use_cache":true}},"parser":{"choice_scores":{"bad":0,"good":1},"type":"llm_classifier","use_cot":false},"prompt":{"messages":[{"content":"You are a scorer.","role":"system"},{"content":"Choose ''good'' if output matches expected, ''bad'' otherwise.","role":"user"}],"type":"chat"}},"slug":"TestScorerAPI_OutputParsing-slug"}'
         form: {}
         headers:
             Content-Type:
@@ -109,19 +145,39 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"log_id":"p","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","slug":"TestScorerAPI_OutputParsing-slug","name":"Simple Scorer","function_type":"scorer","function_data":{"type":"prompt"},"id":"scorer-id-123","created":"2025-11-12T14:55:11.043Z","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","_xact_id":"1000196129554423258"}'
+        body: '{"log_id":"p","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","slug":"TestScorerAPI_OutputParsing-slug","name":"Simple Scorer","function_data":{"type":"prompt"},"function_type":"scorer","prompt_data":{"options":{"model":"gpt-4o-mini","params":{"temperature":0,"use_cache":true}},"parser":{"choice_scores":{"bad":0,"good":1},"type":"llm_classifier","use_cot":false},"prompt":{"messages":[{"content":"You are a scorer.","role":"system"},{"content":"Choose ''good'' if output matches expected, ''bad'' otherwise.","role":"user"}],"type":"chat"}},"id":"c803324b-b0ed-42e7-ae46-a02292a81a4a","created":"2026-10-22T00:00:43.540Z","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","_xact_id":"1000198073871960197"}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:00:43 GMT
+            Etag:
+                - W/"2c1-9sBYTPIAi34d8jNYG753TCINnqQ"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - -l1_7jbxwUj18dgycbIR77V6Npwa8zaVZ2yJEUfef3ODRxzwewXpFw==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 333.394792ms
+        duration: 230.243209ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -146,36 +202,56 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"objects":[{"id":"scorer-id-123","_xact_id":"1000196129554423258","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","log_id":"p","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"Simple Scorer","slug":"TestScorerAPI_OutputParsing-slug","function_type":"scorer","function_data":{"type":"prompt"},"prompt_data":{"parser":{"type":"llm_classifier","use_cot":false,"choice_scores":{"bad":0,"good":1}},"prompt":{"type":"chat","messages":[{"role":"system","content":"You are a scorer."},{"role":"user","content":"Choose ''good'' if output matches expected, ''bad'' otherwise."}]},"options":{"model":"gpt-4o-mini","params":{"use_cache":true,"temperature":0}}}}]}'
+        body: '{"objects":[{"_xact_id":"1000198073871960197","created":"2026-10-22T00:00:43.540Z","description":null,"function_data":{"type":"prompt"},"function_schema":null,"function_type":"scorer","id":"c803324b-b0ed-42e7-ae46-a02292a81a4a","log_id":"p","metadata":null,"name":"Simple Scorer","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","origin":null,"project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","prompt_data":{"parser":{"type":"llm_classifier","use_cot":false,"choice_scores":{"bad":0,"good":1}},"prompt":{"type":"chat","messages":[{"role":"system","content":"You are a scorer."},{"role":"user","content":"Choose ''good'' if output matches expected, ''bad'' otherwise."}]},"options":{"model":"gpt-4o-mini","params":{"use_cache":true,"temperature":0}}},"slug":"TestScorerAPI_OutputParsing-slug","tags":null}]}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:00:44 GMT
+            Etag:
+                - W/"323-5b6rkwlwqRCVrRWoSBOgZyCcFtw"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - g9HSCeORosDBZyoUvcIgQPF8tmuuv_sk_q17zAf6lMeJh50G4LyXow==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 332.457208ms
+        duration: 577.474709ms
     - id: 4
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 120
+        content_length: 97
         transfer_encoding: []
         trailer: {}
         host: api.braintrust.dev
         remote_addr: ""
         request_uri: ""
-        body: '{"input":{"input":{"question":"What is 2+2?"},"output":{"answer":"4"},"expected":{"answer":"4"}}}'
+        body: '{"input":{"expected":{"answer":"4"},"input":{"question":"What is 2+2?"},"output":{"answer":"4"}}}'
         form: {}
         headers:
             Content-Type:
                 - application/json
-        url: https://api.braintrust.dev/v1/function/scorer-id-123/invoke
+        url: https://api.braintrust.dev/v1/function/c803324b-b0ed-42e7-ae46-a02292a81a4a/invoke
         method: POST
       response:
         proto: HTTP/2.0
@@ -184,20 +260,52 @@ interactions:
         transfer_encoding: []
         trailer: {}
         content_length: -1
-        uncompressed: true
-        body: "0.9"
+        uncompressed: false
+        body: '{"name":"Simple Scorer","score":1,"metadata":{"choice":"good"}}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+                - x-bt-cursor,x-bt-found-existing,x-bt-span-id,x-bt-span-export,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-cache
+            Content-Encoding:
+                - identity
             Content-Type:
-                - application/json; charset=utf-8
+                - application/json
+            Date:
+                - Thu, 22 Oct 2026 00:00:45 GMT
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Vary:
+                - Origin, Access-Control-Request-Method, Access-Control-Request-Headers
+            Via:
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - -4lZPBOeRVq7pX4vGrCcOMTXWfGUBxWx12XkChVw8dmwXS0YCJwPBg==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Bt-Cached:
+                - MISS
+            X-Bt-Function-Creds-Cached:
+                - HIT
+            X-Bt-Function-Meta-Cached:
+                - MISS
+            X-Bt-Passthrough:
+                - "false"
+            X-Bt-Request-Id:
+                - 55aa62bb-5d91-440d-8c5a-bdb012117da6
+            X-Bt-Secrets-Scope:
+                - org_and_project
+            X-Bt-Stale-Secrets:
+                - "false"
+            X-Bt-Used-Endpoint:
+                - OPENAI_API_KEY
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 550.123456ms
+        duration: 1.063715625s
     - id: 5
       request:
         proto: HTTP/1.1
@@ -227,26 +335,46 @@ interactions:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:00:45 GMT
+            Etag:
+                - W/"e-xZKibKAiOxxBbzTm2byfFNRkvtA"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - 9Bw7Fac3nHZ7LZRpcn_atNn7dak30avs09VzHjKqYik5fGtpblHqyA==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 163.317875ms
+        duration: 161.749541ms
     - id: 6
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 470
+        content_length: 559
         transfer_encoding: []
         trailer: {}
         host: api.braintrust.dev
         remote_addr: ""
         request_uri: ""
-        body: '{"project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","name":"Detailed Scorer","slug":"TestScorerAPI_OutputParsing-slug2","function_type":"scorer","function_data":{"type":"prompt"},"prompt_data":{"parser":{"type":"llm_classifier","use_cot":true,"choice_scores":{"incorrect":0,"correct":1}},"prompt":{"type":"chat","messages":[{"role":"system","content":"You are a detailed scorer."},{"role":"user","content":"Evaluate if the output is correct. Return ''correct'' or ''incorrect''."}]},"options":{"model":"gpt-4o-mini","params":{"use_cache":true,"temperature":0}}}}'
+        body: '{"function_data":{"type":"prompt"},"function_type":"scorer","name":"Detailed Scorer","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","prompt_data":{"options":{"model":"gpt-4o-mini","params":{"temperature":0,"use_cache":true}},"parser":{"choice_scores":{"correct":1,"incorrect":0},"type":"llm_classifier","use_cot":true},"prompt":{"messages":[{"content":"You are a detailed scorer.","role":"system"},{"content":"Evaluate if the output is correct. Return ''correct'' or ''incorrect''.","role":"user"}],"type":"chat"}},"slug":"TestScorerAPI_OutputParsing-slug2"}'
         form: {}
         headers:
             Content-Type:
@@ -261,19 +389,39 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"log_id":"p","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","slug":"TestScorerAPI_OutputParsing-slug2","name":"Detailed Scorer","function_type":"scorer","function_data":{"type":"prompt"},"id":"scorer-id-456","created":"2025-11-12T14:55:11.043Z","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","_xact_id":"1000196129554423258"}'
+        body: '{"log_id":"p","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","slug":"TestScorerAPI_OutputParsing-slug2","name":"Detailed Scorer","function_data":{"type":"prompt"},"function_type":"scorer","prompt_data":{"options":{"model":"gpt-4o-mini","params":{"temperature":0,"use_cache":true}},"parser":{"choice_scores":{"correct":1,"incorrect":0},"type":"llm_classifier","use_cot":true},"prompt":{"messages":[{"content":"You are a detailed scorer.","role":"system"},{"content":"Evaluate if the output is correct. Return ''correct'' or ''incorrect''.","role":"user"}],"type":"chat"}},"id":"8857554e-3f2b-4734-92ac-fa2dfe3f6980","created":"2026-10-22T00:00:45.562Z","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","_xact_id":"1000198073872091308"}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:00:45 GMT
+            Etag:
+                - W/"2de-cjbkcafTQV5JeQ9+pZQPWlSQaXI"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - rL6h-w3hIzxhNjbswxbEBE4nMoTzjhna_bd13zK6G_mqh24EWT21pg==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 333.394792ms
+        duration: 217.355291ms
     - id: 7
       request:
         proto: HTTP/1.1
@@ -298,36 +446,56 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"objects":[{"id":"scorer-id-456","_xact_id":"1000196129554423258","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","log_id":"p","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","name":"Detailed Scorer","slug":"TestScorerAPI_OutputParsing-slug2","function_type":"scorer","function_data":{"type":"prompt"},"prompt_data":{"parser":{"type":"llm_classifier","use_cot":true,"choice_scores":{"incorrect":0,"correct":1}},"prompt":{"type":"chat","messages":[{"role":"system","content":"You are a detailed scorer."},{"role":"user","content":"Evaluate if the output is correct. Return ''correct'' or ''incorrect''."}]},"options":{"model":"gpt-4o-mini","params":{"use_cache":true,"temperature":0}}}}]}'
+        body: '{"objects":[{"_xact_id":"1000198073872091308","created":"2026-10-22T00:00:45.562Z","description":null,"function_data":{"type":"prompt"},"function_schema":null,"function_type":"scorer","id":"8857554e-3f2b-4734-92ac-fa2dfe3f6980","log_id":"p","metadata":null,"name":"Detailed Scorer","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","origin":null,"project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","prompt_data":{"parser":{"type":"llm_classifier","use_cot":true,"choice_scores":{"correct":1,"incorrect":0}},"prompt":{"type":"chat","messages":[{"role":"system","content":"You are a detailed scorer."},{"role":"user","content":"Evaluate if the output is correct. Return ''correct'' or ''incorrect''."}]},"options":{"model":"gpt-4o-mini","params":{"use_cache":true,"temperature":0}}},"slug":"TestScorerAPI_OutputParsing-slug2","tags":null}]}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:00:46 GMT
+            Etag:
+                - W/"340-2zZOBCJrfTtmwZXmwVInR3X4Eq4"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - SsRlMEZC-3d2aNEh_s_ZrDRHHhmMWev_Rqs_HoRtRrFN8d6_tTUpEg==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 332.457208ms
+        duration: 506.19925ms
     - id: 8
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 120
+        content_length: 97
         transfer_encoding: []
         trailer: {}
         host: api.braintrust.dev
         remote_addr: ""
         request_uri: ""
-        body: '{"input":{"input":{"question":"What is 2+2?"},"output":{"answer":"4"},"expected":{"answer":"4"}}}'
+        body: '{"input":{"expected":{"answer":"4"},"input":{"question":"What is 2+2?"},"output":{"answer":"4"}}}'
         form: {}
         headers:
             Content-Type:
                 - application/json
-        url: https://api.braintrust.dev/v1/function/scorer-id-456/invoke
+        url: https://api.braintrust.dev/v1/function/8857554e-3f2b-4734-92ac-fa2dfe3f6980/invoke
         method: POST
       response:
         proto: HTTP/2.0
@@ -336,20 +504,52 @@ interactions:
         transfer_encoding: []
         trailer: {}
         content_length: -1
-        uncompressed: true
-        body: '{"name":"Detailed Scorer","score":1.0,"metadata":{"reasoning":"The output matches the expected value"}}'
+        uncompressed: false
+        body: '{"name":"Detailed Scorer","score":0,"metadata":{"rationale":"The output is not correct because it does not align with the expected results based on the provided information or criteria. A thorough analysis of the data or context reveals discrepancies that lead to this conclusion.","choice":"incorrect"}}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+                - x-bt-cursor,x-bt-found-existing,x-bt-span-id,x-bt-span-export,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-cache
+            Content-Encoding:
+                - identity
             Content-Type:
-                - application/json; charset=utf-8
+                - application/json
+            Date:
+                - Thu, 22 Oct 2026 00:00:47 GMT
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Vary:
+                - Origin, Access-Control-Request-Method, Access-Control-Request-Headers
+            Via:
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - vGj3AQ6P-5Xvfjm44zSNIyCv4Iqd82Mhqs_YLcbh0vJx3wJ9hZrZqg==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Bt-Cached:
+                - MISS
+            X-Bt-Function-Creds-Cached:
+                - HIT
+            X-Bt-Function-Meta-Cached:
+                - MISS
+            X-Bt-Passthrough:
+                - "false"
+            X-Bt-Request-Id:
+                - 00e58c5e-e582-4954-9ba4-61c2a3e49e0a
+            X-Bt-Secrets-Scope:
+                - org_and_project
+            X-Bt-Stale-Secrets:
+                - "false"
+            X-Bt-Used-Endpoint:
+                - OPENAI_API_KEY
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 650.987654ms
+        duration: 1.341881709s
     - id: 9
       request:
         proto: HTTP/1.1
@@ -364,7 +564,7 @@ interactions:
         body: ""
         form: {}
         headers: {}
-        url: https://api.braintrust.dev/v1/function/scorer-id-123
+        url: https://api.braintrust.dev/v1/function/8857554e-3f2b-4734-92ac-fa2dfe3f6980
         method: DELETE
       response:
         proto: HTTP/2.0
@@ -374,19 +574,39 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"log_id":"p","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","slug":"TestScorerAPI_OutputParsing-slug","id":"scorer-id-123","created":"2025-11-12T14:55:11.883Z","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","_object_delete":true,"_xact_id":"1000196129554423859"}'
+        body: '{"log_id":"p","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","slug":"TestScorerAPI_OutputParsing-slug2","id":"8857554e-3f2b-4734-92ac-fa2dfe3f6980","created":"2026-10-22T00:00:47.672Z","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","_object_delete":true,"_xact_id":"1000198073872222966"}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:00:47 GMT
+            Etag:
+                - W/"125-paGq2k87+pX6AwE1U+oFc4YUnwo"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - OC037jJ1gyQJYttEK7yhPJjkmvJh20UmeGSofwtieroKPnyNTt_spQ==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 457.257292ms
+        duration: 316.161625ms
     - id: 10
       request:
         proto: HTTP/1.1
@@ -401,7 +621,7 @@ interactions:
         body: ""
         form: {}
         headers: {}
-        url: https://api.braintrust.dev/v1/function/scorer-id-456
+        url: https://api.braintrust.dev/v1/function/c803324b-b0ed-42e7-ae46-a02292a81a4a
         method: DELETE
       response:
         proto: HTTP/2.0
@@ -411,16 +631,36 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"log_id":"p","project_id":"842c2063-b9c7-4c40-9fb9-fa95f810c57f","slug":"TestScorerAPI_OutputParsing-slug2","id":"scorer-id-456","created":"2025-11-12T14:55:11.883Z","org_id":"5ba6d482-b475-4c66-8cd2-5815694764e3","_object_delete":true,"_xact_id":"1000196129554423859"}'
+        body: '{"log_id":"p","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","slug":"TestScorerAPI_OutputParsing-slug","id":"c803324b-b0ed-42e7-ae46-a02292a81a4a","created":"2026-10-22T00:00:47.978Z","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","_object_delete":true,"_xact_id":"1000198073872285749"}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:00:48 GMT
+            Etag:
+                - W/"124-DSBFnQw4HjoAPCQ5WjNCPDVsmcw"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - dwoKYpUutwCc61_H-afaf6eVTtocIgi313eBpg1A-Ant5_rtAW69zQ==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 457.257292ms
+        duration: 292.155083ms

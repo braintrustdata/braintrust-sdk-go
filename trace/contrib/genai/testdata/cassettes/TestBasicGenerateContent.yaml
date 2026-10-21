@@ -19,12 +19,12 @@ interactions:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-genai-sdk/1.23.0 gl-go/go1.23.12
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-genai-sdk/1.23.0 gl-go/go1.23.12
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
-        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
         method: POST
       response:
         proto: HTTP/2.0
@@ -41,34 +41,30 @@ interactions:
                   "content": {
                     "parts": [
                       {
-                        "text": "4\n"
+                        "text": "4"
                       }
                     ],
                     "role": "model"
                   },
                   "finishReason": "STOP",
-                  "avgLogprobs": -2.5708461180329323e-05
+                  "index": 0
                 }
               ],
               "usageMetadata": {
-                "promptTokenCount": 13,
-                "candidatesTokenCount": 2,
-                "totalTokenCount": 15,
+                "promptTokenCount": 14,
+                "candidatesTokenCount": 1,
+                "totalTokenCount": 51,
                 "promptTokensDetails": [
                   {
                     "modality": "TEXT",
-                    "tokenCount": 13
+                    "tokenCount": 14
                   }
                 ],
-                "candidatesTokensDetails": [
-                  {
-                    "modality": "TEXT",
-                    "tokenCount": 2
-                  }
-                ]
+                "thoughtsTokenCount": 36,
+                "serviceTier": "standard"
               },
-              "modelVersion": "gemini-2.0-flash-exp",
-              "responseId": "hSkOabSeMo6o_uMPuvGCqAk"
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "hlPZauD5Kuma9MoP7q_g6QI"
             }
         headers:
             Alt-Svc:
@@ -76,11 +72,11 @@ interactions:
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Fri, 07 Nov 2025 17:16:54 GMT
+                - Thu, 22 Oct 2026 00:06:31 GMT
             Server:
                 - scaffolding on HTTPServer2
             Server-Timing:
-                - gfet4t7; dur=456
+                - gfet4t7; dur=574
             Vary:
                 - Origin
                 - X-Origin
@@ -89,8 +85,10 @@ interactions:
                 - nosniff
             X-Frame-Options:
                 - SAMEORIGIN
+            X-Gemini-Service-Tier:
+                - standard
             X-Xss-Protection:
                 - "0"
         status: 200 OK
         code: 200
-        duration: 523.688792ms
+        duration: 619.733458ms

@@ -19,11 +19,11 @@ interactions:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
         url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
@@ -43,7 +43,7 @@ interactions:
                   "content": {
                     "parts": [
                       {
-                        "text": "Hi."
+                        "text": "Hi"
                       }
                     ],
                     "role": "model"
@@ -54,8 +54,8 @@ interactions:
               ],
               "usageMetadata": {
                 "promptTokenCount": 9,
-                "candidatesTokenCount": 2,
-                "totalTokenCount": 11,
+                "candidatesTokenCount": 1,
+                "totalTokenCount": 10,
                 "promptTokensDetails": [
                   {
                     "modality": "TEXT",
@@ -65,7 +65,7 @@ interactions:
                 "serviceTier": "standard"
               },
               "modelVersion": "gemini-2.5-flash",
-              "responseId": "bQPRaqDxOs-R_uMP946bgQQ"
+              "responseId": "YFLZaozIEubQz7IPjoGLuAQ"
             }
         headers:
             Alt-Svc:
@@ -73,11 +73,11 @@ interactions:
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Thu, 15 Oct 2026 16:46:38 GMT
+                - Thu, 22 Oct 2026 00:01:36 GMT
             Server:
                 - scaffolding on HTTPServer2
             Server-Timing:
-                - gfet4t7; dur=427
+                - gfet4t7; dur=531
             Vary:
                 - Origin
                 - X-Origin
@@ -92,4 +92,4 @@ interactions:
                 - "0"
         status: 200 OK
         code: 200
-        duration: 526.522292ms
+        duration: 700.063084ms

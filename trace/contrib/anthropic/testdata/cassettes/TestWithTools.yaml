@@ -6,13 +6,13 @@ interactions:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 349
+        content_length: 351
         transfer_encoding: []
         trailer: {}
         host: ""
         remote_addr: ""
         request_uri: ""
-        body: '{"max_tokens":1024,"messages":[{"content":[{"text":"What''s the weather in San Francisco?","type":"text"}],"role":"user"}],"model":"claude-3-haiku-20240307","tools":[{"input_schema":{"properties":{"location":{"description":"The city and state, e.g. San Francisco, CA","type":"string"}},"required":["location"],"type":"object"},"name":"get_weather"}]}'
+        body: '{"max_tokens":1024,"messages":[{"content":[{"text":"What''s the weather in San Francisco?","type":"text"}],"role":"user"}],"model":"claude-haiku-4-5-20251001","tools":[{"input_schema":{"properties":{"location":{"description":"The city and state, e.g. San Francisco, CA","type":"string"}},"required":["location"],"type":"object"},"name":"get_weather"}]}'
         form: {}
         headers:
             Accept:
@@ -22,7 +22,7 @@ interactions:
             Content-Type:
                 - application/json
             User-Agent:
-                - Anthropic/Go 1.4.0
+                - Anthropic/Go 1.23.0
             X-Stainless-Arch:
                 - arm64
             X-Stainless-Lang:
@@ -30,15 +30,15 @@ interactions:
             X-Stainless-Os:
                 - MacOS
             X-Stainless-Package-Version:
-                - 1.4.0
+                - 1.23.0
             X-Stainless-Retry-Count:
                 - "0"
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.23.12
+                - go1.26.10
             X-Stainless-Timeout:
-                - "28"
+                - "600"
         url: https://api.anthropic.com/v1/messages
         method: POST
       response:
@@ -49,52 +49,56 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"model":"claude-3-haiku-20240307","id":"msg_016UbiTkgnDDsKez2ZHQw5ac","type":"message","role":"assistant","content":[{"type":"text","text":"Here is the weather information for San Francisco:"},{"type":"tool_use","id":"toolu_01NKDPGTZQr9u9r1U4GBQEdB","name":"get_weather","input":{"location":"San Francisco, CA"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":340,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":66,"service_tier":"standard"}}'
+        body: '{"model":"claude-haiku-4-5-20251001","id":"msg_011CgGJLpTRhBpZKycdKUTcP","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_01XnixP1Rnqk1dS6Kn6gPmDz","name":"get_weather","input":{"location":"San Francisco, CA"},"caller":{"type":"direct"}}],"container":null,"stop_reason":"tool_use","stop_sequence":null,"stop_details":null,"usage":{"input_tokens":572,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":57,"service_tier":"standard","inference_geo":"not_available","speed":"standard"},"diagnostics":null}'
         headers:
             Anthropic-Ratelimit-Input-Tokens-Limit:
-                - "8000000"
+                - "10000000"
             Anthropic-Ratelimit-Input-Tokens-Remaining:
-                - "8000000"
+                - "10000000"
             Anthropic-Ratelimit-Input-Tokens-Reset:
-                - "2025-11-12T02:55:30Z"
+                - "2026-10-22T00:06:13Z"
             Anthropic-Ratelimit-Output-Tokens-Limit:
-                - "1500000"
+                - "2000000"
             Anthropic-Ratelimit-Output-Tokens-Remaining:
-                - "1500000"
+                - "2000000"
             Anthropic-Ratelimit-Output-Tokens-Reset:
-                - "2025-11-12T02:55:31Z"
+                - "2026-10-22T00:06:13Z"
             Anthropic-Ratelimit-Requests-Limit:
-                - "10000"
+                - "20000"
             Anthropic-Ratelimit-Requests-Remaining:
-                - "9999"
+                - "19999"
             Anthropic-Ratelimit-Requests-Reset:
-                - "2025-11-12T02:55:30Z"
+                - "2026-10-22T00:06:12Z"
             Anthropic-Ratelimit-Tokens-Limit:
-                - "9500000"
+                - "12000000"
             Anthropic-Ratelimit-Tokens-Remaining:
-                - "9500000"
+                - "12000000"
             Anthropic-Ratelimit-Tokens-Reset:
-                - "2025-11-12T02:55:30Z"
+                - "2026-10-22T00:06:13Z"
+            Anthropic-Workspace-Id:
+                - wrkspc_01J8hau4yJ2SKvtbeP9drm9A
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - 99d2c036ff0a7c7e-EWR
+                - a4e4413809641421-SEA
+            Content-Security-Policy:
+                - default-src 'none'; frame-ancestors 'none'
             Content-Type:
                 - application/json
             Date:
-                - Wed, 12 Nov 2025 02:55:31 GMT
+                - Thu, 22 Oct 2026 00:06:13 GMT
             Request-Id:
-                - req_011CV3Ezc3Bn42dFkA8aqrbG
-            Retry-After:
-                - "31"
+                - req_011CgGJLpFXqVkAeCFsnsR2T
             Server:
                 - cloudflare
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
-            X-Envoy-Upstream-Service-Time:
-                - "629"
+            Traceresponse:
+                - 00-6ad9537400000000390d0466b153f221-34b406a9d32d9f98-01
+            Vary:
+                - Accept-Encoding
             X-Robots-Tag:
                 - none
         status: 200 OK
         code: 200
-        duration: 680.126667ms
+        duration: 846.0625ms

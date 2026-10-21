@@ -16,15 +16,15 @@ interactions:
         form: {}
         headers:
             Amz-Sdk-Invocation-Id:
-                - 0520661b-9848-43b4-956b-bf38c5425aa1
+                - 453f9951-a383-4fd6-829a-a9d9572dc403
             Amz-Sdk-Request:
                 - attempt=1; max=3
             Content-Type:
                 - application/json
             User-Agent:
-                - aws-sdk-go-v2/1.41.5 ua/2.1 os/macos lang/go#1.26.2 md/GOOS#darwin md/GOARCH#arm64 api/bedrockruntime#1.50.4 m/E,g
+                - aws-sdk-go-v2/1.41.5 ua/2.1 os/macos lang/go#1.26.10 md/GOOS#darwin md/GOARCH#arm64 api/bedrockruntime#1.50.4 m/E,g
             X-Amz-Date:
-                - 20260417T175540Z
+                - 20261022T000615Z
         url: https://bedrock-runtime.us-east-2.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/converse
         method: POST
       response:
@@ -33,18 +33,18 @@ interactions:
         proto_minor: 0
         transfer_encoding: []
         trailer: {}
-        content_length: 426
+        content_length: 425
         uncompressed: false
-        body: '{"metrics":{"latencyMs":1614},"output":{"message":{"content":[{"toolUse":{"input":{"city":"Paris"},"name":"get_weather","toolUseId":"tooluse_DWkjDzxB23n7SWnZvl3sy0","type":"tool_use"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":567,"outputTokens":54,"serverToolUsage":{},"totalTokens":621}}'
+        body: '{"metrics":{"latencyMs":790},"output":{"message":{"content":[{"toolUse":{"input":{"city":"Paris"},"name":"get_weather","toolUseId":"tooluse_HbanJGaaB1ScVQrCzMbeWP","type":"tool_use"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":567,"outputTokens":54,"serverToolUsage":{},"totalTokens":621}}'
         headers:
             Content-Length:
-                - "426"
+                - "425"
             Content-Type:
                 - application/json
             Date:
-                - Fri, 17 Apr 2026 17:55:42 GMT
+                - Thu, 22 Oct 2026 00:06:16 GMT
             X-Amzn-Requestid:
-                - 61716b46-b9fb-4fc6-94af-f3d50faea36e
+                - eff11303-9bfc-45d2-b0b4-f940072d6971
         status: 200 OK
         code: 200
-        duration: 1.671020084s
+        duration: 880.13375ms

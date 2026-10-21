@@ -16,15 +16,15 @@ interactions:
         form: {}
         headers:
             Amz-Sdk-Invocation-Id:
-                - c1d89c2c-c182-4353-a8f9-5dc733535e81
+                - 3f0a2a87-8721-4be9-b51d-fbb46f52729e
             Amz-Sdk-Request:
-                - attempt=1; max=3
+                - attempt=1; max=1
             Content-Type:
                 - application/json
             User-Agent:
-                - aws-sdk-go-v2/1.41.5 ua/2.1 os/macos lang/go#1.26.3 md/GOOS#darwin md/GOARCH#arm64 api/bedrockruntime#1.50.4 m/E,g
+                - aws-sdk-go-v2/1.41.5 ua/2.1 os/macos lang/go#1.26.10 md/GOOS#darwin md/GOARCH#arm64 api/bedrockruntime#1.50.4 m/g
             X-Amz-Date:
-                - 20260519T215705Z
+                - 20261022T000750Z
         url: https://bedrock-runtime.us-east-2.amazonaws.com/model/us.amazon.nova-lite-v1%3A0/converse
         method: POST
       response:
@@ -33,18 +33,18 @@ interactions:
         proto_minor: 0
         transfer_encoding: []
         trailer: {}
-        content_length: 350
+        content_length: 312
         uncompressed: false
-        body: '{"metrics":{"latencyMs":525},"output":{"message":{"content":[{"text":"I can''t see any image in the provided information. Could you please provide more context or a description of the image so I can assist you better?"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":536,"outputTokens":32,"serverToolUsage":{},"totalTokens":568}}'
+        body: '{"metrics":{"latencyMs":481},"output":{"message":{"content":[{"text":"Sorry, I cannot describe the image as it is not available. Can you provide more information about the image?"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":536,"outputTokens":23,"serverToolUsage":{},"totalTokens":559}}'
         headers:
             Content-Length:
-                - "350"
+                - "312"
             Content-Type:
                 - application/json
             Date:
-                - Tue, 19 May 2026 21:57:06 GMT
+                - Thu, 22 Oct 2026 00:07:51 GMT
             X-Amzn-Requestid:
-                - cc12a1c9-0b74-4796-8981-55e8bbf69ce5
+                - 23c3ec44-cfac-4115-aac8-581e0c9201df
         status: 200 OK
         code: 200
-        duration: 918.572167ms
+        duration: 827.654875ms

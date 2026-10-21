@@ -19,11 +19,11 @@ interactions:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
         url: https://generativelanguage.googleapis.com/v1beta/models/nonexistent-model-for-tracing-test:generateContent
@@ -50,11 +50,11 @@ interactions:
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Thu, 15 Oct 2026 22:42:07 GMT
+                - Thu, 22 Oct 2026 00:05:36 GMT
             Server:
                 - scaffolding on HTTPServer2
             Server-Timing:
-                - gfet4t7; dur=90
+                - gfet4t7; dur=96
             Vary:
                 - Origin
                 - X-Origin
@@ -67,7 +67,7 @@ interactions:
                 - "0"
         status: 404 Not Found
         code: 404
-        duration: 296.68475ms
+        duration: 132.576875ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -86,11 +86,11 @@ interactions:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
         url: https://generativelanguage.googleapis.com/v1beta/models/nonexistent-model-for-tracing-test:generateContent
@@ -117,11 +117,11 @@ interactions:
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Thu, 15 Oct 2026 22:42:07 GMT
+                - Thu, 22 Oct 2026 00:05:36 GMT
             Server:
                 - scaffolding on HTTPServer2
             Server-Timing:
-                - gfet4t7; dur=105
+                - gfet4t7; dur=74
             Vary:
                 - Origin
                 - X-Origin
@@ -134,4 +134,4 @@ interactions:
                 - "0"
         status: 404 Not Found
         code: 404
-        duration: 123.862959ms
+        duration: 112.800709ms

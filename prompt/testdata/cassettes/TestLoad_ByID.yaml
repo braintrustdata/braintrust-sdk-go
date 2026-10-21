@@ -6,6 +6,124 @@ interactions:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
+        content_length: 23
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"go-sdk-tests"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","name":"go-sdk-tests","description":null,"created":"2026-10-19T23:49:12.896Z","deleted_at":null,"user_id":"c1f71e19-b3ce-4f59-89a9-055901f7755b","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:27 GMT
+            Etag:
+                - W/"fe-7iaq6aBQFNs98OpqCWtmRX1e6fw"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 87247d9a9b2f9e51b0c72b364948aefa.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - FiY-9cYd2RLIdtuMMVhV7nco-mTZZWeFpJNPu8gfxCjusNAZBYCFKw==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Bt-Found-Existing:
+                - "true"
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 95.772917ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/prompt?limit=1&project_id=900b1ba7-5336-4a3f-8a6d-52e1a170bd78&slug=sdk-go-load-prompt
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"objects":[{"_xact_id":"1000198073873795655","created":"2026-10-22T00:01:11.605Z","description":null,"function_type":"prompt","id":"fb99c4ff-a918-4ac1-8003-920a4cb11480","log_id":"p","metadata":null,"name":"sdk-go-load-prompt","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","prompt_data":{"prompt":{"type":"chat","messages":[{"role":"system","content":"You greet people warmly."},{"role":"user","content":"Say hello to {{name}}."}]},"options":{"model":"gpt-4o-mini","params":{"temperature":0}}},"slug":"sdk-go-load-prompt","tags":null,"function_data":{"type":"prompt"}}]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:27 GMT
+            Etag:
+                - W/"271-mUlZWNub77hlWWdBKyONgURgmoc"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 87247d9a9b2f9e51b0c72b364948aefa.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - N4H1rF3YSMGHU5y3hPbQyuAyM4HeZuRYWx3CGnzErB-U_6fIiX0wjQ==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 96.643084ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
         content_length: 0
         transfer_encoding: []
         trailer: {}
@@ -25,47 +143,40 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"objects":[{"_xact_id":"1000197686699028920","created":"2026-08-14T14:57:32.298Z","description":null,"function_type":"prompt","id":"9db0c7e3-4cd8-478b-9048-1af5b3d854fe","log_id":"p","metadata":null,"name":"sdk-go-load-prompt","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","project_id":"7f591203-74a0-4126-9103-1fb905b32618","prompt_data":{"prompt":{"type":"chat","messages":[{"role":"system","content":"You greet people warmly."},{"role":"user","content":"Say hello to {{name}}."}]},"options":{"model":"gpt-4o-mini","params":{"temperature":0}},"template_format":"mustache"},"slug":"sdk-go-load-prompt","tags":null,"function_data":{"type":"prompt"}}]}'
+        body: '{"objects":[{"_xact_id":"1000198073873795655","created":"2026-10-22T00:01:11.605Z","description":null,"function_type":"prompt","id":"fb99c4ff-a918-4ac1-8003-920a4cb11480","log_id":"p","metadata":null,"name":"sdk-go-load-prompt","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","prompt_data":{"prompt":{"type":"chat","messages":[{"role":"system","content":"You greet people warmly."},{"role":"user","content":"Say hello to {{name}}."}]},"options":{"model":"gpt-4o-mini","params":{"temperature":0}}},"slug":"sdk-go-load-prompt","tags":null,"function_data":{"type":"prompt"}}]}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
             Cache-Control:
                 - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Thu, 20 Aug 2026 21:43:29 GMT
+                - Thu, 22 Oct 2026 00:01:27 GMT
             Etag:
-                - W/"28e-oiNY5yIaVrgkrkmBvxQCaQZo8Pw"
+                - W/"271-mUlZWNub77hlWWdBKyONgURgmoc"
             Expires:
                 - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
             Surrogate-Control:
                 - no-store
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 94f960efa39aa7dd12cbd55282bf4f8e.cloudfront.net (CloudFront), 1.1 b7248001409a22dcf06ac3c9df2f5fac.cloudfront.net (CloudFront)
-            X-Amz-Apigw-Id:
-                - Ca84TEm5IAMEMig=
+                - 1.1 87247d9a9b2f9e51b0c72b364948aefa.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - TeyHOKwQQWnuwM4VPb1-JA_rs6V2pOCk_Rvi-ZWsDKUkrBkIEVrWOw==
+                - 0yycwmB987KRtTaNm8xkyxZG4LOCF0XnxIYTUQw1QYj7wgnhJK7qdg==
             X-Amz-Cf-Pop:
-                - CMH68-P3
-                - CMH68-P5
-            X-Amzn-Requestid:
-                - 5e7ec6a0-fccc-4869-993c-dcb3920f61f1
-            X-Amzn-Trace-Id:
-                - Root=1-6a877501-2ee893aa17f0055000f8fb73;Parent=061827f9d5e3c6b4;Sampled=0;Lineage=1:24be3d11:0
-            X-Bt-Internal-Trace-Id:
-                - 6a877501000000004e365641ca1fc787
+                - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 44.542936ms
-    - id: 1
+        duration: 100.47175ms
+    - id: 3
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -79,7 +190,7 @@ interactions:
         body: ""
         form: {}
         headers: {}
-        url: https://api.braintrust.dev/v1/prompt/9db0c7e3-4cd8-478b-9048-1af5b3d854fe
+        url: https://api.braintrust.dev/v1/prompt/fb99c4ff-a918-4ac1-8003-920a4cb11480
         method: GET
       response:
         proto: HTTP/2.0
@@ -89,43 +200,36 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"_xact_id":"1000197686699028920","created":"2026-08-14T14:57:32.298Z","description":null,"function_type":"prompt","id":"9db0c7e3-4cd8-478b-9048-1af5b3d854fe","log_id":"p","metadata":null,"name":"sdk-go-load-prompt","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","project_id":"7f591203-74a0-4126-9103-1fb905b32618","prompt_data":{"prompt":{"type":"chat","messages":[{"role":"system","content":"You greet people warmly."},{"role":"user","content":"Say hello to {{name}}."}]},"options":{"model":"gpt-4o-mini","params":{"temperature":0}},"template_format":"mustache"},"slug":"sdk-go-load-prompt","tags":null,"function_data":{"type":"prompt"}}'
+        body: '{"_xact_id":"1000198073873795655","created":"2026-10-22T00:01:11.605Z","description":null,"function_type":"prompt","id":"fb99c4ff-a918-4ac1-8003-920a4cb11480","log_id":"p","metadata":null,"name":"sdk-go-load-prompt","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","prompt_data":{"prompt":{"type":"chat","messages":[{"role":"system","content":"You greet people warmly."},{"role":"user","content":"Say hello to {{name}}."}]},"options":{"model":"gpt-4o-mini","params":{"temperature":0}}},"slug":"sdk-go-load-prompt","tags":null,"function_data":{"type":"prompt"}}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
             Cache-Control:
                 - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Thu, 20 Aug 2026 21:43:29 GMT
+                - Thu, 22 Oct 2026 00:01:28 GMT
             Etag:
-                - W/"280-wtSHLkYcDy0XFl83W+BqW688Ey0"
+                - W/"263-69tKgAHu23i5WxdV+Hv+KUYwWXM"
             Expires:
                 - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
             Surrogate-Control:
                 - no-store
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 bbc57e4c259e16f712316786b8f9a84a.cloudfront.net (CloudFront), 1.1 b7248001409a22dcf06ac3c9df2f5fac.cloudfront.net (CloudFront)
-            X-Amz-Apigw-Id:
-                - Ca84UGZwoAMEnOQ=
+                - 1.1 87247d9a9b2f9e51b0c72b364948aefa.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - eUvvbZBsSZfCuGqRvLUUNV_AyqDjA0N_xeiyWCgN3LAXDD6iMPb0qg==
+                - 6yIdrLzWK7chIiaqd84a_xG-J_Pa9YqPM1cWz-zpfCnmgqY2QLVPNQ==
             X-Amz-Cf-Pop:
-                - CMH68-P3
-                - CMH68-P5
-            X-Amzn-Requestid:
-                - 621a76d4-1707-4f8a-b80a-71d5c38eddd0
-            X-Amzn-Trace-Id:
-                - Root=1-6a877501-543ba345059d0ff540568e75;Parent=02ec66463cf0f74c;Sampled=0;Lineage=1:24be3d11:0
-            X-Bt-Internal-Trace-Id:
-                - 6a8775010000000079454fe2f7a9cd34
+                - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 387.147624ms
+        duration: 100.252625ms

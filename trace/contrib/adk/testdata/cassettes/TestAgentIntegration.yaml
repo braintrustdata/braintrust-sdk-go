@@ -6,25 +6,27 @@ interactions:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 456
+        content_length: 786
         transfer_encoding: []
         trailer: {}
         host: generativelanguage.googleapis.com
         remote_addr: ""
         request_uri: ""
         body: |
-            {"contents":[{"parts":[{"text":"What is 127 multiplied by 49?"}],"role":"user"}],"generationConfig":{"maxOutputTokens":500},"systemInstruction":{"parts":[{"text":"You are a helpful math assistant. Use the calculator tool to perform calculations."}]},"tools":[{"functionDeclarations":[{"name":"calculator","description":"Performs basic arithmetic operations (add, subtract, multiply, divide)","parameters":{"type":"object","properties":{"a":{"type":"number","description":"The first number"},"b":{"type":"number","description":"The second number"},"operation":{"type":"string","description":"The operation to perform: add, subtract, multiply, or divide"}},"required":["a","b","operation"]}}]}]}
+            {"contents":[{"parts":[{"text":"What is 127 multiplied by 49?"}],"role":"user"}],"generationConfig":{"maxOutputTokens":500},"systemInstruction":{"parts":[{"text":"You are a helpful math assistant. Use the calculator tool to perform calculations."}],"role":"user"},"tools":[{"functionDeclarations":[{"description":"Performs basic arithmetic operations (add, subtract, multiply, divide)","name":"calculator","parametersJsonSchema":{"additionalProperties":false,"properties":{"a":{"description":"The first number","type":"number"},"b":{"description":"The second number","type":"number"},"operation":{"description":"The operation to perform: add, subtract, multiply, or divide","type":"string"}},"required":["operation","a","b"],"type":"object"},"responseJsonSchema":{"type":"number"}}]}]}
         form: {}
         headers:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-genai-sdk/1.23.0 gl-go/go1.23.12
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-genai-sdk/1.23.0 gl-go/go1.23.12
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
-        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
         method: POST
       response:
         proto: HTTP/2.0
@@ -45,58 +47,88 @@ interactions:
                           "name": "calculator",
                           "args": {
                             "operation": "multiply",
-                            "a": 127,
-                            "b": 49
+                            "b": 49,
+                            "a": 127
                           }
-                        }
+                        },
+                        "thoughtSignature": "CtoBAWkUfRM9jrEdB50h4KL2W3cpwFSb+fn9zUYSn9RGWr445WFyvFOy7vRT0jLqyWdMoR4ll/QsKAuGKd8OTn8R4mxyGFQFh72xNdGqFU/xlUOZ0rSkOu1KhRZ/+soGZBLROThBiiqcILYZ01kb6wEAo7zPoTGPY3yIde6RuMC7iKV7tbPR8KS6ZbWHAAJ0Eq+WLDx9CTNqQQ9SV9dcATgD5S/cVWHmBWMThyXFwSLLHImQcDxJT1OrOVkmnaNnd9on61jhTUpK89ndgfi8NrBiEw4BtKFZXDIZpso="
                       }
                     ],
                     "role": "model"
                   },
-                  "finishReason": "STOP"
+                  "finishReason": "STOP",
+                  "index": 0,
+                  "finishMessage": "Model generated function call(s)."
                 }
               ],
               "usageMetadata": {
-                "promptTokenCount": 85,
-                "candidatesTokenCount": 15,
-                "totalTokenCount": 100
+                "promptTokenCount": 111,
+                "candidatesTokenCount": 26,
+                "totalTokenCount": 191,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 111
+                  }
+                ],
+                "thoughtsTokenCount": 54,
+                "serviceTier": "standard"
               },
-              "modelVersion": "gemini-2.0-flash-exp"
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "UVPZaorIFPCj_uMP192f-Q0"
             }
         headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Wed, 05 Feb 2026 12:00:00 GMT
+                - Thu, 22 Oct 2026 00:05:38 GMT
             Server:
                 - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=861
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Gemini-Service-Tier:
+                - standard
+            X-Xss-Protection:
+                - "0"
         status: 200 OK
         code: 200
-        duration: 500ms
+        duration: 900.278792ms
     - id: 1
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 678
+        content_length: 1313
         transfer_encoding: []
         trailer: {}
         host: generativelanguage.googleapis.com
         remote_addr: ""
         request_uri: ""
         body: |
-            {"contents":[{"parts":[{"text":"What is 127 multiplied by 49?"}],"role":"user"},{"parts":[{"functionCall":{"name":"calculator","args":{"a":127,"b":49,"operation":"multiply"}}}],"role":"model"},{"parts":[{"functionResponse":{"name":"calculator","response":{"result":6223}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":500},"systemInstruction":{"parts":[{"text":"You are a helpful math assistant. Use the calculator tool to perform calculations."}]},"tools":[{"functionDeclarations":[{"name":"calculator","description":"Performs basic arithmetic operations (add, subtract, multiply, divide)","parameters":{"type":"object","properties":{"a":{"type":"number","description":"The first number"},"b":{"type":"number","description":"The second number"},"operation":{"type":"string","description":"The operation to perform: add, subtract, multiply, or divide"}},"required":["a","b","operation"]}}]}]}
+            {"contents":[{"parts":[{"text":"What is 127 multiplied by 49?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"a":127,"b":49,"operation":"multiply"},"name":"calculator"},"thoughtSignature":"CtoBAWkUfRM9jrEdB50h4KL2W3cpwFSb+fn9zUYSn9RGWr445WFyvFOy7vRT0jLqyWdMoR4ll/QsKAuGKd8OTn8R4mxyGFQFh72xNdGqFU/xlUOZ0rSkOu1KhRZ/+soGZBLROThBiiqcILYZ01kb6wEAo7zPoTGPY3yIde6RuMC7iKV7tbPR8KS6ZbWHAAJ0Eq+WLDx9CTNqQQ9SV9dcATgD5S/cVWHmBWMThyXFwSLLHImQcDxJT1OrOVkmnaNnd9on61jhTUpK89ndgfi8NrBiEw4BtKFZXDIZpso="}],"role":"model"},{"parts":[{"functionResponse":{"name":"calculator","response":{"result":6223}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":500},"systemInstruction":{"parts":[{"text":"You are a helpful math assistant. Use the calculator tool to perform calculations."}],"role":"user"},"tools":[{"functionDeclarations":[{"description":"Performs basic arithmetic operations (add, subtract, multiply, divide)","name":"calculator","parametersJsonSchema":{"additionalProperties":false,"properties":{"a":{"description":"The first number","type":"number"},"b":{"description":"The second number","type":"number"},"operation":{"description":"The operation to perform: add, subtract, multiply, or divide","type":"string"}},"required":["operation","a","b"],"type":"object"},"responseJsonSchema":{"type":"number"}}]}]}
         form: {}
         headers:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-genai-sdk/1.23.0 gl-go/go1.23.12
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-genai-sdk/1.23.0 gl-go/go1.23.12
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
-        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
         method: POST
       response:
         proto: HTTP/2.0
@@ -118,24 +150,48 @@ interactions:
                     ],
                     "role": "model"
                   },
-                  "finishReason": "STOP"
+                  "finishReason": "STOP",
+                  "index": 0
                 }
               ],
               "usageMetadata": {
-                "promptTokenCount": 120,
-                "candidatesTokenCount": 12,
-                "totalTokenCount": 132
+                "promptTokenCount": 153,
+                "candidatesTokenCount": 15,
+                "totalTokenCount": 168,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 153
+                  }
+                ],
+                "serviceTier": "standard"
               },
-              "modelVersion": "gemini-2.0-flash-exp"
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "UlPZav6RD_Tc_uMP49HL6Q4"
             }
         headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Wed, 05 Feb 2026 12:00:01 GMT
+                - Thu, 22 Oct 2026 00:05:38 GMT
             Server:
                 - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=561
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Gemini-Service-Tier:
+                - standard
+            X-Xss-Protection:
+                - "0"
         status: 200 OK
         code: 200
-        duration: 450ms
-
+        duration: 597.773083ms

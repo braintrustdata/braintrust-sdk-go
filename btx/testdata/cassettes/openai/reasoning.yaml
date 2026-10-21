@@ -34,7 +34,7 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.26.3
+                - go1.26.10
         url: https://api.openai.com/v1/responses
         method: POST
       response:
@@ -47,15 +47,16 @@ interactions:
         uncompressed: true
         body: |-
             {
-              "id": "resp_0c2cd20eb299ac8d006a0e8973115881999ccd340d31018ba1",
+              "id": "resp_01f8a88ded6fb6df016ad953e3792487d09d6cd306b14e045b",
               "object": "response",
-              "created_at": 1779337587,
+              "created_at": 1792627683,
               "status": "completed",
+              "access_programs": null,
               "background": false,
               "billing": {
                 "payer": "developer"
               },
-              "completed_at": 1779337594,
+              "completed_at": 1792627692,
               "error": null,
               "frequency_penalty": 0.0,
               "incomplete_details": null,
@@ -66,21 +67,27 @@ interactions:
               "moderation": null,
               "output": [
                 {
-                  "id": "rs_0c2cd20eb299ac8d006a0e89736de08199af93a017faf6f1e0",
+                  "id": "rs_01f8a88ded6fb6df016ad953e3f1d487d0981a9ae4db575734",
                   "type": "reasoning",
+                  "content": [],
+                  "encrypted_content": "gAAAAABq2VPsK1OJ5QQh2rEvp2vHM-JPf48w768upP7cvhpvni8vI05flErGeu5je5owahG07Vu-r7ccIKzIZOyOCFwO8X_v6-p9-h9mbVm5PwcBnIQCL-Kf57slLWuNc_Jlw31ssb2GKns6zsFRwsNC5vR5Y6useVkr4rGq7q1tCUN5LZoEY-zWdHQdYbKgK6q-yBx7IoXifqmYUqdYvH6q-XRoKw58Ps77dV6H2YUy1Iq0CK2AqvD1Cy-jNBkGO19P3eQ3juaBjj8k2o0t8PShyxbP4kdfRFIku0VTqBntHX-TKB_Zi3yZljGBTb6AXHnV_94hqhcXgBWfp06pSMyI8vSRZXbp_CQMP6XeGzNvp1tizp2GEMBLtiIYvSfCHXKA6e7InA0xE_OH3vUlTWad5xQiiBpgwzwCBwDwZMHDbO_BfqOliV5qFqKaI5yLsiZg2TRCFYdUxTrQA5l7q3aILUqe_-db_ImW_WM6WCR24gmgWbc3GU2I2CBGMsPDcAN3N84KpT75YYW2zL_axrUWyez1e_NgSd1ia8Tj_LbLrjQq65iMUsYVZmsBy_WCD4s6x0Y9MOQj0qu32VNR5KuBllPBr7SVLn0jXQf9pv93ZoEX7quf7zpX89Zt0U2-zjgc-7rjRsNTmxxSkP4KHa9fWUICNRre98FbKh8KNqFLyeuoZkO8qjXTm0C0g2ZQ2DA0KG1Z3ItF2biSFK0UyTzh2JMPsDaixe5n_OS1UiJeBv9phVkfA_BtK17DbR0GaF7pQ45Xwr37Zi7lX5nO_hNcEq3mSo15SCaFG0Hq2f6qoRBASVdDG-3KqErC9rFA5s7cUn1dBAjtBUgd8EawYJqfOByutLJH0KKTo_wxemJoqHcHikPxW9n3UJkcTQLDJPlNF0alcRDHZMA-XsCltvOqqB7ciL8eU32nlmJIwNw2tJrdeFveyG4FPn2dQe2h8dLbDDUd1ENd86tlu9OBFhkXCorPxHataEgh-NDhgg_KrHLD--9ni3OYHYTzE4X6LDIdzR9oYhXGpDuxywEzmD2M3Cy9p2VaA0exkRrgqkGqYHRMyk-ML6ZWLIyvzEey8tu5Ubr71E8Oo7VwpY56T2pM5oaGzzPu7qLsXKkRBtAZfKuTjn0dl3GwW5umxzfKULbGxTz1h0plxPjgwNZyK9w2HLmfpkEjxZ-wJb1oInupSgdFESl7r3fZNIBmbSAM6t2oI0wbFvoEU474Py9t9zMp1CG8O207F6oZLHXxVC4I7aKqvZswirNEI0vdjIIOYTs9RPJOcTFbkzhEU0sM3j6-Ydd1T3G0yzEvsCq5TANjUdeyvHgV5YyO7Gg5e1BKwryaTEOEGV7Qf4-bhJHU9SqUdCy10fJt9ZTYpuu8PtH2IzkZYMHkL9nnBrhV6WtiYigbnMPn6yeM-kcAkulehgTu-1xO7w9DcSc75db0cIsA2oQol-_12iHUnFHfuceH15QjjefA87P2r66aZdHqynfZVcYRPlCvz5SuRcSB88cinC_vaKEgepWMYiQwxi5YiLUTjIsi0l1oRGuUQm67ierxqQBm_Z-VDo1EoyVf7ewjvzJ_U67HUD90YB-3uRAN9Waw_JAi003Nzlr-1uetRWsCa5WcFyaKB_CTEpmtECZdsHU5GMMysOtk1hqI90vkQqUBTUBnZ1rEcHsMcQltUfljiWeTmSQKwrq1AhM2UTiiGCjEhVIaukKwx5av3uBLEohnYYDOfE9xEGew0_5eD1EX3U71Eq7Q6IMX6hGWpSOLaeTth06CvPlcuZ0j5UX6rCG9l0Kj32hK-QpQjscnshZJ7uo4jtZ_XV69Ls4DtiKlPkbs8_f9LyaWPPlbmb44h73CyEAc-YknqTN-BSuQSwIUj1KHyn8AU_9gJJHyB7CVviHYvnQ9UphrFnea5hBTgKzV_PkEMtAV-9VCmzg4WANARYCEZzSMaII13Q2a2ZQLSf3S-4OuWpFy89xjmKyMVOoMbLAJAFFb-enp_C0jasgulPxlE_wD_VLgURixi6cpjpI_2WPtv8swcewg_Myh02y0VO2fwy9mq8jqyge-RSaddM7u_fSa4p_gcAipn6jzfh9_uLpNj7qebCOzmWHSY1N-w0LDK8N_3XaReYMbUXJI60DGIbxy4qQrHhqeEiiO-69NVpqO3bQ3EdSzSFDcGAo3nrwxYfl-ta9riUM0QFyeHlGKlnB_zQMgsvp0tghe7LEvdusVC7tEMo0O5EkGzYoTVO69BuYIPQAv9Wzt0d5rtqo7p7VKTc2j_zA2PAusizLl1JpDmovj_HYuvR0uozVmveknTlpKaJdJHZLUMRQUJSVccyqmvdWYpUN-N6__Hgt5KqKTWrmusqjuJaGYDeKlDOKgeBmFRwVT0fIKsUAxXM55IG5Z9SLEJsFz6Ie3srZ4sDRGTkyKBFm3gDzMXqmkTb_0La6je8yrbwFT7L6htYOakaTxnkHKVLXMT-hmkhOAtbFf2bwVJckDxdfFzWfcLG0WlEu_LItkBmXy36ok65o1_OVAKnkBjlUnLxfz2nHI5-QgDe1j3kRVaWD2LRS5R2INQTI-YaJlX5PZbWTzCCQeiSybs1uV2Bpu9B5S-Ci5kus1_gfPHmp0ckOCfyVNmJUrqgzsdZZNbAO503onaTDSd2Ri1FuTcoevRFixR5ov0c_3LWVEwe0g7VnkK6jx9fv_i-fQuRFVK6FiOoieo9OYdsNZFZGeTtEssyKh0OuPDmMQQiOO7AG1JCfVXrBiqKi505Fcw4fHwQ2Nodsj0IKZ2zXRamVPJBbOB306d1BoSZffYZ7BmRVHVYNu9hZ-5tD3WcddbEo2AjgjgIAfmF-ofbb8pDuK0Qrw70hgQUVlc_wijEKsZVBZ9kiwW1Kb1vs6mSpR7341ASJCwoRFtP0j49OFsOz61TfUA-HJwm3TmtfO-dAg2GRSE3rwHbYZrx0ZCD7GnButruGpGtFv1OHl-1O9W3KVF9E65i8B13PkE5y4bavyqtYtjGtXUzvuDbwWA8yG0WwRN7RU8mKmgwOYx0ExblswgL7cpR3m8LOo5P5E5_qYxjpWcr9zfLMz0KalRae8FJjEYJTemk8iQEm-KCLixOXT_SE4swu-XJbhRgUe55-oB74_6vpVf1OQGQfpy_hMOpjGARWe-jC5o7Vw6wW7V0IukaYtzD_9p49-NCQiLm-He84m-_E5LFPkrntHX_lYZW2h6mTnCX37Yk5LkUtX3IagqWn-eQmfMPO1o9Y4Nt1rWoTt1ykBxHalOgfjtvaUbLb2pWn6tQcpDFhLlpGt-913hlFX-8E8mJrYAWLJ8OfJ8Bcqpo59uNrnLV8YMRX9FionEYaO4hFZspRgvsP91ezdJQD1JI6_bEmbpJ0cegJ02IDYSwCzaL_5D5Y8BRMRw6JPPq_Jxav7djJvJ-CVF-eTmx5DuzP3eN1IrMcAEdvKGc3o4ExSAI41SedQYmsOlwMXCNRu1p5-pJW2lKxMt5Jgf1zmcuMrDpUg6yRl32Y4dUtIimQbEhx1GYpfO6LyzNKB3Ktdu1KmHQFccu_hYTs8FV7BHNgWgAZ_1UlObQLPgjBoj5BDk3_jgfq8ajKKoMFUpXvGa_m4JIi4KHxT7HVvfQsJi9ABNaFoxiwFiVeV5xS8CnsGAfjg5EBX0Z-2RZb4VWYj3UmhSCZgugQb7SeaNVGMiMRLoeDTDZqzs3eeKAmrg1f1w9YO72SEbKh5rhjhgow1XQFeJJMyFV8IOnQq19Brrjo9LaYAb6lynmhY_hX8ZePCtktlVsJa5IApVy_xrT2NxrkoaSQ4su9Kn2bgdTbY7dYs37AxsbMlr282Lgnkd9uDSLdGl1FgADI3fAGjQ6ZbTDEUPHT20Jr5N-eQr21fdxI6_wJH87UoMA2tOYAh81jwwrKH2lowif84vC6jG4-sFhrrCR5ZfxjtyrkKbC7ghTdmai6kUIkTtYLOdAkec0BA9MK1xU5KG-HB0Nc3LNJlLWNvN7fuAFHLk8AuyL2SAqGLZom3YRfKbtVJJH4OaRXQcHRSXbh6Uc1_qbVTJK2p4I96DVOq9x6Yf_U3JQi8oYI1uzi65vqlorCpk6hBNCJxeHiTxnmZIDgRAGqCYV2xqq5LWvqBVobM-cCzn5vNwALkrngY-y0YdlBfHZExsK74dcFl4G8rCDG9ytVS093ilPNtNUsHPs4iCuQXcgu1dIe_Z9IBI5h85zS-AlHsTCJ3MJpg5G-DsjneN55KqDTIYj6aqrext4z_Wxw8VX3h7s1dMRwcI3Q5_b5K_dl4UTeGpZU9w8l5xyP3m9-cnEF5G6JKMz8v9_T5fV6jbYMexNJesiW48qVyTML5Sh60anePr4ZIelDAz8lerqd3utCw07KrykuB6-qJAtEzIJn9xxC0pDqKTklvyWyK328iDeOjaixfhMjnjXbNYfyCKYz-8ADrDzaPlNvhReo4rfNO6k-jlvTcfU1F9LqPdMtOselBWCc8iEpZdacONgjc7lqJrUcOo7ae0dhixOxOLc_OZkATr-WZcChw-YvarWJU1ECoJ1mqibouFq2m-eUON_TFNSFnHLzMfOMGBzpgi7EpnI8U3uVtSFTU65s7P98PK-MQ-KNmG4NIY6968DR70LdkoQqBPmz0Zhp4EBEAU7VpG9lM0lKolEKikPutqUv-PuX4nrT0oWA0op9pNa5T3_zlsMkpzNaGa0hoKWE-IfXGB7NspPG8-HBQ3yKXsbUA-F22lk54xyTNK8eCbNFS8iWY7V2jVL3Vmu-XWGObHMibtHry5QRQLAIT43ZA8a_OuAj5Rl_YKQXSaTj3BgiZmohPtpZnagmE2NmNrQiS7FUYW8X8pAwoeMm7uNSxHlR7wnDxTfqRnbTzO2O2x_doHZCqHhCUe9P3oVWmTxS1cKrYwudtCosBp7uB5QmIQDpyiLxa7o__Yhskwo83ENrCLDzCwzQ0yBdTE-let7jGLAIIAKzR3J1i4usxh9KfYXo1Xj_Fgy0G9lrFnUiiexEFIub0nRT6Mdvx8JiOnpuInhQTOTQrxggQQu4EGJvtxFqyNWJR01_bYKQ5Og7auZ1-PKNr7kLoZ9QYOUTL690pdRSxcWuoLeU18EmuY9EYOqWUFsXzA4ukPPpFCWbrkjCa7zZcF7cAHD2U6g_bSSi04O18LfDr_S9nf8zgqVbiyMozc-bgLbn09m3Vnjyb3APMq_xP7LKuAK6uePsZ4S8_Oo7qCEhSSraPEMpnqologS097GKFDdvZbmhOFEjbnQxDDAr0slDyrvg8DlEz-54hygS6ikEG0y0r00U9ElCZYC3ALSy6BueXDnborgwa2BSnW34X4N3Qvry-wX4IRw_BEHeH2P6y0w7Z5pLURNlCZbUONFE6AAuxZe5LVSH3Oyv8leG7_Lwp0rVpbYrX8uA5tGAB7aEQ683ROu5U8-6ULMue8jyUf2yV8j8hY9zo8k9BUpjZ-X1hL7-YH52q8EQj0HzZpDpbeSJzr7Q5haHMi6KPTBR_fY9VaRpT-rY9G4IMvLedMVhrN3s7VZOcpUCBc6Jc8g4IxeLVVLCdyLd1PG3v4VQss5BDWdeff04oBko_2Tv1eGjNT-bdl173hyVwa_yf1Fqx9QJ6f2uyOHZghvQ_3CBctqnGqa8chKIcSC-MyP7AdFpQfkKVh-X7EQXf4GjlDkO9THrJFu39A7L4q7RnwYffFiax4QEqjhvFst9CrNBSfnNv6xKGSL7IeqCJAASsouuAFRcCVBswXp1dW1EEp11Dh0rF_BVNsZTUld4ddH6cHgPOhybK6KQsABEZ79flXQkrUljkKRk7gEjEfaF8YlolI3UjLHihiE2RqR-GG6nlcoP9HunWH7TjN3ozqLduCAYtvq21wZk6OjTtt3uMmNnk3254gyaS9vTr-5gHWfsRRdOMj1Fxs5e9TWGD7CA54-eCXJSUI_WxhQRwHSxrv4O9Zef7g3rusuiTXTG1_eMX0x0lA6Oqtdia3ofRxTsO-wAtpv5E9JXi7OQ39f8N3JimRr-UxS3ZEbKI2IJXff3h5g6xNkSKpUus6Vwx1T_dJiOqS0l9314j5fK6YSDDktr3THKnV7jB1olb8smjGm_1NxjKH_iES_mXHfw6rsm_ZPYdXvPJVQdqMUnZQ0WyOsNHTPw6KyzwLoHoBRj1I44OgGMlj1guxHATmSPxfcpFopXw_TaZjz0uPoL_E6XGOV1pW3ScUkciBkdJSLcIzybGQzJgNgyqsYPv2ER6KptHHu_Zy3ImnYyoaht6ykGwaZzkSsWK_bGsctbI1FhM1F5GhQIjZjjBNTr5rhHlFka5XtUsqjZ08W_AqN463pGr2BL6xW2ZDWCQROPAPyiiZyglLGg8vzUkd-gb46wJuFaWP12vf4sNK5nj3hlyUytMob1ozWchqqG0OQQh9jwTxScJtmW71rhFlhuZC0GzCXAGX-ABfZCfzAO9EgLAMvcbx9mk08G7IW-iwtshbMi4AOl_ltJ9EMvouqxnz1FjpQaaXVMAIL9VvxTYD7v6ZUj20JVSNOAkv6EOsAMEmlnmKpl1YmaTxA3yPD1hhf8jxVifNScWQUPyvOgNZH6Vpa3AqWMkOsRNUUa6ewUXQScLHaE7ySRsefxLhaZ01x3Zwq8-dqnTbyOzswqVMyorbAuqdSiG5vqroiEpLAnp08p3rJaUPBKnpc0IeR_tRAdvHWSVIGx9Vt9e2W_3Tn-GmDJiX73B4M4bLnN6r2-ullejD1VG2iXkZUgrKzYPbbI5xmxKfGPTJ7DF4ixGvYQAEOxxR3mhyF4A-F8I2TIpIqSIM_4vW661uW6PrsYd12mwZE-YWh6x6BLMpacwCwVcDZlZuCkeVYdyZVm4HCpq0FrzgDlse2Y4_F2zbJS462W8KoDSAk5EgpoSPWHAiRDnwDr0v3eFdP60uW2S4s29RPcs_s2q_3UQFRGimMlyu01_qLVsc6ZXf-D9IDzx2F6q6Y5IAVpYU0qhXw8DepTVIOkfXnBhfMs9g1ZUSZEV61DZHrcDvfjbGxbGIImFS0e5aowZJYX5wF3LAmwutz4JClGkxDYMlHypq6jEr-4AOTY3CjFsPF6TCR8BefBDOCkPGqYMV5WpMHpbMGWr69YFCxzit1qZDZ-swi5iSme-oLkizxszqekU3aXFNkOAwS7OZF-eJKTTlVLS3DD3Gj9B2gyhbnp7CVhLZzQjQLr9ayMljdyZV5UvadjVG3jw2WoLgYorOaQZxCJQBy0Qw_SxEvlE4qZJ5BZrOR_pTR9aZuOMMKxS7waPEk4onR0LJEq3hTdNEJlw_gX7jdD13xWAKuNzXfhnMXdvXP2GoH37P9xogyBJWXpqOGxJbbh82RJtTsMAwKZUKSbjF8p2nE5ZBKw3NDo6-v8PwtHfvMaMXhMQQWfu9J-drZwtR2g84MTofkEjzLmf6OSv6xrqwVcR2XL4a-QjW_mm_mlp5naeoywyV0ZVf9Ah5ifSW1R8JDEAQJcJQAY_q3VYquzpcx-jOwXNqIOlGKcgWgtX6Xvyzj59rradCfs2lPRdLHKp8UYdMpSUwpH4igVbGXcbVaJfrha-EMg5WDerFX1XuTImErWh4SeqN4hUsdttAB0egox0RRlnYW8zLLdwluW7131Wka62cBBt3aMPb3YtsW3Sq4_1J4TPmQqTrGDSpyO0MthYhWgyuXmqbS-GMiemq7t5DcBjs0RY0YVzOqXP3zx4Pp8zzohbTbTXLmeIzc_E4Nl6_wbL1K1aDqD8xWSVPMuDbL7mwGh1H36L8RYiAtRm-ywYTtFslO8fvNbF9a3_3LQrkX6wyv3HDvYw8ZfXfaRJZuwAfWE19qJxh3pQPrMm3c1gJPse1avscACIUK3gMt2-2_bxsH48dZhGuMCA0ocf2BaOB-r7Fj8hnXeXPSGzFU619x6AZmpGx1_ZCE1t2iK-JP8orOYiAwCrpDZP0MIirEAgk5CHuUtY9iVuWm7anqDmC0SI1fse-6Qzano84T6ssAJJu_8ivBgKjuGW8_yIOYajdMyQA-aS-X7jW-yMbxFU1X1-gorspu9ImwqDwF6ucYhwzupirRMFB4XxzUBE3KdyS0YtGxJaxlarC5_1uh2k8sJ4I-kWTi7NZL_6umaXdDV4bmala-uOK1XyhVBNihguVvB-sg6Si0Q6WMiy8yir6bcgR1oaKGbchfXMu2NKeDZwRRHLfDcfHG3LulMoGeX4narkV2MnuXOe9tib72C6q5Vf0-EdAdmF41wEHlkczzEqGA6lSfgkQXa1vCc-bnXS4BbvgwfC2Et-_-Dp3oF2GQwjtYdZc3dSVRMmQY2QtJrEAfWnvVrNd7pvNl3V9kkmzWpw0I3OOyegavZcnwgOn6OyTJ6_Oxa5PpeKCwXxhmf6lrIVzINhuxczf1KHTUknKbRfcPm5uAzUY_Q5KSIwsSLAnzVVIerwerMWloS5Z5kqXi9KULSNpdCmMsqZv-Pn5bIq5v9e41iVhaGVfuLMvUbaT8XUt6scJ8Lv-G7uYuiawT4i0Akp62bnJGGJ9FxnZUIOvzZLQKJUlh0eeEwB6aXqLiqg3dJazdD7GcYGwQ3A8uwRb_FSGDeUglFkaHzbHH1AfdQCNykUyT6U9KiYOdYGoekG0MFKtpW5N0Djcw0OWKThrCKt9mOZa74CD0_HhRlsEKkQqmiqLN1OSklDvrlTgwzWGAqd8JQloB6BrArzQ_QNcK7gtDGxyKfeY0teq_KjsUT8hVNZy_-XottpUM2F1BryK-2LpEZCrVgaPKjazIG9NwcNUdCLQ_wUYdBemePz597u3gWgUAiJyFTiXGcn3hM3klwCvgVWfGMeFPaUMuzfKGBhkyH40TPX2YijgU1WwrNbggCNF2nMapRQiDxugudkO4ZA9gG8CNPRZynGVtQUyvYrtP-E381raxyvOA354fbvRKdNJGxZ3avirh8lj1-DgHMckhjybwFt_WztrAeXB6UHH5zgH_HSJOf1Fye9opcr7Ry1cM-zGyfZ4M6NAwfX_hVH6C_fsD9nags_HgYUjw31mAJeoQvNejht5AAO46LuXb-L2vLmf9D8vmjxlU68Whi7zFVdONQexhmCh37H7Y1X0WegeEbUtnUmIoeIEn8NndfGgp0AHnRnR_GDjBumuh3Af-y31jPszi5XuMdpwym6FucIa5gyOdGDk2lOlobi1R5dvOPiuTqQ6KVmSwcanRbeqXTsg3PF20foPXwmxRNc98trkLNYTh3JPfZ-zLGmZrw0hotAPTq764dnz8OtiAixoU6zc54ueUFDPvmda7VJoAeo2iPQd2_vyrMB_Z1fYWLKZhLWODhPeqZpkKa_yUWeaPVqSJHF7fq_NjEQjU7e1OPBcbKb1xgHkTQW9v173mJu8i7kHYyONw9VB8VKWmG1aSI3G6PDXu34Cq6atCFGVs-69UW_yynZ1JTsB5x9nL_ZB-FYIa_KDhAYveD2tSHbupTMSL2nVoKLwgG45nYM9bvWpzFuu2luQgbUibpJ87_g_M2V18kt4-oXfeI947Eyr8NICkts8KMs3er6tDD0QYTOqq6cARVL7WbB8cGsWJ08-3pgyorFJbKBfRTETXgcPACmXD6iRaYLONekb8ZFOm0BplY3WMpeTZfKYo52nG-yOEx0p8O6W9HN_VVlrCXvlt6u0r-g7frF4dI3GiV58v2KA7cZGOwFV8GWUEsq7GIBqxrd7HaZyUfnQrKkQD9zWdlIvwBg03DDWjsj0PN-tWaQ4SrygFkWBvouLDqiQ3P5S_gm2omqLpqY9JZp4OcBwTDpJTL7SW6pStacz66-RJJBC_g7dmLofPVIl5PeGJmcQ3iaVf4Zz6i95jmLUqkoGxUALuvFu9fg7NdBb8lcTO4zqyvmvD5s-hfM31dtlvoJtWxzcZAJys2W1mK-k5SEDPVo8aNBdJD4T-RdDBkeiEEKZ1wHdo-lhlyyw9SHNO8SvAW6pTabYXLQ6uhg8Ykk_8iunHE9hD3AjI7Qch9C2Mj-UlklGvbPKSCzbRbXH1J7gFAzr8exTdXh1rtGi2-Euqhr5MJQxVdX5PTT3hk2SQwLLjfgwerCtP9UBEz8dg64etJqMnUSac8paAljGPS1VPrsFqti8oaxdxb_-9GkFpwPlqqVpNAsrzm-HBEK8bSgdJYakMdfDxJizssRUC4LcFMwYNiKuh1q-9_0ejTugPkKjZbQGdw9VbqhANYbGau4-9DthiNKFwEp5dV3uOivcsrzHC0EZ6l5GSIAPM4S_TUQxf04EO8PZ5v2cAsWEWkiIh0vyo0-supnltkV3cyDoguWmvA-Icv0nUHbCvGsCp0BZ6DTYzVIp76CqymqgI8LuK3DIPf1lmD3tjuXaceUDGZboUaSys57Tk3N65Qz5hdyzxKZSK33foxolnOUC4J5WykKsJZNQIYpdaqG7lBP-tDvLIzp2-JRXBk8Et6zXwgnoz8qcr5FSEm_WBTEMrds1r76LHwm3UWdAtbMdku99NCH-W3qNWgYz3xj1bcdWEgGTIQ_xC2NoDI1_CnxsYR8BpGc31rCBKLT3JdMWyhst6JB-YRNM6nQRuyHsBH3Jns8uHt-eNSVA5SjFqXs92NjbvD3Lc16S1TKQDgqPPzJWomfqdB_EaGBOYOmvLHeTXuTKSLR_lbGeXMdAot8RjU3cOW_awTMXc9BkGyCC7TAJUzQM3hGgOU1MKmLqN7OeUee8cpkS08XE_co_Xq76SRdz-93RWDH45Nhr4fraxP9SxEQ4W7ICYASJZPA2HJyR2PYkzlnxBOd4SJLK095KatY5ZIGxe8RkudtZ91rRwE3BKpDaKr6ZMRSp9xxzu5djrWD3xWe12e4ZaNV1eO29x4FerNlELUIQJRouqLP-9aKpsTB0eqlUIi6cTfYOkH1bV0nj57X0D28UVM-AKFzQQ6iHZtz1vfoqm7iMXduZrTNb9YJRtue2vmB6euS7jAyt3MNfFjff4ZxnQZczT7dmhw_ZF77xN6ldqhE9xBAlvlLsVkRzBNQU0KtwphbuX6Ft1HwCDzx-oXPQ-qpvbQC38Vp-KG4UY6zZvns5_T0eMbUozJN4KE8U0FDHCm6ziO9_XDiwuHALFJLL62Q1i3JvxBTpX6PvKTtBCJE_duOxOlWtAdLGu3qRvOsJr-XKIrlGGZsqua2IlymAa1qL1SXiL9qgxgupL9fJF19c9ors-qkrCPAMKLp4T5g6RFMjLJA_UBQ_qVWRo2tX_8IeiSejSUuUCS6y475-HW5UbaUduApyYnOIgHErzaugfLJRCy7hwLBVPFPNoChdh6e1zHsBdC5DwyHjde00EdqUj5TdsPSN6U7IgVVu1GWxtGThLsmfnjyWgvAw2rd3yhzqB0PhV3mR9uZPXoJwZR41MDdwN_fmrryxCDOHxJjtA1HqGhtSRMKwZ0LGgWJP2Pbgmjhoxss62m4iqLr71o-VbVDRm1Fwg3Dd-zvAaudJWB7v-nWXG17LtvS496ryRujsTaaE3uxTcUw0lqWff5KRzzmW7aHj2H2VAsMZH7UeVFEchbJu9zM2edcRRDMP9VUXx9ZtR-mFgazJ9d7Xo70Y0vay25RfDl7uqShLLUTXZ9HuupSF0LpnOc9MRd7OpuOXW_mSQpmX1cwO0WJkANu5HI01sZEGFSbg9LUw5ZI2T09Tpcgt82-qcA-9qOpRXnIvSr2sfcQRtfc1F42u4tbWn7k7cxFYb3WZPkmhZARb8Cxmh-4K3HJigdn4OSN14hmhp5oHcaJ4i6MEI0oTw_2DoJw2oL3Nmx9H_5ifATs5DnnUj3Z2reo6JtEkqIy86F_ajdU5chSvbFRM8UdoLZHBkmuxxWpO0LicOtSZFNBd4o4K438CcttXT_YtV_90bsRmLd5jB52jcPReYJSzSi0MNh7PLoNfQWJPAnpgZ9QyuCsSlwHw5BA_iXSNgVTIg58z3yuM5nWcDQz5_Lt5PM5ur_9IoufWQxsOmWG1l2-uUgXanww9UsCJIrnrFv7YyQFCFf4fxyv4rtxdGEdA2yfYjJY05g7r2SJe2Gsj3HcNWgFJVLNXkihTWi3sgv4i2Tw7qfDlvDUp0H_0d12IUlY2vqnQcF-oD9-GFyzhU_JCpWm5tKh_3bsHh46JEp4LeekuzXJ0It3nSkxgwvoXMCiq3-V4V7qnblTPt_iyDmqsH51doUzNHLEG9Q14ryCYrjcwrhsLG57A3_q3g==",
                   "summary": [
                     {
                       "type": "summary_text",
-                      "text": "**Exploring the sequence pattern**\n\nThe user's sequence is 2, 6, 12, 20, 30. I notice that these numbers can be expressed as n(n+1) \u2014 for example, 2 = 1*2, 6 = 2*3, and so on. This shows the pattern follows the formula a_n = n(n+1), so they\u2019re also pronic numbers. Alternatively, I observe that the differences between terms increase consistently: +4, +6, +8, +10, indicating that the second differences are constant at 2, which points to a quadratic nature."
+                      "text": "**Identifying the sequence pattern**\n\nThe user is asking about the sequence: 2, 6, 12, 20, 30. I see that each term can be expressed as the product of consecutive integers: 2 = 1*2, 6 = 2*3, 12 = 3*4, and so on. This means the nth term formula is a_n = n(n+1). Alternatively, these numbers are pronic numbers or double triangular numbers, represented as a_n = 2 * T_n, where T_n is the nth triangular number. So, the key pattern is that each term is formed by multiplying n and (n+1)."
                     },
                     {
                       "type": "summary_text",
-                      "text": "**Clarifying the nth term formula**\n\nI'm working on the sequence formula, realizing that the nth term, a_n, can be expressed as n(n+1) or equivalently n^2 + n. This pattern connects to pronic numbers, where each term results from multiplying two consecutive integers. Starting from n=1 gives us 2, 6, and so on. \n\nThe differences between terms increase consistently by 2, indicating a quadratic nature. So, my final conclusion is that the nth term formula is a_n = n(n+1), identifying these numbers as pronic."
+                      "text": "**Explaining the sequence formula**\n\nThe user is looking for the pattern in the sequence: 2, 6, 12, 20, 30. I see that each term can be expressed as n(n+1), meaning a_n = n^2 + n. The differences between the terms are increasing by 2, indicating a quadratic nature. \n\nThis pattern corresponds to pronic numbers or triangular numbers multiplied by 2. Ultimately, the formula for the nth term is a_n = n(n+1), starting from n=1. I've confirmed this approach through different calculations!"
+                    },
+                    {
+                      "type": "summary_text",
+                      "text": "**Formulating the sequence pattern**\n\nThe formula for the sequence is a_n = n(n+1), indicating pronic numbers. Essentially, these numbers are also known as oblong numbers or double triangular numbers, expressed as a_n = 2T_n, where T_n is the nth triangular number. \n\nSo, for instance, we see the pattern as the product of consecutive integers: 1\u00d72=2, 2\u00d73=6, and so on. My final answer highlights that the sequence starts at n=1, resulting in a_n = n(n+1). There\u2019s also an alternative where if n starts from 0, a_n gives 0, 2, 6, and 12, but our sequence clearly starts at 2."
                     }
                   ]
                 },
                 {
-                  "id": "msg_0c2cd20eb299ac8d006a0e897a3d648199a583c5e5b3a90739",
+                  "id": "msg_01f8a88ded6fb6df016ad953ebd47487d0bcfea0ce8a20e877",
                   "type": "message",
                   "status": "completed",
                   "content": [
@@ -88,7 +95,7 @@ interactions:
                       "type": "output_text",
                       "annotations": [],
                       "logprobs": [],
-                      "text": "The easiest way to see what\u2019s going on is to look at the differences:\n\n  2,   6,   12,   20,   30  \n   \u21974   \u21976    \u21978    \u219710  \n\nSince the increments go up by 2 each time, the second difference is constant (2), so the sequence is given by a quadratic in n.  A more direct observation is:\n\n  2 = 1\u00b72  \n  6 = 2\u00b73  \n 12 = 3\u00b74  \n 20 = 4\u00b75  \n 30 = 5\u00b76  \n\nIn other words the nth term is the product of two consecutive integers:\n\n  a\u2099 = n\u2009(n + 1)  \n\nEquivalently,\n\n  a\u2099 = n\u00b2 + n."
+                      "text": "The terms are the \u201cpronic\u201d (or \u201coblong\u201d) numbers, each one the product of two consecutive integers:\n\n1\u00b72 = 2  \n2\u00b73 = 6  \n3\u00b74 = 12  \n4\u00b75 = 20  \n5\u00b76 = 30  \n\nIf we label the first term by n=1, the nth term is\n\na\u2099 = n\u2009(n + 1)\n\nor equivalently\n\na\u2099 = n\u00b2 + n."
                     }
                   ],
                   "role": "assistant"
@@ -100,12 +107,14 @@ interactions:
               "prompt_cache_key": null,
               "prompt_cache_retention": "in_memory",
               "reasoning": {
+                "context": "current_turn",
                 "effort": "high",
+                "mode": "standard",
                 "summary": "detailed"
               },
               "safety_identifier": null,
               "service_tier": "default",
-              "store": true,
+              "store": false,
               "temperature": 1.0,
               "text": {
                 "format": {
@@ -114,6 +123,24 @@ interactions:
                 "verbosity": "medium"
               },
               "tool_choice": "auto",
+              "tool_usage": {
+                "image_gen": {
+                  "input_tokens": 0,
+                  "input_tokens_details": {
+                    "image_tokens": 0,
+                    "text_tokens": 0
+                  },
+                  "output_tokens": 0,
+                  "output_tokens_details": {
+                    "image_tokens": 0,
+                    "text_tokens": 0
+                  },
+                  "total_tokens": 0
+                },
+                "web_search": {
+                  "num_requests": 0
+                }
+              },
               "tools": [],
               "top_logprobs": 0,
               "top_p": 1.0,
@@ -121,13 +148,14 @@ interactions:
               "usage": {
                 "input_tokens": 41,
                 "input_tokens_details": {
+                  "cache_write_tokens": 0,
                   "cached_tokens": 0
                 },
-                "output_tokens": 1003,
+                "output_tokens": 1253,
                 "output_tokens_details": {
-                  "reasoning_tokens": 768
+                  "reasoning_tokens": 1088
                 },
-                "total_tokens": 1044
+                "total_tokens": 1294
               },
               "user": null,
               "metadata": {}
@@ -142,15 +170,15 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - 9ff0d2ac38bd9b6d-SEA
+                - a4e443ed384445f7-SEA
             Content-Type:
                 - application/json
             Date:
-                - Thu, 21 May 2026 04:26:34 GMT
+                - Thu, 22 Oct 2026 00:08:12 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "8061"
+                - "8890"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -158,7 +186,7 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=YffoGhR.CQ1MJ4LxzaM3nxMZ0JDjQkDtk6RgJDt_eYQ-1779337586.5951757-1.0.1.1-Tc82esciUit8iigxGSc4NXOP0OL23t4zLu6kI5P.gyXbbG54UKt41_e_KbWUTqwCIUFOE7iYP1kCYLzBFF.wjeP3xoofxy3Lep0b.CMWDyVcA_XZfJMEVCVV8J7jzLOS; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 21 May 2026 04:56:34 GMT
+                - __cf_bm=tXG.JWNqTBu4LnlEvBZURyX86KAvE9WqnrSCTIhZUdk-1792627683.3946047-1.0.1.1-nbZ4VYnoo5A_EJFbhGudqYCqaratH.CZbQqkg.9Ce6PKpAZ.Wd1uwv1iB55qCXhIZMaJL3gCkZ6wD7P7TdYvJF7Jynwd2O7LdA_4yGqvIPsz0pNJtA5fBBhrCD9LXjIq; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:38:12 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
@@ -170,28 +198,28 @@ interactions:
             X-Ratelimit-Remaining-Requests:
                 - "29999"
             X-Ratelimit-Remaining-Tokens:
-                - "149999752"
+                - "149999750"
             X-Ratelimit-Reset-Requests:
                 - 2ms
             X-Ratelimit-Reset-Tokens:
                 - 0s
             X-Request-Id:
-                - req_79e4895b3da040ab99ce78d99f1a5034
+                - req_fd1c85506c714e0e9a0798836274279b
         status: 200 OK
         code: 200
-        duration: 8.495933791s
+        duration: 9.014437166s
     - id: 1
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 2191
+        content_length: 2583
         transfer_encoding: []
         trailer: {}
         host: ""
         remote_addr: ""
         request_uri: ""
-        body: '{"input":[{"content":"Look at this sequence: 2, 6, 12, 20, 30. What is the pattern and what would be the formula for the nth term?\n","role":"user"},{"id":"rs_0c2cd20eb299ac8d006a0e89736de08199af93a017faf6f1e0","summary":[{"text":"**Exploring the sequence pattern**\n\nThe user''s sequence is 2, 6, 12, 20, 30. I notice that these numbers can be expressed as n(n+1) — for example, 2 = 1*2, 6 = 2*3, and so on. This shows the pattern follows the formula a_n = n(n+1), so they’re also pronic numbers. Alternatively, I observe that the differences between terms increase consistently: +4, +6, +8, +10, indicating that the second differences are constant at 2, which points to a quadratic nature.","type":"summary_text"},{"text":"**Clarifying the nth term formula**\n\nI''m working on the sequence formula, realizing that the nth term, a_n, can be expressed as n(n+1) or equivalently n^2 + n. This pattern connects to pronic numbers, where each term results from multiplying two consecutive integers. Starting from n=1 gives us 2, 6, and so on. \n\nThe differences between terms increase consistently by 2, indicating a quadratic nature. So, my final conclusion is that the nth term formula is a_n = n(n+1), identifying these numbers as pronic.","type":"summary_text"}],"type":"reasoning"},{"id":"msg_0c2cd20eb299ac8d006a0e897a3d648199a583c5e5b3a90739","content":[{"annotations":[],"text":"The easiest way to see what’s going on is to look at the differences:\n\n  2,   6,   12,   20,   30  \n   ↗4   ↗6    ↗8    ↗10  \n\nSince the increments go up by 2 each time, the second difference is constant (2), so the sequence is given by a quadratic in n.  A more direct observation is:\n\n  2 = 1·2  \n  6 = 2·3  \n 12 = 3·4  \n 20 = 4·5  \n 30 = 5·6  \n\nIn other words the nth term is the product of two consecutive integers:\n\n  aₙ = n (n + 1)  \n\nEquivalently,\n\n  aₙ = n² + n.","type":"output_text"}],"status":"completed","role":"assistant","type":"message"},{"content":"Using the pattern you discovered, what would be the 10th term? And can you find the sum of the first 10 terms?","role":"user"}],"model":"o4-mini","reasoning":{"effort":"high","summary":"detailed"}}'
+        body: '{"input":[{"content":"Look at this sequence: 2, 6, 12, 20, 30. What is the pattern and what would be the formula for the nth term?\n","role":"user"},{"id":"rs_01f8a88ded6fb6df016ad953e3f1d487d0981a9ae4db575734","summary":[{"text":"**Identifying the sequence pattern**\n\nThe user is asking about the sequence: 2, 6, 12, 20, 30. I see that each term can be expressed as the product of consecutive integers: 2 = 1*2, 6 = 2*3, 12 = 3*4, and so on. This means the nth term formula is a_n = n(n+1). Alternatively, these numbers are pronic numbers or double triangular numbers, represented as a_n = 2 * T_n, where T_n is the nth triangular number. So, the key pattern is that each term is formed by multiplying n and (n+1).","type":"summary_text"},{"text":"**Explaining the sequence formula**\n\nThe user is looking for the pattern in the sequence: 2, 6, 12, 20, 30. I see that each term can be expressed as n(n+1), meaning a_n = n^2 + n. The differences between the terms are increasing by 2, indicating a quadratic nature. \n\nThis pattern corresponds to pronic numbers or triangular numbers multiplied by 2. Ultimately, the formula for the nth term is a_n = n(n+1), starting from n=1. I''ve confirmed this approach through different calculations!","type":"summary_text"},{"text":"**Formulating the sequence pattern**\n\nThe formula for the sequence is a_n = n(n+1), indicating pronic numbers. Essentially, these numbers are also known as oblong numbers or double triangular numbers, expressed as a_n = 2T_n, where T_n is the nth triangular number. \n\nSo, for instance, we see the pattern as the product of consecutive integers: 1×2=2, 2×3=6, and so on. My final answer highlights that the sequence starts at n=1, resulting in a_n = n(n+1). There’s also an alternative where if n starts from 0, a_n gives 0, 2, 6, and 12, but our sequence clearly starts at 2.","type":"summary_text"}],"type":"reasoning"},{"id":"msg_01f8a88ded6fb6df016ad953ebd47487d0bcfea0ce8a20e877","content":[{"annotations":[],"text":"The terms are the “pronic” (or “oblong”) numbers, each one the product of two consecutive integers:\n\n1·2 = 2  \n2·3 = 6  \n3·4 = 12  \n4·5 = 20  \n5·6 = 30  \n\nIf we label the first term by n=1, the nth term is\n\naₙ = n (n + 1)\n\nor equivalently\n\naₙ = n² + n.","type":"output_text"}],"status":"completed","role":"assistant","type":"message"},{"content":"Using the pattern you discovered, what would be the 10th term? And can you find the sum of the first 10 terms?","role":"user"}],"model":"o4-mini","reasoning":{"effort":"high","summary":"detailed"}}'
         form: {}
         headers:
             Accept:
@@ -213,7 +241,7 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.26.3
+                - go1.26.10
         url: https://api.openai.com/v1/responses
         method: POST
       response:
@@ -226,15 +254,16 @@ interactions:
         uncompressed: true
         body: |-
             {
-              "id": "resp_0c2cd20eb299ac8d006a0e897b27288199a8ec347091012ef2",
+              "id": "resp_01f8a88ded6fb6df016ad953ec86d887d097c5ed4516b43425",
               "object": "response",
-              "created_at": 1779337595,
+              "created_at": 1792627692,
               "status": "completed",
+              "access_programs": null,
               "background": false,
               "billing": {
                 "payer": "developer"
               },
-              "completed_at": 1779337602,
+              "completed_at": 1792627695,
               "error": null,
               "frequency_penalty": 0.0,
               "incomplete_details": null,
@@ -245,21 +274,19 @@ interactions:
               "moderation": null,
               "output": [
                 {
-                  "id": "rs_0c2cd20eb299ac8d006a0e897bb9fc8199ae7e583d3970e8dc",
+                  "id": "rs_01f8a88ded6fb6df016ad953ece8b087d084d5bc851f3dc89e",
                   "type": "reasoning",
+                  "content": [],
+                  "encrypted_content": "gAAAAABq2VPw_CtmuYvjLey9zYR4Zs8wPauJc2NgvTFgG9aaF0Ig6TFUFrdEyG1fShl-OQX721_qWiyq6xmMZbZTGiKLR98f8-I7zDCApiLw2by1EIZD14fLeeJ4Hg0_Eiy69aZwAM8c7j-UnF2BQ4eEMeulPvQwvhdEDSZhtgihdrWcr8nRhTPqJUcBh5D7dCwyXzVP-yoIhLgmJiVZTEbklofvSW-Tc_7ledJ4iHGbp821dT7CdGLS2DnlJIKVNshvLKJk5qmJzOhRVqQkaAijMcjM9g6GIjPDRZWsiu6EJB1D0KV423iLkJ0jkv2GwYxCgd3N2zf_SX2ZpqleS9K_O7-6dDVe9Dpvtoyn29CPRI4BGoMNVSxk8Vh181JcJ7WwIShBWBdfBuyuW7oqZVOwx2bzK9DnImosJ6FqNJzgUu5QPpFG_PhNmQU3XmfDpObfjluCLmtaYh5qToD8xtzS-zfm70vNGQhIMv8_GnGiurHChVVaFDEzY0WadVGudHWCMHoGzu0SS1QjwOczebDhWFDb09alT_f0eWjBA0eYaRF_vF8n7fbvBpSNFuhhi40gLjXROBjNf8onf2_M6_ZuN_e-o4cDZC7gm0xiiFR7v3Xd2_p1894BekQlDt0Wrm9RUOmNhrRN4lbkIw0M4mnPKTFjf1n0712ifLrhDe2PYV4opcXIvp0GBkaPi5kFcTEDut5kFvu1axrE0wH1C0O0uOE_W25W0PEzUI0eu3ZwnYANBG5eG5sRNoi-O4Q3-qgFT1-PA5JCYZt6tTGYABZUdDGtFE4ucreBgV6gpSrn7HAgV4e8hyUp_E9EICjxpLv8_djxKTEa76xMkeq9uvL4pwkuyGM03miTDIg5KlHQzc5ExFORxYlE7gB4iX1qUTHizZJsz0JqN1jegSxaSVk2aYyQdduQsj4SIxW8AcdAD2Alc4AMgt2Bk9Gpf20V5gKn9UY1-NS_8XQ2kFM_yATYJ3TY8iYUuweQbkofaAdLmsRLga6qxp6rPgr2Z4HvfVVBjKEq_GKvvKTTTDEKdLtyFzcNRifiiaJ1cOHg4vg_XsTTw6aqlq22g2791h6DSV1H6RazmGcq59DxE13SiwMA34WDyvi2m8xh0n6fIouKVlF0Xj09mXZNEGof7lhLVpJl3Z_J10oTpfwMLQ-2YX_lTEJ-tIwyEl3dNN05F-mVIYjrTC46eP8eTffUDBTsDlBaQSP-pEJKdx-H4BnypktDOJ-yZ2qWCHxOlrTKYRWaHkuh51XbucNUcjrhyKA8b94bhnL85vHVu22yfyjw1F-YTmCc1ncPPzB8vtUFGLF-BdQi65i-AggQ3Hk9ArqFqaHhuIyYOt-rwRRlcq1fZUwbCI01P3Z2QpcIJCm_nqqrqggdARF4aBwkdDvy5Y7eDWwqs2MWb_b9CiC_qwRbWJ5N1zfU_ZvtT9hDbppb-sGq1cyecwTHRjDmQ4-M8Fwtnu0iDuLpXT12iJwUQQ-H9nJbOgcLQW-TXEfMNDbvZtuXnxmcTuq2p0o55BZUb0_DtkBhDhvg8zQkC-6ff5XjBZuE0J0Dkz3mWHySIFMbnhR-YnLHprvGYDdPRYy0dydThOEqQWfrSqwL1mCnXT7Dyd4edcEizOnxoa_HvnZR4RFBWqgep6kXfl5MgKLiKpox3aI7IfU7qCyxmFu1_8FN-Y8YOac-OHBbeerMqUV49_iMuzfCNpRSaoQ3qJmWZ3phluENaDvCl-VxXhgm0nFoEfC6ABQuRaKAtypP3YMyfy_RNlTl4rygnykQgsG1u1eAgF-Y6VqTDK6lt83BZTqROjfZAY6ikCM45-ic2FbB2HuyXkdTbcWQFCHkpNCKc-GTFWz5xZUu0RGxhoxJKY1udbLtWA3_ARS6d5mXhhoqNFj7VxO1nJH5SrHF4k6FeBelqEmp8xIz5OurLB8eWwpS09W7o6T6Zb0yCQ2hBmPGLl0_7bv3wOwq4-ZuVPzjwFuT6O5sEW-N6J6-cwXoXipqP4vMgMJ4dPsmQHd6WCp8-MX_-aiLTnhwG2Q7MzGoKSvQKahQ0TkWy7HT3rWjGiBRzeVe8W7MfDCI0-3-DFRUbNrAc38SBBsiPY-TK64gIy2ExDe7circhQil74cE-4Y86Ia2wcGixV0qID67NriPzA-cChKDYBnH8gBe-FbFMiQP0srK8kpo0LL3NS3zZyWoy8wz9E9d3suBv8z5uvaf1fYPMnB6qHhe4eiMW6qt6aJTFofUjd1xxta1zUQhlxCIpwJGP9TnQzvV6OzTpOJ2YpR-6PO3v5Kum-eB4EoDJlfy11he7GOjdxh0kcIQt3xBzwBsCxVx67KI9AA73KEKuSQJ_HzJTYkA2a2G1NmZN1cP9OJ28lkidrzJrOb997yVbJoJaM0Sja6tKOG5RBCHDA-vbrQhjS7TLIUzbXlmpShz8YTejIIPV7ZzK6gNckvh4tqxtpA-BmAK7y6e_0B_BgcW2pIN8N98AWdSDomBcuUMgOoCPm02K1gZLDrbxHR7zi9cHggKElotTUaGFS3MtE8wi28mUvNT2vyG32BnaRjlxJpMTJ7p--St70sgY6gMb1YUGUR2SvmYRTtELiY9DD1DSnwK_K8kA_7-1Y5N1rQhiCv-DePYkyN-kp8w7ttu0Z836NhZB4ED0ZuO8P9zedz7kQ0AvzVl40sqBvx7XQViS94L8-i6pL_CU6GrIu8QOg24V6zBejT41so3NhF-Sw7NMvr38c6QF6s5x4ndnplmhbuIwOYC-tIbqUkYMGp_xnxJ_-iQ-4lHF9cV7FjISVpOefC8MX6ZOwi2OKXxLiQw9AaxDBa02rjJXAFBT1TETxbo4GQ12tvfn2X86NvRc00K6eYD4Ni4O1FuD6bef490-JwE780s7Z3ny0t9DMP_KiLdNlx4aaMU9uqfT6Oy5_lhmbou1VqPgAU7wznil1gg85vhDvzw04dnNoF_HY2Ve3OHViJjQz6KVTFf_Qe5EtzcINn8wcjgDThwiXjlcLn9u2VrGpeJeaea8JsWb6O7VsPGmfogvJyQyWfTKG916Vepyudv0jUtKtECRqP2ZmeDbwIm1CksYXm9eO6aFaLHLDVHbN-Vjbxc-FkKYsWSD94ZPi0crSdplHJOqAyI9lqcqwRzbj3Qk52ZSv05nlyDScxwZ5Xv_f2Y_pVeB0II7Y6hugQOgveHxXm0IqYx8sUPrN9-IhtfK2kmwaxlZS_aLArNd4PbwYfoAb_3dpr0J72JfSW4-mJuEjV7dWDiPZ3237KQLu_hJ30Vs2uK4fyP5Mtf5bnzzE2YcNMWChN1AZrFGXFTOGeMWDzw5pqzjLnTbHBqT3REzBXApGsk5Ze13nieBfWsVoy5k0jJh3VXu0y5_SRe-A5Il-w8EZfiEO4YiaK8nBJjhwHglKGVqj8-lHGMQM5c8_HPae7AebvHAnqxSNspOKtpx1EePHN1aiNVbF1RHMJUqaOO3ETTNM68SWSEY8em7El71sJXlDfFQp_aJcquUzph6UT6qNuDrHS2tPnXiC1_avWEV8iCANFG9jiZDK_FDHdZinlafPovC8Yy1lY4o5Lg5AyJX1AQ5wzfF68aAtjcRTv1q8DeTYQHc05DzO0WUW--2hpJn8hjOkpptXTrxqgYl6gW1gypgyiDQM5eQHhzyTfylGSowa87h5LGzlRAYa2Wd4Q9fIsLN0A4v0rOeerxHhPOYG1wN-hLK8DDzixdLYGwEZJy_P8BygodLTX7jV3LSps7EpkarNA4pf9Laj97gSnRt2bunmf1yOE_EMm2O6OOLC6uIRtlLUUu4mqdzyvJYLUuad0qL7hwXi0EzXFb1diTn6xnVfVhtuvSaUQqiuLmWaPfz6EaxUw_At5ELoi-jcp26EAjewXsatnSQbeTE5N3bYwOU0qqmmEwqdynJgHllATJoRW2ZdgTbvSTpsCZuWZ1OEs2o5qEn7nlQ6kvfdMog-TagjSx7oQavNGrt7YPjUVhZRQhon9Fm0PnyFkz1dBm5Siupex1-M4AXmSTYWzRvNNxqM6Z9jBhkOtAKr1hR63KiOLXDXH5yCXJNCWypg==",
                   "summary": [
                     {
                       "type": "summary_text",
-                      "text": "**Calculating terms and sums**\n\nThe user asks to find the 10th term using the pattern \\( a_n = n(n+1) \\). For the 10th term, I calculate \\( a_{10} = 10 \\times 11 = 110 \\). Then, I find the sum of the first 10 terms. The sum \\( S_{10} = \\sum_{n=1}^{10} n(n+1) = \\sum n^2 + \\sum n \\) equals 440 when calculated. I also mention the closed form for \\( S_n = \\frac{n(n+1)(n+2)}{3} \\)."
-                    },
-                    {
-                      "type": "summary_text",
-                      "text": "**Presenting results**\n\nI calculate the 10th term as \\(10 \\times 11 = 110\\) and find the sum of the first ten terms to be 440. Additionally, I should mention the closed-form expression for the sum, which is \\(S_n = \\frac{n(n+1)(n+2)}{3}\\). So, the final answers are the 10th term, 110, and the sum, 440, along with the formula for future reference. Keeping these points clear is key!"
+                      "text": "**Evaluating pronic numbers**\n\nI\u2019m considering pronic numbers, which are calculated as n(n+1). Starting from n=1, for the 10th term, I find it by multiplying 10 and 11 to get 110. To sum the first 10 terms, I evaluate it as the sum of squares and the sum of n. The calculations yield 385 for the squares and 55 for n, giving a total of 440. I can also use the sum formula for pronic numbers, confirming the results: the 10th term is 110, and the sum is 440."
                     }
                   ]
                 },
                 {
-                  "id": "msg_0c2cd20eb299ac8d006a0e8981fcc88199ba398ddb74e142ad",
+                  "id": "msg_01f8a88ded6fb6df016ad953efb4f087d0bca3a93cc51229cb",
                   "type": "message",
                   "status": "completed",
                   "content": [
@@ -267,7 +294,7 @@ interactions:
                       "type": "output_text",
                       "annotations": [],
                       "logprobs": [],
-                      "text": "The nth term is  \n  a\u2099 = n(n + 1).  \n\nSo for n = 10:  \n  a\u2081\u2080 = 10\u00b711 = 110.  \n\nThe sum of the first 10 terms is  \n  S\u2081\u2080 = \u2211\u2096\u208c\u2081\u00b9\u2070 k(k + 1)  \n      = \u2211k\u00b2 + \u2211k  \n      = [10\u00b711\u00b721/6] + [10\u00b711/2]  \n      = 385 + 55  \n      = 440.  \n\n(Equivalently, S\u2099 = n(n + 1)(n + 2)/3, so S\u2081\u2080 = 10\u00b711\u00b712/3 = 440.)"
+                      "text": "The nth term is a\u2099 = n(n + 1).  \n\u2013 So the 10th term is a\u2081\u2080 = 10\u00b711 = 110.  \n\u2013 The sum of the first 10 terms is  \n   \u2211\u2099\u208c\u2081\u00b9\u2070 n(n + 1) = \u2211n\u00b2 + \u2211n  \n     = (10\u00b711\u00b721)/6 + (10\u00b711)/2  \n     = 385 + 55  \n     = 440.  \n\nAlternatively, one can use the closed\u2010form  \n   \u2211\u2099\u208c\u2081\u1d3a n(n + 1) = N(N + 1)(N + 2)/3  \nand for N=10 that gives 10\u00b711\u00b712/3 = 440."
                     }
                   ],
                   "role": "assistant"
@@ -279,12 +306,14 @@ interactions:
               "prompt_cache_key": null,
               "prompt_cache_retention": "in_memory",
               "reasoning": {
+                "context": "current_turn",
                 "effort": "high",
+                "mode": "standard",
                 "summary": "detailed"
               },
               "safety_identifier": null,
               "service_tier": "default",
-              "store": true,
+              "store": false,
               "temperature": 1.0,
               "text": {
                 "format": {
@@ -293,20 +322,39 @@ interactions:
                 "verbosity": "medium"
               },
               "tool_choice": "auto",
+              "tool_usage": {
+                "image_gen": {
+                  "input_tokens": 0,
+                  "input_tokens_details": {
+                    "image_tokens": 0,
+                    "text_tokens": 0
+                  },
+                  "output_tokens": 0,
+                  "output_tokens_details": {
+                    "image_tokens": 0,
+                    "text_tokens": 0
+                  },
+                  "total_tokens": 0
+                },
+                "web_search": {
+                  "num_requests": 0
+                }
+              },
               "tools": [],
               "top_logprobs": 0,
               "top_p": 1.0,
               "truncation": "disabled",
               "usage": {
-                "input_tokens": 252,
+                "input_tokens": 179,
                 "input_tokens_details": {
+                  "cache_write_tokens": 0,
                   "cached_tokens": 0
                 },
-                "output_tokens": 552,
+                "output_tokens": 453,
                 "output_tokens_details": {
-                  "reasoning_tokens": 320
+                  "reasoning_tokens": 256
                 },
-                "total_tokens": 804
+                "total_tokens": 632
               },
               "user": null,
               "metadata": {}
@@ -321,15 +369,15 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - 9ff0d2e15d939b6d-SEA
+                - a4e44425b90645f7-SEA
             Content-Type:
                 - application/json
             Date:
-                - Thu, 21 May 2026 04:26:42 GMT
+                - Thu, 22 Oct 2026 00:08:16 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "7359"
+                - "3503"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -337,7 +385,7 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=Y9PzXOtB7xeKcN1_PXJQYfPdvVHfQ_yxsVMIEyjUw94-1779337595.0944118-1.0.1.1-R0lfO9ih0qDZ_BPwDI.yDQMGZ5HS52qQ7kR5FwurWcEd4yvZPj_ReiYzuyUsyXxtLj41JvzQ4yyXDvHjMt3BOho8sFeuJbdlXVBMEMch.qaGKaZj2LfMETX6EJpQaZVU; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 21 May 2026 04:56:42 GMT
+                - __cf_bm=l4aLUnERulnYr.Mht1ihd2120dyd_QjWIBOzWUG7yGE-1792627692.4381096-1.0.1.1-jnP5WJFpy5yxEAlziSP6SEFKiQ_b2hT05A4HuJ3Jq_66sLMwnOa515HggU_nZcI3zCxvwP5xDJE.4SbMF43PPrcXb1d6FLs6FdWIexLGnEzVK1mCuHsPFelgvwsJpIaG; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:38:16 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
@@ -349,13 +397,13 @@ interactions:
             X-Ratelimit-Remaining-Requests:
                 - "29999"
             X-Ratelimit-Remaining-Tokens:
-                - "149999540"
+                - "149999615"
             X-Ratelimit-Reset-Requests:
                 - 2ms
             X-Ratelimit-Reset-Tokens:
                 - 0s
             X-Request-Id:
-                - req_7bd871fd031544edb26d5c708f3a8bc7
+                - req_d8b7b81a830e416e879351ca45f0c86a
         status: 200 OK
         code: 200
-        duration: 7.67716125s
+        duration: 3.63695025s

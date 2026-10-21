@@ -39,35 +39,36 @@ interactions:
                 }
             }
         headers:
+            Access-Control-Expose-Headers:
+                - CF-Ray
+                - CF-Ray
             Alt-Svc:
                 - h3=":443"; ma=86400
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - 99d6de83c979d468-IAD
+                - a4e442844fd1ad2d-SEA
             Content-Length:
                 - "265"
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Wed, 12 Nov 2025 14:55:14 GMT
+                - Thu, 22 Oct 2026 00:07:05 GMT
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=UnLnYx8lMJIPMGccJ4Prs7SF0GMe2T2hjApAqGmuLJ0-1762959314-1.0.1.1-NCkza6yrPTeiH7cxcMNAnx.YAlm5iV8CMtvAiocR0FJMW1wj1MNkDjQnCxGAUfWGYPbPcmaiFZB0_tMO.d20Uog8i9cKUzHm7WH7n8hpNqk; path=/; expires=Wed, 12-Nov-25 15:25:14 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
-                - _cfuvid=w1sfjMkqXTDFb.ap8f8IlDNNTWzZ.KE.6Uk452LfWFY-1762959314620-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+                - __cf_bm=FrS7DkvGZarGMm.hXqY9U74d2OVbNGX.BZ9CIB5xIKs-1792627625.6420593-1.0.1.1-GWROdMjm0HGDZqV8JRZNDigxW1iUvZ3vZJwe_69SgyAr5.jAqXA9w55GYAfpr36sHGZAR14Pjx7_MZGy9rBqaRYFFO4j1SfdCVMKJr42fqZZyIA43Tk9aL_eZbJtF3mX; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:37:05 GMT
+                - _cfuvid=ZOBZe1kaN4BPgZ9hYAzOXWHUqb8fk6L4kX3hsJbjAZk-1792627625.6420593-1.0.1.1-wkzSlVlJbCni2VlWQ7z8m.u21DdtnU_AjVVdbZ4UbAo; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             Vary:
                 - Origin
             X-Content-Type-Options:
                 - nosniff
-            X-Envoy-Upstream-Service-Time:
-                - "2"
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Request-Id:
-                - req_33713323e0644351992b209b0f342031
+                - req_a51a6d7c5dc14b958ba97c8517570499
         status: 401 Unauthorized
         code: 401
-        duration: 106.175667ms
+        duration: 202.979416ms

@@ -19,6 +19,22 @@ interactions:
                 - application/json
             Content-Type:
                 - application/json
+            User-Agent:
+                - OpenAI/Go 1.12.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 1.12.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.26.10
         url: https://api.openai.com/v1/chat/completions
         method: POST
       response:
@@ -31,44 +47,103 @@ interactions:
         uncompressed: true
         body: |
             {
-              "id": "chatcmpl-test",
+              "id": "chatcmpl-EbaXmX7yHXiJ18yLSlm5di8kkBhvw",
               "object": "chat.completion",
-              "created": 1700000000,
-              "model": "gpt-4o-mini",
+              "created": 1792627318,
+              "model": "gpt-4o-mini-2024-07-18",
               "choices": [
                 {
                   "index": 0,
                   "message": {
                     "role": "assistant",
-                    "content": "Hello!"
+                    "content": "Hello! How can I assist you today?",
+                    "refusal": null,
+                    "annotations": []
                   },
+                  "logprobs": null,
                   "finish_reason": "stop"
                 }
               ],
               "usage": {
-                "prompt_tokens": 10,
-                "completion_tokens": 2,
-                "total_tokens": 12
-              }
+                "prompt_tokens": 9,
+                "completion_tokens": 9,
+                "total_tokens": 18,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0,
+                  "audio_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "reasoning_tokens": 0,
+                  "audio_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "service_tier": "default",
+              "system_fingerprint": "fp_4be5992575"
             }
         headers:
+            Access-Control-Expose-Headers:
+                - X-Request-ID
+                - CF-Ray
+                - CF-Ray
+            Alt-Svc:
+                - h3=":443"; ma=86400
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - a4e43b048d0c681f-SEA
             Content-Type:
                 - application/json
+            Date:
+                - Thu, 22 Oct 2026 00:01:59 GMT
+            Openai-Organization:
+                - braintrust-data
+            Openai-Processing-Ms:
+                - "547"
+            Openai-Project:
+                - proj_vsCSXafhhByzWOThMrJcZiw9
+            Openai-Version:
+                - "2020-10-01"
+            Server:
+                - cloudflare
+            Set-Cookie:
+                - __cf_bm=RrsvmCHqMDbAlz8eiichBLIf_wuZqwXepcO8N4vRiiU-1792627318.4868834-1.0.1.1-PNcatEMAUnqoiTMvTeG3hI2zRneYiMyv0UMVrKcK7UguT49ctTpWhs9Fr8gY_YzYsYkaHvzWaGr2ET01pkfE9xLTLuk7nIliYSp54a.0TSDJyYCMCCCTBuENKKjYI4Ka; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:31:59 GMT
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            X-Content-Type-Options:
+                - nosniff
+            X-Openai-Proxy-Wasm:
+                - v0.1
+            X-Ratelimit-Limit-Requests:
+                - "30000"
+            X-Ratelimit-Limit-Tokens:
+                - "150000000"
+            X-Ratelimit-Remaining-Requests:
+                - "29999"
+            X-Ratelimit-Remaining-Tokens:
+                - "149999995"
+            X-Ratelimit-Reset-Requests:
+                - 2ms
+            X-Ratelimit-Reset-Tokens:
+                - 0s
+            X-Request-Id:
+                - req_d34ab40ad8094ccda418811fa7a6c95b
         status: 200 OK
         code: 200
-        duration: 100ms
+        duration: 677.859083ms
     - id: 1
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 116
+        content_length: 131
         transfer_encoding: []
         trailer: {}
         host: ""
         remote_addr: ""
         request_uri: ""
-        body: '{"max_tokens":1024,"messages":[{"content":[{"text":"Say hello","type":"text"}],"role":"user"}],"model":"claude-3-haiku-20240307"}'
+        body: '{"max_tokens":1024,"messages":[{"content":[{"text":"Say hello","type":"text"}],"role":"user"}],"model":"claude-haiku-4-5-20251001"}'
         form: {}
         headers:
             Accept:
@@ -77,6 +152,24 @@ interactions:
                 - "2023-06-01"
             Content-Type:
                 - application/json
+            User-Agent:
+                - Anthropic/Go 1.23.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 1.23.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.26.10
+            X-Stainless-Timeout:
+                - "600"
         url: https://api.anthropic.com/v1/messages
         method: POST
       response:
@@ -87,50 +180,83 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: |
-            {
-              "id": "msg_01test",
-              "type": "message",
-              "role": "assistant",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "Hello!"
-                }
-              ],
-              "model": "claude-3-haiku-20240307",
-              "stop_reason": "end_turn",
-              "stop_sequence": null,
-              "usage": {
-                "input_tokens": 10,
-                "output_tokens": 2,
-                "cache_creation_input_tokens": 0,
-                "cache_read_input_tokens": 0
-              }
-            }
+        body: "{\"model\":\"claude-haiku-4-5-20251001\",\"id\":\"msg_011CgGJ29SAatxjCLnrFt2dD\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Hello! \U0001F44B How can I help you today?\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":9,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":16,\"service_tier\":\"standard\",\"inference_geo\":\"not_available\",\"speed\":\"standard\"},\"diagnostics\":null}"
         headers:
+            Anthropic-Ratelimit-Input-Tokens-Limit:
+                - "10000000"
+            Anthropic-Ratelimit-Input-Tokens-Remaining:
+                - "10000000"
+            Anthropic-Ratelimit-Input-Tokens-Reset:
+                - "2026-10-22T00:01:59Z"
+            Anthropic-Ratelimit-Output-Tokens-Limit:
+                - "2000000"
+            Anthropic-Ratelimit-Output-Tokens-Remaining:
+                - "2000000"
+            Anthropic-Ratelimit-Output-Tokens-Reset:
+                - "2026-10-22T00:01:59Z"
+            Anthropic-Ratelimit-Requests-Limit:
+                - "20000"
+            Anthropic-Ratelimit-Requests-Remaining:
+                - "19999"
+            Anthropic-Ratelimit-Requests-Reset:
+                - "2026-10-22T00:01:59Z"
+            Anthropic-Ratelimit-Tokens-Limit:
+                - "12000000"
+            Anthropic-Ratelimit-Tokens-Remaining:
+                - "12000000"
+            Anthropic-Ratelimit-Tokens-Reset:
+                - "2026-10-22T00:01:59Z"
+            Anthropic-Workspace-Id:
+                - wrkspc_01J8hau4yJ2SKvtbeP9drm9A
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - a4e43b08ceec2672-SEA
+            Content-Security-Policy:
+                - default-src 'none'; frame-ancestors 'none'
             Content-Type:
                 - application/json
+            Date:
+                - Thu, 22 Oct 2026 00:01:59 GMT
+            Request-Id:
+                - req_011CgGJ29DmT8weKVfbE7MRP
+            Server:
+                - cloudflare
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            Traceresponse:
+                - 00-6ad95277000000001eb45f503f6c2ba7-67f930902a154a61-01
+            Vary:
+                - Accept-Encoding
+            X-Robots-Tag:
+                - none
         status: 200 OK
         code: 200
-        duration: 100ms
+        duration: 618.50325ms
     - id: 2
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 59
+        content_length: 62
         transfer_encoding: []
         trailer: {}
         host: generativelanguage.googleapis.com
         remote_addr: ""
         request_uri: ""
-        body: '{"contents":[{"parts":[{"text":"Say hello"}],"role":"user"}]}'
+        body: |
+            {"contents":[{"parts":[{"text":"Say hello"}],"role":"user"}]}
         form: {}
         headers:
             Content-Type:
                 - application/json
-        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent
+            User-Agent:
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
+            X-Goog-Api-Client:
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
         method: POST
       response:
         proto: HTTP/2.0
@@ -147,27 +273,57 @@ interactions:
                   "content": {
                     "parts": [
                       {
-                        "text": "Hello! How can I help you today?\n"
+                        "text": "Hello!"
                       }
                     ],
                     "role": "model"
                   },
-                  "finishReason": "STOP"
+                  "finishReason": "STOP",
+                  "index": 0
                 }
               ],
               "usageMetadata": {
                 "promptTokenCount": 3,
-                "candidatesTokenCount": 10,
-                "totalTokenCount": 13
+                "candidatesTokenCount": 2,
+                "totalTokenCount": 18,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 3
+                  }
+                ],
+                "thoughtsTokenCount": 13,
+                "serviceTier": "standard"
               },
-              "modelVersion": "gemini-2.0-flash-exp"
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "d1LZaqq8NJKCmtkPwbaG6AI"
             }
         headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
             Content-Type:
                 - application/json; charset=UTF-8
+            Date:
+                - Thu, 22 Oct 2026 00:02:00 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=411
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Gemini-Service-Tier:
+                - standard
+            X-Xss-Protection:
+                - "0"
         status: 200 OK
         code: 200
-        duration: 100ms
+        duration: 588.76775ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -176,7 +332,7 @@ interactions:
         content_length: 90
         transfer_encoding: []
         trailer: {}
-        host: ""
+        host: api.openai.com
         remote_addr: ""
         request_uri: ""
         body: '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Say hello"}],"temperature":0}'
@@ -196,29 +352,88 @@ interactions:
         uncompressed: true
         body: |
             {
-              "id": "chatcmpl-langchaingo-test",
+              "id": "chatcmpl-EbaXoR4tD8euDP8goRtwc0zA4HFIT",
               "object": "chat.completion",
-              "created": 1717171717,
-              "model": "gpt-4o-mini",
+              "created": 1792627320,
+              "model": "gpt-4o-mini-2024-07-18",
               "choices": [
                 {
                   "index": 0,
                   "message": {
                     "role": "assistant",
-                    "content": "Hello from LangChainGo"
+                    "content": "Hello! How can I assist you today?",
+                    "refusal": null,
+                    "annotations": []
                   },
+                  "logprobs": null,
                   "finish_reason": "stop"
                 }
               ],
               "usage": {
-                "prompt_tokens": 5,
-                "completion_tokens": 4,
-                "total_tokens": 9
-              }
+                "prompt_tokens": 9,
+                "completion_tokens": 9,
+                "total_tokens": 18,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0,
+                  "audio_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "reasoning_tokens": 0,
+                  "audio_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "service_tier": "default",
+              "system_fingerprint": "fp_4be5992575"
             }
         headers:
+            Access-Control-Expose-Headers:
+                - X-Request-ID
+                - CF-Ray
+                - CF-Ray
+            Alt-Svc:
+                - h3=":443"; ma=86400
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - a4e43b1058d0681f-SEA
             Content-Type:
                 - application/json
+            Date:
+                - Thu, 22 Oct 2026 00:02:01 GMT
+            Openai-Organization:
+                - braintrust-data
+            Openai-Processing-Ms:
+                - "551"
+            Openai-Project:
+                - proj_vsCSXafhhByzWOThMrJcZiw9
+            Openai-Version:
+                - "2020-10-01"
+            Server:
+                - cloudflare
+            Set-Cookie:
+                - __cf_bm=IggiPN8LZxs9wtzyLd3csnCUxXtGX152HH3F8IIAPbA-1792627320.3825815-1.0.1.1-FeNEzWOTnuzLRlCI2iMr39c9Gbq0Q29ZfD5HmtNRBH8gBTVh_NLWcjaSLrgSz5_k7cer9AzYc4JdheRNBkSINY0XUUwW80v9v4.M8wMcLf6maNwjL5RrktQnqehIylpB; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:32:01 GMT
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            X-Content-Type-Options:
+                - nosniff
+            X-Openai-Proxy-Wasm:
+                - v0.1
+            X-Ratelimit-Limit-Requests:
+                - "30000"
+            X-Ratelimit-Limit-Tokens:
+                - "150000000"
+            X-Ratelimit-Remaining-Requests:
+                - "29999"
+            X-Ratelimit-Remaining-Tokens:
+                - "149999995"
+            X-Ratelimit-Reset-Requests:
+                - 2ms
+            X-Ratelimit-Reset-Tokens:
+                - 0s
+            X-Request-Id:
+                - req_49bc99248f874884924ea45aa70b3b23
         status: 200 OK
         code: 200
-        duration: 100ms
+        duration: 1.023669458s

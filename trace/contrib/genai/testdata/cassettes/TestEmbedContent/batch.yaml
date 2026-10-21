@@ -19,9 +19,9 @@ interactions:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-genai-sdk/1.41.0 gl-go/go1.26.2
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-genai-sdk/1.41.0 gl-go/go1.26.2
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
         url: https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:batchEmbedContents
@@ -9273,11 +9273,11 @@ interactions:
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Thu, 16 Apr 2026 21:43:45 GMT
+                - Thu, 22 Oct 2026 00:06:30 GMT
             Server:
                 - scaffolding on HTTPServer2
             Server-Timing:
-                - gfet4t7; dur=195
+                - gfet4t7; dur=211
             Vary:
                 - Origin
                 - X-Origin
@@ -9290,4 +9290,4 @@ interactions:
                 - "0"
         status: 200 OK
         code: 200
-        duration: 226.454459ms
+        duration: 387.389417ms

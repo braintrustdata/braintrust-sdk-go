@@ -34,7 +34,7 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.23.12
+                - go1.26.10
         url: https://api.openai.com/v1/responses
         method: POST
       response:
@@ -47,28 +47,39 @@ interactions:
         uncompressed: true
         body: |-
             {
-              "id": "resp_02206c8b4a11ec49006913f739d5588195aefc03b14c41f1ee",
+              "id": "resp_007ecfff0c9542ba016ad953c98c7c87d0a51f86dfcf0525a5",
               "object": "response",
-              "created_at": 1762916153,
+              "created_at": 1792627657,
               "status": "completed",
+              "access_programs": null,
               "background": false,
               "billing": {
                 "payer": "developer"
               },
+              "completed_at": 1792627659,
               "error": null,
+              "frequency_penalty": 0.0,
               "incomplete_details": null,
               "instructions": null,
               "max_output_tokens": null,
               "max_tool_calls": null,
               "model": "gpt-5-2025-08-07",
+              "moderation": null,
               "output": [
                 {
-                  "id": "rs_02206c8b4a11ec49006913f73a9dd081958473cdb6d7400061",
+                  "id": "rs_007ecfff0c9542ba016ad953c9ed5887d0afe8cca8b0a0fb14",
                   "type": "reasoning",
-                  "summary": []
+                  "content": [],
+                  "encrypted_content": "gAAAAABq2VPLw2t4Tk8qdSy7bpL63Vd47HtWX56zygDJFMr2XO__IiVnGhSnLSUV3GPLs7XuXQp5gZrFhDVT-o4-JdM0aYFFNmvSHqKmPvhNIBCNbyHnDysIvZzpj3gbjEvveSfpGnheBtmRQomWyz4jxZHpIe32a72mJq2m0jwXKbbPdOGoVXRhI5YMfqN-jKGxY6YAPObhSkq-9oGdnpS0S5DbQ8DeC6lHLOEiMYvo-upqQdiVDQkUhUD1lvT7UnMbo7_wZbeESkZDCs0dQh-jNIhO0Vcby919CMP6gWrQ4y0B6YHt5jIdvpfTQ3P0zmyCLMF1W2ADtOZNDqBSI3flBrAo7u_VJ4hzv9ZmYrKRCab2FsClQrVs3smy2c5ooyAUhG8rfDLLigzZHeP3LQ8qrTNDLTKZ6oKPluCYhpW2JQO7DAo-EjqHLtAex86gVK21XDQInABJj09XuxcmyRFlp16RchkZ9c-e9cAOtcGt0UgDg83Njfgjn-iW_VbYsXQ130lHjmb2D9tLKHyZEqZ17ZkSnrBxdaP9zgZdv8SkS6cSGLBOz_2e6F3OTycN9eCDjrkew4EdguG1XXQY15PB95gU5cgVOCJn63s9v4aozHOjQ_qKrHFR0Fum5NMTuI3oCGw8Qrr0_m19Azlmbw9FZSDdFvAfJnaFhxkC0hqOJ63acL9C558TGjTmNXh_xw8y92h_1bzAGixme1eHnm-UgfSSX2tju3fQTt6qaOZdeR36mh1leDjtBJ-_m-NnaEmao_y_AMXwFM6hSPGVMxSd1Q4pvmyU2D4b2KTk9_eC6h3uQYlSVRNgiekLnFf8SpkYHubYjiOu2TpGPvUDGe2zb1S50D20zmBuB6rG4H5JjBy0VvKQ_wtcRHBHwgdpZVbIJuwAUb0J_onrT1Z4Mtbyc1m9SijRXBSpQOKETiZ4W6GdEHgQ8FWz7heJD5E4B0KwslMsV9KwcdD4kcjyx998W1mShbxan5gnvWgy-kX1u9ZqoMHkxP_KlqRjjP8s12M1fRGYtfOnAdmOHOZKP28u6kRNbJ2QutJsBV5CzbcycUOI7M04FjnyZDvwdk98BsKL7ibk7QJepQ4cYsRTXE8eZRbDVzDsDvIKs0nC1808rfkkf2kW9-uUxoujBGldIqxuFNRKCEUQbTBiKFH89EhhLOY0QtnSs1KgJ8TAT-0bMEyHnrwLTHXhyptojslwO11ou9Zkt0yIsJL_0xdYuiEuag7rACzTLSpLJ-TZtjwikXCByRB_MWV7roul69mRoGJCuqme0x52mrV0ErtUALYPAFjgvZI_WPrac0Tn4n9YeM3l0P1Jyfg-TuMGNhWGYSkpY-MljP02Zcjm6hn1_gH4skHdheXx7Whs1iLwhkVcfhnJ-laQMOE9WzIWFuYnnOku_7AfxCx75G4NPvq3A8QzWHPsI0kF9EBz5hC2KWUE9BL5rqxhU7cFjFmJZSgZsrUvhs_aMZo7HqzANHzsrilNJ1VwkJfTyXeZ6tcsuMuBgWHeDzqtewNO-ZdMfosofp1esApLeU-VZrPI4Oq8HUUq4PecCZpidnx3-eUqMbjx_XrmC0lORYWPbFWc9cQ9MjU3k4rzjtw42bH2t65-O8eCaFySRxIaj7TSqkYOiequqTtHAR0rzKZi4GmZVZieo06k1_Cu6gjVK7YCh3PpGrAqvgQjG13czs3g1nsB_uiIaIBVWFa6jQhlt1QKugRQ5jbepyx257nZT6k1swhTlFOswG0vRjOnzw==",
+                  "summary": [
+                    {
+                      "type": "summary_text",
+                      "text": "**Providing a concise answer**\n\nI see the user is asking a straightforward question, and the answer is simply \"Paris.\" I think it's best to keep my response concise and focused, without adding any extra information that could dilute the clarity of the answer. Keeping it simple and to the point is the way to go here! So, I\u2019ll just say \u201cParis\u201d and leave it at that."
+                    }
+                  ]
                 },
                 {
-                  "id": "msg_02206c8b4a11ec49006913f73b13c48195876dd9e9b55b0dbb",
+                  "id": "msg_007ecfff0c9542ba016ad953caf3f087d08dec9d2cedc2b65e",
                   "type": "message",
                   "status": "completed",
                   "content": [
@@ -83,16 +94,19 @@ interactions:
                 }
               ],
               "parallel_tool_calls": true,
+              "presence_penalty": 0.0,
               "previous_response_id": null,
               "prompt_cache_key": null,
-              "prompt_cache_retention": null,
+              "prompt_cache_retention": "in_memory",
               "reasoning": {
+                "context": "current_turn",
                 "effort": "low",
+                "mode": "standard",
                 "summary": "detailed"
               },
               "safety_identifier": null,
               "service_tier": "default",
-              "store": true,
+              "store": false,
               "temperature": 1.0,
               "text": {
                 "format": {
@@ -101,6 +115,24 @@ interactions:
                 "verbosity": "medium"
               },
               "tool_choice": "auto",
+              "tool_usage": {
+                "image_gen": {
+                  "input_tokens": 0,
+                  "input_tokens_details": {
+                    "image_tokens": 0,
+                    "text_tokens": 0
+                  },
+                  "output_tokens": 0,
+                  "output_tokens_details": {
+                    "image_tokens": 0,
+                    "text_tokens": 0
+                  },
+                  "total_tokens": 0
+                },
+                "web_search": {
+                  "num_requests": 0
+                }
+              },
               "tools": [],
               "top_logprobs": 0,
               "top_p": 1.0,
@@ -108,32 +140,37 @@ interactions:
               "usage": {
                 "input_tokens": 13,
                 "input_tokens_details": {
+                  "cache_write_tokens": 0,
                   "cached_tokens": 0
                 },
-                "output_tokens": 8,
+                "output_tokens": 29,
                 "output_tokens_details": {
                   "reasoning_tokens": 0
                 },
-                "total_tokens": 21
+                "total_tokens": 42
               },
               "user": null,
               "metadata": {}
             }
         headers:
+            Access-Control-Expose-Headers:
+                - X-Request-ID
+                - CF-Ray
+                - CF-Ray
             Alt-Svc:
                 - h3=":443"; ma=86400
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - 99d2c0c91de7e55d-EWR
+                - a4e4434b3a13ae4f-SEA
             Content-Type:
                 - application/json
             Date:
-                - Wed, 12 Nov 2025 02:55:55 GMT
+                - Thu, 22 Oct 2026 00:07:39 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "1643"
+                - "1535"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -141,14 +178,11 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=Jc4zJOwGdFP3gz0sr8mZK.h3flUCndP4OwyQWb.4k3c-1762916155-1.0.1.1-8LbGJOeBxrjnksdG6legmSKDoHM3DI.5So7.3WTbsXu.hz1Qf5LM7N0Q1gmaSl.exsEvB93Od7JEw0Al_62NOm70I3y26pmy8gKK5QslZ7U; path=/; expires=Wed, 12-Nov-25 03:25:55 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
-                - _cfuvid=9oPswhYlJzo2zchZJAzjpHI480Tg8rZ8jh0bvgTI52k-1762916155486-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+                - __cf_bm=3Ra8bJzSMUc5BJI2sVhsetYj2G34OdHQdy6u7kqNgxQ-1792627657.4814181-1.0.1.1-SkKJCAHD_QWsKGm1eVbFHFqQ4eg5ONpUK4G_BnP_csZzOZ3EIHRe_q2cn9k2732dGWEm1u9uYKTX_ukaLMaG4qK3GfM9jS0FZELq0uDmwq7ztmo.RLi1NvtW3eapnAmz; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:37:39 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
                 - nosniff
-            X-Envoy-Upstream-Service-Time:
-                - "1651"
             X-Ratelimit-Limit-Requests:
                 - "15000"
             X-Ratelimit-Limit-Tokens:
@@ -162,7 +196,7 @@ interactions:
             X-Ratelimit-Reset-Tokens:
                 - 0s
             X-Request-Id:
-                - req_9482a07e4ba447c8b4115aece8125646
+                - req_181a2fda53bd4d93b6d63ab87c019454
         status: 200 OK
         code: 200
-        duration: 1.840950125s
+        duration: 1.625191792s

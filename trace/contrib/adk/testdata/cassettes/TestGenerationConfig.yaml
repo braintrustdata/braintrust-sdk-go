@@ -19,11 +19,11 @@ interactions:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
         url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
@@ -41,6 +41,11 @@ interactions:
               "candidates": [
                 {
                   "content": {
+                    "parts": [
+                      {
+                        "text": "The city"
+                      }
+                    ],
                     "role": "model"
                   },
                   "finishReason": "MAX_TOKENS",
@@ -49,6 +54,7 @@ interactions:
               ],
               "usageMetadata": {
                 "promptTokenCount": 12,
+                "candidatesTokenCount": 2,
                 "totalTokenCount": 58,
                 "promptTokensDetails": [
                   {
@@ -56,11 +62,11 @@ interactions:
                     "tokenCount": 12
                   }
                 ],
-                "thoughtsTokenCount": 46,
+                "thoughtsTokenCount": 44,
                 "serviceTier": "standard"
               },
               "modelVersion": "gemini-2.5-flash",
-              "responseId": "HP7PaseXEunN_PUP3uzS-Aw"
+              "responseId": "UFPZaoOjIIbh_uMP7aa_kAw"
             }
         headers:
             Alt-Svc:
@@ -68,11 +74,11 @@ interactions:
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Wed, 14 Oct 2026 22:11:40 GMT
+                - Thu, 22 Oct 2026 00:05:37 GMT
             Server:
                 - scaffolding on HTTPServer2
             Server-Timing:
-                - gfet4t7; dur=590
+                - gfet4t7; dur=652
             Vary:
                 - Origin
                 - X-Origin
@@ -87,4 +93,4 @@ interactions:
                 - "0"
         status: 200 OK
         code: 200
-        duration: 760.751542ms
+        duration: 822.769667ms

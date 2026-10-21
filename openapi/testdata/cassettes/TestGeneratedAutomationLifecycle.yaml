@@ -38,7 +38,7 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Tue, 20 Oct 2026 22:20:12 GMT
+                - Thu, 22 Oct 2026 00:01:18 GMT
             Etag:
                 - W/"fe-7iaq6aBQFNs98OpqCWtmRX1e6fw"
             Expires:
@@ -50,9 +50,9 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 b3ccaedda78c63d5967b57382ceb4cbe.cloudfront.net (CloudFront)
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - otfdsjNMUjWMySWShrd5gEqAGYYfdccGyLCp87e8dLtKAzKJhP0ijw==
+                - K7QW-uutmhnb_RDmSSZpU_TR7_snZ7hG9hXWpDUPPZKWk3Gd__Uo6A==
             X-Amz-Cf-Pop:
                 - SEA900-P10
             X-Bt-Found-Existing:
@@ -61,7 +61,7 @@ interactions:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 289.917125ms
+        duration: 100.318333ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -73,7 +73,7 @@ interactions:
         host: api.braintrust.dev
         remote_addr: ""
         request_uri: ""
-        body: '{"project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"go-sdk-automation-test-4MIGJCUBCZA7OW7MXLVUYBZLJY","description":"Paused SDK integration test","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
+        body: '{"config":{"action":{"type":"webhook","url":"https://example.com/braintrust-hook"},"btql_filter":"error IS NOT NULL","event_type":"logs","interval_seconds":3600,"status":"paused"},"description":"Paused SDK integration test","name":"go-sdk-automation-test-WIMSQSWJFIJM5WKZMEUGWHQU3E","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78"}'
         form: {}
         headers:
             Content-Type:
@@ -88,7 +88,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"40aeda8d-b76f-4fc2-8e73-3cbaefe6494d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-20T22:20:13.059Z","name":"go-sdk-automation-test-4MIGJCUBCZA7OW7MXLVUYBZLJY","description":"Paused SDK integration test","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
+        body: '{"id":"2b508da9-1f1b-47c6-94f2-e0221e45fe3d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-22T00:01:18.658Z","name":"go-sdk-automation-test-WIMSQSWJFIJM5WKZMEUGWHQU3E","description":"Paused SDK integration test","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -99,9 +99,9 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Tue, 20 Oct 2026 22:20:13 GMT
+                - Thu, 22 Oct 2026 00:01:18 GMT
             Etag:
-                - W/"1d1-Q6l3SpBBICcuFAP8ZTfxwSWhztI"
+                - W/"1d1-31h5TQS2R2/EohUpcabpigsMcDo"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -111,16 +111,16 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 b3ccaedda78c63d5967b57382ceb4cbe.cloudfront.net (CloudFront)
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - eqguPCOlrf7iL4Dp2QLxhxW3diVZrPNrIreOF2B1rqnzJ3KrgX2y8w==
+                - e9FRtgD0DxEmaGXbrnC9eaUoDXnZz4WgyUgCTpwLsYpue9W_HLleBA==
             X-Amz-Cf-Pop:
                 - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 280.142125ms
+        duration: 429.726292ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -135,7 +135,7 @@ interactions:
         body: ""
         form: {}
         headers: {}
-        url: https://api.braintrust.dev/v1/project_automation/40aeda8d-b76f-4fc2-8e73-3cbaefe6494d
+        url: https://api.braintrust.dev/v1/project_automation/2b508da9-1f1b-47c6-94f2-e0221e45fe3d
         method: GET
       response:
         proto: HTTP/2.0
@@ -145,7 +145,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"40aeda8d-b76f-4fc2-8e73-3cbaefe6494d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-20T22:20:13.059Z","name":"go-sdk-automation-test-4MIGJCUBCZA7OW7MXLVUYBZLJY","description":"Paused SDK integration test","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
+        body: '{"id":"2b508da9-1f1b-47c6-94f2-e0221e45fe3d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-22T00:01:18.658Z","name":"go-sdk-automation-test-WIMSQSWJFIJM5WKZMEUGWHQU3E","description":"Paused SDK integration test","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -156,9 +156,9 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Tue, 20 Oct 2026 22:20:17 GMT
+                - Thu, 22 Oct 2026 00:01:18 GMT
             Etag:
-                - W/"1d1-Q6l3SpBBICcuFAP8ZTfxwSWhztI"
+                - W/"1d1-31h5TQS2R2/EohUpcabpigsMcDo"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -168,16 +168,16 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 b3ccaedda78c63d5967b57382ceb4cbe.cloudfront.net (CloudFront)
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - 5QaHGv6rpHl60FgW-7aZVj_anos3oFjlK1RfMajJVzwxyawqOsm72g==
+                - eRVrbFybVbJPzBuJAxRtsvlBMwzWRJXnBt0CxanYWUumhlB4_3yK_w==
             X-Amz-Cf-Pop:
                 - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 4.32219225s
+        duration: 137.397875ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -189,12 +189,12 @@ interactions:
         host: api.braintrust.dev
         remote_addr: ""
         request_uri: ""
-        body: '{"description":"Updated paused SDK integration test","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL AND metadata.environment = ''production''","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
+        body: '{"config":{"action":{"type":"webhook","url":"https://example.com/braintrust-hook"},"btql_filter":"error IS NOT NULL AND metadata.environment = ''production''","event_type":"logs","interval_seconds":3600,"status":"paused"},"description":"Updated paused SDK integration test"}'
         form: {}
         headers:
             Content-Type:
                 - application/json
-        url: https://api.braintrust.dev/v1/project_automation/40aeda8d-b76f-4fc2-8e73-3cbaefe6494d
+        url: https://api.braintrust.dev/v1/project_automation/2b508da9-1f1b-47c6-94f2-e0221e45fe3d
         method: PATCH
       response:
         proto: HTTP/2.0
@@ -204,7 +204,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"40aeda8d-b76f-4fc2-8e73-3cbaefe6494d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-20T22:20:13.059Z","name":"go-sdk-automation-test-4MIGJCUBCZA7OW7MXLVUYBZLJY","description":"Updated paused SDK integration test","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL AND metadata.environment = ''production''","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
+        body: '{"id":"2b508da9-1f1b-47c6-94f2-e0221e45fe3d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-22T00:01:18.658Z","name":"go-sdk-automation-test-WIMSQSWJFIJM5WKZMEUGWHQU3E","description":"Updated paused SDK integration test","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL AND metadata.environment = ''production''","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -215,9 +215,9 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Tue, 20 Oct 2026 22:20:21 GMT
+                - Thu, 22 Oct 2026 00:01:19 GMT
             Etag:
-                - W/"201-s/r9wXz6CIR/hTEKLyshcJKsGyc"
+                - W/"201-VngC03i/+wV+FNAcP1QJSaHqWe4"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -227,16 +227,16 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 b3ccaedda78c63d5967b57382ceb4cbe.cloudfront.net (CloudFront)
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - 2xO-B0NwwsYUrMKk_NmYZDtiO7SN5wkn9qFZpaabbtN56v2_fX7cHw==
+                - jU8JsiiHBbiJ88dzjpB2AR5nGzA-_BZjywd2f7ylJiXh-fCc3NW7qA==
             X-Amz-Cf-Pop:
                 - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 3.666822542s
+        duration: 254.572709ms
     - id: 4
       request:
         proto: HTTP/1.1
@@ -251,7 +251,7 @@ interactions:
         body: ""
         form: {}
         headers: {}
-        url: https://api.braintrust.dev/v1/project_automation/40aeda8d-b76f-4fc2-8e73-3cbaefe6494d
+        url: https://api.braintrust.dev/v1/project_automation/2b508da9-1f1b-47c6-94f2-e0221e45fe3d
         method: GET
       response:
         proto: HTTP/2.0
@@ -261,7 +261,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"40aeda8d-b76f-4fc2-8e73-3cbaefe6494d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-20T22:20:13.059Z","name":"go-sdk-automation-test-4MIGJCUBCZA7OW7MXLVUYBZLJY","description":"Updated paused SDK integration test","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL AND metadata.environment = ''production''","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
+        body: '{"id":"2b508da9-1f1b-47c6-94f2-e0221e45fe3d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-22T00:01:18.658Z","name":"go-sdk-automation-test-WIMSQSWJFIJM5WKZMEUGWHQU3E","description":"Updated paused SDK integration test","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL AND metadata.environment = ''production''","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -272,9 +272,9 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Tue, 20 Oct 2026 22:20:21 GMT
+                - Thu, 22 Oct 2026 00:01:19 GMT
             Etag:
-                - W/"201-s/r9wXz6CIR/hTEKLyshcJKsGyc"
+                - W/"201-VngC03i/+wV+FNAcP1QJSaHqWe4"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -284,16 +284,16 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 b3ccaedda78c63d5967b57382ceb4cbe.cloudfront.net (CloudFront)
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - 2MeFdZQGAOHufebMPH2sV-b_1wL9XsHv85fr1mI-bssajw7dNC2o_A==
+                - RqKoGK-xrHgbiFi13YIZCLMmdR3Rqhp_SnX8Z9CNuGB1OhoobvVY1w==
             X-Amz-Cf-Pop:
                 - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 154.145208ms
+        duration: 149.112375ms
     - id: 5
       request:
         proto: HTTP/1.1
@@ -310,7 +310,7 @@ interactions:
         headers:
             Content-Type:
                 - application/json
-        url: https://api.braintrust.dev/v1/project_automation/40aeda8d-b76f-4fc2-8e73-3cbaefe6494d
+        url: https://api.braintrust.dev/v1/project_automation/2b508da9-1f1b-47c6-94f2-e0221e45fe3d
         method: PATCH
       response:
         proto: HTTP/2.0
@@ -320,7 +320,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"40aeda8d-b76f-4fc2-8e73-3cbaefe6494d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-20T22:20:13.059Z","name":"go-sdk-automation-test-4MIGJCUBCZA7OW7MXLVUYBZLJY","description":"","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL AND metadata.environment = ''production''","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
+        body: '{"id":"2b508da9-1f1b-47c6-94f2-e0221e45fe3d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-22T00:01:18.658Z","name":"go-sdk-automation-test-WIMSQSWJFIJM5WKZMEUGWHQU3E","description":"","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL AND metadata.environment = ''production''","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -331,9 +331,9 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Tue, 20 Oct 2026 22:20:21 GMT
+                - Thu, 22 Oct 2026 00:01:19 GMT
             Etag:
-                - W/"1de-gU/2kbh9hvcpKfCCQfc+X1WYMdk"
+                - W/"1de-q3Jacf6uXjDHh20WhN2KkSYZjwA"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -343,16 +343,16 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 b3ccaedda78c63d5967b57382ceb4cbe.cloudfront.net (CloudFront)
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - L1yYEzxiY07E8cR53LC6ateJHFox1moVaBA5Z2ffMHDZq1tSKO3Blw==
+                - gdlgBPSUJVreJo1tPQrhsoY9kSlF-rLp09oL2n0F7FKhkKKbfUOJPw==
             X-Amz-Cf-Pop:
                 - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 246.095166ms
+        duration: 218.547833ms
     - id: 6
       request:
         proto: HTTP/1.1
@@ -367,7 +367,7 @@ interactions:
         body: ""
         form: {}
         headers: {}
-        url: https://api.braintrust.dev/v1/project_automation/40aeda8d-b76f-4fc2-8e73-3cbaefe6494d
+        url: https://api.braintrust.dev/v1/project_automation/2b508da9-1f1b-47c6-94f2-e0221e45fe3d
         method: GET
       response:
         proto: HTTP/2.0
@@ -377,7 +377,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"40aeda8d-b76f-4fc2-8e73-3cbaefe6494d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-20T22:20:13.059Z","name":"go-sdk-automation-test-4MIGJCUBCZA7OW7MXLVUYBZLJY","description":"","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL AND metadata.environment = ''production''","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
+        body: '{"id":"2b508da9-1f1b-47c6-94f2-e0221e45fe3d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-22T00:01:18.658Z","name":"go-sdk-automation-test-WIMSQSWJFIJM5WKZMEUGWHQU3E","description":"","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL AND metadata.environment = ''production''","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -388,9 +388,9 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Tue, 20 Oct 2026 22:20:25 GMT
+                - Thu, 22 Oct 2026 00:01:25 GMT
             Etag:
-                - W/"1de-gU/2kbh9hvcpKfCCQfc+X1WYMdk"
+                - W/"1de-q3Jacf6uXjDHh20WhN2KkSYZjwA"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -400,16 +400,16 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 b3ccaedda78c63d5967b57382ceb4cbe.cloudfront.net (CloudFront)
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - p0acNTW4VUkS38VN7rMoWWt69hbkPR5s4jJnr2acfMqxjElj27CfHA==
+                - wX19vhMpE6xaDhW95QKRA2CgBvcES7p8IQLjU2h-_F8ZwIYPM0vvuQ==
             X-Amz-Cf-Pop:
                 - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 4.409776s
+        duration: 5.583295917s
     - id: 7
       request:
         proto: HTTP/1.1
@@ -424,7 +424,7 @@ interactions:
         body: ""
         form: {}
         headers: {}
-        url: https://api.braintrust.dev/v1/project_automation/40aeda8d-b76f-4fc2-8e73-3cbaefe6494d
+        url: https://api.braintrust.dev/v1/project_automation/2b508da9-1f1b-47c6-94f2-e0221e45fe3d
         method: DELETE
       response:
         proto: HTTP/2.0
@@ -434,7 +434,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"40aeda8d-b76f-4fc2-8e73-3cbaefe6494d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-20T22:20:13.059Z","name":"go-sdk-automation-test-4MIGJCUBCZA7OW7MXLVUYBZLJY","description":"","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL AND metadata.environment = ''production''","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
+        body: '{"id":"2b508da9-1f1b-47c6-94f2-e0221e45fe3d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-22T00:01:18.658Z","name":"go-sdk-automation-test-WIMSQSWJFIJM5WKZMEUGWHQU3E","description":"","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL AND metadata.environment = ''production''","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -445,9 +445,9 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Tue, 20 Oct 2026 22:20:26 GMT
+                - Thu, 22 Oct 2026 00:01:25 GMT
             Etag:
-                - W/"1de-gU/2kbh9hvcpKfCCQfc+X1WYMdk"
+                - W/"1de-q3Jacf6uXjDHh20WhN2KkSYZjwA"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -457,16 +457,16 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 b3ccaedda78c63d5967b57382ceb4cbe.cloudfront.net (CloudFront)
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - ua4HQ-zLfCHI40pQmSB46AI2NtsR0fl8AoW8AMBfgueboEulZkifWQ==
+                - h9khzf905POnHligVwyvh_geElCYEOrLrqrbBkf0IbnK_FUVclLmMw==
             X-Amz-Cf-Pop:
                 - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 358.866458ms
+        duration: 362.195125ms
     - id: 8
       request:
         proto: HTTP/1.1
@@ -481,7 +481,7 @@ interactions:
         body: ""
         form: {}
         headers: {}
-        url: https://api.braintrust.dev/v1/project_automation/40aeda8d-b76f-4fc2-8e73-3cbaefe6494d
+        url: https://api.braintrust.dev/v1/project_automation/2b508da9-1f1b-47c6-94f2-e0221e45fe3d
         method: GET
       response:
         proto: HTTP/2.0
@@ -491,7 +491,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"Code":"ForbiddenError","Message":"Missing read access to project_automation id 40aeda8d-b76f-4fc2-8e73-3cbaefe6494d, or the project_automation does not exist [user_email=andrew@braintrustdata.com] [user_org=Braintrust SDKs] [timestamp=1792534826.494]"}'
+        body: '{"Code":"ForbiddenError","Message":"Missing read access to project_automation id 2b508da9-1f1b-47c6-94f2-e0221e45fe3d, or the project_automation does not exist [user_email=user@example.com] [user_org=REDACTED] [timestamp=1792627285.691]"}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -502,9 +502,9 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Tue, 20 Oct 2026 22:20:26 GMT
+                - Thu, 22 Oct 2026 00:01:25 GMT
             Etag:
-                - W/"fe-FO/Wwz6OV5lgx79PzM9vDP6/4y8"
+                - W/"fe-mJQYyYN5YDwOoA6v+OORMxtKa2A"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -514,13 +514,13 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 b3ccaedda78c63d5967b57382ceb4cbe.cloudfront.net (CloudFront)
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - vGhM9rwSK-5RtxxsQXMQIfUSJuAUmLxJK2dIDV6qiX1E_jjsEaer5A==
+                - se5_c_u4qFBWdJMB6LhRLt-6tuEJ2wLAWnwVMV7Bhg3tDx_JMnOvfw==
             X-Amz-Cf-Pop:
                 - SEA900-P10
             X-Cache:
                 - Error from cloudfront
         status: 403 Forbidden
         code: 403
-        duration: 206.393875ms
+        duration: 146.600333ms
