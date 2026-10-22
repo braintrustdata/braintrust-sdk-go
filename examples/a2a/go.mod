@@ -2,7 +2,7 @@ module example.com/a2a-example
 
 go 1.25.0
 
-toolchain go1.26.1
+toolchain go1.26.10
 
 require (
 	github.com/a2aproject/a2a-go v0.3.15

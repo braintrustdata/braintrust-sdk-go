@@ -2,7 +2,7 @@ module github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic
 
 go 1.25.0
 
-toolchain go1.26.1
+toolchain go1.26.10
 
 require (
 	github.com/anthropics/anthropic-sdk-go v1.23.0

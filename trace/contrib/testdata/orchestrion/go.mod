@@ -2,7 +2,7 @@ module github.com/braintrustdata/braintrust-sdk-go/trace/contrib/testdata/orches
 
 go 1.25.0
 
-toolchain go1.26.1
+toolchain go1.26.10
 
 require (
 	github.com/DataDog/orchestrion v1.12.1
