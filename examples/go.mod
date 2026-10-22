@@ -7,13 +7,13 @@ toolchain go1.26.1
 require (
 	github.com/anthropics/anthropic-sdk-go v1.23.0
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.50.4
-	github.com/braintrustdata/braintrust-sdk-go v0.18.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.18.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino v0.18.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.18.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.18.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.18.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.18.0
+	github.com/braintrustdata/braintrust-sdk-go v0.19.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.19.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino v0.19.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.19.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.19.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.19.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.19.0
 	github.com/cloudwego/eino v0.8.4
 	github.com/cloudwego/eino-ext/components/embedding/openai v0.0.0-20260416081055-0ebab92e14f2
 	github.com/cloudwego/eino-ext/components/model/claude v0.1.15
@@ -30,10 +30,12 @@ require (
 )
 
 require (
+	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/signin v1.0.9 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/oapi-codegen/runtime v1.7.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	gopkg.in/dnaeon/go-vcr.v3 v3.2.0 // indirect
 )
@@ -57,7 +59,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.41.10 // indirect
 	github.com/aws/smithy-go v1.25.0 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime v0.18.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime v0.19.0
 	github.com/buger/jsonparser v1.1.2 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.15.0 // indirect

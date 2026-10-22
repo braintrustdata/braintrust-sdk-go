@@ -5,8 +5,8 @@ go 1.25.0
 require (
 	github.com/DataDog/orchestrion v1.12.1
 	github.com/anthropics/anthropic-sdk-go v1.23.0
-	github.com/braintrustdata/braintrust-sdk-go v0.18.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/all v0.18.0
+	github.com/braintrustdata/braintrust-sdk-go v0.19.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/all v0.19.0
 	github.com/cloudwego/eino v0.8.4
 	github.com/cloudwego/eino-ext/components/model/openai v0.1.10
 	github.com/firebase/genkit/go v1.5.0
@@ -42,6 +42,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/a2aproject/a2a-go v0.3.15 // indirect
 	github.com/antithesishq/antithesis-sdk-go v0.7.2 // indirect
+	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.41.5 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.8 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.21 // indirect
@@ -51,16 +52,16 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/a2a v0.18.0 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk v0.18.0 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.18.0 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime v0.18.0 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino v0.18.0 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.18.0 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.18.0 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.18.0 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.18.0 // indirect
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.18.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/a2a v0.19.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk v0.19.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic v0.19.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime v0.19.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino v0.19.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai v0.19.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.19.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/github.com/sashabaranov/go-openai v0.19.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.19.0 // indirect
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai v0.19.0 // indirect
 	github.com/buger/jsonparser v1.1.2 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.15.0 // indirect
@@ -126,6 +127,8 @@ require (
 	github.com/nats-io/nkeys v0.4.16 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/nikolalohinski/gonja v1.5.3 // indirect
+	github.com/oapi-codegen/nullable v1.2.0 // indirect
+	github.com/oapi-codegen/runtime v1.7.0 // indirect
 	github.com/outcaste-io/ristretto v0.2.3 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/petermattis/goid v0.0.0-20260816044145-ed329add6b1b // indirect
