@@ -5,8 +5,8 @@ go 1.25.0
 toolchain go1.26.1
 
 require (
-	github.com/braintrustdata/braintrust-sdk-go v0.18.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.18.0
+	github.com/braintrustdata/braintrust-sdk-go v0.19.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo v0.19.0
 	github.com/tmc/langchaingo v0.1.14
 	go.opentelemetry.io/otel v1.45.0
 	go.opentelemetry.io/otel/sdk v1.45.0
@@ -17,6 +17,7 @@ require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.0 // indirect
 	github.com/Masterminds/sprig/v3 v3.2.3 // indirect
+	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
@@ -34,7 +35,9 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/nikolalohinski/gonja v1.5.3 // indirect
-	github.com/pelletier/go-toml/v2 v2.0.9 // indirect
+	github.com/oapi-codegen/nullable v1.2.0 // indirect
+	github.com/oapi-codegen/runtime v1.7.0 // indirect
+	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect

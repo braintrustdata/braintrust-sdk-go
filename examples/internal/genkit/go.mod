@@ -5,8 +5,8 @@ go 1.25.0
 toolchain go1.26.1
 
 require (
-	github.com/braintrustdata/braintrust-sdk-go v0.18.0
-	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.18.0
+	github.com/braintrustdata/braintrust-sdk-go v0.19.0
+	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit v0.19.0
 	github.com/firebase/genkit/go v1.5.0
 	go.opentelemetry.io/otel v1.45.0
 	go.opentelemetry.io/otel/sdk v1.45.0
@@ -17,6 +17,7 @@ require (
 	cloud.google.com/go v0.123.0 // indirect
 	cloud.google.com/go/auth v0.18.2 // indirect
 	cloud.google.com/go/compute/metadata v0.9.0 // indirect
+	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/buger/jsonparser v1.1.2 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
@@ -36,6 +37,8 @@ require (
 	github.com/invopop/jsonschema v0.13.0 // indirect
 	github.com/mailru/easyjson v0.9.0 // indirect
 	github.com/mbleigh/raymond v0.0.0-20250414171441-6b3a58ab9e0a // indirect
+	github.com/oapi-codegen/nullable v1.2.0 // indirect
+	github.com/oapi-codegen/runtime v1.7.0 // indirect
 	github.com/openai/openai-go v1.12.0 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
