@@ -6,24 +6,24 @@ interactions:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 1208
+        content_length: 1262
         transfer_encoding: []
         trailer: {}
         host: generativelanguage.googleapis.com
         remote_addr: ""
         request_uri: ""
         body: |
-            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"}],"generationConfig":{"maxOutputTokens":300},"systemInstruction":{"parts":[{"text":"Always transfer to middle using transfer_to_agent. Do not answer yourself."},{"text":"You have a list of other agents to transfer to:\n\nAgent name: middle\nAgent description: Delegates to its child agent.\n\nIf you are the best to answer the question according to your description, you\ncan answer it.\nIf another agent is better for answering the question according to its\ndescription, call 'transfer_to_agent' function to transfer the\nquestion to that agent. When transfering, do not generate any text other than\nthe function call.\n\n"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"allowedFunctionNames":["transfer_to_agent"],"mode":"ANY"}},"tools":[{"functionDeclarations":[{"description":"Transfer the question to another agent.\nThis tool hands off control to another agent when it's more suitable to answer the user's question according to the agent's description.","name":"transfer_to_agent","parameters":{"properties":{"agent_name":{"description":"the agent name to transfer to","type":"string"}},"required":["agent_name"],"type":"object"}}]}]}
+            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"}],"generationConfig":{"maxOutputTokens":300,"temperature":0,"thinkingConfig":{"thinkingBudget":0}},"systemInstruction":{"parts":[{"text":"Always transfer to middle using transfer_to_agent. Do not answer yourself."},{"text":"You have a list of other agents to transfer to:\n\nAgent name: middle\nAgent description: Delegates to its child agent.\n\nIf you are the best to answer the question according to your description, you\ncan answer it.\nIf another agent is better for answering the question according to its\ndescription, call 'transfer_to_agent' function to transfer the\nquestion to that agent. When transfering, do not generate any text other than\nthe function call.\n\n"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"allowedFunctionNames":["transfer_to_agent"],"mode":"ANY"}},"tools":[{"functionDeclarations":[{"description":"Transfer the question to another agent.\nThis tool hands off control to another agent when it's more suitable to answer the user's question according to the agent's description.","name":"transfer_to_agent","parameters":{"properties":{"agent_name":{"description":"the agent name to transfer to","type":"string"}},"required":["agent_name"],"type":"object"}}]}]}
         form: {}
         headers:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
         url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
@@ -48,8 +48,7 @@ interactions:
                           "args": {
                             "agent_name": "middle"
                           }
-                        },
-                        "thoughtSignature": "CpAEAWkUfRPFoBa9YdfPcVDwwQvkzjkq/qqtvMTavLLRmzmz6kgZTzOumQwqNjg4TAsO4YWkx7xNQTxqDBCWy2r4iSwKUZQZ1djeBUKwEtiNci48ubMcdcr49BVtLEXAsK0paW6gfkMp/ybWYe8z+l/ASmSHXVRFG3ESVWB6rzldV6oudiiOoRX/mTi9eXtLboqXqdoBxGkXmmi/I72FsMcEx2hOFo2PzYK9xRGPhdLut6oMPYP+NXWk2uuFvTf8cNphkvdFeea75WM6Og9nFVhPsQNUFLKxhACDNw17KeDOaXXuttCSlZFHL5MUlLPted8FBm5kVVrimrto76clbF1IRN1ss854bdhy+61AtA8T+2xc5Zu0KFdeP4Zs1N6TKWIU2g8y5j0CGBdTbzsD8/3HZPsqk2bUpA0Mvt1eC77jgRdOZQuiJBPxcI9guIZWPlXQlNpwvmsgt7XtLluqI4mVmJDMFFeGk0qZM+c2K6janXVRTK0GZ63itQHGP+c+zu9JFdUE57YptvBZHg0SilXPcuC5Iifa6olcDG/fELjduYwExRRexmfHfzysRN7abT72HF47UFeGGFOUOIs3lFmnYhGDrpQ8aDh4AiAsSfFoyJo3mD80ed+NftbJ7lAASI1FcWjL38RS4uFARW9gG7WpiZXvv0WXXsKEkxnB6RIRhNeiwlgJ2xbGcEG+pUVwnuO/"
+                        }
                       }
                     ],
                     "role": "model"
@@ -62,18 +61,17 @@ interactions:
               "usageMetadata": {
                 "promptTokenCount": 198,
                 "candidatesTokenCount": 19,
-                "totalTokenCount": 321,
+                "totalTokenCount": 217,
                 "promptTokensDetails": [
                   {
                     "modality": "TEXT",
                     "tokenCount": 198
                   }
                 ],
-                "thoughtsTokenCount": 104,
                 "serviceTier": "standard"
               },
               "modelVersion": "gemini-2.5-flash",
-              "responseId": "gfnPaummHKPO-8YPoKTisAo"
+              "responseId": "RFPZar3QE5Gi_uMPqYqK8AU"
             }
         headers:
             Alt-Svc:
@@ -81,11 +79,11 @@ interactions:
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Wed, 14 Oct 2026 21:52:02 GMT
+                - Thu, 22 Oct 2026 00:05:24 GMT
             Server:
                 - scaffolding on HTTPServer2
             Server-Timing:
-                - gfet4t7; dur=1043
+                - gfet4t7; dur=401
             Vary:
                 - Origin
                 - X-Origin
@@ -100,30 +98,30 @@ interactions:
                 - "0"
         status: 200 OK
         code: 200
-        duration: 1.060972834s
+        duration: 464.28175ms
     - id: 1
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 1437
+        content_length: 1491
         transfer_encoding: []
         trailer: {}
         host: generativelanguage.googleapis.com
         remote_addr: ""
         request_uri: ""
         body: |
-            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"middle\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"}],"generationConfig":{"maxOutputTokens":300},"systemInstruction":{"parts":[{"text":"Always transfer to leaf using transfer_to_agent. Do not answer yourself."},{"text":"You have a list of other agents to transfer to:\n\nAgent name: leaf\nAgent description: \n\nIf you are the best to answer the question according to your description, you\ncan answer it.\nIf another agent is better for answering the question according to its\ndescription, call 'transfer_to_agent' function to transfer the\nquestion to that agent. When transfering, do not generate any text other than\nthe function call.\n\n"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"allowedFunctionNames":["transfer_to_agent"],"mode":"ANY"}},"tools":[{"functionDeclarations":[{"description":"Transfer the question to another agent.\nThis tool hands off control to another agent when it's more suitable to answer the user's question according to the agent's description.","name":"transfer_to_agent","parameters":{"properties":{"agent_name":{"description":"the agent name to transfer to","type":"string"}},"required":["agent_name"],"type":"object"}}]}]}
+            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"middle\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"}],"generationConfig":{"maxOutputTokens":300,"temperature":0,"thinkingConfig":{"thinkingBudget":0}},"systemInstruction":{"parts":[{"text":"Always transfer to leaf using transfer_to_agent. Do not answer yourself."},{"text":"You have a list of other agents to transfer to:\n\nAgent name: leaf\nAgent description: \n\nIf you are the best to answer the question according to your description, you\ncan answer it.\nIf another agent is better for answering the question according to its\ndescription, call 'transfer_to_agent' function to transfer the\nquestion to that agent. When transfering, do not generate any text other than\nthe function call.\n\n"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"allowedFunctionNames":["transfer_to_agent"],"mode":"ANY"}},"tools":[{"functionDeclarations":[{"description":"Transfer the question to another agent.\nThis tool hands off control to another agent when it's more suitable to answer the user's question according to the agent's description.","name":"transfer_to_agent","parameters":{"properties":{"agent_name":{"description":"the agent name to transfer to","type":"string"}},"required":["agent_name"],"type":"object"}}]}]}
         form: {}
         headers:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
         url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
@@ -148,8 +146,7 @@ interactions:
                           "args": {
                             "agent_name": "leaf"
                           }
-                        },
-                        "thoughtSignature": "CsgCAWkUfROOHBwKc2HokIfAyX11vtbOBwqZHPiHPHu8V7d31lFHLagtfUTOL/JSG4v44t2d0xTX4VjbO0jbllDb+7X0FWV26l4xl0OvkvRUxMo+55VJZJsHU6h5FkioeBZDyZFiHRxOtUaiw9B6sxL0+Rff/EHIEQyY/ElnGa3qdTcpeOm+LShagkJSzGqEl4O1DWIMEtFP9jvulJnKN7/oZRHzH/hYTU9M+eT8BuCbOZKnVSz2WfigAzTqCcvCzzx26g/ekX2AHa1kYEpfpIYlV0qq7xS2TgYLfLBDLvj+FwNUnQt8USpYY3MWLAw7uQEf4gbAXfwuBRA4sRtczVaJFbxCVE8Yh6kH3iFWbiDmUZt7Jg/394Qev3Z9/sYlhMxw2RHrRaqnmVAMdjGFTW8TOw04Jko9hQyi3pWFtH1u+iE2XdGWlhXEjg=="
+                        }
                       }
                     ],
                     "role": "model"
@@ -162,18 +159,17 @@ interactions:
               "usageMetadata": {
                 "promptTokenCount": 238,
                 "candidatesTokenCount": 19,
-                "totalTokenCount": 324,
+                "totalTokenCount": 257,
                 "promptTokensDetails": [
                   {
                     "modality": "TEXT",
                     "tokenCount": 238
                   }
                 ],
-                "thoughtsTokenCount": 67,
                 "serviceTier": "standard"
               },
               "modelVersion": "gemini-2.5-flash",
-              "responseId": "gvnPav6GJbyAjrEP4bOnwQw"
+              "responseId": "RFPZaoypMOeV_uMPxf6gmQ0"
             }
         headers:
             Alt-Svc:
@@ -181,11 +177,11 @@ interactions:
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Wed, 14 Oct 2026 21:52:03 GMT
+                - Thu, 22 Oct 2026 00:05:25 GMT
             Server:
                 - scaffolding on HTTPServer2
             Server-Timing:
-                - gfet4t7; dur=846
+                - gfet4t7; dur=592
             Vary:
                 - Origin
                 - X-Origin
@@ -200,30 +196,30 @@ interactions:
                 - "0"
         status: 200 OK
         code: 200
-        duration: 945.934709ms
+        duration: 623.793167ms
     - id: 2
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 715
+        content_length: 769
         transfer_encoding: []
         trailer: {}
         host: generativelanguage.googleapis.com
         remote_addr: ""
         request_uri: ""
         body: |
-            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"middle\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[middle] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"leaf\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[middle] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"}],"generationConfig":{"maxOutputTokens":100},"systemInstruction":{"parts":[{"text":"Reply with one short greeting."}],"role":"user"}}
+            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"middle\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[middle] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"leaf\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[middle] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"}],"generationConfig":{"maxOutputTokens":100,"temperature":0,"thinkingConfig":{"thinkingBudget":0}},"systemInstruction":{"parts":[{"text":"Reply with one short greeting."}],"role":"user"}}
         form: {}
         headers:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
         url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
@@ -243,7 +239,7 @@ interactions:
                   "content": {
                     "parts": [
                       {
-                        "text": "Hi!"
+                        "text": "Hi."
                       }
                     ],
                     "role": "model"
@@ -255,18 +251,17 @@ interactions:
               "usageMetadata": {
                 "promptTokenCount": 99,
                 "candidatesTokenCount": 2,
-                "totalTokenCount": 134,
+                "totalTokenCount": 101,
                 "promptTokensDetails": [
                   {
                     "modality": "TEXT",
                     "tokenCount": 99
                   }
                 ],
-                "thoughtsTokenCount": 33,
                 "serviceTier": "standard"
               },
               "modelVersion": "gemini-2.5-flash",
-              "responseId": "g_nPavrFHber-8YPjuqMiQk"
+              "responseId": "RVPZasKEGfec_uMP7qStoQ0"
             }
         headers:
             Alt-Svc:
@@ -274,11 +269,11 @@ interactions:
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Wed, 14 Oct 2026 21:52:03 GMT
+                - Thu, 22 Oct 2026 00:05:25 GMT
             Server:
                 - scaffolding on HTTPServer2
             Server-Timing:
-                - gfet4t7; dur=445
+                - gfet4t7; dur=393
             Vary:
                 - Origin
                 - X-Origin
@@ -293,30 +288,30 @@ interactions:
                 - "0"
         status: 200 OK
         code: 200
-        duration: 465.011959ms
+        duration: 428.485334ms
     - id: 3
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 2503
+        content_length: 1827
         transfer_encoding: []
         trailer: {}
         host: generativelanguage.googleapis.com
         remote_addr: ""
         request_uri: ""
         body: |
-            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"functionCall":{"args":{"agent_name":"middle"},"name":"transfer_to_agent"},"thoughtSignature":"CpAEAWkUfRPFoBa9YdfPcVDwwQvkzjkq/qqtvMTavLLRmzmz6kgZTzOumQwqNjg4TAsO4YWkx7xNQTxqDBCWy2r4iSwKUZQZ1djeBUKwEtiNci48ubMcdcr49BVtLEXAsK0paW6gfkMp/ybWYe8z+l/ASmSHXVRFG3ESVWB6rzldV6oudiiOoRX/mTi9eXtLboqXqdoBxGkXmmi/I72FsMcEx2hOFo2PzYK9xRGPhdLut6oMPYP+NXWk2uuFvTf8cNphkvdFeea75WM6Og9nFVhPsQNUFLKxhACDNw17KeDOaXXuttCSlZFHL5MUlLPted8FBm5kVVrimrto76clbF1IRN1ss854bdhy+61AtA8T+2xc5Zu0KFdeP4Zs1N6TKWIU2g8y5j0CGBdTbzsD8/3HZPsqk2bUpA0Mvt1eC77jgRdOZQuiJBPxcI9guIZWPlXQlNpwvmsgt7XtLluqI4mVmJDMFFeGk0qZM+c2K6janXVRTK0GZ63itQHGP+c+zu9JFdUE57YptvBZHg0SilXPcuC5Iifa6olcDG/fELjduYwExRRexmfHfzysRN7abT72HF47UFeGGFOUOIs3lFmnYhGDrpQ8aDh4AiAsSfFoyJo3mD80ed+NftbJ7lAASI1FcWjL38RS4uFARW9gG7WpiZXvv0WXXsKEkxnB6RIRhNeiwlgJ2xbGcEG+pUVwnuO/"}],"role":"model"},{"parts":[{"functionResponse":{"name":"transfer_to_agent"}}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[middle] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"leaf\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[middle] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[leaf] said: Hi!"}],"role":"user"},{"parts":[{"text":"Hello"}],"role":"user"}],"generationConfig":{"maxOutputTokens":300},"systemInstruction":{"parts":[{"text":"Always transfer to middle using transfer_to_agent. Do not answer yourself."},{"text":"You have a list of other agents to transfer to:\n\nAgent name: middle\nAgent description: Delegates to its child agent.\n\nIf you are the best to answer the question according to your description, you\ncan answer it.\nIf another agent is better for answering the question according to its\ndescription, call 'transfer_to_agent' function to transfer the\nquestion to that agent. When transfering, do not generate any text other than\nthe function call.\n\n"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"allowedFunctionNames":["transfer_to_agent"],"mode":"ANY"}},"tools":[{"functionDeclarations":[{"description":"Transfer the question to another agent.\nThis tool hands off control to another agent when it's more suitable to answer the user's question according to the agent's description.","name":"transfer_to_agent","parameters":{"properties":{"agent_name":{"description":"the agent name to transfer to","type":"string"}},"required":["agent_name"],"type":"object"}}]}]}
+            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"functionCall":{"args":{"agent_name":"middle"},"name":"transfer_to_agent"}}],"role":"model"},{"parts":[{"functionResponse":{"name":"transfer_to_agent"}}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[middle] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"leaf\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[middle] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[leaf] said: Hi."}],"role":"user"},{"parts":[{"text":"Hello"}],"role":"user"}],"generationConfig":{"maxOutputTokens":300,"temperature":0,"thinkingConfig":{"thinkingBudget":0}},"systemInstruction":{"parts":[{"text":"Always transfer to middle using transfer_to_agent. Do not answer yourself."},{"text":"You have a list of other agents to transfer to:\n\nAgent name: middle\nAgent description: Delegates to its child agent.\n\nIf you are the best to answer the question according to your description, you\ncan answer it.\nIf another agent is better for answering the question according to its\ndescription, call 'transfer_to_agent' function to transfer the\nquestion to that agent. When transfering, do not generate any text other than\nthe function call.\n\n"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"allowedFunctionNames":["transfer_to_agent"],"mode":"ANY"}},"tools":[{"functionDeclarations":[{"description":"Transfer the question to another agent.\nThis tool hands off control to another agent when it's more suitable to answer the user's question according to the agent's description.","name":"transfer_to_agent","parameters":{"properties":{"agent_name":{"description":"the agent name to transfer to","type":"string"}},"required":["agent_name"],"type":"object"}}]}]}
         form: {}
         headers:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
         url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
@@ -341,8 +336,7 @@ interactions:
                           "args": {
                             "agent_name": "middle"
                           }
-                        },
-                        "thoughtSignature": "CqMHAWkUfRMrbPITfi06GfW66wsBH3q0oHn783XH9VQ1zDZt02uXuOp3/Tv63hqXBWDo8ATLN4C8iDPaMx1CCb3CKprI4Rye/XaqvBgh8lqKmDW0GFnQBDQ1Qg6sH/Iro3343HsnytMayj+hjYnMdhIGyBgZABMjl6rRVSfzK/XmrhPV1ZzzGIyQTGtvUJ0sbArt9CuwGCB4iKHuAeBqvWnN5JcT5qJ2OvpwiEJHQ0ZQT+9vMsXXudXmkbPBXJm9aVS2d8PF7LeNbFMgNKqPq6bQapALcpOJeuS2mUptPuhccIx2MM/IIS4dTax6BCrpeAZShM3ij6b2EOGihbIrGSGwj3IoexQ5ZT/CuXRS+6vOOXL0ftVEIRYrQW8whD4Hp5qkrsEmdPiddiMySgcFtyiMBAVD9mtnU4NajzOr2ee7prAAUKpxUqCf3mh2JS1/KR93BZ7g2b4qwfOpvsudWSoQr67iSTljR04M1ymVgxSP+AEXN0vDPtEWKvnRkhlpo68FO2I4nThyva4s/SvCRnv2xNGN30O52jSAtbYg+p5Fs5GTKl0P5fmFNvHI4BniB4eR8qLuuYitDlQBoxudgWkNv9/SMHng+oOBW+HpofSZxfaA1x5GTUB4zX45aL/eKGlPe7kyEjQG/pewls+ls+ytIDhRefgqxI6Q5Nx2CF5ZVlT+jS/S3AVo6r2CTmu+a9WnXa2MdGDMMCgJWiNxfXOgcPTujLDS5iSeHhDDPP0FnVuP0P4kG/q/H78T6TYJRfT12bpS6WiY/3DCPAy0xaPP6txt3zp88RSJLt7I57gdzLl7iVLPAHQypA22U8M3YjsaldIB0bTVucZPBo1q1yuWYuZawCLwH+ld+dBwihJoaeq3rKoAl8xyunGkGJSWMqtpo4JdpgIgqRSpdNP6VebSr8xOMMSRl3VqRQLLlY3Qg3UArsIvAow4ypEdjgsvXrgv+Ia/EckX3uH0DMDO18T5TZsQkNCC+s+DvLLLKiplI5hxct54g/rKDENHdVED3rw3HoJ/yQQao3C6gAiGsQwXCyb0XnyVX8Bp5sGopoZv4tjZcT+0WMxJMdeJZpLxC9suqucJrTRbKYXn+jyAXZXPwTPEZ0CILQaKj4QOWLqkPxOWdFEFMD6m4IWi9JZlrjeGndGRYsYeCsZ1dFYgq/7pn+tNS3fxgLkcTEHOsnsN9zSY5NDm65LpV9+kb3Pv3mz58CV4lHoCojaOe4FSdy2rEaVyLA=="
+                        }
                       }
                     ],
                     "role": "model"
@@ -355,18 +349,17 @@ interactions:
               "usageMetadata": {
                 "promptTokenCount": 288,
                 "candidatesTokenCount": 19,
-                "totalTokenCount": 510,
+                "totalTokenCount": 307,
                 "promptTokensDetails": [
                   {
                     "modality": "TEXT",
                     "tokenCount": 288
                   }
                 ],
-                "thoughtsTokenCount": 203,
                 "serviceTier": "standard"
               },
               "modelVersion": "gemini-2.5-flash",
-              "responseId": "g_nParfuOK38jrEPuIS1yAk"
+              "responseId": "RVPZatuQM9qn_uMPxdGqqAw"
             }
         headers:
             Alt-Svc:
@@ -374,11 +367,11 @@ interactions:
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Wed, 14 Oct 2026 21:52:05 GMT
+                - Thu, 22 Oct 2026 00:05:26 GMT
             Server:
                 - scaffolding on HTTPServer2
             Server-Timing:
-                - gfet4t7; dur=1371
+                - gfet4t7; dur=445
             Vary:
                 - Origin
                 - X-Origin
@@ -393,30 +386,30 @@ interactions:
                 - "0"
         status: 200 OK
         code: 200
-        duration: 1.390187125s
+        duration: 483.846917ms
     - id: 4
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 2464
+        content_length: 2052
         transfer_encoding: []
         trailer: {}
         host: generativelanguage.googleapis.com
         remote_addr: ""
         request_uri: ""
         body: |
-            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"middle\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"},{"parts":[{"functionCall":{"args":{"agent_name":"leaf"},"name":"transfer_to_agent"},"thoughtSignature":"CsgCAWkUfROOHBwKc2HokIfAyX11vtbOBwqZHPiHPHu8V7d31lFHLagtfUTOL/JSG4v44t2d0xTX4VjbO0jbllDb+7X0FWV26l4xl0OvkvRUxMo+55VJZJsHU6h5FkioeBZDyZFiHRxOtUaiw9B6sxL0+Rff/EHIEQyY/ElnGa3qdTcpeOm+LShagkJSzGqEl4O1DWIMEtFP9jvulJnKN7/oZRHzH/hYTU9M+eT8BuCbOZKnVSz2WfigAzTqCcvCzzx26g/ekX2AHa1kYEpfpIYlV0qq7xS2TgYLfLBDLvj+FwNUnQt8USpYY3MWLAw7uQEf4gbAXfwuBRA4sRtczVaJFbxCVE8Yh6kH3iFWbiDmUZt7Jg/394Qev3Z9/sYlhMxw2RHrRaqnmVAMdjGFTW8TOw04Jko9hQyi3pWFtH1u+iE2XdGWlhXEjg=="}],"role":"model"},{"parts":[{"functionResponse":{"name":"transfer_to_agent"}}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[leaf] said: Hi!"}],"role":"user"},{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"middle\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"}],"generationConfig":{"maxOutputTokens":300},"systemInstruction":{"parts":[{"text":"Always transfer to leaf using transfer_to_agent. Do not answer yourself."},{"text":"You have a list of other agents to transfer to:\n\nAgent name: leaf\nAgent description: \n\nIf you are the best to answer the question according to your description, you\ncan answer it.\nIf another agent is better for answering the question according to its\ndescription, call 'transfer_to_agent' function to transfer the\nquestion to that agent. When transfering, do not generate any text other than\nthe function call.\n\n"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"allowedFunctionNames":["transfer_to_agent"],"mode":"ANY"}},"tools":[{"functionDeclarations":[{"description":"Transfer the question to another agent.\nThis tool hands off control to another agent when it's more suitable to answer the user's question according to the agent's description.","name":"transfer_to_agent","parameters":{"properties":{"agent_name":{"description":"the agent name to transfer to","type":"string"}},"required":["agent_name"],"type":"object"}}]}]}
+            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"middle\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"},{"parts":[{"functionCall":{"args":{"agent_name":"leaf"},"name":"transfer_to_agent"}}],"role":"model"},{"parts":[{"functionResponse":{"name":"transfer_to_agent"}}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[leaf] said: Hi."}],"role":"user"},{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"middle\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"}],"generationConfig":{"maxOutputTokens":300,"temperature":0,"thinkingConfig":{"thinkingBudget":0}},"systemInstruction":{"parts":[{"text":"Always transfer to leaf using transfer_to_agent. Do not answer yourself."},{"text":"You have a list of other agents to transfer to:\n\nAgent name: leaf\nAgent description: \n\nIf you are the best to answer the question according to your description, you\ncan answer it.\nIf another agent is better for answering the question according to its\ndescription, call 'transfer_to_agent' function to transfer the\nquestion to that agent. When transfering, do not generate any text other than\nthe function call.\n\n"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"allowedFunctionNames":["transfer_to_agent"],"mode":"ANY"}},"tools":[{"functionDeclarations":[{"description":"Transfer the question to another agent.\nThis tool hands off control to another agent when it's more suitable to answer the user's question according to the agent's description.","name":"transfer_to_agent","parameters":{"properties":{"agent_name":{"description":"the agent name to transfer to","type":"string"}},"required":["agent_name"],"type":"object"}}]}]}
         form: {}
         headers:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
         url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
@@ -464,7 +457,7 @@ interactions:
                 "serviceTier": "standard"
               },
               "modelVersion": "gemini-2.5-flash",
-              "responseId": "hfnPaqqvFJz5-8YPi__X8AQ"
+              "responseId": "RlPZatbCE9qe_uMP1b3ZsQw"
             }
         headers:
             Alt-Svc:
@@ -472,11 +465,11 @@ interactions:
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Wed, 14 Oct 2026 21:52:05 GMT
+                - Thu, 22 Oct 2026 00:05:26 GMT
             Server:
                 - scaffolding on HTTPServer2
             Server-Timing:
-                - gfet4t7; dur=432
+                - gfet4t7; dur=509
             Vary:
                 - Origin
                 - X-Origin
@@ -491,30 +484,30 @@ interactions:
                 - "0"
         status: 200 OK
         code: 200
-        duration: 454.975917ms
+        duration: 580.085625ms
     - id: 5
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 1326
+        content_length: 1380
         transfer_encoding: []
         trailer: {}
         host: generativelanguage.googleapis.com
         remote_addr: ""
         request_uri: ""
         body: |
-            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"middle\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[middle] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"leaf\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[middle] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"},{"parts":[{"text":"Hi!"}],"role":"model"},{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"middle\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[middle] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"leaf\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[middle] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"}],"generationConfig":{"maxOutputTokens":100},"systemInstruction":{"parts":[{"text":"Reply with one short greeting."}],"role":"user"}}
+            {"contents":[{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"middle\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[middle] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"leaf\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[middle] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"},{"parts":[{"text":"Hi."}],"role":"model"},{"parts":[{"text":"Hello"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"middle\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[root] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[middle] called tool \"transfer_to_agent\" with parameters: {\"agent_name\":\"leaf\"}"}],"role":"user"},{"parts":[{"text":"For context:"},{"text":"[middle] \"transfer_to_agent\" tool returned result: {}"}],"role":"user"}],"generationConfig":{"maxOutputTokens":100,"temperature":0,"thinkingConfig":{"thinkingBudget":0}},"systemInstruction":{"parts":[{"text":"Reply with one short greeting."}],"role":"user"}}
         form: {}
         headers:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-adk/0.3.0 gl-go/1.26.5
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
         url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
@@ -534,7 +527,7 @@ interactions:
                   "content": {
                     "parts": [
                       {
-                        "text": "Hi!"
+                        "text": "Hi."
                       }
                     ],
                     "role": "model"
@@ -546,18 +539,17 @@ interactions:
               "usageMetadata": {
                 "promptTokenCount": 194,
                 "candidatesTokenCount": 2,
-                "totalTokenCount": 222,
+                "totalTokenCount": 196,
                 "promptTokensDetails": [
                   {
                     "modality": "TEXT",
                     "tokenCount": 194
                   }
                 ],
-                "thoughtsTokenCount": 26,
                 "serviceTier": "standard"
               },
               "modelVersion": "gemini-2.5-flash",
-              "responseId": "hfnPauDuMN_P-8YPip2k0A0"
+              "responseId": "RlPZaqj8Np2p_uMPnL3QiAw"
             }
         headers:
             Alt-Svc:
@@ -565,11 +557,11 @@ interactions:
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Wed, 14 Oct 2026 21:52:06 GMT
+                - Thu, 22 Oct 2026 00:05:27 GMT
             Server:
                 - scaffolding on HTTPServer2
             Server-Timing:
-                - gfet4t7; dur=586
+                - gfet4t7; dur=294
             Vary:
                 - Origin
                 - X-Origin
@@ -584,4 +576,4 @@ interactions:
                 - "0"
         status: 200 OK
         code: 200
-        duration: 608.588542ms
+        duration: 330.011333ms

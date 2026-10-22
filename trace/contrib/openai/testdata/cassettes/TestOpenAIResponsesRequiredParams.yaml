@@ -34,7 +34,7 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.23.12
+                - go1.26.10
         url: https://api.openai.com/v1/responses
         method: POST
       response:
@@ -47,23 +47,27 @@ interactions:
         uncompressed: true
         body: |-
             {
-              "id": "resp_0c1cd7b65a500ea8006913f729bc588190808355ca0c5a4f06",
+              "id": "resp_087ac9bdcd1d7e98016ad953bde72c87d0908cc1d57e843b98",
               "object": "response",
-              "created_at": 1762916137,
+              "created_at": 1792627645,
               "status": "completed",
+              "access_programs": null,
               "background": false,
               "billing": {
                 "payer": "developer"
               },
+              "completed_at": 1792627646,
               "error": null,
+              "frequency_penalty": 0.0,
               "incomplete_details": null,
               "instructions": null,
               "max_output_tokens": null,
               "max_tool_calls": null,
               "model": "gpt-4o-mini-2024-07-18",
+              "moderation": null,
               "output": [
                 {
-                  "id": "msg_0c1cd7b65a500ea8006913f72a969c81908668f3228ef0ee3f",
+                  "id": "msg_087ac9bdcd1d7e98016ad953be509c87d0849892ffe62fa1e3",
                   "type": "message",
                   "status": "completed",
                   "content": [
@@ -78,16 +82,18 @@ interactions:
                 }
               ],
               "parallel_tool_calls": true,
+              "presence_penalty": 0.0,
               "previous_response_id": null,
               "prompt_cache_key": null,
-              "prompt_cache_retention": null,
+              "prompt_cache_retention": "in_memory",
               "reasoning": {
+                "context": null,
                 "effort": null,
                 "summary": null
               },
               "safety_identifier": null,
               "service_tier": "default",
-              "store": true,
+              "store": false,
               "temperature": 1.0,
               "text": {
                 "format": {
@@ -96,6 +102,24 @@ interactions:
                 "verbosity": "medium"
               },
               "tool_choice": "auto",
+              "tool_usage": {
+                "image_gen": {
+                  "input_tokens": 0,
+                  "input_tokens_details": {
+                    "image_tokens": 0,
+                    "text_tokens": 0
+                  },
+                  "output_tokens": 0,
+                  "output_tokens_details": {
+                    "image_tokens": 0,
+                    "text_tokens": 0
+                  },
+                  "total_tokens": 0
+                },
+                "web_search": {
+                  "num_requests": 0
+                }
+              },
               "tools": [],
               "top_logprobs": 0,
               "top_p": 1.0,
@@ -103,6 +127,7 @@ interactions:
               "usage": {
                 "input_tokens": 14,
                 "input_tokens_details": {
+                  "cache_write_tokens": 0,
                   "cached_tokens": 0
                 },
                 "output_tokens": 9,
@@ -115,20 +140,24 @@ interactions:
               "metadata": {}
             }
         headers:
+            Access-Control-Expose-Headers:
+                - X-Request-ID
+                - CF-Ray
+                - CF-Ray
             Alt-Svc:
                 - h3=":443"; ma=86400
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - 99d2c0605e52e55d-EWR
+                - a4e443010857ae4f-SEA
             Content-Type:
                 - application/json
             Date:
-                - Wed, 12 Nov 2025 02:55:38 GMT
+                - Thu, 22 Oct 2026 00:07:26 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "1138"
+                - "821"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -136,14 +165,11 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=Hpu7W3cAxh9S5KQ7jLFftH9h9P0yLdv4dwCEuuZwRoE-1762916138-1.0.1.1-SEpRe16m5M3d1ZjXfk6v95o0D8auBZbKGragkj8kXzqe6Z66ii9W1h2RpD843GN4OfG9MKW9nq.94S5Ww7DAwOC1zmGdfA34hlrc0MKksUM; path=/; expires=Wed, 12-Nov-25 03:25:38 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
-                - _cfuvid=SakbY9eHp4rfMoWIBFIb2cpGaMD_8Ej_I2C_KRt8Z88-1762916138888-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+                - __cf_bm=Qc6rLp6ORAintg2D6NOMnLkw1ShFR2CWAfk6IRJ033U-1792627645.6123242-1.0.1.1-QpBZz5XlB.7IZGF8icxRHv4gw6_.6XEg01ic7usHzrv3NMiBSseB9dmaiMMHoLCe7DsMk.NLKOjLkfCkzwo1a_q5045ghaN4MMtGFz985H5_HykDA_g534FlzcgnuIK5; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:37:26 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
                 - nosniff
-            X-Envoy-Upstream-Service-Time:
-                - "1142"
             X-Ratelimit-Limit-Requests:
                 - "30000"
             X-Ratelimit-Limit-Tokens:
@@ -151,13 +177,13 @@ interactions:
             X-Ratelimit-Remaining-Requests:
                 - "29999"
             X-Ratelimit-Remaining-Tokens:
-                - "149999965"
+                - "149999967"
             X-Ratelimit-Reset-Requests:
                 - 2ms
             X-Ratelimit-Reset-Tokens:
                 - 0s
             X-Request-Id:
-                - req_68592a53628a4c42a1ee5b3a16fd2e83
+                - req_acc860286193413db982306cb3bf297f
         status: 200 OK
         code: 200
-        duration: 1.905865958s
+        duration: 1.116786375s

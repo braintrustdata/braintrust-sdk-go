@@ -34,7 +34,7 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.26.5
+                - go1.26.10
         url: https://api.openai.com/v1/embeddings
         method: POST
       response:
@@ -63,15 +63,15 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - a2d34554ad510c26-YYZ
+                - a4e44240ef9078c9-SEA
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Tue, 18 Aug 2026 19:19:33 GMT
+                - Thu, 22 Oct 2026 00:06:55 GMT
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=keyWpdGEC4ACL9b2WIIjPBA9nMqwvHDYF6j4hat9lAc-1787080773.8623068-1.0.1.1-BkPGPB1WguSkvnxtkI6BldVXiOXJVrm.1ybj1cA.xK3wZowXLkZgk0N97YTf7G6_6jgpcBEbZJ3FzhKVeq68qeBHfsnk1SNtcMA2KOxlZZV7fc3lviAoIpz_z3r6rcJU; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Tue, 18 Aug 2026 19:49:33 GMT
+                - __cf_bm=SGcLMnLMWJX7yWfnKeMXarOWgXd6q.ggark6cm5Z4do-1792627614.8684847-1.0.1.1-FhN_AVOmsXf6oC.J.e6n_kqDd1KxLE9hUTdFSX_zYB_L6mFbDpKLfkKdFCdoWS8M_XhLtSIRJYaO_KX6T8o66aDteTvhIUKNJ3q_GY_Md.Vpk57XRoJTuN65xvZj6Y1y; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:36:55 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             Vary:
@@ -81,7 +81,7 @@ interactions:
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Request-Id:
-                - req_723b387ad3f44cdc81cedd358561068d
+                - req_03a524d066b84ae39a6634296a784447
         status: 404 Not Found
         code: 404
-        duration: 116.431125ms
+        duration: 232.736458ms

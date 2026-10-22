@@ -2,6 +2,7 @@ package anthropic
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -19,6 +20,8 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 )
+
+const testModel = anthropic.Model("claude-haiku-4-5-20251001")
 
 func TestMiddlewareMatchesProxyPrefixedMessagesPath(t *testing.T) {
 	tp, exporter := oteltest.Setup(t)
@@ -258,11 +261,13 @@ func TestMiddlewareIntegration(t *testing.T) {
 	timer := oteltest.NewTimer()
 	ctx := context.Background()
 	resp, err := client.Messages.New(ctx, anthropic.MessageNewParams{
-		Model: anthropic.Model("claude-3-haiku-20240307"), // Use cheapest model
+		Model: testModel,
 		Messages: []anthropic.MessageParam{
 			anthropic.NewUserMessage(anthropic.NewTextBlock("What is the capital of France?")),
 		},
 		MaxTokens: 1024, // Using higher token count - very low MaxTokens (like 10) cause timeouts
+		// Current models reject temperature with top_p, so the streaming test covers top_p.
+		Temperature: anthropic.Float(0.8),
 	})
 	timeRange := timer.Tick()
 
@@ -271,7 +276,6 @@ func TestMiddlewareIntegration(t *testing.T) {
 	require.NotNil(t, resp)
 
 	// Basic response validation
-	assert.Equal(t, anthropic.Model("claude-3-haiku-20240307"), resp.Model)
 	assert.Equal(t, "assistant", string(resp.Role))
 	assert.NotEmpty(t, resp.Content)
 
@@ -297,8 +301,9 @@ func TestMiddlewareIntegration(t *testing.T) {
 	metadata := span.Metadata()
 	assert.Equal(t, "anthropic", metadata["provider"])
 	assert.NotContains(t, metadata, "endpoint")
-	assert.Equal(t, "claude-3-haiku-20240307", metadata["model"])
+	assert.Equal(t, string(resp.Model), metadata["model"])
 	assert.Equal(t, float64(1024), metadata["max_tokens"])
+	assert.Equal(t, 0.8, metadata["temperature"])
 
 }
 
@@ -311,13 +316,12 @@ func TestMiddlewareIntegrationStreaming(t *testing.T) {
 	timer := oteltest.NewTimer()
 	ctx := context.Background()
 	stream := client.Messages.NewStreaming(ctx, anthropic.MessageNewParams{
-		Model: anthropic.Model("claude-3-haiku-20240307"), // Use cheapest model
+		Model: testModel,
 		Messages: []anthropic.MessageParam{
 			anthropic.NewUserMessage(anthropic.NewTextBlock("Tell me a very short joke.")),
 		},
-		MaxTokens:   512,
-		Temperature: anthropic.Float(0.8),
-		TopP:        anthropic.Float(0.95),
+		MaxTokens: 512,
+		TopP:      anthropic.Float(0.95),
 	})
 
 	var completeText string
@@ -348,24 +352,17 @@ func TestMiddlewareIntegrationStreaming(t *testing.T) {
 	input := span.Attr("braintrust.input_json").String()
 	assert.Contains(t, input, "Tell me a very short joke.")
 
-	output := span.Output()
-	assert.NotNil(t, output)
+	output, ok := span.Output().(map[string]any)
+	require.True(t, ok, "expected a captured assistant message")
 
-	// The output should contain the complete streamed text in JSON format
-	outputStr := span.Attr("braintrust.output_json").String()
-	// For streaming, the output is stored as JSON: [{"text":"...", "type":"text"}]
-	// So we check that both the accumulated text and the JSON contain expected content
-	assert.Contains(t, outputStr, "joke")    // Should contain the word "joke"
-	assert.Contains(t, completeText, "joke") // Ensure we got the text from streaming
-	// Also verify that some of the streamed content matches what's in the span
-	assert.Contains(t, outputStr, completeText[:10]) // Check first 10 chars are in the output
+	// Verify the complete streamed response was captured, independent of wording.
+	assert.Equal(t, []any{map[string]any{"type": "text", "text": completeText}}, output["content"])
 
 	metadata := span.Metadata()
 	assert.Equal(t, "anthropic", metadata["provider"])
 	assert.NotContains(t, metadata, "endpoint")
-	assert.Equal(t, "claude-3-haiku-20240307", metadata["model"])
+	assert.Equal(t, string(testModel), metadata["model"])
 	assert.Equal(t, float64(512), metadata["max_tokens"])
-	assert.Equal(t, 0.8, metadata["temperature"])
 	assert.Equal(t, 0.95, metadata["top_p"])
 	assert.Equal(t, true, metadata["stream"])
 
@@ -781,7 +778,7 @@ func TestMultipleMessages(t *testing.T) {
 	timer := oteltest.NewTimer()
 	ctx := context.Background()
 	resp, err := client.Messages.New(ctx, anthropic.MessageNewParams{
-		Model: anthropic.Model("claude-3-haiku-20240307"),
+		Model: testModel,
 		Messages: []anthropic.MessageParam{
 			anthropic.NewUserMessage(anthropic.NewTextBlock("What is the capital of France?")),
 			anthropic.NewAssistantMessage(anthropic.NewTextBlock("The capital of France is Paris.")),
@@ -817,7 +814,7 @@ func TestWithTools(t *testing.T) {
 	timer := oteltest.NewTimer()
 	ctx := context.Background()
 	resp, err := client.Messages.New(ctx, anthropic.MessageNewParams{
-		Model: anthropic.Model("claude-3-haiku-20240307"),
+		Model: testModel,
 		Messages: []anthropic.MessageParam{
 			anthropic.NewUserMessage(anthropic.NewTextBlock("What's the weather in San Francisco?")),
 		},
@@ -873,7 +870,7 @@ func TestStreamingWithTools(t *testing.T) {
 	timer := oteltest.NewTimer()
 	ctx := context.Background()
 	stream := client.Messages.NewStreaming(ctx, anthropic.MessageNewParams{
-		Model: anthropic.Model("claude-3-haiku-20240307"),
+		Model: testModel,
 		Messages: []anthropic.MessageParam{
 			anthropic.NewUserMessage(anthropic.NewTextBlock("What's the weather in Tokyo?")),
 		},
@@ -894,26 +891,14 @@ func TestStreamingWithTools(t *testing.T) {
 		},
 	})
 
-	var foundToolUse bool
-	var toolName string
-
-	// Iterate through streaming events
+	var message anthropic.Message
 	for stream.Next() {
-		event := stream.Current()
-		switch eventVariant := event.AsAny().(type) {
-		case anthropic.ContentBlockStartEvent:
-			if eventVariant.ContentBlock.Type == "tool_use" {
-				foundToolUse = true
-				toolName = eventVariant.ContentBlock.Name
-			}
-		}
+		require.NoError(t, message.Accumulate(stream.Current()))
 	}
 	require.NoError(t, stream.Err())
 	timeRange := timer.Tick()
 
-	// Verify tool was called
-	assert.True(t, foundToolUse, "Expected tool_use in streaming response")
-	assert.Equal(t, "get_weather", toolName)
+	require.Equal(t, "tool_use", string(message.StopReason))
 
 	// Validate span
 	span := exporter.FlushOne()
@@ -926,14 +911,25 @@ func TestStreamingWithTools(t *testing.T) {
 
 	output, ok := span.Output().(map[string]any)
 	require.True(t, ok)
-	assert.Equal(t, "tool_use", output["stop_reason"])
+	assert.Equal(t, string(message.StopReason), output["stop_reason"])
 	content, ok := output["content"].([]any)
 	require.True(t, ok)
-	require.Len(t, content, 1)
-	toolUse, ok := content[0].(map[string]any)
-	require.True(t, ok)
-	assert.Equal(t, "get_weather", toolUse["name"])
-	assert.Equal(t, map[string]any{"location": "Tokyo"}, toolUse["input"])
+	require.Len(t, content, len(message.Content))
+	for i, block := range message.Content {
+		traced, ok := content[i].(map[string]any)
+		require.True(t, ok)
+		assert.Equal(t, block.Type, traced["type"])
+		switch block.Type {
+		case "tool_use":
+			assert.Equal(t, block.ID, traced["id"])
+			assert.Equal(t, block.Name, traced["name"])
+			var input map[string]any
+			require.NoError(t, json.Unmarshal(block.Input, &input))
+			assert.Equal(t, input, traced["input"])
+		case "text":
+			assert.Equal(t, block.Text, traced["text"])
+		}
+	}
 }
 
 // assertAnthropicFunctionTool asserts metadata.tools keeps Anthropic's native

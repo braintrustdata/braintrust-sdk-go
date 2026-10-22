@@ -23,14 +23,16 @@ import (
 func TestNew_WithMinimalConfig(t *testing.T) {
 	t.Parallel()
 
-	// Create a TracerProvider
+	// Keep this constructor/tracer test independent of configured OTLP endpoints.
+	exporter := tracetest.NewInMemoryExporter()
 	tp := trace.NewTracerProvider()
-	defer func() { _ = tp.Shutdown(context.Background()) }()
+	defer func() { require.NoError(t, tp.Shutdown(context.Background())) }()
 
 	// Create client with minimal config
 	client, err := New(tp,
 		WithAPIKey(auth.TestAPIKey),
 		WithProject("test-project"),
+		WithExporter(exporter),
 		WithLogger(intlogger.NewFailTestLogger(t)),
 	)
 	require.NoError(t, err)
@@ -46,7 +48,10 @@ func TestNew_WithMinimalConfig(t *testing.T) {
 	// Create a span to verify tracer works
 	ctx, span := tracer.Start(context.Background(), "test-span")
 	span.End()
-	assert.NotNil(t, ctx)
+	require.NoError(t, tp.ForceFlush(ctx))
+	spans := exporter.GetSpans()
+	require.Len(t, spans, 1)
+	assert.Equal(t, "test-span", spans[0].Name)
 
 	// Test String() output contains expected info
 	str := client.String()

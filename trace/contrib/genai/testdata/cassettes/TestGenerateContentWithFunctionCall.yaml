@@ -19,9 +19,9 @@ interactions:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-genai-sdk/1.41.0 gl-go/go1.26.5
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
         url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
@@ -47,7 +47,7 @@ interactions:
                             "location": "Paris, France"
                           }
                         },
-                        "thoughtSignature": "CtABARFNMg9YJkiQVLNlGqIfZ7gRDq2T24DSB5q4Zbv1PRixW4HWaN9eek5H6b/2Ap9oY5DhrTpeic5nTWMkeiB+rex9Rzd+298qdfMu5OGdyMlcR6uHebBeS67CRK98jVok+E75B1tXz7daj0JIXU8XCrfVePFkzWx8gJDqQNOG3BP6rmIlbhfj0IfNVA8Js3vqeWj7bu4kzp2VVLJqUeKEik5jRN3z91U0FhgWqgOi6VNyxv7OzJeOj+5D3qVnF1yNLhIuouRB61if7xCagPfaGQ=="
+                        "thoughtSignature": "CvgBAWkUfRPfqjyF608D4S7Dm/OU/5uH9i/lm6Tfa88f0ip6Ab7YyjjFCM7jVwYuY9xY7rHb1fUCpTQmJmFl3XEoZtZBt8lNK23jhqfXyu8s3yYg5oDmB9UPXU19A0fwI+liu4R+IClaxP4I4U7qM8zANLFdBv2plgPLVcflLCXKONMIFyw9s58YXFoa4MGfaYjc6O9FlspjiKvBDzFckKng+lOR6EEa8BrkEKNUI/WhHB5W6JpCj9iJXRTWXdOIw7bu4JNZPsSOv3BHcsol0HYCyAT5rI78wRTAHkADz+t1LUIwiqhZsweafUQSavnJeVN7MNzN8kvp0lg="
                       }
                     ],
                     "role": "model"
@@ -60,18 +60,18 @@ interactions:
               "usageMetadata": {
                 "promptTokenCount": 56,
                 "candidatesTokenCount": 17,
-                "totalTokenCount": 120,
+                "totalTokenCount": 128,
                 "promptTokensDetails": [
                   {
                     "modality": "TEXT",
                     "tokenCount": 56
                   }
                 ],
-                "thoughtsTokenCount": 47,
+                "thoughtsTokenCount": 55,
                 "serviceTier": "standard"
               },
               "modelVersion": "gemini-2.5-flash",
-              "responseId": "VLCEauTGIoya-8YPt6G9yQ8"
+              "responseId": "l1PZas_pMqix9MoPo52YyQs"
             }
         headers:
             Alt-Svc:
@@ -79,11 +79,11 @@ interactions:
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Tue, 18 Aug 2026 19:19:49 GMT
+                - Thu, 22 Oct 2026 00:06:48 GMT
             Server:
                 - scaffolding on HTTPServer2
             Server-Timing:
-                - gfet4t7; dur=600
+                - gfet4t7; dur=667
             Vary:
                 - Origin
                 - X-Origin
@@ -98,4 +98,4 @@ interactions:
                 - "0"
         status: 200 OK
         code: 200
-        duration: 805.257667ms
+        duration: 704.522291ms

@@ -34,7 +34,7 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.26.5
+                - go1.26.10
         url: https://api.openai.com/v1/responses
         method: POST
       response:
@@ -47,16 +47,16 @@ interactions:
         uncompressed: true
         body: |-
             {
-              "id": "resp_001273f38e15d8a0006ab4da96322087d290a47a27a4523ad3",
+              "id": "resp_0cc5dd8390b7fbaa016ad953c056c487d0984c928bcd96d0bf",
               "object": "response",
-              "created_at": 1790237334,
+              "created_at": 1792627648,
               "status": "completed",
               "access_programs": null,
               "background": false,
               "billing": {
                 "payer": "developer"
               },
-              "completed_at": 1790237335,
+              "completed_at": 1792627648,
               "error": null,
               "frequency_penalty": 0.0,
               "incomplete_details": null,
@@ -67,7 +67,7 @@ interactions:
               "moderation": null,
               "output": [
                 {
-                  "id": "msg_001273f38e15d8a0006ab4da9798e887d28a467fa351fa7fb3",
+                  "id": "msg_0cc5dd8390b7fbaa016ad953c0e8fc87d0b99c168190f5fa78",
                   "type": "message",
                   "status": "completed",
                   "content": [
@@ -75,7 +75,7 @@ interactions:
                       "type": "output_text",
                       "annotations": [],
                       "logprobs": [],
-                      "text": "Hello there, friend!"
+                      "text": "Hello, how's it?"
                     }
                   ],
                   "role": "assistant"
@@ -93,7 +93,7 @@ interactions:
               },
               "safety_identifier": null,
               "service_tier": "default",
-              "store": true,
+              "store": false,
               "temperature": 1.0,
               "text": {
                 "format": {
@@ -130,11 +130,11 @@ interactions:
                   "cache_write_tokens": 0,
                   "cached_tokens": 0
                 },
-                "output_tokens": 6,
+                "output_tokens": 7,
                 "output_tokens_details": {
                   "reasoning_tokens": 0
                 },
-                "total_tokens": 20
+                "total_tokens": 21
               },
               "user": null,
               "metadata": {}
@@ -149,41 +149,41 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - a4004dc6a9bcff68-BOM
+                - a4e443119b7dae4f-SEA
             Content-Type:
                 - application/json
             Date:
-                - Thu, 24 Sep 2026 08:08:55 GMT
+                - Thu, 22 Oct 2026 00:07:29 GMT
             Openai-Organization:
-                - fluxai-ql6txb
+                - braintrust-data
             Openai-Processing-Ms:
-                - "1601"
+                - "692"
             Openai-Project:
-                - proj_TyVyJP3AZBjMBnVymwmezBd2
+                - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
                 - "2020-10-01"
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=xFHrAijlZGhRUdKGRVzkAv58CkZNqY73XW7kPCT1WjU-1790237333.5460265-1.0.1.1-C0.TIbQeZJIFeSU3E4P4AE.8mII_gUvtbTu6gTPxt7Brq_676P_7A92diHuDlNXsaUeJseCay.bFt680XKCkVBd76ATUA4c_6lLEPVitMfa0JvtOQuKW4KIBJNS_JX7A; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 24 Sep 2026 08:38:55 GMT
+                - __cf_bm=B.Oy9sVd1fP.DPiFh.xnlGmz6jORTb1nJxreclXasNw-1792627648.2561193-1.0.1.1-OQ0ttwM9EdDfgk9weGBYSueAyITnwDA_5pDI0wLK2DKY2hnVNrVLM9q.rqChA_k7j43D0butwSlwPjzPhKvsmWYGnR.Q9bbeiEdUeBpd8k1Uem1SFUP.TwPQ2qEZ2WiQ; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:37:29 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
                 - nosniff
             X-Ratelimit-Limit-Requests:
-                - "5000"
+                - "30000"
             X-Ratelimit-Limit-Tokens:
-                - "2000000"
+                - "150000000"
             X-Ratelimit-Remaining-Requests:
-                - "4999"
+                - "29999"
             X-Ratelimit-Remaining-Tokens:
-                - "1999967"
+                - "149999967"
             X-Ratelimit-Reset-Requests:
-                - 12ms
+                - 2ms
             X-Ratelimit-Reset-Tokens:
                 - 0s
             X-Request-Id:
-                - req_d7ff155b61814969837f640c52534f75
+                - req_2a36e52b30d04c9ba3c38732ba1ee694
         status: 200 OK
         code: 200
-        duration: 2.555122833s
+        duration: 849.255583ms

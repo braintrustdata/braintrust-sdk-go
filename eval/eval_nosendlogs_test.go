@@ -25,7 +25,7 @@ func TestRun_NoSendLogsRunsLocally(t *testing.T) {
 	require.True(t, ok)
 
 	// No session, no API client: any attempt to reach Braintrust panics.
-	evaluator := NewEvaluator[testInput, testOutput](nil, sdkTP, nil, "local-project")
+	evaluator := NewEvaluatorWithClient[testInput, testOutput](nil, sdkTP, nil, "local-project")
 
 	var mu sync.Mutex
 	var scores []map[string]float64

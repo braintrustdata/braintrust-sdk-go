@@ -16,15 +16,15 @@ interactions:
         form: {}
         headers:
             Amz-Sdk-Invocation-Id:
-                - 0e5bbe02-87d3-4b9c-9c29-b857fe4a3f50
+                - 9c484ba0-d087-4c58-98bc-0259d7c3211b
             Amz-Sdk-Request:
                 - attempt=1; max=3
             Content-Type:
                 - application/json
             User-Agent:
-                - aws-sdk-go-v2/1.41.5 ua/2.1 os/macos lang/go#1.26.2 md/GOOS#darwin md/GOARCH#arm64 api/bedrockruntime#1.50.4 m/E,g
+                - aws-sdk-go-v2/1.41.5 ua/2.1 os/macos lang/go#1.26.10 md/GOOS#darwin md/GOARCH#arm64 api/bedrockruntime#1.50.4 m/E,g
             X-Amz-Date:
-                - 20260417T175544Z
+                - 20261022T000617Z
         url: https://bedrock-runtime.us-east-2.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/converse
         method: POST
       response:
@@ -33,18 +33,18 @@ interactions:
         proto_minor: 0
         transfer_encoding: []
         trailer: {}
-        content_length: 538
+        content_length: 537
         uncompressed: false
-        body: '{"metrics":{"latencyMs":1484},"output":{"message":{"content":[{"citationsContent":{"citations":[{"location":{"documentChar":{"documentIndex":0,"end":26,"start":0}},"sourceContent":[{"text":"France''s capital is Paris."}],"title":"france-facts"}],"content":[{"text":"France''s capital is Paris."}]}}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":573,"outputTokens":25,"serverToolUsage":{},"totalTokens":598}}'
+        body: '{"metrics":{"latencyMs":603},"output":{"message":{"content":[{"citationsContent":{"citations":[{"location":{"documentChar":{"documentIndex":0,"end":26,"start":0}},"sourceContent":[{"text":"France''s capital is Paris."}],"title":"france-facts"}],"content":[{"text":"France''s capital is Paris."}]}}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":573,"outputTokens":25,"serverToolUsage":{},"totalTokens":598}}'
         headers:
             Content-Length:
-                - "538"
+                - "537"
             Content-Type:
                 - application/json
             Date:
-                - Fri, 17 Apr 2026 17:55:45 GMT
+                - Thu, 22 Oct 2026 00:06:18 GMT
             X-Amzn-Requestid:
-                - 5911cf45-3544-4063-82b3-1c6fa26a2b91
+                - b9c69c97-4748-416f-bc83-216731f20bbf
         status: 200 OK
         code: 200
-        duration: 1.533037583s
+        duration: 697.779417ms

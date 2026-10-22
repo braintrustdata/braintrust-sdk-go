@@ -10,42 +10,32 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
+	"github.com/braintrustdata/braintrust-sdk-go/openapi"
 )
 
 // New creates a new functions API client.
+//
+// Deprecated: Use [openapi.NewClientWithResponses].
 func New(client *https.Client) *API {
-	return &API{client: client}
+	return &API{client: https.NewOpenAPIClient(client), invokeClient: client}
 }
 
 // Query searches for functions matching the given options.
 // Returns a list of functions that match the criteria.
+//
+// Deprecated: Use [openapi.ClientWithResponses.GetFunctionWithResponse].
 func (a *API) Query(ctx context.Context, params QueryParams) ([]Function, error) {
-	// Build query parameters
-	queryParams := make(map[string]string)
-
-	if params.ProjectName != "" {
-		queryParams["project_name"] = params.ProjectName
-	}
-	if params.ProjectID != "" {
-		queryParams["project_id"] = params.ProjectID
-	}
-	if params.Slug != "" {
-		queryParams["slug"] = params.Slug
-	}
-	if params.FunctionName != "" {
-		queryParams["function_name"] = params.FunctionName
-	}
-	if params.Version != "" {
-		queryParams["version"] = params.Version
-	}
-	if params.Environment != "" {
-		queryParams["environment"] = params.Environment
-	}
-	if params.Limit > 0 {
-		queryParams["limit"] = fmt.Sprintf("%d", params.Limit)
+	query := &openapi.GetFunctionParams{
+		ProjectName:  https.String(params.ProjectName),
+		ProjectId:    https.String(params.ProjectID),
+		Slug:         https.String(params.Slug),
+		FunctionName: https.String(params.FunctionName),
+		Version:      https.String(params.Version),
+		Environment:  https.String(params.Environment),
+		Limit:        https.Positive(params.Limit),
 	}
 
-	resp, err := a.client.GET(ctx, "/v1/function", queryParams)
+	resp, err := a.client.GetFunction(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -60,6 +50,8 @@ func (a *API) Query(ctx context.Context, params QueryParams) ([]Function, error)
 }
 
 // Create creates a new function.
+//
+// Deprecated: Use [openapi.ClientWithResponses.PostFunctionWithResponse].
 func (a *API) Create(ctx context.Context, params CreateParams) (*Function, error) {
 	if params.ProjectID == "" {
 		return nil, fmt.Errorf("project ID is required")
@@ -71,7 +63,11 @@ func (a *API) Create(ctx context.Context, params CreateParams) (*Function, error
 		return nil, fmt.Errorf("slug is required")
 	}
 
-	resp, err := a.client.POST(ctx, "/v1/function", params)
+	body, err := a.client.JSONBody(params)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := a.client.PostFunctionWithBody(ctx, "application/json", body)
 	if err != nil {
 		return nil, err
 	}
@@ -86,6 +82,10 @@ func (a *API) Create(ctx context.Context, params CreateParams) (*Function, error
 }
 
 // Invoke calls a function with the given input and returns the output.
+//
+// Deprecated: Use [openapi.ClientWithResponses.PostFunctionIdInvokeWithResponse]
+// for direct REST calls. For SDK-managed task/scorer conversion and tracing,
+// use the Functions API on braintrust.NewEvaluator instead.
 func (a *API) Invoke(ctx context.Context, functionID string, input any) (any, error) {
 	tracer := otel.Tracer("braintrust-functions")
 	ctx, span := tracer.Start(ctx, "function.invoke")
@@ -102,7 +102,7 @@ func (a *API) Invoke(ctx context.Context, functionID string, input any) (any, er
 	}
 
 	path := fmt.Sprintf("/v1/function/%s/invoke", functionID)
-	resp, err := a.client.POST(ctx, path, req)
+	resp, err := a.invokeClient.POST(ctx, path, req)
 	if err != nil {
 		return nil, err
 	}
@@ -135,13 +135,14 @@ func (a *API) Invoke(ctx context.Context, functionID string, input any) (any, er
 }
 
 // Delete deletes a function by ID.
+//
+// Deprecated: Use [openapi.ClientWithResponses.DeleteFunctionIdWithResponse].
 func (a *API) Delete(ctx context.Context, functionID string) error {
 	if functionID == "" {
 		return fmt.Errorf("function ID is required")
 	}
 
-	path := fmt.Sprintf("/v1/function/%s", functionID)
-	resp, err := a.client.DELETE(ctx, path)
+	resp, err := a.client.DeleteFunctionId(ctx, functionID)
 	if err != nil {
 		return err
 	}

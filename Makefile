@@ -1,4 +1,4 @@
-.PHONY: help ci build clean test test-quiet test-vcr-off test-vcr-record test-vcr-verify cover cover-path lint fmt mod-verify fix godoc examples release generate check-nested-modules check-prepare-release local-braintrust-replaces test-orchestrion
+.PHONY: help ci build clean test test-quiet test-vcr-off test-vcr-record test-vcr-verify cover cover-path lint fmt mod-verify fix godoc examples release generate fetch-openapi-spec generate-api-client check-api-client-codegen check-nested-modules check-prepare-release local-braintrust-replaces test-orchestrion
 
 # Releasable nested modules, read from the manifest at make-time.
 NESTED_MODULE_DIRS := $(shell ./scripts/list_nested_modules.sh)
@@ -27,6 +27,9 @@ help:
 	@echo "  godoc            - Start godoc server"
 	@echo "  examples         - Run all examples"
 	@echo "  generate         - Generate combined orchestrion.yml"
+	@echo "  fetch-openapi-spec - Fetch the pinned OpenAPI specification"
+	@echo "  generate-api-client - Generate the public OpenAPI REST client"
+	@echo "  check-api-client-codegen - Check the generated OpenAPI client for drift"
 	@echo "  ci               - Run CI pipeline (clean, lint, test, build)"
 	@echo "  precommit        - Run fmt then ci"
 	@echo "  release          - Publish release with goreleaser"
@@ -138,3 +141,12 @@ release: ci
 
 generate:
 	go run ./internal/genorchestrion/cmd
+
+fetch-openapi-spec:
+	go run ./internal/genapi fetch
+
+generate-api-client:
+	go run ./internal/genapi generate
+
+check-api-client-codegen:
+	go run ./internal/genapi check

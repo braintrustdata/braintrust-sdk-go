@@ -38,7 +38,7 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Tue, 20 Oct 2026 17:24:18 GMT
+                - Wed, 21 Oct 2026 23:59:49 GMT
             Etag:
                 - W/"fe-7iaq6aBQFNs98OpqCWtmRX1e6fw"
             Expires:
@@ -50,18 +50,18 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 851c08a67685da1a5c66610a9f744baa.cloudfront.net (CloudFront)
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - GWg49in1AjV5gj6BRZGsRHuQ9up2enaXUMEBdM_S-lph4w5LlfBG5w==
+                - Vf6zkEj-0m-L8qAJvUeOw3lD6wU4RY0QYtn38l4RN9LFhEhKrYA0pw==
             X-Amz-Cf-Pop:
-                - SFO53-P1
+                - SEA900-P10
             X-Bt-Found-Existing:
                 - "true"
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 219.475ms
+        duration: 153.436166ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -88,7 +88,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"1b442930-49fb-47b8-9cbe-ea7fb1019804","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"TestWorkflowExperimentIntegration","description":null,"created":"2026-10-20T17:24:18.970Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"c1f71e19-b3ce-4f59-89a9-055901f7755b","metadata":null,"tags":null}'
+        body: '{"id":"d7c64978-9e41-40b2-8a7b-724a76658e49","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"TestWorkflowExperimentIntegration","description":null,"created":"2026-10-21T23:59:49.506Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -99,9 +99,9 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Tue, 20 Oct 2026 17:24:19 GMT
+                - Wed, 21 Oct 2026 23:59:49 GMT
             Etag:
-                - W/"1d5-CyFwc/DNLDU3QZo+zV0A1ULzxxk"
+                - W/"1d5-ZERKKElvhgV7mYpUgQ0ktj46PE0"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -111,16 +111,16 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 851c08a67685da1a5c66610a9f744baa.cloudfront.net (CloudFront)
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - EIGz2iab__IXfBzk6Ki4duQTVcvdwjSjlZOfdPFBE2Qxk_0swxe_HA==
+                - rcGdMZL15FWzSA85Bn_xJbQwLirbk-sn2Vkfl2dQbviV7ycP_wVr_g==
             X-Amz-Cf-Pop:
-                - SFO53-P1
+                - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 167.166958ms
+        duration: 172.072708ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -132,12 +132,12 @@ interactions:
         host: api.braintrust.dev
         remote_addr: ""
         request_uri: ""
-        body: '{"events":[{"id":"ce34013b-f35e-49ce-b560-eb3997e723be","input":"hello","expected":"hello!","metadata":{"workflow_eval":{"case_id":"greeting","run_id":"9e57962c-8c43-4dec-a9c3-c085de375278","trial_index":0}},"metrics":{"start":1792517059.0233622},"span_id":"cd676f3b88156f09","root_span_id":"8035823439c07066d698c393589a5857","span_attributes":{"name":"eval","type":"eval"},"_is_merge":true}]}'
+        body: '{"events":[{"id":"c3a36404-d9f9-4630-939a-990b1b133200","input":"hello","expected":"hello!","metadata":{"workflow_eval":{"case_id":"greeting","run_id":"ed8bcbdb-2a59-4c6c-9be4-3dc3590c0a4d","trial_index":0}},"metrics":{"start":1792627189.5707588},"span_id":"6fa47ac6e976cb22","root_span_id":"36bef700a6f87fbe54aaadfa13686a19","span_attributes":{"name":"eval","type":"eval"},"_is_merge":true}]}'
         form: {}
         headers:
             Content-Type:
                 - application/json
-        url: https://api.braintrust.dev/v1/experiment/1b442930-49fb-47b8-9cbe-ea7fb1019804/insert
+        url: https://api.braintrust.dev/v1/experiment/d7c64978-9e41-40b2-8a7b-724a76658e49/insert
         method: POST
       response:
         proto: HTTP/2.0
@@ -147,7 +147,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"row_ids":["ce34013b-f35e-49ce-b560-eb3997e723be"]}'
+        body: '{"row_ids":["c3a36404-d9f9-4630-939a-990b1b133200"]}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -158,9 +158,9 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Tue, 20 Oct 2026 17:24:19 GMT
+                - Wed, 21 Oct 2026 23:59:49 GMT
             Etag:
-                - W/"34-FxOr7ioYO46QPCA+DHPWeC+ZVj4"
+                - W/"34-NUHiWVZoSr2m7nRbP2Qj6jyyNwk"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -170,16 +170,16 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 851c08a67685da1a5c66610a9f744baa.cloudfront.net (CloudFront)
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - VG2W997aqlA0p5yu5cpjU71B9daYzRXeamqYb3HNqBZLXBFarbjzHg==
+                - 1ihdnyuzS0rnHfbbYvHtgWPga3QTxIjJIbSBo0WSi4EXU1kUAK5cHQ==
             X-Amz-Cf-Pop:
-                - SFO53-P1
+                - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 618.691416ms
+        duration: 525.280917ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -196,7 +196,7 @@ interactions:
         headers:
             Content-Type:
                 - application/json
-        url: https://api.braintrust.dev/v1/experiment/1b442930-49fb-47b8-9cbe-ea7fb1019804/fetch
+        url: https://api.braintrust.dev/v1/experiment/d7c64978-9e41-40b2-8a7b-724a76658e49/fetch
         method: POST
       response:
         proto: HTTP/2.0
@@ -206,7 +206,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"events":[{"_pagination_key":"p07698802146095202304","_xact_id":"1000198066650941957","audit_data":[{"_xact_id":"1000198066650941957","audit_data":{"action":"merge","from":null,"path":["expected"],"to":"hello!"},"metadata":{},"source":"api"}],"classifications":null,"comments":null,"context":null,"created":"2026-10-20T17:24:19.258Z","error":null,"expected":"hello!","experiment_id":"1b442930-49fb-47b8-9cbe-ea7fb1019804","facets":null,"id":"ce34013b-f35e-49ce-b560-eb3997e723be","input":"hello","is_root":true,"metadata":{"workflow_eval":{"case_id":"greeting","run_id":"9e57962c-8c43-4dec-a9c3-c085de375278","trial_index":0}},"metrics":{"start":1792517059.0233622},"origin":null,"output":null,"project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","root_span_id":"8035823439c07066d698c393589a5857","scores":null,"span_attributes":{"name":"eval","type":"eval"},"span_id":"cd676f3b88156f09","span_parents":null,"tags":null}],"cursor":"atejwwoFAAA"}'
+        body: '{"events":[{"_pagination_key":"p07699275150849015808","_xact_id":"1000198073868421721","audit_data":[{"_xact_id":"1000198073868421721","audit_data":{"action":"merge","from":null,"path":["expected"],"to":"hello!"},"metadata":{},"source":"api"}],"classifications":null,"comments":null,"context":null,"created":"2026-10-21T23:59:49.696Z","error":null,"expected":"hello!","experiment_id":"d7c64978-9e41-40b2-8a7b-724a76658e49","facets":null,"id":"c3a36404-d9f9-4630-939a-990b1b133200","input":"hello","is_root":true,"metadata":{"workflow_eval":{"case_id":"greeting","run_id":"ed8bcbdb-2a59-4c6c-9be4-3dc3590c0a4d","trial_index":0}},"metrics":{"start":1792627189.5707588},"origin":null,"output":null,"project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","root_span_id":"36bef700a6f87fbe54aaadfa13686a19","scores":null,"span_attributes":{"name":"eval","type":"eval"},"span_id":"6fa47ac6e976cb22","span_parents":null,"tags":null}],"cursor":"atlR9QpZAAA"}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -217,7 +217,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Tue, 20 Oct 2026 17:24:20 GMT
+                - Wed, 21 Oct 2026 23:59:50 GMT
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -227,26 +227,26 @@ interactions:
             Vary:
                 - Origin
             Via:
-                - 1.1 851c08a67685da1a5c66610a9f744baa.cloudfront.net (CloudFront)
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - 7-G7FKKT6PpTS3z9UQam27yCDIzFyuC6JOG5GmPJ7f2VCh10EEuwog==
+                - kSLQC302cwJjETEvfE6ps-9qj1qUlDoW9naYhdneTMV1TMTTEw1pSQ==
             X-Amz-Cf-Pop:
-                - SFO53-P1
+                - SEA900-P10
             X-Bt-Api-Duration-Ms:
-                - "383"
+                - "158"
             X-Bt-Brainstore-Duration-Ms:
-                - "87"
+                - "74"
             X-Bt-Count:
                 - "1"
             X-Bt-Cursor:
-                - atejwwoFAAA
+                - atlR9QpZAAA
             X-Bt-Internal-Trace-Id:
-                - 518371d3363f25a3322d90abb4172560
+                - 9ae14fa2c97b93fa2abd1368b4535eaf
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 527.069416ms
+        duration: 404.658583ms
     - id: 4
       request:
         proto: HTTP/1.1
@@ -258,12 +258,12 @@ interactions:
         host: api.braintrust.dev
         remote_addr: ""
         request_uri: ""
-        body: '{"events":[{"id":"ce34013b-f35e-49ce-b560-eb3997e723be","input":"hello","output":"hello!","expected":"hello!","scores":{"correct":1},"metadata":{"workflow_eval":{"case_id":"greeting","run_id":"9e57962c-8c43-4dec-a9c3-c085de375278","trial_index":0}},"metrics":{"end":1792517060.169845,"start":1792517059.0233622},"span_id":"cd676f3b88156f09","root_span_id":"8035823439c07066d698c393589a5857","span_attributes":{"name":"eval","type":"eval"},"_is_merge":true}]}'
+        body: '{"events":[{"id":"c3a36404-d9f9-4630-939a-990b1b133200","input":"hello","output":"hello!","expected":"hello!","scores":{"correct":1},"metadata":{"workflow_eval":{"case_id":"greeting","run_id":"ed8bcbdb-2a59-4c6c-9be4-3dc3590c0a4d","trial_index":0}},"metrics":{"end":1792627190.503649,"start":1792627189.5707588},"span_id":"6fa47ac6e976cb22","root_span_id":"36bef700a6f87fbe54aaadfa13686a19","span_attributes":{"name":"eval","type":"eval"},"_is_merge":true}]}'
         form: {}
         headers:
             Content-Type:
                 - application/json
-        url: https://api.braintrust.dev/v1/experiment/1b442930-49fb-47b8-9cbe-ea7fb1019804/insert
+        url: https://api.braintrust.dev/v1/experiment/d7c64978-9e41-40b2-8a7b-724a76658e49/insert
         method: POST
       response:
         proto: HTTP/2.0
@@ -273,7 +273,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"row_ids":["ce34013b-f35e-49ce-b560-eb3997e723be"]}'
+        body: '{"row_ids":["c3a36404-d9f9-4630-939a-990b1b133200"]}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -284,9 +284,9 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Tue, 20 Oct 2026 17:24:20 GMT
+                - Wed, 21 Oct 2026 23:59:50 GMT
             Etag:
-                - W/"34-FxOr7ioYO46QPCA+DHPWeC+ZVj4"
+                - W/"34-NUHiWVZoSr2m7nRbP2Qj6jyyNwk"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -296,16 +296,16 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 851c08a67685da1a5c66610a9f744baa.cloudfront.net (CloudFront)
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - KiLVkxYbQlunWS1fevmID8dlIACR3h7HmcSkgIKaKIFsyYm5tQRT1A==
+                - dMatJjH4k6OtXLwuiAOe4zI6Dvy0w8zO5OiKQhoCCzJluvrl-7Hf8w==
             X-Amz-Cf-Pop:
-                - SFO53-P1
+                - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 229.164583ms
+        duration: 183.9575ms
     - id: 5
       request:
         proto: HTTP/1.1
@@ -322,7 +322,7 @@ interactions:
         headers:
             Content-Type:
                 - application/json
-        url: https://api.braintrust.dev/v1/experiment/1b442930-49fb-47b8-9cbe-ea7fb1019804/fetch
+        url: https://api.braintrust.dev/v1/experiment/d7c64978-9e41-40b2-8a7b-724a76658e49/fetch
         method: POST
       response:
         proto: HTTP/2.0
@@ -332,7 +332,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"events":[{"_pagination_key":"p07698802146095202304","_xact_id":"1000198066651006335","audit_data":[{"_xact_id":"1000198066650941957","audit_data":{"action":"merge","from":null,"path":["expected"],"to":"hello!"},"metadata":{},"source":"api"},{"_xact_id":"1000198066651006335","audit_data":{"action":"merge","from":null,"path":["output"],"to":"hello!"},"metadata":{},"source":"api"}],"classifications":null,"comments":null,"context":null,"created":"2026-10-20T17:24:19.258Z","error":null,"expected":"hello!","experiment_id":"1b442930-49fb-47b8-9cbe-ea7fb1019804","facets":null,"id":"ce34013b-f35e-49ce-b560-eb3997e723be","input":"hello","is_root":true,"metadata":{"workflow_eval":{"case_id":"greeting","run_id":"9e57962c-8c43-4dec-a9c3-c085de375278","trial_index":0}},"metrics":{"duration":1.1464829444885254,"end":1792517060.169845,"start":1792517059.0233622},"origin":null,"output":"hello!","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","root_span_id":"8035823439c07066d698c393589a5857","scores":{"correct":1},"span_attributes":{"name":"eval","type":"eval"},"span_id":"cd676f3b88156f09","span_parents":null,"tags":null}],"cursor":"atejwwoFAAA"}'
+        body: '{"events":[{"_pagination_key":"p07699275150849015808","_xact_id":"1000198073868486414","audit_data":[{"_xact_id":"1000198073868421721","audit_data":{"action":"merge","from":null,"path":["expected"],"to":"hello!"},"metadata":{},"source":"api"},{"_xact_id":"1000198073868486414","audit_data":{"action":"merge","from":null,"path":["output"],"to":"hello!"},"metadata":{},"source":"api"}],"classifications":null,"comments":null,"context":null,"created":"2026-10-21T23:59:49.696Z","error":null,"expected":"hello!","experiment_id":"d7c64978-9e41-40b2-8a7b-724a76658e49","facets":null,"id":"c3a36404-d9f9-4630-939a-990b1b133200","input":"hello","is_root":true,"metadata":{"workflow_eval":{"case_id":"greeting","run_id":"ed8bcbdb-2a59-4c6c-9be4-3dc3590c0a4d","trial_index":0}},"metrics":{"duration":0.9328901767730713,"end":1792627190.503649,"start":1792627189.5707588},"origin":null,"output":"hello!","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","root_span_id":"36bef700a6f87fbe54aaadfa13686a19","scores":{"correct":1},"span_attributes":{"name":"eval","type":"eval"},"span_id":"6fa47ac6e976cb22","span_parents":null,"tags":null}],"cursor":"atlR9QpZAAA"}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -343,7 +343,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Tue, 20 Oct 2026 17:24:20 GMT
+                - Wed, 21 Oct 2026 23:59:50 GMT
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -353,26 +353,26 @@ interactions:
             Vary:
                 - Origin
             Via:
-                - 1.1 851c08a67685da1a5c66610a9f744baa.cloudfront.net (CloudFront)
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - KuVPYdPHu949ZBYmiVdIfc4lsE0tZDU7eTpBfWITDHgM_x9M2z5C5g==
+                - TapsuPoxda8EWs9HGpbU7inc0g9WCE0jA66VPykyYIeu7XatZMnOdg==
             X-Amz-Cf-Pop:
-                - SFO53-P1
+                - SEA900-P10
             X-Bt-Api-Duration-Ms:
-                - "78"
+                - "87"
             X-Bt-Brainstore-Duration-Ms:
-                - "75"
+                - "84"
             X-Bt-Count:
                 - "1"
             X-Bt-Cursor:
-                - atejwwoFAAA
+                - atlR9QpZAAA
             X-Bt-Internal-Trace-Id:
-                - 5aae1921956b099ca232e4db277ec020
+                - e77075627bda87b80a3d312d876941ed
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 156.626ms
+        duration: 187.945666ms
     - id: 6
       request:
         proto: HTTP/1.1
@@ -387,7 +387,7 @@ interactions:
         body: ""
         form: {}
         headers: {}
-        url: https://api.braintrust.dev/v1/experiment/1b442930-49fb-47b8-9cbe-ea7fb1019804
+        url: https://api.braintrust.dev/v1/experiment/d7c64978-9e41-40b2-8a7b-724a76658e49
         method: DELETE
       response:
         proto: HTTP/2.0
@@ -397,7 +397,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"1b442930-49fb-47b8-9cbe-ea7fb1019804","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"TestWorkflowExperimentIntegration","description":null,"created":"2026-10-20T17:24:18.970Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":"2026-10-20T17:24:20.658Z","dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"c1f71e19-b3ce-4f59-89a9-055901f7755b","metadata":null,"tags":null}'
+        body: '{"id":"d7c64978-9e41-40b2-8a7b-724a76658e49","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"TestWorkflowExperimentIntegration","description":null,"created":"2026-10-21T23:59:49.506Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":"2026-10-21T23:59:50.998Z","dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -408,9 +408,9 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Tue, 20 Oct 2026 17:24:20 GMT
+                - Wed, 21 Oct 2026 23:59:51 GMT
             Etag:
-                - W/"1eb-6AdBUqReH1VLYoRiUCExycfLlgw"
+                - W/"1eb-TM3uEsqtUdNOmj7qCSqRD0tLRcE"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -420,13 +420,13 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 851c08a67685da1a5c66610a9f744baa.cloudfront.net (CloudFront)
+                - 1.1 ffe9646b2ea911744e2d51fc0715cedc.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - FLwQQa_sR76eAL0XIvk2RIcrD1qWqL5P0_HvZEGMcA6kt7GJhOeOiQ==
+                - 9F4IT1sPPp4poWx2fc1bgBjSOKTz1I-caMEny4qfteh3NqZyhW104A==
             X-Amz-Cf-Pop:
-                - SFO53-P1
+                - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 146.548375ms
+        duration: 179.699667ms

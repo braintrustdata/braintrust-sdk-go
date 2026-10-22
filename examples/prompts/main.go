@@ -18,17 +18,18 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
+	"github.com/oapi-codegen/nullable"
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/trace"
 
 	"github.com/braintrustdata/braintrust-sdk-go"
-	functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
-	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/eval"
+	"github.com/braintrustdata/braintrust-sdk-go/openapi"
 	"github.com/braintrustdata/braintrust-sdk-go/prompt"
 	traceopenai "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai"
 )
@@ -53,9 +54,22 @@ func main() {
 		log.Fatalf("initializing Braintrust: %v", err)
 	}
 
+	key := os.Getenv("BRAINTRUST_API_KEY")
+	baseURL := os.Getenv("BRAINTRUST_API_URL")
+	if baseURL == "" {
+		baseURL = "https://api.braintrust.dev"
+	}
+	api, err := openapi.NewClientWithResponses(baseURL, openapi.WithRequestEditorFn(func(_ context.Context, req *http.Request) error {
+		req.Header.Set("Authorization", "Bearer "+key)
+		return nil
+	}))
+	if err != nil {
+		log.Fatalf("initializing REST client: %v", err)
+	}
+
 	// Both halves use this one prompt. Normally you would author it in the
 	// Braintrust UI; here we create it so the example is self-contained.
-	if err := ensurePrompt(ctx, bt); err != nil {
+	if err := ensurePrompt(ctx, api); err != nil {
 		log.Fatalf("creating the prompt: %v", err)
 	}
 
@@ -160,33 +174,62 @@ func invokeHosted(ctx context.Context, bt *braintrust.Client) {
 
 // ensurePrompt creates the prompt both halves use. Creating a prompt with an
 // existing slug replaces it, so running twice is fine.
-func ensurePrompt(ctx context.Context, bt *braintrust.Client) error {
-	api := bt.API()
-
-	project, err := api.Projects().Create(ctx, projects.CreateParams{Name: projectName})
+func ensurePrompt(ctx context.Context, api *openapi.ClientWithResponses) error {
+	project, err := api.PostProjectWithResponse(ctx, openapi.CreateProject{Name: projectName})
 	if err != nil {
 		return err
 	}
+	if project.StatusCode() != http.StatusOK || project.JSON200 == nil {
+		return fmt.Errorf("creating project: HTTP %d: %s", project.StatusCode(), project.Body)
+	}
 
-	_, err = api.Functions().Create(ctx, functionsapi.CreateParams{
-		ProjectID:    project.ID,
+	var functionData openapi.FunctionData
+	if err := functionData.FromFunctionData0(openapi.FunctionData0{Type: "prompt"}); err != nil {
+		return err
+	}
+	var systemContent openapi.ChatCompletionMessageParam_0_Content
+	if err := systemContent.FromChatCompletionMessageParam0Content0("You greet people in one short, warm sentence."); err != nil {
+		return err
+	}
+	var userContent openapi.ChatCompletionMessageParam_1_Content
+	if err := userContent.FromChatCompletionMessageParam1Content0("Say hello to {{name}}."); err != nil {
+		return err
+	}
+	var system, user openapi.ChatCompletionMessageParam
+	if err := system.FromChatCompletionMessageParam0(openapi.ChatCompletionMessageParam0{Role: "system", Content: &systemContent}); err != nil {
+		return err
+	}
+	if err := user.FromChatCompletionMessageParam1(openapi.ChatCompletionMessageParam1{Role: "user", Content: &userContent}); err != nil {
+		return err
+	}
+	var block openapi.PromptBlockDataNullish
+	if err := block.FromPromptBlockDataNullish0(openapi.PromptBlockDataNullish0{
+		Type: "chat", Messages: []openapi.ChatCompletionMessageParam{system, user},
+	}); err != nil {
+		return err
+	}
+	model := "gpt-4o-mini"
+	temperature, maxTokens := float32(0), float32(50)
+	var params openapi.ModelParams
+	if err := params.FromModelParams0(openapi.ModelParams0{Temperature: &temperature, MaxTokens: &maxTokens}); err != nil {
+		return err
+	}
+	response, err := api.PostFunctionWithResponse(ctx, openapi.CreateFunction{
+		ProjectId:    project.JSON200.Id,
 		Name:         promptSlug,
 		Slug:         promptSlug,
-		FunctionData: map[string]any{"type": "prompt"},
-		PromptData: map[string]any{
-			"prompt": map[string]any{
-				"type": "chat",
-				"messages": []map[string]any{
-					{"role": "system", "content": "You greet people in one short, warm sentence."},
-					{"role": "user", "content": "Say hello to {{name}}."},
-				},
-			},
-			"options": map[string]any{
-				"model":  "gpt-4o-mini",
-				"params": map[string]any{"temperature": 0, "max_tokens": 50},
-			},
-			"template_format": "mustache",
-		},
+		FunctionData: functionData,
+		PromptData: nullable.NewNullableWithValue(openapi.PromptDataNullish{
+			Prompt:         nullable.NewNullableWithValue(block),
+			Options:        nullable.NewNullableWithValue(openapi.PromptOptionsNullish{Model: &model, Params: &params}),
+			TemplateFormat: nullable.NewNullableWithValue(openapi.PromptDataNullishTemplateFormat("mustache")),
+		}),
 	})
-	return err
+	if err != nil {
+		return err
+	}
+	if response.StatusCode() != http.StatusOK || response.JSON200 == nil {
+		return fmt.Errorf("creating prompt: HTTP %d: %s", response.StatusCode(), response.Body)
+	}
+	return nil
 }

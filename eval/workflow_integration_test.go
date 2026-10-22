@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/logger"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 )
@@ -18,9 +18,9 @@ import (
 func TestWorkflowExperimentIntegration(t *testing.T) {
 	ctx := context.Background()
 	httpClient := vcr.GetHTTPSClient(t)
-	apiClient := api.NewWithHTTPSClient(httpClient)
+	apiClient := https.NewGenerated(httpClient)
 	session := auth.NewTestSession(auth.TestAPIKey, "org-test", "Test Org", "https://api.braintrust.dev", "https://www.braintrust.dev", "https://www.braintrust.dev", logger.NewFailTestLogger(t))
-	evaluator := NewEvaluator[string, string](session, nil, apiClient, integrationTestProject)
+	evaluator := NewEvaluatorWithClient[string, string](session, nil, apiClient, integrationTestProject)
 	store := NewWorkflowEvalMemoryStore()
 	makeDefinition := func() *WorkflowEval[string, string] {
 		return NewWorkflowEval(evaluator, &WorkflowEval[string, string]{Name: t.Name(), Store: store,
@@ -45,10 +45,12 @@ func TestWorkflowExperimentIntegration(t *testing.T) {
 	w := makeDefinition()
 	result, err := w.Start(ctx, WorkflowStartOpts[string, string]{Dataset: NewDataset([]Case[string, string]{{ID: "greeting", Input: "hello", Expected: "hello!"}})})
 	require.NoError(t, err)
-	t.Cleanup(func() { require.NoError(t, apiClient.Experiments().Delete(ctx, result.ExperimentID)) })
+	t.Cleanup(func() {
+		require.NoError(t, closeFixtureResponse(apiClient.DeleteExperimentId(ctx, result.ExperimentID)))
+	})
 	fetch := func() []map[string]any {
 		t.Helper()
-		resp, err := httpClient.POST(ctx, "/v1/experiment/"+result.ExperimentID+"/fetch", map[string]any{"limit": 100})
+		resp, err := apiClient.PostExperimentIdFetchWithBody(ctx, result.ExperimentID, "application/json", fixtureBody(t, map[string]any{"limit": 100}))
 		require.NoError(t, err)
 		defer func() { require.NoError(t, resp.Body.Close()) }()
 		var body struct {

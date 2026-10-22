@@ -70,6 +70,26 @@ func TestData_RoundTrip(t *testing.T) {
 	assert.Equal(t, data, again)
 }
 
+func TestStoredPrompt_PreservesPromptDataPrecision(t *testing.T) {
+	var row storedPrompt
+	require.NoError(t, json.Unmarshal([]byte(`{
+		"id":"prompt-id",
+		"_xact_id":"1000192656880881099",
+		"prompt_data":{
+			"options":{"params":{"seed":16777217,"temperature":0.123456789}},
+			"parser":{"seed":9007199254740993}
+		}
+	}`), &row))
+
+	p, err := fromRow(row)
+	require.NoError(t, err)
+	assert.Equal(t, "1000192656880881099", p.Version)
+	require.NotNil(t, p.Data.Options)
+	assert.Equal(t, float64(16777217), p.Data.Options.Params["seed"])
+	assert.Equal(t, 0.123456789, p.Data.Options.Params["temperature"])
+	assert.Equal(t, `{"seed":9007199254740993}`, string(p.Data.Parser))
+}
+
 func TestContent_MarshalJSON(t *testing.T) {
 	tests := []struct {
 		name    string

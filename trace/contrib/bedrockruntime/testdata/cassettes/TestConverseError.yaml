@@ -16,15 +16,15 @@ interactions:
         form: {}
         headers:
             Amz-Sdk-Invocation-Id:
-                - e22375e3-f76d-440e-a2fa-6c58d3524b5d
+                - 319bc09a-5642-42ed-8688-60b96e79f536
             Amz-Sdk-Request:
                 - attempt=1; max=3
             Content-Type:
                 - application/json
             User-Agent:
-                - aws-sdk-go-v2/1.41.5 ua/2.1 os/macos lang/go#1.26.2 md/GOOS#darwin md/GOARCH#arm64 api/bedrockruntime#1.50.4 m/E,g
+                - aws-sdk-go-v2/1.41.5 ua/2.1 os/macos lang/go#1.26.10 md/GOOS#darwin md/GOARCH#arm64 api/bedrockruntime#1.50.4 m/E,g
             X-Amz-Date:
-                - 20260417T175550Z
+                - 20261022T000621Z
         url: https://bedrock-runtime.us-east-2.amazonaws.com/model/bogus.nonexistent-model-v1%3A0/converse
         method: POST
       response:
@@ -42,11 +42,11 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 17 Apr 2026 17:55:50 GMT
+                - Thu, 22 Oct 2026 00:06:21 GMT
             X-Amzn-Errortype:
                 - ValidationException:http://internal.amazon.com/coral/com.amazon.bedrock/
             X-Amzn-Requestid:
-                - bf112ec9-2338-4747-9a4d-aaed5db70440
+                - 239d4594-7fbe-4331-ba3b-3b4adc3f745f
         status: 400 Bad Request
         code: 400
-        duration: 75.088458ms
+        duration: 109.6685ms

@@ -19,9 +19,9 @@ interactions:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-genai-sdk/1.41.0 gl-go/go1.26.3
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-genai-sdk/1.41.0 gl-go/go1.26.3
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
         url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent
@@ -42,7 +42,7 @@ interactions:
                     "parts": [
                       {
                         "text": "The color of the image is red.",
-                        "thoughtSignature": "EjQKMgEMOdbHnM18UV2cSxC6K+nzWGGY+YuA69GEp2hTs954u/O1cyhwokU9prkQoYO2XR4b"
+                        "thoughtSignature": "EnMKcQFpFH0TgLMXlvRBukbIVK0ulzbEakiSLg1cxfrxzWD0OLaJJ189wg3MLH5s2s/OihYLSJndt71bAUAl60WiZce+d/RivdKxehkS7fmAfsmJvuEEaQA35P+tmPKMwvKzAgqyKRWDrGcAbYCbmSIRdBD0"
                       }
                     ],
                     "role": "model"
@@ -57,18 +57,18 @@ interactions:
                 "totalTokenCount": 1104,
                 "promptTokensDetails": [
                   {
-                    "modality": "IMAGE",
-                    "tokenCount": 1089
-                  },
-                  {
                     "modality": "TEXT",
                     "tokenCount": 7
+                  },
+                  {
+                    "modality": "IMAGE",
+                    "tokenCount": 1089
                   }
                 ],
                 "serviceTier": "standard"
               },
               "modelVersion": "gemini-3.1-flash-lite",
-              "responseId": "aokOasWeFPfgz7IPtpToAQ"
+              "responseId": "3FPZaozdB7yN_uMP5t764Ak"
             }
         headers:
             Alt-Svc:
@@ -76,11 +76,11 @@ interactions:
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Thu, 21 May 2026 04:26:18 GMT
+                - Thu, 22 Oct 2026 00:07:56 GMT
             Server:
                 - scaffolding on HTTPServer2
             Server-Timing:
-                - gfet4t7; dur=824
+                - gfet4t7; dur=885
             Vary:
                 - Origin
                 - X-Origin
@@ -95,4 +95,4 @@ interactions:
                 - "0"
         status: 200 OK
         code: 200
-        duration: 984.814417ms
+        duration: 1.248648041s

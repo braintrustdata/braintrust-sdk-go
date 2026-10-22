@@ -34,7 +34,7 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.23.12
+                - go1.26.10
         url: https://api.openai.com/v1/chat/completions
         method: POST
       response:
@@ -47,16 +47,16 @@ interactions:
         uncompressed: true
         body: |
             {
-              "id": "chatcmpl-CavJ5EN6Mgrp5rAUKCXmhtfyuEGC3",
+              "id": "chatcmpl-EbacrBH3MGiH8uurXTojsDlKVpQC2",
               "object": "chat.completion",
-              "created": 1762916131,
+              "created": 1792627633,
               "model": "gpt-4o-mini-2024-07-18",
               "choices": [
                 {
                   "index": 0,
                   "message": {
                     "role": "assistant",
-                    "content": "Ahoy there, matey! I be feelin' shipshape and ready to sail the seas of knowledge with ye! How be ye on this fine day?",
+                    "content": "Ahoy there, matey! I be feelin' as fine as a ship sailin' smooth seas! How be ye on this fine day?",
                     "refusal": null,
                     "annotations": []
                   },
@@ -66,8 +66,8 @@ interactions:
               ],
               "usage": {
                 "prompt_tokens": 28,
-                "completion_tokens": 33,
-                "total_tokens": 61,
+                "completion_tokens": 31,
+                "total_tokens": 59,
                 "prompt_tokens_details": {
                   "cached_tokens": 0,
                   "audio_tokens": 0
@@ -80,25 +80,27 @@ interactions:
                 }
               },
               "service_tier": "default",
-              "system_fingerprint": "fp_560af6e559"
+              "system_fingerprint": "fp_0ca0003e75"
             }
         headers:
             Access-Control-Expose-Headers:
                 - X-Request-ID
+                - CF-Ray
+                - CF-Ray
             Alt-Svc:
                 - h3=":443"; ma=86400
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - 99d2c03adec5e55d-EWR
+                - a4e442b1c9bfae4f-SEA
             Content-Type:
                 - application/json
             Date:
-                - Wed, 12 Nov 2025 02:55:32 GMT
+                - Thu, 22 Oct 2026 00:07:13 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "1440"
+                - "524"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -106,14 +108,11 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=DLZJo0gC4B_IP6FNHOtcq5iJznlHULBGaNAN7tTaphw-1762916132-1.0.1.1-VIPl7YbMWo8DbtCZnBvZD_D5S7dtxYH1wwTHwxXZF7TzB6zrprpnt804RmfQfiumOCNa4Fhs1YYTBGUOg7tnLPETrbE0qUAR9f..S6Mm9BE; path=/; expires=Wed, 12-Nov-25 03:25:32 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
-                - _cfuvid=qgmT4eh0TCIY_Xa00zV03HxlTs5Rf4bthWogknni3m0-1762916132580-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+                - __cf_bm=gbBq6YepDL6Kg9pd7U2UOU04.avIxdAGNoQvMNsPI9o-1792627632.9258566-1.0.1.1-7H13u8gwd9uDaqA1_BYT5hrKREKZghtXZiEEoArpVAtfNvMjFQ_FsgQKvO2dx_oF2cByS5XaGqlDD_BNCWs8.rf7hw1.Qh.5lv_NuF2zAigfh7cZXLrfaM00IYfULd8P; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:37:13 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
                 - nosniff
-            X-Envoy-Upstream-Service-Time:
-                - "1465"
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Ratelimit-Limit-Requests:
@@ -129,7 +128,7 @@ interactions:
             X-Ratelimit-Reset-Tokens:
                 - 0s
             X-Request-Id:
-                - req_f7743abe644f40aab4cdb1f1bf4f4bfa
+                - req_f5ee68ab81434209ae2bb13d99d00a9a
         status: 200 OK
         code: 200
-        duration: 1.58768225s
+        duration: 666.2095ms

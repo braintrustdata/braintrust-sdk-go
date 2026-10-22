@@ -19,9 +19,9 @@ interactions:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-genai-sdk/1.41.0 gl-go/go1.26.3
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-genai-sdk/1.41.0 gl-go/go1.26.3
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
         url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent
@@ -42,7 +42,7 @@ interactions:
                     "parts": [
                       {
                         "text": "The capital of France is Paris.",
-                        "thoughtSignature": "EjQKMgEMOdbH97nYeIlnQB7to1yne75zWcBxfVBCB0jJ77el87h0p0K9TTM7RijkSkZ6Zj76"
+                        "thoughtSignature": "EnMKcQFpFH0TP9KuZWrlWAFVBZ7GEt7NysSlGg4O/SUjHQS4BZ3krRKc3Du1Fr89FPTqBJxDf+HDQ01T2hRZlTwlbAPDObDEhvDSX3520VH4H+dfhMw/y5qDAwSGUGuY9GzROLF6Xc7OeBp+cgPWscwiOlZn"
                       }
                     ],
                     "role": "model"
@@ -64,7 +64,7 @@ interactions:
                 "serviceTier": "standard"
               },
               "modelVersion": "gemini-3.1-flash-lite",
-              "responseId": "bIkOarfCELjRz7IP0erfWA"
+              "responseId": "3VPZapSkN92Z_uMPmMuTiQ0"
             }
         headers:
             Alt-Svc:
@@ -72,11 +72,11 @@ interactions:
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Thu, 21 May 2026 04:26:20 GMT
+                - Thu, 22 Oct 2026 00:07:59 GMT
             Server:
                 - scaffolding on HTTPServer2
             Server-Timing:
-                - gfet4t7; dur=610
+                - gfet4t7; dur=1630
             Vary:
                 - Origin
                 - X-Origin
@@ -91,4 +91,4 @@ interactions:
                 - "0"
         status: 200 OK
         code: 200
-        duration: 814.640625ms
+        duration: 1.780598792s

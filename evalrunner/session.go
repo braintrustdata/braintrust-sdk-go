@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/openapi"
 )
 
 // session holds the authenticated Braintrust context for this process.
@@ -19,7 +19,7 @@ import (
 // is what attributes the resulting experiment to them.
 type session struct {
 	session *auth.Session
-	api     *api.API
+	api     *openapi.Client
 }
 
 // newSession logs in and builds an API client.
@@ -44,7 +44,7 @@ func newSession(ctx context.Context, apiKey, appURL, apiURL, orgName string, log
 	}
 
 	apiInfo := authSession.APIInfo()
-	apiClient := api.NewClient(apiInfo.APIKey, api.WithAPIURL(apiInfo.APIURL), api.WithLogger(log))
+	apiClient := https.NewGenerated(https.NewClient(apiInfo.APIKey, apiInfo.APIURL, log))
 
 	return &session{session: authSession, api: apiClient}, nil
 }
@@ -77,7 +77,7 @@ func (s *session) authSession() *auth.Session {
 	return s.session
 }
 
-func (s *session) apiClient() *api.API {
+func (s *session) apiClient() *openapi.Client {
 	if s == nil {
 		return nil
 	}

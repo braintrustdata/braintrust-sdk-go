@@ -8,15 +8,14 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/braintrustdata/braintrust-sdk-go/api"
-	functionsapi "github.com/braintrustdata/braintrust-sdk-go/api/functions"
-	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/config"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/tests"
+	"github.com/braintrustdata/braintrust-sdk-go/openapi"
 )
 
 // setupAPIIntegrationTest sets up common test infrastructure for API integration tests with VCR support
-func setupAPIIntegrationTest(t *testing.T) *api.API {
+func setupAPIIntegrationTest(t *testing.T) *openapi.Client {
 	t.Helper()
 	return createIntegrationTestAPIClient(t)
 }
@@ -27,50 +26,39 @@ func TestFunctionsAPI_Task_StringInput(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	functions := apiClient.Functions()
 
 	// Register project
-	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
+	project, err := decodeFixtureResponse(apiClient.PostProject(ctx, openapi.CreateProject{Name: integrationTestProject}))
 	require.NoError(t, err)
 
 	// Use fixed name for VCR determinism
 	testSlug := tests.Name(t, "slug")
 
 	// Clean up any existing function from previous test runs
-	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
-		ProjectName: integrationTestProject,
-		Slug:        testSlug,
-		Limit:       1,
-	}); len(existing) > 0 {
-		_ = functions.Delete(ctx, existing[0].ID)
+	if existing, _ := decodeFixtureObjects(apiClient.GetFunction(ctx, &openapi.GetFunctionParams{ProjectName: https.String(integrationTestProject), Slug: https.String(testSlug), Limit: https.Positive(1)})); len(existing) > 0 {
+		_ = closeFixtureResponse(apiClient.DeleteFunctionId(ctx, existing[0].ID))
 	}
 
 	// Create a prompt that echoes the input
-	function, err := functions.Create(ctx, functionsapi.CreateParams{
-		ProjectID: project.ID,
-		Name:      "String Echo Task",
-		Slug:      testSlug,
-		FunctionData: map[string]any{
-			"type": "prompt",
-		},
-		PromptData: map[string]any{
-			"prompt": map[string]any{
-				"type": "chat",
-				"messages": []map[string]any{
-					{"role": "user", "content": "Echo this text: {{input}}"},
-				},
-			},
-			"options": map[string]any{
-				"model":  "gpt-4o-mini",
-				"params": map[string]any{"use_cache": true, "temperature": 0},
+	function, err := decodeFixtureResponse(apiClient.PostFunctionWithBody(ctx, "application/json", fixtureBody(t, map[string]any{"project_id": project.ID, "name": "String Echo Task", "slug": testSlug, "function_data": map[string]any{
+		"type": "prompt",
+	}, "prompt_data": map[string]any{
+		"prompt": map[string]any{
+			"type": "chat",
+			"messages": []map[string]any{
+				{"role": "user", "content": "Echo this text: {{input}}"},
 			},
 		},
-	})
+		"options": map[string]any{
+			"model":  "gpt-4o-mini",
+			"params": map[string]any{"use_cache": true, "temperature": 0},
+		},
+	}})))
 	require.NoError(t, err)
 	require.NotNil(t, function)
 
 	defer func() {
-		_ = functions.Delete(ctx, function.ID)
+		_ = closeFixtureResponse(apiClient.DeleteFunctionId(ctx, function.ID))
 	}()
 
 	// Create FunctionsAPI with string types
@@ -99,56 +87,45 @@ func TestFunctionsAPI_Task_StructInput(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	functions := apiClient.Functions()
 
-	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
+	project, err := decodeFixtureResponse(apiClient.PostProject(ctx, openapi.CreateProject{Name: integrationTestProject}))
 	require.NoError(t, err)
 
 	// Use fixed name for VCR determinism
 	testSlug := tests.Name(t, "slug")
 
-	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
-		ProjectName: integrationTestProject,
-		Slug:        testSlug,
-		Limit:       1,
-	}); len(existing) > 0 {
-		_ = functions.Delete(ctx, existing[0].ID)
+	if existing, _ := decodeFixtureObjects(apiClient.GetFunction(ctx, &openapi.GetFunctionParams{ProjectName: https.String(integrationTestProject), Slug: https.String(testSlug), Limit: https.Positive(1)})); len(existing) > 0 {
+		_ = closeFixtureResponse(apiClient.DeleteFunctionId(ctx, existing[0].ID))
 	}
 
 	// Create a prompt that returns JSON
-	function, err := functions.Create(ctx, functionsapi.CreateParams{
-		ProjectID: project.ID,
-		Name:      "Struct Math Task",
-		Slug:      testSlug,
-		FunctionData: map[string]any{
-			"type": "prompt",
-		},
-		PromptData: map[string]any{
-			"prompt": map[string]any{
-				"type": "chat",
-				"messages": []map[string]any{
-					{
-						"role":    "system",
-						"content": "You return JSON with the answer field containing the numeric result.",
-					},
-					{
-						"role":    "user",
-						"content": `Calculate {{input.operation}} of {{input.a}} and {{input.b}}. Return ONLY a JSON object like {"answer": 5}. No other text.`,
-					},
+	function, err := decodeFixtureResponse(apiClient.PostFunctionWithBody(ctx, "application/json", fixtureBody(t, map[string]any{"project_id": project.ID, "name": "Struct Math Task", "slug": testSlug, "function_data": map[string]any{
+		"type": "prompt",
+	}, "prompt_data": map[string]any{
+		"prompt": map[string]any{
+			"type": "chat",
+			"messages": []map[string]any{
+				{
+					"role":    "system",
+					"content": "You return JSON with the answer field containing the numeric result.",
 				},
-			},
-			"options": map[string]any{
-				"model": "gpt-4o-mini",
-				"params": map[string]any{
-					"temperature":     0,
-					"max_tokens":      50,
-					"response_format": map[string]any{"type": "json_object"},
+				{
+					"role":    "user",
+					"content": `Calculate {{input.operation}} of {{input.a}} and {{input.b}}. Return ONLY a JSON object like {"answer": 5}. No other text.`,
 				},
 			},
 		},
-	})
+		"options": map[string]any{
+			"model": "gpt-4o-mini",
+			"params": map[string]any{
+				"temperature":     0,
+				"max_tokens":      50,
+				"response_format": map[string]any{"type": "json_object"},
+			},
+		},
+	}})))
 	require.NoError(t, err)
-	defer func() { _ = functions.Delete(ctx, function.ID) }()
+	defer func() { _ = closeFixtureResponse(apiClient.DeleteFunctionId(ctx, function.ID)) }()
 
 	// Define input and output structs
 	type MathInput struct {
@@ -185,56 +162,45 @@ func TestFunctionsAPI_Task_MapInput(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	functions := apiClient.Functions()
 
-	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
+	project, err := decodeFixtureResponse(apiClient.PostProject(ctx, openapi.CreateProject{Name: integrationTestProject}))
 	require.NoError(t, err)
 
 	// Use fixed name for VCR determinism
 	testSlug := tests.Name(t, "slug")
 
-	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
-		ProjectName: integrationTestProject,
-		Slug:        testSlug,
-		Limit:       1,
-	}); len(existing) > 0 {
-		_ = functions.Delete(ctx, existing[0].ID)
+	if existing, _ := decodeFixtureObjects(apiClient.GetFunction(ctx, &openapi.GetFunctionParams{ProjectName: https.String(integrationTestProject), Slug: https.String(testSlug), Limit: https.Positive(1)})); len(existing) > 0 {
+		_ = closeFixtureResponse(apiClient.DeleteFunctionId(ctx, existing[0].ID))
 	}
 
 	// Create a prompt that processes arbitrary map input
-	function, err := functions.Create(ctx, functionsapi.CreateParams{
-		ProjectID: project.ID,
-		Name:      "Map Processing Task",
-		Slug:      testSlug,
-		FunctionData: map[string]any{
-			"type": "prompt",
-		},
-		PromptData: map[string]any{
-			"prompt": map[string]any{
-				"type": "chat",
-				"messages": []map[string]any{
-					{
-						"role":    "system",
-						"content": "You process input and return a JSON object with a 'result' field.",
-					},
-					{
-						"role":    "user",
-						"content": `Process this data: {{input.name}} - {{input.value}}. Return ONLY JSON like {"result": "processed"}`,
-					},
+	function, err := decodeFixtureResponse(apiClient.PostFunctionWithBody(ctx, "application/json", fixtureBody(t, map[string]any{"project_id": project.ID, "name": "Map Processing Task", "slug": testSlug, "function_data": map[string]any{
+		"type": "prompt",
+	}, "prompt_data": map[string]any{
+		"prompt": map[string]any{
+			"type": "chat",
+			"messages": []map[string]any{
+				{
+					"role":    "system",
+					"content": "You process input and return a JSON object with a 'result' field.",
 				},
-			},
-			"options": map[string]any{
-				"model": "gpt-4o-mini",
-				"params": map[string]any{
-					"temperature":     0,
-					"max_tokens":      50,
-					"response_format": map[string]any{"type": "json_object"},
+				{
+					"role":    "user",
+					"content": `Process this data: {{input.name}} - {{input.value}}. Return ONLY JSON like {"result": "processed"}`,
 				},
 			},
 		},
-	})
+		"options": map[string]any{
+			"model": "gpt-4o-mini",
+			"params": map[string]any{
+				"temperature":     0,
+				"max_tokens":      50,
+				"response_format": map[string]any{"type": "json_object"},
+			},
+		},
+	}})))
 	require.NoError(t, err)
-	defer func() { _ = functions.Delete(ctx, function.ID) }()
+	defer func() { _ = closeFixtureResponse(apiClient.DeleteFunctionId(ctx, function.ID)) }()
 
 	// Create FunctionsAPI with map types
 	functionsAPI := &FunctionsAPI[map[string]any, map[string]any]{
@@ -266,20 +232,15 @@ func TestFunctionsAPI_Scorer_VariousTypes(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	functions := apiClient.Functions()
 
-	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
+	project, err := decodeFixtureResponse(apiClient.PostProject(ctx, openapi.CreateProject{Name: integrationTestProject}))
 	require.NoError(t, err)
 
 	// Use fixed name for VCR determinism
 	testSlug := tests.Name(t, "slug")
 
-	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
-		ProjectName: integrationTestProject,
-		Slug:        testSlug,
-		Limit:       1,
-	}); len(existing) > 0 {
-		_ = functions.Delete(ctx, existing[0].ID)
+	if existing, _ := decodeFixtureObjects(apiClient.GetFunction(ctx, &openapi.GetFunctionParams{ProjectName: https.String(integrationTestProject), Slug: https.String(testSlug), Limit: https.Positive(1)})); len(existing) > 0 {
+		_ = closeFixtureResponse(apiClient.DeleteFunctionId(ctx, existing[0].ID))
 	}
 
 	// Create a scorer that evaluates based on input/output
@@ -302,18 +263,11 @@ func TestFunctionsAPI_Scorer_VariousTypes(t *testing.T) {
 		},
 	}
 
-	function, err := functions.Create(ctx, functionsapi.CreateParams{
-		ProjectID:    project.ID,
-		Name:         "Type Flexible Scorer",
-		Slug:         testSlug,
-		FunctionType: "scorer",
-		FunctionData: map[string]any{
-			"type": "prompt",
-		},
-		PromptData: promptData,
-	})
+	function, err := decodeFixtureResponse(apiClient.PostFunctionWithBody(ctx, "application/json", fixtureBody(t, map[string]any{"project_id": project.ID, "name": "Type Flexible Scorer", "slug": testSlug, "function_type": "scorer", "function_data": map[string]any{
+		"type": "prompt",
+	}, "prompt_data": promptData})))
 	require.NoError(t, err)
-	defer func() { _ = functions.Delete(ctx, function.ID) }()
+	defer func() { _ = closeFixtureResponse(apiClient.DeleteFunctionId(ctx, function.ID)) }()
 
 	// Test with string types
 	stringFunctionsAPI := &FunctionsAPI[string, string]{
@@ -389,98 +343,76 @@ func TestFunctionsAPI_EndToEnd_MixedTypes(t *testing.T) {
 
 	ctx := context.Background()
 
-	functions := apiClient.Functions()
 	cfg := &config.Config{
 		DefaultProjectName: integrationTestProject,
 	}
 
 	// Register project
-	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
+	project, err := decodeFixtureResponse(apiClient.PostProject(ctx, openapi.CreateProject{Name: integrationTestProject}))
 	require.NoError(t, err)
 
 	// Create task function - use fixed name for VCR determinism
 	taskSlug := tests.Name(t, "task")
-	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
-		ProjectName: integrationTestProject,
-		Slug:        taskSlug,
-		Limit:       1,
-	}); len(existing) > 0 {
-		_ = functions.Delete(ctx, existing[0].ID)
+	if existing, _ := decodeFixtureObjects(apiClient.GetFunction(ctx, &openapi.GetFunctionParams{ProjectName: https.String(integrationTestProject), Slug: https.String(taskSlug), Limit: https.Positive(1)})); len(existing) > 0 {
+		_ = closeFixtureResponse(apiClient.DeleteFunctionId(ctx, existing[0].ID))
 	}
 
-	taskFunc, err := functions.Create(ctx, functionsapi.CreateParams{
-		ProjectID: project.ID,
-		Name:      "E2E Task",
-		Slug:      taskSlug,
-		FunctionData: map[string]any{
-			"type": "prompt",
-		},
-		PromptData: map[string]any{
-			"prompt": map[string]any{
-				"type": "chat",
-				"messages": []map[string]any{
-					{
-						"role":    "system",
-						"content": "You answer questions with JSON. Return ONLY the JSON object, no markdown, no code blocks, no backticks.",
-					},
-					{
-						"role":    "user",
-						"content": `Question: {{input.question}}. Return ONLY JSON like {"answer": "your answer", "confidence": 0.9}. No markdown formatting.`,
-					},
+	taskFunc, err := decodeFixtureResponse(apiClient.PostFunctionWithBody(ctx, "application/json", fixtureBody(t, map[string]any{"project_id": project.ID, "name": "E2E Task", "slug": taskSlug, "function_data": map[string]any{
+		"type": "prompt",
+	}, "prompt_data": map[string]any{
+		"prompt": map[string]any{
+			"type": "chat",
+			"messages": []map[string]any{
+				{
+					"role":    "system",
+					"content": "You answer questions with JSON. Return ONLY the JSON object, no markdown, no code blocks, no backticks.",
 				},
-			},
-			"options": map[string]any{
-				"model": "gpt-4o-mini",
-				"params": map[string]any{
-					"temperature":     0,
-					"max_tokens":      100,
-					"response_format": map[string]any{"type": "json_object"},
+				{
+					"role":    "user",
+					"content": `Question: {{input.question}}. Return ONLY JSON like {"answer": "your answer", "confidence": 0.9}. No markdown formatting.`,
 				},
 			},
 		},
-	})
+		"options": map[string]any{
+			"model": "gpt-4o-mini",
+			"params": map[string]any{
+				"temperature":     0,
+				"max_tokens":      100,
+				"response_format": map[string]any{"type": "json_object"},
+			},
+		},
+	}})))
 	require.NoError(t, err)
-	defer func() { _ = functions.Delete(ctx, taskFunc.ID) }()
+	defer func() { _ = closeFixtureResponse(apiClient.DeleteFunctionId(ctx, taskFunc.ID)) }()
 
 	// Create scorer function - use fixed name for VCR determinism
 	scorerSlug := tests.Name(t, "scorer")
-	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
-		ProjectName: integrationTestProject,
-		Slug:        scorerSlug,
-		Limit:       1,
-	}); len(existing) > 0 {
-		_ = functions.Delete(ctx, existing[0].ID)
+	if existing, _ := decodeFixtureObjects(apiClient.GetFunction(ctx, &openapi.GetFunctionParams{ProjectName: https.String(integrationTestProject), Slug: https.String(scorerSlug), Limit: https.Positive(1)})); len(existing) > 0 {
+		_ = closeFixtureResponse(apiClient.DeleteFunctionId(ctx, existing[0].ID))
 	}
 
-	scorerFunc, err := functions.Create(ctx, functionsapi.CreateParams{
-		ProjectID:    project.ID,
-		Name:         "E2E Scorer",
-		Slug:         scorerSlug,
-		FunctionType: "scorer",
-		FunctionData: map[string]any{
-			"type": "prompt",
+	scorerFunc, err := decodeFixtureResponse(apiClient.PostFunctionWithBody(ctx, "application/json", fixtureBody(t, map[string]any{"project_id": project.ID, "name": "E2E Scorer", "slug": scorerSlug, "function_type": "scorer", "function_data": map[string]any{
+		"type": "prompt",
+	}, "prompt_data": map[string]any{
+		"parser": map[string]any{
+			"type":          "llm_classifier",
+			"use_cot":       false,
+			"choice_scores": map[string]any{"incorrect": 0.0, "correct": 1.0},
 		},
-		PromptData: map[string]any{
-			"parser": map[string]any{
-				"type":          "llm_classifier",
-				"use_cot":       false,
-				"choice_scores": map[string]any{"incorrect": 0.0, "correct": 1.0},
-			},
-			"prompt": map[string]any{
-				"type": "chat",
-				"messages": []map[string]any{
-					{"role": "system", "content": "You are a scorer."},
-					{"role": "user", "content": "Is the output.answer field non-empty? Choose 'correct' if yes, 'incorrect' if no."},
-				},
-			},
-			"options": map[string]any{
-				"model":  "gpt-4o-mini",
-				"params": map[string]any{"temperature": 0},
+		"prompt": map[string]any{
+			"type": "chat",
+			"messages": []map[string]any{
+				{"role": "system", "content": "You are a scorer."},
+				{"role": "user", "content": "Is the output.answer field non-empty? Choose 'correct' if yes, 'incorrect' if no."},
 			},
 		},
-	})
+		"options": map[string]any{
+			"model":  "gpt-4o-mini",
+			"params": map[string]any{"temperature": 0},
+		},
+	}})))
 	require.NoError(t, err)
-	defer func() { _ = functions.Delete(ctx, scorerFunc.ID) }()
+	defer func() { _ = closeFixtureResponse(apiClient.DeleteFunctionId(ctx, scorerFunc.ID)) }()
 
 	// Define types
 	type QuestionInput struct {
@@ -521,7 +453,7 @@ func TestFunctionsAPI_EndToEnd_MixedTypes(t *testing.T) {
 	defer func() { _ = tp.Shutdown(ctx) }()
 
 	// Create evaluator with VCR-wrapped API client
-	evaluator := NewEvaluator[QuestionInput, AnswerOutput](session, tp, apiClient, cfg.DefaultProjectName)
+	evaluator := NewEvaluatorWithClient[QuestionInput, AnswerOutput](session, tp, apiClient, cfg.DefaultProjectName)
 	// Use fixed experiment name for VCR determinism
 	result, err := evaluator.Run(ctx, Opts[QuestionInput, AnswerOutput]{
 		Experiment: "test-e2e-exp",
@@ -542,51 +474,40 @@ func TestFunctionsAPI_Task_PrimitiveTypes(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	functions := apiClient.Functions()
 
-	project, err := apiClient.Projects().Create(ctx, projects.CreateParams{Name: integrationTestProject})
+	project, err := decodeFixtureResponse(apiClient.PostProject(ctx, openapi.CreateProject{Name: integrationTestProject}))
 	require.NoError(t, err)
 
 	// Use fixed name for VCR determinism
 	testSlug := tests.Name(t, "slug")
 
-	if existing, _ := functions.Query(ctx, functionsapi.QueryParams{
-		ProjectName: integrationTestProject,
-		Slug:        testSlug,
-		Limit:       1,
-	}); len(existing) > 0 {
-		_ = functions.Delete(ctx, existing[0].ID)
+	if existing, _ := decodeFixtureObjects(apiClient.GetFunction(ctx, &openapi.GetFunctionParams{ProjectName: https.String(integrationTestProject), Slug: https.String(testSlug), Limit: https.Positive(1)})); len(existing) > 0 {
+		_ = closeFixtureResponse(apiClient.DeleteFunctionId(ctx, existing[0].ID))
 	}
 
 	// Create a prompt that doubles a number
-	function, err := functions.Create(ctx, functionsapi.CreateParams{
-		ProjectID: project.ID,
-		Name:      "Number Doubler",
-		Slug:      testSlug,
-		FunctionData: map[string]any{
-			"type": "prompt",
-		},
-		PromptData: map[string]any{
-			"prompt": map[string]any{
-				"type": "chat",
-				"messages": []map[string]any{
-					{
-						"role":    "user",
-						"content": "Double this number: {{input}}. Return ONLY the number, no other text.",
-					},
-				},
-			},
-			"options": map[string]any{
-				"model": "gpt-4o-mini",
-				"params": map[string]any{
-					"temperature": 0,
-					"max_tokens":  10,
+	function, err := decodeFixtureResponse(apiClient.PostFunctionWithBody(ctx, "application/json", fixtureBody(t, map[string]any{"project_id": project.ID, "name": "Number Doubler", "slug": testSlug, "function_data": map[string]any{
+		"type": "prompt",
+	}, "prompt_data": map[string]any{
+		"prompt": map[string]any{
+			"type": "chat",
+			"messages": []map[string]any{
+				{
+					"role":    "user",
+					"content": "Double this number: {{input}}. Return ONLY the number, no other text.",
 				},
 			},
 		},
-	})
+		"options": map[string]any{
+			"model": "gpt-4o-mini",
+			"params": map[string]any{
+				"temperature": 0,
+				"max_tokens":  10,
+			},
+		},
+	}})))
 	require.NoError(t, err)
-	defer func() { _ = functions.Delete(ctx, function.ID) }()
+	defer func() { _ = closeFixtureResponse(apiClient.DeleteFunctionId(ctx, function.ID)) }()
 
 	// Create FunctionsAPI with int types
 	functionsAPI := &FunctionsAPI[int, int]{

@@ -6,14 +6,29 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/braintrustdata/braintrust-sdk-go/api"
-	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
+	"github.com/oapi-codegen/nullable"
+
+	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
+	"github.com/braintrustdata/braintrust-sdk-go/openapi"
 )
+
+// datasetList decodes only the dataset IDs used to resolve a dataset query.
+type datasetList struct {
+	Objects []struct {
+		ID string `json:"id"`
+	} `json:"objects"`
+}
+
+// datasetEvents keeps rows raw so callers decode their own types.
+type datasetEvents struct {
+	Events []json.RawMessage `json:"events"`
+	Cursor string            `json:"cursor"`
+}
 
 // DatasetAPI provides methods for loading datasets with automatic type conversion
 // so they can be easily used in evals.
 type DatasetAPI[I, R any] struct {
-	api *api.API
+	api *openapi.Client
 }
 
 // DatasetQueryOpts contains options for querying datasets.
@@ -47,7 +62,7 @@ func (d *DatasetAPI[I, R]) Get(ctx context.Context, id string) (Dataset[I, R], e
 	}
 
 	return &datasetIterator[I, R]{
-		dataset: newDataset(id, 0, d.api.Datasets()), // 0 = no limit
+		dataset: newDataset(id, 0, d.api), // 0 = no limit
 		id:      id,
 		version: "", // Unknown when loading by ID directly
 	}, nil
@@ -58,30 +73,19 @@ func (d *DatasetAPI[I, R]) Query(ctx context.Context, opts DatasetQueryOpts) (Da
 	// If ID is provided directly, use Get
 	if opts.ID != "" {
 		return &datasetIterator[I, R]{
-			dataset: newDataset(opts.ID, opts.Limit, d.api.Datasets()),
+			dataset: newDataset(opts.ID, opts.Limit, d.api),
 			id:      opts.ID,
 			version: opts.Version,
 		}, nil
 	}
 
-	// Otherwise query for datasets using api.Client
-	queryParams := datasets.QueryParams{
-		Limit: 1, // Only get the most recent
+	queryParams := &openapi.GetDatasetParams{
+		Limit:       https.Positive(1), // Only get the most recent
+		DatasetName: https.String(opts.Name),
+		ProjectId:   https.String(opts.ProjectID),
+		ProjectName: https.String(opts.ProjectName),
 	}
-	if opts.Name != "" {
-		queryParams.Name = opts.Name
-	}
-	if opts.ProjectID != "" {
-		queryParams.ProjectID = opts.ProjectID
-	}
-	if opts.ProjectName != "" {
-		queryParams.ProjectName = opts.ProjectName
-	}
-	if opts.Version != "" {
-		queryParams.Version = opts.Version
-	}
-
-	response, err := d.api.Datasets().Query(ctx, queryParams)
+	response, err := https.DecodeJSON[datasetList](d.api.GetDataset(ctx, queryParams, https.Query("version", opts.Version))) //nolint:bodyclose // false positive: DecodeJSON closes the body
 	if err != nil {
 		return nil, fmt.Errorf("failed to query datasets: %w", err)
 	}
@@ -93,14 +97,14 @@ func (d *DatasetAPI[I, R]) Query(ctx context.Context, opts DatasetQueryOpts) (Da
 	// Return the first (most recent) dataset with full metadata
 	ds := response.Objects[0]
 	return &datasetIterator[I, R]{
-		dataset: newDataset(ds.ID, opts.Limit, d.api.Datasets()),
+		dataset: newDataset(ds.ID, opts.Limit, d.api),
 		id:      ds.ID,
 		version: opts.Version,
 	}, nil
 }
 
 // dataset handles fetching events from Braintrust with pagination.
-// It maintains pagination state and calls datasets.API for each page.
+// It retains raw events until each event is decoded into the caller's types.
 type dataset struct {
 	datasetID      string
 	events         []json.RawMessage
@@ -109,11 +113,11 @@ type dataset struct {
 	exhausted      bool
 	maxRecords     int
 	recordCount    int
-	datasetsClient *datasets.API
+	datasetsClient *openapi.Client
 }
 
 // newDataset creates a new dataset iterator
-func newDataset(datasetID string, maxRecords int, datasetsClient *datasets.API) *dataset {
+func newDataset(datasetID string, maxRecords int, datasetsClient *openapi.Client) *dataset {
 	return &dataset{
 		datasetID:      datasetID,
 		maxRecords:     maxRecords,
@@ -146,7 +150,7 @@ func (d *dataset) nextAs(target interface{}) error {
 	return nil
 }
 
-// fetchNextBatch retrieves the next batch of events using api.DatasetsClient
+// fetchNextBatch retrieves the next page of raw dataset events.
 func (d *dataset) fetchNextBatch() error {
 	batchSize := 100
 
@@ -161,8 +165,14 @@ func (d *dataset) fetchNextBatch() error {
 		}
 	}
 
-	// Use api.DatasetsClient.Fetch() to get the next page
-	result, err := d.datasetsClient.Fetch(context.Background(), d.datasetID, d.cursor, batchSize)
+	if d.datasetID == "" {
+		return fmt.Errorf("failed to fetch dataset events: dataset ID is required")
+	}
+	request := openapi.FetchEventsRequest{Limit: nullable.NewNullableWithValue(batchSize)}
+	if d.cursor != "" {
+		request.Cursor = nullable.NewNullableWithValue(d.cursor)
+	}
+	result, err := https.DecodeJSON[datasetEvents](d.datasetsClient.PostDatasetIdFetch(context.Background(), d.datasetID, request)) //nolint:bodyclose // false positive: DecodeJSON closes the body
 	if err != nil {
 		return fmt.Errorf("failed to fetch dataset events: %w", err)
 	}

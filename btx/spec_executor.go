@@ -572,9 +572,13 @@ const bedrockRegion = "us-east-2"
 
 // executeBedrock dispatches to the correct Bedrock executor based on endpoint.
 func executeBedrock(ctx context.Context, spec LlmSpanSpec, tp oteltrace.TracerProvider, httpClient *http.Client) error {
-	region := os.Getenv("AWS_REGION")
-	if region == "" {
-		region = bedrockRegion
+	// Cassettes record the regional endpoint, so record and replay must use the
+	// same region. Live runs may target another region.
+	region := bedrockRegion
+	if vcr.GetVCRMode() == vcr.ModeOff {
+		if envRegion := os.Getenv("AWS_REGION"); envRegion != "" {
+			region = envRegion
+		}
 	}
 
 	opts := []func(*awsconfig.LoadOptions) error{

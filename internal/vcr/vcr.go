@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -75,8 +76,31 @@ func NewVCRRecorder(t *testing.T, cassettePath string) (*recorder.Recorder, erro
 
 	// Add hook to scrub sensitive data before saving cassettes
 	r.AddHook(scrubCredentials, recorder.BeforeSaveHook)
+	r.AddHook(scrubBodies, recorder.BeforeSaveHook)
 
 	return r, nil
+}
+
+var (
+	// Braintrust error messages identify the caller's organization by name.
+	userOrgPattern = regexp.MustCompile(`\[user_org=[^\]]*\]`)
+	emailPattern   = regexp.MustCompile(`[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}`)
+)
+
+// scrubBodies removes the recording user's identity from request and response
+// bodies before cassettes are saved.
+func scrubBodies(i *cassette.Interaction) error {
+	scrub := func(body string) string {
+		body = userOrgPattern.ReplaceAllString(body, "[user_org=REDACTED]")
+		return emailPattern.ReplaceAllString(body, "user@example.com")
+	}
+	i.Request.Body = scrub(i.Request.Body)
+	body := scrub(i.Response.Body)
+	if body != i.Response.Body && i.Response.ContentLength >= 0 {
+		i.Response.ContentLength = int64(len(body))
+	}
+	i.Response.Body = body
+	return nil
 }
 
 // scrubCredentials removes sensitive headers from cassette interactions

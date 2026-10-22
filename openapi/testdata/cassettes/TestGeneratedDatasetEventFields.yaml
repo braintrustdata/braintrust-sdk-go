@@ -1,0 +1,249 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 23
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"go-sdk-tests"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","name":"go-sdk-tests","description":null,"created":"2026-10-19T23:49:12.896Z","deleted_at":null,"user_id":"c1f71e19-b3ce-4f59-89a9-055901f7755b","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:14 GMT
+            Etag:
+                - W/"fe-7iaq6aBQFNs98OpqCWtmRX1e6fw"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - Z24BQGYPZpXFiE3Lwq330RIo-C0eFM_2GLuNgqEL4kgaHnwdld9JyQ==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Bt-Found-Existing:
+                - "true"
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 107.07775ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 82
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"test-dataset-fields","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/dataset
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"06850513-f449-4aa5-8ef4-df126d4a84f4","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-dataset-fields","description":null,"created":"2026-10-22T00:01:14.159Z","deleted_at":null,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","tags":null,"metadata":null,"url_slug":"test-dataset-fields"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:14 GMT
+            Etag:
+                - W/"136-cQSOuXcYuSpAFmmfU7ItmKXwkFA"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - rh0j3xIlEqWHNco7AqglB4JI33rOJm3-BgPzm2auapbX7Rpv1UsP8Q==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 170.908583ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 230
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"events":[{"input":{"question":"What is the meaning of life?","context":"philosophical"},"expected":{"answer":"42","confidence":0.95},"metadata":{"source":"test","model":"test-model"},"tags":["philosophy","test","integration"]}]}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/dataset/06850513-f449-4aa5-8ef4-df126d4a84f4/insert
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"row_ids":["2ee7db76-bae5-4dab-a2ef-e8f6be4b85ad"]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:14 GMT
+            Etag:
+                - W/"34-qpzXbP+2B8UWqS5yKnH15HYojcA"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - wt4feEt0_salwlP4_rJGDSxritvDP_AqKDRoIk4vsvlRIeXTfEMvfw==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 313.025792ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 12
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"limit":10}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/dataset/06850513-f449-4aa5-8ef4-df126d4a84f4/fetch
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"events":[{"_pagination_key":"p07699275515857993728","_xact_id":"1000198073873991316","audit_data":[{"_xact_id":"1000198073873991316","audit_data":{"action":"upsert"},"metadata":{},"source":"api"}],"classifications":null,"comments":null,"created":"2026-10-22T00:01:14.290Z","dataset_id":"06850513-f449-4aa5-8ef4-df126d4a84f4","expected":{"answer":"42","confidence":0.95},"facets":null,"id":"2ee7db76-bae5-4dab-a2ef-e8f6be4b85ad","input":{"context":"philosophical","question":"What is the meaning of life?"},"is_root":true,"metadata":{"model":"test-model","source":"test"},"origin":null,"project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","root_span_id":"bd777657-459d-4dce-be67-f44edceefc65","span_id":"bd777657-459d-4dce-be67-f44edceefc65","tags":["philosophy","test","integration"]}],"cursor":"atlSSgaUAAA"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json
+            Date:
+                - Thu, 22 Oct 2026 00:01:14 GMT
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - rGmtJYiFD5vJcaW9gS7gll11osDpvP95iiyx_LpVRFup4P0BYpMF7Q==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Bt-Api-Duration-Ms:
+                - "136"
+            X-Bt-Brainstore-Duration-Ms:
+                - "83"
+            X-Bt-Count:
+                - "1"
+            X-Bt-Cursor:
+                - atlSSgaUAAA
+            X-Bt-Internal-Trace-Id:
+                - b259535483d992c9301d82034f000bf9
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 242.903375ms

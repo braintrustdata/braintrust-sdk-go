@@ -3,3 +3,8 @@
 
 # Mark VCR cassettes as generated so they collapse in diffs/PRs
 **/testdata/cassettes/** linguist-generated=true
+
+# Mark the generated OpenAPI client and its pinned spec as generated so they
+# collapse in diffs/PRs
+openapi/*.gen.go linguist-generated=true
+openapi/spec.json linguist-generated=true

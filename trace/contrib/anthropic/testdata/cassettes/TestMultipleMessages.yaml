@@ -6,13 +6,13 @@ interactions:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 317
+        content_length: 319
         transfer_encoding: []
         trailer: {}
         host: ""
         remote_addr: ""
         request_uri: ""
-        body: '{"max_tokens":1024,"messages":[{"content":[{"text":"What is the capital of France?","type":"text"}],"role":"user"},{"content":[{"text":"The capital of France is Paris.","type":"text"}],"role":"assistant"},{"content":[{"text":"What is its population?","type":"text"}],"role":"user"}],"model":"claude-3-haiku-20240307"}'
+        body: '{"max_tokens":1024,"messages":[{"content":[{"text":"What is the capital of France?","type":"text"}],"role":"user"},{"content":[{"text":"The capital of France is Paris.","type":"text"}],"role":"assistant"},{"content":[{"text":"What is its population?","type":"text"}],"role":"user"}],"model":"claude-haiku-4-5-20251001"}'
         form: {}
         headers:
             Accept:
@@ -22,7 +22,7 @@ interactions:
             Content-Type:
                 - application/json
             User-Agent:
-                - Anthropic/Go 1.4.0
+                - Anthropic/Go 1.23.0
             X-Stainless-Arch:
                 - arm64
             X-Stainless-Lang:
@@ -30,15 +30,15 @@ interactions:
             X-Stainless-Os:
                 - MacOS
             X-Stainless-Package-Version:
-                - 1.4.0
+                - 1.23.0
             X-Stainless-Retry-Count:
                 - "0"
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.23.12
+                - go1.26.10
             X-Stainless-Timeout:
-                - "28"
+                - "600"
         url: https://api.anthropic.com/v1/messages
         method: POST
       response:
@@ -49,52 +49,56 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"model":"claude-3-haiku-20240307","id":"msg_017JDabBQ33zzToCmeqwMqzG","type":"message","role":"assistant","content":[{"type":"text","text":"The population of Paris, the capital of France, is around 2.2 million people within the city proper. However, the larger Paris metropolitan area, also known as the Île-de-France region, has a population of around 12.5 million people, making it one of the most populous metropolitan areas in Europe.\n\nSome key facts about the population of Paris:\n\n- Paris city proper population: Around 2.2 million\n- Paris metropolitan area population: Around 12.5 million \n- The Paris metropolitan area is the second largest in the European Union after London.\n- Paris is the most populous city in France and one of the most populous cities in the European Union.\n- The city''s population has remained relatively stable in recent decades, with modest growth.\n- Paris is known for its high population density, with over 21,000 people per square kilometer within the city limits.\n\nSo in summary, while the city of Paris itself has around 2.2 million residents, the broader Paris metropolitan region is home to approximately 12.5 million people, making it one of the most populous urban areas in Europe."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":32,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":245,"service_tier":"standard"}}'
+        body: '{"model":"claude-haiku-4-5-20251001","id":"msg_011CgGJLirLJMgu7u1ZBVPaj","type":"message","role":"assistant","content":[{"type":"text","text":"Paris has a population of approximately 2.1-2.2 million people within the city proper, making it the most populous city in France.\n\nHowever, the greater Paris metropolitan area (Île-de-France region) has a much larger population of around 12 million people, making it one of the largest metropolitan areas in Europe."}],"container":null,"stop_reason":"end_turn","stop_sequence":null,"stop_details":null,"usage":{"input_tokens":32,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":75,"service_tier":"standard","inference_geo":"not_available","speed":"standard"},"diagnostics":null}'
         headers:
             Anthropic-Ratelimit-Input-Tokens-Limit:
-                - "8000000"
+                - "10000000"
             Anthropic-Ratelimit-Input-Tokens-Remaining:
-                - "8000000"
+                - "10000000"
             Anthropic-Ratelimit-Input-Tokens-Reset:
-                - "2025-11-12T14:55:13Z"
+                - "2026-10-22T00:06:11Z"
             Anthropic-Ratelimit-Output-Tokens-Limit:
-                - "1500000"
+                - "2000000"
             Anthropic-Ratelimit-Output-Tokens-Remaining:
-                - "1500000"
+                - "2000000"
             Anthropic-Ratelimit-Output-Tokens-Reset:
-                - "2025-11-12T14:55:15Z"
+                - "2026-10-22T00:06:12Z"
             Anthropic-Ratelimit-Requests-Limit:
-                - "10000"
+                - "20000"
             Anthropic-Ratelimit-Requests-Remaining:
-                - "9999"
+                - "19999"
             Anthropic-Ratelimit-Requests-Reset:
-                - "2025-11-12T14:55:13Z"
+                - "2026-10-22T00:06:11Z"
             Anthropic-Ratelimit-Tokens-Limit:
-                - "9500000"
+                - "12000000"
             Anthropic-Ratelimit-Tokens-Remaining:
-                - "9500000"
+                - "12000000"
             Anthropic-Ratelimit-Tokens-Reset:
-                - "2025-11-12T14:55:13Z"
+                - "2026-10-22T00:06:11Z"
+            Anthropic-Workspace-Id:
+                - wrkspc_01J8hau4yJ2SKvtbeP9drm9A
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - 99d6de7a49be8c51-EWR
+                - a4e4412fdf821421-SEA
+            Content-Security-Policy:
+                - default-src 'none'; frame-ancestors 'none'
             Content-Type:
                 - application/json
             Date:
-                - Wed, 12 Nov 2025 14:55:15 GMT
+                - Thu, 22 Oct 2026 00:06:12 GMT
             Request-Id:
-                - req_011CV4BsnEZVKJYxjBjAHjR5
-            Retry-After:
-                - "48"
+                - req_011CgGJLiffhXvyn7eyKigr6
             Server:
                 - cloudflare
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
-            X-Envoy-Upstream-Service-Time:
-                - "2612"
+            Traceresponse:
+                - 00-6ad9537300000000d66ba53bcf07a2ac-5a789017cf84f194-01
+            Vary:
+                - Accept-Encoding
             X-Robots-Tag:
                 - none
         status: 200 OK
         code: 200
-        duration: 2.648221792s
+        duration: 1.301272792s

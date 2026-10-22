@@ -11,7 +11,9 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/config"
 	"github.com/braintrustdata/braintrust-sdk-go/eval"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
 	"github.com/braintrustdata/braintrust-sdk-go/logger"
+	"github.com/braintrustdata/braintrust-sdk-go/openapi"
 	"github.com/braintrustdata/braintrust-sdk-go/prompt"
 	bttrace "github.com/braintrustdata/braintrust-sdk-go/trace"
 )
@@ -213,14 +215,14 @@ func (c *Client) Tracer(name string, opts ...oteltrace.TracerOption) oteltrace.T
 //	})
 //	result, _ := e.Run(ctx, eval.RunOpts[string, string]{Dataset: dataset})
 func NewEval[I, R any](client *Client, e *eval.Eval[I, R]) *eval.Eval[I, R] {
-	evaluator := eval.NewEvaluator[I, R](client.session, client.tracerProvider, client.API(), client.config.DefaultProjectName)
+	evaluator := eval.NewEvaluatorWithClient[I, R](client.session, client.tracerProvider, client.generatedClient(context.Background()), client.config.DefaultProjectName)
 	return eval.NewEval(evaluator, e)
 }
 
 // NewEvaluator creates a new evaluator for running evaluations with the same
 // input and output types.
 func NewEvaluator[I, R any](client *Client) *eval.Evaluator[I, R] {
-	return eval.NewEvaluator[I, R](client.session, client.tracerProvider, client.API(), client.config.DefaultProjectName)
+	return eval.NewEvaluatorWithClient[I, R](client.session, client.tracerProvider, client.generatedClient(context.Background()), client.config.DefaultProjectName)
 }
 
 // NewWorkflowEval attaches the client to a durable workflow evaluation.
@@ -228,21 +230,13 @@ func NewWorkflowEval[I, R any](client *Client, definition *eval.WorkflowEval[I, 
 	return eval.NewWorkflowEval(NewEvaluator[I, R](client), definition)
 }
 
-// API returns an API client for making direct calls to the Braintrust API.
-// This provides low-level access to projects, datasets, experiments, and other resources.
+// API returns the legacy API facade for source compatibility.
+// SDK evaluation and prompt loading use the generated [openapi.Client] instead.
+// For new direct REST integrations, use the openapi package.
 //
-// Example:
-//
-//	client, _ := braintrust.New(tp, braintrust.WithAPIKey("your-key"))
-//
-//	// Create a dataset
-//	apiClient := client.API()
-//	project, _ := apiClient.Projects().Create(ctx, "my-project")
-//	dataset, _ := apiClient.Datasets().Create(ctx, api.DatasetRequest{
-//	    ProjectID:   project.ID,
-//	    Name:        "my-dataset",
-//	    Description: "My test dataset",
-//	})
+// Deprecated: Use [openapi.NewClientWithResponses] for direct REST operations.
+// Continue to use [Client.LoadPrompt], [NewEvaluator], and [NewWorkflowEval] for
+// SDK-managed prompt loading and evaluations.
 func (c *Client) API() *api.API {
 	_, _ = c.session.ResolveAPIKey(context.Background())
 
@@ -254,6 +248,15 @@ func (c *Client) API() *api.API {
 		api.WithAPIURL(apiInfo.APIURL),
 		api.WithLogger(c.logger),
 	)
+}
+
+// generatedClient resolves the session's credentials and API URL at call time
+// and binds them to a new client with the configured logger. Callers that hold
+// the result (such as evaluators) keep the values from when it was created.
+func (c *Client) generatedClient(ctx context.Context) *openapi.Client {
+	_, _ = c.session.ResolveAPIKey(ctx)
+	apiInfo := c.session.APIInfo()
+	return https.NewGenerated(https.NewClient(apiInfo.APIKey, apiInfo.APIURL, c.logger))
 }
 
 // LoadPrompt loads a prompt saved in Braintrust and returns it ready to render.
@@ -270,7 +273,7 @@ func (c *Client) LoadPrompt(ctx context.Context, opts prompt.LoadOpts) (*prompt.
 	if opts.Project == "" && opts.ProjectID == "" {
 		opts.Project = c.config.DefaultProjectName
 	}
-	return prompt.Load(ctx, c.API(), opts)
+	return prompt.LoadWithClient(ctx, c.generatedClient(ctx), opts)
 }
 
 // Permalink returns a URL to the span in the Braintrust UI.

@@ -4,19 +4,23 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
+	"github.com/braintrustdata/braintrust-sdk-go/openapi"
 )
 
 // API provides operations for managing Braintrust projects.
+//
+// Deprecated: Use [openapi.Client] or [openapi.ClientWithResponses].
 type API struct {
-	client *https.Client
+	client *https.OpenAPIClient
 }
 
 // New creates a new projects API client.
+//
+// Deprecated: Use [openapi.NewClientWithResponses].
 func New(client *https.Client) *API {
-	return &API{client: client}
+	return &API{client: https.NewOpenAPIClient(client)}
 }
 
 // Create creates a new project or returns an existing one if a project with
@@ -27,12 +31,18 @@ func New(client *https.Client) *API {
 //	project, err := client.Projects().Create(ctx, projects.CreateParams{
 //	    Name: "my-project",
 //	})
+//
+// Deprecated: Use [openapi.ClientWithResponses.PostProjectWithResponse].
 func (a *API) Create(ctx context.Context, params CreateParams) (*Project, error) {
 	if params.Name == "" {
 		return nil, fmt.Errorf("project name is required")
 	}
 
-	resp, err := a.client.POST(ctx, "/v1/project", params)
+	body, err := a.client.JSONBody(params)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := a.client.PostProjectWithBody(ctx, "application/json", body)
 	if err != nil {
 		return nil, err
 	}
@@ -51,13 +61,14 @@ func (a *API) Create(ctx context.Context, params CreateParams) (*Project, error)
 // Example:
 //
 //	project, err := client.Projects().Get(ctx, "proj_123")
+//
+// Deprecated: Use [openapi.ClientWithResponses.GetProjectIdWithResponse].
 func (a *API) Get(ctx context.Context, id string) (*Project, error) {
 	if id == "" {
 		return nil, fmt.Errorf("project ID is required")
 	}
 
-	path := fmt.Sprintf("/v1/project/%s", id)
-	resp, err := a.client.GET(ctx, path, nil)
+	resp, err := a.client.GetProjectId(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -78,17 +89,14 @@ func (a *API) Get(ctx context.Context, id string) (*Project, error) {
 //	projects, err := client.Projects().List(ctx, projects.ListParams{
 //	    Limit: 10,
 //	})
+//
+// Deprecated: Use [openapi.ClientWithResponses.GetProjectWithResponse].
 func (a *API) List(ctx context.Context, params ListParams) (*ListResponse, error) {
-	queryParams := make(map[string]string)
-
-	if params.OrgID != "" {
-		queryParams["org_id"] = params.OrgID
+	queryParams := &openapi.GetProjectParams{
+		Limit: https.Positive(params.Limit),
 	}
-	if params.Limit > 0 {
-		queryParams["limit"] = strconv.Itoa(params.Limit)
-	}
-
-	resp, err := a.client.GET(ctx, "/v1/project", queryParams)
+	// The pinned specification omits the supported org_id project filter.
+	resp, err := a.client.GetProject(ctx, queryParams, https.Query("org_id", params.OrgID))
 	if err != nil {
 		return nil, err
 	}
@@ -107,13 +115,14 @@ func (a *API) List(ctx context.Context, params ListParams) (*ListResponse, error
 // Example:
 //
 //	err := client.Projects().Delete(ctx, "proj_123")
+//
+// Deprecated: Use [openapi.ClientWithResponses.DeleteProjectIdWithResponse].
 func (a *API) Delete(ctx context.Context, id string) error {
 	if id == "" {
 		return fmt.Errorf("project ID is required")
 	}
 
-	path := fmt.Sprintf("/v1/project/%s", id)
-	resp, err := a.client.DELETE(ctx, path)
+	resp, err := a.client.DeleteProjectId(ctx, id)
 	if err != nil {
 		return err
 	}

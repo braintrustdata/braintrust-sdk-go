@@ -40,9 +40,10 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 	oteltrace "go.opentelemetry.io/otel/trace"
 
-	"github.com/braintrustdata/braintrust-sdk-go/api"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/auth"
 	"github.com/braintrustdata/braintrust-sdk-go/internal/evalhooks"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
+	"github.com/braintrustdata/braintrust-sdk-go/openapi"
 	bttrace "github.com/braintrustdata/braintrust-sdk-go/trace"
 )
 
@@ -521,7 +522,7 @@ func newEval[I, R any](
 
 // newEvalOpts creates a new eval executor with dependency injection.
 // This replaces the old New() constructor which used global state.
-func newEvalOpts[I, R any](ctx context.Context, s *auth.Session, tp *trace.TracerProvider, apiClient *api.API, opts Opts[I, R], project string) (*eval[I, R], error) {
+func newEvalOpts[I, R any](ctx context.Context, s *auth.Session, tp *trace.TracerProvider, apiClient *openapi.Client, opts Opts[I, R], project string) (*eval[I, R], error) {
 	// Determine project name (use opts.ProjectName if specified, otherwise project)
 	projectName := opts.ProjectName
 	if projectName == "" {
@@ -546,7 +547,8 @@ func newEvalOpts[I, R any](ctx context.Context, s *auth.Session, tp *trace.Trace
 		// to declare. Best-effort: a failed lookup is only a labelling problem and
 		// must not fail the run.
 		if opts.ProjectID != "" {
-			if project, err := apiClient.Projects().Get(ctx, projectID); err == nil && project.Name != "" {
+			project, err := https.DecodeJSON[projectRef](apiClient.GetProjectId(ctx, projectID)) //nolint:bodyclose // false positive: DecodeJSON closes the body
+			if err == nil && project.Name != "" {
 				projectName = project.Name
 			}
 		}
@@ -1120,8 +1122,8 @@ func experimentPermalink(session *auth.Session, experimentID string) string {
 
 // run executes an evaluation using client resources (session, tracerProvider).
 // This is an internal function - users should use Evaluator.Run() instead.
-// apiClient can be nil, in which case one will be created for API calls.
-func run[I, R any](ctx context.Context, opts Opts[I, R], s *auth.Session, tp *trace.TracerProvider, apiClient *api.API, project string) (*Result, error) {
+// apiClient may be nil for a NoSendLogs run.
+func run[I, R any](ctx context.Context, opts Opts[I, R], s *auth.Session, tp *trace.TracerProvider, apiClient *openapi.Client, project string) (*Result, error) {
 	// Validate required fields
 	if opts.Experiment == "" {
 		return nil, fmt.Errorf("%w: Experiment is required", errEval)

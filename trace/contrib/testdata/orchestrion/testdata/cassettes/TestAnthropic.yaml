@@ -6,13 +6,13 @@ interactions:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 116
+        content_length: 131
         transfer_encoding: []
         trailer: {}
         host: ""
         remote_addr: ""
         request_uri: ""
-        body: '{"max_tokens":1024,"messages":[{"content":[{"text":"Say hello","type":"text"}],"role":"user"}],"model":"claude-3-haiku-20240307"}'
+        body: '{"max_tokens":1024,"messages":[{"content":[{"text":"Say hello","type":"text"}],"role":"user"}],"model":"claude-haiku-4-5-20251001"}'
         form: {}
         headers:
             Accept:
@@ -21,6 +21,24 @@ interactions:
                 - "2023-06-01"
             Content-Type:
                 - application/json
+            User-Agent:
+                - Anthropic/Go 1.23.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 1.23.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.26.10
+            X-Stainless-Timeout:
+                - "600"
         url: https://api.anthropic.com/v1/messages
         method: POST
       response:
@@ -31,30 +49,56 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: |
-            {
-              "id": "msg_01test",
-              "type": "message",
-              "role": "assistant",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "Hello!"
-                }
-              ],
-              "model": "claude-3-haiku-20240307",
-              "stop_reason": "end_turn",
-              "stop_sequence": null,
-              "usage": {
-                "input_tokens": 10,
-                "output_tokens": 2,
-                "cache_creation_input_tokens": 0,
-                "cache_read_input_tokens": 0
-              }
-            }
+        body: "{\"model\":\"claude-haiku-4-5-20251001\",\"id\":\"msg_011CgGHziRyjGHHpmuc9trrQ\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Hello! \U0001F44B How can I help you today?\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":9,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":16,\"service_tier\":\"standard\",\"inference_geo\":\"not_available\",\"speed\":\"standard\"},\"diagnostics\":null}"
         headers:
+            Anthropic-Ratelimit-Input-Tokens-Limit:
+                - "10000000"
+            Anthropic-Ratelimit-Input-Tokens-Remaining:
+                - "10000000"
+            Anthropic-Ratelimit-Input-Tokens-Reset:
+                - "2026-10-22T00:01:40Z"
+            Anthropic-Ratelimit-Output-Tokens-Limit:
+                - "2000000"
+            Anthropic-Ratelimit-Output-Tokens-Remaining:
+                - "2000000"
+            Anthropic-Ratelimit-Output-Tokens-Reset:
+                - "2026-10-22T00:01:40Z"
+            Anthropic-Ratelimit-Requests-Limit:
+                - "20000"
+            Anthropic-Ratelimit-Requests-Remaining:
+                - "19999"
+            Anthropic-Ratelimit-Requests-Reset:
+                - "2026-10-22T00:01:39Z"
+            Anthropic-Ratelimit-Tokens-Limit:
+                - "12000000"
+            Anthropic-Ratelimit-Tokens-Remaining:
+                - "12000000"
+            Anthropic-Ratelimit-Tokens-Reset:
+                - "2026-10-22T00:01:40Z"
+            Anthropic-Workspace-Id:
+                - wrkspc_01J8hau4yJ2SKvtbeP9drm9A
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - a4e43a8e281a2672-SEA
+            Content-Security-Policy:
+                - default-src 'none'; frame-ancestors 'none'
             Content-Type:
                 - application/json
+            Date:
+                - Thu, 22 Oct 2026 00:01:40 GMT
+            Request-Id:
+                - req_011CgGHzhSxAZCpPBNRiCUqv
+            Server:
+                - cloudflare
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            Traceresponse:
+                - 00-6ad9526300000000c33e1e21620a2bf9-e3c25beb921185ec-01
+            Vary:
+                - Accept-Encoding
+            X-Robots-Tag:
+                - none
         status: 200 OK
         code: 200
-        duration: 100ms
+        duration: 1.119282416s

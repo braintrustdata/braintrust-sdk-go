@@ -1,0 +1,123 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 23
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"go-sdk-tests"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","name":"go-sdk-tests","description":null,"created":"2026-10-19T23:49:12.896Z","deleted_at":null,"user_id":"c1f71e19-b3ce-4f59-89a9-055901f7755b","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 21 Oct 2026 23:59:45 GMT
+            Etag:
+                - W/"fe-7iaq6aBQFNs98OpqCWtmRX1e6fw"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 d9d466ed70d93f34739969f91577ec74.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - XxvJ3CEl_9bih-ZL7EnzG62LF_pznFIWffaxUskIIUPVzIYSZdiRNQ==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Bt-Found-Existing:
+                - "true"
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 194.589458ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 154
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-register","ensure_new":true,"tags":["test"],"metadata":{"purpose":"testing"}}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/experiment
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"63916b46-bd07-4473-996b-9bd7accf8c74","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-register-ab9940b9","description":null,"created":"2026-10-21T23:59:45.624Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"purpose":"testing"},"tags":["test"]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 21 Oct 2026 23:59:45 GMT
+            Etag:
+                - W/"1ea-cT6itCz7azI2Z6BHk3pOHRC3zLg"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 d9d466ed70d93f34739969f91577ec74.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - xvDb0wgs9EvS81Zs-iIpOy2hVgTDS6f7inn6Rb_-oojL80ESzS-TFg==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 188.1635ms

@@ -34,7 +34,7 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.26.5
+                - go1.26.10
         url: https://api.openai.com/v1/chat/completions
         method: POST
       response:
@@ -46,17 +46,17 @@ interactions:
         content_length: -1
         uncompressed: false
         body: |+
-            data: {"id":"chatcmpl-b86084c6-823b-4fad-aee5-554bdba42e2a","object":"chat.completion.chunk","created":1789324448,"model":"gpt-5-search-api-2025-10-14","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"role":"assistant","content":"Here’s today’s notable headline:\n\n“Trump downplays the need to check AI development and says he doesn’t want to cede edge to China.”  \nPresident","refusal":null},"finish_reason":null}],"usage":null,"obfuscation":"3r0Xq"}
+            data: {"id":"chatcmpl-61377b79-55f0-4c4e-9410-b490959c5e8f","object":"chat.completion.chunk","created":1792627644,"model":"gpt-5-search-api-2025-10-14","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"role":"assistant","content":"Here’s a notable headline from today, October 21, 2026:\n\n**Russia releases detained American","refusal":null},"finish_reason":null}],"usage":null,"obfuscation":"wBAtoKECGi"}
 
-            data: {"id":"chatcmpl-1369beee-9033-4dc9-ba4b-881bcec4acfe","object":"chat.completion.chunk","created":1789324448,"model":"gpt-5-search-api-2025-10-14","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" Donald Trump said Sunday that he is reluctant to impose more regulations on artificial intelligence, expressing concerns about the U.S. losing"},"finish_reason":null}],"usage":null,"obfuscation":"tVEUOycrody"}
+            data: {"id":"chatcmpl-ed50ce9d-a7bc-4e74-83cc-121676ac0c5b","object":"chat.completion.chunk","created":1792627644,"model":"gpt-5-search-api-2025-10-14","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" as Putin signals willingness to resume Ukraine peace talks**  \nU.S. envoy Steve Witkoff met with Russian President Vladimir Putin in St. Petersburg to discuss options for peace in Ukraine. As a result of the meeting, the U.S. citizen Stephen Hubbard—detained since 2022—was"},"finish_reason":null}],"usage":null,"obfuscation":"di204cJ"}
 
-            data: {"id":"chatcmpl-4492e881-649f-4555-b5cf-15b86f412042","object":"chat.completion.chunk","created":1789324448,"model":"gpt-5-search-api-2025-10-14","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" its competitive advantage to China. ([apnews.com](https://apnews.com/article/9df0ebb4c1b0619aa0f88057b5a1092d?utm_source=openai))\n\nSource: AP News — https://apnews.com/article/9df0ebb4c1b0619aa0f88057b5a1092"},"finish_reason":null}],"usage":null,"obfuscation":"nhkTeta7"}
+            data: {"id":"chatcmpl-e0bab263-dc24-4ce1-9bea-dbf078cf394d","object":"chat.completion.chunk","created":1792627644,"model":"gpt-5-search-api-2025-10-14","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" released. Putin also agreed in principle to restart three-way negotiations between Russia, Ukraine, and the United States after November 10. ([russellrecord.com](https://russellrecord.com/?edition=2026-10-21&utm_source=openai))\n"},"finish_reason":null}],"usage":null,"obfuscation":"mk5Q"}
 
-            data: {"id":"chatcmpl-768619c4-e1ec-4803-bef2-0f93c54438a6","object":"chat.completion.chunk","created":1789324448,"model":"gpt-5-search-api-2025-10-14","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"d"},"finish_reason":null}],"usage":null,"obfuscation":"EgEqHvJN0"}
+            data: {"id":"chatcmpl-e601845c-5452-45b3-86a6-f2a71c8adbff","object":"chat.completion.chunk","created":1792627644,"model":"gpt-5-search-api-2025-10-14","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"\nFor more detail, you can read the full report here:  \nhttps://www.russellrecord.com/?edition=2026-10-21"},"finish_reason":null}],"usage":null,"obfuscation":""}
 
-            data: {"id":"chatcmpl-64260435-4301-4b64-a9bc-9e50e267c30d","object":"chat.completion.chunk","created":1789324448,"model":"gpt-5-search-api-2025-10-14","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"annotations":[{"type":"url_citation","url_citation":{"end_index":417,"start_index":324,"title":"Trump downplays the need to check AI development and says he doesn't want to cede edge to China","url":"https://apnews.com/article/9df0ebb4c1b0619aa0f88057b5a1092d?utm_source=openai"}}]},"finish_reason":"stop"}],"usage":null,"obfuscation":"y0EYklluH6"}
+            data: {"id":"chatcmpl-1f618e10-9416-4c91-8afb-7504520214a8","object":"chat.completion.chunk","created":1792627644,"model":"gpt-5-search-api-2025-10-14","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"annotations":[{"type":"url_citation","url_citation":{"end_index":594,"start_index":508,"title":"Headlines for October 21, 2026 | The Russell Record","url":"https://russellrecord.com/?edition=2026-10-21&utm_source=openai"}}]},"finish_reason":"stop"}],"usage":null,"obfuscation":"QHXx"}
 
-            data: {"id":"chatcmpl-64260435-4301-4b64-a9bc-9e50e267c30d","object":"chat.completion.chunk","created":1789324448,"model":"gpt-5-search-api-2025-10-14","service_tier":"default","system_fingerprint":null,"choices":[],"usage":{"prompt_tokens":16499,"completion_tokens":114,"total_tokens":16613,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0}},"obfuscation":"pS"}
+            data: {"id":"chatcmpl-1f618e10-9416-4c91-8afb-7504520214a8","object":"chat.completion.chunk","created":1792627644,"model":"gpt-5-search-api-2025-10-14","service_tier":"default","system_fingerprint":null,"choices":[],"usage":{"prompt_tokens":16636,"completion_tokens":170,"total_tokens":16806,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0}},"obfuscation":"N1"}
 
             data: [DONE]
 
@@ -70,23 +70,23 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - a3a93e6bfbde3e16-BOM
+                - a4e442d2fbb5ae4f-SEA
             Content-Type:
                 - text/event-stream; charset=utf-8
             Date:
-                - Sun, 13 Sep 2026 18:34:08 GMT
+                - Thu, 22 Oct 2026 00:07:24 GMT
             Openai-Organization:
-                - fluxai-ql6txb
+                - braintrust-data
             Openai-Processing-Ms:
-                - "4351"
+                - "5749"
             Openai-Project:
-                - proj_TyVyJP3AZBjMBnVymwmezBd2
+                - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
                 - "2020-10-01"
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=oekVvhUnuemsU1ViJYuSppwDd09qp_q11FW2qkdsPmo-1789324443.5139418-1.0.1.1-5.LN44uWh5qOAm0d1AKzUe_TC8UeLJ5mJfvy5G_s11VSDx53zGtNCsRDCQLYGyo1cCBNeHVGPAWUVCer85vOuIVeVAmJejuQeMHgrSFcOP.oeZPz767.94a1SYbiAgg.; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Sun, 13 Sep 2026 19:04:08 GMT
+                - __cf_bm=N9nUv1diyuGvm5PaC_qifEB_YtI_jHvUFwHap_s6TMg-1792627638.2342122-1.0.1.1-D.9745NKwkq2VL6hY8sA.WfWceVzneGDjjPIMN.hBIpw.bjchCOsqr2clWH4BVDwqj.lGwTW0RtuHf6dSVgJ5tnOsG4qfp8xCj0YxBjhG1RFV_KCwitVP2T1htQRop2k; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:37:24 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
@@ -94,19 +94,19 @@ interactions:
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Ratelimit-Limit-Requests:
-                - "500"
+                - "1000"
             X-Ratelimit-Limit-Tokens:
-                - "45000"
+                - "3000000"
             X-Ratelimit-Remaining-Requests:
-                - "499"
+                - "999"
             X-Ratelimit-Remaining-Tokens:
-                - "44980"
+                - "2999981"
             X-Ratelimit-Reset-Requests:
-                - 120ms
+                - 60ms
             X-Ratelimit-Reset-Tokens:
-                - 25ms
+                - 0s
             X-Request-Id:
-                - req_153cba59761c4dfcab14a7a40c0fcd3f
+                - req_b503693aeef642c4be76f7866c2cd692
         status: 200 OK
         code: 200
-        duration: 4.98808625s
+        duration: 6.037894792s

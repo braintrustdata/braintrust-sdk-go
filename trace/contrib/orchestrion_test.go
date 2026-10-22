@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+
+	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
 )
 
 // TestOrchestrionInjection verifies that orchestrion auto-injects our middleware
@@ -14,7 +16,7 @@ import (
 //  1. Importing the trace/contrib/all meta-module
 //  2. Importing individual integration modules directly
 //
-// The inner tests create SDK clients WITHOUT manual middleware, make mocked API
+// The inner tests create SDK clients WITHOUT manual middleware, make recorded API
 // calls, and verify spans were created.
 func TestOrchestrionInjection(t *testing.T) {
 	t.Parallel()
@@ -61,7 +63,9 @@ func TestOrchestrionInjection(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
+			if vcr.GetVCRMode() != vcr.ModeRecord {
+				t.Parallel()
+			}
 			fixtureDir := prepareOrchestrionFixture(t, repoRoot, tc.imports)
 
 			// Run the inner tests with orchestrion - this compiles with middleware injection.
@@ -79,14 +83,22 @@ func TestOrchestrionInjection(t *testing.T) {
 			// So we explicitly disable workspace mode here to keep the fixture isolated
 			// and to match how a real downstream user would run orchestrion in their own
 			// module.
-			cmd := exec.Command("orchestrion", "go", "test", "-v", "./...")
+			cmd := exec.Command("orchestrion", "go", "test", "-count=1", "-v", "./...")
 			cmd.Dir = fixtureDir
 			cmd.Env = append(os.Environ(), "GOWORK=off")
+			// Record once, then verify individual imports against the same responses.
+			if vcr.GetVCRMode() == vcr.ModeRecord && tc.name == "individual" {
+				cmd.Env = append(cmd.Env, "VCR_MODE=replay")
+			}
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 
 			if err := cmd.Run(); err != nil {
 				t.Fatalf("orchestrion go test failed: %v", err)
+			}
+			if vcr.GetVCRMode() == vcr.ModeRecord && tc.name == "all" {
+				copyDir(t, filepath.Join(fixtureDir, "testdata", "cassettes"),
+					filepath.Join("testdata", "orchestrion", "testdata", "cassettes"))
 			}
 		})
 	}

@@ -6,7 +6,7 @@ interactions:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 127
+        content_length: 99
         transfer_encoding: []
         trailer: {}
         host: ""
@@ -19,6 +19,22 @@ interactions:
                 - application/json
             Content-Type:
                 - application/json
+            User-Agent:
+                - OpenAI/Go 1.12.0
+            X-Stainless-Arch:
+                - arm64
+            X-Stainless-Lang:
+                - go
+            X-Stainless-Os:
+                - MacOS
+            X-Stainless-Package-Version:
+                - 1.12.0
+            X-Stainless-Retry-Count:
+                - "0"
+            X-Stainless-Runtime:
+                - go
+            X-Stainless-Runtime-Version:
+                - go1.26.10
         url: https://api.openai.com/v1/chat/completions
         method: POST
       response:
@@ -31,31 +47,88 @@ interactions:
         uncompressed: true
         body: |
             {
-              "id": "chatcmpl-test",
+              "id": "chatcmpl-EbaXl9xUDINDd9kjaT6Bucu2Otocu",
               "object": "chat.completion",
-              "created": 1700000000,
-              "model": "gpt-4o-mini",
+              "created": 1792627317,
+              "model": "gpt-4o-mini-2024-07-18",
               "choices": [
                 {
                   "index": 0,
                   "message": {
                     "role": "assistant",
-                    "content": "Hello!",
-                    "refusal": null
+                    "content": "Hello! How can I assist you today?",
+                    "refusal": null,
+                    "annotations": []
                   },
                   "logprobs": null,
                   "finish_reason": "stop"
                 }
               ],
               "usage": {
-                "prompt_tokens": 10,
-                "completion_tokens": 2,
-                "total_tokens": 12
-              }
+                "prompt_tokens": 9,
+                "completion_tokens": 9,
+                "total_tokens": 18,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0,
+                  "audio_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "reasoning_tokens": 0,
+                  "audio_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "service_tier": "default",
+              "system_fingerprint": "fp_4be5992575"
             }
         headers:
+            Access-Control-Expose-Headers:
+                - X-Request-ID
+                - CF-Ray
+                - CF-Ray
+            Alt-Svc:
+                - h3=":443"; ma=86400
+            Cf-Cache-Status:
+                - DYNAMIC
+            Cf-Ray:
+                - a4e43afdae1e681f-SEA
             Content-Type:
                 - application/json
+            Date:
+                - Thu, 22 Oct 2026 00:01:58 GMT
+            Openai-Organization:
+                - braintrust-data
+            Openai-Processing-Ms:
+                - "756"
+            Openai-Project:
+                - proj_vsCSXafhhByzWOThMrJcZiw9
+            Openai-Version:
+                - "2020-10-01"
+            Server:
+                - cloudflare
+            Set-Cookie:
+                - __cf_bm=ZVu3gCJmiwovbCK6nPiruHW28BAgSuMdA974brJ4eKs-1792627317.3925765-1.0.1.1-reYYKm9PXgY9_szvXvzGIrZvOtfphi_aTFLM1EEeSjffE1bFG3EYdq5m_CVRUktjOSFo4A4XKmUUZyglnDffbGbLg5DDFSwBaIHv12diU5gG4NKkcHrflYJI_V2oJ7Nr; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:31:58 GMT
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload
+            X-Content-Type-Options:
+                - nosniff
+            X-Openai-Proxy-Wasm:
+                - v0.1
+            X-Ratelimit-Limit-Requests:
+                - "30000"
+            X-Ratelimit-Limit-Tokens:
+                - "150000000"
+            X-Ratelimit-Remaining-Requests:
+                - "29999"
+            X-Ratelimit-Remaining-Tokens:
+                - "149999995"
+            X-Ratelimit-Reset-Requests:
+                - 2ms
+            X-Ratelimit-Reset-Tokens:
+                - 0s
+            X-Request-Id:
+                - req_a8f1df194977451291d3aa9e6146be12
         status: 200 OK
         code: 200
-        duration: 100ms
+        duration: 1.079539125s

@@ -19,6 +19,7 @@ require (
 	github.com/cloudwego/eino-ext/components/model/claude v0.1.15
 	github.com/cloudwego/eino-ext/components/model/openai v0.1.10
 	github.com/firebase/genkit/go v1.5.0
+	github.com/oapi-codegen/nullable v1.2.0
 	github.com/openai/openai-go v1.12.0
 	github.com/sashabaranov/go-openai v1.41.2
 	github.com/stretchr/testify v1.11.1

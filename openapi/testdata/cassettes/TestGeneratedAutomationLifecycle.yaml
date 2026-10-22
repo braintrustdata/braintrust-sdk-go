@@ -1,0 +1,526 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 23
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"go-sdk-tests"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","name":"go-sdk-tests","description":null,"created":"2026-10-19T23:49:12.896Z","deleted_at":null,"user_id":"c1f71e19-b3ce-4f59-89a9-055901f7755b","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:18 GMT
+            Etag:
+                - W/"fe-7iaq6aBQFNs98OpqCWtmRX1e6fw"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - K7QW-uutmhnb_RDmSSZpU_TR7_snZ7hG9hXWpDUPPZKWk3Gd__Uo6A==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Bt-Found-Existing:
+                - "true"
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 100.318333ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 335
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"config":{"action":{"type":"webhook","url":"https://example.com/braintrust-hook"},"btql_filter":"error IS NOT NULL","event_type":"logs","interval_seconds":3600,"status":"paused"},"description":"Paused SDK integration test","name":"go-sdk-automation-test-WIMSQSWJFIJM5WKZMEUGWHQU3E","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project_automation
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"2b508da9-1f1b-47c6-94f2-e0221e45fe3d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-22T00:01:18.658Z","name":"go-sdk-automation-test-WIMSQSWJFIJM5WKZMEUGWHQU3E","description":"Paused SDK integration test","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:18 GMT
+            Etag:
+                - W/"1d1-31h5TQS2R2/EohUpcabpigsMcDo"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - e9FRtgD0DxEmaGXbrnC9eaUoDXnZz4WgyUgCTpwLsYpue9W_HLleBA==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 429.726292ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/project_automation/2b508da9-1f1b-47c6-94f2-e0221e45fe3d
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"2b508da9-1f1b-47c6-94f2-e0221e45fe3d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-22T00:01:18.658Z","name":"go-sdk-automation-test-WIMSQSWJFIJM5WKZMEUGWHQU3E","description":"Paused SDK integration test","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:18 GMT
+            Etag:
+                - W/"1d1-31h5TQS2R2/EohUpcabpigsMcDo"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - eRVrbFybVbJPzBuJAxRtsvlBMwzWRJXnBt0CxanYWUumhlB4_3yK_w==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 137.397875ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 272
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"config":{"action":{"type":"webhook","url":"https://example.com/braintrust-hook"},"btql_filter":"error IS NOT NULL AND metadata.environment = ''production''","event_type":"logs","interval_seconds":3600,"status":"paused"},"description":"Updated paused SDK integration test"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project_automation/2b508da9-1f1b-47c6-94f2-e0221e45fe3d
+        method: PATCH
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"2b508da9-1f1b-47c6-94f2-e0221e45fe3d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-22T00:01:18.658Z","name":"go-sdk-automation-test-WIMSQSWJFIJM5WKZMEUGWHQU3E","description":"Updated paused SDK integration test","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL AND metadata.environment = ''production''","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:19 GMT
+            Etag:
+                - W/"201-VngC03i/+wV+FNAcP1QJSaHqWe4"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - jU8JsiiHBbiJ88dzjpB2AR5nGzA-_BZjywd2f7ylJiXh-fCc3NW7qA==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 254.572709ms
+    - id: 4
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/project_automation/2b508da9-1f1b-47c6-94f2-e0221e45fe3d
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"2b508da9-1f1b-47c6-94f2-e0221e45fe3d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-22T00:01:18.658Z","name":"go-sdk-automation-test-WIMSQSWJFIJM5WKZMEUGWHQU3E","description":"Updated paused SDK integration test","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL AND metadata.environment = ''production''","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:19 GMT
+            Etag:
+                - W/"201-VngC03i/+wV+FNAcP1QJSaHqWe4"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - RqKoGK-xrHgbiFi13YIZCLMmdR3Rqhp_SnX8Z9CNuGB1OhoobvVY1w==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 149.112375ms
+    - id: 5
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 18
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"description":""}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project_automation/2b508da9-1f1b-47c6-94f2-e0221e45fe3d
+        method: PATCH
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"2b508da9-1f1b-47c6-94f2-e0221e45fe3d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-22T00:01:18.658Z","name":"go-sdk-automation-test-WIMSQSWJFIJM5WKZMEUGWHQU3E","description":"","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL AND metadata.environment = ''production''","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:19 GMT
+            Etag:
+                - W/"1de-q3Jacf6uXjDHh20WhN2KkSYZjwA"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - gdlgBPSUJVreJo1tPQrhsoY9kSlF-rLp09oL2n0F7FKhkKKbfUOJPw==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 218.547833ms
+    - id: 6
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/project_automation/2b508da9-1f1b-47c6-94f2-e0221e45fe3d
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"2b508da9-1f1b-47c6-94f2-e0221e45fe3d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-22T00:01:18.658Z","name":"go-sdk-automation-test-WIMSQSWJFIJM5WKZMEUGWHQU3E","description":"","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL AND metadata.environment = ''production''","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:25 GMT
+            Etag:
+                - W/"1de-q3Jacf6uXjDHh20WhN2KkSYZjwA"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - wX19vhMpE6xaDhW95QKRA2CgBvcES7p8IQLjU2h-_F8ZwIYPM0vvuQ==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 5.583295917s
+    - id: 7
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/project_automation/2b508da9-1f1b-47c6-94f2-e0221e45fe3d
+        method: DELETE
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"2b508da9-1f1b-47c6-94f2-e0221e45fe3d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","created":"2026-10-22T00:01:18.658Z","name":"go-sdk-automation-test-WIMSQSWJFIJM5WKZMEUGWHQU3E","description":"","config":{"event_type":"logs","status":"paused","btql_filter":"error IS NOT NULL AND metadata.environment = ''production''","interval_seconds":3600,"action":{"type":"webhook","url":"https://example.com/braintrust-hook"}}}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:25 GMT
+            Etag:
+                - W/"1de-q3Jacf6uXjDHh20WhN2KkSYZjwA"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - h9khzf905POnHligVwyvh_geElCYEOrLrqrbBkf0IbnK_FUVclLmMw==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 362.195125ms
+    - id: 8
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/project_automation/2b508da9-1f1b-47c6-94f2-e0221e45fe3d
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"Code":"ForbiddenError","Message":"Missing read access to project_automation id 2b508da9-1f1b-47c6-94f2-e0221e45fe3d, or the project_automation does not exist [user_email=user@example.com] [user_org=REDACTED] [timestamp=1792627285.691]"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:25 GMT
+            Etag:
+                - W/"fe-mJQYyYN5YDwOoA6v+OORMxtKa2A"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - se5_c_u4qFBWdJMB6LhRLt-6tuEJ2wLAWnwVMV7Bhg3tDx_JMnOvfw==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Error from cloudfront
+        status: 403 Forbidden
+        code: 403
+        duration: 146.600333ms

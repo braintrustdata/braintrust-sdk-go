@@ -45,7 +45,11 @@ func TestSubAgentHierarchy(t *testing.T) {
 				cfg := llmagent.Config{
 					Name: name, Model: llm, Instruction: "Reply with one short greeting.",
 					DisallowTransferToParent: true, DisallowTransferToPeers: true,
-					GenerateContentConfig: &genai.GenerateContentConfig{MaxOutputTokens: 100},
+					GenerateContentConfig: &genai.GenerateContentConfig{
+						MaxOutputTokens: 100,
+						Temperature:     genai.Ptr(float32(0)),
+						ThinkingConfig:  &genai.ThinkingConfig{ThinkingBudget: genai.Ptr(int32(0))},
+					},
 				}
 				if manualCallbacks(name) {
 					cfg.BeforeAgentCallbacks = []agent.BeforeAgentCallback{cb.BeforeAgent}
@@ -82,6 +86,8 @@ func TestSubAgentHierarchy(t *testing.T) {
 					DisallowTransferToParent: true, DisallowTransferToPeers: workflow != "peer_transfer",
 					GenerateContentConfig: &genai.GenerateContentConfig{
 						MaxOutputTokens: 300,
+						Temperature:     genai.Ptr(float32(0)),
+						ThinkingConfig:  &genai.ThinkingConfig{ThinkingBudget: genai.Ptr(int32(0))},
 						ToolConfig: &genai.ToolConfig{FunctionCallingConfig: &genai.FunctionCallingConfig{
 							Mode: genai.FunctionCallingConfigModeAny, AllowedFunctionNames: []string{"transfer_to_agent"},
 						}},

@@ -1,0 +1,410 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 23
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"go-sdk-tests"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","name":"go-sdk-tests","description":null,"created":"2026-10-19T23:49:12.896Z","deleted_at":null,"user_id":"c1f71e19-b3ce-4f59-89a9-055901f7755b","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:07 GMT
+            Etag:
+                - W/"fe-7iaq6aBQFNs98OpqCWtmRX1e6fw"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - qlhio2WKxSCoDfLyWb0NeQ7d7_Gl91MbUH_qtdbx4nukC2YQvPIrKw==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Bt-Found-Existing:
+                - "true"
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 98.42525ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 189
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"description":"Test experiment for lifecycle testing","metadata":{"stage":"created"},"name":"lifecycle-exp","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","tags":["lifecycle","test"]}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/experiment
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"dcc8b67f-fa3b-465c-bac6-8df9728c1fa2","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"lifecycle-exp","description":"Test experiment for lifecycle testing","created":"2026-10-22T00:01:07.953Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"stage":"created"},"tags":["lifecycle","test"]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:07 GMT
+            Etag:
+                - W/"203-uzQ6CWxgt17PaFN2IX5BNii9kFA"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - EJDPZxRAQP1CjmIZv7wcN51lqVmyC5XHKD02mvI64lvlCL635oywXw==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 187.369125ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/experiment/dcc8b67f-fa3b-465c-bac6-8df9728c1fa2
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"dcc8b67f-fa3b-465c-bac6-8df9728c1fa2","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"lifecycle-exp","description":"Test experiment for lifecycle testing","created":"2026-10-22T00:01:07.953Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"stage":"created"},"tags":["lifecycle","test"]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:08 GMT
+            Etag:
+                - W/"203-uzQ6CWxgt17PaFN2IX5BNii9kFA"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - A9ek6hCXEYWGPIMYlSVb42f5VkUFRrX8dmD2Do82UAXDEjKA6uJA3w==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 157.304834ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/experiment?limit=100&project_id=900b1ba7-5336-4a3f-8a6d-52e1a170bd78
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"objects":[{"id":"dcc8b67f-fa3b-465c-bac6-8df9728c1fa2","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"lifecycle-exp","description":"Test experiment for lifecycle testing","created":"2026-10-22T00:01:07.953Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"stage":"created"},"tags":["lifecycle","test"]},{"id":"a2f92309-2ec8-4145-8736-cd83e9e63cd7","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-852053cc","description":null,"created":"2026-10-22T00:00:33.901Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"2f7cf93a-7f32-42d3-b7e4-83d52f45366f","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-dfee05cf","description":null,"created":"2026-10-22T00:00:29.280Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"78f36930-f76e-4d1c-a65b-e870100e35cc","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-3c0204a9","description":null,"created":"2026-10-22T00:00:27.279Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"dd3a730b-cdbe-49c7-b55c-bc0dc3bdf159","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"4bc80331-b717-417e-9bdf-b9f642b4ce4d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-4bf3b1f1","description":null,"created":"2026-10-22T00:00:23.039Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"6037e77a-4252-4313-9266-f3b5ba4521fe","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"2f6f23d9-c3e9-4e85-88d0-2b2c2bff36c3","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-e6006a80","description":null,"created":"2026-10-22T00:00:20.030Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"16a7a653-e327-4438-86ea-2117472c3d45","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"ee38b4dd-a682-4672-888a-512dc940cadc","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-beeed05c","description":null,"created":"2026-10-22T00:00:19.042Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":["production","baseline","v2.0"]},{"id":"cd21cda0-e2b2-4cfc-a8b1-626acb9eab43","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-9e3bf2af","description":null,"created":"2026-10-22T00:00:17.840Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"model":"gpt-4","version":"1.0.0","temperature":0.7},"tags":null},{"id":"24df5194-23c1-4cc0-b77d-963102b507ae","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-update-flag-ea8ebef6-758d0fa9","description":null,"created":"2026-10-22T00:00:17.549Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"183c664e-30a0-4fae-8906-aeebf00d4bcf","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-update-flag-ea8ebef6","description":null,"created":"2026-10-22T00:00:17.017Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"87a08f56-58ad-4f62-acde-ded089d8fe52","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-c9f69aba","description":null,"created":"2026-10-22T00:00:16.596Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"9a787732-5e1e-4e3c-ba80-730c790be9ce","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"classify-aff64c85","description":null,"created":"2026-10-22T00:00:16.235Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"b0c616c5-c208-420e-b05e-a67ba453fbeb","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-e2e-exp-cee560c0","description":null,"created":"2026-10-21T23:59:57.797Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"63916b46-bd07-4473-996b-9bd7accf8c74","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-register-ab9940b9","description":null,"created":"2026-10-21T23:59:45.624Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"99012673-78dd-480e-b048-15878115c6ab","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-register-652db79a","description":null,"created":"2026-10-21T23:37:54.303Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"8fffc5d5-81d6-4000-a37f-e72ed3b32835","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-register-ba0a4e49","description":null,"created":"2026-10-21T23:37:40.054Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"494ca608-6e58-4a92-b997-ea81c035f1f0","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-register-bf340a17","description":null,"created":"2026-10-21T23:37:38.739Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"c370a957-4780-49ea-b1e3-6dc9a39ac55a","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-register-d67cd905","description":null,"created":"2026-10-21T23:37:27.792Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"193a29c3-302e-4617-afb1-41e551501931","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"ensure-new-test-ce3bbd53","description":null,"created":"2026-10-21T22:56:22.859Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"59495537-a220-4508-bdeb-bc83169dc93e","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-4d2b6d6c","description":null,"created":"2026-10-21T22:55:58.697Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"ffd270bf-d044-42ea-aa4f-949b719572f4","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-396f4eb0","description":null,"created":"2026-10-21T22:55:56.020Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"818ea215-4020-4ebd-8f5f-49bd70af3166","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-a9e27c7a","description":null,"created":"2026-10-21T22:55:54.273Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"f8d296a3-87a3-4f0a-b4ef-b847aa755320","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-a3f5a8ab","description":null,"created":"2026-10-21T22:55:53.072Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"eae36ef5-424c-4c7e-a4ff-82db3476056b","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"dbb1686e-acbc-4add-b3a7-08af873ee341","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-a8e8521b","description":null,"created":"2026-10-21T22:55:51.409Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"6c9251a2-0eb2-42cb-a644-68771fcf665c","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"b92c43e6-e33a-4a97-ba18-ce35bf50ff46","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"classify-7712a050","description":null,"created":"2026-10-21T22:55:50.124Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"c99dbadd-0399-42c0-b139-b89b800613f7","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-9ec2d1dc","description":null,"created":"2026-10-21T22:55:49.247Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"e00caf81-77f7-4566-a431-7292ef80530a","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"7b1fa1c9-ab08-49f9-9b33-a973853e5511","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-9f470f8c","description":null,"created":"2026-10-21T22:55:48.429Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":["production","baseline","v2.0"]},{"id":"9df2a13d-edd6-426a-9640-727056818ade","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-f39ef6a3","description":null,"created":"2026-10-21T22:55:48.087Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"model":"gpt-4","version":"1.0.0","temperature":0.7},"tags":null},{"id":"4e2c41f7-d6cc-4eeb-b2c4-9cabcd1d7442","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-update-flag-59ded141-711e4b59","description":null,"created":"2026-10-21T22:55:46.325Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"30285a1d-f270-45b2-967d-01ae75627867","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-update-flag-59ded141","description":null,"created":"2026-10-21T22:55:45.436Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"45bfb588-08ea-4426-8b85-9f0a6810c9d5","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-e2e-exp-5cd846d5","description":null,"created":"2026-10-21T22:55:26.492Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"a0ceb6b9-e1d6-412c-af4f-7a8bd6085ec0","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-register-a001a725","description":null,"created":"2026-10-21T22:55:00.381Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"92734764-13a8-4330-80a0-9a06cbda6073","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"ensure-new-test-a45b3a3e","description":null,"created":"2026-10-21T22:19:08.658Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"ec65b805-8666-4d5f-90d2-0283672fee36","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-62c492fc","description":null,"created":"2026-10-21T22:18:35.138Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"265a4653-2973-4c88-8ad5-26e7adc42f3a","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-0d047091","description":null,"created":"2026-10-21T22:18:32.589Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"85c7adcb-3f19-47b3-8983-ce4ef834f42b","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-820a7f1e","description":null,"created":"2026-10-21T22:18:30.651Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"48d53d97-fb36-4655-918f-ca2a0d4e0ec3","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"7a245226-559f-46df-a509-52df8eff91ca","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-6ce1c15d","description":null,"created":"2026-10-21T22:18:29.217Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"8b3a3cbb-2220-4785-adbc-47e0006813e7","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"0bab23db-4a38-495d-b6f3-207a79ebdfb4","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-1030c797","description":null,"created":"2026-10-21T22:18:27.684Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"9ae69794-0177-4148-ac79-34bbb545d563","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"5e80d906-4e33-4926-a16e-515d011094ed","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-5bc0b954","description":null,"created":"2026-10-21T22:18:26.683Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":["production","baseline","v2.0"]},{"id":"0cf25e5a-c4ab-4af1-9f88-d7ffece65560","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-17e7ca4b","description":null,"created":"2026-10-21T22:18:26.444Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"model":"gpt-4","version":"1.0.0","temperature":0.7},"tags":null},{"id":"5b6c2c45-5c2e-4f38-8605-b3714aa8fbcb","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-update-flag-2da0b4e7-265203fb","description":null,"created":"2026-10-21T22:18:26.210Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"011ac3d0-3178-4f33-b89a-fed96126c497","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-update-flag-2da0b4e7","description":null,"created":"2026-10-21T22:18:25.651Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"888e3d4f-fdca-4fb2-9ff1-d0e5b6c16d04","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-e71e281d","description":null,"created":"2026-10-21T22:18:25.254Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"004d4177-5db9-40b0-92e1-c0449b41477e","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"classify-beadf4e3","description":null,"created":"2026-10-21T22:18:24.910Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"6f522c15-6f90-49cb-b8ed-fef4d21a60a8","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-e2e-exp-fd08c2a6","description":null,"created":"2026-10-21T22:18:07.001Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"0bd5389c-ba16-49e0-ab49-ab15f36f480e","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-register-01eec37c","description":null,"created":"2026-10-21T22:17:56.052Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"9ff630b2-d12b-494c-9d77-47191939452b","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-e2668972","description":null,"created":"2026-10-21T21:44:07.113Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"197531be-c56e-4f12-80df-0aa6fcdc3c66","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"f00e5b1d-a3d8-4bdd-b954-d8459c36ad8d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-register","description":null,"created":"2026-10-21T21:44:04.969Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"purpose":"testing"},"tags":["test"]},{"id":"d84aec55-48dd-4aa6-b6cf-987b30d7d974","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"ensure-new-test-40b764e8","description":null,"created":"2026-10-21T21:43:47.303Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"baa37b7a-e05a-4c5a-bf15-a0cb639297a2","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"ensure-new-test","description":null,"created":"2026-10-21T21:43:47.132Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"576dadd9-0c6a-4a57-81b9-355d95c9ead1","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-bdc98b45","description":null,"created":"2026-10-21T20:56:00.549Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"112ab7bd-274f-4cfe-9a8b-b76b5f5cf7c5","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"classify-b7452ab9","description":null,"created":"2026-10-21T20:56:00.086Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"48febfe1-243c-436a-ac8b-2c062cecc222","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-d0e57f14","description":null,"created":"2026-10-21T20:55:57.301Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"31d6dab9-7025-418b-9604-e768964b6e4b","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-41032c68","description":null,"created":"2026-10-21T20:55:53.578Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"95d8f86f-cfc1-4195-b901-022ea5e2559d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-59939ba6","description":null,"created":"2026-10-21T20:55:51.304Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"f9fa61d8-c0b4-4101-82a6-2077e2daeca8","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"8900220b-cbbe-4704-a847-fa5ad8f0a2d1","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-bc7994ba","description":null,"created":"2026-10-21T20:55:49.009Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"2499c681-6c63-462f-a889-f5190acfe47b","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"ffeae705-d1dc-4cce-834d-3e19699e7ab9","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-d51e3c62","description":null,"created":"2026-10-21T20:55:47.035Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"a0e88e77-d385-44f4-9a9b-ff53b8d09806","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"be0de203-baa3-419b-a31c-5f7a04c242fa","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-3971ac36","description":null,"created":"2026-10-21T20:55:45.999Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":["production","baseline","v2.0"]},{"id":"4fe77659-4da5-48c2-a8f6-d99afd65580d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-4015833a","description":null,"created":"2026-10-21T20:55:45.636Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"model":"gpt-4","version":"1.0.0","temperature":0.7},"tags":null},{"id":"1b6369b9-6a40-45fb-b463-ce9795aca1c3","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-update-flag-66aec00e-ff0e0bdb","description":null,"created":"2026-10-21T20:55:45.303Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"87497df1-528f-4e97-b812-d1b343620c06","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-update-flag-66aec00e","description":null,"created":"2026-10-21T20:55:44.763Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"b0bfb2bd-d49f-42a7-8bff-8520af71b446","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-e2e-exp-0e7ad360","description":null,"created":"2026-10-21T20:55:23.725Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"fdc33588-51e5-4422-8f70-08aa9cf965fc","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-5de9b84d","description":null,"created":"2026-10-21T20:43:09.088Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"18da08eb-3a2a-4f5a-9921-5a02384e34b9","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-c7943c6a","description":null,"created":"2026-10-21T20:43:06.738Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"cf87bd80-191b-4549-908c-159ed0c560a5","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-957d573a","description":null,"created":"2026-10-21T20:43:02.387Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"dae8b700-6f7a-4a93-bbc5-210c0c7dd997","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"38346b8a-d9bf-4867-aaa7-b4f76ed911e5","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-dcfa8f07","description":null,"created":"2026-10-21T20:43:00.445Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"c6f12bc8-83f4-4695-a1e0-850aafd9a1e9","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"0d4af410-13bd-41f4-a3af-5c4badf50910","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-5e05df60","description":null,"created":"2026-10-21T20:42:59.147Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"aebf6675-a327-4292-8b58-2505cb7a7c77","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-7dd84fb7","description":null,"created":"2026-10-21T20:42:58.004Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"a367f051-c221-43da-8315-de0a5332756f","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"ad18a72f-7c61-4edd-b958-94d5dc3e2ee3","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-a5a4b88f","description":null,"created":"2026-10-21T20:42:57.119Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":["production","baseline","v2.0"]},{"id":"41345577-d149-44e1-b5ec-40d3e62d46f1","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"classify-ffe1cfe4","description":null,"created":"2026-10-21T20:42:56.800Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"9f2113d7-6834-4ece-a974-67d343f7ab0e","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-1171f9e7","description":null,"created":"2026-10-21T20:42:56.533Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"model":"gpt-4","version":"1.0.0","temperature":0.7},"tags":null},{"id":"c534c4d4-be9e-4058-a02c-d8b082134120","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-update-flag-9ce91776-2b11b5eb","description":null,"created":"2026-10-21T20:42:56.272Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"3568a1d0-ae5f-45a4-a588-d6ba4bea517c","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-update-flag-9ce91776","description":null,"created":"2026-10-21T20:42:55.768Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"25e383e5-8ee7-4db4-b869-8eb96c6db903","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-e2e-exp-fc265061","description":null,"created":"2026-10-21T20:42:44.733Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"d93b9db2-efe0-42ab-a9ce-747fde4d81e8","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"classify-d1e3defd","description":null,"created":"2026-10-21T20:24:56.988Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"f09103e3-3c6a-4f15-95ec-7db3c5290c2e","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-296b679c","description":null,"created":"2026-10-21T20:24:56.545Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"b558f6bd-fe8d-40ad-973d-f6d0ad06338d","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-51260a2f","description":null,"created":"2026-10-21T20:24:51.430Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"c92f19a5-af2f-4f0e-8dc7-83b6bc9fc1e7","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-5eb8b43e","description":null,"created":"2026-10-21T20:24:49.295Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"f002d812-8808-41c7-923b-a162eec40e9e","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-976ce35d","description":null,"created":"2026-10-21T20:24:47.080Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"aec2a510-1eb5-4b57-8d67-03e4f09d94fd","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"831dd225-358c-4dd5-a9f8-018fdfe71c81","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-a2f384b5","description":null,"created":"2026-10-21T20:24:45.366Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"27189ba9-ede0-458c-b689-41c51991092d","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"ae22b343-69bd-4ef2-8013-4d0c50373e59","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-72bba3d0","description":null,"created":"2026-10-21T20:24:43.350Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"11cdd94e-8e6b-4744-bdf6-ed307695e736","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"cfc7747e-884f-4d84-94a2-3ef1c580b8f9","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-33730651","description":null,"created":"2026-10-21T20:24:42.193Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":["production","baseline","v2.0"]},{"id":"88451546-b355-470c-8db7-e99d2f8de955","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-73088316","description":null,"created":"2026-10-21T20:24:41.932Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"model":"gpt-4","version":"1.0.0","temperature":0.7},"tags":null},{"id":"ed5ce6c9-b7e8-4990-bda8-d95f844bd568","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-update-flag-43c72c88-a1f3f077","description":null,"created":"2026-10-21T20:24:41.662Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"3b175664-d8ea-49e3-9c48-54649f98568a","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-update-flag-43c72c88","description":null,"created":"2026-10-21T20:24:40.633Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"9fb7cd17-a992-4188-8637-763ca915d500","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-e2e-exp-20373741","description":null,"created":"2026-10-21T20:24:29.888Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"5b9506d2-a99f-4a7e-97ed-b85160f73124","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-05b2d427","description":null,"created":"2026-10-21T20:20:21.421Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"8522e191-f582-493f-8acf-1d2e21e57541","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-b73691e4","description":null,"created":"2026-10-21T20:20:19.153Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"e081853f-a31e-4bb5-aa38-0e0a40cd3d94","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-77cbf29a","description":null,"created":"2026-10-21T20:20:15.991Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"e4add1ed-0d26-4a76-9094-243193901c57","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"4b0ec242-0d75-4221-a13d-6fcbd45b7c96","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-4fdb8982","description":null,"created":"2026-10-21T20:20:14.512Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"5dbe4890-92ba-4e03-9530-89b4eb9a2d07","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"3c15c7a4-5919-4aa6-bc97-76121c233a2f","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-a7c269c0","description":null,"created":"2026-10-21T20:20:13.511Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":["production","baseline","v2.0"]},{"id":"f88c1a54-aa7c-4897-9db9-e59bce9026ab","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-e33f2b59","description":null,"created":"2026-10-21T20:20:13.191Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"model":"gpt-4","version":"1.0.0","temperature":0.7},"tags":null},{"id":"f918d764-d1dd-4eb7-a9fb-9a8397fc5428","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-update-flag-9187b249-dd79e19b","description":null,"created":"2026-10-21T20:20:12.821Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"3ad9dfa5-6bde-467b-a2cc-1ac9dcbfa668","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-update-flag-9187b249","description":null,"created":"2026-10-21T20:20:12.077Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"9c5e588a-f977-400d-ba02-0466cf7314d0","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-d07bc296","description":null,"created":"2026-10-21T20:20:11.535Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"d20a3643-96cc-44dd-b318-632a6b716591","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"classify-f3d15ffb","description":null,"created":"2026-10-21T20:20:11.173Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"16300328-575b-41b0-a2df-863cea06df87","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-experiment-509a2bfd","description":null,"created":"2026-10-21T20:20:10.246Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":"bcaa03bb-7d52-4ffd-9935-6bc3aac99c81","dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"9ead3e33-8cb2-4562-99b4-15b7a199ed7f","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"test-e2e-exp-6894a658","description":null,"created":"2026-10-21T20:19:56.124Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"0c615167-ba6b-48f0-9f2d-bcb811cece50","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"partial-failure","description":null,"created":"2026-10-21T20:11:46.319Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null},{"id":"fe18e25b-fa35-47f9-ac57-389e91c3026c","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"prompt-echo","description":null,"created":"2026-10-21T20:11:45.613Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null}]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:08 GMT
+            Etag:
+                - W/"bac8-jU3iVcfzcknnaLn4fPgc5ARTLkY"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - K8jY3kk5GdE_ybuW-GZH9qEZ0b-_RH6-2aSfUbOWB5Nx6XnsdrPJ1g==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 212.802916ms
+    - id: 4
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 76
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"lifecycle-exp","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/experiment
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"dcc8b67f-fa3b-465c-bac6-8df9728c1fa2","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"lifecycle-exp","description":"Test experiment for lifecycle testing","created":"2026-10-22T00:01:07.953Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"stage":"created"},"tags":["lifecycle","test"]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:08 GMT
+            Etag:
+                - W/"203-uzQ6CWxgt17PaFN2IX5BNii9kFA"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - ObSMf9GE092DE5u5nH7D3V8cqd4u6gaOH8onm7R7w9MZNiYWY-qsGg==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 188.030167ms
+    - id: 5
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/experiment/dcc8b67f-fa3b-465c-bac6-8df9728c1fa2
+        method: DELETE
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"dcc8b67f-fa3b-465c-bac6-8df9728c1fa2","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"lifecycle-exp","description":"Test experiment for lifecycle testing","created":"2026-10-22T00:01:07.953Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":"2026-10-22T00:01:08.683Z","dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":{"stage":"created"},"tags":["lifecycle","test"]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:08 GMT
+            Etag:
+                - W/"219-syMTwX60rLAVmExzdUzzUs4bSZY"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - 9pi3PNoo1dmohemMPwyE03MqrIPHs8qudlA_b8WZ-4w6RIz0EEb2qw==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 166.55225ms
+    - id: 6
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/experiment/dcc8b67f-fa3b-465c-bac6-8df9728c1fa2
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"Code":"ForbiddenError","Message":"Missing read access to experiment id dcc8b67f-fa3b-465c-bac6-8df9728c1fa2, or the experiment does not exist [user_email=user@example.com] [user_org=REDACTED] [timestamp=1792627268.87]"}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:08 GMT
+            Etag:
+                - W/"ed-5XjMjj90NcxAuNSLXCsFJ6rLhzM"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 e6b2537b87653726af8a79e6da505188.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - UVAkmc3Hm8IeIP0o7euJpcX4RJtuL0n_pbgg29twj6n9qymARCosvg==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Error from cloudfront
+        status: 403 Forbidden
+        code: 403
+        duration: 160.001334ms

@@ -1,0 +1,233 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 39
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"go-sdk-compat-lifecycle-test"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://api.braintrust.dev/v1/project
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"e7b58beb-f8ba-4576-a058-d263433603fb","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","name":"go-sdk-compat-lifecycle-test","description":null,"created":"2026-10-21T23:59:44.741Z","deleted_at":null,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 21 Oct 2026 23:59:44 GMT
+            Etag:
+                - W/"10e-P6KIqbC8EFZxtYoTkjx4a4jZUz4"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 d9d466ed70d93f34739969f91577ec74.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - PxytyPm2nQSgoIyO5KJBP3F43uDpLmXJ17MXH6ck7S6Rtsuqg7eCyg==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 325.908042ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/project/e7b58beb-f8ba-4576-a058-d263433603fb
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"e7b58beb-f8ba-4576-a058-d263433603fb","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","name":"go-sdk-compat-lifecycle-test","description":null,"created":"2026-10-21T23:59:44.741Z","deleted_at":null,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 21 Oct 2026 23:59:44 GMT
+            Etag:
+                - W/"10e-P6KIqbC8EFZxtYoTkjx4a4jZUz4"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 d9d466ed70d93f34739969f91577ec74.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - uNOPUUN8DqRmAONL-QqzOurxmSoq91disz6jJbPNu5z17ySPCkJ2aQ==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 171.251334ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/project?limit=1&org_id=5abfae3a-7aa7-4653-a9c8-b3efcb18f584
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"objects":[{"id":"e7b58beb-f8ba-4576-a058-d263433603fb","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","name":"go-sdk-compat-lifecycle-test","description":null,"created":"2026-10-21T23:59:44.741Z","deleted_at":null,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","settings":null}]}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 21 Oct 2026 23:59:45 GMT
+            Etag:
+                - W/"11c-MhzWRC0Krbstiu5a5GZnhpoehUg"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 d9d466ed70d93f34739969f91577ec74.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - gOjIpoW6gGTMsVwQnMaI6HHmItWGz4M8TRpeaVN5Lf1DBJjwNPuhuQ==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 161.349125ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.braintrust.dev
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.braintrust.dev/v1/project/e7b58beb-f8ba-4576-a058-d263433603fb
+        method: DELETE
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"id":"e7b58beb-f8ba-4576-a058-d263433603fb","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","name":"go-sdk-compat-lifecycle-test","description":null,"created":"2026-10-21T23:59:44.741Z","deleted_at":"2026-10-21T23:59:45.251Z","user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","settings":null}'
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Expose-Headers:
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+            Cache-Control:
+                - no-store, no-cache, must-revalidate, proxy-revalidate
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Wed, 21 Oct 2026 23:59:45 GMT
+            Etag:
+                - W/"124-E7IWZF6xNmWyH0rJIHP+cgPE+sM"
+            Expires:
+                - "0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains
+            Surrogate-Control:
+                - no-store
+            Vary:
+                - Origin, Accept-Encoding
+            Via:
+                - 1.1 d9d466ed70d93f34739969f91577ec74.cloudfront.net (CloudFront)
+            X-Amz-Cf-Id:
+                - t6Zh4uSBHzCuyjBc_IFWWpIXKgpjRX6r0zvyxTV0MnKQuF8jdmTAvg==
+            X-Amz-Cf-Pop:
+                - SEA900-P10
+            X-Cache:
+                - Miss from cloudfront
+        status: 200 OK
+        code: 200
+        duration: 162.285459ms

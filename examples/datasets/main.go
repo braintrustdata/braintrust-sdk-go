@@ -7,16 +7,20 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
+	"os"
 	"strings"
 	"time"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/trace"
 
+	"github.com/google/uuid"
+	"github.com/oapi-codegen/nullable"
+
 	"github.com/braintrustdata/braintrust-sdk-go"
-	"github.com/braintrustdata/braintrust-sdk-go/api/datasets"
-	"github.com/braintrustdata/braintrust-sdk-go/api/projects"
 	"github.com/braintrustdata/braintrust-sdk-go/eval"
+	"github.com/braintrustdata/braintrust-sdk-go/openapi"
 )
 
 // QuestionInput represents the input structure for a question
@@ -32,61 +36,67 @@ type AnswerExpected struct {
 }
 
 // initializeDataset creates a dataset with sample data and returns the dataset ID
-func initializeDataset(bt *braintrust.Client, projectID string) (string, error) {
+func initializeDataset(ctx context.Context, apiClient *openapi.ClientWithResponses, projectID uuid.UUID) (string, error) {
 	// Create a dataset with timestamp to make it unique
 	timestamp := fmt.Sprintf("%d", time.Now().Unix())
-	datasetInfo, err := bt.API().Datasets().Create(context.Background(), datasets.CreateParams{
-		ProjectID:   projectID,
+	datasetInfo, err := apiClient.PostDatasetWithResponse(ctx, openapi.CreateDataset{
+		ProjectId:   projectID,
 		Name:        "Sample Struct Dataset " + timestamp,
-		Description: "A sample dataset for demonstrating struct-based evaluation",
+		Description: nullable.NewNullableWithValue("A sample dataset for demonstrating struct-based evaluation"),
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to create dataset: %v", err)
 	}
+	if datasetInfo.StatusCode() != http.StatusOK || datasetInfo.JSON200 == nil {
+		return "", fmt.Errorf("failed to create dataset: HTTP %d: %s", datasetInfo.StatusCode(), datasetInfo.Body)
+	}
 
 	// Insert some sample data into the dataset
-	sampleEvents := []datasets.Event{
+	sampleEvents := []openapi.InsertDatasetEvent{
 		{
-			Input: map[string]interface{}{
+			Input: nullable.NewNullableWithValue[any](map[string]interface{}{
 				"text":     "hello world",
 				"context":  "Basic capitalization",
 				"language": "en",
-			},
-			Expected: map[string]interface{}{
+			}),
+			Expected: nullable.NewNullableWithValue[any](map[string]interface{}{
 				"response": "Hello World",
-			},
-			Tags: []string{"basic", "english"},
+			}),
+			Tags: nullable.NewNullableWithValue([]string{"basic", "english"}),
 		},
 		{
-			Input: map[string]interface{}{
+			Input: nullable.NewNullableWithValue[any](map[string]interface{}{
 				"text":     "braintrust is awesome",
 				"context":  "Company name capitalization",
 				"language": "en",
-			},
-			Expected: map[string]interface{}{
+			}),
+			Expected: nullable.NewNullableWithValue[any](map[string]interface{}{
 				"response": "Braintrust Is Awesome",
-			},
-			Tags: []string{"company", "english"},
+			}),
+			Tags: nullable.NewNullableWithValue([]string{"company", "english"}),
 		},
 		{
-			Input: map[string]interface{}{
+			Input: nullable.NewNullableWithValue[any](map[string]interface{}{
 				"text":     "artificial intelligence",
 				"context":  "Technical term capitalization",
 				"language": "en",
-			},
-			Expected: map[string]interface{}{
+			}),
+			Expected: nullable.NewNullableWithValue[any](map[string]interface{}{
 				"response": "Artificial Intelligence",
-			},
-			Tags: []string{"technical", "english"},
+			}),
+			Tags: nullable.NewNullableWithValue([]string{"technical", "english"}),
 		},
 	}
 
-	err = bt.API().Datasets().Insert(context.Background(), datasetInfo.ID, datasets.InsertParams{Events: sampleEvents})
+	inserted, err := apiClient.PostDatasetIdInsertWithResponse(ctx, datasetInfo.JSON200.Id.String(), openapi.InsertDatasetEventRequest{Events: sampleEvents})
 	if err != nil {
-		return "", fmt.Errorf("failed to insert events: %v", err)
+		return "", fmt.Errorf("failed to insert events: %w", err)
+	}
+	if inserted.StatusCode() != http.StatusOK || inserted.JSON200 == nil {
+		return "", fmt.Errorf("failed to insert events: HTTP %d: %s", inserted.StatusCode(), inserted.Body)
 	}
 
-	return datasetInfo.ID, nil
+	return datasetInfo.JSON200.Id.String(), nil
 }
 
 func main() {
@@ -103,16 +113,38 @@ func main() {
 		log.Fatalf("Failed to initialize Braintrust: %v", err)
 	}
 
+	ctx := context.Background()
+	apiKey := os.Getenv("BRAINTRUST_API_KEY")
+	if apiKey == "" {
+		log.Fatal("BRAINTRUST_API_KEY is required")
+	}
+	baseURL := os.Getenv("BRAINTRUST_API_URL")
+	if baseURL == "" {
+		baseURL = "https://api.braintrust.dev"
+	}
+	apiClient, err := openapi.NewClientWithResponses(baseURL,
+		openapi.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
+			req.Header.Set("Authorization", "Bearer "+apiKey)
+			return nil
+		}),
+	)
+	if err != nil {
+		log.Fatalf("Failed to create REST client: %v", err)
+	}
+
 	// First, create a project
-	project, err := bt.API().Projects().Create(context.Background(), projects.CreateParams{
+	project, err := apiClient.PostProjectWithResponse(ctx, openapi.CreateProject{
 		Name: "go-sdk-examples",
 	})
 	if err != nil {
 		log.Fatalf("Failed to create project: %v", err)
 	}
+	if project.StatusCode() != http.StatusOK || project.JSON200 == nil {
+		log.Fatalf("Failed to create project: HTTP %d: %s", project.StatusCode(), project.Body)
+	}
 
 	// Initialize dataset
-	datasetID, err := initializeDataset(bt, project.ID)
+	datasetID, err := initializeDataset(ctx, apiClient, project.JSON200.Id)
 	if err != nil {
 		log.Fatalf("Failed to initialize dataset: %v", err)
 	}

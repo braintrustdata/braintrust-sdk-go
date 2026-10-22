@@ -6,7 +6,7 @@ interactions:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 109
+        content_length: 96
         transfer_encoding: []
         trailer: {}
         host: generativelanguage.googleapis.com
@@ -19,12 +19,12 @@ interactions:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-genai-sdk/1.23.0 gl-go/go1.23.12
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-genai-sdk/1.23.0 gl-go/go1.23.12
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
-        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:streamGenerateContent?alt=sse
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
         method: POST
       response:
         proto: HTTP/2.0
@@ -34,18 +34,30 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: false
-        body: "data: {\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"1\"}],\"role\":\"model\"},\"index\":0}],\"modelVersion\":\"gemini-2.0-flash-exp\"}\r\n\r\ndata: {\"candidates\":[{\"content\":{\"parts\":[{\"text\":\" 2\"}],\"role\":\"model\"},\"index\":0}],\"modelVersion\":\"gemini-2.0-flash-exp\"}\r\n\r\ndata: {\"candidates\":[{\"content\":{\"parts\":[{\"text\":\" 3\\n\"}],\"role\":\"model\"},\"index\":0,\"finishReason\":\"STOP\"}],\"usageMetadata\":{\"promptTokenCount\":12,\"candidatesTokenCount\":8,\"totalTokenCount\":20},\"modelVersion\":\"gemini-2.0-flash-exp\"}\r\n\r\n"
+        body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"1\\n2\\n3\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 14,\"candidatesTokenCount\": 5,\"totalTokenCount\": 57,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 14}],\"thoughtsTokenCount\": 38,\"serviceTier\": \"standard\"},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"h1PZapivFJGb9MoPjreomQ4\"}\r\n\r\n"
         headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Disposition:
+                - attachment
             Content-Type:
                 - text/event-stream
             Date:
-                - Fri, 07 Nov 2025 17:16:55 GMT
+                - Thu, 22 Oct 2026 00:06:31 GMT
             Server:
                 - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=634
             Vary:
                 - Origin
                 - X-Origin
                 - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Xss-Protection:
+                - "0"
         status: 200 OK
         code: 200
-        duration: 623.688792ms
+        duration: 813.534292ms

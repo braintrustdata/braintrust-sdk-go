@@ -1,11 +1,15 @@
 // Package experiments provides operations for managing Braintrust experiments.
+//
+// New REST integrations should use github.com/braintrustdata/braintrust-sdk-go/openapi instead.
 package experiments
 
 import "github.com/braintrustdata/braintrust-sdk-go/internal/https"
 
 // API provides methods for experiment operations
+//
+// Deprecated: Use the openapi package's Client or ClientWithResponses.
 type API struct {
-	client *https.Client
+	client *https.OpenAPIClient
 }
 
 // Experiment represents an experiment from the API

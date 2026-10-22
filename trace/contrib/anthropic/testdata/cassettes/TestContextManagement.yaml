@@ -38,7 +38,7 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.26.5
+                - go1.26.10
             X-Stainless-Timeout:
                 - "600"
         url: https://api.anthropic.com/v1/messages?beta=true
@@ -51,58 +51,56 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"model":"claude-haiku-4-5-20251001","id":"msg_011Cf3aRYzV82kkL923cy2o1","type":"message","role":"assistant","content":[{"type":"text","text":"I apologize, but I''m unable to provide a meaningful summary. The weather data returned for London only showed \"Historical hourly weather data\" repeated multiple times without any actual weather information (temperature, conditions, etc.). The data for Paris also didn''t return usable information.\n\nTo give you a proper weather summary"}],"container":null,"stop_reason":"max_tokens","stop_sequence":null,"stop_details":null,"usage":{"input_tokens":818,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":64,"service_tier":"standard","inference_geo":"not_available"},"context_management":{"applied_edits":[{"type":"clear_tool_uses_20250919","cleared_input_tokens":146,"cleared_tool_uses":1}]}}'
+        body: '{"model":"claude-haiku-4-5-20251001","id":"msg_011CgGJLC1hGEezdc8YEBV1o","type":"message","role":"assistant","content":[{"type":"text","text":"Based on the weather checks I performed:\n\n**Paris**: The result was cleared, so I don''t have specific weather data for Paris to report.\n\n**London**: The data returned appears to be historical hourly weather information, but it doesn''t contain specific weather details like temperature, conditions, or forecasts."}],"container":null,"stop_reason":"max_tokens","stop_sequence":null,"stop_details":null,"usage":{"input_tokens":818,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":64,"service_tier":"standard","inference_geo":"not_available","speed":"standard"},"diagnostics":null,"context_management":{"applied_edits":[{"type":"clear_tool_uses_20250919","cleared_input_tokens":146,"cleared_tool_uses":1}]}}'
         headers:
             Anthropic-Ratelimit-Input-Tokens-Limit:
                 - "10000000"
             Anthropic-Ratelimit-Input-Tokens-Remaining:
                 - "10000000"
             Anthropic-Ratelimit-Input-Tokens-Reset:
-                - "2026-09-14T15:34:55Z"
+                - "2026-10-22T00:06:04Z"
             Anthropic-Ratelimit-Output-Tokens-Limit:
                 - "2000000"
             Anthropic-Ratelimit-Output-Tokens-Remaining:
                 - "2000000"
             Anthropic-Ratelimit-Output-Tokens-Reset:
-                - "2026-09-14T15:34:55Z"
+                - "2026-10-22T00:06:05Z"
             Anthropic-Ratelimit-Requests-Limit:
                 - "20000"
             Anthropic-Ratelimit-Requests-Remaining:
                 - "19999"
             Anthropic-Ratelimit-Requests-Reset:
-                - "2026-09-14T15:34:54Z"
+                - "2026-10-22T00:06:04Z"
             Anthropic-Ratelimit-Tokens-Limit:
                 - "12000000"
             Anthropic-Ratelimit-Tokens-Remaining:
                 - "12000000"
             Anthropic-Ratelimit-Tokens-Reset:
-                - "2026-09-14T15:34:55Z"
+                - "2026-10-22T00:06:04Z"
             Anthropic-Workspace-Id:
-                - wrkspc_018bFG1FgNVWqx5pthtdGTzS
+                - wrkspc_01J8hau4yJ2SKvtbeP9drm9A
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - a3b075603ab36e57-YYZ
+                - a4e44102ad3f1421-SEA
             Content-Security-Policy:
                 - default-src 'none'; frame-ancestors 'none'
             Content-Type:
                 - application/json
             Date:
-                - Mon, 14 Sep 2026 15:34:55 GMT
+                - Thu, 22 Oct 2026 00:06:05 GMT
             Request-Id:
-                - req_011Cf3aRYiNT4irnEgY6p2qd
+                - req_011CgGJLBp3d1VUNnKkYaxHX
             Server:
                 - cloudflare
-            Server-Timing:
-                - x-originResponse;dur=1043
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             Traceresponse:
-                - 00-784349a8d45c6cf798aec3e68f35d0a6-6eee0dbdc08c6ad4-01
+                - 00-6ad9536c00000000ab84ab910a0625e5-d924f469b8cd38c8-01
             Vary:
                 - Accept-Encoding
             X-Robots-Tag:
                 - none
         status: 200 OK
         code: 200
-        duration: 1.16413225s
+        duration: 1.214180333s

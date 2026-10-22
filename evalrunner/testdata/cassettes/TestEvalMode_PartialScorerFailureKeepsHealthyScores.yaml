@@ -27,20 +27,20 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"7f591203-74a0-4126-9103-1fb905b32618","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","name":"go-sdk-tests","description":null,"created":"2026-08-13T20:45:31.574Z","deleted_at":null,"user_id":"c755328d-f64a-4737-a984-e83c088cd9f7","settings":null}'
+        body: '{"id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","org_id":"5abfae3a-7aa7-4653-a9c8-b3efcb18f584","name":"go-sdk-tests","description":null,"created":"2026-10-19T23:49:12.896Z","deleted_at":null,"user_id":"c1f71e19-b3ce-4f59-89a9-055901f7755b","settings":null}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
             Cache-Control:
                 - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Thu, 27 Aug 2026 14:14:18 GMT
+                - Thu, 22 Oct 2026 00:00:54 GMT
             Etag:
-                - W/"fe-e5XSQJyAK+9rnBrPXkKT/jlKL04"
+                - W/"fe-7iaq6aBQFNs98OpqCWtmRX1e6fw"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -50,27 +50,18 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 32a8b37046729bc3f47a204680708ef4.cloudfront.net (CloudFront), 1.1 b7248001409a22dcf06ac3c9df2f5fac.cloudfront.net (CloudFront)
-            X-Amz-Apigw-Id:
-                - Cw_pMFPWoAMEu6g=
+                - 1.1 4ac8d091dce10e726cfc5404bfed72b8.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - lojKNFy1QPaBiezfrFncdA-yX158UbU9cRte137GIIqLHHBP_0tupQ==
+                - p9Z4yVFUrOZfxx84oI7X92ky2Xef2pKNhAur24REXB1GEVa2yN-xkg==
             X-Amz-Cf-Pop:
-                - CMH68-P7
-                - CMH68-P5
-            X-Amzn-Requestid:
-                - 2ed13d8c-a5fe-468d-bf32-d7a970b67a3c
-            X-Amzn-Trace-Id:
-                - Root=1-6a90463a-5210e88150b2da8b77f3676e;Parent=0285b1843db52364;Sampled=0;Lineage=1:24be3d11:0
+                - SEA900-P10
             X-Bt-Found-Existing:
                 - "true"
-            X-Bt-Internal-Trace-Id:
-                - 6a90463a00000000137325d183244d48
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 269.94115ms
+        duration: 100.98825ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -100,13 +91,13 @@ interactions:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
             Cache-Control:
                 - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Thu, 27 Aug 2026 14:14:18 GMT
+                - Thu, 22 Oct 2026 00:00:54 GMT
             Etag:
                 - W/"178-kKbrsfThc+xXlggXc9RQYV+Gr9I"
             Expires:
@@ -118,25 +109,16 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 ed2a58dedcfbb5f690a75d7abac8c0ae.cloudfront.net (CloudFront), 1.1 b7248001409a22dcf06ac3c9df2f5fac.cloudfront.net (CloudFront)
-            X-Amz-Apigw-Id:
-                - Cw_pMFbtoAMESgA=
+                - 1.1 4ac8d091dce10e726cfc5404bfed72b8.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - 02s9i99UPk0sxs8wkcXbg-vNPdizNL-i3eIWVtbKPHF27nLuc7-p_A==
+                - 78VitkTRFk0yrozQ8UHQFAbP6RFgOqo4cqnodc7vP-sAvLEPMB7f-A==
             X-Amz-Cf-Pop:
-                - CMH68-P7
-                - CMH68-P5
-            X-Amzn-Requestid:
-                - 7df39b33-5f8b-4a74-a3c7-9960574b530f
-            X-Amzn-Trace-Id:
-                - Root=1-6a90463a-7c0055b57924e64463c82305;Parent=04028929bc16a260;Sampled=0;Lineage=1:24be3d11:0
-            X-Bt-Internal-Trace-Id:
-                - 6a90463a000000007aea7065db329a5c
+                - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 300.123226ms
+        duration: 150.2305ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -148,7 +130,7 @@ interactions:
         host: api.braintrust.dev
         remote_addr: ""
         request_uri: ""
-        body: '{"project_id":"7f591203-74a0-4126-9103-1fb905b32618","name":"partial-failure"}'
+        body: '{"project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"partial-failure"}'
         form: {}
         headers:
             Content-Type:
@@ -163,20 +145,20 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"id":"f6642efb-a5e2-4ae9-a7ca-f3904c33c073","project_id":"7f591203-74a0-4126-9103-1fb905b32618","name":"partial-failure","description":null,"created":"2026-08-27T14:14:18.816Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"c755328d-f64a-4737-a984-e83c088cd9f7","metadata":null,"tags":null}'
+        body: '{"id":"0c615167-ba6b-48f0-9f2d-bcb811cece50","project_id":"900b1ba7-5336-4a3f-8a6d-52e1a170bd78","name":"partial-failure","description":null,"created":"2026-10-21T20:11:46.319Z","repo_info":null,"commit":null,"base_exp_id":null,"deleted_at":null,"dataset_id":null,"dataset_version":null,"internal_metadata":null,"parameters_id":null,"parameters_version":null,"public":false,"user_id":"a5ca7f9c-bf20-40c4-a82b-5c992f6a38f5","metadata":null,"tags":null}'
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
             Access-Control-Expose-Headers:
-                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
+                - x-bt-cursor,x-bt-found-existing,x-bt-query-plan,x-bt-api-duration-ms,x-bt-brainstore-duration-ms,x-bt-count,x-bt-internal-trace-id,x-bt-error-origin,x-bt-used-endpoint,x-bt-overflow-url
             Cache-Control:
                 - no-store, no-cache, must-revalidate, proxy-revalidate
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Thu, 27 Aug 2026 14:14:18 GMT
+                - Thu, 22 Oct 2026 00:00:54 GMT
             Etag:
-                - W/"1c3-1rzqcNcN//K1lk8dg+l7UxG6oRc"
+                - W/"1c3-55aX4k6i1nx7DiKILD8RhIrPNEI"
             Expires:
                 - "0"
             Strict-Transport-Security:
@@ -186,22 +168,13 @@ interactions:
             Vary:
                 - Origin, Accept-Encoding
             Via:
-                - 1.1 5cf49be63255f33a1b47624d72f70bf6.cloudfront.net (CloudFront), 1.1 b7248001409a22dcf06ac3c9df2f5fac.cloudfront.net (CloudFront)
-            X-Amz-Apigw-Id:
-                - Cw_pPHGwoAMEPgQ=
+                - 1.1 4ac8d091dce10e726cfc5404bfed72b8.cloudfront.net (CloudFront)
             X-Amz-Cf-Id:
-                - _jKy8jATmRFCogr-XQxmt4fDioS6PdcU-PiJ7kZkQ-AdYnOx5TviZw==
+                - -7ybmsSbN3nK1E20PUWUrJi6iqUKTjtGb_Cd6nF6nW6axUCI7YNqOw==
             X-Amz-Cf-Pop:
-                - CMH68-P7
-                - CMH68-P5
-            X-Amzn-Requestid:
-                - ea2ced1a-48db-4cc7-b73b-5eaebcb7c0bc
-            X-Amzn-Trace-Id:
-                - Root=1-6a90463a-406dff7d1692dee14e505ec9;Parent=4933d8e01298056f;Sampled=0;Lineage=1:24be3d11:0
-            X-Bt-Internal-Trace-Id:
-                - 6a90463a000000001e12b7605172c0a5
+                - SEA900-P10
             X-Cache:
                 - Miss from cloudfront
         status: 200 OK
         code: 200
-        duration: 308.430652ms
+        duration: 195.31325ms

@@ -34,7 +34,7 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.23.12
+                - go1.26.10
         url: https://api.openai.com/v1/responses
         method: POST
       response:
@@ -47,23 +47,27 @@ interactions:
         uncompressed: true
         body: |-
             {
-              "id": "resp_0da26a0fd227f9fe016913f72afc0c8196b24549f6c96e55fe",
+              "id": "resp_07bab301573df83b016ad953becfa887d080dfc60886a3c22a",
               "object": "response",
-              "created_at": 1762916139,
+              "created_at": 1792627646,
               "status": "completed",
+              "access_programs": null,
               "background": false,
               "billing": {
                 "payer": "developer"
               },
+              "completed_at": 1792627647,
               "error": null,
+              "frequency_penalty": 0.0,
               "incomplete_details": null,
               "instructions": "Answer the question in a concise manner.",
               "max_output_tokens": 100,
               "max_tool_calls": null,
               "model": "gpt-4o-mini-2024-07-18",
+              "moderation": null,
               "output": [
                 {
-                  "id": "msg_0da26a0fd227f9fe016913f72bb1bc81968efc7051cd47fabb",
+                  "id": "msg_07bab301573df83b016ad953bf4a2087d0ab0fe4294b298b18",
                   "type": "message",
                   "status": "completed",
                   "content": [
@@ -71,17 +75,19 @@ interactions:
                       "type": "output_text",
                       "annotations": [],
                       "logprobs": [],
-                      "text": "13 + 4 equals 17."
+                      "text": "13 + 4 = 17."
                     }
                   ],
                   "role": "assistant"
                 }
               ],
               "parallel_tool_calls": true,
+              "presence_penalty": 0.0,
               "previous_response_id": null,
               "prompt_cache_key": null,
-              "prompt_cache_retention": null,
+              "prompt_cache_retention": "in_memory",
               "reasoning": {
+                "context": null,
                 "effort": null,
                 "summary": null
               },
@@ -96,6 +102,24 @@ interactions:
                 "verbosity": "medium"
               },
               "tool_choice": "auto",
+              "tool_usage": {
+                "image_gen": {
+                  "input_tokens": 0,
+                  "input_tokens_details": {
+                    "image_tokens": 0,
+                    "text_tokens": 0
+                  },
+                  "output_tokens": 0,
+                  "output_tokens_details": {
+                    "image_tokens": 0,
+                    "text_tokens": 0
+                  },
+                  "total_tokens": 0
+                },
+                "web_search": {
+                  "num_requests": 0
+                }
+              },
               "tools": [],
               "top_logprobs": 0,
               "top_p": 1.0,
@@ -103,6 +127,7 @@ interactions:
               "usage": {
                 "input_tokens": 26,
                 "input_tokens_details": {
+                  "cache_write_tokens": 0,
                   "cached_tokens": 0
                 },
                 "output_tokens": 9,
@@ -115,20 +140,24 @@ interactions:
               "metadata": {}
             }
         headers:
+            Access-Control-Expose-Headers:
+                - X-Request-ID
+                - CF-Ray
+                - CF-Ray
             Alt-Svc:
                 - h3=":443"; ma=86400
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - 99d2c06c4b44e55d-EWR
+                - a4e443080eddae4f-SEA
             Content-Type:
                 - application/json
             Date:
-                - Wed, 12 Nov 2025 02:55:39 GMT
+                - Thu, 22 Oct 2026 00:07:27 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "869"
+                - "647"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -136,14 +165,11 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=EJ4_03T1hk9qqeL_NUEPIlJiWEq92Pguheg.FlVanTg-1762916139-1.0.1.1-CetyuAQoQU8uqKpUTrrcD4jUrwgdZMii1lk..Xr3CJjl17B.zu26AAAOb.201w8xxS03K5ps3mroUAtRFH7MihvyNvbWk.OlLMfOW7OIhdE; path=/; expires=Wed, 12-Nov-25 03:25:39 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
-                - _cfuvid=r81D12vRds7483sDtHPDpVuowLwCG5P0xLIsil6Jij4-1762916139857-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+                - __cf_bm=sxegbwPBzYgDq7e72qeQ6ZF72imvQG85vpPFCxxLiLA-1792627646.7288558-1.0.1.1-30tbuPRRGpS8x11Luq.JtYiT6MNqeyY7gKCXMc.br.L3CDt63pQDZN8huOJ3RBfakOZo0FJefedC_sQZV4.pvmsb4ELBbsNAgXdjoXpqEpF7hOlmtJ04eooPRymL01yp; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:37:27 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
                 - nosniff
-            X-Envoy-Upstream-Service-Time:
-                - "874"
             X-Ratelimit-Limit-Requests:
                 - "30000"
             X-Ratelimit-Limit-Tokens:
@@ -157,7 +183,7 @@ interactions:
             X-Ratelimit-Reset-Tokens:
                 - 0s
             X-Request-Id:
-                - req_797bf0726cd145c595c456939c734da0
+                - req_efb3632272754b9a9d75cf9d77380a02
         status: 200 OK
         code: 200
-        duration: 953.197416ms
+        duration: 744.0575ms

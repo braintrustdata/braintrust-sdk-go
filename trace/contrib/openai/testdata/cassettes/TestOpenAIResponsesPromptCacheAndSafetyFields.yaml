@@ -34,7 +34,7 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.26.5
+                - go1.26.10
         url: https://api.openai.com/v1/responses
         method: POST
       response:
@@ -47,15 +47,16 @@ interactions:
         uncompressed: true
         body: |-
             {
-              "id": "resp_075fde55c5e3b9a5006aa2d88aebb887d2ab070ffb490bf2cb",
+              "id": "resp_05d162174956a9a0016ad953bf9a8487d08ddc4bd1b576eb64",
               "object": "response",
-              "created_at": 1789057162,
+              "created_at": 1792627647,
               "status": "completed",
+              "access_programs": null,
               "background": false,
               "billing": {
                 "payer": "developer"
               },
-              "completed_at": 1789057164,
+              "completed_at": 1792627648,
               "error": null,
               "frequency_penalty": 0.0,
               "incomplete_details": null,
@@ -66,7 +67,7 @@ interactions:
               "moderation": null,
               "output": [
                 {
-                  "id": "msg_075fde55c5e3b9a5006aa2d88c5b7487d2bfdbb7597ded338e",
+                  "id": "msg_05d162174956a9a0016ad953c001c087d0949f803959c5251b",
                   "type": "message",
                   "status": "completed",
                   "content": [
@@ -92,7 +93,7 @@ interactions:
               },
               "safety_identifier": "user-456",
               "service_tier": "default",
-              "store": true,
+              "store": false,
               "temperature": 1.0,
               "text": {
                 "format": {
@@ -148,41 +149,41 @@ interactions:
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - a38fc100b8ad3be0-BOM
+                - a4e4430d0e25ae4f-SEA
             Content-Type:
                 - application/json
             Date:
-                - Thu, 10 Sep 2026 16:19:24 GMT
+                - Thu, 22 Oct 2026 00:07:28 GMT
             Openai-Organization:
-                - user-slc7b85csme6l5adpx3xkdkx
+                - braintrust-data
             Openai-Processing-Ms:
-                - "1671"
+                - "570"
             Openai-Project:
-                - proj_TyVyJP3AZBjMBnVymwmezBd2
+                - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
                 - "2020-10-01"
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=bTM0DLcV.X06t3lSL4QyAUoEaQLCJc.w_wutuUhcwG0-1789057162.3528504-1.0.1.1-mQ3MYcEyQSyvQAmByD.oBDJbIxyKxjPUpvz.pi1R9LS89R7kQuFydtR63Ci50yqLxs6WKdSTkaFlZouzFbku72xVKwOwX_UUUyH_ADZR_e7YiZeq4.8G.nGnE9vYX91X; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 10 Sep 2026 16:49:24 GMT
+                - __cf_bm=MA2V2xjO_e3p3jX_11qzhsxTtmyikrViJo50HN_5YIQ-1792627647.5293157-1.0.1.1-AT1px5LHNBYGSmCnFlEM2YbjO76yRx4vhvLFMQLGvENtAUU9u3ILii7LU7_1pInLU_4EU5GVZR4ENfAVw7vymZm9h3XaFkRMzYuCEDecLiNchRPU4n2BagRx3kn7O0kn; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:37:28 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
                 - nosniff
             X-Ratelimit-Limit-Requests:
-                - "5000"
+                - "30000"
             X-Ratelimit-Limit-Tokens:
-                - "2000000"
+                - "150000000"
             X-Ratelimit-Remaining-Requests:
-                - "4999"
+                - "29999"
             X-Ratelimit-Remaining-Tokens:
-                - "1999967"
+                - "149999967"
             X-Ratelimit-Reset-Requests:
-                - 12ms
+                - 2ms
             X-Ratelimit-Reset-Tokens:
                 - 0s
             X-Request-Id:
-                - req_bb94b19b71384d9ea2a5c2e56b464d6e
+                - req_c3a75d8fd22244ea94cf506eea38b36e
         status: 200 OK
         code: 200
-        duration: 2.599062125s
+        duration: 724.624125ms

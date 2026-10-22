@@ -6,18 +6,25 @@ interactions:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 59
+        content_length: 62
         transfer_encoding: []
         trailer: {}
         host: generativelanguage.googleapis.com
         remote_addr: ""
         request_uri: ""
-        body: '{"contents":[{"parts":[{"text":"Say hello"}],"role":"user"}]}'
+        body: |
+            {"contents":[{"parts":[{"text":"Say hello"}],"role":"user"}]}
         form: {}
         headers:
             Content-Type:
                 - application/json
-        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent
+            User-Agent:
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
+            X-Goog-Api-Client:
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
+            X-Server-Timeout:
+                - "30"
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
         method: POST
       response:
         proto: HTTP/2.0
@@ -34,24 +41,54 @@ interactions:
                   "content": {
                     "parts": [
                       {
-                        "text": "Hello! How can I help you today?\n"
+                        "text": "Hello!"
                       }
                     ],
                     "role": "model"
                   },
-                  "finishReason": "STOP"
+                  "finishReason": "STOP",
+                  "index": 0
                 }
               ],
               "usageMetadata": {
                 "promptTokenCount": 3,
-                "candidatesTokenCount": 10,
-                "totalTokenCount": 13
+                "candidatesTokenCount": 2,
+                "totalTokenCount": 23,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 3
+                  }
+                ],
+                "thoughtsTokenCount": 18,
+                "serviceTier": "standard"
               },
-              "modelVersion": "gemini-2.0-flash-exp"
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "ZVLZatXKGNqbqtsP9JaOiQ4"
             }
         headers:
+            Alt-Svc:
+                - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
             Content-Type:
                 - application/json; charset=UTF-8
+            Date:
+                - Thu, 22 Oct 2026 00:01:56 GMT
+            Server:
+                - scaffolding on HTTPServer2
+            Server-Timing:
+                - gfet4t7; dur=14913
+            Vary:
+                - Origin
+                - X-Origin
+                - Referer
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Gemini-Service-Tier:
+                - standard
+            X-Xss-Protection:
+                - "0"
         status: 200 OK
         code: 200
-        duration: 100ms
+        duration: 15.095960958s

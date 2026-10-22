@@ -19,11 +19,11 @@ interactions:
             Content-Type:
                 - application/json
             User-Agent:
-                - google-adk/0.3.0 gl-go/1.24.11
-                - google-genai-sdk/1.40.0 gl-go/go1.24.11
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Goog-Api-Client:
-                - google-adk/0.3.0 gl-go/1.24.11
-                - google-genai-sdk/1.40.0 gl-go/go1.24.11
+                - google-adk/0.3.0 gl-go/1.26.10
+                - google-genai-sdk/1.41.0 gl-go/go1.26.10
             X-Server-Timeout:
                 - "30"
         url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
@@ -43,7 +43,7 @@ interactions:
                   "content": {
                     "parts": [
                       {
-                        "text": "This image depicts a majestic tall ship,"
+                        "text": "This image depicts a tall ship navigating"
                       }
                     ],
                     "role": "model"
@@ -54,7 +54,7 @@ interactions:
               ],
               "usageMetadata": {
                 "promptTokenCount": 285,
-                "candidatesTokenCount": 8,
+                "candidatesTokenCount": 7,
                 "totalTokenCount": 481,
                 "promptTokensDetails": [
                   {
@@ -66,10 +66,11 @@ interactions:
                     "tokenCount": 258
                   }
                 ],
-                "thoughtsTokenCount": 188
+                "thoughtsTokenCount": 189,
+                "serviceTier": "standard"
               },
               "modelVersion": "gemini-2.5-flash",
-              "responseId": "EtGoabKaMZKnqtsPofucyAc"
+              "responseId": "QVPZasiBJeix_PUPutS8qAo"
             }
         headers:
             Alt-Svc:
@@ -77,11 +78,11 @@ interactions:
             Content-Type:
                 - application/json; charset=UTF-8
             Date:
-                - Thu, 05 Mar 2026 00:40:52 GMT
+                - Thu, 22 Oct 2026 00:05:23 GMT
             Server:
                 - scaffolding on HTTPServer2
             Server-Timing:
-                - gfet4t7; dur=2424
+                - gfet4t7; dur=3125
             Vary:
                 - Origin
                 - X-Origin
@@ -90,8 +91,10 @@ interactions:
                 - nosniff
             X-Frame-Options:
                 - SAMEORIGIN
+            X-Gemini-Service-Tier:
+                - standard
             X-Xss-Protection:
                 - "0"
         status: 200 OK
         code: 200
-        duration: 2.443887959s
+        duration: 3.285540875s

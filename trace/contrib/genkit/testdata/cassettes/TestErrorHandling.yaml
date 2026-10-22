@@ -34,7 +34,7 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.24.11
+                - go1.26.10
         url: https://api.openai.com/v1/chat/completions
         method: POST
       response:
@@ -55,20 +55,23 @@ interactions:
                 }
             }
         headers:
+            Access-Control-Expose-Headers:
+                - CF-Ray
+                - CF-Ray
             Alt-Svc:
                 - h3=":443"; ma=86400
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - 9e1eebe149493d64-EWR
+                - a4e442620d2278c9-SEA
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Wed, 25 Mar 2026 15:24:15 GMT
+                - Thu, 22 Oct 2026 00:07:00 GMT
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=4e3cB_1lQJ2V_Cai3Qutb5rIdCJ38qd6SXlh8vDFmc0-1774452254.926443-1.0.1.1-4RbuzSeDjcfmY9.WBL_3RmAEje1uTXu7W6O.2ls1oyYyP9mnOqzmi_UbQ8Vg7FI39JKcOWn4KHWkgnox2rVpUvWX7v6Pfu3xOomK2eAbUUtC4KS0mfcvd9H8Iiy4P5JM; HttpOnly; Secure; Path=/; Domain=api.openai.com; Expires=Wed, 25 Mar 2026 15:54:15 GMT
+                - __cf_bm=8OCIIN9XAD24TrzAcF.Rd5IxVnBD927.k.A50GchclY-1792627620.1627877-1.0.1.1-hCJ2eauyGdmXhATiLxhQ2mPRmrC.Em2SMQrr6_tKaMkzcsAwKkfp.KNVPDNkQEu8LwudEFzVpqYlBbldoJhxU822GRTrJ5O.wmdoqFcrhFVuajP3gveHMAtwW2KdCQZq; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:37:00 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             Vary:
@@ -78,7 +81,7 @@ interactions:
             X-Openai-Proxy-Wasm:
                 - v0.1
             X-Request-Id:
-                - req_24ce6fa707b448c1976331ca6c15db40
+                - req_da077bf8b7b341b9a63a153002bdb49a
         status: 404 Not Found
         code: 404
-        duration: 760.259167ms
+        duration: 163.902792ms

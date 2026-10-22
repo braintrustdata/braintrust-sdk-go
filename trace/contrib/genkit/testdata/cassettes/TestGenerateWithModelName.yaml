@@ -34,7 +34,7 @@ interactions:
             X-Stainless-Runtime:
                 - go
             X-Stainless-Runtime-Version:
-                - go1.24.11
+                - go1.26.10
         url: https://api.openai.com/v1/chat/completions
         method: POST
       response:
@@ -47,9 +47,9 @@ interactions:
         uncompressed: true
         body: |
             {
-              "id": "chatcmpl-DMglsKKd4xfPuvzeqCg7uvQHisdNC",
+              "id": "chatcmpl-EbacfQ4XmxmiNXXaX4GAa3yrZqq1C",
               "object": "chat.completion",
-              "created": 1774300000,
+              "created": 1792627621,
               "model": "gpt-4o-mini-2024-07-18",
               "choices": [
                 {
@@ -80,25 +80,27 @@ interactions:
                 }
               },
               "service_tier": "default",
-              "system_fingerprint": "fp_ca3e7d71bf"
+              "system_fingerprint": "fp_0d55417811"
             }
         headers:
             Access-Control-Expose-Headers:
                 - X-Request-ID
+                - CF-Ray
+                - CF-Ray
             Alt-Svc:
                 - h3=":443"; ma=86400
             Cf-Cache-Status:
                 - DYNAMIC
             Cf-Ray:
-                - 9e1066b9b9be8c33-EWR
+                - a4e4426b6d0578c9-SEA
             Content-Type:
                 - application/json
             Date:
-                - Mon, 23 Mar 2026 21:06:41 GMT
+                - Thu, 22 Oct 2026 00:07:02 GMT
             Openai-Organization:
                 - braintrust-data
             Openai-Processing-Ms:
-                - "352"
+                - "519"
             Openai-Project:
                 - proj_vsCSXafhhByzWOThMrJcZiw9
             Openai-Version:
@@ -106,7 +108,7 @@ interactions:
             Server:
                 - cloudflare
             Set-Cookie:
-                - __cf_bm=wNXxJAeOxO0yQStuhnWY6BM1qtwMSqwIAZ0kIO.k698-1774300000.2741334-1.0.1.1-vX7JnuSOAFjtD_SzJ5F.y5RPAKQyutYrSzMecKf7Sp_EtSx_pRXnZmRLmPG784yehVShKzOIxLeu.B_RWcZRgcWQ4LWS06iq89kHklmBhlnBg0mUuB7au_X2uB.aqnCB; HttpOnly; Secure; Path=/; Domain=api.openai.com; Expires=Mon, 23 Mar 2026 21:36:41 GMT
+                - __cf_bm=JvB3zco5ieX2X__rnr.kjRSiBYcdjF3FWchbfM2Dw7A-1792627621.6632926-1.0.1.1-jM_8Su.byPeOAKf5ict1nlqMvRglEXHpB3myhz_1gOR4buyI6pZmVY77ls_Vv5ycyIQ_XyJzStuGynDMdWzxTWYQ3O.fSjoLWVERYotL6o8pkYqBd9fbz2CX2.UeJN.I; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 22 Oct 2026 00:37:02 GMT
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload
             X-Content-Type-Options:
@@ -126,7 +128,7 @@ interactions:
             X-Ratelimit-Reset-Tokens:
                 - 0s
             X-Request-Id:
-                - req_665b12a84ae44bfe978daa26d5ca3bf4
+                - req_6c7d59cd64d14249b378b3b5e38ccf17
         status: 200 OK
         code: 200
-        duration: 1.004571667s
+        duration: 652.379875ms

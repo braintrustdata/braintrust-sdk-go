@@ -6,11 +6,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/braintrustdata/braintrust-sdk-go/api"
-	promptsapi "github.com/braintrustdata/braintrust-sdk-go/api/prompts"
+	"github.com/braintrustdata/braintrust-sdk-go/internal/https"
+	"github.com/braintrustdata/braintrust-sdk-go/openapi"
 )
 
-// LoadOpts selects the prompt [Load] fetches.
+// LoadOpts selects the prompt [LoadWithClient] fetches.
 type LoadOpts struct {
 	// Slug is the prompt's slug. Required unless ID is set.
 	Slug string
@@ -34,20 +34,14 @@ type LoadOpts struct {
 	Environment string
 }
 
-// Load fetches a prompt from Braintrust and returns it ready to render.
+// LoadWithClient fetches a prompt from Braintrust and returns it ready to render.
 //
 // Most callers want [braintrust.Client.LoadPrompt], which supplies the API
-// client and the default project. Use Load directly when you already hold an
-// API client:
-//
-//	p, err := prompt.Load(ctx, client.API(), prompt.LoadOpts{Slug: "summarizer"})
-//	if err != nil {
-//		return err
-//	}
-//	built, err := p.Build(map[string]any{"input": article})
+// client and the default project. Use LoadWithClient directly when you already
+// hold a configured [openapi.Client].
 //
 // The prompt is fetched every time; nothing is cached.
-func Load(ctx context.Context, client *api.API, opts LoadOpts) (*Prompt, error) {
+func LoadWithClient(ctx context.Context, client *openapi.Client, opts LoadOpts) (*Prompt, error) {
 	if client == nil {
 		return nil, errors.New("loading a prompt needs an API client")
 	}
@@ -55,17 +49,20 @@ func Load(ctx context.Context, client *api.API, opts LoadOpts) (*Prompt, error) 
 		return nil, errors.New("loading a prompt needs a Slug or an ID")
 	}
 
-	prompts := client.Prompts()
+	environment := opts.Environment
+	if opts.Version != "" {
+		environment = ""
+	}
 
 	if opts.ID != "" {
-		row, err := prompts.Get(ctx, opts.ID, promptsapi.QueryParams{
-			Version:     opts.Version,
-			Environment: opts.Environment,
-		})
+		row, err := https.DecodeJSON[storedPrompt](client.GetPromptId(ctx, opts.ID, &openapi.GetPromptIdParams{
+			Version:     https.String(opts.Version),
+			Environment: https.String(environment),
+		}))
 		if err != nil {
 			return nil, fmt.Errorf("loading prompt %q: %w", opts.ID, err)
 		}
-		return fromRow(*row)
+		return fromRow(row)
 	}
 
 	if opts.Project == "" && opts.ProjectID == "" {
@@ -79,18 +76,20 @@ func Load(ctx context.Context, client *api.API, opts LoadOpts) (*Prompt, error) 
 		projectName = ""
 	}
 
-	rows, err := prompts.Query(ctx, promptsapi.QueryParams{
-		ProjectName: projectName,
-		ProjectID:   opts.ProjectID,
-		Slug:        opts.Slug,
-		Version:     opts.Version,
-		Environment: opts.Environment,
-		Limit:       1,
-	})
+	rows, err := https.DecodeJSON[struct {
+		Objects []storedPrompt `json:"objects"`
+	}](client.GetPrompt(ctx, &openapi.GetPromptParams{
+		ProjectName: https.String(projectName),
+		ProjectId:   https.String(opts.ProjectID),
+		Slug:        https.String(opts.Slug),
+		Version:     https.String(opts.Version),
+		Environment: https.String(environment),
+		Limit:       https.Positive(1),
+	}))
 	if err != nil {
 		return nil, fmt.Errorf("loading prompt %q: %w", opts.Slug, err)
 	}
-	if len(rows) == 0 {
+	if len(rows.Objects) == 0 {
 		where := opts.Project
 		if where == "" {
 			where = opts.ProjectID
@@ -98,11 +97,22 @@ func Load(ctx context.Context, client *api.API, opts LoadOpts) (*Prompt, error) 
 		return nil, fmt.Errorf("prompt %q not found in project %q", opts.Slug, where)
 	}
 
-	return fromRow(rows[0])
+	return fromRow(rows.Objects[0])
+}
+
+// storedPrompt preserves prompt data as JSON until it is decoded into the SDK's
+// renderable domain types, without a lossy generated-model round trip.
+type storedPrompt struct {
+	ID         string          `json:"id"`
+	ProjectID  string          `json:"project_id"`
+	XactID     string          `json:"_xact_id"`
+	Name       string          `json:"name"`
+	Slug       string          `json:"slug"`
+	PromptData json.RawMessage `json:"prompt_data"`
 }
 
 // fromRow turns a stored prompt row into a renderable prompt.
-func fromRow(row promptsapi.Prompt) (*Prompt, error) {
+func fromRow(row storedPrompt) (*Prompt, error) {
 	p := &Prompt{
 		ID:        row.ID,
 		Name:      row.Name,
