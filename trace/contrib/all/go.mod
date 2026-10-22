@@ -2,7 +2,7 @@ module github.com/braintrustdata/braintrust-sdk-go/trace/contrib/all
 
 go 1.25.0
 
-toolchain go1.26.1
+toolchain go1.26.10
 
 require (
 	github.com/braintrustdata/braintrust-sdk-go/trace/contrib/a2a v0.19.0

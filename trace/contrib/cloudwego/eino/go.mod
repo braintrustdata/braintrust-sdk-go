@@ -2,7 +2,7 @@ module github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino
 
 go 1.25.0
 
-toolchain go1.26.1
+toolchain go1.26.10
 
 require (
 	github.com/braintrustdata/braintrust-sdk-go v0.19.0
