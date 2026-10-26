@@ -41,7 +41,7 @@ local-braintrust-replaces:
 
 build:
 	go build ./...
-	for dir in $(NESTED_MODULE_DIRS); do go build -C $$dir ./...; done
+	for dir in $(NESTED_MODULE_DIRS); do go build -C $$dir ./... || exit $$?; done
 	go build -C btx ./...
 
 clean:
@@ -51,7 +51,7 @@ clean:
 test:
 	VCR_MODE=replay go test $(GO_TEST_FLAGS) ./...
 	VCR_MODE=replay go test $(GO_TEST_FLAGS) ./examples/internal/workflow-eval
-	for dir in $(NESTED_MODULE_DIRS); do VCR_MODE=replay go test -C $$dir $(GO_TEST_FLAGS) ./...; done
+	for dir in $(NESTED_MODULE_DIRS); do VCR_MODE=replay go test -C $$dir $(GO_TEST_FLAGS) ./... || exit $$?; done
 	VCR_MODE=replay go test -C btx $(GO_TEST_FLAGS) ./...
 
 # The orchestrion injection test compiles a fully instrumented binary per
@@ -104,10 +104,10 @@ mod-verify:
 	# Use GOWORK=off so tidy uses the local replace directives instead of the workspace.
 	# This preserves explicit version pins in nested go.mod files (e.g. set by
 	# prepare_release.sh before tags exist) rather than resetting them to v0.0.0.
-	for dir in $(NESTED_MODULE_DIRS); do GOWORK=off go mod tidy -C $$dir; done
+	for dir in $(NESTED_MODULE_DIRS); do GOWORK=off go mod tidy -C $$dir || exit $$?; done
 	GOWORK=off go mod tidy -C btx
 	go mod verify
-	for dir in $(NESTED_MODULE_DIRS); do (cd $$dir && go mod verify); done
+	for dir in $(NESTED_MODULE_DIRS); do (cd $$dir && go mod verify) || exit $$?; done
 	(cd btx && go mod verify)
 	git diff --exit-code go.mod go.sum \
 		$(foreach dir,$(NESTED_MODULE_DIRS),$(dir)/go.mod $(dir)/go.sum) \

@@ -11,18 +11,33 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: tag-release-${{ github.event.pull_request.head.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  GO_TEST_FLAGS: -timeout=10m
+
 jobs:
   tag:
+    timeout-minutes: 30
     if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/')
     runs-on: ubuntu-24.04
     steps:
       - name: Extract version from branch name
+        timeout-minutes: 1
         id: version
+        env:
+          BRANCH: ${{ github.event.pull_request.head.ref }}
         run: |
-          BRANCH="${{ github.event.pull_request.head.ref }}"
           echo "version=${BRANCH#release/}" >> "$GITHUB_OUTPUT"
 
       - name: Generate app token
+        timeout-minutes: 2
         id: app-token
         uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
         with:
@@ -30,6 +45,7 @@ jobs:
           private-key: ${{ secrets.BRAINTRUST_BOT_PRIVATE_KEY }}
 
       - name: Checkout main
+        timeout-minutes: 2
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           token: ${{ steps.app-token.outputs.token }}
@@ -37,21 +53,28 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Go
+        timeout-minutes: 5
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version-file: go.work
+          cache-dependency-path: '**/go.sum'
 
       - name: Install golangci-lint
+        timeout-minutes: 5
         uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
         with:
           version: v2.11.4
+          # The Run CI step below performs linting once, including btx.
+          install-only: true
 
       - name: Install orchestrion
+        timeout-minutes: 5
         env:
           GOTOOLCHAIN: local
         run: go install github.com/DataDog/orchestrion@v1.12.1
 
       - name: Run CI
+        timeout-minutes: 20
         run: make ci
         env:
           CGO_ENABLED: 0
@@ -61,9 +84,13 @@ jobs:
           BRAINTRUST_API_KEY: ${{ secrets.BRAINTRUST_API_KEY }}
 
       - name: Configure git identity
+        timeout-minutes: 1
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Create and push tags
-        run: ./scripts/release.sh ${{ steps.version.outputs.version }}
+        timeout-minutes: 3
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: ./scripts/release.sh "$VERSION"
