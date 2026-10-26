@@ -30,13 +30,6 @@ All of the common dev tasks are in our `Makefile`.
 make help
 ```
 
-Every GitHub Actions job and step must have an explicit timeout. CI cancels
-superseded runs and stops matrix siblings after a failure. Release workflows
-serialize runs for the same version without cancelling an active release.
-In CI, regular tests have a five-minute package timeout and orchestrion tests
-have ten minutes. Release validation uses ten-minute package timeouts. No job
-may exceed thirty minutes. Run `go test -run '^TestActions' .` to check the runtime
-policy, the final CI gate, and failure handling in the Makefile's module loops.
 
 Constructor tests that depend on the configured API URL must control background
 login: `auth.TestAPIKey` asynchronously supplies a valid server URL and can race
