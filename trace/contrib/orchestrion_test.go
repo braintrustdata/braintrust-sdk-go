@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/vcr"
@@ -26,8 +27,17 @@ func TestOrchestrionInjection(t *testing.T) {
 
 	// Check orchestrion is available.
 	if _, err := exec.LookPath("orchestrion"); err != nil {
-		t.Fatal("orchestrion not found in PATH (install: go install github.com/DataDog/orchestrion@v1.12.1)")
+		t.Fatal("orchestrion not found in PATH (install: go install github.com/DataDog/orchestrion@v1.14.0)")
 	}
+	output, err := exec.Command("orchestrion", "version").CombinedOutput()
+	if err != nil {
+		t.Fatalf("get orchestrion version: %v\n%s", err, output)
+	}
+	orchestrionVersion, ok := strings.CutPrefix(strings.TrimSpace(string(output)), "orchestrion ")
+	if !ok || orchestrionVersion == "" {
+		t.Fatalf("unexpected orchestrion version output: %q", output)
+	}
+	t.Logf("using orchestrion %s", orchestrionVersion)
 
 	repoRoot, err := filepath.Abs(filepath.Join("..", ".."))
 	if err != nil {
@@ -66,7 +76,7 @@ func TestOrchestrionInjection(t *testing.T) {
 			if vcr.GetVCRMode() != vcr.ModeRecord {
 				t.Parallel()
 			}
-			fixtureDir := prepareOrchestrionFixture(t, repoRoot, tc.imports)
+			fixtureDir := prepareOrchestrionFixture(t, repoRoot, orchestrionVersion, tc.imports)
 
 			// Run the inner tests with orchestrion - this compiles with middleware injection.
 			//
@@ -104,7 +114,7 @@ func TestOrchestrionInjection(t *testing.T) {
 	}
 }
 
-func prepareOrchestrionFixture(t *testing.T, repoRoot string, imports []string) string {
+func prepareOrchestrionFixture(t *testing.T, repoRoot, orchestrionVersion string, imports []string) string {
 	t.Helper()
 
 	srcDir := filepath.Join("testdata", "orchestrion")
@@ -115,7 +125,7 @@ func prepareOrchestrionFixture(t *testing.T, repoRoot string, imports []string) 
 	dstDir := filepath.Join(t.TempDir(), "orchestrion")
 	copyDir(t, srcDir, dstDir)
 	writeOrchestrionToolFile(t, filepath.Join(dstDir, "orchestrion.tool.go"), imports)
-	rewriteFixtureReplaceDirectives(t, dstDir, repoRoot)
+	configureFixtureModule(t, dstDir, repoRoot, orchestrionVersion)
 	tidyFixtureModule(t, dstDir)
 
 	return dstDir
@@ -175,7 +185,7 @@ func writeOrchestrionToolFile(t *testing.T, path string, imports []string) {
 	}
 }
 
-func rewriteFixtureReplaceDirectives(t *testing.T, fixtureDir, repoRoot string) {
+func configureFixtureModule(t *testing.T, fixtureDir, repoRoot, orchestrionVersion string) {
 	t.Helper()
 
 	replacements := map[string]string{
@@ -193,8 +203,11 @@ func rewriteFixtureReplaceDirectives(t *testing.T, fixtureDir, repoRoot string) 
 		"github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai":                            filepath.Join(repoRoot, "trace", "contrib", "openai"),
 	}
 
-	// Build one go mod edit call with all -replace flags to avoid 11 subprocess round-trips.
-	args := []string{"mod", "edit"}
+	// Keep the committed fixture compatible with Go 1.25, then pin its tool
+	// dependency to the installed binary. Orchestrion requires these versions
+	// to match; newer releases also raise the fixture's Go minimum during tidy.
+	// Apply local replacements in the same call to avoid subprocess round-trips.
+	args := []string{"mod", "edit", "-require=github.com/DataDog/orchestrion@" + orchestrionVersion}
 	for modulePath, replacementPath := range replacements {
 		args = append(args, "-replace="+modulePath+"="+replacementPath)
 	}
@@ -202,7 +215,7 @@ func rewriteFixtureReplaceDirectives(t *testing.T, fixtureDir, repoRoot string) 
 	cmd.Dir = fixtureDir
 	cmd.Env = append(os.Environ(), "GOWORK=off")
 	if output, err := cmd.CombinedOutput(); err != nil {
-		t.Fatalf("rewrite replace directives: %v\n%s", err, output)
+		t.Fatalf("configure fixture module: %v\n%s", err, output)
 	}
 }
 

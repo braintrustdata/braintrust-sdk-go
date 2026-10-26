@@ -63,7 +63,7 @@ func TestError(t *testing.T) {
 	}
 
 	client := openai.NewClient(
-		option.WithMaxRetries(0),                                     // don't retry errors
+		option.WithMaxRetries(0), // don't retry errors
 		option.WithMiddleware(NewMiddleware(WithTracerProvider(tp))), //nolint:bodyclose // false positive - NewMiddleware returns middleware func
 		option.WithMiddleware(errorware),
 	)
