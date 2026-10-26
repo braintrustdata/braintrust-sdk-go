@@ -5,12 +5,27 @@ on:
     branches: [ main ]  # This runs on pushes/merges to main
   pull_request:
 
+permissions:
+  contents: read
+
+# Only the newest commit on a PR or branch needs CI resources.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
   lint:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        timeout-minutes: 2
       - name: Set up Go
+        timeout-minutes: 5
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version: 1.26.x
@@ -19,18 +34,22 @@ jobs:
           # whichever job saved first won, so the test job restored lint's much
           # smaller cache.
           cache-dependency-path: |
-            go.sum
+            **/go.sum
             .golangci.yml
-      - name: Use local Braintrust modules
-        run: ./scripts/apply_local_braintrust_replaces.sh
-      - name: golangci-lint
+      - name: Install golangci-lint
+        timeout-minutes: 5
         uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
         with:
           version: v2.11.4
+          install-only: true
+      - name: Lint
+        timeout-minutes: 5
+        run: make lint
 
   test:
+    timeout-minutes: 15
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         go-version: [1.25.x, 1.26.x, 1.27.x]
         # FIXME[matt] add windows testing, we need to fix some timing
@@ -44,7 +63,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        timeout-minutes: 2
       - name: Set up Go
+        timeout-minutes: 5
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version: ${{ matrix.go-version }}
@@ -53,13 +74,16 @@ jobs:
           # re-saved and fell behind the nested modules' dependencies.
           cache-dependency-path: '**/go.sum'
       - name: Use local Braintrust modules for test and build
+        timeout-minutes: 1
         run: ./scripts/apply_local_braintrust_replaces.sh
       - name: Test
+        timeout-minutes: 10
         # TestOrchestrionInjection runs in the orchestrion job below.
-        run: make test GO_TEST_FLAGS=-skip=TestOrchestrionInjection
+        run: make test GO_TEST_FLAGS='-timeout=5m -skip=TestOrchestrionInjection'
         env:
           GOTOOLCHAIN: local
       - name: Build
+        timeout-minutes: 3
         run: make build
         env:
           GOTOOLCHAIN: local
@@ -67,12 +91,15 @@ jobs:
   # Tidy output is the same on every supported Go version, so verify modules
   # once, with the minimum Go version from go.mod, instead of in every test job.
   mod-verify:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     env:
       GOTOOLCHAIN: local
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        timeout-minutes: 2
       - name: Set up Go
+        timeout-minutes: 5
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version-file: go.mod
@@ -81,6 +108,7 @@ jobs:
             **/go.sum
             **/go.mod
       - name: Verify modules
+        timeout-minutes: 8
         run: make mod-verify
 
   # TestOrchestrionInjection builds a fully orchestrion-instrumented binary for
@@ -91,8 +119,9 @@ jobs:
   # runner, on Linux only (orchestrion's injection is compile-time and doesn't
   # depend on the OS). It still runs on every supported Go version.
   orchestrion:
+    timeout-minutes: 20
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         go-version: [1.25.x, 1.26.x, 1.27.x]
         variant: [all, individual]
@@ -102,7 +131,9 @@ jobs:
       GOTOOLCHAIN: local
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        timeout-minutes: 2
       - name: Set up Go
+        timeout-minutes: 5
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version: ${{ matrix.go-version }}
@@ -111,9 +142,11 @@ jobs:
           # limit, so don't spend cache space on it.
           cache: false
       - name: Install orchestrion
+        timeout-minutes: 5
         if: matrix.go-version != '1.27.x'
         run: go install github.com/DataDog/orchestrion@v1.12.1
       - name: Install orchestrion with Go 1.27 export-data support
+        timeout-minutes: 5
         if: matrix.go-version == '1.27.x'
         # Orchestrion's pinned x/tools v0.49.0 cannot read Go 1.27's v5
         # export data. v0.50.0 supports it but requires Go 1.26+, so keep
@@ -126,32 +159,43 @@ jobs:
           go get github.com/DataDog/orchestrion@v1.12.1 golang.org/x/tools@v0.50.0
           go install github.com/DataDog/orchestrion
       - name: Use local Braintrust modules
+        timeout-minutes: 1
         run: ./scripts/apply_local_braintrust_replaces.sh
       - name: Test orchestrion injection (${{ matrix.variant }})
+        timeout-minutes: 15
         run: make test-orchestrion ORCHESTRION_VARIANT='^${{ matrix.variant }}$$'
+        env:
+          GO_TEST_FLAGS: -v -timeout=10m
 
   # See scripts/check_prepare_release.sh.
   prepare-release-check:
+    timeout-minutes: 15
     runs-on: ubuntu-24.04
     env:
       GOTOOLCHAIN: local
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        timeout-minutes: 2
       - name: Set up Go
+        timeout-minutes: 5
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version-file: go.work
           cache-dependency-path: '**/go.sum'
       - name: Dry-run release preparation
+        timeout-minutes: 10
         run: make check-prepare-release
 
   check-codegen:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     env:
       GOTOOLCHAIN: local
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        timeout-minutes: 2
       - name: Set up Go
+        timeout-minutes: 5
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version: 1.26.x
@@ -160,14 +204,25 @@ jobs:
             openapi/config.json
             openapi/oapi-codegen.yaml
       - name: Check generated OpenAPI client
+        timeout-minutes: 5
         run: make check-api-client-codegen
       - name: Run offline OpenAPI example
+        timeout-minutes: 2
         run: go run ./examples/internal/openapi
 
   ci-passed:
+    timeout-minutes: 1
     name: ci-passed
+    # Report failed/skipped dependencies as a failure instead of a skipped gate.
+    if: ${{ !cancelled() }}
     needs: [lint, mod-verify, test, orchestrion, prepare-release-check, check-codegen]
     runs-on: ubuntu-latest
     steps:
       - name: Mark CI as passed
-        run: echo "All CI jobs passed successfully"
+        timeout-minutes: 1
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS_JSON"
+          jq -e 'all(.[]; .result == "success")' <<< "$NEEDS_JSON"
+          echo "All CI jobs passed successfully"
