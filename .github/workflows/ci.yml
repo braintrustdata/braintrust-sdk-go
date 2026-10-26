@@ -28,9 +28,9 @@ jobs:
         timeout-minutes: 5
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
-          go-version: 1.26.x
+          go-version: 1.27.x
           # Hash .golangci.yml alongside go.sum so this cache key differs from the
-          # test (1.26.x, ubuntu-latest) job's. They used to share a key, and
+          # test (1.27.x, ubuntu-latest) job's. They used to share a key, and
           # whichever job saved first won, so the test job restored lint's much
           # smaller cache.
           cache-dependency-path: |
@@ -40,7 +40,7 @@ jobs:
         timeout-minutes: 5
         uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
         with:
-          version: v2.11.4
+          version: v2.15.0
           install-only: true
       - name: Lint
         timeout-minutes: 5
@@ -117,7 +117,8 @@ jobs:
   # toolchain ID and invalidates the whole instrumented build. It used to be
   # the long pole of every test job, so it runs here instead: one variant per
   # runner, on Linux only (orchestrion's injection is compile-time and doesn't
-  # depend on the OS). It still runs on every supported Go version.
+  # depend on the OS). Keep Orchestrion v1.12.1 on Go 1.25 to cover existing
+  # consumers; Orchestrion v1.14.0 requires Go 1.26+.
   orchestrion:
     timeout-minutes: 20
     strategy:
@@ -141,23 +142,14 @@ jobs:
           # integration changes, and the Actions cache is close to its size
           # limit, so don't spend cache space on it.
           cache: false
+      - name: Install orchestrion for Go 1.25
+        timeout-minutes: 5
+        if: matrix.go-version == '1.25.x'
+        run: go install github.com/DataDog/orchestrion@v1.12.1
       - name: Install orchestrion
         timeout-minutes: 5
-        if: matrix.go-version != '1.27.x'
-        run: go install github.com/DataDog/orchestrion@v1.12.1
-      - name: Install orchestrion with Go 1.27 export-data support
-        timeout-minutes: 5
-        if: matrix.go-version == '1.27.x'
-        # Orchestrion's pinned x/tools v0.49.0 cannot read Go 1.27's v5
-        # export data. v0.50.0 supports it but requires Go 1.26+, so keep
-        # the original tool build for the older compiler jobs.
-        run: |
-          tool_dir=$(mktemp -d)
-          trap 'rm -rf "$tool_dir"' EXIT
-          cd "$tool_dir"
-          go mod init braintrust-orchestrion-ci
-          go get github.com/DataDog/orchestrion@v1.12.1 golang.org/x/tools@v0.50.0
-          go install github.com/DataDog/orchestrion
+        if: matrix.go-version != '1.25.x'
+        run: go install github.com/DataDog/orchestrion@v1.14.0
       - name: Use local Braintrust modules
         timeout-minutes: 1
         run: ./scripts/apply_local_braintrust_replaces.sh
@@ -180,7 +172,8 @@ jobs:
         timeout-minutes: 5
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
-          go-version-file: go.work
+          # go-version-file selects the SDK minimum, not the toolchain directive.
+          go-version: 1.27.x
           cache-dependency-path: '**/go.sum'
       - name: Dry-run release preparation
         timeout-minutes: 10
@@ -198,7 +191,7 @@ jobs:
         timeout-minutes: 5
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
-          go-version: 1.26.x
+          go-version: 1.27.x
           cache-dependency-path: |
             go.sum
             openapi/config.json

@@ -52,10 +52,12 @@ Trace LLM calls with **automatic** or **manual** instrumentation.
 
 Use [Orchestrion](https://github.com/DataDog/orchestrion) to automatically inject tracing at compile time—no code changes required.
 
-**1. Install orchestrion:**
+**1. Install orchestrion (requires Go 1.26+):**
 ```bash
-go install github.com/DataDog/orchestrion@v1.12.1
+go install github.com/DataDog/orchestrion@v1.14.0
 ```
+
+For Go 1.25, use `github.com/DataDog/orchestrion@v1.12.1` instead.
 
 **2. Create `orchestrion.tool.go` in your project root:**
 ```go
