@@ -3,7 +3,7 @@
 // your own internal AI proxy and want to instrument that.
 //
 // All fields are documented here:
-//  https://www.braintrust.dev/docs/integrations/opentelemetry#manual-tracing
+//  https://docs.braintrust.dev/integrations/sdk-integrations/opentelemetry/send-traces-and-logs#manual-tracing
 
 package main
 

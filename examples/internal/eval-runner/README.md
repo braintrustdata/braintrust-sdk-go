@@ -42,7 +42,7 @@ one.
 ## Prerequisites
 
 1. **The `bt` CLI.** Install it with `brew install braintrustdata/tap/bt`, or see the
-   [CLI docs](https://www.braintrust.dev/docs/reference/cli).
+   [CLI docs](https://docs.braintrust.dev/reference/cli/quickstart).
 2. **Braintrust API key**: `BRAINTRUST_API_KEY` must be set. If you have it in the repo's `.env`,
    mise loads it automatically; otherwise `export` it.
 3. **OpenAI API key**: `OPENAI_API_KEY`, for the `summarizer` eval. The `food-classifier` eval
