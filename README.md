@@ -247,7 +247,7 @@ from being exported.
 
 ## Evaluations
 
-Run [evals](https://www.braintrust.dev/docs/guides/evals) with custom test cases and scoring functions.
+Run [evals](https://docs.braintrust.dev/evaluate) with custom test cases and scoring functions.
 
 ### Define and run
 
@@ -353,7 +353,7 @@ Complete working examples are available in [`examples/`](./examples/):
 
 ## Documentation
 
-- [Braintrust Documentation](https://www.braintrust.dev/docs)
+- [Braintrust Documentation](https://docs.braintrust.dev)
 - [API Reference](https://pkg.go.dev/github.com/braintrustdata/braintrust-sdk-go)
 - [HTTP API client guide](./docs/api-client.md) - Public generated client, configuration, models, and a runnable example
 

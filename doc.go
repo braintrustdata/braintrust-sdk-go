@@ -17,5 +17,5 @@
 // # Learn More
 //
 //   - Examples: https://github.com/braintrustdata/braintrust-sdk-go/tree/main/examples
-//   - Documentation: https://www.braintrust.dev/docs
+//   - Documentation: https://docs.braintrust.dev
 package braintrust

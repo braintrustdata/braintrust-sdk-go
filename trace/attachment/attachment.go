@@ -14,7 +14,7 @@
 //   - Custom scenarios not covered by auto-instrumentation
 //   - Writing instrumentation for new providers
 //
-// For more information, see: https://www.braintrust.dev/docs/instrument/attachments
+// For more information, see: https://docs.braintrust.dev/instrument/attachments
 package attachment
 
 import (
