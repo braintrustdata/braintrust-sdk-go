@@ -743,6 +743,7 @@ func (sp *spanProcessor) OnEnd(span sdktrace.ReadOnlySpan) {
 		return
 	}
 
+	span = normalizeGenkitFlow(span)
 	span = sp.addSpanOrigin(span)
 
 	sp.wrapped.OnEnd(span)
