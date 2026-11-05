@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -915,4 +916,46 @@ func TestAttachmentProcessing_NoAttachmentsPassThrough(t *testing.T) {
 	}
 
 	assert.Equal(inputJSON, exportedInputJSON, "non-attachment spans should pass through unchanged")
+}
+
+// TestSpanProcessor_ConcurrentSpanStartNoRace starts spans from many goroutines
+// at once. Run with -race: OnStart updates the shared org name / app URL
+// attributes, which must be synchronized.
+func TestSpanProcessor_ConcurrentSpanStartNoRace(t *testing.T) {
+	assert := assert.New(t)
+
+	tp := sdktrace.NewTracerProvider()
+	exporter := tracetest.NewInMemoryExporter()
+	session := newTestSession()
+	err := AddSpanProcessor(tp, session, Config{
+		DefaultProjectID: "concurrent-start-test",
+		Exporter:         exporter,
+		Logger:           logger.Discard(),
+	})
+	assert.NoError(err)
+
+	tracer := tp.Tracer("test")
+	const n = 100
+	var wg sync.WaitGroup
+	for i := 0; i < n; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, span := tracer.Start(context.Background(), "concurrent")
+			span.End()
+		}()
+	}
+	wg.Wait()
+
+	_ = tp.ForceFlush(context.Background())
+	spans := exporter.GetSpans()
+	assert.Len(spans, n)
+	for _, s := range spans {
+		attrs := map[attribute.Key]string{}
+		for _, a := range s.Attributes {
+			attrs[a.Key] = a.Value.AsString()
+		}
+		assert.Equal("test-org", attrs[orgAttrKey])
+		assert.Equal("https://www.braintrust.dev", attrs[appURLAttrKey])
+	}
 }
