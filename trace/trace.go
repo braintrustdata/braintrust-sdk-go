@@ -432,58 +432,6 @@ func parseParent(s string) (Parent, error) {
 	return Parent{Type: pt, ID: parts[1]}, nil
 }
 
-// otelAttrs contains the attributes that are added to all spans in our processor.
-type otelAttrs struct {
-	parent attribute.KeyValue
-
-	mu sync.RWMutex
-
-	orgName string
-	appURL  string
-
-	attrs []attribute.KeyValue
-}
-
-func newOtelAttrs(parent Parent, orgName string, appURL string) *otelAttrs {
-	oa := &otelAttrs{
-		parent:  parent.Attr(),
-		orgName: orgName,
-		appURL:  appURL,
-	}
-	oa.makeAttrs()
-	return oa
-}
-
-// Get returns the attributes that should be set on the span. The parent is selectively
-// applied to spans with no parent, so it's separate.
-func (o *otelAttrs) Get() (parent attribute.KeyValue, always []attribute.KeyValue) {
-	o.mu.RLock()
-	defer o.mu.RUnlock()
-	return o.parent, o.attrs
-}
-
-func (o *otelAttrs) SetOrgName(orgName string) {
-	o.mu.Lock()
-	o.orgName = orgName
-	o.mu.Unlock()
-
-	o.makeAttrs()
-}
-
-func (o *otelAttrs) makeAttrs() {
-	var attrs []attribute.KeyValue
-	if o.orgName != "" {
-		attrs = append(attrs, attribute.String(orgAttrKey, o.orgName))
-	}
-	if o.appURL != "" {
-		attrs = append(attrs, attribute.String(appURLAttrKey, o.appURL))
-	}
-
-	o.mu.Lock()
-	o.attrs = attrs
-	o.mu.Unlock()
-}
-
 // OTel attribute keys for Braintrust span input/output.
 const (
 	inputJSONAttrKey  = attribute.Key("braintrust.input_json")
@@ -494,7 +442,8 @@ type spanProcessor struct {
 	wrapped            sdktrace.SpanProcessor
 	filters            []SpanFilterFunc
 	rootFilters        []SpanFilterFunc
-	otelAttrs          *otelAttrs
+	defaultParent      attribute.KeyValue
+	appURL             string        // fixed for the session's lifetime
 	session            *auth.Session // Session provides endpoints and org name
 	logger             logger.Logger
 	attachmentUploader attachmentprocessor.Uploader // nil when attachment processing is disabled
@@ -512,21 +461,16 @@ func newSpanProcessor(
 	uploader attachmentprocessor.Uploader,
 	environment *SpanOriginEnvironment,
 ) (*spanProcessor, error) {
-	// Get app URL from session
-	appURL := session.AppPublicURL()
-
-	// Initialize with empty org name - will be looked up dynamically from session
-	attrs := newOtelAttrs(defaultParent, "", appURL)
-
 	sp := &spanProcessor{
 		wrapped:            proc,
 		filters:            filters,
 		rootFilters:        rootFilters,
-		otelAttrs:          attrs,
+		defaultParent:      defaultParent.Attr(),
 		session:            session,
 		logger:             log,
 		attachmentUploader: uploader,
 		environment:        environment,
+		appURL:             session.AppPublicURL(),
 	}
 
 	return sp, nil
@@ -535,19 +479,6 @@ func newSpanProcessor(
 // OnStart is called when a span is started and assigns parent attributes.
 // It assigns spans to projects or experiments based on context or default parent.
 func (sp *spanProcessor) OnStart(ctx context.Context, span sdktrace.ReadWriteSpan) {
-	// Always check session for latest org name and appURL (non-blocking)
-	// If login hasn't completed yet, OrgName() returns empty string
-	orgName := sp.session.OrgName()
-	if orgName != "" {
-		sp.otelAttrs.SetOrgName(orgName)
-	}
-
-	// Update appURL in case it changed
-	appURL := sp.session.AppPublicURL()
-	sp.otelAttrs.appURL = appURL
-
-	defaultParent, attrs := sp.otelAttrs.Get()
-
 	// All otel spans need to have a parent attached (e.g. project_name:my-project).
 	// If the span doesn't have one already attached, use the one from the context or our default.
 	if !hasParent(span) {
@@ -558,13 +489,19 @@ func (sp *spanProcessor) OnStart(ctx context.Context, span sdktrace.ReadWriteSpa
 			sp.logger.Debug("setting parent from context", "parent", parent.String())
 		} else {
 			// otherwise use the default parent
-			span.SetAttributes(defaultParent)
-			sp.logger.Debug("setting default parent", "parent", defaultParent.Value.AsString())
+			span.SetAttributes(sp.defaultParent)
+			sp.logger.Debug("setting default parent", "parent", sp.defaultParent.Value.AsString())
 		}
 	}
 
-	// Set any other additional attributes (org name, app URL, etc.)
-	span.SetAttributes(attrs...)
+	// The org name is read from the session on every span because login
+	// completes asynchronously; OrgName() returns "" until it does.
+	if orgName := sp.session.OrgName(); orgName != "" {
+		span.SetAttributes(attribute.String(orgAttrKey, orgName))
+	}
+	if sp.appURL != "" {
+		span.SetAttributes(attribute.String(appURLAttrKey, sp.appURL))
+	}
 
 	// Delegate to wrapped processor
 	sp.wrapped.OnStart(ctx, span)
