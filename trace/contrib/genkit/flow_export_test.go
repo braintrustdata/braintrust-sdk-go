@@ -63,7 +63,7 @@ func TestGenkitFlowExportsInputAndOutput(t *testing.T) {
 		}),
 		genkit.WithDefaultModel("openai/gpt-4o-mini"),
 	)
-	flow := genkit.DefineFlow(g, "answer-question", func(ctx context.Context, input string) (string, error) {
+	flow := DefineFlow(g, "answer-question", func(ctx context.Context, input string) (string, error) {
 		response, err := genkit.Generate(ctx, g,
 			ai.WithPrompt(input),
 			ai.WithConfig(&openai.ChatCompletionNewParams{

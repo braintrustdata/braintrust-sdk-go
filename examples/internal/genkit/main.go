@@ -76,9 +76,9 @@ func main() {
 		defer span.End()
 
 		fmt.Println("\n=== Example 1: Basic Text Generation ===")
-		// Genkit flow spans expose their input and output in Braintrust alongside
-		// the nested model span.
-		flow := genkit.DefineFlow(g, "capital-flow", func(ctx context.Context, question string) (string, error) {
+		// tracegenkit.DefineFlow records the flow's input and output on its span,
+		// alongside the nested model span.
+		flow := tracegenkit.DefineFlow(g, "capital-flow", func(ctx context.Context, question string) (string, error) {
 			resp, err := genkit.Generate(ctx, g, ai.WithPrompt(question), ai.WithMiddleware(mw))
 			if err != nil {
 				return "", err
@@ -87,7 +87,7 @@ func main() {
 		})
 		answer, err := flow.Run(ctx, "What is the capital of France? Answer in one sentence.")
 		if err != nil {
-			log.Fatalf("Generate error: %v", err)
+			log.Fatalf("Flow error: %v", err)
 		}
 		fmt.Printf("  %s\n", answer)
 	}()
