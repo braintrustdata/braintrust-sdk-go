@@ -504,6 +504,46 @@ func TestGenkitTool(t *testing.T) {
 	require.True(t, found, "orchestrion did not replace genkit.DefineTool")
 }
 
+// TestGenkitFlow verifies that orchestrion replaces Genkit flow definitions so
+// the flow span carries its input and output without a manual wrapper.
+func TestGenkitFlow(t *testing.T) {
+	exporter := setupOtel(t)
+	g := genkit.Init(context.Background())
+	flow := genkit.DefineFlow(g, "echo_flow", func(_ context.Context, in string) (string, error) {
+		return in + "!", nil
+	})
+
+	output, err := flow.Run(context.Background(), "hello")
+	require.NoError(t, err)
+	require.Equal(t, "hello!", output)
+
+	found := false
+	for _, span := range exporter.Flush() {
+		if span.Name() == "echo_flow" && span.HasAttr("braintrust.input_json") {
+			span.AssertJSONAttrEquals("braintrust.input_json", "hello")
+			span.AssertJSONAttrEquals("braintrust.output_json", "hello!")
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "orchestrion did not replace genkit.DefineFlow")
+
+	unregistered := genkit.NewFlow("unregistered_flow", func(_ context.Context, in string) (string, error) {
+		return in + "?", nil
+	})
+	_, err = unregistered.Run(context.Background(), "hello")
+	require.NoError(t, err)
+	found = false
+	for _, span := range exporter.Flush() {
+		if span.Name() == "unregistered_flow" && span.HasAttr("braintrust.output_json") {
+			span.AssertJSONAttrEquals("braintrust.output_json", "hello?")
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "orchestrion did not replace genkit.NewFlow")
+}
+
 // TestMultipleIntegrations verifies that multiple Braintrust contrib integrations
 // can be enabled together with orchestrion and all produce spans in the same trace.
 func TestMultipleIntegrations(t *testing.T) {

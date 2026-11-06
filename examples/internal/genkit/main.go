@@ -76,14 +76,20 @@ func main() {
 		defer span.End()
 
 		fmt.Println("\n=== Example 1: Basic Text Generation ===")
-		resp, err := genkit.Generate(ctx, g,
-			ai.WithPrompt("What is the capital of France? Answer in one sentence."),
-			ai.WithMiddleware(mw),
-		)
+		// tracegenkit.DefineFlow records the flow's input and output on its span,
+		// alongside the nested model span.
+		flow := tracegenkit.DefineFlow(g, "capital-flow", func(ctx context.Context, question string) (string, error) {
+			resp, err := genkit.Generate(ctx, g, ai.WithPrompt(question), ai.WithMiddleware(mw))
+			if err != nil {
+				return "", err
+			}
+			return resp.Text(), nil
+		})
+		answer, err := flow.Run(ctx, "What is the capital of France? Answer in one sentence.")
 		if err != nil {
-			log.Fatalf("Generate error: %v", err)
+			log.Fatalf("Flow error: %v", err)
 		}
-		fmt.Printf("  %s\n", resp.Text())
+		fmt.Printf("  %s\n", answer)
 	}()
 
 	// --- Example 2: System prompt + multi-turn conversation ---

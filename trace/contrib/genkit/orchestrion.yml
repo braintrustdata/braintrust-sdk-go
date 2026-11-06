@@ -60,3 +60,35 @@ aspects:
             import-path: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
     advice:
       - replace-function: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit.DefineMultipartTool
+  - id: genkit-defineflow-tracing
+    join-point:
+      all-of:
+        - function-call: github.com/firebase/genkit/go/genkit.DefineFlow
+        - not:
+            import-path: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
+    advice:
+      - replace-function: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit.DefineFlow
+  - id: genkit-definestreamingflow-tracing
+    join-point:
+      all-of:
+        - function-call: github.com/firebase/genkit/go/genkit.DefineStreamingFlow
+        - not:
+            import-path: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
+    advice:
+      - replace-function: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit.DefineStreamingFlow
+  - id: genkit-newflow-tracing
+    join-point:
+      all-of:
+        - function-call: github.com/firebase/genkit/go/genkit.NewFlow
+        - not:
+            import-path: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
+    advice:
+      - replace-function: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit.NewFlow
+  - id: genkit-newstreamingflow-tracing
+    join-point:
+      all-of:
+        - function-call: github.com/firebase/genkit/go/genkit.NewStreamingFlow
+        - not:
+            import-path: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit
+    advice:
+      - replace-function: github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit.NewStreamingFlow
