@@ -48,7 +48,7 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/trace/internal"
 )
 
-const instrumentationName = "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/adk"
+const instrumentationName = "adk"
 
 var globalCallbacks = NewCallbacks()
 

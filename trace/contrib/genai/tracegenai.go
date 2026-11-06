@@ -72,7 +72,7 @@ func (c *config) tracer() trace.Tracer {
 	if tp == nil {
 		tp = otel.GetTracerProvider()
 	}
-	return tp.Tracer("github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genai")
+	return tp.Tracer("genai")
 }
 
 // Client returns a new http.Client configured with tracing middleware.

@@ -27,7 +27,7 @@ func main() {
 
 	// The exported context.span_origin records braintrust.sdk.go and, when
 	// available, its version. Instrumentation comes from this OTel scope.
-	tracer := bt.Tracer("example.com/my-app", oteltrace.WithInstrumentationVersion("1.0.0"))
+	tracer := bt.Tracer("my-app", oteltrace.WithInstrumentationVersion("1.0.0"))
 	_, span := tracer.Start(ctx, "span-origin-example")
 	// Caller context and explicit provenance overrides are preserved at export.
 	span.SetAttributes(attribute.String("braintrust.context_json", `{"caller_functionname":"main"}`))

@@ -30,7 +30,7 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/trace/internal"
 )
 
-const instrumentationName = "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/genkit"
+const instrumentationName = "genkit"
 
 // Option configures the Genkit tracing middleware.
 type Option func(*middlewareConfig)

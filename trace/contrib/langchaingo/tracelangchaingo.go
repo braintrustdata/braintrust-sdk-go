@@ -57,7 +57,7 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/trace/internal"
 )
 
-const instrumentationName = "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo"
+const instrumentationName = "langchaingo"
 
 // spanEntry represents a span with its type in the stack
 type spanEntry struct {

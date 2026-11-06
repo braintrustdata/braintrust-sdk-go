@@ -111,7 +111,7 @@ func (h *Handler) tracer() trace.Tracer {
 	if tp == nil {
 		tp = otel.GetTracerProvider()
 	}
-	return tp.Tracer("github.com/braintrustdata/braintrust-sdk-go/trace/contrib/cloudwego/eino")
+	return tp.Tracer("eino")
 }
 
 // OnStart is called before a component begins processing. It creates spans for
