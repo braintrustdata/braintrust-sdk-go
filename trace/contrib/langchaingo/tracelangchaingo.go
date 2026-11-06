@@ -57,6 +57,8 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/trace/internal"
 )
 
+const instrumentationName = "github.com/braintrustdata/braintrust-sdk-go/trace/contrib/langchaingo"
+
 // spanEntry represents a span with its type in the stack
 type spanEntry struct {
 	spanType string
@@ -191,7 +193,7 @@ func (h *Handler) tracer() trace.Tracer {
 	if tp == nil {
 		tp = otel.GetTracerProvider()
 	}
-	return tp.Tracer("braintrust")
+	return tp.Tracer(instrumentationName)
 }
 
 // HandleLLMStart is called at the start of an LLM call with simple string prompts.

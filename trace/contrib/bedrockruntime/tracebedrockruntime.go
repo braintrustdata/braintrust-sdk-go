@@ -81,7 +81,7 @@ func (c *middlewareConfig) tracer() trace.Tracer {
 	if tp == nil {
 		tp = otel.GetTracerProvider()
 	}
-	return tp.Tracer("braintrust")
+	return tp.Tracer("github.com/braintrustdata/braintrust-sdk-go/trace/contrib/bedrockruntime")
 }
 
 // setJSONAttr writes a JSON-encoded span attribute. Marshal errors are

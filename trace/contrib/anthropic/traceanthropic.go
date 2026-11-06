@@ -79,7 +79,7 @@ func (c *middlewareConfig) tracer() trace.Tracer {
 	if tp == nil {
 		tp = otel.GetTracerProvider()
 	}
-	return tp.Tracer("braintrust")
+	return tp.Tracer("github.com/braintrustdata/braintrust-sdk-go/trace/contrib/anthropic")
 }
 
 // NewMiddleware creates a new OpenTelemetry tracing middleware for Anthropic client requests.

@@ -78,7 +78,7 @@ func (c *middlewareConfig) tracer() trace.Tracer {
 	if tp == nil {
 		tp = otel.GetTracerProvider()
 	}
-	return tp.Tracer("braintrust")
+	return tp.Tracer("github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai")
 }
 
 // NewMiddleware creates a new OpenTelemetry tracing middleware for OpenAI client requests.

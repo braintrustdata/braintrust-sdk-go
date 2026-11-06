@@ -173,7 +173,7 @@ func (s *callState) end(fn func()) {
 }
 
 func tracer() trace.Tracer {
-	return otel.GetTracerProvider().Tracer("braintrust")
+	return otel.GetTracerProvider().Tracer("github.com/braintrustdata/braintrust-sdk-go/trace/contrib/a2a")
 }
 
 // InstrumentClient adds Braintrust tracing to eligible direct message calls

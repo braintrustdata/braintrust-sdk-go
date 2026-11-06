@@ -508,42 +508,46 @@ func (sp *spanProcessor) OnStart(ctx context.Context, span sdktrace.ReadWriteSpa
 }
 
 func spanOriginContextJSON(span sdktrace.ReadOnlySpan, environment *SpanOriginEnvironment) string {
-	origin := map[string]any{
-		"span_origin": map[string]any{
-			"name":            "braintrust.sdk.go",
-			"version":         sdkVersion(),
-			"instrumentation": map[string]any{"name": "braintrust-go"},
-		},
-	}
+	contextJSON := map[string]any{}
 	for _, attr := range span.Attributes() {
-		if attr.Key != contextJSONAttrKey {
-			continue
-		}
-		var existing map[string]any
-		if err := json.Unmarshal([]byte(attr.Value.AsString()), &existing); err == nil {
-			for key, value := range existing {
-				if key == "span_origin" {
-					continue
-				}
-				origin[key] = value
+		if attr.Key == contextJSONAttrKey {
+			var existing map[string]any
+			if json.Unmarshal([]byte(attr.Value.AsString()), &existing) == nil && existing != nil {
+				contextJSON = existing
 			}
-			if existingOrigin, ok := existing["span_origin"].(map[string]any); ok {
-				spanOrigin, ok := origin["span_origin"].(map[string]any)
-				if ok {
-					for key, value := range existingOrigin {
-						spanOrigin[key] = value
-					}
-				}
-			}
+			break
 		}
-		break
 	}
-	if environment != nil {
-		spanOrigin, ok := origin["span_origin"].(map[string]any)
-		if !ok {
-			return "{}"
+	origin, ok := contextJSON["span_origin"].(map[string]any)
+	if !ok {
+		origin = map[string]any{}
+	}
+	if _, exists := origin["name"]; !exists {
+		origin["name"] = "braintrust.sdk.go"
+	}
+	if _, exists := origin["version"]; !exists && origin["name"] == "braintrust.sdk.go" {
+		if version := sdkVersion(); version != "" {
+			origin["version"] = version
 		}
-		if _, exists := spanOrigin["environment"]; !exists {
+	}
+	scope := span.InstrumentationScope()
+	instrumentation, ok := origin["instrumentation"].(map[string]any)
+	if !ok {
+		instrumentation = map[string]any{}
+	}
+	if _, exists := instrumentation["name"]; !exists && scope.Name != "" {
+		instrumentation["name"] = scope.Name
+	}
+	// A different explicit name identifies another creator; the scope version
+	// only describes the instrumentation named by that scope.
+	if _, exists := instrumentation["version"]; !exists && instrumentation["name"] == scope.Name && scope.Version != "" {
+		instrumentation["version"] = scope.Version
+	}
+	if len(instrumentation) > 0 {
+		origin["instrumentation"] = instrumentation
+	}
+	if environment != nil && (environment.Type != "" || environment.Name != "") {
+		if _, exists := origin["environment"]; !exists {
 			env := map[string]any{}
 			if environment.Type != "" {
 				env["type"] = environment.Type
@@ -551,10 +555,11 @@ func spanOriginContextJSON(span sdktrace.ReadOnlySpan, environment *SpanOriginEn
 			if environment.Name != "" {
 				env["name"] = environment.Name
 			}
-			spanOrigin["environment"] = env
+			origin["environment"] = env
 		}
 	}
-	data, err := json.Marshal(origin)
+	contextJSON["span_origin"] = origin
+	data, err := json.Marshal(contextJSON)
 	if err != nil {
 		return "{}"
 	}
@@ -572,7 +577,7 @@ func sdkVersion() string {
 			}
 		}
 	}
-	return "unknown"
+	return ""
 }
 
 func isReleaseVersion(version string) bool {

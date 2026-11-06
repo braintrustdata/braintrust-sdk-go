@@ -117,6 +117,7 @@ func TestOpenAIResponsesRequiredParams(t *testing.T) {
 
 	ts := exporter.FlushOne()
 	assertSpanValid(t, ts, timeRange)
+	assert.Equal("github.com/braintrustdata/braintrust-sdk-go/trace/contrib/openai", ts.Stub.InstrumentationScope.Name)
 
 	// Responses must use the JSON attributes for proper UI display (issue #33).
 	ts.AssertJSONAttrEquals("braintrust.input_json", "What is 13+4?")
