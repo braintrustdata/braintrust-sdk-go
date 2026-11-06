@@ -111,7 +111,7 @@ func (h *Handler) tracer() trace.Tracer {
 	if tp == nil {
 		tp = otel.GetTracerProvider()
 	}
-	return tp.Tracer("braintrust")
+	return tp.Tracer("eino")
 }
 
 // OnStart is called before a component begins processing. It creates spans for

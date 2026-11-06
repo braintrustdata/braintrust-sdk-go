@@ -25,6 +25,7 @@ Comprehensive examples testing all features for each AI provider:
 
 ### Specialized Testing
 
+- **[span-origin/](span-origin/)** - SDK and instrumentation provenance, explicit environment configuration, and preserved caller context.
 - **[workflow-eval/](workflow-eval/)** - Durable workflow tasks/scorers, provider batching, polling, webhook completion, and Redis restart
 
 - **[langchaingo-anthropic/](langchaingo-anthropic/)** - LangChainGo with Anthropic provider (uses forked langchaingo)

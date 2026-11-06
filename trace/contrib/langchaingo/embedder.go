@@ -75,7 +75,7 @@ func (e *tracedEmbedder) tracer() trace.Tracer {
 	if tp == nil {
 		tp = otel.GetTracerProvider()
 	}
-	return tp.Tracer("braintrust")
+	return tp.Tracer(instrumentationName)
 }
 
 func (e *tracedEmbedder) EmbedDocuments(ctx context.Context, texts []string) ([][]float32, error) {

@@ -72,7 +72,7 @@ func (e *tracedEmbedder) tracer() trace.Tracer {
 	if tp == nil {
 		tp = otel.GetTracerProvider()
 	}
-	return tp.Tracer("braintrust")
+	return tp.Tracer(instrumentationName)
 }
 
 func (e *tracedEmbedder) Embed(ctx context.Context, req *ai.EmbedRequest) (*ai.EmbedResponse, error) {

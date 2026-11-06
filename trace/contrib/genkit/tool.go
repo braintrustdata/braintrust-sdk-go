@@ -136,7 +136,7 @@ func startToolSpan(
 		if span.SpanContext().IsValid() {
 			tracerProvider = span.TracerProvider()
 		}
-		ctx, span = tracerProvider.Tracer("braintrust").Start(ctx, name)
+		ctx, span = tracerProvider.Tracer(instrumentationName).Start(ctx, name)
 	}
 	_ = internal.SetJSONAttr(span, "braintrust.span_attributes", map[string]string{"type": "tool"})
 	_ = internal.SetJSONAttr(span, "braintrust.input_json", normalizeJSON(input))

@@ -30,12 +30,16 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/trace/internal"
 )
 
+const instrumentationName = "genkit"
+
 // Option configures the Genkit tracing middleware.
 type Option func(*middlewareConfig)
 
 // WithTracerProvider sets a custom TracerProvider for the middleware.
 func WithTracerProvider(tp trace.TracerProvider) Option {
-	return func(cfg *middlewareConfig) { cfg.tracer = tp.Tracer("braintrust") }
+	return func(cfg *middlewareConfig) {
+		cfg.tracer = tp.Tracer(instrumentationName)
+	}
 }
 
 // WithLogger sets a custom logger for the middleware.
@@ -83,7 +87,7 @@ type agentState struct {
 func NewMiddleware(opts ...Option) ai.ModelMiddleware {
 	cfg := &middlewareConfig{
 		logger: logger.Discard(),
-		tracer: otel.GetTracerProvider().Tracer("braintrust"),
+		tracer: otel.GetTracerProvider().Tracer(instrumentationName),
 		agents: make(map[string]*agentState),
 	}
 	for _, opt := range opts {

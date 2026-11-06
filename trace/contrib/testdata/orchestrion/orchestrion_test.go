@@ -68,7 +68,8 @@ func TestADK(t *testing.T) {
 	spanCount := 0
 	for _, span := range spans {
 		// ADK also emits native spans, including another call_llm span.
-		if span.Stub.InstrumentationScope.Name == "braintrust" {
+		if span.Stub.InstrumentationScope.Name == "adk" ||
+			span.Stub.InstrumentationScope.Name == "genai" {
 			spanCount++
 			byName[span.Name()] = span
 		}

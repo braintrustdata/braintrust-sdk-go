@@ -48,6 +48,8 @@ import (
 	"github.com/braintrustdata/braintrust-sdk-go/trace/internal"
 )
 
+const instrumentationName = "adk"
+
 var globalCallbacks = NewCallbacks()
 
 // cleanupJSON recursively removes keys with empty values from JSON structures.
@@ -115,7 +117,7 @@ type CallbacksOption func(*callbacksImpl)
 // If not provided, the global otel.GetTracerProvider() is used.
 func WithTracerProvider(tp trace.TracerProvider) CallbacksOption {
 	return func(callbacks *callbacksImpl) {
-		callbacks.tracer = tp.Tracer("braintrust")
+		callbacks.tracer = tp.Tracer(instrumentationName)
 	}
 }
 
@@ -170,7 +172,7 @@ type agentRun struct {
 func NewCallbacks(opts ...CallbacksOption) Callbacks {
 	cb := &callbacksImpl{
 		logger:    logger.Discard(),
-		tracer:    otel.GetTracerProvider().Tracer("braintrust"),
+		tracer:    otel.GetTracerProvider().Tracer(instrumentationName),
 		spans:     make(map[string]map[string]trace.Span),
 		agentRuns: make(map[string][]agentRun),
 	}
