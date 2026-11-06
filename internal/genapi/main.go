@@ -165,8 +165,8 @@ func validateSpec(input []byte, expectedDigest string) error {
 		return fmt.Errorf("OpenAPI document must be a JSON object")
 	}
 	var version string
-	if err := json.Unmarshal(document["openapi"], &version); err != nil || version != "3.0.3" {
-		return fmt.Errorf("OpenAPI document must declare openapi: \"3.0.3\"")
+	if err := json.Unmarshal(document["openapi"], &version); err != nil || (version != "3.0.3" && version != "3.1.1") {
+		return fmt.Errorf("OpenAPI document must declare openapi: \"3.0.3\" or \"3.1.1\"")
 	}
 	var paths map[string]json.RawMessage
 	if err := json.Unmarshal(document["paths"], &paths); err != nil || paths == nil {

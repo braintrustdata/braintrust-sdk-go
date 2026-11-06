@@ -72,6 +72,8 @@ func (c *Client) CreateEnvironment(ctx context.Context, body CreateEnvironmentJS
 
 // DeleteEnvironment Delete environment
 //
+// Delete an environment object by its id.
+//
 // Corresponds with DELETE /environment/{environment_id} (the `DeleteEnvironment` operationId).
 func (c *Client) DeleteEnvironment(ctx context.Context, environmentId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteEnvironmentRequest(c.Server, environmentId)
@@ -87,6 +89,8 @@ func (c *Client) DeleteEnvironment(ctx context.Context, environmentId openapi_ty
 
 // GetEnvironment Get environment
 //
+// Get an environment object by its id.
+//
 // Corresponds with GET /environment/{environment_id} (the `GetEnvironment` operationId).
 func (c *Client) GetEnvironment(ctx context.Context, environmentId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetEnvironmentRequest(c.Server, environmentId)
@@ -101,6 +105,8 @@ func (c *Client) GetEnvironment(ctx context.Context, environmentId openapi_types
 }
 
 // UpdateEnvironmentWithBody Partially update environment
+//
+// Partially update an environment object. Specify the fields to update in the payload.
 //
 // Takes any type of body and a specified content type.
 //
@@ -118,6 +124,8 @@ func (c *Client) UpdateEnvironmentWithBody(ctx context.Context, environmentId op
 }
 
 // UpdateEnvironment Partially update environment
+//
+// Partially update an environment object. Specify the fields to update in the payload.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -833,6 +841,8 @@ func (c *ClientWithResponses) CreateEnvironmentWithResponse(ctx context.Context,
 
 // DeleteEnvironmentWithResponse Delete environment
 //
+// Delete an environment object by its id.
+//
 // Returns a wrapper object for the known response body format(s).
 //
 // Corresponds with DELETE /environment/{environment_id} (the `DeleteEnvironment` operationId).
@@ -845,6 +855,8 @@ func (c *ClientWithResponses) DeleteEnvironmentWithResponse(ctx context.Context,
 }
 
 // GetEnvironmentWithResponse Get environment
+//
+// Get an environment object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -859,6 +871,8 @@ func (c *ClientWithResponses) GetEnvironmentWithResponse(ctx context.Context, en
 
 // UpdateEnvironmentWithBodyWithResponse Partially update environment
 //
+// Partially update an environment object. Specify the fields to update in the payload.
+//
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
 // Corresponds with PATCH /environment/{environment_id} (the `UpdateEnvironment` operationId).
@@ -871,6 +885,8 @@ func (c *ClientWithResponses) UpdateEnvironmentWithBodyWithResponse(ctx context.
 }
 
 // UpdateEnvironmentWithResponse Partially update environment
+//
+// Partially update an environment object. Specify the fields to update in the payload.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //

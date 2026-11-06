@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-// ProjectGroup A project group is a collection of projects which can inherit access from project-group ACLs
+// ProjectGroup A project group is a collection of projects which inherit access from project_group_projects ACLs. The group's definition and membership are governed separately by project_group ACLs.
 type ProjectGroup struct {
 	// Created Date of project group creation
 	Created nullable.Nullable[time.Time] `json:"created,omitempty"`
@@ -31,7 +31,7 @@ type ProjectGroup struct {
 	// Id Unique identifier for the project group
 	Id openapi_types.UUID `json:"id"`
 
-	// MemberProjects Sorted ids of active projects in this project group
+	// MemberProjects Sorted ids of active projects in this project group. Modifying membership requires project_group:update on the group.
 	MemberProjects []openapi_types.UUID `json:"member_projects"`
 
 	// Name Name of the project group
@@ -46,9 +46,9 @@ type ProjectGroup struct {
 	UserId nullable.Nullable[openapi_types.UUID] `json:"user_id,omitempty"`
 }
 
-// GetProjectGroup List project_groups
+// GetProjectGroup List project groups
 //
-// List out all project_groups. The project_groups are sorted by creation date, with the most recently-created project_groups coming first
+// List out all project groups. The project groups are sorted by creation date, with the most recently-created project groups coming first
 //
 // Corresponds with GET /v1/project_group (the `GetProjectGroup` operationId).
 func (c *Client) GetProjectGroup(ctx context.Context, params *GetProjectGroupParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -63,9 +63,9 @@ func (c *Client) GetProjectGroup(ctx context.Context, params *GetProjectGroupPar
 	return c.Client.Do(req)
 }
 
-// PostProjectGroupWithBody Create project_group
+// PostProjectGroupWithBody Create project group
 //
-// Create a new project_group. If there is an existing project_group with the same name as the one specified in the request, will return the existing project_group unmodified
+// Create a new project group. If there is an existing project group with the same name as the one specified in the request, will return the existing project group unmodified
 //
 // Takes any type of body and a specified content type.
 //
@@ -82,9 +82,9 @@ func (c *Client) PostProjectGroupWithBody(ctx context.Context, contentType strin
 	return c.Client.Do(req)
 }
 
-// PostProjectGroup Create project_group
+// PostProjectGroup Create project group
 //
-// Create a new project_group. If there is an existing project_group with the same name as the one specified in the request, will return the existing project_group unmodified
+// Create a new project group. If there is an existing project group with the same name as the one specified in the request, will return the existing project group unmodified
 //
 // Takes a body of the `application/json` content type.
 //
@@ -101,9 +101,9 @@ func (c *Client) PostProjectGroup(ctx context.Context, body PostProjectGroupJSON
 	return c.Client.Do(req)
 }
 
-// PutProjectGroupWithBody Create or replace project_group
+// PutProjectGroupWithBody Create or replace project group
 //
-// Create or replace project_group. If there is an existing project_group with the same name as the one specified in the request, will replace the existing project_group with the provided fields
+// Create or replace project group. If there is an existing project group with the same name as the one specified in the request, will replace the existing project group with the provided fields
 //
 // Takes any type of body and a specified content type.
 //
@@ -120,9 +120,9 @@ func (c *Client) PutProjectGroupWithBody(ctx context.Context, contentType string
 	return c.Client.Do(req)
 }
 
-// PutProjectGroup Create or replace project_group
+// PutProjectGroup Create or replace project group
 //
-// Create or replace project_group. If there is an existing project_group with the same name as the one specified in the request, will replace the existing project_group with the provided fields
+// Create or replace project group. If there is an existing project group with the same name as the one specified in the request, will replace the existing project group with the provided fields
 //
 // Takes a body of the `application/json` content type.
 //
@@ -139,9 +139,9 @@ func (c *Client) PutProjectGroup(ctx context.Context, body PutProjectGroupJSONRe
 	return c.Client.Do(req)
 }
 
-// DeleteProjectGroupId Delete project_group
+// DeleteProjectGroupId Delete project group
 //
-// Delete a project_group object by its id.
+// Delete a project group object by its id.
 //
 // Corresponds with DELETE /v1/project_group/{project_group_id} (the `DeleteProjectGroupId` operationId).
 func (c *Client) DeleteProjectGroupId(ctx context.Context, projectGroupId ProjectGroupIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -156,9 +156,9 @@ func (c *Client) DeleteProjectGroupId(ctx context.Context, projectGroupId Projec
 	return c.Client.Do(req)
 }
 
-// GetProjectGroupId Get project_group
+// GetProjectGroupId Get project group
 //
-// Get a project_group object by its id.
+// Get a project group object by its id.
 //
 // Corresponds with GET /v1/project_group/{project_group_id} (the `GetProjectGroupId` operationId).
 func (c *Client) GetProjectGroupId(ctx context.Context, projectGroupId ProjectGroupIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -173,9 +173,9 @@ func (c *Client) GetProjectGroupId(ctx context.Context, projectGroupId ProjectGr
 	return c.Client.Do(req)
 }
 
-// PatchProjectGroupIdWithBody Partially update project_group
+// PatchProjectGroupIdWithBody Partially update project group
 //
-// Partially update a project_group object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a project group object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes any type of body and a specified content type.
 //
@@ -192,9 +192,9 @@ func (c *Client) PatchProjectGroupIdWithBody(ctx context.Context, projectGroupId
 	return c.Client.Do(req)
 }
 
-// PatchProjectGroupId Partially update project_group
+// PatchProjectGroupId Partially update project group
 //
-// Partially update a project_group object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a project group object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -530,7 +530,7 @@ type GetProjectGroupResponse struct {
 	HTTPResponse *http.Response
 	// JSON200 the response for an HTTP 200 `application/json` response
 	JSON200 *struct {
-		// Objects A list of project_group objects
+		// Objects A list of project group objects
 		Objects []ProjectGroup `json:"objects"`
 	}
 	// JSON400 the response for an HTTP 400 `application/json` response
@@ -549,7 +549,7 @@ type GetProjectGroupResponse struct {
 
 // GetJSON200 returns the response for an HTTP 200 `application/json` response
 func (r GetProjectGroupResponse) GetJSON200() *struct {
-	// Objects A list of project_group objects
+	// Objects A list of project group objects
 	Objects []ProjectGroup `json:"objects"`
 } {
 	return r.JSON200
@@ -1024,9 +1024,9 @@ func (r PatchProjectGroupIdResponse) ContentType() string {
 	return ""
 }
 
-// GetProjectGroupWithResponse List project_groups
+// GetProjectGroupWithResponse List project groups
 //
-// List out all project_groups. The project_groups are sorted by creation date, with the most recently-created project_groups coming first
+// List out all project groups. The project groups are sorted by creation date, with the most recently-created project groups coming first
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1039,9 +1039,9 @@ func (c *ClientWithResponses) GetProjectGroupWithResponse(ctx context.Context, p
 	return ParseGetProjectGroupResponse(rsp)
 }
 
-// PostProjectGroupWithBodyWithResponse Create project_group
+// PostProjectGroupWithBodyWithResponse Create project group
 //
-// Create a new project_group. If there is an existing project_group with the same name as the one specified in the request, will return the existing project_group unmodified
+// Create a new project group. If there is an existing project group with the same name as the one specified in the request, will return the existing project group unmodified
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1054,9 +1054,9 @@ func (c *ClientWithResponses) PostProjectGroupWithBodyWithResponse(ctx context.C
 	return ParsePostProjectGroupResponse(rsp)
 }
 
-// PostProjectGroupWithResponse Create project_group
+// PostProjectGroupWithResponse Create project group
 //
-// Create a new project_group. If there is an existing project_group with the same name as the one specified in the request, will return the existing project_group unmodified
+// Create a new project group. If there is an existing project group with the same name as the one specified in the request, will return the existing project group unmodified
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1069,9 +1069,9 @@ func (c *ClientWithResponses) PostProjectGroupWithResponse(ctx context.Context, 
 	return ParsePostProjectGroupResponse(rsp)
 }
 
-// PutProjectGroupWithBodyWithResponse Create or replace project_group
+// PutProjectGroupWithBodyWithResponse Create or replace project group
 //
-// Create or replace project_group. If there is an existing project_group with the same name as the one specified in the request, will replace the existing project_group with the provided fields
+// Create or replace project group. If there is an existing project group with the same name as the one specified in the request, will replace the existing project group with the provided fields
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1084,9 +1084,9 @@ func (c *ClientWithResponses) PutProjectGroupWithBodyWithResponse(ctx context.Co
 	return ParsePutProjectGroupResponse(rsp)
 }
 
-// PutProjectGroupWithResponse Create or replace project_group
+// PutProjectGroupWithResponse Create or replace project group
 //
-// Create or replace project_group. If there is an existing project_group with the same name as the one specified in the request, will replace the existing project_group with the provided fields
+// Create or replace project group. If there is an existing project group with the same name as the one specified in the request, will replace the existing project group with the provided fields
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1099,9 +1099,9 @@ func (c *ClientWithResponses) PutProjectGroupWithResponse(ctx context.Context, b
 	return ParsePutProjectGroupResponse(rsp)
 }
 
-// DeleteProjectGroupIdWithResponse Delete project_group
+// DeleteProjectGroupIdWithResponse Delete project group
 //
-// Delete a project_group object by its id.
+// Delete a project group object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1114,9 +1114,9 @@ func (c *ClientWithResponses) DeleteProjectGroupIdWithResponse(ctx context.Conte
 	return ParseDeleteProjectGroupIdResponse(rsp)
 }
 
-// GetProjectGroupIdWithResponse Get project_group
+// GetProjectGroupIdWithResponse Get project group
 //
-// Get a project_group object by its id.
+// Get a project group object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1129,9 +1129,9 @@ func (c *ClientWithResponses) GetProjectGroupIdWithResponse(ctx context.Context,
 	return ParseGetProjectGroupIdResponse(rsp)
 }
 
-// PatchProjectGroupIdWithBodyWithResponse Partially update project_group
+// PatchProjectGroupIdWithBodyWithResponse Partially update project group
 //
-// Partially update a project_group object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a project group object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1144,9 +1144,9 @@ func (c *ClientWithResponses) PatchProjectGroupIdWithBodyWithResponse(ctx contex
 	return ParsePatchProjectGroupIdResponse(rsp)
 }
 
-// PatchProjectGroupIdWithResponse Partially update project_group
+// PatchProjectGroupIdWithResponse Partially update project group
 //
-// Partially update a project_group object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a project group object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1175,7 +1175,7 @@ func ParseGetProjectGroupResponse(rsp *http.Response) (*GetProjectGroupResponse,
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			// Objects A list of project_group objects
+			// Objects A list of project group objects
 			Objects []ProjectGroup `json:"objects"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

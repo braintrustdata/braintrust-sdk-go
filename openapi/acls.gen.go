@@ -41,13 +41,11 @@ type Acl struct {
 	// ObjectType The object type that the ACL applies to
 	ObjectType AclObjectType `json:"object_type"`
 
-	// Permission Each permission permits a certain type of operation on an object in the system
-	//
-	// Permissions can be assigned to to objects on an individual basis, or grouped into roles
-	Permission *Permission `json:"permission,omitempty"`
+	// Permission Permission the ACL grants. Exactly one of `permission` and `role_id` will be provided
+	Permission nullable.Nullable[Permission] `json:"permission,omitempty"`
 
-	// RestrictObjectType The object type that the ACL applies to
-	RestrictObjectType *AclObjectType `json:"restrict_object_type,omitempty"`
+	// RestrictObjectType When setting a permission directly, optionally restricts the permission grant to just the specified object type. Cannot be set alongside a `role_id`.
+	RestrictObjectType nullable.Nullable[AclObjectType] `json:"restrict_object_type,omitempty"`
 
 	// RoleId Id of the role the ACL grants. Exactly one of `permission` and `role_id` will be provided
 	RoleId nullable.Nullable[openapi_types.UUID] `json:"role_id,omitempty"`
@@ -62,9 +60,9 @@ type AclBatchUpdateResponse struct {
 	RemovedAcls []Acl `json:"removed_acls"`
 }
 
-// DeleteAclWithBody Delete single acl
+// DeleteAclWithBody Delete single ACL
 //
-// Delete a single acl.
+// Delete a single ACL.
 //
 // Takes any type of body and a specified content type.
 //
@@ -81,9 +79,9 @@ func (c *Client) DeleteAclWithBody(ctx context.Context, contentType string, body
 	return c.Client.Do(req)
 }
 
-// DeleteAcl Delete single acl
+// DeleteAcl Delete single ACL
 //
-// Delete a single acl.
+// Delete a single ACL.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -100,9 +98,9 @@ func (c *Client) DeleteAcl(ctx context.Context, body DeleteAclJSONRequestBody, r
 	return c.Client.Do(req)
 }
 
-// GetAcl List acls
+// GetAcl List ACLs
 //
-// List out all acls. The acls are sorted by creation date, with the most recently-created acls coming first
+// List out all ACLs. The ACLs are sorted by creation date, with the most recently-created ACLs coming first
 //
 // Corresponds with GET /v1/acl (the `GetAcl` operationId).
 func (c *Client) GetAcl(ctx context.Context, params *GetAclParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -117,9 +115,9 @@ func (c *Client) GetAcl(ctx context.Context, params *GetAclParams, reqEditors ..
 	return c.Client.Do(req)
 }
 
-// PostAclWithBody Create acl
+// PostAclWithBody Create ACL
 //
-// Create a new acl. If there is an existing acl with the same contents as the one specified in the request, will return the existing acl unmodified
+// Create a new ACL. If there is an existing ACL with the same contents as the one specified in the request, will return the existing ACL unmodified
 //
 // Takes any type of body and a specified content type.
 //
@@ -136,9 +134,9 @@ func (c *Client) PostAclWithBody(ctx context.Context, contentType string, body i
 	return c.Client.Do(req)
 }
 
-// PostAcl Create acl
+// PostAcl Create ACL
 //
-// Create a new acl. If there is an existing acl with the same contents as the one specified in the request, will return the existing acl unmodified
+// Create a new ACL. If there is an existing ACL with the same contents as the one specified in the request, will return the existing ACL unmodified
 //
 // Takes a body of the `application/json` content type.
 //
@@ -155,9 +153,9 @@ func (c *Client) PostAcl(ctx context.Context, body PostAclJSONRequestBody, reqEd
 	return c.Client.Do(req)
 }
 
-// AclBatchUpdateWithBody Batch update acls
+// AclBatchUpdateWithBody Batch update ACLs
 //
-// Batch update acls. This operation is idempotent, so adding acls which already exist will have no effect, and removing acls which do not exist will have no effect.
+// Batch update ACLs. This operation is idempotent, so adding ACLs which already exist will have no effect, and removing ACLs which do not exist will have no effect.
 //
 // Takes any type of body and a specified content type.
 //
@@ -174,9 +172,9 @@ func (c *Client) AclBatchUpdateWithBody(ctx context.Context, contentType string,
 	return c.Client.Do(req)
 }
 
-// AclBatchUpdate Batch update acls
+// AclBatchUpdate Batch update ACLs
 //
-// Batch update acls. This operation is idempotent, so adding acls which already exist will have no effect, and removing acls which do not exist will have no effect.
+// Batch update ACLs. This operation is idempotent, so adding ACLs which already exist will have no effect, and removing ACLs which do not exist will have no effect.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -193,9 +191,9 @@ func (c *Client) AclBatchUpdate(ctx context.Context, body AclBatchUpdateJSONRequ
 	return c.Client.Do(req)
 }
 
-// AclListOrg List org acls
+// AclListOrg List org ACLs
 //
-// List all acls in the org. This query requires the caller to have `read_acls` permission at the organization level
+// List all ACLs in the org. This query requires the caller to have `read_acls` permission at the organization level
 //
 // Corresponds with GET /v1/acl/list_org (the `AclListOrg` operationId).
 func (c *Client) AclListOrg(ctx context.Context, params *AclListOrgParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -210,9 +208,9 @@ func (c *Client) AclListOrg(ctx context.Context, params *AclListOrgParams, reqEd
 	return c.Client.Do(req)
 }
 
-// DeleteAclId Delete acl
+// DeleteAclId Delete ACL
 //
-// Delete an acl object by its id.
+// Delete an ACL object by its id.
 //
 // Corresponds with DELETE /v1/acl/{acl_id} (the `DeleteAclId` operationId).
 func (c *Client) DeleteAclId(ctx context.Context, aclId AclIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -227,9 +225,9 @@ func (c *Client) DeleteAclId(ctx context.Context, aclId AclIdParamParameter, req
 	return c.Client.Do(req)
 }
 
-// GetAclId Get acl
+// GetAclId Get ACL
 //
-// Get an acl object by its id.
+// Get an ACL object by its id.
 //
 // Corresponds with GET /v1/acl/{acl_id} (the `GetAclId` operationId).
 func (c *Client) GetAclId(ctx context.Context, aclId AclIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -877,7 +875,7 @@ type GetAclResponse struct {
 	HTTPResponse *http.Response
 	// JSON200 the response for an HTTP 200 `application/json` response
 	JSON200 *struct {
-		// Objects A list of acl objects
+		// Objects A list of ACL objects
 		Objects []Acl `json:"objects"`
 	}
 	// JSON400 the response for an HTTP 400 `application/json` response
@@ -896,7 +894,7 @@ type GetAclResponse struct {
 
 // GetJSON200 returns the response for an HTTP 200 `application/json` response
 func (r GetAclResponse) GetJSON200() *struct {
-	// Objects A list of acl objects
+	// Objects A list of ACL objects
 	Objects []Acl `json:"objects"`
 } {
 	return r.JSON200
@@ -1371,9 +1369,9 @@ func (r GetAclIdResponse) ContentType() string {
 	return ""
 }
 
-// DeleteAclWithBodyWithResponse Delete single acl
+// DeleteAclWithBodyWithResponse Delete single ACL
 //
-// Delete a single acl.
+// Delete a single ACL.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1386,9 +1384,9 @@ func (c *ClientWithResponses) DeleteAclWithBodyWithResponse(ctx context.Context,
 	return ParseDeleteAclResponse(rsp)
 }
 
-// DeleteAclWithResponse Delete single acl
+// DeleteAclWithResponse Delete single ACL
 //
-// Delete a single acl.
+// Delete a single ACL.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1401,9 +1399,9 @@ func (c *ClientWithResponses) DeleteAclWithResponse(ctx context.Context, body De
 	return ParseDeleteAclResponse(rsp)
 }
 
-// GetAclWithResponse List acls
+// GetAclWithResponse List ACLs
 //
-// List out all acls. The acls are sorted by creation date, with the most recently-created acls coming first
+// List out all ACLs. The ACLs are sorted by creation date, with the most recently-created ACLs coming first
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1416,9 +1414,9 @@ func (c *ClientWithResponses) GetAclWithResponse(ctx context.Context, params *Ge
 	return ParseGetAclResponse(rsp)
 }
 
-// PostAclWithBodyWithResponse Create acl
+// PostAclWithBodyWithResponse Create ACL
 //
-// Create a new acl. If there is an existing acl with the same contents as the one specified in the request, will return the existing acl unmodified
+// Create a new ACL. If there is an existing ACL with the same contents as the one specified in the request, will return the existing ACL unmodified
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1431,9 +1429,9 @@ func (c *ClientWithResponses) PostAclWithBodyWithResponse(ctx context.Context, c
 	return ParsePostAclResponse(rsp)
 }
 
-// PostAclWithResponse Create acl
+// PostAclWithResponse Create ACL
 //
-// Create a new acl. If there is an existing acl with the same contents as the one specified in the request, will return the existing acl unmodified
+// Create a new ACL. If there is an existing ACL with the same contents as the one specified in the request, will return the existing ACL unmodified
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1446,9 +1444,9 @@ func (c *ClientWithResponses) PostAclWithResponse(ctx context.Context, body Post
 	return ParsePostAclResponse(rsp)
 }
 
-// AclBatchUpdateWithBodyWithResponse Batch update acls
+// AclBatchUpdateWithBodyWithResponse Batch update ACLs
 //
-// Batch update acls. This operation is idempotent, so adding acls which already exist will have no effect, and removing acls which do not exist will have no effect.
+// Batch update ACLs. This operation is idempotent, so adding ACLs which already exist will have no effect, and removing ACLs which do not exist will have no effect.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1461,9 +1459,9 @@ func (c *ClientWithResponses) AclBatchUpdateWithBodyWithResponse(ctx context.Con
 	return ParseAclBatchUpdateResponse2(rsp)
 }
 
-// AclBatchUpdateWithResponse Batch update acls
+// AclBatchUpdateWithResponse Batch update ACLs
 //
-// Batch update acls. This operation is idempotent, so adding acls which already exist will have no effect, and removing acls which do not exist will have no effect.
+// Batch update ACLs. This operation is idempotent, so adding ACLs which already exist will have no effect, and removing ACLs which do not exist will have no effect.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1476,9 +1474,9 @@ func (c *ClientWithResponses) AclBatchUpdateWithResponse(ctx context.Context, bo
 	return ParseAclBatchUpdateResponse2(rsp)
 }
 
-// AclListOrgWithResponse List org acls
+// AclListOrgWithResponse List org ACLs
 //
-// List all acls in the org. This query requires the caller to have `read_acls` permission at the organization level
+// List all ACLs in the org. This query requires the caller to have `read_acls` permission at the organization level
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1491,9 +1489,9 @@ func (c *ClientWithResponses) AclListOrgWithResponse(ctx context.Context, params
 	return ParseAclListOrgResponse(rsp)
 }
 
-// DeleteAclIdWithResponse Delete acl
+// DeleteAclIdWithResponse Delete ACL
 //
-// Delete an acl object by its id.
+// Delete an ACL object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1506,9 +1504,9 @@ func (c *ClientWithResponses) DeleteAclIdWithResponse(ctx context.Context, aclId
 	return ParseDeleteAclIdResponse(rsp)
 }
 
-// GetAclIdWithResponse Get acl
+// GetAclIdWithResponse Get ACL
 //
-// Get an acl object by its id.
+// Get an ACL object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1626,7 +1624,7 @@ func ParseGetAclResponse(rsp *http.Response) (*GetAclResponse, error) {
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			// Objects A list of acl objects
+			// Objects A list of ACL objects
 			Objects []Acl `json:"objects"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

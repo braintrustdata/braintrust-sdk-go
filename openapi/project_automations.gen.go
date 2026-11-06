@@ -428,18 +428,7 @@ type ProjectAutomationConfig0Action1 struct {
 	// Channel The Slack channel ID to post to
 	Channel string `json:"channel"`
 
-	// FormattingPrompt Publish a Slack mrkdwn digest.
-	//
-	// Pattern selection requirement: include every selected Pattern whose final status is active at the end of this automation run, plus every selected Pattern that changed from active to inactive during this run (a newly inactive outcome). Exclude Patterns that were already inactive before this run and remained inactive. Do not mention excluded Patterns anywhere in the digest, including Highlights. If no selected Patterns meet these criteria, say "No current pattern outcomes." This requirement overrides conflicting formatting guidance.
-	//
-	// Include a complete "*Pattern outcomes*" section with one row for every included Pattern.
-	//
-	// Use this row format exactly:
-	// • <pattern_url|Pattern title> — `outcome`
-	//
-	// If a Pattern has no URL, use the plain title instead. Do not use GitHub Markdown tables or code-block tables, because links must remain clickable. Do not omit any active selected Pattern.
-	//
-	// After the outcome list, include a "*Highlights*" section with one very short paragraph, 2-3 sentences maximum. Summarize what changed or what broadly stands out among the included active Patterns. Do not introduce new claims beyond the run report.
+	// FormattingPrompt Instructions for Loop to format content sent to this destination
 	FormattingPrompt *string `json:"formatting_prompt,omitempty"`
 
 	// MessageTemplate Custom message template for the alert
@@ -669,18 +658,7 @@ type ProjectAutomationConfig4Action1 struct {
 	// Channel The Slack channel ID to post to
 	Channel string `json:"channel"`
 
-	// FormattingPrompt Publish a Slack mrkdwn digest.
-	//
-	// Pattern selection requirement: include every selected Pattern whose final status is active at the end of this automation run, plus every selected Pattern that changed from active to inactive during this run (a newly inactive outcome). Exclude Patterns that were already inactive before this run and remained inactive. Do not mention excluded Patterns anywhere in the digest, including Highlights. If no selected Patterns meet these criteria, say "No current pattern outcomes." This requirement overrides conflicting formatting guidance.
-	//
-	// Include a complete "*Pattern outcomes*" section with one row for every included Pattern.
-	//
-	// Use this row format exactly:
-	// • <pattern_url|Pattern title> — `outcome`
-	//
-	// If a Pattern has no URL, use the plain title instead. Do not use GitHub Markdown tables or code-block tables, because links must remain clickable. Do not omit any active selected Pattern.
-	//
-	// After the outcome list, include a "*Highlights*" section with one very short paragraph, 2-3 sentences maximum. Summarize what changed or what broadly stands out among the included active Patterns. Do not introduce new claims beyond the run report.
+	// FormattingPrompt Instructions for Loop to format content sent to this destination
 	FormattingPrompt *string `json:"formatting_prompt,omitempty"`
 
 	// MessageTemplate Custom message template for the alert
@@ -1360,9 +1338,9 @@ func (t *ProjectAutomation_Config) UnmarshalJSON(b []byte) error {
 	return err
 }
 
-// GetProjectAutomation List project_automations
+// GetProjectAutomation List project automations
 //
-// List out all project_automations. The project_automations are sorted by creation date, with the most recently-created project_automations coming first
+// List out all project automations. The project automations are sorted by creation date, with the most recently-created project automations coming first
 //
 // Corresponds with GET /v1/project_automation (the `GetProjectAutomation` operationId).
 func (c *Client) GetProjectAutomation(ctx context.Context, params *GetProjectAutomationParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -1377,9 +1355,9 @@ func (c *Client) GetProjectAutomation(ctx context.Context, params *GetProjectAut
 	return c.Client.Do(req)
 }
 
-// PostProjectAutomationWithBody Create project_automation
+// PostProjectAutomationWithBody Create project automation
 //
-// Create a new project_automation. If there is an existing project_automation with the same name as the one specified in the request, will return the existing project_automation unmodified
+// Create a new project automation. If there is an existing project automation with the same name as the one specified in the request, will return the existing project automation unmodified
 //
 // Takes any type of body and a specified content type.
 //
@@ -1396,9 +1374,9 @@ func (c *Client) PostProjectAutomationWithBody(ctx context.Context, contentType 
 	return c.Client.Do(req)
 }
 
-// PostProjectAutomation Create project_automation
+// PostProjectAutomation Create project automation
 //
-// Create a new project_automation. If there is an existing project_automation with the same name as the one specified in the request, will return the existing project_automation unmodified
+// Create a new project automation. If there is an existing project automation with the same name as the one specified in the request, will return the existing project automation unmodified
 //
 // Takes a body of the `application/json` content type.
 //
@@ -1415,9 +1393,9 @@ func (c *Client) PostProjectAutomation(ctx context.Context, body PostProjectAuto
 	return c.Client.Do(req)
 }
 
-// PutProjectAutomationWithBody Create or replace project_automation
+// PutProjectAutomationWithBody Create or replace project automation
 //
-// Create or replace project_automation. If there is an existing project_automation with the same name as the one specified in the request, will replace the existing project_automation with the provided fields
+// Create or replace project automation. If there is an existing project automation with the same name as the one specified in the request, will replace the existing project automation with the provided fields
 //
 // Takes any type of body and a specified content type.
 //
@@ -1434,9 +1412,9 @@ func (c *Client) PutProjectAutomationWithBody(ctx context.Context, contentType s
 	return c.Client.Do(req)
 }
 
-// PutProjectAutomation Create or replace project_automation
+// PutProjectAutomation Create or replace project automation
 //
-// Create or replace project_automation. If there is an existing project_automation with the same name as the one specified in the request, will replace the existing project_automation with the provided fields
+// Create or replace project automation. If there is an existing project automation with the same name as the one specified in the request, will replace the existing project automation with the provided fields
 //
 // Takes a body of the `application/json` content type.
 //
@@ -1453,9 +1431,9 @@ func (c *Client) PutProjectAutomation(ctx context.Context, body PutProjectAutoma
 	return c.Client.Do(req)
 }
 
-// DeleteProjectAutomationId Delete project_automation
+// DeleteProjectAutomationId Delete project automation
 //
-// Delete a project_automation object by its id.
+// Delete a project automation object by its id.
 //
 // Corresponds with DELETE /v1/project_automation/{project_automation_id} (the `DeleteProjectAutomationId` operationId).
 func (c *Client) DeleteProjectAutomationId(ctx context.Context, projectAutomationId ProjectAutomationIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -1470,9 +1448,9 @@ func (c *Client) DeleteProjectAutomationId(ctx context.Context, projectAutomatio
 	return c.Client.Do(req)
 }
 
-// GetProjectAutomationId Get project_automation
+// GetProjectAutomationId Get project automation
 //
-// Get a project_automation object by its id.
+// Get a project automation object by its id.
 //
 // Corresponds with GET /v1/project_automation/{project_automation_id} (the `GetProjectAutomationId` operationId).
 func (c *Client) GetProjectAutomationId(ctx context.Context, projectAutomationId ProjectAutomationIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -1487,9 +1465,9 @@ func (c *Client) GetProjectAutomationId(ctx context.Context, projectAutomationId
 	return c.Client.Do(req)
 }
 
-// PatchProjectAutomationIdWithBody Partially update project_automation
+// PatchProjectAutomationIdWithBody Partially update project automation
 //
-// Partially update a project_automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a project automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes any type of body and a specified content type.
 //
@@ -1506,9 +1484,9 @@ func (c *Client) PatchProjectAutomationIdWithBody(ctx context.Context, projectAu
 	return c.Client.Do(req)
 }
 
-// PatchProjectAutomationId Partially update project_automation
+// PatchProjectAutomationId Partially update project automation
 //
-// Partially update a project_automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a project automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -1844,7 +1822,7 @@ type GetProjectAutomationResponse struct {
 	HTTPResponse *http.Response
 	// JSON200 the response for an HTTP 200 `application/json` response
 	JSON200 *struct {
-		// Objects A list of project_automation objects
+		// Objects A list of project automation objects
 		Objects []ProjectAutomation `json:"objects"`
 	}
 	// JSON400 the response for an HTTP 400 `application/json` response
@@ -1863,7 +1841,7 @@ type GetProjectAutomationResponse struct {
 
 // GetJSON200 returns the response for an HTTP 200 `application/json` response
 func (r GetProjectAutomationResponse) GetJSON200() *struct {
-	// Objects A list of project_automation objects
+	// Objects A list of project automation objects
 	Objects []ProjectAutomation `json:"objects"`
 } {
 	return r.JSON200
@@ -2338,9 +2316,9 @@ func (r PatchProjectAutomationIdResponse) ContentType() string {
 	return ""
 }
 
-// GetProjectAutomationWithResponse List project_automations
+// GetProjectAutomationWithResponse List project automations
 //
-// List out all project_automations. The project_automations are sorted by creation date, with the most recently-created project_automations coming first
+// List out all project automations. The project automations are sorted by creation date, with the most recently-created project automations coming first
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -2353,9 +2331,9 @@ func (c *ClientWithResponses) GetProjectAutomationWithResponse(ctx context.Conte
 	return ParseGetProjectAutomationResponse(rsp)
 }
 
-// PostProjectAutomationWithBodyWithResponse Create project_automation
+// PostProjectAutomationWithBodyWithResponse Create project automation
 //
-// Create a new project_automation. If there is an existing project_automation with the same name as the one specified in the request, will return the existing project_automation unmodified
+// Create a new project automation. If there is an existing project automation with the same name as the one specified in the request, will return the existing project automation unmodified
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -2368,9 +2346,9 @@ func (c *ClientWithResponses) PostProjectAutomationWithBodyWithResponse(ctx cont
 	return ParsePostProjectAutomationResponse(rsp)
 }
 
-// PostProjectAutomationWithResponse Create project_automation
+// PostProjectAutomationWithResponse Create project automation
 //
-// Create a new project_automation. If there is an existing project_automation with the same name as the one specified in the request, will return the existing project_automation unmodified
+// Create a new project automation. If there is an existing project automation with the same name as the one specified in the request, will return the existing project automation unmodified
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -2383,9 +2361,9 @@ func (c *ClientWithResponses) PostProjectAutomationWithResponse(ctx context.Cont
 	return ParsePostProjectAutomationResponse(rsp)
 }
 
-// PutProjectAutomationWithBodyWithResponse Create or replace project_automation
+// PutProjectAutomationWithBodyWithResponse Create or replace project automation
 //
-// Create or replace project_automation. If there is an existing project_automation with the same name as the one specified in the request, will replace the existing project_automation with the provided fields
+// Create or replace project automation. If there is an existing project automation with the same name as the one specified in the request, will replace the existing project automation with the provided fields
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -2398,9 +2376,9 @@ func (c *ClientWithResponses) PutProjectAutomationWithBodyWithResponse(ctx conte
 	return ParsePutProjectAutomationResponse(rsp)
 }
 
-// PutProjectAutomationWithResponse Create or replace project_automation
+// PutProjectAutomationWithResponse Create or replace project automation
 //
-// Create or replace project_automation. If there is an existing project_automation with the same name as the one specified in the request, will replace the existing project_automation with the provided fields
+// Create or replace project automation. If there is an existing project automation with the same name as the one specified in the request, will replace the existing project automation with the provided fields
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -2413,9 +2391,9 @@ func (c *ClientWithResponses) PutProjectAutomationWithResponse(ctx context.Conte
 	return ParsePutProjectAutomationResponse(rsp)
 }
 
-// DeleteProjectAutomationIdWithResponse Delete project_automation
+// DeleteProjectAutomationIdWithResponse Delete project automation
 //
-// Delete a project_automation object by its id.
+// Delete a project automation object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -2428,9 +2406,9 @@ func (c *ClientWithResponses) DeleteProjectAutomationIdWithResponse(ctx context.
 	return ParseDeleteProjectAutomationIdResponse(rsp)
 }
 
-// GetProjectAutomationIdWithResponse Get project_automation
+// GetProjectAutomationIdWithResponse Get project automation
 //
-// Get a project_automation object by its id.
+// Get a project automation object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -2443,9 +2421,9 @@ func (c *ClientWithResponses) GetProjectAutomationIdWithResponse(ctx context.Con
 	return ParseGetProjectAutomationIdResponse(rsp)
 }
 
-// PatchProjectAutomationIdWithBodyWithResponse Partially update project_automation
+// PatchProjectAutomationIdWithBodyWithResponse Partially update project automation
 //
-// Partially update a project_automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a project automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -2458,9 +2436,9 @@ func (c *ClientWithResponses) PatchProjectAutomationIdWithBodyWithResponse(ctx c
 	return ParsePatchProjectAutomationIdResponse(rsp)
 }
 
-// PatchProjectAutomationIdWithResponse Partially update project_automation
+// PatchProjectAutomationIdWithResponse Partially update project automation
 //
-// Partially update a project_automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a project automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -2489,7 +2467,7 @@ func ParseGetProjectAutomationResponse(rsp *http.Response) (*GetProjectAutomatio
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			// Objects A list of project_automation objects
+			// Objects A list of project automation objects
 			Objects []ProjectAutomation `json:"objects"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

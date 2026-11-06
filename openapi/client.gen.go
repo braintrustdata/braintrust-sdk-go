@@ -102,15 +102,21 @@ type ClientInterface interface {
 
 	// DeleteEnvironment Delete environment
 	//
+	// Delete an environment object by its id.
+	//
 	// Corresponds with DELETE /environment/{environment_id} (the `DeleteEnvironment` operationId).
 	DeleteEnvironment(ctx context.Context, environmentId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetEnvironment Get environment
 	//
+	// Get an environment object by its id.
+	//
 	// Corresponds with GET /environment/{environment_id} (the `GetEnvironment` operationId).
 	GetEnvironment(ctx context.Context, environmentId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// UpdateEnvironmentWithBody Partially update environment
+	//
+	// Partially update an environment object. Specify the fields to update in the payload.
 	//
 	// Takes any type of body and a specified content type.
 	//
@@ -119,262 +125,189 @@ type ClientInterface interface {
 
 	// UpdateEnvironment Partially update environment
 	//
+	// Partially update an environment object. Specify the fields to update in the payload.
+	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with PATCH /environment/{environment_id} (the `UpdateEnvironment` operationId).
 	UpdateEnvironment(ctx context.Context, environmentId openapi_types.UUID, body UpdateEnvironmentJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteAclWithBody Delete single acl
+	// DeleteAclWithBody Delete single ACL
 	//
-	// Delete a single acl.
+	// Delete a single ACL.
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with DELETE /v1/acl (the `DeleteAcl` operationId).
 	DeleteAclWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteAcl Delete single acl
+	// DeleteAcl Delete single ACL
 	//
-	// Delete a single acl.
+	// Delete a single ACL.
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with DELETE /v1/acl (the `DeleteAcl` operationId).
 	DeleteAcl(ctx context.Context, body DeleteAclJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetAcl List acls
+	// GetAcl List ACLs
 	//
-	// List out all acls. The acls are sorted by creation date, with the most recently-created acls coming first
+	// List out all ACLs. The ACLs are sorted by creation date, with the most recently-created ACLs coming first
 	//
 	// Corresponds with GET /v1/acl (the `GetAcl` operationId).
 	GetAcl(ctx context.Context, params *GetAclParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostAclWithBody Create acl
+	// PostAclWithBody Create ACL
 	//
-	// Create a new acl. If there is an existing acl with the same contents as the one specified in the request, will return the existing acl unmodified
+	// Create a new ACL. If there is an existing ACL with the same contents as the one specified in the request, will return the existing ACL unmodified
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with POST /v1/acl (the `PostAcl` operationId).
 	PostAclWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostAcl Create acl
+	// PostAcl Create ACL
 	//
-	// Create a new acl. If there is an existing acl with the same contents as the one specified in the request, will return the existing acl unmodified
+	// Create a new ACL. If there is an existing ACL with the same contents as the one specified in the request, will return the existing ACL unmodified
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with POST /v1/acl (the `PostAcl` operationId).
 	PostAcl(ctx context.Context, body PostAclJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// AclBatchUpdateWithBody Batch update acls
+	// AclBatchUpdateWithBody Batch update ACLs
 	//
-	// Batch update acls. This operation is idempotent, so adding acls which already exist will have no effect, and removing acls which do not exist will have no effect.
+	// Batch update ACLs. This operation is idempotent, so adding ACLs which already exist will have no effect, and removing ACLs which do not exist will have no effect.
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with POST /v1/acl/batch_update (the `AclBatchUpdate` operationId).
 	AclBatchUpdateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// AclBatchUpdate Batch update acls
+	// AclBatchUpdate Batch update ACLs
 	//
-	// Batch update acls. This operation is idempotent, so adding acls which already exist will have no effect, and removing acls which do not exist will have no effect.
+	// Batch update ACLs. This operation is idempotent, so adding ACLs which already exist will have no effect, and removing ACLs which do not exist will have no effect.
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with POST /v1/acl/batch_update (the `AclBatchUpdate` operationId).
 	AclBatchUpdate(ctx context.Context, body AclBatchUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// AclListOrg List org acls
+	// AclListOrg List org ACLs
 	//
-	// List all acls in the org. This query requires the caller to have `read_acls` permission at the organization level
+	// List all ACLs in the org. This query requires the caller to have `read_acls` permission at the organization level
 	//
 	// Corresponds with GET /v1/acl/list_org (the `AclListOrg` operationId).
 	AclListOrg(ctx context.Context, params *AclListOrgParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteAclId Delete acl
+	// DeleteAclId Delete ACL
 	//
-	// Delete an acl object by its id.
+	// Delete an ACL object by its id.
 	//
 	// Corresponds with DELETE /v1/acl/{acl_id} (the `DeleteAclId` operationId).
 	DeleteAclId(ctx context.Context, aclId AclIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetAclId Get acl
+	// GetAclId Get ACL
 	//
-	// Get an acl object by its id.
+	// Get an ACL object by its id.
 	//
 	// Corresponds with GET /v1/acl/{acl_id} (the `GetAclId` operationId).
 	GetAclId(ctx context.Context, aclId AclIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetAgent List agents
+	// DeleteAiSecretWithBody Delete single AI secret
 	//
-	// List out all agents. The agents are sorted by creation date, with the most recently-created agents coming first
-	//
-	// Corresponds with GET /v1/agent (the `GetAgent` operationId).
-	GetAgent(ctx context.Context, params *GetAgentParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// PostAgentWithBody Create agent
-	//
-	// Create a new agent. If there is an existing agent with the same name as the one specified in the request, will return the existing agent unmodified
-	//
-	// Takes any type of body and a specified content type.
-	//
-	// Corresponds with POST /v1/agent (the `PostAgent` operationId).
-	PostAgentWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// PostAgent Create agent
-	//
-	// Create a new agent. If there is an existing agent with the same name as the one specified in the request, will return the existing agent unmodified
-	//
-	// Takes a body of the `application/json` content type.
-	//
-	// Corresponds with POST /v1/agent (the `PostAgent` operationId).
-	PostAgent(ctx context.Context, body PostAgentJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// PutAgentWithBody Create or replace agent
-	//
-	// Create or replace agent. If there is an existing agent with the same name as the one specified in the request, will replace the existing agent with the provided fields
-	//
-	// Takes any type of body and a specified content type.
-	//
-	// Corresponds with PUT /v1/agent (the `PutAgent` operationId).
-	PutAgentWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// PutAgent Create or replace agent
-	//
-	// Create or replace agent. If there is an existing agent with the same name as the one specified in the request, will replace the existing agent with the provided fields
-	//
-	// Takes a body of the `application/json` content type.
-	//
-	// Corresponds with PUT /v1/agent (the `PutAgent` operationId).
-	PutAgent(ctx context.Context, body PutAgentJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// DeleteAgentId Delete agent
-	//
-	// Delete a agent object by its id.
-	//
-	// Corresponds with DELETE /v1/agent/{agent_id} (the `DeleteAgentId` operationId).
-	DeleteAgentId(ctx context.Context, agentId AgentIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// GetAgentId Get agent
-	//
-	// Get a agent object by its id.
-	//
-	// Corresponds with GET /v1/agent/{agent_id} (the `GetAgentId` operationId).
-	GetAgentId(ctx context.Context, agentId AgentIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// PatchAgentIdWithBody Partially update agent
-	//
-	// Partially update a agent object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
-	//
-	// Takes any type of body and a specified content type.
-	//
-	// Corresponds with PATCH /v1/agent/{agent_id} (the `PatchAgentId` operationId).
-	PatchAgentIdWithBody(ctx context.Context, agentId AgentIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// PatchAgentId Partially update agent
-	//
-	// Partially update a agent object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
-	//
-	// Takes a body of the `application/json` content type.
-	//
-	// Corresponds with PATCH /v1/agent/{agent_id} (the `PatchAgentId` operationId).
-	PatchAgentId(ctx context.Context, agentId AgentIdParamParameter, body PatchAgentIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// DeleteAiSecretWithBody Delete single ai_secret
-	//
-	// Delete a single ai_secret.
+	// Delete a single AI secret.
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with DELETE /v1/ai_secret (the `DeleteAiSecret` operationId).
 	DeleteAiSecretWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteAiSecret Delete single ai_secret
+	// DeleteAiSecret Delete single AI secret
 	//
-	// Delete a single ai_secret.
+	// Delete a single AI secret.
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with DELETE /v1/ai_secret (the `DeleteAiSecret` operationId).
 	DeleteAiSecret(ctx context.Context, body DeleteAiSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetAiSecret List ai_secrets
+	// GetAiSecret List AI secrets
 	//
-	// List out all ai_secrets. The ai_secrets are sorted by creation date, with the most recently-created ai_secrets coming first
+	// List out all AI secrets. The AI secrets are sorted by creation date, with the most recently-created AI secrets coming first
 	//
 	// Corresponds with GET /v1/ai_secret (the `GetAiSecret` operationId).
 	GetAiSecret(ctx context.Context, params *GetAiSecretParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostAiSecretWithBody Create ai_secret
+	// PostAiSecretWithBody Create AI secret
 	//
-	// Create a new ai_secret. If there is an existing ai_secret with the same name as the one specified in the request, will return the existing ai_secret unmodified
+	// Create a new AI secret. If there is an existing AI secret with the same name as the one specified in the request, will return the existing AI secret unmodified
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with POST /v1/ai_secret (the `PostAiSecret` operationId).
 	PostAiSecretWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostAiSecret Create ai_secret
+	// PostAiSecret Create AI secret
 	//
-	// Create a new ai_secret. If there is an existing ai_secret with the same name as the one specified in the request, will return the existing ai_secret unmodified
+	// Create a new AI secret. If there is an existing AI secret with the same name as the one specified in the request, will return the existing AI secret unmodified
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with POST /v1/ai_secret (the `PostAiSecret` operationId).
 	PostAiSecret(ctx context.Context, body PostAiSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutAiSecretWithBody Create or replace ai_secret
+	// PutAiSecretWithBody Create or replace AI secret
 	//
-	// Create or replace ai_secret. If there is an existing ai_secret with the same name as the one specified in the request, will replace the existing ai_secret with the provided fields
+	// Create or replace AI secret. If there is an existing AI secret with the same name as the one specified in the request, will replace the existing AI secret with the provided fields
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PUT /v1/ai_secret (the `PutAiSecret` operationId).
 	PutAiSecretWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutAiSecret Create or replace ai_secret
+	// PutAiSecret Create or replace AI secret
 	//
-	// Create or replace ai_secret. If there is an existing ai_secret with the same name as the one specified in the request, will replace the existing ai_secret with the provided fields
+	// Create or replace AI secret. If there is an existing AI secret with the same name as the one specified in the request, will replace the existing AI secret with the provided fields
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with PUT /v1/ai_secret (the `PutAiSecret` operationId).
 	PutAiSecret(ctx context.Context, body PutAiSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteAiSecretId Delete ai_secret
+	// DeleteAiSecretId Delete AI secret
 	//
-	// Delete an ai_secret object by its id.
+	// Delete an AI secret object by its id.
 	//
 	// Corresponds with DELETE /v1/ai_secret/{ai_secret_id} (the `DeleteAiSecretId` operationId).
 	DeleteAiSecretId(ctx context.Context, aiSecretId AiSecretIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetAiSecretId Get ai_secret
+	// GetAiSecretId Get AI secret
 	//
-	// Get an ai_secret object by its id.
+	// Get an AI secret object by its id.
 	//
 	// Corresponds with GET /v1/ai_secret/{ai_secret_id} (the `GetAiSecretId` operationId).
 	GetAiSecretId(ctx context.Context, aiSecretId AiSecretIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchAiSecretIdWithBody Partially update ai_secret
+	// PatchAiSecretIdWithBody Partially update AI secret
 	//
-	// Partially update an ai_secret object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update an AI secret object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PATCH /v1/ai_secret/{ai_secret_id} (the `PatchAiSecretId` operationId).
 	PatchAiSecretIdWithBody(ctx context.Context, aiSecretId AiSecretIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchAiSecretId Partially update ai_secret
+	// PatchAiSecretId Partially update AI secret
 	//
-	// Partially update an ai_secret object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update an AI secret object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with PATCH /v1/ai_secret/{ai_secret_id} (the `PatchAiSecretId` operationId).
 	PatchAiSecretId(ctx context.Context, aiSecretId AiSecretIdParamParameter, body PatchAiSecretIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetApiKey List api_keys
+	// GetApiKey List API keys
 	//
 	// List out all API keys. They are sorted by creation date, with the most recently-created keys coming first.
 	//
@@ -383,16 +316,16 @@ type ClientInterface interface {
 	// Corresponds with GET /v1/api_key (the `GetApiKey` operationId).
 	GetApiKey(ctx context.Context, params *GetApiKeyParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteApiKeyId Delete api_key
+	// DeleteApiKeyId Delete API key
 	//
-	// Delete an api_key object by its id.
+	// Delete an API key object by its id.
 	//
 	// Corresponds with DELETE /v1/api_key/{api_key_id} (the `DeleteApiKeyId` operationId).
 	DeleteApiKeyId(ctx context.Context, apiKeyId ApiKeyIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetApiKeyId Get api_key
+	// GetApiKeyId Get API key
 	//
-	// Get an api_key object by its id.
+	// Get an API key object by its id.
 	//
 	// Corresponds with GET /v1/api_key/{api_key_id} (the `GetApiKeyId` operationId).
 	GetApiKeyId(ctx context.Context, apiKeyId ApiKeyIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -515,155 +448,193 @@ type ClientInterface interface {
 	// Corresponds with POST /v1/dataset/{dataset_id}/insert (the `PostDatasetIdInsert` operationId).
 	PostDatasetIdInsert(ctx context.Context, datasetId DatasetIdParamParameter, body PostDatasetIdInsertJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// PostDatasetIdRestoreWithBody Restore dataset
+	//
+	// Restore a dataset to an earlier version, such as a dataset snapshot. Rows changed since that version are reverted, and rows created since then are deleted. The restore is recorded as a new transaction, so dataset history is preserved. Fails if more than 20,000 rows changed since the requested version. Requires update permission on the dataset.
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /v1/dataset/{dataset_id}/restore (the `PostDatasetIdRestore` operationId).
+	PostDatasetIdRestoreWithBody(ctx context.Context, datasetId DatasetIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostDatasetIdRestore Restore dataset
+	//
+	// Restore a dataset to an earlier version, such as a dataset snapshot. Rows changed since that version are reverted, and rows created since then are deleted. The restore is recorded as a new transaction, so dataset history is preserved. Fails if more than 20,000 rows changed since the requested version. Requires update permission on the dataset.
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /v1/dataset/{dataset_id}/restore (the `PostDatasetIdRestore` operationId).
+	PostDatasetIdRestore(ctx context.Context, datasetId DatasetIdParamParameter, body PostDatasetIdRestoreJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostDatasetIdRestorePreviewWithBody Preview dataset restore
+	//
+	// Preview restoring a dataset to an earlier version, such as a dataset snapshot. Returns how many rows a restore would change, without modifying the dataset. Fails if more than 20,000 rows changed since the requested version. Requires read permission on the dataset.
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /v1/dataset/{dataset_id}/restore/preview (the `PostDatasetIdRestorePreview` operationId).
+	PostDatasetIdRestorePreviewWithBody(ctx context.Context, datasetId DatasetIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostDatasetIdRestorePreview Preview dataset restore
+	//
+	// Preview restoring a dataset to an earlier version, such as a dataset snapshot. Returns how many rows a restore would change, without modifying the dataset. Fails if more than 20,000 rows changed since the requested version. Requires read permission on the dataset.
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /v1/dataset/{dataset_id}/restore/preview (the `PostDatasetIdRestorePreview` operationId).
+	PostDatasetIdRestorePreview(ctx context.Context, datasetId DatasetIdParamParameter, body PostDatasetIdRestorePreviewJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetDatasetIdSummarize Summarize dataset
+	//
+	// Return the dataset and project names and URLs. Set `summarize_data=true` to include the total number of records in the dataset; otherwise, only metadata is returned.
 	//
 	// Corresponds with GET /v1/dataset/{dataset_id}/summarize (the `GetDatasetIdSummarize` operationId).
 	GetDatasetIdSummarize(ctx context.Context, datasetId DatasetIdParamParameter, params *GetDatasetIdSummarizeParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetDatasetSnapshot List dataset_snapshots
+	// GetDatasetSnapshot List dataset snapshots
 	//
-	// List out all dataset_snapshots. The dataset_snapshots are sorted by creation date, with the most recently-created dataset_snapshots coming first
+	// List out all dataset snapshots. The dataset snapshots are sorted by creation date, with the most recently-created dataset snapshots coming first
 	//
 	// Corresponds with GET /v1/dataset_snapshot (the `GetDatasetSnapshot` operationId).
 	GetDatasetSnapshot(ctx context.Context, params *GetDatasetSnapshotParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostDatasetSnapshotWithBody Create dataset_snapshot
+	// PostDatasetSnapshotWithBody Create dataset snapshot
 	//
-	// Create a new dataset_snapshot. If there is an existing dataset_snapshot with the same name as the one specified in the request, will return the existing dataset_snapshot unmodified
+	// Create a new dataset snapshot. If there is an existing dataset snapshot with the same name as the one specified in the request, will return the existing dataset snapshot unmodified
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with POST /v1/dataset_snapshot (the `PostDatasetSnapshot` operationId).
 	PostDatasetSnapshotWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostDatasetSnapshot Create dataset_snapshot
+	// PostDatasetSnapshot Create dataset snapshot
 	//
-	// Create a new dataset_snapshot. If there is an existing dataset_snapshot with the same name as the one specified in the request, will return the existing dataset_snapshot unmodified
+	// Create a new dataset snapshot. If there is an existing dataset snapshot with the same name as the one specified in the request, will return the existing dataset snapshot unmodified
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with POST /v1/dataset_snapshot (the `PostDatasetSnapshot` operationId).
 	PostDatasetSnapshot(ctx context.Context, body PostDatasetSnapshotJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutDatasetSnapshotWithBody Create or replace dataset_snapshot
+	// PutDatasetSnapshotWithBody Create or replace dataset snapshot
 	//
-	// Create or replace dataset_snapshot. If there is an existing dataset_snapshot with the same name as the one specified in the request, will replace the existing dataset_snapshot with the provided fields
+	// Create or replace dataset snapshot. If there is an existing dataset snapshot with the same name as the one specified in the request, will replace the existing dataset snapshot with the provided fields
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PUT /v1/dataset_snapshot (the `PutDatasetSnapshot` operationId).
 	PutDatasetSnapshotWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutDatasetSnapshot Create or replace dataset_snapshot
+	// PutDatasetSnapshot Create or replace dataset snapshot
 	//
-	// Create or replace dataset_snapshot. If there is an existing dataset_snapshot with the same name as the one specified in the request, will replace the existing dataset_snapshot with the provided fields
+	// Create or replace dataset snapshot. If there is an existing dataset snapshot with the same name as the one specified in the request, will replace the existing dataset snapshot with the provided fields
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with PUT /v1/dataset_snapshot (the `PutDatasetSnapshot` operationId).
 	PutDatasetSnapshot(ctx context.Context, body PutDatasetSnapshotJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteDatasetSnapshotId Delete dataset_snapshot
+	// DeleteDatasetSnapshotId Delete dataset snapshot
 	//
-	// Delete a dataset_snapshot object by its id.
+	// Delete a dataset snapshot object by its id.
 	//
 	// Corresponds with DELETE /v1/dataset_snapshot/{dataset_snapshot_id} (the `DeleteDatasetSnapshotId` operationId).
 	DeleteDatasetSnapshotId(ctx context.Context, datasetSnapshotId DatasetSnapshotIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetDatasetSnapshotId Get dataset_snapshot
+	// GetDatasetSnapshotId Get dataset snapshot
 	//
-	// Get a dataset_snapshot object by its id.
+	// Get a dataset snapshot object by its id.
 	//
 	// Corresponds with GET /v1/dataset_snapshot/{dataset_snapshot_id} (the `GetDatasetSnapshotId` operationId).
 	GetDatasetSnapshotId(ctx context.Context, datasetSnapshotId DatasetSnapshotIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchDatasetSnapshotIdWithBody Partially update dataset_snapshot
+	// PatchDatasetSnapshotIdWithBody Partially update dataset snapshot
 	//
-	// Partially update a dataset_snapshot object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a dataset snapshot object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PATCH /v1/dataset_snapshot/{dataset_snapshot_id} (the `PatchDatasetSnapshotId` operationId).
 	PatchDatasetSnapshotIdWithBody(ctx context.Context, datasetSnapshotId DatasetSnapshotIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchDatasetSnapshotId Partially update dataset_snapshot
+	// PatchDatasetSnapshotId Partially update dataset snapshot
 	//
-	// Partially update a dataset_snapshot object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a dataset snapshot object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with PATCH /v1/dataset_snapshot/{dataset_snapshot_id} (the `PatchDatasetSnapshotId` operationId).
 	PatchDatasetSnapshotId(ctx context.Context, datasetSnapshotId DatasetSnapshotIdParamParameter, body PatchDatasetSnapshotIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetEnvVar List env_vars
+	// GetEnvVar List env vars
 	//
-	// List out all env_vars. The env_vars are sorted by creation date, with the most recently-created env_vars coming first
+	// List out all env vars. The env vars are sorted by creation date, with the most recently-created env vars coming first
 	//
 	// Corresponds with GET /v1/env_var (the `GetEnvVar` operationId).
 	GetEnvVar(ctx context.Context, params *GetEnvVarParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostEnvVarWithBody Create env_var
+	// PostEnvVarWithBody Create env var
 	//
-	// Create a new env_var. If there is an existing env_var with the same name as the one specified in the request, will return the existing env_var unmodified
+	// Create a new env var. If there is an existing env var with the same name as the one specified in the request, will return the existing env var unmodified
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with POST /v1/env_var (the `PostEnvVar` operationId).
 	PostEnvVarWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostEnvVar Create env_var
+	// PostEnvVar Create env var
 	//
-	// Create a new env_var. If there is an existing env_var with the same name as the one specified in the request, will return the existing env_var unmodified
+	// Create a new env var. If there is an existing env var with the same name as the one specified in the request, will return the existing env var unmodified
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with POST /v1/env_var (the `PostEnvVar` operationId).
 	PostEnvVar(ctx context.Context, body PostEnvVarJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutEnvVarWithBody Create or replace env_var
+	// PutEnvVarWithBody Create or replace env var
 	//
-	// Create or replace env_var. If there is an existing env_var with the same name as the one specified in the request, will replace the existing env_var with the provided fields
+	// Create or replace env var. If there is an existing env var with the same name as the one specified in the request, will replace the existing env var with the provided fields
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PUT /v1/env_var (the `PutEnvVar` operationId).
 	PutEnvVarWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutEnvVar Create or replace env_var
+	// PutEnvVar Create or replace env var
 	//
-	// Create or replace env_var. If there is an existing env_var with the same name as the one specified in the request, will replace the existing env_var with the provided fields
+	// Create or replace env var. If there is an existing env var with the same name as the one specified in the request, will replace the existing env var with the provided fields
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with PUT /v1/env_var (the `PutEnvVar` operationId).
 	PutEnvVar(ctx context.Context, body PutEnvVarJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteEnvVarId Delete env_var
+	// DeleteEnvVarId Delete env var
 	//
-	// Delete an env_var object by its id.
+	// Delete an env var object by its id.
 	//
 	// Corresponds with DELETE /v1/env_var/{env_var_id} (the `DeleteEnvVarId` operationId).
 	DeleteEnvVarId(ctx context.Context, envVarId EnvVarIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetEnvVarId Get env_var
+	// GetEnvVarId Get env var
 	//
-	// Get an env_var object by its id.
+	// Get an env var object by its id.
 	//
 	// Corresponds with GET /v1/env_var/{env_var_id} (the `GetEnvVarId` operationId).
 	GetEnvVarId(ctx context.Context, envVarId EnvVarIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchEnvVarIdWithBody Partially update env_var
+	// PatchEnvVarIdWithBody Partially update env var
 	//
-	// Partially update an env_var object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update an env var object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PATCH /v1/env_var/{env_var_id} (the `PatchEnvVarId` operationId).
 	PatchEnvVarIdWithBody(ctx context.Context, envVarId EnvVarIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchEnvVarId Partially update env_var
+	// PatchEnvVarId Partially update env var
 	//
-	// Partially update an env_var object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update an env var object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes a body of the `application/json` content type.
 	//
@@ -790,6 +761,8 @@ type ClientInterface interface {
 
 	// GetExperimentIdSummarize Summarize experiment
 	//
+	// Return the experiment and project names and URLs. Set `summarize_scores=true` to include aggregate scores and metrics, with differences, improvements, and regressions relative to a comparison experiment. Use `comparison_experiment_id` to select the comparison; otherwise, the experiment's base experiment or the most recent experiment in the project is used.
+	//
 	// Corresponds with GET /v1/experiment/{experiment_id}/summarize (the `GetExperimentIdSummarize` operationId).
 	GetExperimentIdSummarize(ctx context.Context, experimentId ExperimentIdParamParameter, params *GetExperimentIdSummarizeParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -870,7 +843,7 @@ type ClientInterface interface {
 
 	// PostFunctionIdInvokeWithBody Invoke function
 	//
-	// Invoke a function.
+	// Run the specified function with the provided input and return its result. Use `version` to select a specific function version, `parent` to attach the call to a trace, and `stream` to receive results in the Braintrust SSE format.
 	//
 	// Takes any type of body and a specified content type.
 	//
@@ -879,7 +852,7 @@ type ClientInterface interface {
 
 	// PostFunctionIdInvoke Invoke function
 	//
-	// Invoke a function.
+	// Run the specified function with the provided input and return its result. Use `version` to select a specific function version, `parent` to attach the call to a trace, and `stream` to receive results in the Braintrust SSE format.
 	//
 	// Takes a body of the `application/json` content type.
 	//
@@ -961,155 +934,80 @@ type ClientInterface interface {
 	// Corresponds with PATCH /v1/group/{group_id} (the `PatchGroupId` operationId).
 	PatchGroupId(ctx context.Context, groupId GroupIdParamParameter, body PatchGroupIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetMcpServer List mcp_servers
+	// GetMcpServer List MCP servers
 	//
-	// List out all mcp_servers. The mcp_servers are sorted by creation date, with the most recently-created mcp_servers coming first
+	// List out all MCP servers. The MCP servers are sorted by creation date, with the most recently-created MCP servers coming first
 	//
 	// Corresponds with GET /v1/mcp_server (the `GetMcpServer` operationId).
 	GetMcpServer(ctx context.Context, params *GetMcpServerParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostMcpServerWithBody Create mcp_server
+	// PostMcpServerWithBody Create MCP server
 	//
-	// Create a new mcp_server. If there is an existing mcp_server with the same name as the one specified in the request, will return the existing mcp_server unmodified
+	// Create a new MCP server. If there is an existing MCP server with the same name as the one specified in the request, will return the existing MCP server unmodified
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with POST /v1/mcp_server (the `PostMcpServer` operationId).
 	PostMcpServerWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostMcpServer Create mcp_server
+	// PostMcpServer Create MCP server
 	//
-	// Create a new mcp_server. If there is an existing mcp_server with the same name as the one specified in the request, will return the existing mcp_server unmodified
+	// Create a new MCP server. If there is an existing MCP server with the same name as the one specified in the request, will return the existing MCP server unmodified
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with POST /v1/mcp_server (the `PostMcpServer` operationId).
 	PostMcpServer(ctx context.Context, body PostMcpServerJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutMcpServerWithBody Create or replace mcp_server
+	// PutMcpServerWithBody Create or replace MCP server
 	//
-	// Create or replace mcp_server. If there is an existing mcp_server with the same name as the one specified in the request, will replace the existing mcp_server with the provided fields
+	// Create or replace MCP server. If there is an existing MCP server with the same name as the one specified in the request, will replace the existing MCP server with the provided fields
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PUT /v1/mcp_server (the `PutMcpServer` operationId).
 	PutMcpServerWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutMcpServer Create or replace mcp_server
+	// PutMcpServer Create or replace MCP server
 	//
-	// Create or replace mcp_server. If there is an existing mcp_server with the same name as the one specified in the request, will replace the existing mcp_server with the provided fields
+	// Create or replace MCP server. If there is an existing MCP server with the same name as the one specified in the request, will replace the existing MCP server with the provided fields
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with PUT /v1/mcp_server (the `PutMcpServer` operationId).
 	PutMcpServer(ctx context.Context, body PutMcpServerJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteMcpServerId Delete mcp_server
+	// DeleteMcpServerId Delete MCP server
 	//
-	// Delete a mcp_server object by its id.
+	// Delete an MCP server object by its id.
 	//
 	// Corresponds with DELETE /v1/mcp_server/{mcp_server_id} (the `DeleteMcpServerId` operationId).
 	DeleteMcpServerId(ctx context.Context, mcpServerId McpServerIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetMcpServerId Get mcp_server
+	// GetMcpServerId Get MCP server
 	//
-	// Get a mcp_server object by its id.
+	// Get an MCP server object by its id.
 	//
 	// Corresponds with GET /v1/mcp_server/{mcp_server_id} (the `GetMcpServerId` operationId).
 	GetMcpServerId(ctx context.Context, mcpServerId McpServerIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchMcpServerIdWithBody Partially update mcp_server
+	// PatchMcpServerIdWithBody Partially update MCP server
 	//
-	// Partially update a mcp_server object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update an MCP server object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PATCH /v1/mcp_server/{mcp_server_id} (the `PatchMcpServerId` operationId).
 	PatchMcpServerIdWithBody(ctx context.Context, mcpServerId McpServerIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchMcpServerId Partially update mcp_server
+	// PatchMcpServerId Partially update MCP server
 	//
-	// Partially update a mcp_server object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update an MCP server object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with PATCH /v1/mcp_server/{mcp_server_id} (the `PatchMcpServerId` operationId).
 	PatchMcpServerId(ctx context.Context, mcpServerId McpServerIdParamParameter, body PatchMcpServerIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// GetOrgAutomation List org_automations
-	//
-	// List out all org_automations. The org_automations are sorted by creation date, with the most recently-created org_automations coming first
-	//
-	// Corresponds with GET /v1/org_automation (the `GetOrgAutomation` operationId).
-	GetOrgAutomation(ctx context.Context, params *GetOrgAutomationParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// PostOrgAutomationWithBody Create org_automation
-	//
-	// Create a new org_automation. If there is an existing org_automation with the same name as the one specified in the request, will return the existing org_automation unmodified
-	//
-	// Takes any type of body and a specified content type.
-	//
-	// Corresponds with POST /v1/org_automation (the `PostOrgAutomation` operationId).
-	PostOrgAutomationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// PostOrgAutomation Create org_automation
-	//
-	// Create a new org_automation. If there is an existing org_automation with the same name as the one specified in the request, will return the existing org_automation unmodified
-	//
-	// Takes a body of the `application/json` content type.
-	//
-	// Corresponds with POST /v1/org_automation (the `PostOrgAutomation` operationId).
-	PostOrgAutomation(ctx context.Context, body PostOrgAutomationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// PutOrgAutomationWithBody Create or replace org_automation
-	//
-	// Create or replace org_automation. If there is an existing org_automation with the same name as the one specified in the request, will replace the existing org_automation with the provided fields
-	//
-	// Takes any type of body and a specified content type.
-	//
-	// Corresponds with PUT /v1/org_automation (the `PutOrgAutomation` operationId).
-	PutOrgAutomationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// PutOrgAutomation Create or replace org_automation
-	//
-	// Create or replace org_automation. If there is an existing org_automation with the same name as the one specified in the request, will replace the existing org_automation with the provided fields
-	//
-	// Takes a body of the `application/json` content type.
-	//
-	// Corresponds with PUT /v1/org_automation (the `PutOrgAutomation` operationId).
-	PutOrgAutomation(ctx context.Context, body PutOrgAutomationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// DeleteOrgAutomationId Delete org_automation
-	//
-	// Delete a org_automation object by its id.
-	//
-	// Corresponds with DELETE /v1/org_automation/{org_automation_id} (the `DeleteOrgAutomationId` operationId).
-	DeleteOrgAutomationId(ctx context.Context, orgAutomationId OrgAutomationIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// GetOrgAutomationId Get org_automation
-	//
-	// Get a org_automation object by its id.
-	//
-	// Corresponds with GET /v1/org_automation/{org_automation_id} (the `GetOrgAutomationId` operationId).
-	GetOrgAutomationId(ctx context.Context, orgAutomationId OrgAutomationIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// PatchOrgAutomationIdWithBody Partially update org_automation
-	//
-	// Partially update a org_automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
-	//
-	// Takes any type of body and a specified content type.
-	//
-	// Corresponds with PATCH /v1/org_automation/{org_automation_id} (the `PatchOrgAutomationId` operationId).
-	PatchOrgAutomationIdWithBody(ctx context.Context, orgAutomationId OrgAutomationIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// PatchOrgAutomationId Partially update org_automation
-	//
-	// Partially update a org_automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
-	//
-	// Takes a body of the `application/json` content type.
-	//
-	// Corresponds with PATCH /v1/org_automation/{org_automation_id} (the `PatchOrgAutomationId` operationId).
-	PatchOrgAutomationId(ctx context.Context, orgAutomationId OrgAutomationIdParamParameter, body PatchOrgAutomationIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetOrganization List organizations
 	//
@@ -1117,6 +1015,13 @@ type ClientInterface interface {
 	//
 	// Corresponds with GET /v1/organization (the `GetOrganization` operationId).
 	GetOrganization(ctx context.Context, params *GetOrganizationParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetOrganizationApiKeys List organization API keys
+	//
+	// List all API keys associated with users in an organization, sorted by creation date with the newest keys first. An organization-scoped API key determines the organization; otherwise, provide `org_id`. If `org_id` does not match the organization-scoped key's organization, or the caller is not an owner of the organization, no keys are returned. Responses include key metadata only; key secrets are never returned. To list service tokens, use `GET /v1/service_token`.
+	//
+	// Corresponds with GET /v1/organization/api_keys (the `GetOrganizationApiKeys` operationId).
+	GetOrganizationApiKeys(ctx context.Context, params *GetOrganizationApiKeysParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// PatchOrganizationMembersWithBody Modify organization membership
 	//
@@ -1218,300 +1123,300 @@ type ClientInterface interface {
 	// Corresponds with PATCH /v1/project/{project_id} (the `PatchProjectId` operationId).
 	PatchProjectId(ctx context.Context, projectId ProjectIdParamParameter, body PatchProjectIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetProjectAutomation List project_automations
+	// GetProjectAutomation List project automations
 	//
-	// List out all project_automations. The project_automations are sorted by creation date, with the most recently-created project_automations coming first
+	// List out all project automations. The project automations are sorted by creation date, with the most recently-created project automations coming first
 	//
 	// Corresponds with GET /v1/project_automation (the `GetProjectAutomation` operationId).
 	GetProjectAutomation(ctx context.Context, params *GetProjectAutomationParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostProjectAutomationWithBody Create project_automation
+	// PostProjectAutomationWithBody Create project automation
 	//
-	// Create a new project_automation. If there is an existing project_automation with the same name as the one specified in the request, will return the existing project_automation unmodified
+	// Create a new project automation. If there is an existing project automation with the same name as the one specified in the request, will return the existing project automation unmodified
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with POST /v1/project_automation (the `PostProjectAutomation` operationId).
 	PostProjectAutomationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostProjectAutomation Create project_automation
+	// PostProjectAutomation Create project automation
 	//
-	// Create a new project_automation. If there is an existing project_automation with the same name as the one specified in the request, will return the existing project_automation unmodified
+	// Create a new project automation. If there is an existing project automation with the same name as the one specified in the request, will return the existing project automation unmodified
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with POST /v1/project_automation (the `PostProjectAutomation` operationId).
 	PostProjectAutomation(ctx context.Context, body PostProjectAutomationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutProjectAutomationWithBody Create or replace project_automation
+	// PutProjectAutomationWithBody Create or replace project automation
 	//
-	// Create or replace project_automation. If there is an existing project_automation with the same name as the one specified in the request, will replace the existing project_automation with the provided fields
+	// Create or replace project automation. If there is an existing project automation with the same name as the one specified in the request, will replace the existing project automation with the provided fields
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PUT /v1/project_automation (the `PutProjectAutomation` operationId).
 	PutProjectAutomationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutProjectAutomation Create or replace project_automation
+	// PutProjectAutomation Create or replace project automation
 	//
-	// Create or replace project_automation. If there is an existing project_automation with the same name as the one specified in the request, will replace the existing project_automation with the provided fields
+	// Create or replace project automation. If there is an existing project automation with the same name as the one specified in the request, will replace the existing project automation with the provided fields
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with PUT /v1/project_automation (the `PutProjectAutomation` operationId).
 	PutProjectAutomation(ctx context.Context, body PutProjectAutomationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteProjectAutomationId Delete project_automation
+	// DeleteProjectAutomationId Delete project automation
 	//
-	// Delete a project_automation object by its id.
+	// Delete a project automation object by its id.
 	//
 	// Corresponds with DELETE /v1/project_automation/{project_automation_id} (the `DeleteProjectAutomationId` operationId).
 	DeleteProjectAutomationId(ctx context.Context, projectAutomationId ProjectAutomationIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetProjectAutomationId Get project_automation
+	// GetProjectAutomationId Get project automation
 	//
-	// Get a project_automation object by its id.
+	// Get a project automation object by its id.
 	//
 	// Corresponds with GET /v1/project_automation/{project_automation_id} (the `GetProjectAutomationId` operationId).
 	GetProjectAutomationId(ctx context.Context, projectAutomationId ProjectAutomationIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchProjectAutomationIdWithBody Partially update project_automation
+	// PatchProjectAutomationIdWithBody Partially update project automation
 	//
-	// Partially update a project_automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a project automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PATCH /v1/project_automation/{project_automation_id} (the `PatchProjectAutomationId` operationId).
 	PatchProjectAutomationIdWithBody(ctx context.Context, projectAutomationId ProjectAutomationIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchProjectAutomationId Partially update project_automation
+	// PatchProjectAutomationId Partially update project automation
 	//
-	// Partially update a project_automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a project automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with PATCH /v1/project_automation/{project_automation_id} (the `PatchProjectAutomationId` operationId).
 	PatchProjectAutomationId(ctx context.Context, projectAutomationId ProjectAutomationIdParamParameter, body PatchProjectAutomationIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetProjectGroup List project_groups
+	// GetProjectGroup List project groups
 	//
-	// List out all project_groups. The project_groups are sorted by creation date, with the most recently-created project_groups coming first
+	// List out all project groups. The project groups are sorted by creation date, with the most recently-created project groups coming first
 	//
 	// Corresponds with GET /v1/project_group (the `GetProjectGroup` operationId).
 	GetProjectGroup(ctx context.Context, params *GetProjectGroupParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostProjectGroupWithBody Create project_group
+	// PostProjectGroupWithBody Create project group
 	//
-	// Create a new project_group. If there is an existing project_group with the same name as the one specified in the request, will return the existing project_group unmodified
+	// Create a new project group. If there is an existing project group with the same name as the one specified in the request, will return the existing project group unmodified
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with POST /v1/project_group (the `PostProjectGroup` operationId).
 	PostProjectGroupWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostProjectGroup Create project_group
+	// PostProjectGroup Create project group
 	//
-	// Create a new project_group. If there is an existing project_group with the same name as the one specified in the request, will return the existing project_group unmodified
+	// Create a new project group. If there is an existing project group with the same name as the one specified in the request, will return the existing project group unmodified
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with POST /v1/project_group (the `PostProjectGroup` operationId).
 	PostProjectGroup(ctx context.Context, body PostProjectGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutProjectGroupWithBody Create or replace project_group
+	// PutProjectGroupWithBody Create or replace project group
 	//
-	// Create or replace project_group. If there is an existing project_group with the same name as the one specified in the request, will replace the existing project_group with the provided fields
+	// Create or replace project group. If there is an existing project group with the same name as the one specified in the request, will replace the existing project group with the provided fields
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PUT /v1/project_group (the `PutProjectGroup` operationId).
 	PutProjectGroupWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutProjectGroup Create or replace project_group
+	// PutProjectGroup Create or replace project group
 	//
-	// Create or replace project_group. If there is an existing project_group with the same name as the one specified in the request, will replace the existing project_group with the provided fields
+	// Create or replace project group. If there is an existing project group with the same name as the one specified in the request, will replace the existing project group with the provided fields
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with PUT /v1/project_group (the `PutProjectGroup` operationId).
 	PutProjectGroup(ctx context.Context, body PutProjectGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteProjectGroupId Delete project_group
+	// DeleteProjectGroupId Delete project group
 	//
-	// Delete a project_group object by its id.
+	// Delete a project group object by its id.
 	//
 	// Corresponds with DELETE /v1/project_group/{project_group_id} (the `DeleteProjectGroupId` operationId).
 	DeleteProjectGroupId(ctx context.Context, projectGroupId ProjectGroupIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetProjectGroupId Get project_group
+	// GetProjectGroupId Get project group
 	//
-	// Get a project_group object by its id.
+	// Get a project group object by its id.
 	//
 	// Corresponds with GET /v1/project_group/{project_group_id} (the `GetProjectGroupId` operationId).
 	GetProjectGroupId(ctx context.Context, projectGroupId ProjectGroupIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchProjectGroupIdWithBody Partially update project_group
+	// PatchProjectGroupIdWithBody Partially update project group
 	//
-	// Partially update a project_group object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a project group object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PATCH /v1/project_group/{project_group_id} (the `PatchProjectGroupId` operationId).
 	PatchProjectGroupIdWithBody(ctx context.Context, projectGroupId ProjectGroupIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchProjectGroupId Partially update project_group
+	// PatchProjectGroupId Partially update project group
 	//
-	// Partially update a project_group object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a project group object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with PATCH /v1/project_group/{project_group_id} (the `PatchProjectGroupId` operationId).
 	PatchProjectGroupId(ctx context.Context, projectGroupId ProjectGroupIdParamParameter, body PatchProjectGroupIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetProjectScore List project_scores
+	// GetProjectScore List project scores
 	//
-	// List out all project_scores. The project_scores are sorted by creation date, with the most recently-created project_scores coming first
+	// List out all project scores. The project scores are sorted by creation date, with the most recently-created project scores coming first
 	//
 	// Corresponds with GET /v1/project_score (the `GetProjectScore` operationId).
 	GetProjectScore(ctx context.Context, params *GetProjectScoreParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostProjectScoreWithBody Create project_score
+	// PostProjectScoreWithBody Create project score
 	//
-	// Create a new project_score. If there is an existing project_score in the project with the same name as the one specified in the request, will return the existing project_score unmodified
+	// Create a new project score. If there is an existing project score in the project with the same name as the one specified in the request, will return the existing project score unmodified
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with POST /v1/project_score (the `PostProjectScore` operationId).
 	PostProjectScoreWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostProjectScore Create project_score
+	// PostProjectScore Create project score
 	//
-	// Create a new project_score. If there is an existing project_score in the project with the same name as the one specified in the request, will return the existing project_score unmodified
+	// Create a new project score. If there is an existing project score in the project with the same name as the one specified in the request, will return the existing project score unmodified
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with POST /v1/project_score (the `PostProjectScore` operationId).
 	PostProjectScore(ctx context.Context, body PostProjectScoreJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutProjectScoreWithBody Create or replace project_score
+	// PutProjectScoreWithBody Create or replace project score
 	//
-	// Create or replace project_score. If there is an existing project_score in the project with the same name as the one specified in the request, will replace the existing project_score with the provided fields
+	// Create or replace project score. If there is an existing project score in the project with the same name as the one specified in the request, will replace the existing project score with the provided fields
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PUT /v1/project_score (the `PutProjectScore` operationId).
 	PutProjectScoreWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutProjectScore Create or replace project_score
+	// PutProjectScore Create or replace project score
 	//
-	// Create or replace project_score. If there is an existing project_score in the project with the same name as the one specified in the request, will replace the existing project_score with the provided fields
+	// Create or replace project score. If there is an existing project score in the project with the same name as the one specified in the request, will replace the existing project score with the provided fields
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with PUT /v1/project_score (the `PutProjectScore` operationId).
 	PutProjectScore(ctx context.Context, body PutProjectScoreJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteProjectScoreId Delete project_score
+	// DeleteProjectScoreId Delete project score
 	//
-	// Delete a project_score object by its id.
+	// Delete a project score object by its id.
 	//
 	// Corresponds with DELETE /v1/project_score/{project_score_id} (the `DeleteProjectScoreId` operationId).
 	DeleteProjectScoreId(ctx context.Context, projectScoreId ProjectScoreIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetProjectScoreId Get project_score
+	// GetProjectScoreId Get project score
 	//
-	// Get a project_score object by its id.
+	// Get a project score object by its id.
 	//
 	// Corresponds with GET /v1/project_score/{project_score_id} (the `GetProjectScoreId` operationId).
 	GetProjectScoreId(ctx context.Context, projectScoreId ProjectScoreIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchProjectScoreIdWithBody Partially update project_score
+	// PatchProjectScoreIdWithBody Partially update project score
 	//
-	// Partially update a project_score object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a project score object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PATCH /v1/project_score/{project_score_id} (the `PatchProjectScoreId` operationId).
 	PatchProjectScoreIdWithBody(ctx context.Context, projectScoreId ProjectScoreIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchProjectScoreId Partially update project_score
+	// PatchProjectScoreId Partially update project score
 	//
-	// Partially update a project_score object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a project score object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with PATCH /v1/project_score/{project_score_id} (the `PatchProjectScoreId` operationId).
 	PatchProjectScoreId(ctx context.Context, projectScoreId ProjectScoreIdParamParameter, body PatchProjectScoreIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetProjectTag List project_tags
+	// GetProjectTag List project tags
 	//
-	// List out all project_tags. The project_tags are sorted by creation date, with the most recently-created project_tags coming first
+	// List out all project tags. The project tags are sorted by creation date, with the most recently-created project tags coming first
 	//
 	// Corresponds with GET /v1/project_tag (the `GetProjectTag` operationId).
 	GetProjectTag(ctx context.Context, params *GetProjectTagParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostProjectTagWithBody Create project_tag
+	// PostProjectTagWithBody Create project tag
 	//
-	// Create a new project_tag. If there is an existing project_tag in the project with the same name as the one specified in the request, will return the existing project_tag unmodified
+	// Create a new project tag. If there is an existing project tag in the project with the same name as the one specified in the request, will return the existing project tag unmodified
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with POST /v1/project_tag (the `PostProjectTag` operationId).
 	PostProjectTagWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostProjectTag Create project_tag
+	// PostProjectTag Create project tag
 	//
-	// Create a new project_tag. If there is an existing project_tag in the project with the same name as the one specified in the request, will return the existing project_tag unmodified
+	// Create a new project tag. If there is an existing project tag in the project with the same name as the one specified in the request, will return the existing project tag unmodified
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with POST /v1/project_tag (the `PostProjectTag` operationId).
 	PostProjectTag(ctx context.Context, body PostProjectTagJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutProjectTagWithBody Create or replace project_tag
+	// PutProjectTagWithBody Create or replace project tag
 	//
-	// Create or replace project_tag. If there is an existing project_tag in the project with the same name as the one specified in the request, will replace the existing project_tag with the provided fields
+	// Create or replace project tag. If there is an existing project tag in the project with the same name as the one specified in the request, will replace the existing project tag with the provided fields
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PUT /v1/project_tag (the `PutProjectTag` operationId).
 	PutProjectTagWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutProjectTag Create or replace project_tag
+	// PutProjectTag Create or replace project tag
 	//
-	// Create or replace project_tag. If there is an existing project_tag in the project with the same name as the one specified in the request, will replace the existing project_tag with the provided fields
+	// Create or replace project tag. If there is an existing project tag in the project with the same name as the one specified in the request, will replace the existing project tag with the provided fields
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with PUT /v1/project_tag (the `PutProjectTag` operationId).
 	PutProjectTag(ctx context.Context, body PutProjectTagJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteProjectTagId Delete project_tag
+	// DeleteProjectTagId Delete project tag
 	//
-	// Delete a project_tag object by its id.
+	// Delete a project tag object by its id.
 	//
 	// Corresponds with DELETE /v1/project_tag/{project_tag_id} (the `DeleteProjectTagId` operationId).
 	DeleteProjectTagId(ctx context.Context, projectTagId ProjectTagIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetProjectTagId Get project_tag
+	// GetProjectTagId Get project tag
 	//
-	// Get a project_tag object by its id.
+	// Get a project tag object by its id.
 	//
 	// Corresponds with GET /v1/project_tag/{project_tag_id} (the `GetProjectTagId` operationId).
 	GetProjectTagId(ctx context.Context, projectTagId ProjectTagIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchProjectTagIdWithBody Partially update project_tag
+	// PatchProjectTagIdWithBody Partially update project tag
 	//
-	// Partially update a project_tag object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a project tag object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PATCH /v1/project_tag/{project_tag_id} (the `PatchProjectTagId` operationId).
 	PatchProjectTagIdWithBody(ctx context.Context, projectTagId ProjectTagIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchProjectTagId Partially update project_tag
+	// PatchProjectTagId Partially update project tag
 	//
-	// Partially update a project_tag object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a project tag object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes a body of the `application/json` content type.
 	//
@@ -1668,156 +1573,156 @@ type ClientInterface interface {
 	// Corresponds with PATCH /v1/role/{role_id} (the `PatchRoleId` operationId).
 	PatchRoleId(ctx context.Context, roleId RoleIdParamParameter, body PatchRoleIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteServiceTokenWithBody Delete single service_token
+	// DeleteServiceTokenWithBody Delete single service token
 	//
-	// Delete a single service_token.
+	// Delete a single service token.
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with DELETE /v1/service_token (the `DeleteServiceToken` operationId).
 	DeleteServiceTokenWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteServiceToken Delete single service_token
+	// DeleteServiceToken Delete single service token
 	//
-	// Delete a single service_token.
+	// Delete a single service token.
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with DELETE /v1/service_token (the `DeleteServiceToken` operationId).
 	DeleteServiceToken(ctx context.Context, body DeleteServiceTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetServiceToken List service_tokens
+	// GetServiceToken List service tokens
 	//
 	// List out all service tokens. They are sorted by creation date, with the most recently-created tokens coming first.
 	//
-	// To create a service token, visit [**Settings > Service tokens**](https://www.braintrust.dev/app/~/configuration/org/service-tokens) as an organization owner, or call [`POST /v1/service_token`](https://www.braintrust.dev/docs/api-reference/servicetokens/create-service_token) and authenticate with a service token that has organization-owner permissions.
+	// To create a service token, visit [**Settings > Service tokens**](https://www.braintrust.dev/app/~/configuration/org/service-tokens) as an organization owner or an Owner of an active project group in the organization, or call [`POST /v1/service_token`](https://docs.braintrust.dev/api-reference/servicetokens/create-service_token) with a service token. Results include only service tokens you can manage.
 	//
 	// Corresponds with GET /v1/service_token (the `GetServiceToken` operationId).
 	GetServiceToken(ctx context.Context, params *GetServiceTokenParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostServiceTokenWithBody Create service_token
+	// PostServiceTokenWithBody Create service token
 	//
 	// Create a new service token.
 	//
-	// When calling this endpoint, you must authenticate using a service token that has organization-owner permissions. User API keys cannot be used.
+	// Authenticate with a service token. A service token whose service account is an organization owner can create tokens for any service account. A service token whose service account holds the Owner role on a project group can create tokens for a service account in the same organization when the target account has a permission grant on a project group it owns. The calling service account must also hold all of the target account's permissions in the organization; otherwise the request returns 403. User API keys cannot be used.
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with POST /v1/service_token (the `PostServiceToken` operationId).
 	PostServiceTokenWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostServiceToken Create service_token
+	// PostServiceToken Create service token
 	//
 	// Create a new service token.
 	//
-	// When calling this endpoint, you must authenticate using a service token that has organization-owner permissions. User API keys cannot be used.
+	// Authenticate with a service token. A service token whose service account is an organization owner can create tokens for any service account. A service token whose service account holds the Owner role on a project group can create tokens for a service account in the same organization when the target account has a permission grant on a project group it owns. The calling service account must also hold all of the target account's permissions in the organization; otherwise the request returns 403. User API keys cannot be used.
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with POST /v1/service_token (the `PostServiceToken` operationId).
 	PostServiceToken(ctx context.Context, body PostServiceTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutServiceTokenWithBody Create or replace service_token
+	// PutServiceTokenWithBody Create or replace service token
 	//
-	// Create or replace service_token. If there is an existing service_token with the same name as the one specified in the request, will replace the existing service_token with the provided fields
+	// Create or replace service token. If there is an existing service token with the same name as the one specified in the request, will replace the existing service token with the provided fields
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PUT /v1/service_token (the `PutServiceToken` operationId).
 	PutServiceTokenWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutServiceToken Create or replace service_token
+	// PutServiceToken Create or replace service token
 	//
-	// Create or replace service_token. If there is an existing service_token with the same name as the one specified in the request, will replace the existing service_token with the provided fields
+	// Create or replace service token. If there is an existing service token with the same name as the one specified in the request, will replace the existing service token with the provided fields
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with PUT /v1/service_token (the `PutServiceToken` operationId).
 	PutServiceToken(ctx context.Context, body PutServiceTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteServiceTokenId Delete service_token
+	// DeleteServiceTokenId Delete service token
 	//
-	// Delete a service_token object by its id.
+	// Delete a service token object by its id.
 	//
 	// Corresponds with DELETE /v1/service_token/{service_token_id} (the `DeleteServiceTokenId` operationId).
 	DeleteServiceTokenId(ctx context.Context, serviceTokenId ServiceTokenIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetServiceTokenId Get service_token
+	// GetServiceTokenId Get service token
 	//
-	// Get a service_token object by its id.
+	// Get a service token object by its id.
 	//
 	// Corresponds with GET /v1/service_token/{service_token_id} (the `GetServiceTokenId` operationId).
 	GetServiceTokenId(ctx context.Context, serviceTokenId ServiceTokenIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetSpanIframe List span_iframes
+	// GetSpanIframe List span iframes
 	//
-	// List out all span_iframes. The span_iframes are sorted by creation date, with the most recently-created span_iframes coming first
+	// List out all span iframes. The span iframes are sorted by creation date, with the most recently-created span iframes coming first
 	//
 	// Corresponds with GET /v1/span_iframe (the `GetSpanIframe` operationId).
 	GetSpanIframe(ctx context.Context, params *GetSpanIframeParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostSpanIframeWithBody Create span_iframe
+	// PostSpanIframeWithBody Create span iframe
 	//
-	// Create a new span_iframe. If there is an existing span_iframe with the same name as the one specified in the request, will return the existing span_iframe unmodified
+	// Create a new span iframe. If there is an existing span iframe with the same name as the one specified in the request, will return the existing span iframe unmodified
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with POST /v1/span_iframe (the `PostSpanIframe` operationId).
 	PostSpanIframeWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostSpanIframe Create span_iframe
+	// PostSpanIframe Create span iframe
 	//
-	// Create a new span_iframe. If there is an existing span_iframe with the same name as the one specified in the request, will return the existing span_iframe unmodified
+	// Create a new span iframe. If there is an existing span iframe with the same name as the one specified in the request, will return the existing span iframe unmodified
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with POST /v1/span_iframe (the `PostSpanIframe` operationId).
 	PostSpanIframe(ctx context.Context, body PostSpanIframeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutSpanIframeWithBody Create or replace span_iframe
+	// PutSpanIframeWithBody Create or replace span iframe
 	//
-	// Create or replace span_iframe. If there is an existing span_iframe with the same name as the one specified in the request, will replace the existing span_iframe with the provided fields
+	// Create or replace span iframe. If there is an existing span iframe with the same name as the one specified in the request, will replace the existing span iframe with the provided fields
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PUT /v1/span_iframe (the `PutSpanIframe` operationId).
 	PutSpanIframeWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutSpanIframe Create or replace span_iframe
+	// PutSpanIframe Create or replace span iframe
 	//
-	// Create or replace span_iframe. If there is an existing span_iframe with the same name as the one specified in the request, will replace the existing span_iframe with the provided fields
+	// Create or replace span iframe. If there is an existing span iframe with the same name as the one specified in the request, will replace the existing span iframe with the provided fields
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with PUT /v1/span_iframe (the `PutSpanIframe` operationId).
 	PutSpanIframe(ctx context.Context, body PutSpanIframeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteSpanIframeId Delete span_iframe
+	// DeleteSpanIframeId Delete span iframe
 	//
-	// Delete a span_iframe object by its id.
+	// Delete a span iframe object by its id.
 	//
 	// Corresponds with DELETE /v1/span_iframe/{span_iframe_id} (the `DeleteSpanIframeId` operationId).
 	DeleteSpanIframeId(ctx context.Context, spanIframeId SpanIframeIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetSpanIframeId Get span_iframe
+	// GetSpanIframeId Get span iframe
 	//
-	// Get a span_iframe object by its id.
+	// Get a span iframe object by its id.
 	//
 	// Corresponds with GET /v1/span_iframe/{span_iframe_id} (the `GetSpanIframeId` operationId).
 	GetSpanIframeId(ctx context.Context, spanIframeId SpanIframeIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchSpanIframeIdWithBody Partially update span_iframe
+	// PatchSpanIframeIdWithBody Partially update span iframe
 	//
-	// Partially update a span_iframe object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a span iframe object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with PATCH /v1/span_iframe/{span_iframe_id} (the `PatchSpanIframeId` operationId).
 	PatchSpanIframeIdWithBody(ctx context.Context, spanIframeId SpanIframeIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchSpanIframeId Partially update span_iframe
+	// PatchSpanIframeId Partially update span iframe
 	//
-	// Partially update a span_iframe object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a span iframe object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes a body of the `application/json` content type.
 	//
@@ -1998,12 +1903,16 @@ type ClientWithResponsesInterface interface {
 
 	// DeleteEnvironmentWithResponse Delete environment
 	//
+	// Delete an environment object by its id.
+	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /environment/{environment_id} (the `DeleteEnvironment` operationId).
 	DeleteEnvironmentWithResponse(ctx context.Context, environmentId openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteEnvironmentResponse, error)
 
 	// GetEnvironmentWithResponse Get environment
+	//
+	// Get an environment object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
@@ -2012,6 +1921,8 @@ type ClientWithResponsesInterface interface {
 
 	// UpdateEnvironmentWithBodyWithResponse Partially update environment
 	//
+	// Partially update an environment object. Specify the fields to update in the payload.
+	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PATCH /environment/{environment_id} (the `UpdateEnvironment` operationId).
@@ -2019,282 +1930,203 @@ type ClientWithResponsesInterface interface {
 
 	// UpdateEnvironmentWithResponse Partially update environment
 	//
+	// Partially update an environment object. Specify the fields to update in the payload.
+	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PATCH /environment/{environment_id} (the `UpdateEnvironment` operationId).
 	UpdateEnvironmentWithResponse(ctx context.Context, environmentId openapi_types.UUID, body UpdateEnvironmentJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateEnvironmentResponse, error)
 
-	// DeleteAclWithBodyWithResponse Delete single acl
+	// DeleteAclWithBodyWithResponse Delete single ACL
 	//
-	// Delete a single acl.
+	// Delete a single ACL.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /v1/acl (the `DeleteAcl` operationId).
 	DeleteAclWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeleteAclResponse, error)
 
-	// DeleteAclWithResponse Delete single acl
+	// DeleteAclWithResponse Delete single ACL
 	//
-	// Delete a single acl.
+	// Delete a single ACL.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /v1/acl (the `DeleteAcl` operationId).
 	DeleteAclWithResponse(ctx context.Context, body DeleteAclJSONRequestBody, reqEditors ...RequestEditorFn) (*DeleteAclResponse, error)
 
-	// GetAclWithResponse List acls
+	// GetAclWithResponse List ACLs
 	//
-	// List out all acls. The acls are sorted by creation date, with the most recently-created acls coming first
+	// List out all ACLs. The ACLs are sorted by creation date, with the most recently-created ACLs coming first
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/acl (the `GetAcl` operationId).
 	GetAclWithResponse(ctx context.Context, params *GetAclParams, reqEditors ...RequestEditorFn) (*GetAclResponse, error)
 
-	// PostAclWithBodyWithResponse Create acl
+	// PostAclWithBodyWithResponse Create ACL
 	//
-	// Create a new acl. If there is an existing acl with the same contents as the one specified in the request, will return the existing acl unmodified
+	// Create a new ACL. If there is an existing ACL with the same contents as the one specified in the request, will return the existing ACL unmodified
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/acl (the `PostAcl` operationId).
 	PostAclWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAclResponse, error)
 
-	// PostAclWithResponse Create acl
+	// PostAclWithResponse Create ACL
 	//
-	// Create a new acl. If there is an existing acl with the same contents as the one specified in the request, will return the existing acl unmodified
+	// Create a new ACL. If there is an existing ACL with the same contents as the one specified in the request, will return the existing ACL unmodified
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/acl (the `PostAcl` operationId).
 	PostAclWithResponse(ctx context.Context, body PostAclJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAclResponse, error)
 
-	// AclBatchUpdateWithBodyWithResponse Batch update acls
+	// AclBatchUpdateWithBodyWithResponse Batch update ACLs
 	//
-	// Batch update acls. This operation is idempotent, so adding acls which already exist will have no effect, and removing acls which do not exist will have no effect.
+	// Batch update ACLs. This operation is idempotent, so adding ACLs which already exist will have no effect, and removing ACLs which do not exist will have no effect.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/acl/batch_update (the `AclBatchUpdate` operationId).
 	AclBatchUpdateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AclBatchUpdateResponse2, error)
 
-	// AclBatchUpdateWithResponse Batch update acls
+	// AclBatchUpdateWithResponse Batch update ACLs
 	//
-	// Batch update acls. This operation is idempotent, so adding acls which already exist will have no effect, and removing acls which do not exist will have no effect.
+	// Batch update ACLs. This operation is idempotent, so adding ACLs which already exist will have no effect, and removing ACLs which do not exist will have no effect.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/acl/batch_update (the `AclBatchUpdate` operationId).
 	AclBatchUpdateWithResponse(ctx context.Context, body AclBatchUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*AclBatchUpdateResponse2, error)
 
-	// AclListOrgWithResponse List org acls
+	// AclListOrgWithResponse List org ACLs
 	//
-	// List all acls in the org. This query requires the caller to have `read_acls` permission at the organization level
+	// List all ACLs in the org. This query requires the caller to have `read_acls` permission at the organization level
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/acl/list_org (the `AclListOrg` operationId).
 	AclListOrgWithResponse(ctx context.Context, params *AclListOrgParams, reqEditors ...RequestEditorFn) (*AclListOrgResponse, error)
 
-	// DeleteAclIdWithResponse Delete acl
+	// DeleteAclIdWithResponse Delete ACL
 	//
-	// Delete an acl object by its id.
+	// Delete an ACL object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /v1/acl/{acl_id} (the `DeleteAclId` operationId).
 	DeleteAclIdWithResponse(ctx context.Context, aclId AclIdParamParameter, reqEditors ...RequestEditorFn) (*DeleteAclIdResponse, error)
 
-	// GetAclIdWithResponse Get acl
+	// GetAclIdWithResponse Get ACL
 	//
-	// Get an acl object by its id.
+	// Get an ACL object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/acl/{acl_id} (the `GetAclId` operationId).
 	GetAclIdWithResponse(ctx context.Context, aclId AclIdParamParameter, reqEditors ...RequestEditorFn) (*GetAclIdResponse, error)
 
-	// GetAgentWithResponse List agents
+	// DeleteAiSecretWithBodyWithResponse Delete single AI secret
 	//
-	// List out all agents. The agents are sorted by creation date, with the most recently-created agents coming first
-	//
-	// Returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with GET /v1/agent (the `GetAgent` operationId).
-	GetAgentWithResponse(ctx context.Context, params *GetAgentParams, reqEditors ...RequestEditorFn) (*GetAgentResponse, error)
-
-	// PostAgentWithBodyWithResponse Create agent
-	//
-	// Create a new agent. If there is an existing agent with the same name as the one specified in the request, will return the existing agent unmodified
-	//
-	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with POST /v1/agent (the `PostAgent` operationId).
-	PostAgentWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAgentResponse, error)
-
-	// PostAgentWithResponse Create agent
-	//
-	// Create a new agent. If there is an existing agent with the same name as the one specified in the request, will return the existing agent unmodified
-	//
-	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with POST /v1/agent (the `PostAgent` operationId).
-	PostAgentWithResponse(ctx context.Context, body PostAgentJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAgentResponse, error)
-
-	// PutAgentWithBodyWithResponse Create or replace agent
-	//
-	// Create or replace agent. If there is an existing agent with the same name as the one specified in the request, will replace the existing agent with the provided fields
-	//
-	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with PUT /v1/agent (the `PutAgent` operationId).
-	PutAgentWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutAgentResponse, error)
-
-	// PutAgentWithResponse Create or replace agent
-	//
-	// Create or replace agent. If there is an existing agent with the same name as the one specified in the request, will replace the existing agent with the provided fields
-	//
-	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with PUT /v1/agent (the `PutAgent` operationId).
-	PutAgentWithResponse(ctx context.Context, body PutAgentJSONRequestBody, reqEditors ...RequestEditorFn) (*PutAgentResponse, error)
-
-	// DeleteAgentIdWithResponse Delete agent
-	//
-	// Delete a agent object by its id.
-	//
-	// Returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with DELETE /v1/agent/{agent_id} (the `DeleteAgentId` operationId).
-	DeleteAgentIdWithResponse(ctx context.Context, agentId AgentIdParamParameter, reqEditors ...RequestEditorFn) (*DeleteAgentIdResponse, error)
-
-	// GetAgentIdWithResponse Get agent
-	//
-	// Get a agent object by its id.
-	//
-	// Returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with GET /v1/agent/{agent_id} (the `GetAgentId` operationId).
-	GetAgentIdWithResponse(ctx context.Context, agentId AgentIdParamParameter, reqEditors ...RequestEditorFn) (*GetAgentIdResponse, error)
-
-	// PatchAgentIdWithBodyWithResponse Partially update agent
-	//
-	// Partially update a agent object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
-	//
-	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with PATCH /v1/agent/{agent_id} (the `PatchAgentId` operationId).
-	PatchAgentIdWithBodyWithResponse(ctx context.Context, agentId AgentIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchAgentIdResponse, error)
-
-	// PatchAgentIdWithResponse Partially update agent
-	//
-	// Partially update a agent object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
-	//
-	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with PATCH /v1/agent/{agent_id} (the `PatchAgentId` operationId).
-	PatchAgentIdWithResponse(ctx context.Context, agentId AgentIdParamParameter, body PatchAgentIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchAgentIdResponse, error)
-
-	// DeleteAiSecretWithBodyWithResponse Delete single ai_secret
-	//
-	// Delete a single ai_secret.
+	// Delete a single AI secret.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /v1/ai_secret (the `DeleteAiSecret` operationId).
 	DeleteAiSecretWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeleteAiSecretResponse, error)
 
-	// DeleteAiSecretWithResponse Delete single ai_secret
+	// DeleteAiSecretWithResponse Delete single AI secret
 	//
-	// Delete a single ai_secret.
+	// Delete a single AI secret.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /v1/ai_secret (the `DeleteAiSecret` operationId).
 	DeleteAiSecretWithResponse(ctx context.Context, body DeleteAiSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*DeleteAiSecretResponse, error)
 
-	// GetAiSecretWithResponse List ai_secrets
+	// GetAiSecretWithResponse List AI secrets
 	//
-	// List out all ai_secrets. The ai_secrets are sorted by creation date, with the most recently-created ai_secrets coming first
+	// List out all AI secrets. The AI secrets are sorted by creation date, with the most recently-created AI secrets coming first
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/ai_secret (the `GetAiSecret` operationId).
 	GetAiSecretWithResponse(ctx context.Context, params *GetAiSecretParams, reqEditors ...RequestEditorFn) (*GetAiSecretResponse, error)
 
-	// PostAiSecretWithBodyWithResponse Create ai_secret
+	// PostAiSecretWithBodyWithResponse Create AI secret
 	//
-	// Create a new ai_secret. If there is an existing ai_secret with the same name as the one specified in the request, will return the existing ai_secret unmodified
+	// Create a new AI secret. If there is an existing AI secret with the same name as the one specified in the request, will return the existing AI secret unmodified
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/ai_secret (the `PostAiSecret` operationId).
 	PostAiSecretWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAiSecretResponse, error)
 
-	// PostAiSecretWithResponse Create ai_secret
+	// PostAiSecretWithResponse Create AI secret
 	//
-	// Create a new ai_secret. If there is an existing ai_secret with the same name as the one specified in the request, will return the existing ai_secret unmodified
+	// Create a new AI secret. If there is an existing AI secret with the same name as the one specified in the request, will return the existing AI secret unmodified
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/ai_secret (the `PostAiSecret` operationId).
 	PostAiSecretWithResponse(ctx context.Context, body PostAiSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAiSecretResponse, error)
 
-	// PutAiSecretWithBodyWithResponse Create or replace ai_secret
+	// PutAiSecretWithBodyWithResponse Create or replace AI secret
 	//
-	// Create or replace ai_secret. If there is an existing ai_secret with the same name as the one specified in the request, will replace the existing ai_secret with the provided fields
+	// Create or replace AI secret. If there is an existing AI secret with the same name as the one specified in the request, will replace the existing AI secret with the provided fields
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/ai_secret (the `PutAiSecret` operationId).
 	PutAiSecretWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutAiSecretResponse, error)
 
-	// PutAiSecretWithResponse Create or replace ai_secret
+	// PutAiSecretWithResponse Create or replace AI secret
 	//
-	// Create or replace ai_secret. If there is an existing ai_secret with the same name as the one specified in the request, will replace the existing ai_secret with the provided fields
+	// Create or replace AI secret. If there is an existing AI secret with the same name as the one specified in the request, will replace the existing AI secret with the provided fields
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/ai_secret (the `PutAiSecret` operationId).
 	PutAiSecretWithResponse(ctx context.Context, body PutAiSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*PutAiSecretResponse, error)
 
-	// DeleteAiSecretIdWithResponse Delete ai_secret
+	// DeleteAiSecretIdWithResponse Delete AI secret
 	//
-	// Delete an ai_secret object by its id.
+	// Delete an AI secret object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /v1/ai_secret/{ai_secret_id} (the `DeleteAiSecretId` operationId).
 	DeleteAiSecretIdWithResponse(ctx context.Context, aiSecretId AiSecretIdParamParameter, reqEditors ...RequestEditorFn) (*DeleteAiSecretIdResponse, error)
 
-	// GetAiSecretIdWithResponse Get ai_secret
+	// GetAiSecretIdWithResponse Get AI secret
 	//
-	// Get an ai_secret object by its id.
+	// Get an AI secret object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/ai_secret/{ai_secret_id} (the `GetAiSecretId` operationId).
 	GetAiSecretIdWithResponse(ctx context.Context, aiSecretId AiSecretIdParamParameter, reqEditors ...RequestEditorFn) (*GetAiSecretIdResponse, error)
 
-	// PatchAiSecretIdWithBodyWithResponse Partially update ai_secret
+	// PatchAiSecretIdWithBodyWithResponse Partially update AI secret
 	//
-	// Partially update an ai_secret object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update an AI secret object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PATCH /v1/ai_secret/{ai_secret_id} (the `PatchAiSecretId` operationId).
 	PatchAiSecretIdWithBodyWithResponse(ctx context.Context, aiSecretId AiSecretIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchAiSecretIdResponse, error)
 
-	// PatchAiSecretIdWithResponse Partially update ai_secret
+	// PatchAiSecretIdWithResponse Partially update AI secret
 	//
-	// Partially update an ai_secret object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update an AI secret object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PATCH /v1/ai_secret/{ai_secret_id} (the `PatchAiSecretId` operationId).
 	PatchAiSecretIdWithResponse(ctx context.Context, aiSecretId AiSecretIdParamParameter, body PatchAiSecretIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchAiSecretIdResponse, error)
 
-	// GetApiKeyWithResponse List api_keys
+	// GetApiKeyWithResponse List API keys
 	//
 	// List out all API keys. They are sorted by creation date, with the most recently-created keys coming first.
 	//
@@ -2305,18 +2137,18 @@ type ClientWithResponsesInterface interface {
 	// Corresponds with GET /v1/api_key (the `GetApiKey` operationId).
 	GetApiKeyWithResponse(ctx context.Context, params *GetApiKeyParams, reqEditors ...RequestEditorFn) (*GetApiKeyResponse, error)
 
-	// DeleteApiKeyIdWithResponse Delete api_key
+	// DeleteApiKeyIdWithResponse Delete API key
 	//
-	// Delete an api_key object by its id.
+	// Delete an API key object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /v1/api_key/{api_key_id} (the `DeleteApiKeyId` operationId).
 	DeleteApiKeyIdWithResponse(ctx context.Context, apiKeyId ApiKeyIdParamParameter, reqEditors ...RequestEditorFn) (*DeleteApiKeyIdResponse, error)
 
-	// GetApiKeyIdWithResponse Get api_key
+	// GetApiKeyIdWithResponse Get API key
 	//
-	// Get an api_key object by its id.
+	// Get an API key object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
@@ -2449,169 +2281,207 @@ type ClientWithResponsesInterface interface {
 	// Corresponds with POST /v1/dataset/{dataset_id}/insert (the `PostDatasetIdInsert` operationId).
 	PostDatasetIdInsertWithResponse(ctx context.Context, datasetId DatasetIdParamParameter, body PostDatasetIdInsertJSONRequestBody, reqEditors ...RequestEditorFn) (*PostDatasetIdInsertResponse, error)
 
+	// PostDatasetIdRestoreWithBodyWithResponse Restore dataset
+	//
+	// Restore a dataset to an earlier version, such as a dataset snapshot. Rows changed since that version are reverted, and rows created since then are deleted. The restore is recorded as a new transaction, so dataset history is preserved. Fails if more than 20,000 rows changed since the requested version. Requires update permission on the dataset.
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /v1/dataset/{dataset_id}/restore (the `PostDatasetIdRestore` operationId).
+	PostDatasetIdRestoreWithBodyWithResponse(ctx context.Context, datasetId DatasetIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostDatasetIdRestoreResponse, error)
+
+	// PostDatasetIdRestoreWithResponse Restore dataset
+	//
+	// Restore a dataset to an earlier version, such as a dataset snapshot. Rows changed since that version are reverted, and rows created since then are deleted. The restore is recorded as a new transaction, so dataset history is preserved. Fails if more than 20,000 rows changed since the requested version. Requires update permission on the dataset.
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /v1/dataset/{dataset_id}/restore (the `PostDatasetIdRestore` operationId).
+	PostDatasetIdRestoreWithResponse(ctx context.Context, datasetId DatasetIdParamParameter, body PostDatasetIdRestoreJSONRequestBody, reqEditors ...RequestEditorFn) (*PostDatasetIdRestoreResponse, error)
+
+	// PostDatasetIdRestorePreviewWithBodyWithResponse Preview dataset restore
+	//
+	// Preview restoring a dataset to an earlier version, such as a dataset snapshot. Returns how many rows a restore would change, without modifying the dataset. Fails if more than 20,000 rows changed since the requested version. Requires read permission on the dataset.
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /v1/dataset/{dataset_id}/restore/preview (the `PostDatasetIdRestorePreview` operationId).
+	PostDatasetIdRestorePreviewWithBodyWithResponse(ctx context.Context, datasetId DatasetIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostDatasetIdRestorePreviewResponse, error)
+
+	// PostDatasetIdRestorePreviewWithResponse Preview dataset restore
+	//
+	// Preview restoring a dataset to an earlier version, such as a dataset snapshot. Returns how many rows a restore would change, without modifying the dataset. Fails if more than 20,000 rows changed since the requested version. Requires read permission on the dataset.
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /v1/dataset/{dataset_id}/restore/preview (the `PostDatasetIdRestorePreview` operationId).
+	PostDatasetIdRestorePreviewWithResponse(ctx context.Context, datasetId DatasetIdParamParameter, body PostDatasetIdRestorePreviewJSONRequestBody, reqEditors ...RequestEditorFn) (*PostDatasetIdRestorePreviewResponse, error)
+
 	// GetDatasetIdSummarizeWithResponse Summarize dataset
+	//
+	// Return the dataset and project names and URLs. Set `summarize_data=true` to include the total number of records in the dataset; otherwise, only metadata is returned.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/dataset/{dataset_id}/summarize (the `GetDatasetIdSummarize` operationId).
 	GetDatasetIdSummarizeWithResponse(ctx context.Context, datasetId DatasetIdParamParameter, params *GetDatasetIdSummarizeParams, reqEditors ...RequestEditorFn) (*GetDatasetIdSummarizeResponse, error)
 
-	// GetDatasetSnapshotWithResponse List dataset_snapshots
+	// GetDatasetSnapshotWithResponse List dataset snapshots
 	//
-	// List out all dataset_snapshots. The dataset_snapshots are sorted by creation date, with the most recently-created dataset_snapshots coming first
+	// List out all dataset snapshots. The dataset snapshots are sorted by creation date, with the most recently-created dataset snapshots coming first
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/dataset_snapshot (the `GetDatasetSnapshot` operationId).
 	GetDatasetSnapshotWithResponse(ctx context.Context, params *GetDatasetSnapshotParams, reqEditors ...RequestEditorFn) (*GetDatasetSnapshotResponse, error)
 
-	// PostDatasetSnapshotWithBodyWithResponse Create dataset_snapshot
+	// PostDatasetSnapshotWithBodyWithResponse Create dataset snapshot
 	//
-	// Create a new dataset_snapshot. If there is an existing dataset_snapshot with the same name as the one specified in the request, will return the existing dataset_snapshot unmodified
+	// Create a new dataset snapshot. If there is an existing dataset snapshot with the same name as the one specified in the request, will return the existing dataset snapshot unmodified
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/dataset_snapshot (the `PostDatasetSnapshot` operationId).
 	PostDatasetSnapshotWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostDatasetSnapshotResponse, error)
 
-	// PostDatasetSnapshotWithResponse Create dataset_snapshot
+	// PostDatasetSnapshotWithResponse Create dataset snapshot
 	//
-	// Create a new dataset_snapshot. If there is an existing dataset_snapshot with the same name as the one specified in the request, will return the existing dataset_snapshot unmodified
+	// Create a new dataset snapshot. If there is an existing dataset snapshot with the same name as the one specified in the request, will return the existing dataset snapshot unmodified
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/dataset_snapshot (the `PostDatasetSnapshot` operationId).
 	PostDatasetSnapshotWithResponse(ctx context.Context, body PostDatasetSnapshotJSONRequestBody, reqEditors ...RequestEditorFn) (*PostDatasetSnapshotResponse, error)
 
-	// PutDatasetSnapshotWithBodyWithResponse Create or replace dataset_snapshot
+	// PutDatasetSnapshotWithBodyWithResponse Create or replace dataset snapshot
 	//
-	// Create or replace dataset_snapshot. If there is an existing dataset_snapshot with the same name as the one specified in the request, will replace the existing dataset_snapshot with the provided fields
+	// Create or replace dataset snapshot. If there is an existing dataset snapshot with the same name as the one specified in the request, will replace the existing dataset snapshot with the provided fields
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/dataset_snapshot (the `PutDatasetSnapshot` operationId).
 	PutDatasetSnapshotWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutDatasetSnapshotResponse, error)
 
-	// PutDatasetSnapshotWithResponse Create or replace dataset_snapshot
+	// PutDatasetSnapshotWithResponse Create or replace dataset snapshot
 	//
-	// Create or replace dataset_snapshot. If there is an existing dataset_snapshot with the same name as the one specified in the request, will replace the existing dataset_snapshot with the provided fields
+	// Create or replace dataset snapshot. If there is an existing dataset snapshot with the same name as the one specified in the request, will replace the existing dataset snapshot with the provided fields
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/dataset_snapshot (the `PutDatasetSnapshot` operationId).
 	PutDatasetSnapshotWithResponse(ctx context.Context, body PutDatasetSnapshotJSONRequestBody, reqEditors ...RequestEditorFn) (*PutDatasetSnapshotResponse, error)
 
-	// DeleteDatasetSnapshotIdWithResponse Delete dataset_snapshot
+	// DeleteDatasetSnapshotIdWithResponse Delete dataset snapshot
 	//
-	// Delete a dataset_snapshot object by its id.
+	// Delete a dataset snapshot object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /v1/dataset_snapshot/{dataset_snapshot_id} (the `DeleteDatasetSnapshotId` operationId).
 	DeleteDatasetSnapshotIdWithResponse(ctx context.Context, datasetSnapshotId DatasetSnapshotIdParamParameter, reqEditors ...RequestEditorFn) (*DeleteDatasetSnapshotIdResponse, error)
 
-	// GetDatasetSnapshotIdWithResponse Get dataset_snapshot
+	// GetDatasetSnapshotIdWithResponse Get dataset snapshot
 	//
-	// Get a dataset_snapshot object by its id.
+	// Get a dataset snapshot object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/dataset_snapshot/{dataset_snapshot_id} (the `GetDatasetSnapshotId` operationId).
 	GetDatasetSnapshotIdWithResponse(ctx context.Context, datasetSnapshotId DatasetSnapshotIdParamParameter, reqEditors ...RequestEditorFn) (*GetDatasetSnapshotIdResponse, error)
 
-	// PatchDatasetSnapshotIdWithBodyWithResponse Partially update dataset_snapshot
+	// PatchDatasetSnapshotIdWithBodyWithResponse Partially update dataset snapshot
 	//
-	// Partially update a dataset_snapshot object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a dataset snapshot object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PATCH /v1/dataset_snapshot/{dataset_snapshot_id} (the `PatchDatasetSnapshotId` operationId).
 	PatchDatasetSnapshotIdWithBodyWithResponse(ctx context.Context, datasetSnapshotId DatasetSnapshotIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchDatasetSnapshotIdResponse, error)
 
-	// PatchDatasetSnapshotIdWithResponse Partially update dataset_snapshot
+	// PatchDatasetSnapshotIdWithResponse Partially update dataset snapshot
 	//
-	// Partially update a dataset_snapshot object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a dataset snapshot object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PATCH /v1/dataset_snapshot/{dataset_snapshot_id} (the `PatchDatasetSnapshotId` operationId).
 	PatchDatasetSnapshotIdWithResponse(ctx context.Context, datasetSnapshotId DatasetSnapshotIdParamParameter, body PatchDatasetSnapshotIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchDatasetSnapshotIdResponse, error)
 
-	// GetEnvVarWithResponse List env_vars
+	// GetEnvVarWithResponse List env vars
 	//
-	// List out all env_vars. The env_vars are sorted by creation date, with the most recently-created env_vars coming first
+	// List out all env vars. The env vars are sorted by creation date, with the most recently-created env vars coming first
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/env_var (the `GetEnvVar` operationId).
 	GetEnvVarWithResponse(ctx context.Context, params *GetEnvVarParams, reqEditors ...RequestEditorFn) (*GetEnvVarResponse, error)
 
-	// PostEnvVarWithBodyWithResponse Create env_var
+	// PostEnvVarWithBodyWithResponse Create env var
 	//
-	// Create a new env_var. If there is an existing env_var with the same name as the one specified in the request, will return the existing env_var unmodified
+	// Create a new env var. If there is an existing env var with the same name as the one specified in the request, will return the existing env var unmodified
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/env_var (the `PostEnvVar` operationId).
 	PostEnvVarWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostEnvVarResponse, error)
 
-	// PostEnvVarWithResponse Create env_var
+	// PostEnvVarWithResponse Create env var
 	//
-	// Create a new env_var. If there is an existing env_var with the same name as the one specified in the request, will return the existing env_var unmodified
+	// Create a new env var. If there is an existing env var with the same name as the one specified in the request, will return the existing env var unmodified
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/env_var (the `PostEnvVar` operationId).
 	PostEnvVarWithResponse(ctx context.Context, body PostEnvVarJSONRequestBody, reqEditors ...RequestEditorFn) (*PostEnvVarResponse, error)
 
-	// PutEnvVarWithBodyWithResponse Create or replace env_var
+	// PutEnvVarWithBodyWithResponse Create or replace env var
 	//
-	// Create or replace env_var. If there is an existing env_var with the same name as the one specified in the request, will replace the existing env_var with the provided fields
+	// Create or replace env var. If there is an existing env var with the same name as the one specified in the request, will replace the existing env var with the provided fields
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/env_var (the `PutEnvVar` operationId).
 	PutEnvVarWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutEnvVarResponse, error)
 
-	// PutEnvVarWithResponse Create or replace env_var
+	// PutEnvVarWithResponse Create or replace env var
 	//
-	// Create or replace env_var. If there is an existing env_var with the same name as the one specified in the request, will replace the existing env_var with the provided fields
+	// Create or replace env var. If there is an existing env var with the same name as the one specified in the request, will replace the existing env var with the provided fields
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/env_var (the `PutEnvVar` operationId).
 	PutEnvVarWithResponse(ctx context.Context, body PutEnvVarJSONRequestBody, reqEditors ...RequestEditorFn) (*PutEnvVarResponse, error)
 
-	// DeleteEnvVarIdWithResponse Delete env_var
+	// DeleteEnvVarIdWithResponse Delete env var
 	//
-	// Delete an env_var object by its id.
+	// Delete an env var object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /v1/env_var/{env_var_id} (the `DeleteEnvVarId` operationId).
 	DeleteEnvVarIdWithResponse(ctx context.Context, envVarId EnvVarIdParamParameter, reqEditors ...RequestEditorFn) (*DeleteEnvVarIdResponse, error)
 
-	// GetEnvVarIdWithResponse Get env_var
+	// GetEnvVarIdWithResponse Get env var
 	//
-	// Get an env_var object by its id.
+	// Get an env var object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/env_var/{env_var_id} (the `GetEnvVarId` operationId).
 	GetEnvVarIdWithResponse(ctx context.Context, envVarId EnvVarIdParamParameter, reqEditors ...RequestEditorFn) (*GetEnvVarIdResponse, error)
 
-	// PatchEnvVarIdWithBodyWithResponse Partially update env_var
+	// PatchEnvVarIdWithBodyWithResponse Partially update env var
 	//
-	// Partially update an env_var object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update an env var object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PATCH /v1/env_var/{env_var_id} (the `PatchEnvVarId` operationId).
 	PatchEnvVarIdWithBodyWithResponse(ctx context.Context, envVarId EnvVarIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchEnvVarIdResponse, error)
 
-	// PatchEnvVarIdWithResponse Partially update env_var
+	// PatchEnvVarIdWithResponse Partially update env var
 	//
-	// Partially update an env_var object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update an env var object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
@@ -2746,6 +2616,8 @@ type ClientWithResponsesInterface interface {
 
 	// GetExperimentIdSummarizeWithResponse Summarize experiment
 	//
+	// Return the experiment and project names and URLs. Set `summarize_scores=true` to include aggregate scores and metrics, with differences, improvements, and regressions relative to a comparison experiment. Use `comparison_experiment_id` to select the comparison; otherwise, the experiment's base experiment or the most recent experiment in the project is used.
+	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/experiment/{experiment_id}/summarize (the `GetExperimentIdSummarize` operationId).
@@ -2834,7 +2706,7 @@ type ClientWithResponsesInterface interface {
 
 	// PostFunctionIdInvokeWithBodyWithResponse Invoke function
 	//
-	// Invoke a function.
+	// Run the specified function with the provided input and return its result. Use `version` to select a specific function version, `parent` to attach the call to a trace, and `stream` to receive results in the Braintrust SSE format.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
@@ -2843,7 +2715,7 @@ type ClientWithResponsesInterface interface {
 
 	// PostFunctionIdInvokeWithResponse Invoke function
 	//
-	// Invoke a function.
+	// Run the specified function with the provided input and return its result. Use `version` to select a specific function version, `parent` to attach the call to a trace, and `stream` to receive results in the Braintrust SSE format.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
@@ -2931,167 +2803,86 @@ type ClientWithResponsesInterface interface {
 	// Corresponds with PATCH /v1/group/{group_id} (the `PatchGroupId` operationId).
 	PatchGroupIdWithResponse(ctx context.Context, groupId GroupIdParamParameter, body PatchGroupIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchGroupIdResponse, error)
 
-	// GetMcpServerWithResponse List mcp_servers
+	// GetMcpServerWithResponse List MCP servers
 	//
-	// List out all mcp_servers. The mcp_servers are sorted by creation date, with the most recently-created mcp_servers coming first
+	// List out all MCP servers. The MCP servers are sorted by creation date, with the most recently-created MCP servers coming first
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/mcp_server (the `GetMcpServer` operationId).
 	GetMcpServerWithResponse(ctx context.Context, params *GetMcpServerParams, reqEditors ...RequestEditorFn) (*GetMcpServerResponse, error)
 
-	// PostMcpServerWithBodyWithResponse Create mcp_server
+	// PostMcpServerWithBodyWithResponse Create MCP server
 	//
-	// Create a new mcp_server. If there is an existing mcp_server with the same name as the one specified in the request, will return the existing mcp_server unmodified
+	// Create a new MCP server. If there is an existing MCP server with the same name as the one specified in the request, will return the existing MCP server unmodified
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/mcp_server (the `PostMcpServer` operationId).
 	PostMcpServerWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostMcpServerResponse, error)
 
-	// PostMcpServerWithResponse Create mcp_server
+	// PostMcpServerWithResponse Create MCP server
 	//
-	// Create a new mcp_server. If there is an existing mcp_server with the same name as the one specified in the request, will return the existing mcp_server unmodified
+	// Create a new MCP server. If there is an existing MCP server with the same name as the one specified in the request, will return the existing MCP server unmodified
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/mcp_server (the `PostMcpServer` operationId).
 	PostMcpServerWithResponse(ctx context.Context, body PostMcpServerJSONRequestBody, reqEditors ...RequestEditorFn) (*PostMcpServerResponse, error)
 
-	// PutMcpServerWithBodyWithResponse Create or replace mcp_server
+	// PutMcpServerWithBodyWithResponse Create or replace MCP server
 	//
-	// Create or replace mcp_server. If there is an existing mcp_server with the same name as the one specified in the request, will replace the existing mcp_server with the provided fields
+	// Create or replace MCP server. If there is an existing MCP server with the same name as the one specified in the request, will replace the existing MCP server with the provided fields
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/mcp_server (the `PutMcpServer` operationId).
 	PutMcpServerWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutMcpServerResponse, error)
 
-	// PutMcpServerWithResponse Create or replace mcp_server
+	// PutMcpServerWithResponse Create or replace MCP server
 	//
-	// Create or replace mcp_server. If there is an existing mcp_server with the same name as the one specified in the request, will replace the existing mcp_server with the provided fields
+	// Create or replace MCP server. If there is an existing MCP server with the same name as the one specified in the request, will replace the existing MCP server with the provided fields
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/mcp_server (the `PutMcpServer` operationId).
 	PutMcpServerWithResponse(ctx context.Context, body PutMcpServerJSONRequestBody, reqEditors ...RequestEditorFn) (*PutMcpServerResponse, error)
 
-	// DeleteMcpServerIdWithResponse Delete mcp_server
+	// DeleteMcpServerIdWithResponse Delete MCP server
 	//
-	// Delete a mcp_server object by its id.
+	// Delete an MCP server object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /v1/mcp_server/{mcp_server_id} (the `DeleteMcpServerId` operationId).
 	DeleteMcpServerIdWithResponse(ctx context.Context, mcpServerId McpServerIdParamParameter, reqEditors ...RequestEditorFn) (*DeleteMcpServerIdResponse, error)
 
-	// GetMcpServerIdWithResponse Get mcp_server
+	// GetMcpServerIdWithResponse Get MCP server
 	//
-	// Get a mcp_server object by its id.
+	// Get an MCP server object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/mcp_server/{mcp_server_id} (the `GetMcpServerId` operationId).
 	GetMcpServerIdWithResponse(ctx context.Context, mcpServerId McpServerIdParamParameter, reqEditors ...RequestEditorFn) (*GetMcpServerIdResponse, error)
 
-	// PatchMcpServerIdWithBodyWithResponse Partially update mcp_server
+	// PatchMcpServerIdWithBodyWithResponse Partially update MCP server
 	//
-	// Partially update a mcp_server object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update an MCP server object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PATCH /v1/mcp_server/{mcp_server_id} (the `PatchMcpServerId` operationId).
 	PatchMcpServerIdWithBodyWithResponse(ctx context.Context, mcpServerId McpServerIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchMcpServerIdResponse, error)
 
-	// PatchMcpServerIdWithResponse Partially update mcp_server
+	// PatchMcpServerIdWithResponse Partially update MCP server
 	//
-	// Partially update a mcp_server object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update an MCP server object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PATCH /v1/mcp_server/{mcp_server_id} (the `PatchMcpServerId` operationId).
 	PatchMcpServerIdWithResponse(ctx context.Context, mcpServerId McpServerIdParamParameter, body PatchMcpServerIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchMcpServerIdResponse, error)
-
-	// GetOrgAutomationWithResponse List org_automations
-	//
-	// List out all org_automations. The org_automations are sorted by creation date, with the most recently-created org_automations coming first
-	//
-	// Returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with GET /v1/org_automation (the `GetOrgAutomation` operationId).
-	GetOrgAutomationWithResponse(ctx context.Context, params *GetOrgAutomationParams, reqEditors ...RequestEditorFn) (*GetOrgAutomationResponse, error)
-
-	// PostOrgAutomationWithBodyWithResponse Create org_automation
-	//
-	// Create a new org_automation. If there is an existing org_automation with the same name as the one specified in the request, will return the existing org_automation unmodified
-	//
-	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with POST /v1/org_automation (the `PostOrgAutomation` operationId).
-	PostOrgAutomationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostOrgAutomationResponse, error)
-
-	// PostOrgAutomationWithResponse Create org_automation
-	//
-	// Create a new org_automation. If there is an existing org_automation with the same name as the one specified in the request, will return the existing org_automation unmodified
-	//
-	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with POST /v1/org_automation (the `PostOrgAutomation` operationId).
-	PostOrgAutomationWithResponse(ctx context.Context, body PostOrgAutomationJSONRequestBody, reqEditors ...RequestEditorFn) (*PostOrgAutomationResponse, error)
-
-	// PutOrgAutomationWithBodyWithResponse Create or replace org_automation
-	//
-	// Create or replace org_automation. If there is an existing org_automation with the same name as the one specified in the request, will replace the existing org_automation with the provided fields
-	//
-	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with PUT /v1/org_automation (the `PutOrgAutomation` operationId).
-	PutOrgAutomationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutOrgAutomationResponse, error)
-
-	// PutOrgAutomationWithResponse Create or replace org_automation
-	//
-	// Create or replace org_automation. If there is an existing org_automation with the same name as the one specified in the request, will replace the existing org_automation with the provided fields
-	//
-	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with PUT /v1/org_automation (the `PutOrgAutomation` operationId).
-	PutOrgAutomationWithResponse(ctx context.Context, body PutOrgAutomationJSONRequestBody, reqEditors ...RequestEditorFn) (*PutOrgAutomationResponse, error)
-
-	// DeleteOrgAutomationIdWithResponse Delete org_automation
-	//
-	// Delete a org_automation object by its id.
-	//
-	// Returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with DELETE /v1/org_automation/{org_automation_id} (the `DeleteOrgAutomationId` operationId).
-	DeleteOrgAutomationIdWithResponse(ctx context.Context, orgAutomationId OrgAutomationIdParamParameter, reqEditors ...RequestEditorFn) (*DeleteOrgAutomationIdResponse, error)
-
-	// GetOrgAutomationIdWithResponse Get org_automation
-	//
-	// Get a org_automation object by its id.
-	//
-	// Returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with GET /v1/org_automation/{org_automation_id} (the `GetOrgAutomationId` operationId).
-	GetOrgAutomationIdWithResponse(ctx context.Context, orgAutomationId OrgAutomationIdParamParameter, reqEditors ...RequestEditorFn) (*GetOrgAutomationIdResponse, error)
-
-	// PatchOrgAutomationIdWithBodyWithResponse Partially update org_automation
-	//
-	// Partially update a org_automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
-	//
-	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with PATCH /v1/org_automation/{org_automation_id} (the `PatchOrgAutomationId` operationId).
-	PatchOrgAutomationIdWithBodyWithResponse(ctx context.Context, orgAutomationId OrgAutomationIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchOrgAutomationIdResponse, error)
-
-	// PatchOrgAutomationIdWithResponse Partially update org_automation
-	//
-	// Partially update a org_automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
-	//
-	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with PATCH /v1/org_automation/{org_automation_id} (the `PatchOrgAutomationId` operationId).
-	PatchOrgAutomationIdWithResponse(ctx context.Context, orgAutomationId OrgAutomationIdParamParameter, body PatchOrgAutomationIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchOrgAutomationIdResponse, error)
 
 	// GetOrganizationWithResponse List organizations
 	//
@@ -3101,6 +2892,15 @@ type ClientWithResponsesInterface interface {
 	//
 	// Corresponds with GET /v1/organization (the `GetOrganization` operationId).
 	GetOrganizationWithResponse(ctx context.Context, params *GetOrganizationParams, reqEditors ...RequestEditorFn) (*GetOrganizationResponse, error)
+
+	// GetOrganizationApiKeysWithResponse List organization API keys
+	//
+	// List all API keys associated with users in an organization, sorted by creation date with the newest keys first. An organization-scoped API key determines the organization; otherwise, provide `org_id`. If `org_id` does not match the organization-scoped key's organization, or the caller is not an owner of the organization, no keys are returned. Responses include key metadata only; key secrets are never returned. To list service tokens, use `GET /v1/service_token`.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /v1/organization/api_keys (the `GetOrganizationApiKeys` operationId).
+	GetOrganizationApiKeysWithResponse(ctx context.Context, params *GetOrganizationApiKeysParams, reqEditors ...RequestEditorFn) (*GetOrganizationApiKeysResponse, error)
 
 	// PatchOrganizationMembersWithBodyWithResponse Modify organization membership
 	//
@@ -3210,324 +3010,324 @@ type ClientWithResponsesInterface interface {
 	// Corresponds with PATCH /v1/project/{project_id} (the `PatchProjectId` operationId).
 	PatchProjectIdWithResponse(ctx context.Context, projectId ProjectIdParamParameter, body PatchProjectIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchProjectIdResponse, error)
 
-	// GetProjectAutomationWithResponse List project_automations
+	// GetProjectAutomationWithResponse List project automations
 	//
-	// List out all project_automations. The project_automations are sorted by creation date, with the most recently-created project_automations coming first
+	// List out all project automations. The project automations are sorted by creation date, with the most recently-created project automations coming first
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/project_automation (the `GetProjectAutomation` operationId).
 	GetProjectAutomationWithResponse(ctx context.Context, params *GetProjectAutomationParams, reqEditors ...RequestEditorFn) (*GetProjectAutomationResponse, error)
 
-	// PostProjectAutomationWithBodyWithResponse Create project_automation
+	// PostProjectAutomationWithBodyWithResponse Create project automation
 	//
-	// Create a new project_automation. If there is an existing project_automation with the same name as the one specified in the request, will return the existing project_automation unmodified
+	// Create a new project automation. If there is an existing project automation with the same name as the one specified in the request, will return the existing project automation unmodified
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/project_automation (the `PostProjectAutomation` operationId).
 	PostProjectAutomationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostProjectAutomationResponse, error)
 
-	// PostProjectAutomationWithResponse Create project_automation
+	// PostProjectAutomationWithResponse Create project automation
 	//
-	// Create a new project_automation. If there is an existing project_automation with the same name as the one specified in the request, will return the existing project_automation unmodified
+	// Create a new project automation. If there is an existing project automation with the same name as the one specified in the request, will return the existing project automation unmodified
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/project_automation (the `PostProjectAutomation` operationId).
 	PostProjectAutomationWithResponse(ctx context.Context, body PostProjectAutomationJSONRequestBody, reqEditors ...RequestEditorFn) (*PostProjectAutomationResponse, error)
 
-	// PutProjectAutomationWithBodyWithResponse Create or replace project_automation
+	// PutProjectAutomationWithBodyWithResponse Create or replace project automation
 	//
-	// Create or replace project_automation. If there is an existing project_automation with the same name as the one specified in the request, will replace the existing project_automation with the provided fields
+	// Create or replace project automation. If there is an existing project automation with the same name as the one specified in the request, will replace the existing project automation with the provided fields
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/project_automation (the `PutProjectAutomation` operationId).
 	PutProjectAutomationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutProjectAutomationResponse, error)
 
-	// PutProjectAutomationWithResponse Create or replace project_automation
+	// PutProjectAutomationWithResponse Create or replace project automation
 	//
-	// Create or replace project_automation. If there is an existing project_automation with the same name as the one specified in the request, will replace the existing project_automation with the provided fields
+	// Create or replace project automation. If there is an existing project automation with the same name as the one specified in the request, will replace the existing project automation with the provided fields
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/project_automation (the `PutProjectAutomation` operationId).
 	PutProjectAutomationWithResponse(ctx context.Context, body PutProjectAutomationJSONRequestBody, reqEditors ...RequestEditorFn) (*PutProjectAutomationResponse, error)
 
-	// DeleteProjectAutomationIdWithResponse Delete project_automation
+	// DeleteProjectAutomationIdWithResponse Delete project automation
 	//
-	// Delete a project_automation object by its id.
+	// Delete a project automation object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /v1/project_automation/{project_automation_id} (the `DeleteProjectAutomationId` operationId).
 	DeleteProjectAutomationIdWithResponse(ctx context.Context, projectAutomationId ProjectAutomationIdParamParameter, reqEditors ...RequestEditorFn) (*DeleteProjectAutomationIdResponse, error)
 
-	// GetProjectAutomationIdWithResponse Get project_automation
+	// GetProjectAutomationIdWithResponse Get project automation
 	//
-	// Get a project_automation object by its id.
+	// Get a project automation object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/project_automation/{project_automation_id} (the `GetProjectAutomationId` operationId).
 	GetProjectAutomationIdWithResponse(ctx context.Context, projectAutomationId ProjectAutomationIdParamParameter, reqEditors ...RequestEditorFn) (*GetProjectAutomationIdResponse, error)
 
-	// PatchProjectAutomationIdWithBodyWithResponse Partially update project_automation
+	// PatchProjectAutomationIdWithBodyWithResponse Partially update project automation
 	//
-	// Partially update a project_automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a project automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PATCH /v1/project_automation/{project_automation_id} (the `PatchProjectAutomationId` operationId).
 	PatchProjectAutomationIdWithBodyWithResponse(ctx context.Context, projectAutomationId ProjectAutomationIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchProjectAutomationIdResponse, error)
 
-	// PatchProjectAutomationIdWithResponse Partially update project_automation
+	// PatchProjectAutomationIdWithResponse Partially update project automation
 	//
-	// Partially update a project_automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a project automation object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PATCH /v1/project_automation/{project_automation_id} (the `PatchProjectAutomationId` operationId).
 	PatchProjectAutomationIdWithResponse(ctx context.Context, projectAutomationId ProjectAutomationIdParamParameter, body PatchProjectAutomationIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchProjectAutomationIdResponse, error)
 
-	// GetProjectGroupWithResponse List project_groups
+	// GetProjectGroupWithResponse List project groups
 	//
-	// List out all project_groups. The project_groups are sorted by creation date, with the most recently-created project_groups coming first
+	// List out all project groups. The project groups are sorted by creation date, with the most recently-created project groups coming first
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/project_group (the `GetProjectGroup` operationId).
 	GetProjectGroupWithResponse(ctx context.Context, params *GetProjectGroupParams, reqEditors ...RequestEditorFn) (*GetProjectGroupResponse, error)
 
-	// PostProjectGroupWithBodyWithResponse Create project_group
+	// PostProjectGroupWithBodyWithResponse Create project group
 	//
-	// Create a new project_group. If there is an existing project_group with the same name as the one specified in the request, will return the existing project_group unmodified
+	// Create a new project group. If there is an existing project group with the same name as the one specified in the request, will return the existing project group unmodified
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/project_group (the `PostProjectGroup` operationId).
 	PostProjectGroupWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostProjectGroupResponse, error)
 
-	// PostProjectGroupWithResponse Create project_group
+	// PostProjectGroupWithResponse Create project group
 	//
-	// Create a new project_group. If there is an existing project_group with the same name as the one specified in the request, will return the existing project_group unmodified
+	// Create a new project group. If there is an existing project group with the same name as the one specified in the request, will return the existing project group unmodified
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/project_group (the `PostProjectGroup` operationId).
 	PostProjectGroupWithResponse(ctx context.Context, body PostProjectGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*PostProjectGroupResponse, error)
 
-	// PutProjectGroupWithBodyWithResponse Create or replace project_group
+	// PutProjectGroupWithBodyWithResponse Create or replace project group
 	//
-	// Create or replace project_group. If there is an existing project_group with the same name as the one specified in the request, will replace the existing project_group with the provided fields
+	// Create or replace project group. If there is an existing project group with the same name as the one specified in the request, will replace the existing project group with the provided fields
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/project_group (the `PutProjectGroup` operationId).
 	PutProjectGroupWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutProjectGroupResponse, error)
 
-	// PutProjectGroupWithResponse Create or replace project_group
+	// PutProjectGroupWithResponse Create or replace project group
 	//
-	// Create or replace project_group. If there is an existing project_group with the same name as the one specified in the request, will replace the existing project_group with the provided fields
+	// Create or replace project group. If there is an existing project group with the same name as the one specified in the request, will replace the existing project group with the provided fields
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/project_group (the `PutProjectGroup` operationId).
 	PutProjectGroupWithResponse(ctx context.Context, body PutProjectGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*PutProjectGroupResponse, error)
 
-	// DeleteProjectGroupIdWithResponse Delete project_group
+	// DeleteProjectGroupIdWithResponse Delete project group
 	//
-	// Delete a project_group object by its id.
+	// Delete a project group object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /v1/project_group/{project_group_id} (the `DeleteProjectGroupId` operationId).
 	DeleteProjectGroupIdWithResponse(ctx context.Context, projectGroupId ProjectGroupIdParamParameter, reqEditors ...RequestEditorFn) (*DeleteProjectGroupIdResponse, error)
 
-	// GetProjectGroupIdWithResponse Get project_group
+	// GetProjectGroupIdWithResponse Get project group
 	//
-	// Get a project_group object by its id.
+	// Get a project group object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/project_group/{project_group_id} (the `GetProjectGroupId` operationId).
 	GetProjectGroupIdWithResponse(ctx context.Context, projectGroupId ProjectGroupIdParamParameter, reqEditors ...RequestEditorFn) (*GetProjectGroupIdResponse, error)
 
-	// PatchProjectGroupIdWithBodyWithResponse Partially update project_group
+	// PatchProjectGroupIdWithBodyWithResponse Partially update project group
 	//
-	// Partially update a project_group object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a project group object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PATCH /v1/project_group/{project_group_id} (the `PatchProjectGroupId` operationId).
 	PatchProjectGroupIdWithBodyWithResponse(ctx context.Context, projectGroupId ProjectGroupIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchProjectGroupIdResponse, error)
 
-	// PatchProjectGroupIdWithResponse Partially update project_group
+	// PatchProjectGroupIdWithResponse Partially update project group
 	//
-	// Partially update a project_group object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a project group object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PATCH /v1/project_group/{project_group_id} (the `PatchProjectGroupId` operationId).
 	PatchProjectGroupIdWithResponse(ctx context.Context, projectGroupId ProjectGroupIdParamParameter, body PatchProjectGroupIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchProjectGroupIdResponse, error)
 
-	// GetProjectScoreWithResponse List project_scores
+	// GetProjectScoreWithResponse List project scores
 	//
-	// List out all project_scores. The project_scores are sorted by creation date, with the most recently-created project_scores coming first
+	// List out all project scores. The project scores are sorted by creation date, with the most recently-created project scores coming first
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/project_score (the `GetProjectScore` operationId).
 	GetProjectScoreWithResponse(ctx context.Context, params *GetProjectScoreParams, reqEditors ...RequestEditorFn) (*GetProjectScoreResponse, error)
 
-	// PostProjectScoreWithBodyWithResponse Create project_score
+	// PostProjectScoreWithBodyWithResponse Create project score
 	//
-	// Create a new project_score. If there is an existing project_score in the project with the same name as the one specified in the request, will return the existing project_score unmodified
+	// Create a new project score. If there is an existing project score in the project with the same name as the one specified in the request, will return the existing project score unmodified
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/project_score (the `PostProjectScore` operationId).
 	PostProjectScoreWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostProjectScoreResponse, error)
 
-	// PostProjectScoreWithResponse Create project_score
+	// PostProjectScoreWithResponse Create project score
 	//
-	// Create a new project_score. If there is an existing project_score in the project with the same name as the one specified in the request, will return the existing project_score unmodified
+	// Create a new project score. If there is an existing project score in the project with the same name as the one specified in the request, will return the existing project score unmodified
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/project_score (the `PostProjectScore` operationId).
 	PostProjectScoreWithResponse(ctx context.Context, body PostProjectScoreJSONRequestBody, reqEditors ...RequestEditorFn) (*PostProjectScoreResponse, error)
 
-	// PutProjectScoreWithBodyWithResponse Create or replace project_score
+	// PutProjectScoreWithBodyWithResponse Create or replace project score
 	//
-	// Create or replace project_score. If there is an existing project_score in the project with the same name as the one specified in the request, will replace the existing project_score with the provided fields
+	// Create or replace project score. If there is an existing project score in the project with the same name as the one specified in the request, will replace the existing project score with the provided fields
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/project_score (the `PutProjectScore` operationId).
 	PutProjectScoreWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutProjectScoreResponse, error)
 
-	// PutProjectScoreWithResponse Create or replace project_score
+	// PutProjectScoreWithResponse Create or replace project score
 	//
-	// Create or replace project_score. If there is an existing project_score in the project with the same name as the one specified in the request, will replace the existing project_score with the provided fields
+	// Create or replace project score. If there is an existing project score in the project with the same name as the one specified in the request, will replace the existing project score with the provided fields
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/project_score (the `PutProjectScore` operationId).
 	PutProjectScoreWithResponse(ctx context.Context, body PutProjectScoreJSONRequestBody, reqEditors ...RequestEditorFn) (*PutProjectScoreResponse, error)
 
-	// DeleteProjectScoreIdWithResponse Delete project_score
+	// DeleteProjectScoreIdWithResponse Delete project score
 	//
-	// Delete a project_score object by its id.
+	// Delete a project score object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /v1/project_score/{project_score_id} (the `DeleteProjectScoreId` operationId).
 	DeleteProjectScoreIdWithResponse(ctx context.Context, projectScoreId ProjectScoreIdParamParameter, reqEditors ...RequestEditorFn) (*DeleteProjectScoreIdResponse, error)
 
-	// GetProjectScoreIdWithResponse Get project_score
+	// GetProjectScoreIdWithResponse Get project score
 	//
-	// Get a project_score object by its id.
+	// Get a project score object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/project_score/{project_score_id} (the `GetProjectScoreId` operationId).
 	GetProjectScoreIdWithResponse(ctx context.Context, projectScoreId ProjectScoreIdParamParameter, reqEditors ...RequestEditorFn) (*GetProjectScoreIdResponse, error)
 
-	// PatchProjectScoreIdWithBodyWithResponse Partially update project_score
+	// PatchProjectScoreIdWithBodyWithResponse Partially update project score
 	//
-	// Partially update a project_score object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a project score object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PATCH /v1/project_score/{project_score_id} (the `PatchProjectScoreId` operationId).
 	PatchProjectScoreIdWithBodyWithResponse(ctx context.Context, projectScoreId ProjectScoreIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchProjectScoreIdResponse, error)
 
-	// PatchProjectScoreIdWithResponse Partially update project_score
+	// PatchProjectScoreIdWithResponse Partially update project score
 	//
-	// Partially update a project_score object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a project score object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PATCH /v1/project_score/{project_score_id} (the `PatchProjectScoreId` operationId).
 	PatchProjectScoreIdWithResponse(ctx context.Context, projectScoreId ProjectScoreIdParamParameter, body PatchProjectScoreIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchProjectScoreIdResponse, error)
 
-	// GetProjectTagWithResponse List project_tags
+	// GetProjectTagWithResponse List project tags
 	//
-	// List out all project_tags. The project_tags are sorted by creation date, with the most recently-created project_tags coming first
+	// List out all project tags. The project tags are sorted by creation date, with the most recently-created project tags coming first
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/project_tag (the `GetProjectTag` operationId).
 	GetProjectTagWithResponse(ctx context.Context, params *GetProjectTagParams, reqEditors ...RequestEditorFn) (*GetProjectTagResponse, error)
 
-	// PostProjectTagWithBodyWithResponse Create project_tag
+	// PostProjectTagWithBodyWithResponse Create project tag
 	//
-	// Create a new project_tag. If there is an existing project_tag in the project with the same name as the one specified in the request, will return the existing project_tag unmodified
+	// Create a new project tag. If there is an existing project tag in the project with the same name as the one specified in the request, will return the existing project tag unmodified
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/project_tag (the `PostProjectTag` operationId).
 	PostProjectTagWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostProjectTagResponse, error)
 
-	// PostProjectTagWithResponse Create project_tag
+	// PostProjectTagWithResponse Create project tag
 	//
-	// Create a new project_tag. If there is an existing project_tag in the project with the same name as the one specified in the request, will return the existing project_tag unmodified
+	// Create a new project tag. If there is an existing project tag in the project with the same name as the one specified in the request, will return the existing project tag unmodified
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/project_tag (the `PostProjectTag` operationId).
 	PostProjectTagWithResponse(ctx context.Context, body PostProjectTagJSONRequestBody, reqEditors ...RequestEditorFn) (*PostProjectTagResponse, error)
 
-	// PutProjectTagWithBodyWithResponse Create or replace project_tag
+	// PutProjectTagWithBodyWithResponse Create or replace project tag
 	//
-	// Create or replace project_tag. If there is an existing project_tag in the project with the same name as the one specified in the request, will replace the existing project_tag with the provided fields
+	// Create or replace project tag. If there is an existing project tag in the project with the same name as the one specified in the request, will replace the existing project tag with the provided fields
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/project_tag (the `PutProjectTag` operationId).
 	PutProjectTagWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutProjectTagResponse, error)
 
-	// PutProjectTagWithResponse Create or replace project_tag
+	// PutProjectTagWithResponse Create or replace project tag
 	//
-	// Create or replace project_tag. If there is an existing project_tag in the project with the same name as the one specified in the request, will replace the existing project_tag with the provided fields
+	// Create or replace project tag. If there is an existing project tag in the project with the same name as the one specified in the request, will replace the existing project tag with the provided fields
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/project_tag (the `PutProjectTag` operationId).
 	PutProjectTagWithResponse(ctx context.Context, body PutProjectTagJSONRequestBody, reqEditors ...RequestEditorFn) (*PutProjectTagResponse, error)
 
-	// DeleteProjectTagIdWithResponse Delete project_tag
+	// DeleteProjectTagIdWithResponse Delete project tag
 	//
-	// Delete a project_tag object by its id.
+	// Delete a project tag object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /v1/project_tag/{project_tag_id} (the `DeleteProjectTagId` operationId).
 	DeleteProjectTagIdWithResponse(ctx context.Context, projectTagId ProjectTagIdParamParameter, reqEditors ...RequestEditorFn) (*DeleteProjectTagIdResponse, error)
 
-	// GetProjectTagIdWithResponse Get project_tag
+	// GetProjectTagIdWithResponse Get project tag
 	//
-	// Get a project_tag object by its id.
+	// Get a project tag object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/project_tag/{project_tag_id} (the `GetProjectTagId` operationId).
 	GetProjectTagIdWithResponse(ctx context.Context, projectTagId ProjectTagIdParamParameter, reqEditors ...RequestEditorFn) (*GetProjectTagIdResponse, error)
 
-	// PatchProjectTagIdWithBodyWithResponse Partially update project_tag
+	// PatchProjectTagIdWithBodyWithResponse Partially update project tag
 	//
-	// Partially update a project_tag object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a project tag object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PATCH /v1/project_tag/{project_tag_id} (the `PatchProjectTagId` operationId).
 	PatchProjectTagIdWithBodyWithResponse(ctx context.Context, projectTagId ProjectTagIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchProjectTagIdResponse, error)
 
-	// PatchProjectTagIdWithResponse Partially update project_tag
+	// PatchProjectTagIdWithResponse Partially update project tag
 	//
-	// Partially update a project_tag object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a project tag object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
@@ -3696,168 +3496,168 @@ type ClientWithResponsesInterface interface {
 	// Corresponds with PATCH /v1/role/{role_id} (the `PatchRoleId` operationId).
 	PatchRoleIdWithResponse(ctx context.Context, roleId RoleIdParamParameter, body PatchRoleIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchRoleIdResponse, error)
 
-	// DeleteServiceTokenWithBodyWithResponse Delete single service_token
+	// DeleteServiceTokenWithBodyWithResponse Delete single service token
 	//
-	// Delete a single service_token.
+	// Delete a single service token.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /v1/service_token (the `DeleteServiceToken` operationId).
 	DeleteServiceTokenWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeleteServiceTokenResponse, error)
 
-	// DeleteServiceTokenWithResponse Delete single service_token
+	// DeleteServiceTokenWithResponse Delete single service token
 	//
-	// Delete a single service_token.
+	// Delete a single service token.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /v1/service_token (the `DeleteServiceToken` operationId).
 	DeleteServiceTokenWithResponse(ctx context.Context, body DeleteServiceTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*DeleteServiceTokenResponse, error)
 
-	// GetServiceTokenWithResponse List service_tokens
+	// GetServiceTokenWithResponse List service tokens
 	//
 	// List out all service tokens. They are sorted by creation date, with the most recently-created tokens coming first.
 	//
-	// To create a service token, visit [**Settings > Service tokens**](https://www.braintrust.dev/app/~/configuration/org/service-tokens) as an organization owner, or call [`POST /v1/service_token`](https://www.braintrust.dev/docs/api-reference/servicetokens/create-service_token) and authenticate with a service token that has organization-owner permissions.
+	// To create a service token, visit [**Settings > Service tokens**](https://www.braintrust.dev/app/~/configuration/org/service-tokens) as an organization owner or an Owner of an active project group in the organization, or call [`POST /v1/service_token`](https://docs.braintrust.dev/api-reference/servicetokens/create-service_token) with a service token. Results include only service tokens you can manage.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/service_token (the `GetServiceToken` operationId).
 	GetServiceTokenWithResponse(ctx context.Context, params *GetServiceTokenParams, reqEditors ...RequestEditorFn) (*GetServiceTokenResponse, error)
 
-	// PostServiceTokenWithBodyWithResponse Create service_token
+	// PostServiceTokenWithBodyWithResponse Create service token
 	//
 	// Create a new service token.
 	//
-	// When calling this endpoint, you must authenticate using a service token that has organization-owner permissions. User API keys cannot be used.
+	// Authenticate with a service token. A service token whose service account is an organization owner can create tokens for any service account. A service token whose service account holds the Owner role on a project group can create tokens for a service account in the same organization when the target account has a permission grant on a project group it owns. The calling service account must also hold all of the target account's permissions in the organization; otherwise the request returns 403. User API keys cannot be used.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/service_token (the `PostServiceToken` operationId).
 	PostServiceTokenWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostServiceTokenResponse, error)
 
-	// PostServiceTokenWithResponse Create service_token
+	// PostServiceTokenWithResponse Create service token
 	//
 	// Create a new service token.
 	//
-	// When calling this endpoint, you must authenticate using a service token that has organization-owner permissions. User API keys cannot be used.
+	// Authenticate with a service token. A service token whose service account is an organization owner can create tokens for any service account. A service token whose service account holds the Owner role on a project group can create tokens for a service account in the same organization when the target account has a permission grant on a project group it owns. The calling service account must also hold all of the target account's permissions in the organization; otherwise the request returns 403. User API keys cannot be used.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/service_token (the `PostServiceToken` operationId).
 	PostServiceTokenWithResponse(ctx context.Context, body PostServiceTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*PostServiceTokenResponse, error)
 
-	// PutServiceTokenWithBodyWithResponse Create or replace service_token
+	// PutServiceTokenWithBodyWithResponse Create or replace service token
 	//
-	// Create or replace service_token. If there is an existing service_token with the same name as the one specified in the request, will replace the existing service_token with the provided fields
+	// Create or replace service token. If there is an existing service token with the same name as the one specified in the request, will replace the existing service token with the provided fields
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/service_token (the `PutServiceToken` operationId).
 	PutServiceTokenWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutServiceTokenResponse, error)
 
-	// PutServiceTokenWithResponse Create or replace service_token
+	// PutServiceTokenWithResponse Create or replace service token
 	//
-	// Create or replace service_token. If there is an existing service_token with the same name as the one specified in the request, will replace the existing service_token with the provided fields
+	// Create or replace service token. If there is an existing service token with the same name as the one specified in the request, will replace the existing service token with the provided fields
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/service_token (the `PutServiceToken` operationId).
 	PutServiceTokenWithResponse(ctx context.Context, body PutServiceTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*PutServiceTokenResponse, error)
 
-	// DeleteServiceTokenIdWithResponse Delete service_token
+	// DeleteServiceTokenIdWithResponse Delete service token
 	//
-	// Delete a service_token object by its id.
+	// Delete a service token object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /v1/service_token/{service_token_id} (the `DeleteServiceTokenId` operationId).
 	DeleteServiceTokenIdWithResponse(ctx context.Context, serviceTokenId ServiceTokenIdParamParameter, reqEditors ...RequestEditorFn) (*DeleteServiceTokenIdResponse, error)
 
-	// GetServiceTokenIdWithResponse Get service_token
+	// GetServiceTokenIdWithResponse Get service token
 	//
-	// Get a service_token object by its id.
+	// Get a service token object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/service_token/{service_token_id} (the `GetServiceTokenId` operationId).
 	GetServiceTokenIdWithResponse(ctx context.Context, serviceTokenId ServiceTokenIdParamParameter, reqEditors ...RequestEditorFn) (*GetServiceTokenIdResponse, error)
 
-	// GetSpanIframeWithResponse List span_iframes
+	// GetSpanIframeWithResponse List span iframes
 	//
-	// List out all span_iframes. The span_iframes are sorted by creation date, with the most recently-created span_iframes coming first
+	// List out all span iframes. The span iframes are sorted by creation date, with the most recently-created span iframes coming first
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/span_iframe (the `GetSpanIframe` operationId).
 	GetSpanIframeWithResponse(ctx context.Context, params *GetSpanIframeParams, reqEditors ...RequestEditorFn) (*GetSpanIframeResponse, error)
 
-	// PostSpanIframeWithBodyWithResponse Create span_iframe
+	// PostSpanIframeWithBodyWithResponse Create span iframe
 	//
-	// Create a new span_iframe. If there is an existing span_iframe with the same name as the one specified in the request, will return the existing span_iframe unmodified
+	// Create a new span iframe. If there is an existing span iframe with the same name as the one specified in the request, will return the existing span iframe unmodified
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/span_iframe (the `PostSpanIframe` operationId).
 	PostSpanIframeWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostSpanIframeResponse, error)
 
-	// PostSpanIframeWithResponse Create span_iframe
+	// PostSpanIframeWithResponse Create span iframe
 	//
-	// Create a new span_iframe. If there is an existing span_iframe with the same name as the one specified in the request, will return the existing span_iframe unmodified
+	// Create a new span iframe. If there is an existing span iframe with the same name as the one specified in the request, will return the existing span iframe unmodified
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /v1/span_iframe (the `PostSpanIframe` operationId).
 	PostSpanIframeWithResponse(ctx context.Context, body PostSpanIframeJSONRequestBody, reqEditors ...RequestEditorFn) (*PostSpanIframeResponse, error)
 
-	// PutSpanIframeWithBodyWithResponse Create or replace span_iframe
+	// PutSpanIframeWithBodyWithResponse Create or replace span iframe
 	//
-	// Create or replace span_iframe. If there is an existing span_iframe with the same name as the one specified in the request, will replace the existing span_iframe with the provided fields
+	// Create or replace span iframe. If there is an existing span iframe with the same name as the one specified in the request, will replace the existing span iframe with the provided fields
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/span_iframe (the `PutSpanIframe` operationId).
 	PutSpanIframeWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutSpanIframeResponse, error)
 
-	// PutSpanIframeWithResponse Create or replace span_iframe
+	// PutSpanIframeWithResponse Create or replace span iframe
 	//
-	// Create or replace span_iframe. If there is an existing span_iframe with the same name as the one specified in the request, will replace the existing span_iframe with the provided fields
+	// Create or replace span iframe. If there is an existing span iframe with the same name as the one specified in the request, will replace the existing span iframe with the provided fields
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PUT /v1/span_iframe (the `PutSpanIframe` operationId).
 	PutSpanIframeWithResponse(ctx context.Context, body PutSpanIframeJSONRequestBody, reqEditors ...RequestEditorFn) (*PutSpanIframeResponse, error)
 
-	// DeleteSpanIframeIdWithResponse Delete span_iframe
+	// DeleteSpanIframeIdWithResponse Delete span iframe
 	//
-	// Delete a span_iframe object by its id.
+	// Delete a span iframe object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with DELETE /v1/span_iframe/{span_iframe_id} (the `DeleteSpanIframeId` operationId).
 	DeleteSpanIframeIdWithResponse(ctx context.Context, spanIframeId SpanIframeIdParamParameter, reqEditors ...RequestEditorFn) (*DeleteSpanIframeIdResponse, error)
 
-	// GetSpanIframeIdWithResponse Get span_iframe
+	// GetSpanIframeIdWithResponse Get span iframe
 	//
-	// Get a span_iframe object by its id.
+	// Get a span iframe object by its id.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with GET /v1/span_iframe/{span_iframe_id} (the `GetSpanIframeId` operationId).
 	GetSpanIframeIdWithResponse(ctx context.Context, spanIframeId SpanIframeIdParamParameter, reqEditors ...RequestEditorFn) (*GetSpanIframeIdResponse, error)
 
-	// PatchSpanIframeIdWithBodyWithResponse Partially update span_iframe
+	// PatchSpanIframeIdWithBodyWithResponse Partially update span iframe
 	//
-	// Partially update a span_iframe object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a span iframe object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with PATCH /v1/span_iframe/{span_iframe_id} (the `PatchSpanIframeId` operationId).
 	PatchSpanIframeIdWithBodyWithResponse(ctx context.Context, spanIframeId SpanIframeIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchSpanIframeIdResponse, error)
 
-	// PatchSpanIframeIdWithResponse Partially update span_iframe
+	// PatchSpanIframeIdWithResponse Partially update span iframe
 	//
-	// Partially update a span_iframe object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+	// Partially update a span iframe object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//

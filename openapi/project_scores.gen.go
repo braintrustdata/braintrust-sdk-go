@@ -45,9 +45,9 @@ type ProjectScore struct {
 	UserId    openapi_types.UUID `json:"user_id"`
 }
 
-// GetProjectScore List project_scores
+// GetProjectScore List project scores
 //
-// List out all project_scores. The project_scores are sorted by creation date, with the most recently-created project_scores coming first
+// List out all project scores. The project scores are sorted by creation date, with the most recently-created project scores coming first
 //
 // Corresponds with GET /v1/project_score (the `GetProjectScore` operationId).
 func (c *Client) GetProjectScore(ctx context.Context, params *GetProjectScoreParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -62,9 +62,9 @@ func (c *Client) GetProjectScore(ctx context.Context, params *GetProjectScorePar
 	return c.Client.Do(req)
 }
 
-// PostProjectScoreWithBody Create project_score
+// PostProjectScoreWithBody Create project score
 //
-// Create a new project_score. If there is an existing project_score in the project with the same name as the one specified in the request, will return the existing project_score unmodified
+// Create a new project score. If there is an existing project score in the project with the same name as the one specified in the request, will return the existing project score unmodified
 //
 // Takes any type of body and a specified content type.
 //
@@ -81,9 +81,9 @@ func (c *Client) PostProjectScoreWithBody(ctx context.Context, contentType strin
 	return c.Client.Do(req)
 }
 
-// PostProjectScore Create project_score
+// PostProjectScore Create project score
 //
-// Create a new project_score. If there is an existing project_score in the project with the same name as the one specified in the request, will return the existing project_score unmodified
+// Create a new project score. If there is an existing project score in the project with the same name as the one specified in the request, will return the existing project score unmodified
 //
 // Takes a body of the `application/json` content type.
 //
@@ -100,9 +100,9 @@ func (c *Client) PostProjectScore(ctx context.Context, body PostProjectScoreJSON
 	return c.Client.Do(req)
 }
 
-// PutProjectScoreWithBody Create or replace project_score
+// PutProjectScoreWithBody Create or replace project score
 //
-// Create or replace project_score. If there is an existing project_score in the project with the same name as the one specified in the request, will replace the existing project_score with the provided fields
+// Create or replace project score. If there is an existing project score in the project with the same name as the one specified in the request, will replace the existing project score with the provided fields
 //
 // Takes any type of body and a specified content type.
 //
@@ -119,9 +119,9 @@ func (c *Client) PutProjectScoreWithBody(ctx context.Context, contentType string
 	return c.Client.Do(req)
 }
 
-// PutProjectScore Create or replace project_score
+// PutProjectScore Create or replace project score
 //
-// Create or replace project_score. If there is an existing project_score in the project with the same name as the one specified in the request, will replace the existing project_score with the provided fields
+// Create or replace project score. If there is an existing project score in the project with the same name as the one specified in the request, will replace the existing project score with the provided fields
 //
 // Takes a body of the `application/json` content type.
 //
@@ -138,9 +138,9 @@ func (c *Client) PutProjectScore(ctx context.Context, body PutProjectScoreJSONRe
 	return c.Client.Do(req)
 }
 
-// DeleteProjectScoreId Delete project_score
+// DeleteProjectScoreId Delete project score
 //
-// Delete a project_score object by its id.
+// Delete a project score object by its id.
 //
 // Corresponds with DELETE /v1/project_score/{project_score_id} (the `DeleteProjectScoreId` operationId).
 func (c *Client) DeleteProjectScoreId(ctx context.Context, projectScoreId ProjectScoreIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -155,9 +155,9 @@ func (c *Client) DeleteProjectScoreId(ctx context.Context, projectScoreId Projec
 	return c.Client.Do(req)
 }
 
-// GetProjectScoreId Get project_score
+// GetProjectScoreId Get project score
 //
-// Get a project_score object by its id.
+// Get a project score object by its id.
 //
 // Corresponds with GET /v1/project_score/{project_score_id} (the `GetProjectScoreId` operationId).
 func (c *Client) GetProjectScoreId(ctx context.Context, projectScoreId ProjectScoreIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -172,9 +172,9 @@ func (c *Client) GetProjectScoreId(ctx context.Context, projectScoreId ProjectSc
 	return c.Client.Do(req)
 }
 
-// PatchProjectScoreIdWithBody Partially update project_score
+// PatchProjectScoreIdWithBody Partially update project score
 //
-// Partially update a project_score object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a project score object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes any type of body and a specified content type.
 //
@@ -191,9 +191,9 @@ func (c *Client) PatchProjectScoreIdWithBody(ctx context.Context, projectScoreId
 	return c.Client.Do(req)
 }
 
-// PatchProjectScoreId Partially update project_score
+// PatchProjectScoreId Partially update project score
 //
-// Partially update a project_score object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a project score object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -565,7 +565,7 @@ type GetProjectScoreResponse struct {
 	HTTPResponse *http.Response
 	// JSON200 the response for an HTTP 200 `application/json` response
 	JSON200 *struct {
-		// Objects A list of project_score objects
+		// Objects A list of project score objects
 		Objects []ProjectScore `json:"objects"`
 	}
 	// JSON400 the response for an HTTP 400 `application/json` response
@@ -584,7 +584,7 @@ type GetProjectScoreResponse struct {
 
 // GetJSON200 returns the response for an HTTP 200 `application/json` response
 func (r GetProjectScoreResponse) GetJSON200() *struct {
-	// Objects A list of project_score objects
+	// Objects A list of project score objects
 	Objects []ProjectScore `json:"objects"`
 } {
 	return r.JSON200
@@ -1059,9 +1059,9 @@ func (r PatchProjectScoreIdResponse) ContentType() string {
 	return ""
 }
 
-// GetProjectScoreWithResponse List project_scores
+// GetProjectScoreWithResponse List project scores
 //
-// List out all project_scores. The project_scores are sorted by creation date, with the most recently-created project_scores coming first
+// List out all project scores. The project scores are sorted by creation date, with the most recently-created project scores coming first
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1074,9 +1074,9 @@ func (c *ClientWithResponses) GetProjectScoreWithResponse(ctx context.Context, p
 	return ParseGetProjectScoreResponse(rsp)
 }
 
-// PostProjectScoreWithBodyWithResponse Create project_score
+// PostProjectScoreWithBodyWithResponse Create project score
 //
-// Create a new project_score. If there is an existing project_score in the project with the same name as the one specified in the request, will return the existing project_score unmodified
+// Create a new project score. If there is an existing project score in the project with the same name as the one specified in the request, will return the existing project score unmodified
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1089,9 +1089,9 @@ func (c *ClientWithResponses) PostProjectScoreWithBodyWithResponse(ctx context.C
 	return ParsePostProjectScoreResponse(rsp)
 }
 
-// PostProjectScoreWithResponse Create project_score
+// PostProjectScoreWithResponse Create project score
 //
-// Create a new project_score. If there is an existing project_score in the project with the same name as the one specified in the request, will return the existing project_score unmodified
+// Create a new project score. If there is an existing project score in the project with the same name as the one specified in the request, will return the existing project score unmodified
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1104,9 +1104,9 @@ func (c *ClientWithResponses) PostProjectScoreWithResponse(ctx context.Context, 
 	return ParsePostProjectScoreResponse(rsp)
 }
 
-// PutProjectScoreWithBodyWithResponse Create or replace project_score
+// PutProjectScoreWithBodyWithResponse Create or replace project score
 //
-// Create or replace project_score. If there is an existing project_score in the project with the same name as the one specified in the request, will replace the existing project_score with the provided fields
+// Create or replace project score. If there is an existing project score in the project with the same name as the one specified in the request, will replace the existing project score with the provided fields
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1119,9 +1119,9 @@ func (c *ClientWithResponses) PutProjectScoreWithBodyWithResponse(ctx context.Co
 	return ParsePutProjectScoreResponse(rsp)
 }
 
-// PutProjectScoreWithResponse Create or replace project_score
+// PutProjectScoreWithResponse Create or replace project score
 //
-// Create or replace project_score. If there is an existing project_score in the project with the same name as the one specified in the request, will replace the existing project_score with the provided fields
+// Create or replace project score. If there is an existing project score in the project with the same name as the one specified in the request, will replace the existing project score with the provided fields
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1134,9 +1134,9 @@ func (c *ClientWithResponses) PutProjectScoreWithResponse(ctx context.Context, b
 	return ParsePutProjectScoreResponse(rsp)
 }
 
-// DeleteProjectScoreIdWithResponse Delete project_score
+// DeleteProjectScoreIdWithResponse Delete project score
 //
-// Delete a project_score object by its id.
+// Delete a project score object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1149,9 +1149,9 @@ func (c *ClientWithResponses) DeleteProjectScoreIdWithResponse(ctx context.Conte
 	return ParseDeleteProjectScoreIdResponse(rsp)
 }
 
-// GetProjectScoreIdWithResponse Get project_score
+// GetProjectScoreIdWithResponse Get project score
 //
-// Get a project_score object by its id.
+// Get a project score object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1164,9 +1164,9 @@ func (c *ClientWithResponses) GetProjectScoreIdWithResponse(ctx context.Context,
 	return ParseGetProjectScoreIdResponse(rsp)
 }
 
-// PatchProjectScoreIdWithBodyWithResponse Partially update project_score
+// PatchProjectScoreIdWithBodyWithResponse Partially update project score
 //
-// Partially update a project_score object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a project score object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1179,9 +1179,9 @@ func (c *ClientWithResponses) PatchProjectScoreIdWithBodyWithResponse(ctx contex
 	return ParsePatchProjectScoreIdResponse(rsp)
 }
 
-// PatchProjectScoreIdWithResponse Partially update project_score
+// PatchProjectScoreIdWithResponse Partially update project score
 //
-// Partially update a project_score object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a project score object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1210,7 +1210,7 @@ func ParseGetProjectScoreResponse(rsp *http.Response) (*GetProjectScoreResponse,
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			// Objects A list of project_score objects
+			// Objects A list of project score objects
 			Objects []ProjectScore `json:"objects"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

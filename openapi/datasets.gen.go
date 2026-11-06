@@ -65,7 +65,7 @@ type DatasetEvent struct {
 	UnderscoreXactId string `json:"_xact_id"`
 
 	// AuditData Optional list of audit entries attached to this event
-	AuditData nullable.Nullable[[]nullable.Nullable[interface{}]] `json:"audit_data,omitempty"`
+	AuditData nullable.Nullable[[]interface{}] `json:"audit_data,omitempty"`
 
 	// Classifications Classifications for this event (dictionary from classification name to items)
 	Classifications nullable.Nullable[map[string][]struct {
@@ -86,7 +86,7 @@ type DatasetEvent struct {
 	}] `json:"classifications,omitempty"`
 
 	// Comments Optional list of comments attached to this event
-	Comments nullable.Nullable[[]nullable.Nullable[interface{}]] `json:"comments,omitempty"`
+	Comments nullable.Nullable[[]interface{}] `json:"comments,omitempty"`
 
 	// Created The timestamp the dataset event was created
 	Created time.Time `json:"created"`
@@ -95,7 +95,7 @@ type DatasetEvent struct {
 	DatasetId openapi_types.UUID `json:"dataset_id"`
 
 	// Expected The output of your application, including post-processing (an arbitrary, JSON serializable object)
-	Expected nullable.Nullable[interface{}] `json:"expected,omitempty"`
+	Expected interface{} `json:"expected,omitempty"`
 
 	// Facets Facets for categorization (dictionary from facet id to value)
 	Facets nullable.Nullable[map[string]*string] `json:"facets,omitempty"`
@@ -104,7 +104,7 @@ type DatasetEvent struct {
 	Id string `json:"id"`
 
 	// Input The argument that uniquely define an input case (an arbitrary, JSON serializable object)
-	Input nullable.Nullable[interface{}] `json:"input,omitempty"`
+	Input interface{} `json:"input,omitempty"`
 
 	// IsRoot Whether this span is a root span
 	IsRoot nullable.Nullable[bool] `json:"is_root,omitempty"`
@@ -121,7 +121,7 @@ type DatasetEvent struct {
 	// RootSpanId A unique identifier for the trace this dataset event belongs to
 	RootSpanId string `json:"root_span_id"`
 
-	// SpanId A unique identifier used to link different dataset events together as part of a full trace. See the [tracing guide](https://www.braintrust.dev/docs/instrument) for full details on tracing
+	// SpanId A unique identifier used to link different dataset events together as part of a full trace. See the [tracing guide](https://docs.braintrust.dev/instrument) for full details on tracing
 	SpanId string `json:"span_id"`
 
 	// Tags A list of tags to log
@@ -133,6 +133,27 @@ type DatasetEvent_Metadata struct {
 	// Model The model used for this example
 	Model                nullable.Nullable[string] `json:"model,omitempty"`
 	AdditionalProperties map[string]interface{}    `json:"-"`
+}
+
+// DatasetRestorePreviewResponse defines model for DatasetRestorePreviewResponse.
+type DatasetRestorePreviewResponse struct {
+	// RowsToDelete Number of rows created after the requested version that would be deleted
+	RowsToDelete int `json:"rows_to_delete"`
+
+	// RowsToRestore Number of rows that would be restored to their value at the requested version
+	RowsToRestore int `json:"rows_to_restore"`
+}
+
+// DatasetRestoreResponse defines model for DatasetRestoreResponse.
+type DatasetRestoreResponse struct {
+	// RowsDeleted Number of rows created after the requested version that were deleted
+	RowsDeleted int `json:"rows_deleted"`
+
+	// RowsRestored Number of rows restored to their value at the requested version
+	RowsRestored int `json:"rows_restored"`
+
+	// XactId Transaction id of the restore, or null if the restore made no changes
+	XactId nullable.Nullable[string] `json:"xact_id"`
 }
 
 // FetchDatasetEventsResponse defines model for FetchDatasetEventsResponse.
@@ -490,7 +511,85 @@ func (c *Client) PostDatasetIdInsert(ctx context.Context, datasetId DatasetIdPar
 	return c.Client.Do(req)
 }
 
+// PostDatasetIdRestoreWithBody Restore dataset
+//
+// Restore a dataset to an earlier version, such as a dataset snapshot. Rows changed since that version are reverted, and rows created since then are deleted. The restore is recorded as a new transaction, so dataset history is preserved. Fails if more than 20,000 rows changed since the requested version. Requires update permission on the dataset.
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /v1/dataset/{dataset_id}/restore (the `PostDatasetIdRestore` operationId).
+func (c *Client) PostDatasetIdRestoreWithBody(ctx context.Context, datasetId DatasetIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostDatasetIdRestoreRequestWithBody(c.Server, datasetId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// PostDatasetIdRestore Restore dataset
+//
+// Restore a dataset to an earlier version, such as a dataset snapshot. Rows changed since that version are reverted, and rows created since then are deleted. The restore is recorded as a new transaction, so dataset history is preserved. Fails if more than 20,000 rows changed since the requested version. Requires update permission on the dataset.
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /v1/dataset/{dataset_id}/restore (the `PostDatasetIdRestore` operationId).
+func (c *Client) PostDatasetIdRestore(ctx context.Context, datasetId DatasetIdParamParameter, body PostDatasetIdRestoreJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostDatasetIdRestoreRequest(c.Server, datasetId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// PostDatasetIdRestorePreviewWithBody Preview dataset restore
+//
+// Preview restoring a dataset to an earlier version, such as a dataset snapshot. Returns how many rows a restore would change, without modifying the dataset. Fails if more than 20,000 rows changed since the requested version. Requires read permission on the dataset.
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /v1/dataset/{dataset_id}/restore/preview (the `PostDatasetIdRestorePreview` operationId).
+func (c *Client) PostDatasetIdRestorePreviewWithBody(ctx context.Context, datasetId DatasetIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostDatasetIdRestorePreviewRequestWithBody(c.Server, datasetId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// PostDatasetIdRestorePreview Preview dataset restore
+//
+// Preview restoring a dataset to an earlier version, such as a dataset snapshot. Returns how many rows a restore would change, without modifying the dataset. Fails if more than 20,000 rows changed since the requested version. Requires read permission on the dataset.
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /v1/dataset/{dataset_id}/restore/preview (the `PostDatasetIdRestorePreview` operationId).
+func (c *Client) PostDatasetIdRestorePreview(ctx context.Context, datasetId DatasetIdParamParameter, body PostDatasetIdRestorePreviewJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostDatasetIdRestorePreviewRequest(c.Server, datasetId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 // GetDatasetIdSummarize Summarize dataset
+//
+// Return the dataset and project names and URLs. Set `summarize_data=true` to include the total number of records in the dataset; otherwise, only metadata is returned.
 //
 // Corresponds with GET /v1/dataset/{dataset_id}/summarize (the `GetDatasetIdSummarize` operationId).
 func (c *Client) GetDatasetIdSummarize(ctx context.Context, datasetId DatasetIdParamParameter, params *GetDatasetIdSummarizeParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -1017,6 +1116,100 @@ func NewPostDatasetIdInsertRequestWithBody(server string, datasetId DatasetIdPar
 	}
 
 	operationPath := fmt.Sprintf("/v1/dataset/%s/insert", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPostDatasetIdRestoreRequest calls the generic PostDatasetIdRestore builder with application/json body
+func NewPostDatasetIdRestoreRequest(server string, datasetId DatasetIdParamParameter, body PostDatasetIdRestoreJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostDatasetIdRestoreRequestWithBody(server, datasetId, "application/json", bodyReader)
+}
+
+// NewPostDatasetIdRestoreRequestWithBody constructs an http.Request for the PostDatasetIdRestore method, with any body, and a specified content type
+func NewPostDatasetIdRestoreRequestWithBody(server string, datasetId DatasetIdParamParameter, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "dataset_id", datasetId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: "uuid"})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dataset/%s/restore", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPostDatasetIdRestorePreviewRequest calls the generic PostDatasetIdRestorePreview builder with application/json body
+func NewPostDatasetIdRestorePreviewRequest(server string, datasetId DatasetIdParamParameter, body PostDatasetIdRestorePreviewJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostDatasetIdRestorePreviewRequestWithBody(server, datasetId, "application/json", bodyReader)
+}
+
+// NewPostDatasetIdRestorePreviewRequestWithBody constructs an http.Request for the PostDatasetIdRestorePreview method, with any body, and a specified content type
+func NewPostDatasetIdRestorePreviewRequestWithBody(server string, datasetId DatasetIdParamParameter, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "dataset_id", datasetId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: "uuid"})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dataset/%s/restore/preview", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1850,6 +2043,172 @@ func (r PostDatasetIdInsertResponse) ContentType() string {
 	return ""
 }
 
+// PostDatasetIdRestoreResponse429Headers the declared response headers of an HTTP 429 response for PostDatasetIdRestore
+type PostDatasetIdRestoreResponse429Headers struct {
+	RetryAfter *string
+}
+
+type PostDatasetIdRestoreResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *DatasetRestoreResponse
+	// JSON400 the response for an HTTP 400 `application/json` response
+	JSON400 *interface{}
+	// JSON401 the response for an HTTP 401 `application/json` response
+	JSON401 *interface{}
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *interface{}
+	// JSON429 the response for an HTTP 429 `application/json` response
+	JSON429 *interface{}
+	// JSON500 the response for an HTTP 500 `application/json` response
+	JSON500 *interface{}
+	// Headers429 the parsed response headers for an HTTP 429 response
+	Headers429 *PostDatasetIdRestoreResponse429Headers
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r PostDatasetIdRestoreResponse) GetJSON200() *DatasetRestoreResponse {
+	return r.JSON200
+}
+
+// GetJSON400 returns the response for an HTTP 400 `application/json` response
+func (r PostDatasetIdRestoreResponse) GetJSON400() *interface{} {
+	return r.JSON400
+}
+
+// GetJSON401 returns the response for an HTTP 401 `application/json` response
+func (r PostDatasetIdRestoreResponse) GetJSON401() *interface{} {
+	return r.JSON401
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r PostDatasetIdRestoreResponse) GetJSON403() *interface{} {
+	return r.JSON403
+}
+
+// GetJSON429 returns the response for an HTTP 429 `application/json` response
+func (r PostDatasetIdRestoreResponse) GetJSON429() *interface{} {
+	return r.JSON429
+}
+
+// GetJSON500 returns the response for an HTTP 500 `application/json` response
+func (r PostDatasetIdRestoreResponse) GetJSON500() *interface{} {
+	return r.JSON500
+}
+
+// GetBody returns the raw response body bytes
+func (r PostDatasetIdRestoreResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r PostDatasetIdRestoreResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostDatasetIdRestoreResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r PostDatasetIdRestoreResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+// PostDatasetIdRestorePreviewResponse429Headers the declared response headers of an HTTP 429 response for PostDatasetIdRestorePreview
+type PostDatasetIdRestorePreviewResponse429Headers struct {
+	RetryAfter *string
+}
+
+type PostDatasetIdRestorePreviewResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *DatasetRestorePreviewResponse
+	// JSON400 the response for an HTTP 400 `application/json` response
+	JSON400 *interface{}
+	// JSON401 the response for an HTTP 401 `application/json` response
+	JSON401 *interface{}
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *interface{}
+	// JSON429 the response for an HTTP 429 `application/json` response
+	JSON429 *interface{}
+	// JSON500 the response for an HTTP 500 `application/json` response
+	JSON500 *interface{}
+	// Headers429 the parsed response headers for an HTTP 429 response
+	Headers429 *PostDatasetIdRestorePreviewResponse429Headers
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r PostDatasetIdRestorePreviewResponse) GetJSON200() *DatasetRestorePreviewResponse {
+	return r.JSON200
+}
+
+// GetJSON400 returns the response for an HTTP 400 `application/json` response
+func (r PostDatasetIdRestorePreviewResponse) GetJSON400() *interface{} {
+	return r.JSON400
+}
+
+// GetJSON401 returns the response for an HTTP 401 `application/json` response
+func (r PostDatasetIdRestorePreviewResponse) GetJSON401() *interface{} {
+	return r.JSON401
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r PostDatasetIdRestorePreviewResponse) GetJSON403() *interface{} {
+	return r.JSON403
+}
+
+// GetJSON429 returns the response for an HTTP 429 `application/json` response
+func (r PostDatasetIdRestorePreviewResponse) GetJSON429() *interface{} {
+	return r.JSON429
+}
+
+// GetJSON500 returns the response for an HTTP 500 `application/json` response
+func (r PostDatasetIdRestorePreviewResponse) GetJSON500() *interface{} {
+	return r.JSON500
+}
+
+// GetBody returns the raw response body bytes
+func (r PostDatasetIdRestorePreviewResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r PostDatasetIdRestorePreviewResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostDatasetIdRestorePreviewResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r PostDatasetIdRestorePreviewResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
 // GetDatasetIdSummarizeResponse429Headers the declared response headers of an HTTP 429 response for GetDatasetIdSummarize
 type GetDatasetIdSummarizeResponse429Headers struct {
 	RetryAfter *string
@@ -2143,7 +2502,69 @@ func (c *ClientWithResponses) PostDatasetIdInsertWithResponse(ctx context.Contex
 	return ParsePostDatasetIdInsertResponse(rsp)
 }
 
+// PostDatasetIdRestoreWithBodyWithResponse Restore dataset
+//
+// Restore a dataset to an earlier version, such as a dataset snapshot. Rows changed since that version are reverted, and rows created since then are deleted. The restore is recorded as a new transaction, so dataset history is preserved. Fails if more than 20,000 rows changed since the requested version. Requires update permission on the dataset.
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /v1/dataset/{dataset_id}/restore (the `PostDatasetIdRestore` operationId).
+func (c *ClientWithResponses) PostDatasetIdRestoreWithBodyWithResponse(ctx context.Context, datasetId DatasetIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostDatasetIdRestoreResponse, error) {
+	rsp, err := c.PostDatasetIdRestoreWithBody(ctx, datasetId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostDatasetIdRestoreResponse(rsp)
+}
+
+// PostDatasetIdRestoreWithResponse Restore dataset
+//
+// Restore a dataset to an earlier version, such as a dataset snapshot. Rows changed since that version are reverted, and rows created since then are deleted. The restore is recorded as a new transaction, so dataset history is preserved. Fails if more than 20,000 rows changed since the requested version. Requires update permission on the dataset.
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /v1/dataset/{dataset_id}/restore (the `PostDatasetIdRestore` operationId).
+func (c *ClientWithResponses) PostDatasetIdRestoreWithResponse(ctx context.Context, datasetId DatasetIdParamParameter, body PostDatasetIdRestoreJSONRequestBody, reqEditors ...RequestEditorFn) (*PostDatasetIdRestoreResponse, error) {
+	rsp, err := c.PostDatasetIdRestore(ctx, datasetId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostDatasetIdRestoreResponse(rsp)
+}
+
+// PostDatasetIdRestorePreviewWithBodyWithResponse Preview dataset restore
+//
+// Preview restoring a dataset to an earlier version, such as a dataset snapshot. Returns how many rows a restore would change, without modifying the dataset. Fails if more than 20,000 rows changed since the requested version. Requires read permission on the dataset.
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /v1/dataset/{dataset_id}/restore/preview (the `PostDatasetIdRestorePreview` operationId).
+func (c *ClientWithResponses) PostDatasetIdRestorePreviewWithBodyWithResponse(ctx context.Context, datasetId DatasetIdParamParameter, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostDatasetIdRestorePreviewResponse, error) {
+	rsp, err := c.PostDatasetIdRestorePreviewWithBody(ctx, datasetId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostDatasetIdRestorePreviewResponse(rsp)
+}
+
+// PostDatasetIdRestorePreviewWithResponse Preview dataset restore
+//
+// Preview restoring a dataset to an earlier version, such as a dataset snapshot. Returns how many rows a restore would change, without modifying the dataset. Fails if more than 20,000 rows changed since the requested version. Requires read permission on the dataset.
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /v1/dataset/{dataset_id}/restore/preview (the `PostDatasetIdRestorePreview` operationId).
+func (c *ClientWithResponses) PostDatasetIdRestorePreviewWithResponse(ctx context.Context, datasetId DatasetIdParamParameter, body PostDatasetIdRestorePreviewJSONRequestBody, reqEditors ...RequestEditorFn) (*PostDatasetIdRestorePreviewResponse, error) {
+	rsp, err := c.PostDatasetIdRestorePreview(ctx, datasetId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostDatasetIdRestorePreviewResponse(rsp)
+}
+
 // GetDatasetIdSummarizeWithResponse Summarize dataset
+//
+// Return the dataset and project names and URLs. Set `summarize_data=true` to include the total number of records in the dataset; otherwise, only metadata is returned.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -2947,6 +3368,184 @@ func ParsePostDatasetIdInsertResponse(rsp *http.Response) (*PostDatasetIdInsertR
 	switch {
 	case rsp.StatusCode == 429:
 		var headers PostDatasetIdInsertResponse429Headers
+		if values := rsp.Header.Values("Retry-After"); len(values) > 0 {
+			var value string
+			if err := runtime.BindStyledParameterWithOptions("simple", "Retry-After", values[0], &value, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			}
+			headers.RetryAfter = &value
+		}
+		response.Headers429 = &headers
+	}
+
+	return response, nil
+}
+
+// ParsePostDatasetIdRestoreResponse parses an HTTP response from a PostDatasetIdRestoreWithResponse call
+func ParsePostDatasetIdRestoreResponse(rsp *http.Response) (*PostDatasetIdRestoreResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostDatasetIdRestoreResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DatasetRestoreResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 429:
+		var dest interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON429 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	case rsp.StatusCode == 400:
+	// Content-type (text/plain) unsupported
+
+	case rsp.StatusCode == 401:
+	// Content-type (text/plain) unsupported
+
+	case rsp.StatusCode == 403:
+	// Content-type (text/plain) unsupported
+
+	case rsp.StatusCode == 429:
+	// Content-type (text/plain) unsupported
+
+	case rsp.StatusCode == 500:
+		// Content-type (text/plain) unsupported
+
+	}
+
+	switch {
+	case rsp.StatusCode == 429:
+		var headers PostDatasetIdRestoreResponse429Headers
+		if values := rsp.Header.Values("Retry-After"); len(values) > 0 {
+			var value string
+			if err := runtime.BindStyledParameterWithOptions("simple", "Retry-After", values[0], &value, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			}
+			headers.RetryAfter = &value
+		}
+		response.Headers429 = &headers
+	}
+
+	return response, nil
+}
+
+// ParsePostDatasetIdRestorePreviewResponse parses an HTTP response from a PostDatasetIdRestorePreviewWithResponse call
+func ParsePostDatasetIdRestorePreviewResponse(rsp *http.Response) (*PostDatasetIdRestorePreviewResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostDatasetIdRestorePreviewResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DatasetRestorePreviewResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 429:
+		var dest interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON429 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	case rsp.StatusCode == 400:
+	// Content-type (text/plain) unsupported
+
+	case rsp.StatusCode == 401:
+	// Content-type (text/plain) unsupported
+
+	case rsp.StatusCode == 403:
+	// Content-type (text/plain) unsupported
+
+	case rsp.StatusCode == 429:
+	// Content-type (text/plain) unsupported
+
+	case rsp.StatusCode == 500:
+		// Content-type (text/plain) unsupported
+
+	}
+
+	switch {
+	case rsp.StatusCode == 429:
+		var headers PostDatasetIdRestorePreviewResponse429Headers
 		if values := rsp.Header.Values("Retry-After"); len(values) > 0 {
 			var value string
 			if err := runtime.BindStyledParameterWithOptions("simple", "Retry-After", values[0], &value, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""}); err != nil {

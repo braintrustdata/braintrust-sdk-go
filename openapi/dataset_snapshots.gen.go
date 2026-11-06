@@ -32,13 +32,13 @@ type DatasetSnapshot struct {
 	// Name Name of the dataset snapshot
 	Name string `json:"name"`
 
-	// XactId Transaction id of the brainstore version at the time of the snapshot
+	// XactId Transaction ID of the dataset version at the time of the snapshot
 	XactId string `json:"xact_id"`
 }
 
-// GetDatasetSnapshot List dataset_snapshots
+// GetDatasetSnapshot List dataset snapshots
 //
-// List out all dataset_snapshots. The dataset_snapshots are sorted by creation date, with the most recently-created dataset_snapshots coming first
+// List out all dataset snapshots. The dataset snapshots are sorted by creation date, with the most recently-created dataset snapshots coming first
 //
 // Corresponds with GET /v1/dataset_snapshot (the `GetDatasetSnapshot` operationId).
 func (c *Client) GetDatasetSnapshot(ctx context.Context, params *GetDatasetSnapshotParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -53,9 +53,9 @@ func (c *Client) GetDatasetSnapshot(ctx context.Context, params *GetDatasetSnaps
 	return c.Client.Do(req)
 }
 
-// PostDatasetSnapshotWithBody Create dataset_snapshot
+// PostDatasetSnapshotWithBody Create dataset snapshot
 //
-// Create a new dataset_snapshot. If there is an existing dataset_snapshot with the same name as the one specified in the request, will return the existing dataset_snapshot unmodified
+// Create a new dataset snapshot. If there is an existing dataset snapshot with the same name as the one specified in the request, will return the existing dataset snapshot unmodified
 //
 // Takes any type of body and a specified content type.
 //
@@ -72,9 +72,9 @@ func (c *Client) PostDatasetSnapshotWithBody(ctx context.Context, contentType st
 	return c.Client.Do(req)
 }
 
-// PostDatasetSnapshot Create dataset_snapshot
+// PostDatasetSnapshot Create dataset snapshot
 //
-// Create a new dataset_snapshot. If there is an existing dataset_snapshot with the same name as the one specified in the request, will return the existing dataset_snapshot unmodified
+// Create a new dataset snapshot. If there is an existing dataset snapshot with the same name as the one specified in the request, will return the existing dataset snapshot unmodified
 //
 // Takes a body of the `application/json` content type.
 //
@@ -91,9 +91,9 @@ func (c *Client) PostDatasetSnapshot(ctx context.Context, body PostDatasetSnapsh
 	return c.Client.Do(req)
 }
 
-// PutDatasetSnapshotWithBody Create or replace dataset_snapshot
+// PutDatasetSnapshotWithBody Create or replace dataset snapshot
 //
-// Create or replace dataset_snapshot. If there is an existing dataset_snapshot with the same name as the one specified in the request, will replace the existing dataset_snapshot with the provided fields
+// Create or replace dataset snapshot. If there is an existing dataset snapshot with the same name as the one specified in the request, will replace the existing dataset snapshot with the provided fields
 //
 // Takes any type of body and a specified content type.
 //
@@ -110,9 +110,9 @@ func (c *Client) PutDatasetSnapshotWithBody(ctx context.Context, contentType str
 	return c.Client.Do(req)
 }
 
-// PutDatasetSnapshot Create or replace dataset_snapshot
+// PutDatasetSnapshot Create or replace dataset snapshot
 //
-// Create or replace dataset_snapshot. If there is an existing dataset_snapshot with the same name as the one specified in the request, will replace the existing dataset_snapshot with the provided fields
+// Create or replace dataset snapshot. If there is an existing dataset snapshot with the same name as the one specified in the request, will replace the existing dataset snapshot with the provided fields
 //
 // Takes a body of the `application/json` content type.
 //
@@ -129,9 +129,9 @@ func (c *Client) PutDatasetSnapshot(ctx context.Context, body PutDatasetSnapshot
 	return c.Client.Do(req)
 }
 
-// DeleteDatasetSnapshotId Delete dataset_snapshot
+// DeleteDatasetSnapshotId Delete dataset snapshot
 //
-// Delete a dataset_snapshot object by its id.
+// Delete a dataset snapshot object by its id.
 //
 // Corresponds with DELETE /v1/dataset_snapshot/{dataset_snapshot_id} (the `DeleteDatasetSnapshotId` operationId).
 func (c *Client) DeleteDatasetSnapshotId(ctx context.Context, datasetSnapshotId DatasetSnapshotIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -146,9 +146,9 @@ func (c *Client) DeleteDatasetSnapshotId(ctx context.Context, datasetSnapshotId 
 	return c.Client.Do(req)
 }
 
-// GetDatasetSnapshotId Get dataset_snapshot
+// GetDatasetSnapshotId Get dataset snapshot
 //
-// Get a dataset_snapshot object by its id.
+// Get a dataset snapshot object by its id.
 //
 // Corresponds with GET /v1/dataset_snapshot/{dataset_snapshot_id} (the `GetDatasetSnapshotId` operationId).
 func (c *Client) GetDatasetSnapshotId(ctx context.Context, datasetSnapshotId DatasetSnapshotIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -163,9 +163,9 @@ func (c *Client) GetDatasetSnapshotId(ctx context.Context, datasetSnapshotId Dat
 	return c.Client.Do(req)
 }
 
-// PatchDatasetSnapshotIdWithBody Partially update dataset_snapshot
+// PatchDatasetSnapshotIdWithBody Partially update dataset snapshot
 //
-// Partially update a dataset_snapshot object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a dataset snapshot object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes any type of body and a specified content type.
 //
@@ -182,9 +182,9 @@ func (c *Client) PatchDatasetSnapshotIdWithBody(ctx context.Context, datasetSnap
 	return c.Client.Do(req)
 }
 
-// PatchDatasetSnapshotId Partially update dataset_snapshot
+// PatchDatasetSnapshotId Partially update dataset snapshot
 //
-// Partially update a dataset_snapshot object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a dataset snapshot object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -520,7 +520,7 @@ type GetDatasetSnapshotResponse struct {
 	HTTPResponse *http.Response
 	// JSON200 the response for an HTTP 200 `application/json` response
 	JSON200 *struct {
-		// Objects A list of dataset_snapshot objects
+		// Objects A list of dataset snapshot objects
 		Objects []DatasetSnapshot `json:"objects"`
 	}
 	// JSON400 the response for an HTTP 400 `application/json` response
@@ -539,7 +539,7 @@ type GetDatasetSnapshotResponse struct {
 
 // GetJSON200 returns the response for an HTTP 200 `application/json` response
 func (r GetDatasetSnapshotResponse) GetJSON200() *struct {
-	// Objects A list of dataset_snapshot objects
+	// Objects A list of dataset snapshot objects
 	Objects []DatasetSnapshot `json:"objects"`
 } {
 	return r.JSON200
@@ -1014,9 +1014,9 @@ func (r PatchDatasetSnapshotIdResponse) ContentType() string {
 	return ""
 }
 
-// GetDatasetSnapshotWithResponse List dataset_snapshots
+// GetDatasetSnapshotWithResponse List dataset snapshots
 //
-// List out all dataset_snapshots. The dataset_snapshots are sorted by creation date, with the most recently-created dataset_snapshots coming first
+// List out all dataset snapshots. The dataset snapshots are sorted by creation date, with the most recently-created dataset snapshots coming first
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1029,9 +1029,9 @@ func (c *ClientWithResponses) GetDatasetSnapshotWithResponse(ctx context.Context
 	return ParseGetDatasetSnapshotResponse(rsp)
 }
 
-// PostDatasetSnapshotWithBodyWithResponse Create dataset_snapshot
+// PostDatasetSnapshotWithBodyWithResponse Create dataset snapshot
 //
-// Create a new dataset_snapshot. If there is an existing dataset_snapshot with the same name as the one specified in the request, will return the existing dataset_snapshot unmodified
+// Create a new dataset snapshot. If there is an existing dataset snapshot with the same name as the one specified in the request, will return the existing dataset snapshot unmodified
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1044,9 +1044,9 @@ func (c *ClientWithResponses) PostDatasetSnapshotWithBodyWithResponse(ctx contex
 	return ParsePostDatasetSnapshotResponse(rsp)
 }
 
-// PostDatasetSnapshotWithResponse Create dataset_snapshot
+// PostDatasetSnapshotWithResponse Create dataset snapshot
 //
-// Create a new dataset_snapshot. If there is an existing dataset_snapshot with the same name as the one specified in the request, will return the existing dataset_snapshot unmodified
+// Create a new dataset snapshot. If there is an existing dataset snapshot with the same name as the one specified in the request, will return the existing dataset snapshot unmodified
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1059,9 +1059,9 @@ func (c *ClientWithResponses) PostDatasetSnapshotWithResponse(ctx context.Contex
 	return ParsePostDatasetSnapshotResponse(rsp)
 }
 
-// PutDatasetSnapshotWithBodyWithResponse Create or replace dataset_snapshot
+// PutDatasetSnapshotWithBodyWithResponse Create or replace dataset snapshot
 //
-// Create or replace dataset_snapshot. If there is an existing dataset_snapshot with the same name as the one specified in the request, will replace the existing dataset_snapshot with the provided fields
+// Create or replace dataset snapshot. If there is an existing dataset snapshot with the same name as the one specified in the request, will replace the existing dataset snapshot with the provided fields
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1074,9 +1074,9 @@ func (c *ClientWithResponses) PutDatasetSnapshotWithBodyWithResponse(ctx context
 	return ParsePutDatasetSnapshotResponse(rsp)
 }
 
-// PutDatasetSnapshotWithResponse Create or replace dataset_snapshot
+// PutDatasetSnapshotWithResponse Create or replace dataset snapshot
 //
-// Create or replace dataset_snapshot. If there is an existing dataset_snapshot with the same name as the one specified in the request, will replace the existing dataset_snapshot with the provided fields
+// Create or replace dataset snapshot. If there is an existing dataset snapshot with the same name as the one specified in the request, will replace the existing dataset snapshot with the provided fields
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1089,9 +1089,9 @@ func (c *ClientWithResponses) PutDatasetSnapshotWithResponse(ctx context.Context
 	return ParsePutDatasetSnapshotResponse(rsp)
 }
 
-// DeleteDatasetSnapshotIdWithResponse Delete dataset_snapshot
+// DeleteDatasetSnapshotIdWithResponse Delete dataset snapshot
 //
-// Delete a dataset_snapshot object by its id.
+// Delete a dataset snapshot object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1104,9 +1104,9 @@ func (c *ClientWithResponses) DeleteDatasetSnapshotIdWithResponse(ctx context.Co
 	return ParseDeleteDatasetSnapshotIdResponse(rsp)
 }
 
-// GetDatasetSnapshotIdWithResponse Get dataset_snapshot
+// GetDatasetSnapshotIdWithResponse Get dataset snapshot
 //
-// Get a dataset_snapshot object by its id.
+// Get a dataset snapshot object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1119,9 +1119,9 @@ func (c *ClientWithResponses) GetDatasetSnapshotIdWithResponse(ctx context.Conte
 	return ParseGetDatasetSnapshotIdResponse(rsp)
 }
 
-// PatchDatasetSnapshotIdWithBodyWithResponse Partially update dataset_snapshot
+// PatchDatasetSnapshotIdWithBodyWithResponse Partially update dataset snapshot
 //
-// Partially update a dataset_snapshot object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a dataset snapshot object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1134,9 +1134,9 @@ func (c *ClientWithResponses) PatchDatasetSnapshotIdWithBodyWithResponse(ctx con
 	return ParsePatchDatasetSnapshotIdResponse(rsp)
 }
 
-// PatchDatasetSnapshotIdWithResponse Partially update dataset_snapshot
+// PatchDatasetSnapshotIdWithResponse Partially update dataset snapshot
 //
-// Partially update a dataset_snapshot object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a dataset snapshot object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1165,7 +1165,7 @@ func ParseGetDatasetSnapshotResponse(rsp *http.Response) (*GetDatasetSnapshotRes
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			// Objects A list of dataset_snapshot objects
+			// Objects A list of dataset snapshot objects
 			Objects []DatasetSnapshot `json:"objects"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

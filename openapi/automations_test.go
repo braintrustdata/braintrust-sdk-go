@@ -91,7 +91,7 @@ func TestGeneratedAutomationLifecycle(t *testing.T) {
 	}))
 	description := "Updated paused SDK integration test"
 	updated, err := client.PatchProjectAutomationIdWithResponse(ctx, id, openapi.PatchProjectAutomation{
-		Description: nullable.NewNullableWithValue(description), Config: &patchConfig,
+		Description: nullable.NewNullableWithValue(description), Config: nullable.NewNullableWithValue(patchConfig),
 	})
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, updated.StatusCode(), string(updated.Body))

@@ -44,9 +44,9 @@ type AISecret struct {
 	UpdatedAt nullable.Nullable[time.Time] `json:"updated_at,omitempty"`
 }
 
-// DeleteAiSecretWithBody Delete single ai_secret
+// DeleteAiSecretWithBody Delete single AI secret
 //
-// Delete a single ai_secret.
+// Delete a single AI secret.
 //
 // Takes any type of body and a specified content type.
 //
@@ -63,9 +63,9 @@ func (c *Client) DeleteAiSecretWithBody(ctx context.Context, contentType string,
 	return c.Client.Do(req)
 }
 
-// DeleteAiSecret Delete single ai_secret
+// DeleteAiSecret Delete single AI secret
 //
-// Delete a single ai_secret.
+// Delete a single AI secret.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -82,9 +82,9 @@ func (c *Client) DeleteAiSecret(ctx context.Context, body DeleteAiSecretJSONRequ
 	return c.Client.Do(req)
 }
 
-// GetAiSecret List ai_secrets
+// GetAiSecret List AI secrets
 //
-// List out all ai_secrets. The ai_secrets are sorted by creation date, with the most recently-created ai_secrets coming first
+// List out all AI secrets. The AI secrets are sorted by creation date, with the most recently-created AI secrets coming first
 //
 // Corresponds with GET /v1/ai_secret (the `GetAiSecret` operationId).
 func (c *Client) GetAiSecret(ctx context.Context, params *GetAiSecretParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -99,9 +99,9 @@ func (c *Client) GetAiSecret(ctx context.Context, params *GetAiSecretParams, req
 	return c.Client.Do(req)
 }
 
-// PostAiSecretWithBody Create ai_secret
+// PostAiSecretWithBody Create AI secret
 //
-// Create a new ai_secret. If there is an existing ai_secret with the same name as the one specified in the request, will return the existing ai_secret unmodified
+// Create a new AI secret. If there is an existing AI secret with the same name as the one specified in the request, will return the existing AI secret unmodified
 //
 // Takes any type of body and a specified content type.
 //
@@ -118,9 +118,9 @@ func (c *Client) PostAiSecretWithBody(ctx context.Context, contentType string, b
 	return c.Client.Do(req)
 }
 
-// PostAiSecret Create ai_secret
+// PostAiSecret Create AI secret
 //
-// Create a new ai_secret. If there is an existing ai_secret with the same name as the one specified in the request, will return the existing ai_secret unmodified
+// Create a new AI secret. If there is an existing AI secret with the same name as the one specified in the request, will return the existing AI secret unmodified
 //
 // Takes a body of the `application/json` content type.
 //
@@ -137,9 +137,9 @@ func (c *Client) PostAiSecret(ctx context.Context, body PostAiSecretJSONRequestB
 	return c.Client.Do(req)
 }
 
-// PutAiSecretWithBody Create or replace ai_secret
+// PutAiSecretWithBody Create or replace AI secret
 //
-// Create or replace ai_secret. If there is an existing ai_secret with the same name as the one specified in the request, will replace the existing ai_secret with the provided fields
+// Create or replace AI secret. If there is an existing AI secret with the same name as the one specified in the request, will replace the existing AI secret with the provided fields
 //
 // Takes any type of body and a specified content type.
 //
@@ -156,9 +156,9 @@ func (c *Client) PutAiSecretWithBody(ctx context.Context, contentType string, bo
 	return c.Client.Do(req)
 }
 
-// PutAiSecret Create or replace ai_secret
+// PutAiSecret Create or replace AI secret
 //
-// Create or replace ai_secret. If there is an existing ai_secret with the same name as the one specified in the request, will replace the existing ai_secret with the provided fields
+// Create or replace AI secret. If there is an existing AI secret with the same name as the one specified in the request, will replace the existing AI secret with the provided fields
 //
 // Takes a body of the `application/json` content type.
 //
@@ -175,9 +175,9 @@ func (c *Client) PutAiSecret(ctx context.Context, body PutAiSecretJSONRequestBod
 	return c.Client.Do(req)
 }
 
-// DeleteAiSecretId Delete ai_secret
+// DeleteAiSecretId Delete AI secret
 //
-// Delete an ai_secret object by its id.
+// Delete an AI secret object by its id.
 //
 // Corresponds with DELETE /v1/ai_secret/{ai_secret_id} (the `DeleteAiSecretId` operationId).
 func (c *Client) DeleteAiSecretId(ctx context.Context, aiSecretId AiSecretIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -192,9 +192,9 @@ func (c *Client) DeleteAiSecretId(ctx context.Context, aiSecretId AiSecretIdPara
 	return c.Client.Do(req)
 }
 
-// GetAiSecretId Get ai_secret
+// GetAiSecretId Get AI secret
 //
-// Get an ai_secret object by its id.
+// Get an AI secret object by its id.
 //
 // Corresponds with GET /v1/ai_secret/{ai_secret_id} (the `GetAiSecretId` operationId).
 func (c *Client) GetAiSecretId(ctx context.Context, aiSecretId AiSecretIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -209,9 +209,9 @@ func (c *Client) GetAiSecretId(ctx context.Context, aiSecretId AiSecretIdParamPa
 	return c.Client.Do(req)
 }
 
-// PatchAiSecretIdWithBody Partially update ai_secret
+// PatchAiSecretIdWithBody Partially update AI secret
 //
-// Partially update an ai_secret object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update an AI secret object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes any type of body and a specified content type.
 //
@@ -228,9 +228,9 @@ func (c *Client) PatchAiSecretIdWithBody(ctx context.Context, aiSecretId AiSecre
 	return c.Client.Do(req)
 }
 
-// PatchAiSecretId Partially update ai_secret
+// PatchAiSecretId Partially update AI secret
 //
-// Partially update an ai_secret object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update an AI secret object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -701,7 +701,7 @@ type GetAiSecretResponse struct {
 	HTTPResponse *http.Response
 	// JSON200 the response for an HTTP 200 `application/json` response
 	JSON200 *struct {
-		// Objects A list of ai_secret objects
+		// Objects A list of AI secret objects
 		Objects []AISecret `json:"objects"`
 	}
 	// JSON400 the response for an HTTP 400 `application/json` response
@@ -720,7 +720,7 @@ type GetAiSecretResponse struct {
 
 // GetJSON200 returns the response for an HTTP 200 `application/json` response
 func (r GetAiSecretResponse) GetJSON200() *struct {
-	// Objects A list of ai_secret objects
+	// Objects A list of AI secret objects
 	Objects []AISecret `json:"objects"`
 } {
 	return r.JSON200
@@ -1195,9 +1195,9 @@ func (r PatchAiSecretIdResponse) ContentType() string {
 	return ""
 }
 
-// DeleteAiSecretWithBodyWithResponse Delete single ai_secret
+// DeleteAiSecretWithBodyWithResponse Delete single AI secret
 //
-// Delete a single ai_secret.
+// Delete a single AI secret.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1210,9 +1210,9 @@ func (c *ClientWithResponses) DeleteAiSecretWithBodyWithResponse(ctx context.Con
 	return ParseDeleteAiSecretResponse(rsp)
 }
 
-// DeleteAiSecretWithResponse Delete single ai_secret
+// DeleteAiSecretWithResponse Delete single AI secret
 //
-// Delete a single ai_secret.
+// Delete a single AI secret.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1225,9 +1225,9 @@ func (c *ClientWithResponses) DeleteAiSecretWithResponse(ctx context.Context, bo
 	return ParseDeleteAiSecretResponse(rsp)
 }
 
-// GetAiSecretWithResponse List ai_secrets
+// GetAiSecretWithResponse List AI secrets
 //
-// List out all ai_secrets. The ai_secrets are sorted by creation date, with the most recently-created ai_secrets coming first
+// List out all AI secrets. The AI secrets are sorted by creation date, with the most recently-created AI secrets coming first
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1240,9 +1240,9 @@ func (c *ClientWithResponses) GetAiSecretWithResponse(ctx context.Context, param
 	return ParseGetAiSecretResponse(rsp)
 }
 
-// PostAiSecretWithBodyWithResponse Create ai_secret
+// PostAiSecretWithBodyWithResponse Create AI secret
 //
-// Create a new ai_secret. If there is an existing ai_secret with the same name as the one specified in the request, will return the existing ai_secret unmodified
+// Create a new AI secret. If there is an existing AI secret with the same name as the one specified in the request, will return the existing AI secret unmodified
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1255,9 +1255,9 @@ func (c *ClientWithResponses) PostAiSecretWithBodyWithResponse(ctx context.Conte
 	return ParsePostAiSecretResponse(rsp)
 }
 
-// PostAiSecretWithResponse Create ai_secret
+// PostAiSecretWithResponse Create AI secret
 //
-// Create a new ai_secret. If there is an existing ai_secret with the same name as the one specified in the request, will return the existing ai_secret unmodified
+// Create a new AI secret. If there is an existing AI secret with the same name as the one specified in the request, will return the existing AI secret unmodified
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1270,9 +1270,9 @@ func (c *ClientWithResponses) PostAiSecretWithResponse(ctx context.Context, body
 	return ParsePostAiSecretResponse(rsp)
 }
 
-// PutAiSecretWithBodyWithResponse Create or replace ai_secret
+// PutAiSecretWithBodyWithResponse Create or replace AI secret
 //
-// Create or replace ai_secret. If there is an existing ai_secret with the same name as the one specified in the request, will replace the existing ai_secret with the provided fields
+// Create or replace AI secret. If there is an existing AI secret with the same name as the one specified in the request, will replace the existing AI secret with the provided fields
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1285,9 +1285,9 @@ func (c *ClientWithResponses) PutAiSecretWithBodyWithResponse(ctx context.Contex
 	return ParsePutAiSecretResponse(rsp)
 }
 
-// PutAiSecretWithResponse Create or replace ai_secret
+// PutAiSecretWithResponse Create or replace AI secret
 //
-// Create or replace ai_secret. If there is an existing ai_secret with the same name as the one specified in the request, will replace the existing ai_secret with the provided fields
+// Create or replace AI secret. If there is an existing AI secret with the same name as the one specified in the request, will replace the existing AI secret with the provided fields
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1300,9 +1300,9 @@ func (c *ClientWithResponses) PutAiSecretWithResponse(ctx context.Context, body 
 	return ParsePutAiSecretResponse(rsp)
 }
 
-// DeleteAiSecretIdWithResponse Delete ai_secret
+// DeleteAiSecretIdWithResponse Delete AI secret
 //
-// Delete an ai_secret object by its id.
+// Delete an AI secret object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1315,9 +1315,9 @@ func (c *ClientWithResponses) DeleteAiSecretIdWithResponse(ctx context.Context, 
 	return ParseDeleteAiSecretIdResponse(rsp)
 }
 
-// GetAiSecretIdWithResponse Get ai_secret
+// GetAiSecretIdWithResponse Get AI secret
 //
-// Get an ai_secret object by its id.
+// Get an AI secret object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1330,9 +1330,9 @@ func (c *ClientWithResponses) GetAiSecretIdWithResponse(ctx context.Context, aiS
 	return ParseGetAiSecretIdResponse(rsp)
 }
 
-// PatchAiSecretIdWithBodyWithResponse Partially update ai_secret
+// PatchAiSecretIdWithBodyWithResponse Partially update AI secret
 //
-// Partially update an ai_secret object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update an AI secret object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1345,9 +1345,9 @@ func (c *ClientWithResponses) PatchAiSecretIdWithBodyWithResponse(ctx context.Co
 	return ParsePatchAiSecretIdResponse(rsp)
 }
 
-// PatchAiSecretIdWithResponse Partially update ai_secret
+// PatchAiSecretIdWithResponse Partially update AI secret
 //
-// Partially update an ai_secret object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update an AI secret object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1465,7 +1465,7 @@ func ParseGetAiSecretResponse(rsp *http.Response) (*GetAiSecretResponse, error) 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			// Objects A list of ai_secret objects
+			// Objects A list of AI secret objects
 			Objects []AISecret `json:"objects"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

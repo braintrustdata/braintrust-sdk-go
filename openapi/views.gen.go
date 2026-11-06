@@ -30,6 +30,7 @@ const (
 	ViewViewTypeLogs                 ViewViewType = "logs"
 	ViewViewTypeMonitor              ViewViewType = "monitor"
 	ViewViewTypeParameters           ViewViewType = "parameters"
+	ViewViewTypePatterns             ViewViewType = "patterns"
 	ViewViewTypePlayground           ViewViewType = "playground"
 	ViewViewTypePlaygrounds          ViewViewType = "playgrounds"
 	ViewViewTypeProjects             ViewViewType = "projects"
@@ -62,6 +63,8 @@ func (e ViewViewType) Valid() bool {
 	case ViewViewTypeMonitor:
 		return true
 	case ViewViewTypeParameters:
+		return true
+	case ViewViewTypePatterns:
 		return true
 	case ViewViewTypePlayground:
 		return true
@@ -119,7 +122,7 @@ type View struct {
 	ViewData nullable.Nullable[ViewData] `json:"view_data,omitempty"`
 
 	// ViewType Type of object that the view corresponds to.
-	ViewType nullable.Nullable[ViewViewType] `json:"view_type"`
+	ViewType ViewViewType `json:"view_type"`
 }
 
 // ViewViewType Type of object that the view corresponds to.

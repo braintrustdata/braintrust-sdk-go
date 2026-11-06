@@ -64,7 +64,7 @@ type EnvVar struct {
 	// PreviewSecret Redacted preview of the stored secret value
 	PreviewSecret nullable.Nullable[string] `json:"preview_secret,omitempty"`
 
-	// SecretCategory The category of the secret: env_var for regular environment variables, ai_provider for AI provider API keys
+	// SecretCategory The category of the secret: env_var for regular environment variables, ai_provider for AI provider API keys, sandbox_provider for sandbox provider credentials, automation_integration for automation delivery credentials
 	SecretCategory *EnvVarSecretCategory `json:"secret_category,omitempty"`
 
 	// SecretType Optional classification for the secret (for example, the AI provider name)
@@ -80,12 +80,12 @@ type EnvVar struct {
 	Used nullable.Nullable[time.Time] `json:"used,omitempty"`
 }
 
-// EnvVarSecretCategory The category of the secret: env_var for regular environment variables, ai_provider for AI provider API keys
+// EnvVarSecretCategory The category of the secret: env_var for regular environment variables, ai_provider for AI provider API keys, sandbox_provider for sandbox provider credentials, automation_integration for automation delivery credentials
 type EnvVarSecretCategory string
 
-// GetEnvVar List env_vars
+// GetEnvVar List env vars
 //
-// List out all env_vars. The env_vars are sorted by creation date, with the most recently-created env_vars coming first
+// List out all env vars. The env vars are sorted by creation date, with the most recently-created env vars coming first
 //
 // Corresponds with GET /v1/env_var (the `GetEnvVar` operationId).
 func (c *Client) GetEnvVar(ctx context.Context, params *GetEnvVarParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -100,9 +100,9 @@ func (c *Client) GetEnvVar(ctx context.Context, params *GetEnvVarParams, reqEdit
 	return c.Client.Do(req)
 }
 
-// PostEnvVarWithBody Create env_var
+// PostEnvVarWithBody Create env var
 //
-// Create a new env_var. If there is an existing env_var with the same name as the one specified in the request, will return the existing env_var unmodified
+// Create a new env var. If there is an existing env var with the same name as the one specified in the request, will return the existing env var unmodified
 //
 // Takes any type of body and a specified content type.
 //
@@ -119,9 +119,9 @@ func (c *Client) PostEnvVarWithBody(ctx context.Context, contentType string, bod
 	return c.Client.Do(req)
 }
 
-// PostEnvVar Create env_var
+// PostEnvVar Create env var
 //
-// Create a new env_var. If there is an existing env_var with the same name as the one specified in the request, will return the existing env_var unmodified
+// Create a new env var. If there is an existing env var with the same name as the one specified in the request, will return the existing env var unmodified
 //
 // Takes a body of the `application/json` content type.
 //
@@ -138,9 +138,9 @@ func (c *Client) PostEnvVar(ctx context.Context, body PostEnvVarJSONRequestBody,
 	return c.Client.Do(req)
 }
 
-// PutEnvVarWithBody Create or replace env_var
+// PutEnvVarWithBody Create or replace env var
 //
-// Create or replace env_var. If there is an existing env_var with the same name as the one specified in the request, will replace the existing env_var with the provided fields
+// Create or replace env var. If there is an existing env var with the same name as the one specified in the request, will replace the existing env var with the provided fields
 //
 // Takes any type of body and a specified content type.
 //
@@ -157,9 +157,9 @@ func (c *Client) PutEnvVarWithBody(ctx context.Context, contentType string, body
 	return c.Client.Do(req)
 }
 
-// PutEnvVar Create or replace env_var
+// PutEnvVar Create or replace env var
 //
-// Create or replace env_var. If there is an existing env_var with the same name as the one specified in the request, will replace the existing env_var with the provided fields
+// Create or replace env var. If there is an existing env var with the same name as the one specified in the request, will replace the existing env var with the provided fields
 //
 // Takes a body of the `application/json` content type.
 //
@@ -176,9 +176,9 @@ func (c *Client) PutEnvVar(ctx context.Context, body PutEnvVarJSONRequestBody, r
 	return c.Client.Do(req)
 }
 
-// DeleteEnvVarId Delete env_var
+// DeleteEnvVarId Delete env var
 //
-// Delete an env_var object by its id.
+// Delete an env var object by its id.
 //
 // Corresponds with DELETE /v1/env_var/{env_var_id} (the `DeleteEnvVarId` operationId).
 func (c *Client) DeleteEnvVarId(ctx context.Context, envVarId EnvVarIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -193,9 +193,9 @@ func (c *Client) DeleteEnvVarId(ctx context.Context, envVarId EnvVarIdParamParam
 	return c.Client.Do(req)
 }
 
-// GetEnvVarId Get env_var
+// GetEnvVarId Get env var
 //
-// Get an env_var object by its id.
+// Get an env var object by its id.
 //
 // Corresponds with GET /v1/env_var/{env_var_id} (the `GetEnvVarId` operationId).
 func (c *Client) GetEnvVarId(ctx context.Context, envVarId EnvVarIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -210,9 +210,9 @@ func (c *Client) GetEnvVarId(ctx context.Context, envVarId EnvVarIdParamParamete
 	return c.Client.Do(req)
 }
 
-// PatchEnvVarIdWithBody Partially update env_var
+// PatchEnvVarIdWithBody Partially update env var
 //
-// Partially update an env_var object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update an env var object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes any type of body and a specified content type.
 //
@@ -229,9 +229,9 @@ func (c *Client) PatchEnvVarIdWithBody(ctx context.Context, envVarId EnvVarIdPar
 	return c.Client.Do(req)
 }
 
-// PatchEnvVarId Partially update env_var
+// PatchEnvVarId Partially update env var
 //
-// Partially update an env_var object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update an env var object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -555,7 +555,7 @@ type GetEnvVarResponse struct {
 	HTTPResponse *http.Response
 	// JSON200 the response for an HTTP 200 `application/json` response
 	JSON200 *struct {
-		// Objects A list of env_var objects
+		// Objects A list of env var objects
 		Objects []EnvVar `json:"objects"`
 	}
 	// JSON400 the response for an HTTP 400 `application/json` response
@@ -574,7 +574,7 @@ type GetEnvVarResponse struct {
 
 // GetJSON200 returns the response for an HTTP 200 `application/json` response
 func (r GetEnvVarResponse) GetJSON200() *struct {
-	// Objects A list of env_var objects
+	// Objects A list of env var objects
 	Objects []EnvVar `json:"objects"`
 } {
 	return r.JSON200
@@ -1049,9 +1049,9 @@ func (r PatchEnvVarIdResponse) ContentType() string {
 	return ""
 }
 
-// GetEnvVarWithResponse List env_vars
+// GetEnvVarWithResponse List env vars
 //
-// List out all env_vars. The env_vars are sorted by creation date, with the most recently-created env_vars coming first
+// List out all env vars. The env vars are sorted by creation date, with the most recently-created env vars coming first
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1064,9 +1064,9 @@ func (c *ClientWithResponses) GetEnvVarWithResponse(ctx context.Context, params 
 	return ParseGetEnvVarResponse(rsp)
 }
 
-// PostEnvVarWithBodyWithResponse Create env_var
+// PostEnvVarWithBodyWithResponse Create env var
 //
-// Create a new env_var. If there is an existing env_var with the same name as the one specified in the request, will return the existing env_var unmodified
+// Create a new env var. If there is an existing env var with the same name as the one specified in the request, will return the existing env var unmodified
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1079,9 +1079,9 @@ func (c *ClientWithResponses) PostEnvVarWithBodyWithResponse(ctx context.Context
 	return ParsePostEnvVarResponse(rsp)
 }
 
-// PostEnvVarWithResponse Create env_var
+// PostEnvVarWithResponse Create env var
 //
-// Create a new env_var. If there is an existing env_var with the same name as the one specified in the request, will return the existing env_var unmodified
+// Create a new env var. If there is an existing env var with the same name as the one specified in the request, will return the existing env var unmodified
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1094,9 +1094,9 @@ func (c *ClientWithResponses) PostEnvVarWithResponse(ctx context.Context, body P
 	return ParsePostEnvVarResponse(rsp)
 }
 
-// PutEnvVarWithBodyWithResponse Create or replace env_var
+// PutEnvVarWithBodyWithResponse Create or replace env var
 //
-// Create or replace env_var. If there is an existing env_var with the same name as the one specified in the request, will replace the existing env_var with the provided fields
+// Create or replace env var. If there is an existing env var with the same name as the one specified in the request, will replace the existing env var with the provided fields
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1109,9 +1109,9 @@ func (c *ClientWithResponses) PutEnvVarWithBodyWithResponse(ctx context.Context,
 	return ParsePutEnvVarResponse(rsp)
 }
 
-// PutEnvVarWithResponse Create or replace env_var
+// PutEnvVarWithResponse Create or replace env var
 //
-// Create or replace env_var. If there is an existing env_var with the same name as the one specified in the request, will replace the existing env_var with the provided fields
+// Create or replace env var. If there is an existing env var with the same name as the one specified in the request, will replace the existing env var with the provided fields
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1124,9 +1124,9 @@ func (c *ClientWithResponses) PutEnvVarWithResponse(ctx context.Context, body Pu
 	return ParsePutEnvVarResponse(rsp)
 }
 
-// DeleteEnvVarIdWithResponse Delete env_var
+// DeleteEnvVarIdWithResponse Delete env var
 //
-// Delete an env_var object by its id.
+// Delete an env var object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1139,9 +1139,9 @@ func (c *ClientWithResponses) DeleteEnvVarIdWithResponse(ctx context.Context, en
 	return ParseDeleteEnvVarIdResponse(rsp)
 }
 
-// GetEnvVarIdWithResponse Get env_var
+// GetEnvVarIdWithResponse Get env var
 //
-// Get an env_var object by its id.
+// Get an env var object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1154,9 +1154,9 @@ func (c *ClientWithResponses) GetEnvVarIdWithResponse(ctx context.Context, envVa
 	return ParseGetEnvVarIdResponse(rsp)
 }
 
-// PatchEnvVarIdWithBodyWithResponse Partially update env_var
+// PatchEnvVarIdWithBodyWithResponse Partially update env var
 //
-// Partially update an env_var object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update an env var object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1169,9 +1169,9 @@ func (c *ClientWithResponses) PatchEnvVarIdWithBodyWithResponse(ctx context.Cont
 	return ParsePatchEnvVarIdResponse(rsp)
 }
 
-// PatchEnvVarIdWithResponse Partially update env_var
+// PatchEnvVarIdWithResponse Partially update env var
 //
-// Partially update an env_var object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update an env var object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1200,7 +1200,7 @@ func ParseGetEnvVarResponse(rsp *http.Response) (*GetEnvVarResponse, error) {
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			// Objects A list of env_var objects
+			// Objects A list of env var objects
 			Objects []EnvVar `json:"objects"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

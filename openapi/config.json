@@ -2,8 +2,8 @@
   "spec": {
     "repository": "braintrustdata/braintrust-openapi",
     "path": "openapi/spec.json",
-    "commit": "e53363ed2c1530a53b68872433f68844dceaad1b",
-    "sha256": "e5be7d758587038ebe330354f7a5337645f9bd3b2c7bffa46b5f6dcaea056478"
+    "commit": "4cc0615694512d6e77fce6bff2c70d1531208daa",
+    "sha256": "ed5153cb78828024c12575df294a886624341065e9e9dd5095d52992087db1be"
   },
   "generator": {
     "version": "v2.8.0"

@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-var validSpec = []byte("{\n  \"openapi\": \"3.0.3\", \"paths\": {}, \"components\": {\"schemas\": {}}\n}\n")
+var validSpec = []byte("{\n  \"openapi\": \"3.1.1\", \"paths\": {}, \"components\": {\"schemas\": {}}\n}\n")
 
 func TestFetchPreservesDestinationOnFailure(t *testing.T) {
 	tests := []struct {
@@ -69,7 +69,7 @@ func TestFetchPreservesOriginalBytes(t *testing.T) {
 	if err := json.Unmarshal(content, &document); err != nil {
 		t.Fatal(err)
 	}
-	if document["openapi"] != "3.0.3" {
+	if document["openapi"] != "3.1.1" {
 		t.Fatalf("unexpected document: %v", document)
 	}
 }
