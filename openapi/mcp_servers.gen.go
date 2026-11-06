@@ -44,9 +44,9 @@ type MCPServer struct {
 	UserId nullable.Nullable[openapi_types.UUID] `json:"user_id,omitempty"`
 }
 
-// GetMcpServer List mcp_servers
+// GetMcpServer List MCP servers
 //
-// List out all mcp_servers. The mcp_servers are sorted by creation date, with the most recently-created mcp_servers coming first
+// List out all MCP servers. The MCP servers are sorted by creation date, with the most recently-created MCP servers coming first
 //
 // Corresponds with GET /v1/mcp_server (the `GetMcpServer` operationId).
 func (c *Client) GetMcpServer(ctx context.Context, params *GetMcpServerParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -61,9 +61,9 @@ func (c *Client) GetMcpServer(ctx context.Context, params *GetMcpServerParams, r
 	return c.Client.Do(req)
 }
 
-// PostMcpServerWithBody Create mcp_server
+// PostMcpServerWithBody Create MCP server
 //
-// Create a new mcp_server. If there is an existing mcp_server with the same name as the one specified in the request, will return the existing mcp_server unmodified
+// Create a new MCP server. If there is an existing MCP server with the same name as the one specified in the request, will return the existing MCP server unmodified
 //
 // Takes any type of body and a specified content type.
 //
@@ -80,9 +80,9 @@ func (c *Client) PostMcpServerWithBody(ctx context.Context, contentType string, 
 	return c.Client.Do(req)
 }
 
-// PostMcpServer Create mcp_server
+// PostMcpServer Create MCP server
 //
-// Create a new mcp_server. If there is an existing mcp_server with the same name as the one specified in the request, will return the existing mcp_server unmodified
+// Create a new MCP server. If there is an existing MCP server with the same name as the one specified in the request, will return the existing MCP server unmodified
 //
 // Takes a body of the `application/json` content type.
 //
@@ -99,9 +99,9 @@ func (c *Client) PostMcpServer(ctx context.Context, body PostMcpServerJSONReques
 	return c.Client.Do(req)
 }
 
-// PutMcpServerWithBody Create or replace mcp_server
+// PutMcpServerWithBody Create or replace MCP server
 //
-// Create or replace mcp_server. If there is an existing mcp_server with the same name as the one specified in the request, will replace the existing mcp_server with the provided fields
+// Create or replace MCP server. If there is an existing MCP server with the same name as the one specified in the request, will replace the existing MCP server with the provided fields
 //
 // Takes any type of body and a specified content type.
 //
@@ -118,9 +118,9 @@ func (c *Client) PutMcpServerWithBody(ctx context.Context, contentType string, b
 	return c.Client.Do(req)
 }
 
-// PutMcpServer Create or replace mcp_server
+// PutMcpServer Create or replace MCP server
 //
-// Create or replace mcp_server. If there is an existing mcp_server with the same name as the one specified in the request, will replace the existing mcp_server with the provided fields
+// Create or replace MCP server. If there is an existing MCP server with the same name as the one specified in the request, will replace the existing MCP server with the provided fields
 //
 // Takes a body of the `application/json` content type.
 //
@@ -137,9 +137,9 @@ func (c *Client) PutMcpServer(ctx context.Context, body PutMcpServerJSONRequestB
 	return c.Client.Do(req)
 }
 
-// DeleteMcpServerId Delete mcp_server
+// DeleteMcpServerId Delete MCP server
 //
-// Delete a mcp_server object by its id.
+// Delete an MCP server object by its id.
 //
 // Corresponds with DELETE /v1/mcp_server/{mcp_server_id} (the `DeleteMcpServerId` operationId).
 func (c *Client) DeleteMcpServerId(ctx context.Context, mcpServerId McpServerIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -154,9 +154,9 @@ func (c *Client) DeleteMcpServerId(ctx context.Context, mcpServerId McpServerIdP
 	return c.Client.Do(req)
 }
 
-// GetMcpServerId Get mcp_server
+// GetMcpServerId Get MCP server
 //
-// Get a mcp_server object by its id.
+// Get an MCP server object by its id.
 //
 // Corresponds with GET /v1/mcp_server/{mcp_server_id} (the `GetMcpServerId` operationId).
 func (c *Client) GetMcpServerId(ctx context.Context, mcpServerId McpServerIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -171,9 +171,9 @@ func (c *Client) GetMcpServerId(ctx context.Context, mcpServerId McpServerIdPara
 	return c.Client.Do(req)
 }
 
-// PatchMcpServerIdWithBody Partially update mcp_server
+// PatchMcpServerIdWithBody Partially update MCP server
 //
-// Partially update a mcp_server object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update an MCP server object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes any type of body and a specified content type.
 //
@@ -190,9 +190,9 @@ func (c *Client) PatchMcpServerIdWithBody(ctx context.Context, mcpServerId McpSe
 	return c.Client.Do(req)
 }
 
-// PatchMcpServerId Partially update mcp_server
+// PatchMcpServerId Partially update MCP server
 //
-// Partially update a mcp_server object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update an MCP server object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -528,7 +528,7 @@ type GetMcpServerResponse struct {
 	HTTPResponse *http.Response
 	// JSON200 the response for an HTTP 200 `application/json` response
 	JSON200 *struct {
-		// Objects A list of mcp_server objects
+		// Objects A list of MCP server objects
 		Objects []MCPServer `json:"objects"`
 	}
 	// JSON400 the response for an HTTP 400 `application/json` response
@@ -547,7 +547,7 @@ type GetMcpServerResponse struct {
 
 // GetJSON200 returns the response for an HTTP 200 `application/json` response
 func (r GetMcpServerResponse) GetJSON200() *struct {
-	// Objects A list of mcp_server objects
+	// Objects A list of MCP server objects
 	Objects []MCPServer `json:"objects"`
 } {
 	return r.JSON200
@@ -1022,9 +1022,9 @@ func (r PatchMcpServerIdResponse) ContentType() string {
 	return ""
 }
 
-// GetMcpServerWithResponse List mcp_servers
+// GetMcpServerWithResponse List MCP servers
 //
-// List out all mcp_servers. The mcp_servers are sorted by creation date, with the most recently-created mcp_servers coming first
+// List out all MCP servers. The MCP servers are sorted by creation date, with the most recently-created MCP servers coming first
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1037,9 +1037,9 @@ func (c *ClientWithResponses) GetMcpServerWithResponse(ctx context.Context, para
 	return ParseGetMcpServerResponse(rsp)
 }
 
-// PostMcpServerWithBodyWithResponse Create mcp_server
+// PostMcpServerWithBodyWithResponse Create MCP server
 //
-// Create a new mcp_server. If there is an existing mcp_server with the same name as the one specified in the request, will return the existing mcp_server unmodified
+// Create a new MCP server. If there is an existing MCP server with the same name as the one specified in the request, will return the existing MCP server unmodified
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1052,9 +1052,9 @@ func (c *ClientWithResponses) PostMcpServerWithBodyWithResponse(ctx context.Cont
 	return ParsePostMcpServerResponse(rsp)
 }
 
-// PostMcpServerWithResponse Create mcp_server
+// PostMcpServerWithResponse Create MCP server
 //
-// Create a new mcp_server. If there is an existing mcp_server with the same name as the one specified in the request, will return the existing mcp_server unmodified
+// Create a new MCP server. If there is an existing MCP server with the same name as the one specified in the request, will return the existing MCP server unmodified
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1067,9 +1067,9 @@ func (c *ClientWithResponses) PostMcpServerWithResponse(ctx context.Context, bod
 	return ParsePostMcpServerResponse(rsp)
 }
 
-// PutMcpServerWithBodyWithResponse Create or replace mcp_server
+// PutMcpServerWithBodyWithResponse Create or replace MCP server
 //
-// Create or replace mcp_server. If there is an existing mcp_server with the same name as the one specified in the request, will replace the existing mcp_server with the provided fields
+// Create or replace MCP server. If there is an existing MCP server with the same name as the one specified in the request, will replace the existing MCP server with the provided fields
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1082,9 +1082,9 @@ func (c *ClientWithResponses) PutMcpServerWithBodyWithResponse(ctx context.Conte
 	return ParsePutMcpServerResponse(rsp)
 }
 
-// PutMcpServerWithResponse Create or replace mcp_server
+// PutMcpServerWithResponse Create or replace MCP server
 //
-// Create or replace mcp_server. If there is an existing mcp_server with the same name as the one specified in the request, will replace the existing mcp_server with the provided fields
+// Create or replace MCP server. If there is an existing MCP server with the same name as the one specified in the request, will replace the existing MCP server with the provided fields
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1097,9 +1097,9 @@ func (c *ClientWithResponses) PutMcpServerWithResponse(ctx context.Context, body
 	return ParsePutMcpServerResponse(rsp)
 }
 
-// DeleteMcpServerIdWithResponse Delete mcp_server
+// DeleteMcpServerIdWithResponse Delete MCP server
 //
-// Delete a mcp_server object by its id.
+// Delete an MCP server object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1112,9 +1112,9 @@ func (c *ClientWithResponses) DeleteMcpServerIdWithResponse(ctx context.Context,
 	return ParseDeleteMcpServerIdResponse(rsp)
 }
 
-// GetMcpServerIdWithResponse Get mcp_server
+// GetMcpServerIdWithResponse Get MCP server
 //
-// Get a mcp_server object by its id.
+// Get an MCP server object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1127,9 +1127,9 @@ func (c *ClientWithResponses) GetMcpServerIdWithResponse(ctx context.Context, mc
 	return ParseGetMcpServerIdResponse(rsp)
 }
 
-// PatchMcpServerIdWithBodyWithResponse Partially update mcp_server
+// PatchMcpServerIdWithBodyWithResponse Partially update MCP server
 //
-// Partially update a mcp_server object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update an MCP server object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1142,9 +1142,9 @@ func (c *ClientWithResponses) PatchMcpServerIdWithBodyWithResponse(ctx context.C
 	return ParsePatchMcpServerIdResponse(rsp)
 }
 
-// PatchMcpServerIdWithResponse Partially update mcp_server
+// PatchMcpServerIdWithResponse Partially update MCP server
 //
-// Partially update a mcp_server object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update an MCP server object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1173,7 +1173,7 @@ func ParseGetMcpServerResponse(rsp *http.Response) (*GetMcpServerResponse, error
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			// Objects A list of mcp_server objects
+			// Objects A list of MCP server objects
 			Objects []MCPServer `json:"objects"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

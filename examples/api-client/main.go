@@ -326,7 +326,7 @@ func AutomationLifecycle(ctx context.Context, client *openapi.ClientWithResponse
 	}
 	updated, err := client.PatchProjectAutomationIdWithResponse(ctx, automationID, openapi.PatchProjectAutomation{
 		Description: nullable.NewNullableWithValue("Updated temporary paused automation with a stricter factuality filter"),
-		Config:      &patchConfig,
+		Config:      nullable.NewNullableWithValue(patchConfig),
 	})
 	if err != nil {
 		return fmt.Errorf("update temporary automation: %w", err)

@@ -47,9 +47,9 @@ type SpanIFrame struct {
 	UserId nullable.Nullable[openapi_types.UUID] `json:"user_id,omitempty"`
 }
 
-// GetSpanIframe List span_iframes
+// GetSpanIframe List span iframes
 //
-// List out all span_iframes. The span_iframes are sorted by creation date, with the most recently-created span_iframes coming first
+// List out all span iframes. The span iframes are sorted by creation date, with the most recently-created span iframes coming first
 //
 // Corresponds with GET /v1/span_iframe (the `GetSpanIframe` operationId).
 func (c *Client) GetSpanIframe(ctx context.Context, params *GetSpanIframeParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -64,9 +64,9 @@ func (c *Client) GetSpanIframe(ctx context.Context, params *GetSpanIframeParams,
 	return c.Client.Do(req)
 }
 
-// PostSpanIframeWithBody Create span_iframe
+// PostSpanIframeWithBody Create span iframe
 //
-// Create a new span_iframe. If there is an existing span_iframe with the same name as the one specified in the request, will return the existing span_iframe unmodified
+// Create a new span iframe. If there is an existing span iframe with the same name as the one specified in the request, will return the existing span iframe unmodified
 //
 // Takes any type of body and a specified content type.
 //
@@ -83,9 +83,9 @@ func (c *Client) PostSpanIframeWithBody(ctx context.Context, contentType string,
 	return c.Client.Do(req)
 }
 
-// PostSpanIframe Create span_iframe
+// PostSpanIframe Create span iframe
 //
-// Create a new span_iframe. If there is an existing span_iframe with the same name as the one specified in the request, will return the existing span_iframe unmodified
+// Create a new span iframe. If there is an existing span iframe with the same name as the one specified in the request, will return the existing span iframe unmodified
 //
 // Takes a body of the `application/json` content type.
 //
@@ -102,9 +102,9 @@ func (c *Client) PostSpanIframe(ctx context.Context, body PostSpanIframeJSONRequ
 	return c.Client.Do(req)
 }
 
-// PutSpanIframeWithBody Create or replace span_iframe
+// PutSpanIframeWithBody Create or replace span iframe
 //
-// Create or replace span_iframe. If there is an existing span_iframe with the same name as the one specified in the request, will replace the existing span_iframe with the provided fields
+// Create or replace span iframe. If there is an existing span iframe with the same name as the one specified in the request, will replace the existing span iframe with the provided fields
 //
 // Takes any type of body and a specified content type.
 //
@@ -121,9 +121,9 @@ func (c *Client) PutSpanIframeWithBody(ctx context.Context, contentType string, 
 	return c.Client.Do(req)
 }
 
-// PutSpanIframe Create or replace span_iframe
+// PutSpanIframe Create or replace span iframe
 //
-// Create or replace span_iframe. If there is an existing span_iframe with the same name as the one specified in the request, will replace the existing span_iframe with the provided fields
+// Create or replace span iframe. If there is an existing span iframe with the same name as the one specified in the request, will replace the existing span iframe with the provided fields
 //
 // Takes a body of the `application/json` content type.
 //
@@ -140,9 +140,9 @@ func (c *Client) PutSpanIframe(ctx context.Context, body PutSpanIframeJSONReques
 	return c.Client.Do(req)
 }
 
-// DeleteSpanIframeId Delete span_iframe
+// DeleteSpanIframeId Delete span iframe
 //
-// Delete a span_iframe object by its id.
+// Delete a span iframe object by its id.
 //
 // Corresponds with DELETE /v1/span_iframe/{span_iframe_id} (the `DeleteSpanIframeId` operationId).
 func (c *Client) DeleteSpanIframeId(ctx context.Context, spanIframeId SpanIframeIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -157,9 +157,9 @@ func (c *Client) DeleteSpanIframeId(ctx context.Context, spanIframeId SpanIframe
 	return c.Client.Do(req)
 }
 
-// GetSpanIframeId Get span_iframe
+// GetSpanIframeId Get span iframe
 //
-// Get a span_iframe object by its id.
+// Get a span iframe object by its id.
 //
 // Corresponds with GET /v1/span_iframe/{span_iframe_id} (the `GetSpanIframeId` operationId).
 func (c *Client) GetSpanIframeId(ctx context.Context, spanIframeId SpanIframeIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -174,9 +174,9 @@ func (c *Client) GetSpanIframeId(ctx context.Context, spanIframeId SpanIframeIdP
 	return c.Client.Do(req)
 }
 
-// PatchSpanIframeIdWithBody Partially update span_iframe
+// PatchSpanIframeIdWithBody Partially update span iframe
 //
-// Partially update a span_iframe object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a span iframe object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes any type of body and a specified content type.
 //
@@ -193,9 +193,9 @@ func (c *Client) PatchSpanIframeIdWithBody(ctx context.Context, spanIframeId Spa
 	return c.Client.Do(req)
 }
 
-// PatchSpanIframeId Partially update span_iframe
+// PatchSpanIframeId Partially update span iframe
 //
-// Partially update a span_iframe object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a span iframe object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -531,7 +531,7 @@ type GetSpanIframeResponse struct {
 	HTTPResponse *http.Response
 	// JSON200 the response for an HTTP 200 `application/json` response
 	JSON200 *struct {
-		// Objects A list of span_iframe objects
+		// Objects A list of span iframe objects
 		Objects []SpanIFrame `json:"objects"`
 	}
 	// JSON400 the response for an HTTP 400 `application/json` response
@@ -550,7 +550,7 @@ type GetSpanIframeResponse struct {
 
 // GetJSON200 returns the response for an HTTP 200 `application/json` response
 func (r GetSpanIframeResponse) GetJSON200() *struct {
-	// Objects A list of span_iframe objects
+	// Objects A list of span iframe objects
 	Objects []SpanIFrame `json:"objects"`
 } {
 	return r.JSON200
@@ -1025,9 +1025,9 @@ func (r PatchSpanIframeIdResponse) ContentType() string {
 	return ""
 }
 
-// GetSpanIframeWithResponse List span_iframes
+// GetSpanIframeWithResponse List span iframes
 //
-// List out all span_iframes. The span_iframes are sorted by creation date, with the most recently-created span_iframes coming first
+// List out all span iframes. The span iframes are sorted by creation date, with the most recently-created span iframes coming first
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1040,9 +1040,9 @@ func (c *ClientWithResponses) GetSpanIframeWithResponse(ctx context.Context, par
 	return ParseGetSpanIframeResponse(rsp)
 }
 
-// PostSpanIframeWithBodyWithResponse Create span_iframe
+// PostSpanIframeWithBodyWithResponse Create span iframe
 //
-// Create a new span_iframe. If there is an existing span_iframe with the same name as the one specified in the request, will return the existing span_iframe unmodified
+// Create a new span iframe. If there is an existing span iframe with the same name as the one specified in the request, will return the existing span iframe unmodified
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1055,9 +1055,9 @@ func (c *ClientWithResponses) PostSpanIframeWithBodyWithResponse(ctx context.Con
 	return ParsePostSpanIframeResponse(rsp)
 }
 
-// PostSpanIframeWithResponse Create span_iframe
+// PostSpanIframeWithResponse Create span iframe
 //
-// Create a new span_iframe. If there is an existing span_iframe with the same name as the one specified in the request, will return the existing span_iframe unmodified
+// Create a new span iframe. If there is an existing span iframe with the same name as the one specified in the request, will return the existing span iframe unmodified
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1070,9 +1070,9 @@ func (c *ClientWithResponses) PostSpanIframeWithResponse(ctx context.Context, bo
 	return ParsePostSpanIframeResponse(rsp)
 }
 
-// PutSpanIframeWithBodyWithResponse Create or replace span_iframe
+// PutSpanIframeWithBodyWithResponse Create or replace span iframe
 //
-// Create or replace span_iframe. If there is an existing span_iframe with the same name as the one specified in the request, will replace the existing span_iframe with the provided fields
+// Create or replace span iframe. If there is an existing span iframe with the same name as the one specified in the request, will replace the existing span iframe with the provided fields
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1085,9 +1085,9 @@ func (c *ClientWithResponses) PutSpanIframeWithBodyWithResponse(ctx context.Cont
 	return ParsePutSpanIframeResponse(rsp)
 }
 
-// PutSpanIframeWithResponse Create or replace span_iframe
+// PutSpanIframeWithResponse Create or replace span iframe
 //
-// Create or replace span_iframe. If there is an existing span_iframe with the same name as the one specified in the request, will replace the existing span_iframe with the provided fields
+// Create or replace span iframe. If there is an existing span iframe with the same name as the one specified in the request, will replace the existing span iframe with the provided fields
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1100,9 +1100,9 @@ func (c *ClientWithResponses) PutSpanIframeWithResponse(ctx context.Context, bod
 	return ParsePutSpanIframeResponse(rsp)
 }
 
-// DeleteSpanIframeIdWithResponse Delete span_iframe
+// DeleteSpanIframeIdWithResponse Delete span iframe
 //
-// Delete a span_iframe object by its id.
+// Delete a span iframe object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1115,9 +1115,9 @@ func (c *ClientWithResponses) DeleteSpanIframeIdWithResponse(ctx context.Context
 	return ParseDeleteSpanIframeIdResponse(rsp)
 }
 
-// GetSpanIframeIdWithResponse Get span_iframe
+// GetSpanIframeIdWithResponse Get span iframe
 //
-// Get a span_iframe object by its id.
+// Get a span iframe object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1130,9 +1130,9 @@ func (c *ClientWithResponses) GetSpanIframeIdWithResponse(ctx context.Context, s
 	return ParseGetSpanIframeIdResponse(rsp)
 }
 
-// PatchSpanIframeIdWithBodyWithResponse Partially update span_iframe
+// PatchSpanIframeIdWithBodyWithResponse Partially update span iframe
 //
-// Partially update a span_iframe object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a span iframe object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1145,9 +1145,9 @@ func (c *ClientWithResponses) PatchSpanIframeIdWithBodyWithResponse(ctx context.
 	return ParsePatchSpanIframeIdResponse(rsp)
 }
 
-// PatchSpanIframeIdWithResponse Partially update span_iframe
+// PatchSpanIframeIdWithResponse Partially update span iframe
 //
-// Partially update a span_iframe object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a span iframe object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1176,7 +1176,7 @@ func ParseGetSpanIframeResponse(rsp *http.Response) (*GetSpanIframeResponse, err
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			// Objects A list of span_iframe objects
+			// Objects A list of span iframe objects
 			Objects []SpanIFrame `json:"objects"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

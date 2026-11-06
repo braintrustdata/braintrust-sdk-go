@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-// GetApiKey List api_keys
+// GetApiKey List API keys
 //
 // List out all API keys. They are sorted by creation date, with the most recently-created keys coming first.
 //
@@ -32,9 +32,9 @@ func (c *Client) GetApiKey(ctx context.Context, params *GetApiKeyParams, reqEdit
 	return c.Client.Do(req)
 }
 
-// DeleteApiKeyId Delete api_key
+// DeleteApiKeyId Delete API key
 //
-// Delete an api_key object by its id.
+// Delete an API key object by its id.
 //
 // Corresponds with DELETE /v1/api_key/{api_key_id} (the `DeleteApiKeyId` operationId).
 func (c *Client) DeleteApiKeyId(ctx context.Context, apiKeyId ApiKeyIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -49,9 +49,9 @@ func (c *Client) DeleteApiKeyId(ctx context.Context, apiKeyId ApiKeyIdParamParam
 	return c.Client.Do(req)
 }
 
-// GetApiKeyId Get api_key
+// GetApiKeyId Get API key
 //
-// Get an api_key object by its id.
+// Get an API key object by its id.
 //
 // Corresponds with GET /v1/api_key/{api_key_id} (the `GetApiKeyId` operationId).
 func (c *Client) GetApiKeyId(ctx context.Context, apiKeyId ApiKeyIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -258,7 +258,7 @@ type GetApiKeyResponse struct {
 	HTTPResponse *http.Response
 	// JSON200 the response for an HTTP 200 `application/json` response
 	JSON200 *struct {
-		// Objects A list of api_key objects
+		// Objects A list of API key objects
 		Objects []ApiKey `json:"objects"`
 	}
 	// JSON400 the response for an HTTP 400 `application/json` response
@@ -277,7 +277,7 @@ type GetApiKeyResponse struct {
 
 // GetJSON200 returns the response for an HTTP 200 `application/json` response
 func (r GetApiKeyResponse) GetJSON200() *struct {
-	// Objects A list of api_key objects
+	// Objects A list of API key objects
 	Objects []ApiKey `json:"objects"`
 } {
 	return r.JSON200
@@ -503,7 +503,7 @@ func (r GetApiKeyIdResponse) ContentType() string {
 	return ""
 }
 
-// GetApiKeyWithResponse List api_keys
+// GetApiKeyWithResponse List API keys
 //
 // List out all API keys. They are sorted by creation date, with the most recently-created keys coming first.
 //
@@ -520,9 +520,9 @@ func (c *ClientWithResponses) GetApiKeyWithResponse(ctx context.Context, params 
 	return ParseGetApiKeyResponse(rsp)
 }
 
-// DeleteApiKeyIdWithResponse Delete api_key
+// DeleteApiKeyIdWithResponse Delete API key
 //
-// Delete an api_key object by its id.
+// Delete an API key object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -535,9 +535,9 @@ func (c *ClientWithResponses) DeleteApiKeyIdWithResponse(ctx context.Context, ap
 	return ParseDeleteApiKeyIdResponse(rsp)
 }
 
-// GetApiKeyIdWithResponse Get api_key
+// GetApiKeyIdWithResponse Get API key
 //
-// Get an api_key object by its id.
+// Get an API key object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -566,7 +566,7 @@ func ParseGetApiKeyResponse(rsp *http.Response) (*GetApiKeyResponse, error) {
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			// Objects A list of api_key objects
+			// Objects A list of API key objects
 			Objects []ApiKey `json:"objects"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

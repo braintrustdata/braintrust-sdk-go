@@ -181,7 +181,7 @@ func (c *Client) PatchFunctionId(ctx context.Context, functionId FunctionIdParam
 
 // PostFunctionIdInvokeWithBody Invoke function
 //
-// Invoke a function.
+// Run the specified function with the provided input and return its result. Use `version` to select a specific function version, `parent` to attach the call to a trace, and `stream` to receive results in the Braintrust SSE format.
 //
 // Takes any type of body and a specified content type.
 //
@@ -200,7 +200,7 @@ func (c *Client) PostFunctionIdInvokeWithBody(ctx context.Context, functionId Fu
 
 // PostFunctionIdInvoke Invoke function
 //
-// Invoke a function.
+// Run the specified function with the provided input and return its result. Use `version` to select a specific function version, `parent` to attach the call to a trace, and `stream` to receive results in the Braintrust SSE format.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -1354,7 +1354,7 @@ func (c *ClientWithResponses) PatchFunctionIdWithResponse(ctx context.Context, f
 
 // PostFunctionIdInvokeWithBodyWithResponse Invoke function
 //
-// Invoke a function.
+// Run the specified function with the provided input and return its result. Use `version` to select a specific function version, `parent` to attach the call to a trace, and `stream` to receive results in the Braintrust SSE format.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1369,7 +1369,7 @@ func (c *ClientWithResponses) PostFunctionIdInvokeWithBodyWithResponse(ctx conte
 
 // PostFunctionIdInvokeWithResponse Invoke function
 //
-// Invoke a function.
+// Run the specified function with the provided input and return its result. Use `version` to select a specific function version, `parent` to attach the call to a trace, and `stream` to receive results in the Braintrust SSE format.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1939,6 +1939,9 @@ func ParsePostFunctionIdInvokeResponse(rsp *http.Response) (*PostFunctionIdInvok
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	case rsp.StatusCode == 200:
+		// Content-type (text/event-stream) unsupported
 
 	}
 

@@ -838,21 +838,6 @@ func (e CodeBundleRuntimeContextRuntime) Valid() bool {
 	}
 }
 
-// Defines values for CreateOrgAutomationConfigEventType.
-const (
-	CreateOrgAutomationConfigEventTypeRetention CreateOrgAutomationConfigEventType = "retention"
-)
-
-// Valid indicates whether the value is a known member of the CreateOrgAutomationConfigEventType enum.
-func (e CreateOrgAutomationConfigEventType) Valid() bool {
-	switch e {
-	case CreateOrgAutomationConfigEventTypeRetention:
-		return true
-	default:
-		return false
-	}
-}
-
 // Defines values for CreateProjectAutomationConfig0Action0Type.
 const (
 	CreateProjectAutomationConfig0Action0TypeWebhook CreateProjectAutomationConfig0Action0Type = "webhook"
@@ -1211,6 +1196,7 @@ const (
 	CreateViewViewTypeLogs                 CreateViewViewType = "logs"
 	CreateViewViewTypeMonitor              CreateViewViewType = "monitor"
 	CreateViewViewTypeParameters           CreateViewViewType = "parameters"
+	CreateViewViewTypePatterns             CreateViewViewType = "patterns"
 	CreateViewViewTypePlayground           CreateViewViewType = "playground"
 	CreateViewViewTypePlaygrounds          CreateViewViewType = "playgrounds"
 	CreateViewViewTypeProjects             CreateViewViewType = "projects"
@@ -1243,6 +1229,8 @@ func (e CreateViewViewType) Valid() bool {
 	case CreateViewViewTypeMonitor:
 		return true
 	case CreateViewViewTypeParameters:
+		return true
+	case CreateViewViewTypePatterns:
 		return true
 	case CreateViewViewTypePlayground:
 		return true
@@ -1798,6 +1786,177 @@ func (e FunctionData8Type) Valid() bool {
 	}
 }
 
+// Defines values for FunctionData9Config0Agent0Type.
+const (
+	FunctionData9Config0Agent0TypeLivekit FunctionData9Config0Agent0Type = "livekit"
+)
+
+// Valid indicates whether the value is a known member of the FunctionData9Config0Agent0Type enum.
+func (e FunctionData9Config0Agent0Type) Valid() bool {
+	switch e {
+	case FunctionData9Config0Agent0TypeLivekit:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionData9Config0Agent1Type.
+const (
+	FunctionData9Config0Agent1TypePhone FunctionData9Config0Agent1Type = "phone"
+)
+
+// Valid indicates whether the value is a known member of the FunctionData9Config0Agent1Type enum.
+func (e FunctionData9Config0Agent1Type) Valid() bool {
+	switch e {
+	case FunctionData9Config0Agent1TypePhone:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionData9Config0Agent2Type.
+const (
+	FunctionData9Config0Agent2TypeSip FunctionData9Config0Agent2Type = "sip"
+)
+
+// Valid indicates whether the value is a known member of the FunctionData9Config0Agent2Type enum.
+func (e FunctionData9Config0Agent2Type) Valid() bool {
+	switch e {
+	case FunctionData9Config0Agent2TypeSip:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionData9Config0Initiator.
+const (
+	FunctionData9Config0InitiatorAgent         FunctionData9Config0Initiator = "agent"
+	FunctionData9Config0InitiatorSimulatedUser FunctionData9Config0Initiator = "simulated_user"
+)
+
+// Valid indicates whether the value is a known member of the FunctionData9Config0Initiator enum.
+func (e FunctionData9Config0Initiator) Valid() bool {
+	switch e {
+	case FunctionData9Config0InitiatorAgent:
+		return true
+	case FunctionData9Config0InitiatorSimulatedUser:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionData9Config0Modality.
+const (
+	FunctionData9Config0ModalityVoice FunctionData9Config0Modality = "voice"
+)
+
+// Valid indicates whether the value is a known member of the FunctionData9Config0Modality enum.
+func (e FunctionData9Config0Modality) Valid() bool {
+	switch e {
+	case FunctionData9Config0ModalityVoice:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionData9Config1Agent0Type.
+const (
+	FunctionData9Config1Agent0TypeLivekit FunctionData9Config1Agent0Type = "livekit"
+)
+
+// Valid indicates whether the value is a known member of the FunctionData9Config1Agent0Type enum.
+func (e FunctionData9Config1Agent0Type) Valid() bool {
+	switch e {
+	case FunctionData9Config1Agent0TypeLivekit:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionData9Config1Agent1Permissions.
+const (
+	FunctionData9Config1Agent1PermissionsDeny FunctionData9Config1Agent1Permissions = "deny"
+)
+
+// Valid indicates whether the value is a known member of the FunctionData9Config1Agent1Permissions enum.
+func (e FunctionData9Config1Agent1Permissions) Valid() bool {
+	switch e {
+	case FunctionData9Config1Agent1PermissionsDeny:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionData9Config1Agent1Type.
+const (
+	FunctionData9Config1Agent1TypeAcp FunctionData9Config1Agent1Type = "acp"
+)
+
+// Valid indicates whether the value is a known member of the FunctionData9Config1Agent1Type enum.
+func (e FunctionData9Config1Agent1Type) Valid() bool {
+	switch e {
+	case FunctionData9Config1Agent1TypeAcp:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionData9Config1Initiator.
+const (
+	FunctionData9Config1InitiatorAgent         FunctionData9Config1Initiator = "agent"
+	FunctionData9Config1InitiatorSimulatedUser FunctionData9Config1Initiator = "simulated_user"
+)
+
+// Valid indicates whether the value is a known member of the FunctionData9Config1Initiator enum.
+func (e FunctionData9Config1Initiator) Valid() bool {
+	switch e {
+	case FunctionData9Config1InitiatorAgent:
+		return true
+	case FunctionData9Config1InitiatorSimulatedUser:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionData9Config1Modality.
+const (
+	FunctionData9Config1ModalityText FunctionData9Config1Modality = "text"
+)
+
+// Valid indicates whether the value is a known member of the FunctionData9Config1Modality enum.
+func (e FunctionData9Config1Modality) Valid() bool {
+	switch e {
+	case FunctionData9Config1ModalityText:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionData9Type.
+const (
+	FunctionData9TypeSimulation FunctionData9Type = "simulation"
+)
+
+// Valid indicates whether the value is a known member of the FunctionData9Type enum.
+func (e FunctionData9Type) Valid() bool {
+	switch e {
+	case FunctionData9TypeSimulation:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for FunctionDataNullish0Type.
 const (
 	FunctionDataNullish0TypePrompt FunctionDataNullish0Type = "prompt"
@@ -2173,6 +2332,177 @@ const (
 func (e FunctionDataNullish8Type) Valid() bool {
 	switch e {
 	case FunctionDataNullish8TypeTopicMap:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionDataNullish9Config0Agent0Type.
+const (
+	FunctionDataNullish9Config0Agent0TypeLivekit FunctionDataNullish9Config0Agent0Type = "livekit"
+)
+
+// Valid indicates whether the value is a known member of the FunctionDataNullish9Config0Agent0Type enum.
+func (e FunctionDataNullish9Config0Agent0Type) Valid() bool {
+	switch e {
+	case FunctionDataNullish9Config0Agent0TypeLivekit:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionDataNullish9Config0Agent1Type.
+const (
+	FunctionDataNullish9Config0Agent1TypePhone FunctionDataNullish9Config0Agent1Type = "phone"
+)
+
+// Valid indicates whether the value is a known member of the FunctionDataNullish9Config0Agent1Type enum.
+func (e FunctionDataNullish9Config0Agent1Type) Valid() bool {
+	switch e {
+	case FunctionDataNullish9Config0Agent1TypePhone:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionDataNullish9Config0Agent2Type.
+const (
+	FunctionDataNullish9Config0Agent2TypeSip FunctionDataNullish9Config0Agent2Type = "sip"
+)
+
+// Valid indicates whether the value is a known member of the FunctionDataNullish9Config0Agent2Type enum.
+func (e FunctionDataNullish9Config0Agent2Type) Valid() bool {
+	switch e {
+	case FunctionDataNullish9Config0Agent2TypeSip:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionDataNullish9Config0Initiator.
+const (
+	FunctionDataNullish9Config0InitiatorAgent         FunctionDataNullish9Config0Initiator = "agent"
+	FunctionDataNullish9Config0InitiatorSimulatedUser FunctionDataNullish9Config0Initiator = "simulated_user"
+)
+
+// Valid indicates whether the value is a known member of the FunctionDataNullish9Config0Initiator enum.
+func (e FunctionDataNullish9Config0Initiator) Valid() bool {
+	switch e {
+	case FunctionDataNullish9Config0InitiatorAgent:
+		return true
+	case FunctionDataNullish9Config0InitiatorSimulatedUser:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionDataNullish9Config0Modality.
+const (
+	FunctionDataNullish9Config0ModalityVoice FunctionDataNullish9Config0Modality = "voice"
+)
+
+// Valid indicates whether the value is a known member of the FunctionDataNullish9Config0Modality enum.
+func (e FunctionDataNullish9Config0Modality) Valid() bool {
+	switch e {
+	case FunctionDataNullish9Config0ModalityVoice:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionDataNullish9Config1Agent0Type.
+const (
+	FunctionDataNullish9Config1Agent0TypeLivekit FunctionDataNullish9Config1Agent0Type = "livekit"
+)
+
+// Valid indicates whether the value is a known member of the FunctionDataNullish9Config1Agent0Type enum.
+func (e FunctionDataNullish9Config1Agent0Type) Valid() bool {
+	switch e {
+	case FunctionDataNullish9Config1Agent0TypeLivekit:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionDataNullish9Config1Agent1Permissions.
+const (
+	FunctionDataNullish9Config1Agent1PermissionsDeny FunctionDataNullish9Config1Agent1Permissions = "deny"
+)
+
+// Valid indicates whether the value is a known member of the FunctionDataNullish9Config1Agent1Permissions enum.
+func (e FunctionDataNullish9Config1Agent1Permissions) Valid() bool {
+	switch e {
+	case FunctionDataNullish9Config1Agent1PermissionsDeny:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionDataNullish9Config1Agent1Type.
+const (
+	FunctionDataNullish9Config1Agent1TypeAcp FunctionDataNullish9Config1Agent1Type = "acp"
+)
+
+// Valid indicates whether the value is a known member of the FunctionDataNullish9Config1Agent1Type enum.
+func (e FunctionDataNullish9Config1Agent1Type) Valid() bool {
+	switch e {
+	case FunctionDataNullish9Config1Agent1TypeAcp:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionDataNullish9Config1Initiator.
+const (
+	FunctionDataNullish9Config1InitiatorAgent         FunctionDataNullish9Config1Initiator = "agent"
+	FunctionDataNullish9Config1InitiatorSimulatedUser FunctionDataNullish9Config1Initiator = "simulated_user"
+)
+
+// Valid indicates whether the value is a known member of the FunctionDataNullish9Config1Initiator enum.
+func (e FunctionDataNullish9Config1Initiator) Valid() bool {
+	switch e {
+	case FunctionDataNullish9Config1InitiatorAgent:
+		return true
+	case FunctionDataNullish9Config1InitiatorSimulatedUser:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionDataNullish9Config1Modality.
+const (
+	FunctionDataNullish9Config1ModalityText FunctionDataNullish9Config1Modality = "text"
+)
+
+// Valid indicates whether the value is a known member of the FunctionDataNullish9Config1Modality enum.
+func (e FunctionDataNullish9Config1Modality) Valid() bool {
+	switch e {
+	case FunctionDataNullish9Config1ModalityText:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FunctionDataNullish9Type.
+const (
+	FunctionDataNullish9TypeSimulation FunctionDataNullish9Type = "simulation"
+)
+
+// Valid indicates whether the value is a known member of the FunctionDataNullish9Type enum.
+func (e FunctionDataNullish9Type) Valid() bool {
+	switch e {
+	case FunctionDataNullish9TypeSimulation:
 		return true
 	default:
 		return false
@@ -2758,15 +3088,18 @@ func (e OnlineScoreConfigScorers4Type) Valid() bool {
 	}
 }
 
-// Defines values for PatchOrgAutomationConfigEventType.
+// Defines values for OnlineScoreConfigServiceTier.
 const (
-	PatchOrgAutomationConfigEventTypeRetention PatchOrgAutomationConfigEventType = "retention"
+	OnlineScoreConfigServiceTierFlex     OnlineScoreConfigServiceTier = "flex"
+	OnlineScoreConfigServiceTierStandard OnlineScoreConfigServiceTier = "standard"
 )
 
-// Valid indicates whether the value is a known member of the PatchOrgAutomationConfigEventType enum.
-func (e PatchOrgAutomationConfigEventType) Valid() bool {
+// Valid indicates whether the value is a known member of the OnlineScoreConfigServiceTier enum.
+func (e OnlineScoreConfigServiceTier) Valid() bool {
 	switch e {
-	case PatchOrgAutomationConfigEventTypeRetention:
+	case OnlineScoreConfigServiceTierFlex:
+		return true
+	case OnlineScoreConfigServiceTierStandard:
 		return true
 	default:
 		return false
@@ -3161,6 +3494,7 @@ const (
 	PatchViewViewTypeLogs                 PatchViewViewType = "logs"
 	PatchViewViewTypeMonitor              PatchViewViewType = "monitor"
 	PatchViewViewTypeParameters           PatchViewViewType = "parameters"
+	PatchViewViewTypePatterns             PatchViewViewType = "patterns"
 	PatchViewViewTypePlayground           PatchViewViewType = "playground"
 	PatchViewViewTypePlaygrounds          PatchViewViewType = "playgrounds"
 	PatchViewViewTypeProjects             PatchViewViewType = "projects"
@@ -3193,6 +3527,8 @@ func (e PatchViewViewType) Valid() bool {
 	case PatchViewViewTypeMonitor:
 		return true
 	case PatchViewViewTypeParameters:
+		return true
+	case PatchViewViewTypePatterns:
 		return true
 	case PatchViewViewTypePlayground:
 		return true
@@ -3454,6 +3790,90 @@ func (e PromptBlockData1Type) Valid() bool {
 	}
 }
 
+// Defines values for PromptBlockData2Input1Role.
+const (
+	PromptBlockData2Input1RoleAssistant PromptBlockData2Input1Role = "assistant"
+	PromptBlockData2Input1RoleDeveloper PromptBlockData2Input1Role = "developer"
+	PromptBlockData2Input1RoleSystem    PromptBlockData2Input1Role = "system"
+	PromptBlockData2Input1RoleUser      PromptBlockData2Input1Role = "user"
+)
+
+// Valid indicates whether the value is a known member of the PromptBlockData2Input1Role enum.
+func (e PromptBlockData2Input1Role) Valid() bool {
+	switch e {
+	case PromptBlockData2Input1RoleAssistant:
+		return true
+	case PromptBlockData2Input1RoleDeveloper:
+		return true
+	case PromptBlockData2Input1RoleSystem:
+		return true
+	case PromptBlockData2Input1RoleUser:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PromptBlockData2Questions0Type.
+const (
+	PromptBlockData2Questions0TypePredicate PromptBlockData2Questions0Type = "predicate"
+)
+
+// Valid indicates whether the value is a known member of the PromptBlockData2Questions0Type enum.
+func (e PromptBlockData2Questions0Type) Valid() bool {
+	switch e {
+	case PromptBlockData2Questions0TypePredicate:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PromptBlockData2Questions1Type.
+const (
+	PromptBlockData2Questions1TypeChoice PromptBlockData2Questions1Type = "choice"
+)
+
+// Valid indicates whether the value is a known member of the PromptBlockData2Questions1Type enum.
+func (e PromptBlockData2Questions1Type) Valid() bool {
+	switch e {
+	case PromptBlockData2Questions1TypeChoice:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PromptBlockData2Questions2Type.
+const (
+	PromptBlockData2Questions2TypeScore PromptBlockData2Questions2Type = "score"
+)
+
+// Valid indicates whether the value is a known member of the PromptBlockData2Questions2Type enum.
+func (e PromptBlockData2Questions2Type) Valid() bool {
+	switch e {
+	case PromptBlockData2Questions2TypeScore:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PromptBlockData2Type.
+const (
+	PromptBlockData2TypeDecisions PromptBlockData2Type = "decisions"
+)
+
+// Valid indicates whether the value is a known member of the PromptBlockData2Type enum.
+func (e PromptBlockData2Type) Valid() bool {
+	switch e {
+	case PromptBlockData2TypeDecisions:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for PromptBlockDataNullish0Type.
 const (
 	PromptBlockDataNullish0TypeChat PromptBlockDataNullish0Type = "chat"
@@ -3478,6 +3898,90 @@ const (
 func (e PromptBlockDataNullish1Type) Valid() bool {
 	switch e {
 	case PromptBlockDataNullish1TypeCompletion:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PromptBlockDataNullish2Input1Role.
+const (
+	PromptBlockDataNullish2Input1RoleAssistant PromptBlockDataNullish2Input1Role = "assistant"
+	PromptBlockDataNullish2Input1RoleDeveloper PromptBlockDataNullish2Input1Role = "developer"
+	PromptBlockDataNullish2Input1RoleSystem    PromptBlockDataNullish2Input1Role = "system"
+	PromptBlockDataNullish2Input1RoleUser      PromptBlockDataNullish2Input1Role = "user"
+)
+
+// Valid indicates whether the value is a known member of the PromptBlockDataNullish2Input1Role enum.
+func (e PromptBlockDataNullish2Input1Role) Valid() bool {
+	switch e {
+	case PromptBlockDataNullish2Input1RoleAssistant:
+		return true
+	case PromptBlockDataNullish2Input1RoleDeveloper:
+		return true
+	case PromptBlockDataNullish2Input1RoleSystem:
+		return true
+	case PromptBlockDataNullish2Input1RoleUser:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PromptBlockDataNullish2Questions0Type.
+const (
+	PromptBlockDataNullish2Questions0TypePredicate PromptBlockDataNullish2Questions0Type = "predicate"
+)
+
+// Valid indicates whether the value is a known member of the PromptBlockDataNullish2Questions0Type enum.
+func (e PromptBlockDataNullish2Questions0Type) Valid() bool {
+	switch e {
+	case PromptBlockDataNullish2Questions0TypePredicate:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PromptBlockDataNullish2Questions1Type.
+const (
+	PromptBlockDataNullish2Questions1TypeChoice PromptBlockDataNullish2Questions1Type = "choice"
+)
+
+// Valid indicates whether the value is a known member of the PromptBlockDataNullish2Questions1Type enum.
+func (e PromptBlockDataNullish2Questions1Type) Valid() bool {
+	switch e {
+	case PromptBlockDataNullish2Questions1TypeChoice:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PromptBlockDataNullish2Questions2Type.
+const (
+	PromptBlockDataNullish2Questions2TypeScore PromptBlockDataNullish2Questions2Type = "score"
+)
+
+// Valid indicates whether the value is a known member of the PromptBlockDataNullish2Questions2Type enum.
+func (e PromptBlockDataNullish2Questions2Type) Valid() bool {
+	switch e {
+	case PromptBlockDataNullish2Questions2TypeScore:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PromptBlockDataNullish2Type.
+const (
+	PromptBlockDataNullish2TypeDecisions PromptBlockDataNullish2Type = "decisions"
+)
+
+// Valid indicates whether the value is a known member of the PromptBlockDataNullish2Type enum.
+func (e PromptBlockDataNullish2Type) Valid() bool {
+	switch e {
+	case PromptBlockDataNullish2TypeDecisions:
 		return true
 	default:
 		return false
@@ -3770,6 +4274,7 @@ func (e SpanScopeType) Valid() bool {
 const (
 	SpanTypeAutomation   SpanType = "automation"
 	SpanTypeClassifier   SpanType = "classifier"
+	SpanTypeDecision     SpanType = "decision"
 	SpanTypeEval         SpanType = "eval"
 	SpanTypeFacet        SpanType = "facet"
 	SpanTypeFunction     SpanType = "function"
@@ -3789,6 +4294,8 @@ func (e SpanType) Valid() bool {
 	case SpanTypeAutomation:
 		return true
 	case SpanTypeClassifier:
+		return true
+	case SpanTypeDecision:
 		return true
 	case SpanTypeEval:
 		return true
@@ -4222,6 +4729,24 @@ func (e TraceScopeType) Valid() bool {
 	}
 }
 
+// Defines values for ViewOptions0OptionsFilterScope.
+const (
+	ViewOptions0OptionsFilterScopeSpan  ViewOptions0OptionsFilterScope = "span"
+	ViewOptions0OptionsFilterScopeTrace ViewOptions0OptionsFilterScope = "trace"
+)
+
+// Valid indicates whether the value is a known member of the ViewOptions0OptionsFilterScope enum.
+func (e ViewOptions0OptionsFilterScope) Valid() bool {
+	switch e {
+	case ViewOptions0OptionsFilterScopeSpan:
+		return true
+	case ViewOptions0OptionsFilterScopeTrace:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ViewOptions0OptionsSpanType.
 const (
 	ViewOptions0OptionsSpanTypeFrame ViewOptions0OptionsSpanType = "frame"
@@ -4430,6 +4955,7 @@ const (
 	ViewTypeLogs                 ViewType = "logs"
 	ViewTypeMonitor              ViewType = "monitor"
 	ViewTypeParameters           ViewType = "parameters"
+	ViewTypePatterns             ViewType = "patterns"
 	ViewTypePlayground           ViewType = "playground"
 	ViewTypePlaygrounds          ViewType = "playgrounds"
 	ViewTypeProjects             ViewType = "projects"
@@ -4462,6 +4988,8 @@ func (e ViewType) Valid() bool {
 	case ViewTypeMonitor:
 		return true
 	case ViewTypeParameters:
+		return true
+	case ViewTypePatterns:
 		return true
 	case ViewTypePlayground:
 		return true
@@ -4569,6 +5097,7 @@ const (
 	WindowedAutomationConfigLoopHarnessClaudeCode WindowedAutomationConfigLoopHarness = "claude-code"
 	WindowedAutomationConfigLoopHarnessCodex      WindowedAutomationConfigLoopHarness = "codex"
 	WindowedAutomationConfigLoopHarnessNative     WindowedAutomationConfigLoopHarness = "native"
+	WindowedAutomationConfigLoopHarnessPi         WindowedAutomationConfigLoopHarness = "pi"
 )
 
 // Valid indicates whether the value is a known member of the WindowedAutomationConfigLoopHarness enum.
@@ -4579,6 +5108,8 @@ func (e WindowedAutomationConfigLoopHarness) Valid() bool {
 	case WindowedAutomationConfigLoopHarnessCodex:
 		return true
 	case WindowedAutomationConfigLoopHarnessNative:
+		return true
+	case WindowedAutomationConfigLoopHarnessPi:
 		return true
 	default:
 		return false
@@ -4618,14 +5149,47 @@ func (e WindowedAutomationConfigLoopReasoningEffort) Valid() bool {
 	}
 }
 
+// Defines values for WindowedAutomationConfigLoopTargetId.
+const (
+	WindowedAutomationConfigLoopTargetIdOverview WindowedAutomationConfigLoopTargetId = "overview"
+)
+
+// Valid indicates whether the value is a known member of the WindowedAutomationConfigLoopTargetId enum.
+func (e WindowedAutomationConfigLoopTargetId) Valid() bool {
+	switch e {
+	case WindowedAutomationConfigLoopTargetIdOverview:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for WindowedAutomationConfigLoopTargetType.
+const (
+	WindowedAutomationConfigLoopTargetTypeDashboard WindowedAutomationConfigLoopTargetType = "dashboard"
+)
+
+// Valid indicates whether the value is a known member of the WindowedAutomationConfigLoopTargetType enum.
+func (e WindowedAutomationConfigLoopTargetType) Valid() bool {
+	switch e {
+	case WindowedAutomationConfigLoopTargetTypeDashboard:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for WindowedAutomationConfigProductOrigin.
 const (
-	WindowedAutomationConfigProductOriginPatterns WindowedAutomationConfigProductOrigin = "patterns"
+	WindowedAutomationConfigProductOriginDashboard WindowedAutomationConfigProductOrigin = "dashboard"
+	WindowedAutomationConfigProductOriginPatterns  WindowedAutomationConfigProductOrigin = "patterns"
 )
 
 // Valid indicates whether the value is a known member of the WindowedAutomationConfigProductOrigin enum.
 func (e WindowedAutomationConfigProductOrigin) Valid() bool {
 	switch e {
+	case WindowedAutomationConfigProductOriginDashboard:
+		return true
 	case WindowedAutomationConfigProductOriginPatterns:
 		return true
 	default:
@@ -4842,13 +5406,11 @@ type AclItem struct {
 	// ObjectType The object type that the ACL applies to
 	ObjectType AclObjectType `json:"object_type"`
 
-	// Permission Each permission permits a certain type of operation on an object in the system
-	//
-	// Permissions can be assigned to to objects on an individual basis, or grouped into roles
-	Permission *Permission `json:"permission,omitempty"`
+	// Permission Permission the ACL grants. Exactly one of `permission` and `role_id` will be provided
+	Permission nullable.Nullable[Permission] `json:"permission,omitempty"`
 
-	// RestrictObjectType The object type that the ACL applies to
-	RestrictObjectType *AclObjectType `json:"restrict_object_type,omitempty"`
+	// RestrictObjectType When setting a permission directly, optionally restricts the permission grant to just the specified object type. Cannot be set alongside a `role_id`.
+	RestrictObjectType nullable.Nullable[AclObjectType] `json:"restrict_object_type,omitempty"`
 
 	// RoleId Id of the role the ACL grants. Exactly one of `permission` and `role_id` will be provided
 	RoleId nullable.Nullable[openapi_types.UUID] `json:"role_id,omitempty"`
@@ -4868,7 +5430,7 @@ type AclListOrgObjectType string
 
 // AclListPermission Each permission permits a certain type of operation on an object in the system
 //
-// Permissions can be assigned to to objects on an individual basis, or grouped into roles
+// Permissions can be assigned to objects on an individual basis, or grouped into roles
 type AclListPermission string
 
 // AclListRestrictObjectType The object type that the ACL applies to
@@ -4885,12 +5447,6 @@ type AclObjectId = string
 
 // AclObjectType The object type that the ACL applies to
 type AclObjectType string
-
-// AgentIdParam Agent id
-type AgentIdParam = string
-
-// AgentName Name of the agent to search for
-type AgentName = string
 
 // AiSecretIdParam AiSecret id
 type AiSecretIdParam = string
@@ -4913,8 +5469,10 @@ type ApiKey struct {
 	Name string `json:"name"`
 
 	// OrgId Unique identifier for the organization
-	OrgId       nullable.Nullable[openapi_types.UUID] `json:"org_id,omitempty"`
-	PreviewName string                                `json:"preview_name"`
+	OrgId nullable.Nullable[openapi_types.UUID] `json:"org_id,omitempty"`
+
+	// PreviewName Masked preview showing the key prefix and last four characters, e.g. sk-…AbCd.
+	PreviewName string `json:"preview_name"`
 
 	// UserEmail The user's email
 	UserEmail nullable.Nullable[string] `json:"user_email,omitempty"`
@@ -5336,7 +5894,7 @@ type CodeBundleLocation2 struct {
 	EvalName    string    `json:"eval_name"`
 
 	// EvaluatorDefinition Definition of current evaluator with parameters
-	EvaluatorDefinition nullable.Nullable[interface{}] `json:"evaluator_definition,omitempty"`
+	EvaluatorDefinition interface{} `json:"evaluator_definition,omitempty"`
 
 	// Parameters Parameter values for sandbox eval execution
 	Parameters  *map[string]interface{}           `json:"parameters,omitempty"`
@@ -5348,7 +5906,7 @@ type CodeBundleLocation2 struct {
 type CodeBundleLocation2SandboxSpec0 struct {
 	Provider CodeBundleLocation2SandboxSpec0Provider `json:"provider"`
 
-	// SnapshotRef sandbox snapshot ref
+	// SnapshotRef The Modal snapshot to start the sandbox from
 	SnapshotRef string `json:"snapshot_ref"`
 }
 
@@ -5397,21 +5955,6 @@ type CreateAISecret struct {
 	Type   nullable.Nullable[string] `json:"type,omitempty"`
 }
 
-// CreateAgent An agent is a project-scoped durable object that identifies an AI agent or service emitting spans
-type CreateAgent struct {
-	// Description Textual description of the agent
-	Description nullable.Nullable[string] `json:"description,omitempty"`
-
-	// Metadata User-controlled metadata about the agent
-	Metadata nullable.Nullable[map[string]interface{}] `json:"metadata,omitempty"`
-
-	// Name Name of the agent. Within a project, agent names are unique
-	Name string `json:"name"`
-
-	// ProjectId Unique identifier for the project that the agent belongs under
-	ProjectId openapi_types.UUID `json:"project_id"`
-}
-
 // CreateDataset defines model for CreateDataset.
 type CreateDataset struct {
 	// Description Textual description of the dataset
@@ -5441,7 +5984,7 @@ type CreateDatasetSnapshot struct {
 	// Name Name of the dataset snapshot
 	Name string `json:"name"`
 
-	// XactId Transaction id of the brainstore version at the time of the snapshot
+	// XactId Transaction ID of the dataset version at the time of the snapshot
 	XactId string `json:"xact_id"`
 }
 
@@ -5520,15 +6063,15 @@ type CreateFunction struct {
 
 	// FunctionSchema JSON schema for the function's parameters and return type
 	FunctionSchema nullable.Nullable[struct {
-		Parameters nullable.Nullable[interface{}] `json:"parameters,omitempty"`
-		Returns    nullable.Nullable[interface{}] `json:"returns,omitempty"`
+		Parameters interface{} `json:"parameters,omitempty"`
+		Returns    interface{} `json:"returns,omitempty"`
 	}] `json:"function_schema,omitempty"`
 	FunctionType nullable.Nullable[FunctionTypeEnumNullish] `json:"function_type,omitempty"`
 
 	// Name Name of the prompt
 	Name   string `json:"name"`
 	Origin nullable.Nullable[struct {
-		// Internal The function exists for internal purposes and should not be displayed in the list of functions.
+		// Internal If true, the function was created for use by another Braintrust object and is hidden from function lists in the Braintrust UI.
 		Internal nullable.Nullable[bool] `json:"internal,omitempty"`
 
 		// ObjectId Id of the object the function is originating from
@@ -5586,33 +6129,6 @@ type CreateMCPServer struct {
 	Url string `json:"url"`
 }
 
-// CreateOrgAutomation defines model for CreateOrgAutomation.
-type CreateOrgAutomation struct {
-	// Config The configuration for the org automation rule
-	Config struct {
-		// EventType The type of automation.
-		EventType CreateOrgAutomationConfigEventType `json:"event_type"`
-
-		// ObjectType The object type that the retention policy applies to
-		ObjectType RetentionObjectType `json:"object_type"`
-
-		// RetentionDays The number of days to retain the object
-		RetentionDays int `json:"retention_days"`
-	} `json:"config"`
-
-	// Description Textual description of the project automation
-	Description nullable.Nullable[string] `json:"description,omitempty"`
-
-	// Name Name of the project automation
-	Name string `json:"name"`
-
-	// OrgId Unique identifier for the organization that the org automation belongs under
-	OrgId openapi_types.UUID `json:"org_id"`
-}
-
-// CreateOrgAutomationConfigEventType The type of automation.
-type CreateOrgAutomationConfigEventType string
-
 // CreateProject defines model for CreateProject.
 type CreateProject struct {
 	// Description Textual description of the project
@@ -5624,7 +6140,7 @@ type CreateProject struct {
 	// OrgName For nearly all users, this parameter should be unnecessary. But in the rare case that your API key belongs to multiple organizations, you may specify the name of the organization the project belongs in.
 	OrgName nullable.Nullable[string] `json:"org_name,omitempty"`
 
-	// ProjectGroupName Create the project within the named project group in this organization. Requires project_group:update and either project_group_projects:create on the group or org_project:create on the organization.
+	// ProjectGroupName Create the project within the named project group in this organization. Requires project_group:update on the group's definition.
 	ProjectGroupName nullable.Nullable[string] `json:"project_group_name,omitempty"`
 }
 
@@ -5681,18 +6197,7 @@ type CreateProjectAutomationConfig0Action1 struct {
 	// Channel The Slack channel ID to post to
 	Channel string `json:"channel"`
 
-	// FormattingPrompt Publish a Slack mrkdwn digest.
-	//
-	// Pattern selection requirement: include every selected Pattern whose final status is active at the end of this automation run, plus every selected Pattern that changed from active to inactive during this run (a newly inactive outcome). Exclude Patterns that were already inactive before this run and remained inactive. Do not mention excluded Patterns anywhere in the digest, including Highlights. If no selected Patterns meet these criteria, say "No current pattern outcomes." This requirement overrides conflicting formatting guidance.
-	//
-	// Include a complete "*Pattern outcomes*" section with one row for every included Pattern.
-	//
-	// Use this row format exactly:
-	// • <pattern_url|Pattern title> — `outcome`
-	//
-	// If a Pattern has no URL, use the plain title instead. Do not use GitHub Markdown tables or code-block tables, because links must remain clickable. Do not omit any active selected Pattern.
-	//
-	// After the outcome list, include a "*Highlights*" section with one very short paragraph, 2-3 sentences maximum. Summarize what changed or what broadly stands out among the included active Patterns. Do not introduce new claims beyond the run report.
+	// FormattingPrompt Instructions for Loop to format content sent to this destination
 	FormattingPrompt *string `json:"formatting_prompt,omitempty"`
 
 	// MessageTemplate Custom message template for the alert
@@ -5922,18 +6427,7 @@ type CreateProjectAutomationConfig4Action1 struct {
 	// Channel The Slack channel ID to post to
 	Channel string `json:"channel"`
 
-	// FormattingPrompt Publish a Slack mrkdwn digest.
-	//
-	// Pattern selection requirement: include every selected Pattern whose final status is active at the end of this automation run, plus every selected Pattern that changed from active to inactive during this run (a newly inactive outcome). Exclude Patterns that were already inactive before this run and remained inactive. Do not mention excluded Patterns anywhere in the digest, including Highlights. If no selected Patterns meet these criteria, say "No current pattern outcomes." This requirement overrides conflicting formatting guidance.
-	//
-	// Include a complete "*Pattern outcomes*" section with one row for every included Pattern.
-	//
-	// Use this row format exactly:
-	// • <pattern_url|Pattern title> — `outcome`
-	//
-	// If a Pattern has no URL, use the plain title instead. Do not use GitHub Markdown tables or code-block tables, because links must remain clickable. Do not omit any active selected Pattern.
-	//
-	// After the outcome list, include a "*Highlights*" section with one very short paragraph, 2-3 sentences maximum. Summarize what changed or what broadly stands out among the included active Patterns. Do not introduce new claims beyond the run report.
+	// FormattingPrompt Instructions for Loop to format content sent to this destination
 	FormattingPrompt *string `json:"formatting_prompt,omitempty"`
 
 	// MessageTemplate Custom message template for the alert
@@ -6060,11 +6554,9 @@ type CreateRole struct {
 	MemberPermissions nullable.Nullable[[]struct {
 		// Permission Each permission permits a certain type of operation on an object in the system
 		//
-		// Permissions can be assigned to to objects on an individual basis, or grouped into roles
-		Permission Permission `json:"permission"`
-
-		// RestrictObjectType The object type that the ACL applies to
-		RestrictObjectType *AclObjectType `json:"restrict_object_type,omitempty"`
+		// Permissions can be assigned to objects on an individual basis, or grouped into roles
+		Permission         Permission                       `json:"permission"`
+		RestrictObjectType nullable.Nullable[AclObjectType] `json:"restrict_object_type,omitempty"`
 	}] `json:"member_permissions,omitempty"`
 
 	// MemberRoles Ids of the roles this role inherits from
@@ -6124,17 +6616,29 @@ type CreateView struct {
 	ViewData nullable.Nullable[ViewData] `json:"view_data,omitempty"`
 
 	// ViewType Type of object that the view corresponds to.
-	ViewType nullable.Nullable[CreateViewViewType] `json:"view_type"`
+	ViewType CreateViewViewType `json:"view_type"`
 }
 
 // CreateViewViewType Type of object that the view corresponds to.
 type CreateViewViewType string
+
+// CreatedAfter Include API keys created at or after this timestamp
+type CreatedAfter = time.Time
+
+// CreatedBefore Include API keys created at or before this timestamp
+type CreatedBefore = time.Time
 
 // DatasetIdParam Dataset id
 type DatasetIdParam = string
 
 // DatasetName Name of the dataset to search for
 type DatasetName = string
+
+// DatasetRestoreRequest defines model for DatasetRestoreRequest.
+type DatasetRestoreRequest struct {
+	// Version The dataset version to restore to, such as the `xact_id` of a dataset snapshot
+	Version string `json:"version"`
+}
 
 // DatasetSnapshotIdParam DatasetSnapshot id
 type DatasetSnapshotIdParam = string
@@ -6255,9 +6759,9 @@ type FacetPreprocessorId0Type string
 // FacetPreprocessorId1 defines model for FacetPreprocessorId.1.
 type FacetPreprocessorId1 struct {
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum] `json:"function_type,omitempty"`
-	Name         string                              `json:"name"`
-	Type         FacetPreprocessorId1Type            `json:"type"`
+	FunctionType *FunctionTypeEnum        `json:"function_type,omitempty"`
+	Name         string                   `json:"name"`
+	Type         FacetPreprocessorId1Type `json:"type"`
 }
 
 // FacetPreprocessorId1Type defines model for FacetPreprocessorId.1.Type.
@@ -6312,7 +6816,7 @@ type FeedbackExperimentItem struct {
 	Comment nullable.Nullable[string] `json:"comment,omitempty"`
 
 	// Expected The ground truth value (an arbitrary, JSON serializable object) that you'd compare to `output` to determine if your `output` value is correct or not
-	Expected nullable.Nullable[interface{}] `json:"expected,omitempty"`
+	Expected interface{} `json:"expected,omitempty"`
 
 	// Id The id of the experiment event to log feedback for. This is the row `id` returned by `POST /v1/experiment/{experiment_id}/insert`
 	Id string `json:"id"`
@@ -6348,43 +6852,27 @@ type FetchEventsRequest struct {
 	// The string can be obtained directly from the `cursor` property of the previous fetch query
 	Cursor nullable.Nullable[FetchPaginationCursor] `json:"cursor,omitempty"`
 
-	// Limit limit the number of traces fetched
+	// Limit Limit the number of traces fetched
 	//
-	// Fetch queries may be paginated if the total result size is expected to be large (e.g. project_logs which accumulate over a long time). Note that fetch queries only support pagination in descending time order (from latest to earliest `_xact_id`. Furthermore, later pages may return rows which showed up in earlier pages, except with an earlier `_xact_id`. This happens because pagination occurs over the whole version history of the event log. You will most likely want to exclude any such duplicate, outdated rows (by `id`) from your combined result set.
+	// Fetch queries may be paginated if the total result size is expected to be large (e.g. project_logs which accumulate over a long time). Note that fetch queries only support pagination in descending time order (from latest to earliest `_xact_id`). Furthermore, later pages may return rows which showed up in earlier pages, except with an earlier `_xact_id`. This happens because pagination occurs over the whole version history of the event log. You will most likely want to exclude any such duplicate, outdated rows (by `id`) from your combined result set.
 	//
 	// The `limit` parameter controls the number of full traces to return. So you may end up with more individual rows than the specified limit if you are fetching events containing traces.
-	Limit nullable.Nullable[FetchLimit] `json:"limit,omitempty"`
-
-	// MaxRootSpanId DEPRECATION NOTICE: The manually-constructed pagination cursor is deprecated in favor of the explicit 'cursor' returned by object fetch requests. Please prefer the 'cursor' argument going forwards.
-	//
-	// Together, `max_xact_id` and `max_root_span_id` form a pagination cursor
-	//
-	// Since a paginated fetch query returns results in order from latest to earliest, the cursor for the next page can be found as the row with the minimum (earliest) value of the tuple `(_xact_id, root_span_id)`. See the documentation of `limit` for an overview of paginating fetch queries.
-	MaxRootSpanId *MaxRootSpanId `json:"max_root_span_id,omitempty"`
-
-	// MaxXactId DEPRECATION NOTICE: The manually-constructed pagination cursor is deprecated in favor of the explicit 'cursor' returned by object fetch requests. Please prefer the 'cursor' argument going forwards.
-	//
-	// Together, `max_xact_id` and `max_root_span_id` form a pagination cursor
-	//
-	// Since a paginated fetch query returns results in order from latest to earliest, the cursor for the next page can be found as the row with the minimum (earliest) value of the tuple `(_xact_id, root_span_id)`. See the documentation of `limit` for an overview of paginating fetch queries.
-	MaxXactId *MaxXactId `json:"max_xact_id,omitempty"`
-
-	// Version Retrieve a snapshot of events from a past time
-	//
-	// The version id is essentially a filter on the latest event transaction id. You can use the `max_xact_id` returned by a past fetch as the version to reproduce that exact fetch.
-	Version *Version `json:"version,omitempty"`
+	Limit         nullable.Nullable[FetchLimit]    `json:"limit,omitempty"`
+	MaxRootSpanId nullable.Nullable[MaxRootSpanId] `json:"max_root_span_id,omitempty"`
+	MaxXactId     nullable.Nullable[MaxXactId]     `json:"max_xact_id,omitempty"`
+	Version       nullable.Nullable[Version]       `json:"version,omitempty"`
 }
 
-// FetchLimit limit the number of traces fetched
+// FetchLimit Limit the number of traces fetched
 //
-// Fetch queries may be paginated if the total result size is expected to be large (e.g. project_logs which accumulate over a long time). Note that fetch queries only support pagination in descending time order (from latest to earliest `_xact_id`. Furthermore, later pages may return rows which showed up in earlier pages, except with an earlier `_xact_id`. This happens because pagination occurs over the whole version history of the event log. You will most likely want to exclude any such duplicate, outdated rows (by `id`) from your combined result set.
+// Fetch queries may be paginated if the total result size is expected to be large (e.g. project_logs which accumulate over a long time). Note that fetch queries only support pagination in descending time order (from latest to earliest `_xact_id`). Furthermore, later pages may return rows which showed up in earlier pages, except with an earlier `_xact_id`. This happens because pagination occurs over the whole version history of the event log. You will most likely want to exclude any such duplicate, outdated rows (by `id`) from your combined result set.
 //
 // The `limit` parameter controls the number of full traces to return. So you may end up with more individual rows than the specified limit if you are fetching events containing traces.
 type FetchLimit = int
 
-// FetchLimitParam limit the number of traces fetched
+// FetchLimitParam Limit the number of traces fetched
 //
-// Fetch queries may be paginated if the total result size is expected to be large (e.g. project_logs which accumulate over a long time). Note that fetch queries only support pagination in descending time order (from latest to earliest `_xact_id`. Furthermore, later pages may return rows which showed up in earlier pages, except with an earlier `_xact_id`. This happens because pagination occurs over the whole version history of the event log. You will most likely want to exclude any such duplicate, outdated rows (by `id`) from your combined result set.
+// Fetch queries may be paginated if the total result size is expected to be large (e.g. project_logs which accumulate over a long time). Note that fetch queries only support pagination in descending time order (from latest to earliest `_xact_id`). Furthermore, later pages may return rows which showed up in earlier pages, except with an earlier `_xact_id`. This happens because pagination occurs over the whole version history of the event log. You will most likely want to exclude any such duplicate, outdated rows (by `id`) from your combined result set.
 //
 // The `limit` parameter controls the number of full traces to return. So you may end up with more individual rows than the specified limit if you are fetching events containing traces.
 type FetchLimitParam = int
@@ -6408,8 +6896,8 @@ type Function struct {
 
 	// FunctionSchema JSON schema for the function's parameters and return type
 	FunctionSchema nullable.Nullable[struct {
-		Parameters nullable.Nullable[interface{}] `json:"parameters,omitempty"`
-		Returns    nullable.Nullable[interface{}] `json:"returns,omitempty"`
+		Parameters interface{} `json:"parameters,omitempty"`
+		Returns    interface{} `json:"returns,omitempty"`
 	}] `json:"function_schema,omitempty"`
 	FunctionType nullable.Nullable[FunctionTypeEnumNullish] `json:"function_type,omitempty"`
 
@@ -6428,7 +6916,7 @@ type Function struct {
 	// OrgId Unique identifier for the organization
 	OrgId  openapi_types.UUID `json:"org_id"`
 	Origin nullable.Nullable[struct {
-		// Internal The function exists for internal purposes and should not be displayed in the list of functions.
+		// Internal If true, the function was created for use by another Braintrust object and is hidden from function lists in the Braintrust UI.
 		Internal nullable.Nullable[bool] `json:"internal,omitempty"`
 
 		// ObjectId Id of the object the function is originating from
@@ -6544,7 +7032,7 @@ type FunctionData1Data0Location2 struct {
 	EvalName    string    `json:"eval_name"`
 
 	// EvaluatorDefinition Definition of current evaluator with parameters
-	EvaluatorDefinition nullable.Nullable[interface{}] `json:"evaluator_definition,omitempty"`
+	EvaluatorDefinition interface{} `json:"evaluator_definition,omitempty"`
 
 	// Parameters Parameter values for sandbox eval execution
 	Parameters  *map[string]interface{}                      `json:"parameters,omitempty"`
@@ -6556,7 +7044,7 @@ type FunctionData1Data0Location2 struct {
 type FunctionData1Data0Location2SandboxSpec0 struct {
 	Provider FunctionData1Data0Location2SandboxSpec0Provider `json:"provider"`
 
-	// SnapshotRef sandbox snapshot ref
+	// SnapshotRef The Modal snapshot to start the sandbox from
 	SnapshotRef string `json:"snapshot_ref"`
 }
 
@@ -6637,9 +7125,9 @@ type FunctionData4 struct {
 	Config nullable.Nullable[map[string]interface{}] `json:"config,omitempty"`
 
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum] `json:"function_type,omitempty"`
-	Name         string                              `json:"name"`
-	Type         FunctionData4Type                   `json:"type"`
+	FunctionType *FunctionTypeEnum `json:"function_type,omitempty"`
+	Name         string            `json:"name"`
+	Type         FunctionData4Type `json:"type"`
 }
 
 // FunctionData4Type defines model for FunctionData.4.Type.
@@ -6722,7 +7210,7 @@ type FunctionData8SourceFacetFunction0Type string
 // FunctionData8SourceFacetFunction1 defines model for FunctionData.8.SourceFacetFunction.1.
 type FunctionData8SourceFacetFunction1 struct {
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum]   `json:"function_type,omitempty"`
+	FunctionType *FunctionTypeEnum                     `json:"function_type,omitempty"`
 	Name         string                                `json:"name"`
 	Type         FunctionData8SourceFacetFunction1Type `json:"type"`
 }
@@ -6745,7 +7233,7 @@ type FunctionData8SourceFacetFunction3Type string
 // FunctionData8SourceFacetFunction4 defines model for FunctionData.8.SourceFacetFunction.4.
 type FunctionData8SourceFacetFunction4 struct {
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum]   `json:"function_type,omitempty"`
+	FunctionType *FunctionTypeEnum                     `json:"function_type,omitempty"`
 	Name         string                                `json:"name"`
 	Type         FunctionData8SourceFacetFunction4Type `json:"type"`
 }
@@ -6760,6 +7248,132 @@ type FunctionData_8_SourceFacetFunction struct {
 
 // FunctionData8Type defines model for FunctionData.8.Type.
 type FunctionData8Type string
+
+// FunctionData9 A task function that runs a conversation between an agent and a simulated user.
+type FunctionData9 struct {
+	Config FunctionData_9_Config `json:"config"`
+	Type   FunctionData9Type     `json:"type"`
+}
+
+// FunctionData9Config0 defines model for FunctionData.9.Config.0.
+type FunctionData9Config0 struct {
+	Agent FunctionData_9_Config_0_Agent `json:"agent"`
+
+	// Initiator Who speaks first in the conversation
+	Initiator *FunctionData9Config0Initiator `json:"initiator,omitempty"`
+	Modality  *FunctionData9Config0Modality  `json:"modality,omitempty"`
+
+	// TimeoutSeconds Maximum conversation duration in seconds
+	TimeoutSeconds *int `json:"timeout_seconds,omitempty"`
+}
+
+// FunctionData9Config0Agent0 defines model for FunctionData.9.Config.0.Agent.0.
+type FunctionData9Config0Agent0 struct {
+	// AgentName The name of the LiveKit agent to dispatch
+	AgentName string `json:"agent_name"`
+
+	// ServerUrl The WebSocket URL of the LiveKit project hosting the agent
+	ServerUrl string                         `json:"server_url"`
+	Type      FunctionData9Config0Agent0Type `json:"type"`
+}
+
+// FunctionData9Config0Agent0Type defines model for FunctionData.9.Config.0.Agent.0.Type.
+type FunctionData9Config0Agent0Type string
+
+// FunctionData9Config0Agent1 defines model for FunctionData.9.Config.0.Agent.1.
+type FunctionData9Config0Agent1 struct {
+	PhoneNumber string                         `json:"phone_number"`
+	Type        FunctionData9Config0Agent1Type `json:"type"`
+}
+
+// FunctionData9Config0Agent1Type defines model for FunctionData.9.Config.0.Agent.1.Type.
+type FunctionData9Config0Agent1Type string
+
+// FunctionData9Config0Agent2 defines model for FunctionData.9.Config.0.Agent.2.
+type FunctionData9Config0Agent2 struct {
+	Type FunctionData9Config0Agent2Type `json:"type"`
+	Uri  string                         `json:"uri"`
+}
+
+// FunctionData9Config0Agent2Type defines model for FunctionData.9.Config.0.Agent.2.Type.
+type FunctionData9Config0Agent2Type string
+
+// FunctionData_9_Config_0_Agent defines model for FunctionData.9.Config.0.Agent.
+type FunctionData_9_Config_0_Agent struct {
+	union json.RawMessage
+}
+
+// FunctionData9Config0Initiator Who speaks first in the conversation
+type FunctionData9Config0Initiator string
+
+// FunctionData9Config0Modality defines model for FunctionData.9.Config.0.Modality.
+type FunctionData9Config0Modality string
+
+// FunctionData9Config1 defines model for FunctionData.9.Config.1.
+type FunctionData9Config1 struct {
+	Agent FunctionData_9_Config_1_Agent `json:"agent"`
+
+	// Initiator Who speaks first in the conversation
+	Initiator *FunctionData9Config1Initiator `json:"initiator,omitempty"`
+	Modality  FunctionData9Config1Modality   `json:"modality"`
+
+	// TimeoutSeconds Maximum conversation duration in seconds
+	TimeoutSeconds *int `json:"timeout_seconds,omitempty"`
+}
+
+// FunctionData9Config1Agent0 defines model for FunctionData.9.Config.1.Agent.0.
+type FunctionData9Config1Agent0 struct {
+	// AgentName The name of the LiveKit agent to dispatch
+	AgentName string `json:"agent_name"`
+
+	// ServerUrl The WebSocket URL of the LiveKit project hosting the agent
+	ServerUrl string                         `json:"server_url"`
+	Type      FunctionData9Config1Agent0Type `json:"type"`
+}
+
+// FunctionData9Config1Agent0Type defines model for FunctionData.9.Config.1.Agent.0.Type.
+type FunctionData9Config1Agent0Type string
+
+// FunctionData9Config1Agent1 defines model for FunctionData.9.Config.1.Agent.1.
+type FunctionData9Config1Agent1 struct {
+	// Args Arguments passed to the executable without shell interpretation
+	Args *[]string `json:"args,omitempty"`
+
+	// Command Executable for the ACP agent subprocess, communicating over stdio
+	Command string `json:"command"`
+
+	// Cwd Absolute working directory for the ACP session on the execution host
+	Cwd string `json:"cwd"`
+
+	// Permissions Deny ACP permission requests; this does not sandbox the subprocess
+	Permissions *FunctionData9Config1Agent1Permissions `json:"permissions,omitempty"`
+	Type        FunctionData9Config1Agent1Type         `json:"type"`
+}
+
+// FunctionData9Config1Agent1Permissions Deny ACP permission requests; this does not sandbox the subprocess
+type FunctionData9Config1Agent1Permissions string
+
+// FunctionData9Config1Agent1Type defines model for FunctionData.9.Config.1.Agent.1.Type.
+type FunctionData9Config1Agent1Type string
+
+// FunctionData_9_Config_1_Agent defines model for FunctionData.9.Config.1.Agent.
+type FunctionData_9_Config_1_Agent struct {
+	union json.RawMessage
+}
+
+// FunctionData9Config1Initiator Who speaks first in the conversation
+type FunctionData9Config1Initiator string
+
+// FunctionData9Config1Modality defines model for FunctionData.9.Config.1.Modality.
+type FunctionData9Config1Modality string
+
+// FunctionData_9_Config defines model for FunctionData.9.Config.
+type FunctionData_9_Config struct {
+	union json.RawMessage
+}
+
+// FunctionData9Type defines model for FunctionData.9.Type.
+type FunctionData9Type string
 
 // FunctionDataNullish defines model for FunctionDataNullish.
 type FunctionDataNullish struct {
@@ -6851,7 +7465,7 @@ type FunctionDataNullish1Data0Location2 struct {
 	EvalName    string    `json:"eval_name"`
 
 	// EvaluatorDefinition Definition of current evaluator with parameters
-	EvaluatorDefinition nullable.Nullable[interface{}] `json:"evaluator_definition,omitempty"`
+	EvaluatorDefinition interface{} `json:"evaluator_definition,omitempty"`
 
 	// Parameters Parameter values for sandbox eval execution
 	Parameters  *map[string]interface{}                             `json:"parameters,omitempty"`
@@ -6863,7 +7477,7 @@ type FunctionDataNullish1Data0Location2 struct {
 type FunctionDataNullish1Data0Location2SandboxSpec0 struct {
 	Provider FunctionDataNullish1Data0Location2SandboxSpec0Provider `json:"provider"`
 
-	// SnapshotRef sandbox snapshot ref
+	// SnapshotRef The Modal snapshot to start the sandbox from
 	SnapshotRef string `json:"snapshot_ref"`
 }
 
@@ -6944,9 +7558,9 @@ type FunctionDataNullish4 struct {
 	Config nullable.Nullable[map[string]interface{}] `json:"config,omitempty"`
 
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum] `json:"function_type,omitempty"`
-	Name         string                              `json:"name"`
-	Type         FunctionDataNullish4Type            `json:"type"`
+	FunctionType *FunctionTypeEnum        `json:"function_type,omitempty"`
+	Name         string                   `json:"name"`
+	Type         FunctionDataNullish4Type `json:"type"`
 }
 
 // FunctionDataNullish4Type defines model for FunctionDataNullish.4.Type.
@@ -7029,7 +7643,7 @@ type FunctionDataNullish8SourceFacetFunction0Type string
 // FunctionDataNullish8SourceFacetFunction1 defines model for FunctionDataNullish.8.SourceFacetFunction.1.
 type FunctionDataNullish8SourceFacetFunction1 struct {
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum]          `json:"function_type,omitempty"`
+	FunctionType *FunctionTypeEnum                            `json:"function_type,omitempty"`
 	Name         string                                       `json:"name"`
 	Type         FunctionDataNullish8SourceFacetFunction1Type `json:"type"`
 }
@@ -7052,7 +7666,7 @@ type FunctionDataNullish8SourceFacetFunction3Type string
 // FunctionDataNullish8SourceFacetFunction4 defines model for FunctionDataNullish.8.SourceFacetFunction.4.
 type FunctionDataNullish8SourceFacetFunction4 struct {
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum]          `json:"function_type,omitempty"`
+	FunctionType *FunctionTypeEnum                            `json:"function_type,omitempty"`
 	Name         string                                       `json:"name"`
 	Type         FunctionDataNullish8SourceFacetFunction4Type `json:"type"`
 }
@@ -7067,6 +7681,132 @@ type FunctionDataNullish_8_SourceFacetFunction struct {
 
 // FunctionDataNullish8Type defines model for FunctionDataNullish.8.Type.
 type FunctionDataNullish8Type string
+
+// FunctionDataNullish9 A task function that runs a conversation between an agent and a simulated user.
+type FunctionDataNullish9 struct {
+	Config FunctionDataNullish_9_Config `json:"config"`
+	Type   FunctionDataNullish9Type     `json:"type"`
+}
+
+// FunctionDataNullish9Config0 defines model for FunctionDataNullish.9.Config.0.
+type FunctionDataNullish9Config0 struct {
+	Agent FunctionDataNullish_9_Config_0_Agent `json:"agent"`
+
+	// Initiator Who speaks first in the conversation
+	Initiator *FunctionDataNullish9Config0Initiator `json:"initiator,omitempty"`
+	Modality  *FunctionDataNullish9Config0Modality  `json:"modality,omitempty"`
+
+	// TimeoutSeconds Maximum conversation duration in seconds
+	TimeoutSeconds *int `json:"timeout_seconds,omitempty"`
+}
+
+// FunctionDataNullish9Config0Agent0 defines model for FunctionDataNullish.9.Config.0.Agent.0.
+type FunctionDataNullish9Config0Agent0 struct {
+	// AgentName The name of the LiveKit agent to dispatch
+	AgentName string `json:"agent_name"`
+
+	// ServerUrl The WebSocket URL of the LiveKit project hosting the agent
+	ServerUrl string                                `json:"server_url"`
+	Type      FunctionDataNullish9Config0Agent0Type `json:"type"`
+}
+
+// FunctionDataNullish9Config0Agent0Type defines model for FunctionDataNullish.9.Config.0.Agent.0.Type.
+type FunctionDataNullish9Config0Agent0Type string
+
+// FunctionDataNullish9Config0Agent1 defines model for FunctionDataNullish.9.Config.0.Agent.1.
+type FunctionDataNullish9Config0Agent1 struct {
+	PhoneNumber string                                `json:"phone_number"`
+	Type        FunctionDataNullish9Config0Agent1Type `json:"type"`
+}
+
+// FunctionDataNullish9Config0Agent1Type defines model for FunctionDataNullish.9.Config.0.Agent.1.Type.
+type FunctionDataNullish9Config0Agent1Type string
+
+// FunctionDataNullish9Config0Agent2 defines model for FunctionDataNullish.9.Config.0.Agent.2.
+type FunctionDataNullish9Config0Agent2 struct {
+	Type FunctionDataNullish9Config0Agent2Type `json:"type"`
+	Uri  string                                `json:"uri"`
+}
+
+// FunctionDataNullish9Config0Agent2Type defines model for FunctionDataNullish.9.Config.0.Agent.2.Type.
+type FunctionDataNullish9Config0Agent2Type string
+
+// FunctionDataNullish_9_Config_0_Agent defines model for FunctionDataNullish.9.Config.0.Agent.
+type FunctionDataNullish_9_Config_0_Agent struct {
+	union json.RawMessage
+}
+
+// FunctionDataNullish9Config0Initiator Who speaks first in the conversation
+type FunctionDataNullish9Config0Initiator string
+
+// FunctionDataNullish9Config0Modality defines model for FunctionDataNullish.9.Config.0.Modality.
+type FunctionDataNullish9Config0Modality string
+
+// FunctionDataNullish9Config1 defines model for FunctionDataNullish.9.Config.1.
+type FunctionDataNullish9Config1 struct {
+	Agent FunctionDataNullish_9_Config_1_Agent `json:"agent"`
+
+	// Initiator Who speaks first in the conversation
+	Initiator *FunctionDataNullish9Config1Initiator `json:"initiator,omitempty"`
+	Modality  FunctionDataNullish9Config1Modality   `json:"modality"`
+
+	// TimeoutSeconds Maximum conversation duration in seconds
+	TimeoutSeconds *int `json:"timeout_seconds,omitempty"`
+}
+
+// FunctionDataNullish9Config1Agent0 defines model for FunctionDataNullish.9.Config.1.Agent.0.
+type FunctionDataNullish9Config1Agent0 struct {
+	// AgentName The name of the LiveKit agent to dispatch
+	AgentName string `json:"agent_name"`
+
+	// ServerUrl The WebSocket URL of the LiveKit project hosting the agent
+	ServerUrl string                                `json:"server_url"`
+	Type      FunctionDataNullish9Config1Agent0Type `json:"type"`
+}
+
+// FunctionDataNullish9Config1Agent0Type defines model for FunctionDataNullish.9.Config.1.Agent.0.Type.
+type FunctionDataNullish9Config1Agent0Type string
+
+// FunctionDataNullish9Config1Agent1 defines model for FunctionDataNullish.9.Config.1.Agent.1.
+type FunctionDataNullish9Config1Agent1 struct {
+	// Args Arguments passed to the executable without shell interpretation
+	Args *[]string `json:"args,omitempty"`
+
+	// Command Executable for the ACP agent subprocess, communicating over stdio
+	Command string `json:"command"`
+
+	// Cwd Absolute working directory for the ACP session on the execution host
+	Cwd string `json:"cwd"`
+
+	// Permissions Deny ACP permission requests; this does not sandbox the subprocess
+	Permissions *FunctionDataNullish9Config1Agent1Permissions `json:"permissions,omitempty"`
+	Type        FunctionDataNullish9Config1Agent1Type         `json:"type"`
+}
+
+// FunctionDataNullish9Config1Agent1Permissions Deny ACP permission requests; this does not sandbox the subprocess
+type FunctionDataNullish9Config1Agent1Permissions string
+
+// FunctionDataNullish9Config1Agent1Type defines model for FunctionDataNullish.9.Config.1.Agent.1.Type.
+type FunctionDataNullish9Config1Agent1Type string
+
+// FunctionDataNullish_9_Config_1_Agent defines model for FunctionDataNullish.9.Config.1.Agent.
+type FunctionDataNullish_9_Config_1_Agent struct {
+	union json.RawMessage
+}
+
+// FunctionDataNullish9Config1Initiator Who speaks first in the conversation
+type FunctionDataNullish9Config1Initiator string
+
+// FunctionDataNullish9Config1Modality defines model for FunctionDataNullish.9.Config.1.Modality.
+type FunctionDataNullish9Config1Modality string
+
+// FunctionDataNullish_9_Config defines model for FunctionDataNullish.9.Config.
+type FunctionDataNullish_9_Config struct {
+	union json.RawMessage
+}
+
+// FunctionDataNullish9Type defines model for FunctionDataNullish.9.Type.
+type FunctionDataNullish9Type string
 
 // FunctionIdParam Function id
 type FunctionIdParam = string
@@ -7197,7 +7937,7 @@ type GraphNode3 struct {
 	Type GraphNode3Type `json:"type"`
 
 	// Value A literal value to be returned
-	Value nullable.Nullable[interface{}] `json:"value,omitempty"`
+	Value interface{} `json:"value,omitempty"`
 }
 
 // GraphNode3Type defines model for GraphNode.3.Type.
@@ -7335,10 +8075,10 @@ type ImageRenderingMode string
 type InsertDatasetEvent struct {
 	// UnderscoreArrayDelete The `_array_delete` field allows removing specific values from array fields. It is an array of objects with `path` and `delete` properties.
 	//
-	// For example, to remove tags "foo" and "bar" from an existing row: `{"_is_merge": true, "_array_delete": [{"path": ["tags"], "delete": ["foo", "bar"]}]}`. For nested fields like `metadata.categories`, use `[{"path": ["metadata", "categories"], "delete": ["value"]}]`. This will remove those specific values from the array while preserving others.
+	// For example, to remove tags "foo" and "bar" from an existing row with id "abc": `{"id": "abc", "_is_merge": true, "_array_delete": [{"path": ["tags"], "delete": ["foo", "bar"]}]}`. For nested fields like `metadata.categories`, use `{"id": "abc", "_is_merge": true, "_array_delete": [{"path": ["metadata", "categories"], "delete": ["value"]}]}`. This will remove those specific values from the array while preserving others.
 	UnderscoreArrayDelete nullable.Nullable[[]struct {
-		Delete []nullable.Nullable[interface{}] `json:"delete"`
-		Path   []string                         `json:"path"`
+		Delete []interface{} `json:"delete"`
+		Path   []string      `json:"path"`
 	}] `json:"_array_delete,omitempty"`
 
 	// UnderscoreIsMerge The `_is_merge` field controls how the row is merged with any existing row with the same id in the DB. By default (or when set to `false`), the existing row is completely replaced by the new row. When set to `true`, the new row is deep-merged into the existing row, if one is found. If no existing row is found, the new row is inserted as is.
@@ -7348,26 +8088,25 @@ type InsertDatasetEvent struct {
 
 	// UnderscoreMergePaths The `_merge_paths` field allows controlling the depth of the merge, when `_is_merge=true`. `_merge_paths` is a list of paths, where each path is a list of field names. The deep merge will not descend below any of the specified merge paths.
 	//
-	// For example, say there is an existing row in the DB `{"id": "foo", "input": {"a": {"b": 10}, "c": {"d": 20}}, "output": {"a": 20}}`. If we merge a new row as `{"_is_merge": true, "_merge_paths": [["input", "a"], ["output"]], "input": {"a": {"q": 30}, "c": {"e": 30}, "bar": "baz"}, "output": {"d": 40}}`, the new row will be `{"id": "foo": "input": {"a": {"q": 30}, "c": {"d": 20, "e": 30}, "bar": "baz"}, "output": {"d": 40}}`. In this case, due to the merge paths, we have replaced `input.a` and `output`, but have still deep-merged `input` and `input.c`.
+	// For example, say there is an existing row in the DB `{"id": "foo", "input": {"a": {"b": 10}, "c": {"d": 20}}, "output": {"a": 20}}`. If we merge a new row as `{"id": "foo", "_is_merge": true, "_merge_paths": [["input", "a"], ["output"]], "input": {"a": {"q": 30}, "c": {"e": 30}, "bar": "baz"}, "output": {"d": 40}}`, the new row will be `{"id": "foo", "input": {"a": {"q": 30}, "c": {"d": 20, "e": 30}, "bar": "baz"}, "output": {"d": 40}}`. In this case, due to the merge paths, we have replaced `input.a` and `output`, but have still deep-merged `input` and `input.c`.
 	UnderscoreMergePaths nullable.Nullable[[][]string] `json:"_merge_paths,omitempty"`
 
 	// UnderscoreObjectDelete Pass `_object_delete=true` to mark the dataset event deleted. Deleted events will not show up in subsequent fetches for this dataset
 	UnderscoreObjectDelete nullable.Nullable[bool] `json:"_object_delete,omitempty"`
 
-	// UnderscoreParentId DEPRECATED: The `_parent_id` field is deprecated and should not be used. Support for `_parent_id` will be dropped in a future version of Braintrust. Log `span_id`, `root_span_id`, and `span_parents` explicitly instead.
+	// UnderscoreParentId Deprecated. Log `span_id`, `root_span_id`, and `span_parents` explicitly instead.
 	//
-	// Use the `_parent_id` field to create this row as a subspan of an existing row. Tracking hierarchical relationships are important for tracing (see the [guide](https://www.braintrust.dev/docs/instrument) for full details).
-	//
-	// For example, say we have logged a row `{"id": "abc", "input": "foo", "output": "bar", "expected": "boo", "scores": {"correctness": 0.33}}`. We can create a sub-span of the parent row by logging `{"_parent_id": "abc", "id": "llm_call", "input": {"prompt": "What comes after foo?"}, "output": "bar", "metrics": {"tokens": 1}}`. In the webapp, only the root span row `"abc"` will show up in the summary view. You can view the full trace hierarchy (in this case, the `"llm_call"` row) by clicking on the "abc" row.
+	// For legacy clients, `_parent_id` identifies the existing row to use as this row's parent.
 	//
 	// If the row is being merged into an existing row, this field will be ignored.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 	UnderscoreParentId nullable.Nullable[string] `json:"_parent_id,omitempty"`
 
 	// Created The timestamp the dataset event was created
 	Created nullable.Nullable[time.Time] `json:"created,omitempty"`
 
 	// Expected The output of your application, including post-processing (an arbitrary, JSON serializable object)
-	Expected nullable.Nullable[interface{}] `json:"expected,omitempty"`
+	Expected interface{} `json:"expected,omitempty"`
 
 	// Facets Facets for categorization (dictionary from facet id to value)
 	Facets nullable.Nullable[map[string]*string] `json:"facets,omitempty"`
@@ -7376,7 +8115,7 @@ type InsertDatasetEvent struct {
 	Id nullable.Nullable[string] `json:"id,omitempty"`
 
 	// Input The argument that uniquely define an input case (an arbitrary, JSON serializable object)
-	Input nullable.Nullable[interface{}] `json:"input,omitempty"`
+	Input interface{} `json:"input,omitempty"`
 
 	// Metadata A dictionary with additional data about the test example, model outputs, or just about anything else that's relevant, that you can use to help find and analyze examples later. For example, you could log the `prompt`, example's `id`, or anything else that would be useful to slice/dice later. The values in `metadata` can be any JSON-serializable type, but its keys must be strings
 	Metadata nullable.Nullable[InsertDatasetEvent_Metadata] `json:"metadata,omitempty"`
@@ -7384,23 +8123,23 @@ type InsertDatasetEvent struct {
 	// Origin Indicates the event was copied from another object.
 	Origin nullable.Nullable[ObjectReferenceNullish] `json:"origin,omitempty"`
 
-	// RootSpanId Use `span_id`, `root_span_id`, and `span_parents` instead of `_parent_id`, which is now deprecated. The span_id is a unique identifier describing the row's place in the a trace, and the root_span_id is a unique identifier for the whole trace. See the [guide](https://www.braintrust.dev/docs/instrument) for full details.
+	// RootSpanId Use `span_id`, `root_span_id`, and `span_parents` instead of `_parent_id`, which is now deprecated. The span_id is a unique identifier describing the row's place in the trace, and the root_span_id is a unique identifier for the whole trace. See the [guide](https://docs.braintrust.dev/instrument) for full details.
 	//
-	// For example, say we have logged a row `{"id": "abc", "span_id": "span0", "root_span_id": "root_span0", "input": "foo", "output": "bar", "expected": "boo", "scores": {"correctness": 0.33}}`. We can create a sub-span of the parent row by logging `{"id": "llm_call", "span_id": "span1", "root_span_id": "root_span0", "span_parents": ["span0"], "input": {"prompt": "What comes after foo?"}, "output": "bar", "metrics": {"tokens": 1}}`. In the webapp, only the root span row `"abc"` will show up in the summary view. You can view the full trace hierarchy (in this case, the `"llm_call"` row) by clicking on the "abc" row.
+	// For example, say we have logged a row `{"id": "abc", "span_id": "span0", "root_span_id": "root_span0", "input": "foo", "output": "bar", "expected": "boo", "scores": {"correctness": 0.33}}`. We can create a sub-span of the parent row by logging `{"id": "llm_call", "span_id": "span1", "root_span_id": "root_span0", "span_parents": ["span0"], "input": {"prompt": "What comes after foo?"}, "output": "bar", "metrics": {"tokens": 1}}`. In the Braintrust UI, only the root span row `"abc"` will show up in the summary view. You can view the full trace hierarchy (in this case, the `"llm_call"` row) by clicking on the "abc" row.
 	//
 	// If the row is being merged into an existing row, this field will be ignored.
 	RootSpanId nullable.Nullable[string] `json:"root_span_id,omitempty"`
 
-	// SpanId Use `span_id`, `root_span_id`, and `span_parents` instead of `_parent_id`, which is now deprecated. The span_id is a unique identifier describing the row's place in the a trace, and the root_span_id is a unique identifier for the whole trace. See the [guide](https://www.braintrust.dev/docs/instrument) for full details.
+	// SpanId Use `span_id`, `root_span_id`, and `span_parents` instead of `_parent_id`, which is now deprecated. The span_id is a unique identifier describing the row's place in the trace, and the root_span_id is a unique identifier for the whole trace. See the [guide](https://docs.braintrust.dev/instrument) for full details.
 	//
-	// For example, say we have logged a row `{"id": "abc", "span_id": "span0", "root_span_id": "root_span0", "input": "foo", "output": "bar", "expected": "boo", "scores": {"correctness": 0.33}}`. We can create a sub-span of the parent row by logging `{"id": "llm_call", "span_id": "span1", "root_span_id": "root_span0", "span_parents": ["span0"], "input": {"prompt": "What comes after foo?"}, "output": "bar", "metrics": {"tokens": 1}}`. In the webapp, only the root span row `"abc"` will show up in the summary view. You can view the full trace hierarchy (in this case, the `"llm_call"` row) by clicking on the "abc" row.
+	// For example, say we have logged a row `{"id": "abc", "span_id": "span0", "root_span_id": "root_span0", "input": "foo", "output": "bar", "expected": "boo", "scores": {"correctness": 0.33}}`. We can create a sub-span of the parent row by logging `{"id": "llm_call", "span_id": "span1", "root_span_id": "root_span0", "span_parents": ["span0"], "input": {"prompt": "What comes after foo?"}, "output": "bar", "metrics": {"tokens": 1}}`. In the Braintrust UI, only the root span row `"abc"` will show up in the summary view. You can view the full trace hierarchy (in this case, the `"llm_call"` row) by clicking on the "abc" row.
 	//
 	// If the row is being merged into an existing row, this field will be ignored.
 	SpanId nullable.Nullable[string] `json:"span_id,omitempty"`
 
-	// SpanParents Use `span_id`, `root_span_id`, and `span_parents` instead of `_parent_id`, which is now deprecated. The span_id is a unique identifier describing the row's place in the a trace, and the root_span_id is a unique identifier for the whole trace. See the [guide](https://www.braintrust.dev/docs/instrument) for full details.
+	// SpanParents Use `span_id`, `root_span_id`, and `span_parents` instead of `_parent_id`, which is now deprecated. The span_id is a unique identifier describing the row's place in the trace, and the root_span_id is a unique identifier for the whole trace. See the [guide](https://docs.braintrust.dev/instrument) for full details.
 	//
-	// For example, say we have logged a row `{"id": "abc", "span_id": "span0", "root_span_id": "root_span0", "input": "foo", "output": "bar", "expected": "boo", "scores": {"correctness": 0.33}}`. We can create a sub-span of the parent row by logging `{"id": "llm_call", "span_id": "span1", "root_span_id": "root_span0", "span_parents": ["span0"], "input": {"prompt": "What comes after foo?"}, "output": "bar", "metrics": {"tokens": 1}}`. In the webapp, only the root span row `"abc"` will show up in the summary view. You can view the full trace hierarchy (in this case, the `"llm_call"` row) by clicking on the "abc" row.
+	// For example, say we have logged a row `{"id": "abc", "span_id": "span0", "root_span_id": "root_span0", "input": "foo", "output": "bar", "expected": "boo", "scores": {"correctness": 0.33}}`. We can create a sub-span of the parent row by logging `{"id": "llm_call", "span_id": "span1", "root_span_id": "root_span0", "span_parents": ["span0"], "input": {"prompt": "What comes after foo?"}, "output": "bar", "metrics": {"tokens": 1}}`. In the Braintrust UI, only the root span row `"abc"` will show up in the summary view. You can view the full trace hierarchy (in this case, the `"llm_call"` row) by clicking on the "abc" row.
 	//
 	// If the row is being merged into an existing row, this field will be ignored.
 	SpanParents nullable.Nullable[[]string] `json:"span_parents,omitempty"`
@@ -7432,10 +8171,10 @@ type InsertEventsResponse struct {
 type InsertExperimentEvent struct {
 	// UnderscoreArrayDelete The `_array_delete` field allows removing specific values from array fields. It is an array of objects with `path` and `delete` properties.
 	//
-	// For example, to remove tags "foo" and "bar" from an existing row: `{"_is_merge": true, "_array_delete": [{"path": ["tags"], "delete": ["foo", "bar"]}]}`. For nested fields like `metadata.categories`, use `[{"path": ["metadata", "categories"], "delete": ["value"]}]`. This will remove those specific values from the array while preserving others.
+	// For example, to remove tags "foo" and "bar" from an existing row with id "abc": `{"id": "abc", "_is_merge": true, "_array_delete": [{"path": ["tags"], "delete": ["foo", "bar"]}]}`. For nested fields like `metadata.categories`, use `{"id": "abc", "_is_merge": true, "_array_delete": [{"path": ["metadata", "categories"], "delete": ["value"]}]}`. This will remove those specific values from the array while preserving others.
 	UnderscoreArrayDelete nullable.Nullable[[]struct {
-		Delete []nullable.Nullable[interface{}] `json:"delete"`
-		Path   []string                         `json:"path"`
+		Delete []interface{} `json:"delete"`
+		Path   []string      `json:"path"`
 	}] `json:"_array_delete,omitempty"`
 
 	// UnderscoreIsMerge The `_is_merge` field controls how the row is merged with any existing row with the same id in the DB. By default (or when set to `false`), the existing row is completely replaced by the new row. When set to `true`, the new row is deep-merged into the existing row, if one is found. If no existing row is found, the new row is inserted as is.
@@ -7445,19 +8184,18 @@ type InsertExperimentEvent struct {
 
 	// UnderscoreMergePaths The `_merge_paths` field allows controlling the depth of the merge, when `_is_merge=true`. `_merge_paths` is a list of paths, where each path is a list of field names. The deep merge will not descend below any of the specified merge paths.
 	//
-	// For example, say there is an existing row in the DB `{"id": "foo", "input": {"a": {"b": 10}, "c": {"d": 20}}, "output": {"a": 20}}`. If we merge a new row as `{"_is_merge": true, "_merge_paths": [["input", "a"], ["output"]], "input": {"a": {"q": 30}, "c": {"e": 30}, "bar": "baz"}, "output": {"d": 40}}`, the new row will be `{"id": "foo": "input": {"a": {"q": 30}, "c": {"d": 20, "e": 30}, "bar": "baz"}, "output": {"d": 40}}`. In this case, due to the merge paths, we have replaced `input.a` and `output`, but have still deep-merged `input` and `input.c`.
+	// For example, say there is an existing row in the DB `{"id": "foo", "input": {"a": {"b": 10}, "c": {"d": 20}}, "output": {"a": 20}}`. If we merge a new row as `{"id": "foo", "_is_merge": true, "_merge_paths": [["input", "a"], ["output"]], "input": {"a": {"q": 30}, "c": {"e": 30}, "bar": "baz"}, "output": {"d": 40}}`, the new row will be `{"id": "foo", "input": {"a": {"q": 30}, "c": {"d": 20, "e": 30}, "bar": "baz"}, "output": {"d": 40}}`. In this case, due to the merge paths, we have replaced `input.a` and `output`, but have still deep-merged `input` and `input.c`.
 	UnderscoreMergePaths nullable.Nullable[[][]string] `json:"_merge_paths,omitempty"`
 
 	// UnderscoreObjectDelete Pass `_object_delete=true` to mark the experiment event deleted. Deleted events will not show up in subsequent fetches for this experiment
 	UnderscoreObjectDelete nullable.Nullable[bool] `json:"_object_delete,omitempty"`
 
-	// UnderscoreParentId DEPRECATED: The `_parent_id` field is deprecated and should not be used. Support for `_parent_id` will be dropped in a future version of Braintrust. Log `span_id`, `root_span_id`, and `span_parents` explicitly instead.
+	// UnderscoreParentId Deprecated. Log `span_id`, `root_span_id`, and `span_parents` explicitly instead.
 	//
-	// Use the `_parent_id` field to create this row as a subspan of an existing row. Tracking hierarchical relationships are important for tracing (see the [guide](https://www.braintrust.dev/docs/instrument) for full details).
-	//
-	// For example, say we have logged a row `{"id": "abc", "input": "foo", "output": "bar", "expected": "boo", "scores": {"correctness": 0.33}}`. We can create a sub-span of the parent row by logging `{"_parent_id": "abc", "id": "llm_call", "input": {"prompt": "What comes after foo?"}, "output": "bar", "metrics": {"tokens": 1}}`. In the webapp, only the root span row `"abc"` will show up in the summary view. You can view the full trace hierarchy (in this case, the `"llm_call"` row) by clicking on the "abc" row.
+	// For legacy clients, `_parent_id` identifies the existing row to use as this row's parent.
 	//
 	// If the row is being merged into an existing row, this field will be ignored.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 	UnderscoreParentId nullable.Nullable[string] `json:"_parent_id,omitempty"`
 
 	// Context Context is additional information about the code that produced the experiment event. It is essentially the textual counterpart to `metrics`. Use the `caller_*` attributes to track the location in code which produced the experiment event
@@ -7467,10 +8205,10 @@ type InsertExperimentEvent struct {
 	Created nullable.Nullable[time.Time] `json:"created,omitempty"`
 
 	// Error The error that occurred, if any.
-	Error nullable.Nullable[interface{}] `json:"error,omitempty"`
+	Error interface{} `json:"error,omitempty"`
 
 	// Expected The ground truth value (an arbitrary, JSON serializable object) that you'd compare to `output` to determine if your `output` value is correct or not. Braintrust currently does not compare `output` to `expected` for you, since there are so many different ways to do that correctly. Instead, these values are just used to help you navigate your experiments while digging into analyses. However, we may later use these values to re-score outputs or fine-tune your models
-	Expected nullable.Nullable[interface{}] `json:"expected,omitempty"`
+	Expected interface{} `json:"expected,omitempty"`
 
 	// Facets Facets for categorization (dictionary from facet id to value)
 	Facets nullable.Nullable[map[string]*string] `json:"facets,omitempty"`
@@ -7479,7 +8217,7 @@ type InsertExperimentEvent struct {
 	Id nullable.Nullable[string] `json:"id,omitempty"`
 
 	// Input The arguments that uniquely define a test case (an arbitrary, JSON serializable object). Later on, Braintrust will use the `input` to know whether two test cases are the same between experiments, so they should not contain experiment-specific state. A simple rule of thumb is that if you run the same experiment twice, the `input` should be identical
-	Input nullable.Nullable[interface{}] `json:"input,omitempty"`
+	Input interface{} `json:"input,omitempty"`
 
 	// Metadata A dictionary with additional data about the test example, model outputs, or just about anything else that's relevant, that you can use to help find and analyze examples later. For example, you could log the `prompt`, example's `id`, or anything else that would be useful to slice/dice later. The values in `metadata` can be any JSON-serializable type, but its keys must be strings
 	Metadata nullable.Nullable[InsertExperimentEvent_Metadata] `json:"metadata,omitempty"`
@@ -7491,31 +8229,31 @@ type InsertExperimentEvent struct {
 	Origin nullable.Nullable[ObjectReferenceNullish] `json:"origin,omitempty"`
 
 	// Output The output of your application, including post-processing (an arbitrary, JSON serializable object), that allows you to determine whether the result is correct or not. For example, in an app that generates SQL queries, the `output` should be the _result_ of the SQL query generated by the model, not the query itself, because there may be multiple valid queries that answer a single question
-	Output nullable.Nullable[interface{}] `json:"output,omitempty"`
+	Output interface{} `json:"output,omitempty"`
 
-	// RootSpanId Use `span_id`, `root_span_id`, and `span_parents` instead of `_parent_id`, which is now deprecated. The span_id is a unique identifier describing the row's place in the a trace, and the root_span_id is a unique identifier for the whole trace. See the [guide](https://www.braintrust.dev/docs/instrument) for full details.
+	// RootSpanId Use `span_id`, `root_span_id`, and `span_parents` instead of `_parent_id`, which is now deprecated. The span_id is a unique identifier describing the row's place in the trace, and the root_span_id is a unique identifier for the whole trace. See the [guide](https://docs.braintrust.dev/instrument) for full details.
 	//
-	// For example, say we have logged a row `{"id": "abc", "span_id": "span0", "root_span_id": "root_span0", "input": "foo", "output": "bar", "expected": "boo", "scores": {"correctness": 0.33}}`. We can create a sub-span of the parent row by logging `{"id": "llm_call", "span_id": "span1", "root_span_id": "root_span0", "span_parents": ["span0"], "input": {"prompt": "What comes after foo?"}, "output": "bar", "metrics": {"tokens": 1}}`. In the webapp, only the root span row `"abc"` will show up in the summary view. You can view the full trace hierarchy (in this case, the `"llm_call"` row) by clicking on the "abc" row.
+	// For example, say we have logged a row `{"id": "abc", "span_id": "span0", "root_span_id": "root_span0", "input": "foo", "output": "bar", "expected": "boo", "scores": {"correctness": 0.33}}`. We can create a sub-span of the parent row by logging `{"id": "llm_call", "span_id": "span1", "root_span_id": "root_span0", "span_parents": ["span0"], "input": {"prompt": "What comes after foo?"}, "output": "bar", "metrics": {"tokens": 1}}`. In the Braintrust UI, only the root span row `"abc"` will show up in the summary view. You can view the full trace hierarchy (in this case, the `"llm_call"` row) by clicking on the "abc" row.
 	//
 	// If the row is being merged into an existing row, this field will be ignored.
 	RootSpanId nullable.Nullable[string] `json:"root_span_id,omitempty"`
 
-	// Scores A dictionary of numeric values (between 0 and 1) to log. The scores should give you a variety of signals that help you determine how accurate the outputs are compared to what you expect and diagnose failures. For example, a summarization app might have one score that tells you how accurate the summary is, and another that measures the word similarity between the generated and grouth truth summary. The word similarity score could help you determine whether the summarization was covering similar concepts or not. You can use these scores to help you sort, filter, and compare experiments
+	// Scores A dictionary of numeric values (between 0 and 1) to log. The scores should give you a variety of signals that help you determine how accurate the outputs are compared to what you expect and diagnose failures. For example, a summarization app might have one score that tells you how accurate the summary is, and another that measures the word similarity between the generated and ground truth summary. The word similarity score could help you determine whether the summarization was covering similar concepts or not. You can use these scores to help you sort, filter, and compare experiments.
 	Scores nullable.Nullable[map[string]*float32] `json:"scores,omitempty"`
 
 	// SpanAttributes Human-identifying attributes of the span, such as name, type, etc.
 	SpanAttributes nullable.Nullable[SpanAttributes] `json:"span_attributes,omitempty"`
 
-	// SpanId Use `span_id`, `root_span_id`, and `span_parents` instead of `_parent_id`, which is now deprecated. The span_id is a unique identifier describing the row's place in the a trace, and the root_span_id is a unique identifier for the whole trace. See the [guide](https://www.braintrust.dev/docs/instrument) for full details.
+	// SpanId Use `span_id`, `root_span_id`, and `span_parents` instead of `_parent_id`, which is now deprecated. The span_id is a unique identifier describing the row's place in the trace, and the root_span_id is a unique identifier for the whole trace. See the [guide](https://docs.braintrust.dev/instrument) for full details.
 	//
-	// For example, say we have logged a row `{"id": "abc", "span_id": "span0", "root_span_id": "root_span0", "input": "foo", "output": "bar", "expected": "boo", "scores": {"correctness": 0.33}}`. We can create a sub-span of the parent row by logging `{"id": "llm_call", "span_id": "span1", "root_span_id": "root_span0", "span_parents": ["span0"], "input": {"prompt": "What comes after foo?"}, "output": "bar", "metrics": {"tokens": 1}}`. In the webapp, only the root span row `"abc"` will show up in the summary view. You can view the full trace hierarchy (in this case, the `"llm_call"` row) by clicking on the "abc" row.
+	// For example, say we have logged a row `{"id": "abc", "span_id": "span0", "root_span_id": "root_span0", "input": "foo", "output": "bar", "expected": "boo", "scores": {"correctness": 0.33}}`. We can create a sub-span of the parent row by logging `{"id": "llm_call", "span_id": "span1", "root_span_id": "root_span0", "span_parents": ["span0"], "input": {"prompt": "What comes after foo?"}, "output": "bar", "metrics": {"tokens": 1}}`. In the Braintrust UI, only the root span row `"abc"` will show up in the summary view. You can view the full trace hierarchy (in this case, the `"llm_call"` row) by clicking on the "abc" row.
 	//
 	// If the row is being merged into an existing row, this field will be ignored.
 	SpanId nullable.Nullable[string] `json:"span_id,omitempty"`
 
-	// SpanParents Use `span_id`, `root_span_id`, and `span_parents` instead of `_parent_id`, which is now deprecated. The span_id is a unique identifier describing the row's place in the a trace, and the root_span_id is a unique identifier for the whole trace. See the [guide](https://www.braintrust.dev/docs/instrument) for full details.
+	// SpanParents Use `span_id`, `root_span_id`, and `span_parents` instead of `_parent_id`, which is now deprecated. The span_id is a unique identifier describing the row's place in the trace, and the root_span_id is a unique identifier for the whole trace. See the [guide](https://docs.braintrust.dev/instrument) for full details.
 	//
-	// For example, say we have logged a row `{"id": "abc", "span_id": "span0", "root_span_id": "root_span0", "input": "foo", "output": "bar", "expected": "boo", "scores": {"correctness": 0.33}}`. We can create a sub-span of the parent row by logging `{"id": "llm_call", "span_id": "span1", "root_span_id": "root_span0", "span_parents": ["span0"], "input": {"prompt": "What comes after foo?"}, "output": "bar", "metrics": {"tokens": 1}}`. In the webapp, only the root span row `"abc"` will show up in the summary view. You can view the full trace hierarchy (in this case, the `"llm_call"` row) by clicking on the "abc" row.
+	// For example, say we have logged a row `{"id": "abc", "span_id": "span0", "root_span_id": "root_span0", "input": "foo", "output": "bar", "expected": "boo", "scores": {"correctness": 0.33}}`. We can create a sub-span of the parent row by logging `{"id": "llm_call", "span_id": "span1", "root_span_id": "root_span0", "span_parents": ["span0"], "input": {"prompt": "What comes after foo?"}, "output": "bar", "metrics": {"tokens": 1}}`. In the Braintrust UI, only the root span row `"abc"` will show up in the summary view. You can view the full trace hierarchy (in this case, the `"llm_call"` row) by clicking on the "abc" row.
 	//
 	// If the row is being merged into an existing row, this field will be ignored.
 	SpanParents nullable.Nullable[[]string] `json:"span_parents,omitempty"`
@@ -7546,14 +8284,14 @@ type InsertExperimentEvent_Metadata struct {
 
 // InsertExperimentEvent_Metrics Metrics are numerical measurements tracking the execution of the code that produced the experiment event. Use "start" and "end" to track the time span over which the experiment event was produced
 type InsertExperimentEvent_Metrics struct {
-	// CallerFilename This metric is deprecated
-	CallerFilename nullable.Nullable[interface{}] `json:"caller_filename,omitempty"`
+	// CallerFilename Deprecated. Use `context.caller_filename` instead.
+	CallerFilename interface{} `json:"caller_filename,omitempty"`
 
-	// CallerFunctionname This metric is deprecated
-	CallerFunctionname nullable.Nullable[interface{}] `json:"caller_functionname,omitempty"`
+	// CallerFunctionname Deprecated. Use `context.caller_functionname` instead.
+	CallerFunctionname interface{} `json:"caller_functionname,omitempty"`
 
-	// CallerLineno This metric is deprecated
-	CallerLineno nullable.Nullable[interface{}] `json:"caller_lineno,omitempty"`
+	// CallerLineno Deprecated. Use `context.caller_lineno` instead.
+	CallerLineno interface{} `json:"caller_lineno,omitempty"`
 
 	// CompletionTokens The number of tokens in the completion generated by the model (only set if this is an LLM span)
 	CompletionTokens nullable.Nullable[int] `json:"completion_tokens,omitempty"`
@@ -7584,10 +8322,10 @@ type InvokeApi struct {
 	EndpointName nullable.Nullable[string] `json:"endpoint_name,omitempty"`
 
 	// Expected The expected output of the function
-	Expected nullable.Nullable[interface{}] `json:"expected,omitempty"`
+	Expected interface{} `json:"expected,omitempty"`
 
 	// Input Argument to the function, which can be any JSON serializable value
-	Input nullable.Nullable[interface{}] `json:"input,omitempty"`
+	Input interface{} `json:"input,omitempty"`
 
 	// McpAuth Map of MCP server URL to auth credentials
 	McpAuth *map[string]struct {
@@ -7598,7 +8336,7 @@ type InvokeApi struct {
 	// Messages If the function is an LLM, additional messages to pass along to it
 	Messages *[]ChatCompletionMessageParam `json:"messages,omitempty"`
 
-	// Metadata Any relevant metadata. This will be logged and available as the `metadata` argument.
+	// Metadata Any relevant metadata to log on the span. For prompts, this is available as the `metadata` template variable. For code functions, this is passed through hooks and is not added to `input`.
 	Metadata nullable.Nullable[map[string]interface{}] `json:"metadata,omitempty"`
 
 	// Mode The mode format of the returned value (defaults to 'auto')
@@ -7609,6 +8347,9 @@ type InvokeApi struct {
 
 	// Parent Options for tracing the function call
 	Parent *InvokeParent `json:"parent,omitempty"`
+
+	// RequestSource A label identifying the caller, used to attribute usage
+	RequestSource *string `json:"request_source,omitempty"`
 
 	// Stream Whether to stream the response. If true, results will be returned in the Braintrust SSE format.
 	Stream nullable.Nullable[bool] `json:"stream,omitempty"`
@@ -7637,7 +8378,7 @@ type InvokeParent0 struct {
 	// PropagatedEvent Include these properties in every span created under this parent
 	PropagatedEvent nullable.Nullable[map[string]interface{}] `json:"propagated_event,omitempty"`
 
-	// RowIds Identifiers for the row to to log a subspan under
+	// RowIds Identifiers for the row to log a subspan under
 	RowIds nullable.Nullable[struct {
 		// Id The id of the row
 		Id string `json:"id"`
@@ -7661,6 +8402,8 @@ type InvokeParent1 = string
 // Together, `max_xact_id` and `max_root_span_id` form a pagination cursor
 //
 // Since a paginated fetch query returns results in order from latest to earliest, the cursor for the next page can be found as the row with the minimum (earliest) value of the tuple `(_xact_id, root_span_id)`. See the documentation of `limit` for an overview of paginating fetch queries.
+//
+// Deprecated: this type has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 type MaxRootSpanId = string
 
 // MaxXactId DEPRECATION NOTICE: The manually-constructed pagination cursor is deprecated in favor of the explicit 'cursor' returned by object fetch requests. Please prefer the 'cursor' argument going forwards.
@@ -7668,6 +8411,8 @@ type MaxRootSpanId = string
 // Together, `max_xact_id` and `max_root_span_id` form a pagination cursor
 //
 // Since a paginated fetch query returns results in order from latest to earliest, the cursor for the next page can be found as the row with the minimum (earliest) value of the tuple `(_xact_id, root_span_id)`. See the documentation of `limit` for an overview of paginating fetch queries.
+//
+// Deprecated: this type has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 type MaxXactId = string
 
 // McpServerIdParam McpServer id
@@ -7824,9 +8569,9 @@ type NullableSavedFunctionId0Type string
 // NullableSavedFunctionId1 defines model for NullableSavedFunctionId.1.
 type NullableSavedFunctionId1 struct {
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum] `json:"function_type,omitempty"`
-	Name         string                              `json:"name"`
-	Type         NullableSavedFunctionId1Type        `json:"type"`
+	FunctionType *FunctionTypeEnum            `json:"function_type,omitempty"`
+	Name         string                       `json:"name"`
+	Type         NullableSavedFunctionId1Type `json:"type"`
 }
 
 // NullableSavedFunctionId1Type defines model for NullableSavedFunctionId.1.Type.
@@ -7873,6 +8618,9 @@ type OnlineScoreConfig struct {
 	// Scorers The list of functions to run for online scoring. Can include scorers, facets, or other function types.
 	Scorers []nullable.Nullable[OnlineScoreConfig_Scorers_Item] `json:"scorers"`
 
+	// ServiceTier Service tier for online scoring. If omitted, prompt-level service tiers are preserved.
+	ServiceTier *OnlineScoreConfigServiceTier `json:"service_tier,omitempty"`
+
 	// SkipLogging Whether to skip adding scorer spans when computing scores
 	SkipLogging nullable.Nullable[bool] `json:"skip_logging,omitempty"`
 
@@ -7900,9 +8648,9 @@ type OnlineScoreConfigScorers0Type string
 // OnlineScoreConfigScorers1 defines model for OnlineScoreConfig.Scorers.1.
 type OnlineScoreConfigScorers1 struct {
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum] `json:"function_type,omitempty"`
-	Name         string                              `json:"name"`
-	Type         OnlineScoreConfigScorers1Type       `json:"type"`
+	FunctionType *FunctionTypeEnum             `json:"function_type,omitempty"`
+	Name         string                        `json:"name"`
+	Type         OnlineScoreConfigScorers1Type `json:"type"`
 }
 
 // OnlineScoreConfigScorers1Type defines model for OnlineScoreConfig.Scorers.1.Type.
@@ -7923,9 +8671,9 @@ type OnlineScoreConfigScorers3Type string
 // OnlineScoreConfigScorers4 defines model for OnlineScoreConfig.Scorers.4.
 type OnlineScoreConfigScorers4 struct {
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum] `json:"function_type,omitempty"`
-	Name         string                              `json:"name"`
-	Type         OnlineScoreConfigScorers4Type       `json:"type"`
+	FunctionType *FunctionTypeEnum             `json:"function_type,omitempty"`
+	Name         string                        `json:"name"`
+	Type         OnlineScoreConfigScorers4Type `json:"type"`
 }
 
 // OnlineScoreConfigScorers4Type defines model for OnlineScoreConfig.Scorers.4.Type.
@@ -7936,11 +8684,11 @@ type OnlineScoreConfig_Scorers_Item struct {
 	union json.RawMessage
 }
 
-// OrgAutomationIdParam OrgAutomation id
-type OrgAutomationIdParam = string
+// OnlineScoreConfigServiceTier Service tier for online scoring. If omitted, prompt-level service tiers are preserved.
+type OnlineScoreConfigServiceTier string
 
-// OrgAutomationName Name of the org_automation to search for
-type OrgAutomationName = string
+// OrgId Identify the organization to list API keys for
+type OrgId = string
 
 // OrgName Filter search results to within a particular organization
 type OrgName = string
@@ -7956,18 +8704,6 @@ type PatchAISecret struct {
 	Name   nullable.Nullable[string] `json:"name,omitempty"`
 	Secret nullable.Nullable[string] `json:"secret,omitempty"`
 	Type   nullable.Nullable[string] `json:"type,omitempty"`
-}
-
-// PatchAgent An agent is a project-scoped durable object that identifies an AI agent or service emitting spans
-type PatchAgent struct {
-	// Description Textual description of the agent
-	Description nullable.Nullable[string] `json:"description,omitempty"`
-
-	// Metadata User-controlled metadata about the agent
-	Metadata nullable.Nullable[map[string]interface{}] `json:"metadata,omitempty"`
-
-	// Name Name of the agent. Within a project, agent names are unique
-	Name nullable.Nullable[string] `json:"name,omitempty"`
 }
 
 // PatchDataset defines model for PatchDataset.
@@ -8101,42 +8837,27 @@ type PatchMCPServer struct {
 	Url nullable.Nullable[string] `json:"url,omitempty"`
 }
 
-// PatchOrgAutomation defines model for PatchOrgAutomation.
-type PatchOrgAutomation struct {
-	// Config The configuration for the org automation rule
-	Config nullable.Nullable[struct {
-		// EventType The type of automation.
-		EventType PatchOrgAutomationConfigEventType `json:"event_type"`
-
-		// ObjectType The object type that the retention policy applies to
-		ObjectType RetentionObjectType `json:"object_type"`
-
-		// RetentionDays The number of days to retain the object
-		RetentionDays int `json:"retention_days"`
-	}] `json:"config,omitempty"`
-
-	// Description Textual description of the project automation
-	Description nullable.Nullable[string] `json:"description,omitempty"`
-
-	// Name Name of the project automation
-	Name nullable.Nullable[string] `json:"name,omitempty"`
-}
-
-// PatchOrgAutomationConfigEventType The type of automation.
-type PatchOrgAutomationConfigEventType string
-
 // PatchOrganization defines model for PatchOrganization.
 type PatchOrganization struct {
+	// ApiUrl URL of the organization's data plane API. If unset, the Braintrust-hosted API is used.
 	ApiUrl nullable.Nullable[string] `json:"api_url,omitempty"`
 
 	// ImageRenderingMode Controls how images are rendered in the UI: 'auto' loads images automatically, 'click_to_load' shows a placeholder until clicked, 'blocked' prevents image loading entirely
 	ImageRenderingMode nullable.Nullable[ImageRenderingMode] `json:"image_rendering_mode,omitempty"`
-	IsDataplanePrivate nullable.Nullable[bool]               `json:"is_dataplane_private,omitempty"`
-	IsUniversalApi     nullable.Nullable[bool]               `json:"is_universal_api,omitempty"`
+
+	// IsDataplanePrivate Whether the organization's data plane is only reachable from a private network
+	IsDataplanePrivate nullable.Nullable[bool] `json:"is_dataplane_private,omitempty"`
+
+	// IsUniversalApi Whether the data plane at `api_url` also serves the AI proxy, at `api_url` with `/v1/proxy` appended
+	IsUniversalApi nullable.Nullable[bool] `json:"is_universal_api,omitempty"`
 
 	// Name Name of the organization
-	Name        nullable.Nullable[string] `json:"name,omitempty"`
-	ProxyUrl    nullable.Nullable[string] `json:"proxy_url,omitempty"`
+	Name nullable.Nullable[string] `json:"name,omitempty"`
+
+	// ProxyUrl URL of the organization's AI proxy
+	ProxyUrl nullable.Nullable[string] `json:"proxy_url,omitempty"`
+
+	// RealtimeUrl URL of the organization's realtime service
 	RealtimeUrl nullable.Nullable[string] `json:"realtime_url,omitempty"`
 }
 
@@ -8162,6 +8883,9 @@ type PatchOrganizationMembers struct {
 		// Ids Ids of existing users to invite
 		Ids nullable.Nullable[[]openapi_types.UUID] `json:"ids,omitempty"`
 
+		// ProjectGroupId Grants new service accounts read access to this project group. Required when a project-group Owner creates service accounts.
+		ProjectGroupId nullable.Nullable[openapi_types.UUID] `json:"project_group_id,omitempty"`
+
 		// SendInviteEmails If true, send invite emails to the users who wore actually added
 		SendInviteEmails nullable.Nullable[bool] `json:"send_invite_emails,omitempty"`
 
@@ -8172,7 +8896,7 @@ type PatchOrganizationMembers struct {
 			// TokenExpiresInSeconds Number of seconds from now after which the initial service token should expire. If omitted, the token never expires.
 			TokenExpiresInSeconds nullable.Nullable[int] `json:"token_expires_in_seconds,omitempty"`
 
-			// TokenName Optional name of an initial service token to create for the new service account. This is a narrow compatibility carve-out only on PATCH /v1/organization/members. When this field is set, the request must be authenticated with a service token that has organization-owner permissions, not a user API key.
+			// TokenName Optional name of an initial service token to create for the new service account. When set, authenticate with a UI session or service token, not a user API key. The caller must own the organization or the project group specified by invite_users.project_group_id.
 			TokenName nullable.Nullable[string] `json:"token_name,omitempty"`
 		}] `json:"service_accounts,omitempty"`
 	}] `json:"invite_users,omitempty"`
@@ -8256,7 +8980,7 @@ type PatchProject_Settings_SpanFieldOrder_Layout struct {
 // PatchProjectAutomation defines model for PatchProjectAutomation.
 type PatchProjectAutomation struct {
 	// Config The configuration for the automation rule
-	Config *PatchProjectAutomation_Config `json:"config,omitempty"`
+	Config nullable.Nullable[PatchProjectAutomation_Config] `json:"config,omitempty"`
 
 	// Description Textual description of the project automation
 	Description nullable.Nullable[string] `json:"description,omitempty"`
@@ -8303,18 +9027,7 @@ type PatchProjectAutomationConfig0Action1 struct {
 	// Channel The Slack channel ID to post to
 	Channel string `json:"channel"`
 
-	// FormattingPrompt Publish a Slack mrkdwn digest.
-	//
-	// Pattern selection requirement: include every selected Pattern whose final status is active at the end of this automation run, plus every selected Pattern that changed from active to inactive during this run (a newly inactive outcome). Exclude Patterns that were already inactive before this run and remained inactive. Do not mention excluded Patterns anywhere in the digest, including Highlights. If no selected Patterns meet these criteria, say "No current pattern outcomes." This requirement overrides conflicting formatting guidance.
-	//
-	// Include a complete "*Pattern outcomes*" section with one row for every included Pattern.
-	//
-	// Use this row format exactly:
-	// • <pattern_url|Pattern title> — `outcome`
-	//
-	// If a Pattern has no URL, use the plain title instead. Do not use GitHub Markdown tables or code-block tables, because links must remain clickable. Do not omit any active selected Pattern.
-	//
-	// After the outcome list, include a "*Highlights*" section with one very short paragraph, 2-3 sentences maximum. Summarize what changed or what broadly stands out among the included active Patterns. Do not introduce new claims beyond the run report.
+	// FormattingPrompt Instructions for Loop to format content sent to this destination
 	FormattingPrompt *string `json:"formatting_prompt,omitempty"`
 
 	// MessageTemplate Custom message template for the alert
@@ -8544,18 +9257,7 @@ type PatchProjectAutomationConfig4Action1 struct {
 	// Channel The Slack channel ID to post to
 	Channel string `json:"channel"`
 
-	// FormattingPrompt Publish a Slack mrkdwn digest.
-	//
-	// Pattern selection requirement: include every selected Pattern whose final status is active at the end of this automation run, plus every selected Pattern that changed from active to inactive during this run (a newly inactive outcome). Exclude Patterns that were already inactive before this run and remained inactive. Do not mention excluded Patterns anywhere in the digest, including Highlights. If no selected Patterns meet these criteria, say "No current pattern outcomes." This requirement overrides conflicting formatting guidance.
-	//
-	// Include a complete "*Pattern outcomes*" section with one row for every included Pattern.
-	//
-	// Use this row format exactly:
-	// • <pattern_url|Pattern title> — `outcome`
-	//
-	// If a Pattern has no URL, use the plain title instead. Do not use GitHub Markdown tables or code-block tables, because links must remain clickable. Do not omit any active selected Pattern.
-	//
-	// After the outcome list, include a "*Highlights*" section with one very short paragraph, 2-3 sentences maximum. Summarize what changed or what broadly stands out among the included active Patterns. Do not introduce new claims beyond the run report.
+	// FormattingPrompt Instructions for Loop to format content sent to this destination
 	FormattingPrompt *string `json:"formatting_prompt,omitempty"`
 
 	// MessageTemplate Custom message template for the alert
@@ -8598,9 +9300,6 @@ type PatchProjectAutomation_Config_4_Action struct {
 // PatchProjectAutomationConfig4EventType The type of automation.
 type PatchProjectAutomationConfig4EventType string
 
-// PatchProjectAutomationConfig8 defines model for PatchProjectAutomation.Config.8.
-type PatchProjectAutomationConfig8 = interface{}
-
 // PatchProjectAutomation_Config The configuration for the automation rule
 type PatchProjectAutomation_Config struct {
 	union json.RawMessage
@@ -8630,10 +9329,8 @@ type PatchProjectScore struct {
 	Description nullable.Nullable[string] `json:"description,omitempty"`
 
 	// Name Name of the project score
-	Name nullable.Nullable[string] `json:"name,omitempty"`
-
-	// ScoreType The type of the configured score
-	ScoreType *ProjectScoreType `json:"score_type,omitempty"`
+	Name      nullable.Nullable[string]           `json:"name,omitempty"`
+	ScoreType nullable.Nullable[ProjectScoreType] `json:"score_type,omitempty"`
 }
 
 // PatchProjectTag defines model for PatchProjectTag.
@@ -8672,11 +9369,9 @@ type PatchRole struct {
 	AddMemberPermissions nullable.Nullable[[]struct {
 		// Permission Each permission permits a certain type of operation on an object in the system
 		//
-		// Permissions can be assigned to to objects on an individual basis, or grouped into roles
-		Permission Permission `json:"permission"`
-
-		// RestrictObjectType The object type that the ACL applies to
-		RestrictObjectType *AclObjectType `json:"restrict_object_type,omitempty"`
+		// Permissions can be assigned to objects on an individual basis, or grouped into roles
+		Permission         Permission                       `json:"permission"`
+		RestrictObjectType nullable.Nullable[AclObjectType] `json:"restrict_object_type,omitempty"`
 	}] `json:"add_member_permissions,omitempty"`
 
 	// AddMemberRoles A list of role IDs to add to the role's inheriting-from set
@@ -8692,11 +9387,9 @@ type PatchRole struct {
 	RemoveMemberPermissions nullable.Nullable[[]struct {
 		// Permission Each permission permits a certain type of operation on an object in the system
 		//
-		// Permissions can be assigned to to objects on an individual basis, or grouped into roles
-		Permission Permission `json:"permission"`
-
-		// RestrictObjectType The object type that the ACL applies to
-		RestrictObjectType *AclObjectType `json:"restrict_object_type,omitempty"`
+		// Permissions can be assigned to objects on an individual basis, or grouped into roles
+		Permission         Permission                       `json:"permission"`
+		RestrictObjectType nullable.Nullable[AclObjectType] `json:"restrict_object_type,omitempty"`
 	}] `json:"remove_member_permissions,omitempty"`
 
 	// RemoveMemberRoles A list of role IDs to remove from the role's inheriting-from set
@@ -8753,7 +9446,7 @@ type PatchViewViewType string
 
 // Permission Each permission permits a certain type of operation on an object in the system
 //
-// Permissions can be assigned to to objects on an individual basis, or grouped into roles
+// Permissions can be assigned to objects on an individual basis, or grouped into roles
 type Permission string
 
 // PreprocessorId For prompt-backed functions: the saved, global, or inline preprocessor to use for trace template variables. Set to null to disable preprocessing. If omitted, the traced project's default preprocessor will be used, falling back to the global 'thread' preprocessor.
@@ -8963,6 +9656,94 @@ type PromptBlockData1 struct {
 // PromptBlockData1Type defines model for PromptBlockData.1.Type.
 type PromptBlockData1Type string
 
+// PromptBlockData2 defines model for PromptBlockData.2.
+type PromptBlockData2 struct {
+	Input     PromptBlockData_2_Input            `json:"input"`
+	Questions []PromptBlockData_2_Questions_Item `json:"questions"`
+	Type      PromptBlockData2Type               `json:"type"`
+}
+
+// PromptBlockData2Input0 defines model for PromptBlockData.2.Input.0.
+type PromptBlockData2Input0 = string
+
+// PromptBlockData2Input1 defines model for PromptBlockData.2.Input.1.
+type PromptBlockData2Input1 = []struct {
+	Content PromptBlockData_2_Input_1_Content `json:"content"`
+	Role    PromptBlockData2Input1Role        `json:"role"`
+}
+
+// PromptBlockData2Input1Content0 defines model for PromptBlockData.2.Input.1.Content.0.
+type PromptBlockData2Input1Content0 = string
+
+// PromptBlockData2Input1Content1 defines model for PromptBlockData.2.Input.1.Content.1.
+type PromptBlockData2Input1Content1 = []ChatCompletionContentPartText
+
+// PromptBlockData_2_Input_1_Content defines model for PromptBlockData.2.Input.1.Content.
+type PromptBlockData_2_Input_1_Content struct {
+	union json.RawMessage
+}
+
+// PromptBlockData2Input1Role defines model for PromptBlockData.2.Input.1.Role.
+type PromptBlockData2Input1Role string
+
+// PromptBlockData_2_Input defines model for PromptBlockData.2.Input.
+type PromptBlockData_2_Input struct {
+	union json.RawMessage
+}
+
+// PromptBlockData2Questions0 defines model for PromptBlockData.2.Questions.0.
+type PromptBlockData2Questions0 struct {
+	Type PromptBlockData2Questions0Type `json:"type"`
+}
+
+// PromptBlockData2Questions0Type defines model for PromptBlockData.2.Questions.0.Type.
+type PromptBlockData2Questions0Type string
+
+// PromptBlockData2Questions1 defines model for PromptBlockData.2.Questions.1.
+type PromptBlockData2Questions1 struct {
+	Choices []struct {
+		Description *string                                     `json:"description,omitempty"`
+		Value       PromptBlockData_2_Questions_1_Choices_Value `json:"value"`
+	} `json:"choices"`
+	Type PromptBlockData2Questions1Type `json:"type"`
+}
+
+// PromptBlockData2Questions1ChoicesValue0 defines model for PromptBlockData.2.Questions.1.Choices.Value.0.
+type PromptBlockData2Questions1ChoicesValue0 = string
+
+// PromptBlockData2Questions1ChoicesValue1 defines model for PromptBlockData.2.Questions.1.Choices.Value.1.
+type PromptBlockData2Questions1ChoicesValue1 = bool
+
+// PromptBlockData_2_Questions_1_Choices_Value defines model for PromptBlockData.2.Questions.1.Choices.Value.
+type PromptBlockData_2_Questions_1_Choices_Value struct {
+	union json.RawMessage
+}
+
+// PromptBlockData2Questions1Type defines model for PromptBlockData.2.Questions.1.Type.
+type PromptBlockData2Questions1Type string
+
+// PromptBlockData2Questions2 defines model for PromptBlockData.2.Questions.2.
+type PromptBlockData2Questions2 struct {
+	Levels []struct {
+		Description *string `json:"description,omitempty"`
+		Label       string  `json:"label"`
+	} `json:"levels"`
+	Type PromptBlockData2Questions2Type `json:"type"`
+}
+
+// PromptBlockData2Questions2Type defines model for PromptBlockData.2.Questions.2.Type.
+type PromptBlockData2Questions2Type string
+
+// PromptBlockData_2_Questions_Item defines model for PromptBlockData.2.Questions.Item.
+type PromptBlockData_2_Questions_Item struct {
+	Instructions string  `json:"instructions"`
+	Name         *string `json:"name,omitempty"`
+	union        json.RawMessage
+}
+
+// PromptBlockData2Type defines model for PromptBlockData.2.Type.
+type PromptBlockData2Type string
+
 // PromptBlockDataNullish defines model for PromptBlockDataNullish.
 type PromptBlockDataNullish struct {
 	union json.RawMessage
@@ -8986,6 +9767,94 @@ type PromptBlockDataNullish1 struct {
 
 // PromptBlockDataNullish1Type defines model for PromptBlockDataNullish.1.Type.
 type PromptBlockDataNullish1Type string
+
+// PromptBlockDataNullish2 defines model for PromptBlockDataNullish.2.
+type PromptBlockDataNullish2 struct {
+	Input     PromptBlockDataNullish_2_Input            `json:"input"`
+	Questions []PromptBlockDataNullish_2_Questions_Item `json:"questions"`
+	Type      PromptBlockDataNullish2Type               `json:"type"`
+}
+
+// PromptBlockDataNullish2Input0 defines model for PromptBlockDataNullish.2.Input.0.
+type PromptBlockDataNullish2Input0 = string
+
+// PromptBlockDataNullish2Input1 defines model for PromptBlockDataNullish.2.Input.1.
+type PromptBlockDataNullish2Input1 = []struct {
+	Content PromptBlockDataNullish_2_Input_1_Content `json:"content"`
+	Role    PromptBlockDataNullish2Input1Role        `json:"role"`
+}
+
+// PromptBlockDataNullish2Input1Content0 defines model for PromptBlockDataNullish.2.Input.1.Content.0.
+type PromptBlockDataNullish2Input1Content0 = string
+
+// PromptBlockDataNullish2Input1Content1 defines model for PromptBlockDataNullish.2.Input.1.Content.1.
+type PromptBlockDataNullish2Input1Content1 = []ChatCompletionContentPartText
+
+// PromptBlockDataNullish_2_Input_1_Content defines model for PromptBlockDataNullish.2.Input.1.Content.
+type PromptBlockDataNullish_2_Input_1_Content struct {
+	union json.RawMessage
+}
+
+// PromptBlockDataNullish2Input1Role defines model for PromptBlockDataNullish.2.Input.1.Role.
+type PromptBlockDataNullish2Input1Role string
+
+// PromptBlockDataNullish_2_Input defines model for PromptBlockDataNullish.2.Input.
+type PromptBlockDataNullish_2_Input struct {
+	union json.RawMessage
+}
+
+// PromptBlockDataNullish2Questions0 defines model for PromptBlockDataNullish.2.Questions.0.
+type PromptBlockDataNullish2Questions0 struct {
+	Type PromptBlockDataNullish2Questions0Type `json:"type"`
+}
+
+// PromptBlockDataNullish2Questions0Type defines model for PromptBlockDataNullish.2.Questions.0.Type.
+type PromptBlockDataNullish2Questions0Type string
+
+// PromptBlockDataNullish2Questions1 defines model for PromptBlockDataNullish.2.Questions.1.
+type PromptBlockDataNullish2Questions1 struct {
+	Choices []struct {
+		Description *string                                            `json:"description,omitempty"`
+		Value       PromptBlockDataNullish_2_Questions_1_Choices_Value `json:"value"`
+	} `json:"choices"`
+	Type PromptBlockDataNullish2Questions1Type `json:"type"`
+}
+
+// PromptBlockDataNullish2Questions1ChoicesValue0 defines model for PromptBlockDataNullish.2.Questions.1.Choices.Value.0.
+type PromptBlockDataNullish2Questions1ChoicesValue0 = string
+
+// PromptBlockDataNullish2Questions1ChoicesValue1 defines model for PromptBlockDataNullish.2.Questions.1.Choices.Value.1.
+type PromptBlockDataNullish2Questions1ChoicesValue1 = bool
+
+// PromptBlockDataNullish_2_Questions_1_Choices_Value defines model for PromptBlockDataNullish.2.Questions.1.Choices.Value.
+type PromptBlockDataNullish_2_Questions_1_Choices_Value struct {
+	union json.RawMessage
+}
+
+// PromptBlockDataNullish2Questions1Type defines model for PromptBlockDataNullish.2.Questions.1.Type.
+type PromptBlockDataNullish2Questions1Type string
+
+// PromptBlockDataNullish2Questions2 defines model for PromptBlockDataNullish.2.Questions.2.
+type PromptBlockDataNullish2Questions2 struct {
+	Levels []struct {
+		Description *string `json:"description,omitempty"`
+		Label       string  `json:"label"`
+	} `json:"levels"`
+	Type PromptBlockDataNullish2Questions2Type `json:"type"`
+}
+
+// PromptBlockDataNullish2Questions2Type defines model for PromptBlockDataNullish.2.Questions.2.Type.
+type PromptBlockDataNullish2Questions2Type string
+
+// PromptBlockDataNullish_2_Questions_Item defines model for PromptBlockDataNullish.2.Questions.Item.
+type PromptBlockDataNullish_2_Questions_Item struct {
+	Instructions string  `json:"instructions"`
+	Name         *string `json:"name,omitempty"`
+	union        json.RawMessage
+}
+
+// PromptBlockDataNullish2Type defines model for PromptBlockDataNullish.2.Type.
+type PromptBlockDataNullish2Type string
 
 // PromptDataNullish The prompt, model, and its parameters
 type PromptDataNullish struct {
@@ -9052,7 +9921,7 @@ type PromptDataNullishToolFunctions0Type string
 // PromptDataNullishToolFunctions1 defines model for PromptDataNullish.ToolFunctions.1.
 type PromptDataNullishToolFunctions1 struct {
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum] `json:"function_type,omitempty"`
+	FunctionType *FunctionTypeEnum                   `json:"function_type,omitempty"`
 	Name         string                              `json:"name"`
 	Type         PromptDataNullishToolFunctions1Type `json:"type"`
 }
@@ -9075,7 +9944,7 @@ type PromptDataNullishToolFunctions3Type string
 // PromptDataNullishToolFunctions4 defines model for PromptDataNullish.ToolFunctions.4.
 type PromptDataNullishToolFunctions4 struct {
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum] `json:"function_type,omitempty"`
+	FunctionType *FunctionTypeEnum                   `json:"function_type,omitempty"`
 	Name         string                              `json:"name"`
 	Type         PromptDataNullishToolFunctions4Type `json:"type"`
 }
@@ -9090,7 +9959,7 @@ type PromptDataNullish_ToolFunctions_Item struct {
 
 // PromptEnvironment Filter by environment slug. Cannot be used together with `version`.
 //
-// For `GET /v1/prompt`, environment resolution currently requires the request to match a single prompt. If multiple prompts match, the endpoint returns `400` (for example when `limit=1` is not set). Use `limit=1` or other filters (for example `slug`, `project_id`) to narrow results.
+// For `GET /v1/prompt`, return prompts associated with the environment at their assigned versions. Pagination applies to the matching prompts.
 type PromptEnvironment = string
 
 // PromptIdParam Prompt id
@@ -9234,11 +10103,9 @@ type Role struct {
 	MemberPermissions nullable.Nullable[[]struct {
 		// Permission Each permission permits a certain type of operation on an object in the system
 		//
-		// Permissions can be assigned to to objects on an individual basis, or grouped into roles
-		Permission Permission `json:"permission"`
-
-		// RestrictObjectType The object type that the ACL applies to
-		RestrictObjectType *AclObjectType `json:"restrict_object_type,omitempty"`
+		// Permissions can be assigned to objects on an individual basis, or grouped into roles
+		Permission         Permission                       `json:"permission"`
+		RestrictObjectType nullable.Nullable[AclObjectType] `json:"restrict_object_type,omitempty"`
 	}] `json:"member_permissions,omitempty"`
 
 	// MemberRoles Ids of the roles this role inherits from
@@ -9286,9 +10153,9 @@ type SavedFunctionId0Type string
 // SavedFunctionId1 defines model for SavedFunctionId.1.
 type SavedFunctionId1 struct {
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum] `json:"function_type,omitempty"`
-	Name         string                              `json:"name"`
-	Type         SavedFunctionId1Type                `json:"type"`
+	FunctionType *FunctionTypeEnum    `json:"function_type,omitempty"`
+	Name         string               `json:"name"`
+	Type         SavedFunctionId1Type `json:"type"`
 }
 
 // SavedFunctionId1Type defines model for SavedFunctionId.1.Type.
@@ -9427,7 +10294,7 @@ type TopicAutomationConfigFacetFunctions0Type string
 // TopicAutomationConfigFacetFunctions1 defines model for TopicAutomationConfig.FacetFunctions.1.
 type TopicAutomationConfigFacetFunctions1 struct {
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum]      `json:"function_type,omitempty"`
+	FunctionType *FunctionTypeEnum                        `json:"function_type,omitempty"`
 	Name         string                                   `json:"name"`
 	Type         TopicAutomationConfigFacetFunctions1Type `json:"type"`
 }
@@ -9450,7 +10317,7 @@ type TopicAutomationConfigFacetFunctions3Type string
 // TopicAutomationConfigFacetFunctions4 defines model for TopicAutomationConfig.FacetFunctions.4.
 type TopicAutomationConfigFacetFunctions4 struct {
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum]      `json:"function_type,omitempty"`
+	FunctionType *FunctionTypeEnum                        `json:"function_type,omitempty"`
 	Name         string                                   `json:"name"`
 	Type         TopicAutomationConfigFacetFunctions4Type `json:"type"`
 }
@@ -9508,18 +10375,7 @@ type TopicDigestAutomationConfig struct {
 		// Channel The Slack channel ID to post to
 		Channel string `json:"channel"`
 
-		// FormattingPrompt Publish a Slack mrkdwn digest.
-		//
-		// Pattern selection requirement: include every selected Pattern whose final status is active at the end of this automation run, plus every selected Pattern that changed from active to inactive during this run (a newly inactive outcome). Exclude Patterns that were already inactive before this run and remained inactive. Do not mention excluded Patterns anywhere in the digest, including Highlights. If no selected Patterns meet these criteria, say "No current pattern outcomes." This requirement overrides conflicting formatting guidance.
-		//
-		// Include a complete "*Pattern outcomes*" section with one row for every included Pattern.
-		//
-		// Use this row format exactly:
-		// • <pattern_url|Pattern title> — `outcome`
-		//
-		// If a Pattern has no URL, use the plain title instead. Do not use GitHub Markdown tables or code-block tables, because links must remain clickable. Do not omit any active selected Pattern.
-		//
-		// After the outcome list, include a "*Highlights*" section with one very short paragraph, 2-3 sentences maximum. Summarize what changed or what broadly stands out among the included active Patterns. Do not introduce new claims beyond the run report.
+		// FormattingPrompt Instructions for Loop to format content sent to this destination
 		FormattingPrompt *string `json:"formatting_prompt,omitempty"`
 
 		// MessageTemplate Custom message template for the alert
@@ -9610,7 +10466,7 @@ type TopicMapDataSourceFacetFunction0Type string
 // TopicMapDataSourceFacetFunction1 defines model for TopicMapData.SourceFacetFunction.1.
 type TopicMapDataSourceFacetFunction1 struct {
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum]  `json:"function_type,omitempty"`
+	FunctionType *FunctionTypeEnum                    `json:"function_type,omitempty"`
 	Name         string                               `json:"name"`
 	Type         TopicMapDataSourceFacetFunction1Type `json:"type"`
 }
@@ -9633,7 +10489,7 @@ type TopicMapDataSourceFacetFunction3Type string
 // TopicMapDataSourceFacetFunction4 defines model for TopicMapData.SourceFacetFunction.4.
 type TopicMapDataSourceFacetFunction4 struct {
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum]  `json:"function_type,omitempty"`
+	FunctionType *FunctionTypeEnum                    `json:"function_type,omitempty"`
 	Name         string                               `json:"name"`
 	Type         TopicMapDataSourceFacetFunction4Type `json:"type"`
 }
@@ -9671,7 +10527,7 @@ type TopicMapFunctionAutomationFunction0Type string
 // TopicMapFunctionAutomationFunction1 defines model for TopicMapFunctionAutomation.Function.1.
 type TopicMapFunctionAutomationFunction1 struct {
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum]     `json:"function_type,omitempty"`
+	FunctionType *FunctionTypeEnum                       `json:"function_type,omitempty"`
 	Name         string                                  `json:"name"`
 	Type         TopicMapFunctionAutomationFunction1Type `json:"type"`
 }
@@ -9694,7 +10550,7 @@ type TopicMapFunctionAutomationFunction3Type string
 // TopicMapFunctionAutomationFunction4 defines model for TopicMapFunctionAutomation.Function.4.
 type TopicMapFunctionAutomationFunction4 struct {
 	// FunctionType The type of global function. Defaults to 'scorer'.
-	FunctionType nullable.Nullable[FunctionTypeEnum]     `json:"function_type,omitempty"`
+	FunctionType *FunctionTypeEnum                       `json:"function_type,omitempty"`
 	Name         string                                  `json:"name"`
 	Type         TopicMapFunctionAutomationFunction4Type `json:"type"`
 }
@@ -9778,16 +10634,16 @@ type Version = string
 
 // ViewData The view definition
 type ViewData struct {
-	CustomCharts nullable.Nullable[interface{}]    `json:"custom_charts,omitempty"`
+	CustomCharts interface{}                       `json:"custom_charts,omitempty"`
 	Search       nullable.Nullable[ViewDataSearch] `json:"search,omitempty"`
 }
 
 // ViewDataSearch defines model for ViewDataSearch.
 type ViewDataSearch struct {
-	Filter nullable.Nullable[[]nullable.Nullable[interface{}]] `json:"filter,omitempty"`
-	Match  nullable.Nullable[[]nullable.Nullable[interface{}]] `json:"match,omitempty"`
-	Sort   nullable.Nullable[[]nullable.Nullable[interface{}]] `json:"sort,omitempty"`
-	Tag    nullable.Nullable[[]nullable.Nullable[interface{}]] `json:"tag,omitempty"`
+	Filter nullable.Nullable[[]interface{}] `json:"filter,omitempty"`
+	Match  nullable.Nullable[[]interface{}] `json:"match,omitempty"`
+	Sort   nullable.Nullable[[]interface{}] `json:"sort,omitempty"`
+	Tag    nullable.Nullable[[]interface{}] `json:"tag,omitempty"`
 }
 
 // ViewIdParam View id
@@ -9806,6 +10662,7 @@ type ViewOptions0 struct {
 	FreezeColumns nullable.Nullable[bool] `json:"freezeColumns,omitempty"`
 	Options       struct {
 		ChartVisibility nullable.Nullable[map[string]bool]             `json:"chartVisibility,omitempty"`
+		FilterScope     *ViewOptions0OptionsFilterScope                `json:"filterScope,omitempty"`
 		FrameEnd        nullable.Nullable[string]                      `json:"frameEnd,omitempty"`
 		FrameStart      nullable.Nullable[string]                      `json:"frameStart,omitempty"`
 		GroupBy         nullable.Nullable[string]                      `json:"groupBy,omitempty"`
@@ -9817,6 +10674,9 @@ type ViewOptions0 struct {
 	} `json:"options"`
 	ViewType ViewOptions0ViewType `json:"viewType"`
 }
+
+// ViewOptions0OptionsFilterScope defines model for ViewOptions.0.Options.FilterScope.
+type ViewOptions0OptionsFilterScope string
 
 // ViewOptions0OptionsSpanType defines model for ViewOptions.0.Options.SpanType.
 type ViewOptions0OptionsSpanType string
@@ -9911,6 +10771,9 @@ type WindowedAutomationConfig struct {
 	// Actions Delivery actions exposed to Loop as tools, or run directly when Loop is not configured
 	Actions *[]WindowedAutomationConfig_Actions_Item `json:"actions,omitempty"`
 
+	// Continuous Between scheduled runs, check for accumulated new work. The executor decides how to process it.
+	Continuous *bool `json:"continuous,omitempty"`
+
 	// EventType The type of automation.
 	EventType WindowedAutomationConfigEventType `json:"event_type"`
 
@@ -9923,18 +10786,24 @@ type WindowedAutomationConfig struct {
 		AutoApproveTools *[]string `json:"auto_approve_tools,omitempty"`
 		EndpointName     *string   `json:"endpoint_name,omitempty"`
 
-		// Harness Required when saving a Loop automation. Currently only Codex is supported.
+		// Harness Required for an explicit model selection. Currently only Codex is supported.
 		Harness *WindowedAutomationConfigLoopHarness `json:"harness,omitempty"`
 
 		// IncludeTriggerInput Whether to include the automation trigger payload as input
 		IncludeTriggerInput *bool `json:"include_trigger_input,omitempty"`
 
-		// Model Required when saving a Loop automation.
+		// Model Omit harness, model, and endpoint_name to inherit the organization default provider and its recommended execution settings.
 		Model *string `json:"model,omitempty"`
 
 		// Prompt Instructions for the Loop agent
 		Prompt          string                                       `json:"prompt"`
 		ReasoningEffort *WindowedAutomationConfigLoopReasoningEffort `json:"reasoning_effort,omitempty"`
+
+		// Target The object this automation writes to or maintains
+		Target *struct {
+			Id   WindowedAutomationConfigLoopTargetId   `json:"id"`
+			Type WindowedAutomationConfigLoopTargetType `json:"type"`
+		} `json:"target,omitempty"`
 	} `json:"loop,omitempty"`
 
 	// ProductOrigin The product surface that created and manages the automation
@@ -10001,18 +10870,7 @@ type WindowedAutomationConfigActions1 struct {
 	// Channel The Slack channel ID to post to
 	Channel string `json:"channel"`
 
-	// FormattingPrompt Publish a Slack mrkdwn digest.
-	//
-	// Pattern selection requirement: include every selected Pattern whose final status is active at the end of this automation run, plus every selected Pattern that changed from active to inactive during this run (a newly inactive outcome). Exclude Patterns that were already inactive before this run and remained inactive. Do not mention excluded Patterns anywhere in the digest, including Highlights. If no selected Patterns meet these criteria, say "No current pattern outcomes." This requirement overrides conflicting formatting guidance.
-	//
-	// Include a complete "*Pattern outcomes*" section with one row for every included Pattern.
-	//
-	// Use this row format exactly:
-	// • <pattern_url|Pattern title> — `outcome`
-	//
-	// If a Pattern has no URL, use the plain title instead. Do not use GitHub Markdown tables or code-block tables, because links must remain clickable. Do not omit any active selected Pattern.
-	//
-	// After the outcome list, include a "*Highlights*" section with one very short paragraph, 2-3 sentences maximum. Summarize what changed or what broadly stands out among the included active Patterns. Do not introduce new claims beyond the run report.
+	// FormattingPrompt Instructions for Loop to format content sent to this destination
 	FormattingPrompt *string `json:"formatting_prompt,omitempty"`
 
 	// MessageTemplate Custom message template for the alert
@@ -10055,11 +10913,17 @@ type WindowedAutomationConfig_Actions_Item struct {
 // WindowedAutomationConfigEventType The type of automation.
 type WindowedAutomationConfigEventType string
 
-// WindowedAutomationConfigLoopHarness Required when saving a Loop automation. Currently only Codex is supported.
+// WindowedAutomationConfigLoopHarness Required for an explicit model selection. Currently only Codex is supported.
 type WindowedAutomationConfigLoopHarness string
 
 // WindowedAutomationConfigLoopReasoningEffort defines model for WindowedAutomationConfig.Loop.ReasoningEffort.
 type WindowedAutomationConfigLoopReasoningEffort string
+
+// WindowedAutomationConfigLoopTargetId defines model for WindowedAutomationConfig.Loop.Target.Id.
+type WindowedAutomationConfigLoopTargetId string
+
+// WindowedAutomationConfigLoopTargetType defines model for WindowedAutomationConfig.Loop.Target.Type.
+type WindowedAutomationConfigLoopTargetType string
 
 // WindowedAutomationConfigProductOrigin The product surface that created and manages the automation
 type WindowedAutomationConfigProductOrigin string
@@ -10142,7 +11006,7 @@ type AclListOrgObjectTypeParameter = AclListOrgObjectType
 
 // AclListPermissionParameter Each permission permits a certain type of operation on an object in the system
 //
-// Permissions can be assigned to to objects on an individual basis, or grouped into roles
+// Permissions can be assigned to objects on an individual basis, or grouped into roles
 type AclListPermissionParameter = AclListPermission
 
 // AclListRestrictObjectTypeParameter The object type that the ACL applies to
@@ -10159,12 +11023,6 @@ type AclObjectIdParameter = AclObjectId
 
 // AclObjectTypeParameter The object type that the ACL applies to
 type AclObjectTypeParameter = AclObjectType
-
-// AgentIdParamParameter Agent id
-type AgentIdParamParameter = AgentIdParam
-
-// AgentNameParameter Name of the agent to search for
-type AgentNameParameter = AgentName
 
 // AiSecretIdParamParameter AiSecret id
 type AiSecretIdParamParameter = AiSecretIdParam
@@ -10186,6 +11044,12 @@ type AppLimitWithDefaultParamParameter = AppLimitWithDefaultParam
 
 // ComparisonExperimentIdParameter The experiment to compare against, if summarizing scores and metrics. If omitted, will fall back to the `base_exp_id` stored in the experiment metadata, and then to the most recent experiment run in the same project. Must pass `summarize_scores=true` for this id to be used
 type ComparisonExperimentIdParameter = ComparisonExperimentId
+
+// CreatedAfterParameter Include API keys created at or after this timestamp
+type CreatedAfterParameter = CreatedAfter
+
+// CreatedBeforeParameter Include API keys created at or before this timestamp
+type CreatedBeforeParameter = CreatedBefore
 
 // DatasetIdParamParameter Dataset id
 type DatasetIdParamParameter = DatasetIdParam
@@ -10222,9 +11086,9 @@ type ExperimentIdParamParameter = ExperimentIdParam
 // ExperimentNameParameter Name of the experiment to search for
 type ExperimentNameParameter = ExperimentName
 
-// FetchLimitParamParameter limit the number of traces fetched
+// FetchLimitParamParameter Limit the number of traces fetched
 //
-// Fetch queries may be paginated if the total result size is expected to be large (e.g. project_logs which accumulate over a long time). Note that fetch queries only support pagination in descending time order (from latest to earliest `_xact_id`. Furthermore, later pages may return rows which showed up in earlier pages, except with an earlier `_xact_id`. This happens because pagination occurs over the whole version history of the event log. You will most likely want to exclude any such duplicate, outdated rows (by `id`) from your combined result set.
+// Fetch queries may be paginated if the total result size is expected to be large (e.g. project_logs which accumulate over a long time). Note that fetch queries only support pagination in descending time order (from latest to earliest `_xact_id`). Furthermore, later pages may return rows which showed up in earlier pages, except with an earlier `_xact_id`. This happens because pagination occurs over the whole version history of the event log. You will most likely want to exclude any such duplicate, outdated rows (by `id`) from your combined result set.
 //
 // The `limit` parameter controls the number of full traces to return. So you may end up with more individual rows than the specified limit if you are fetching events containing traces.
 type FetchLimitParamParameter = FetchLimitParam
@@ -10249,6 +11113,8 @@ type IdsParameter = Ids
 // Together, `max_xact_id` and `max_root_span_id` form a pagination cursor
 //
 // Since a paginated fetch query returns results in order from latest to earliest, the cursor for the next page can be found as the row with the minimum (earliest) value of the tuple `(_xact_id, root_span_id)`. See the documentation of `limit` for an overview of paginating fetch queries.
+//
+// Deprecated: this type has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 type MaxRootSpanIdParameter = MaxRootSpanId
 
 // MaxXactIdParameter DEPRECATION NOTICE: The manually-constructed pagination cursor is deprecated in favor of the explicit 'cursor' returned by object fetch requests. Please prefer the 'cursor' argument going forwards.
@@ -10256,6 +11122,8 @@ type MaxRootSpanIdParameter = MaxRootSpanId
 // Together, `max_xact_id` and `max_root_span_id` form a pagination cursor
 //
 // Since a paginated fetch query returns results in order from latest to earliest, the cursor for the next page can be found as the row with the minimum (earliest) value of the tuple `(_xact_id, root_span_id)`. See the documentation of `limit` for an overview of paginating fetch queries.
+//
+// Deprecated: this type has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 type MaxXactIdParameter = MaxXactId
 
 // McpServerIdParamParameter McpServer id
@@ -10264,11 +11132,8 @@ type McpServerIdParamParameter = McpServerIdParam
 // McpServerNameParameter Name of the mcp_server to search for
 type McpServerNameParameter = McpServerName
 
-// OrgAutomationIdParamParameter OrgAutomation id
-type OrgAutomationIdParamParameter = OrgAutomationIdParam
-
-// OrgAutomationNameParameter Name of the org_automation to search for
-type OrgAutomationNameParameter = OrgAutomationName
+// OrgIdParameter Identify the organization to list API keys for
+type OrgIdParameter = OrgId
 
 // OrgNameParameter Filter search results to within a particular organization
 type OrgNameParameter = OrgName
@@ -10314,7 +11179,7 @@ type ProjectTagNameParameter = ProjectTagName
 
 // PromptEnvironmentParameter Filter by environment slug. Cannot be used together with `version`.
 //
-// For `GET /v1/prompt`, environment resolution currently requires the request to match a single prompt. If multiple prompts match, the endpoint returns `400` (for example when `limit=1` is not set). Use `limit=1` or other filters (for example `slug`, `project_id`) to narrow results.
+// For `GET /v1/prompt`, return prompts associated with the environment at their assigned versions. Pagination applies to the matching prompts.
 type PromptEnvironmentParameter = PromptEnvironment
 
 // PromptIdParamParameter Prompt id
@@ -10391,6 +11256,8 @@ type ListEnvironmentsParams struct {
 	Ids *struct {
 		union json.RawMessage
 	} `form:"ids,omitempty" json:"ids,omitempty"`
+
+	// Name Name of the environment to search for
 	Name *string `form:"name,omitempty" json:"name,omitempty"`
 
 	// OrgName Filter search results to within a particular organization
@@ -10435,7 +11302,7 @@ type GetAclParams struct {
 
 	// Permission Each permission permits a certain type of operation on an object in the system
 	//
-	// Permissions can be assigned to to objects on an individual basis, or grouped into roles
+	// Permissions can be assigned to objects on an individual basis, or grouped into roles
 	Permission *AclListPermissionParameter `form:"permission,omitempty" json:"permission,omitempty"`
 
 	// RestrictObjectType The object type that the ACL applies to
@@ -10477,7 +11344,7 @@ type AclListOrgParams struct {
 
 	// Permission Each permission permits a certain type of operation on an object in the system
 	//
-	// Permissions can be assigned to to objects on an individual basis, or grouped into roles
+	// Permissions can be assigned to objects on an individual basis, or grouped into roles
 	Permission *AclListPermissionParameter `form:"permission,omitempty" json:"permission,omitempty"`
 
 	// RestrictObjectType The object type that the ACL applies to
@@ -10485,31 +11352,6 @@ type AclListOrgParams struct {
 
 	// RoleId Id of the role the ACL grants. Exactly one of `permission` and `role_id` will be provided
 	RoleId *AclListRoleIdParameter `form:"role_id,omitempty" json:"role_id,omitempty"`
-
-	// OrgName Filter search results to within a particular organization
-	OrgName *OrgNameParameter `form:"org_name,omitempty" json:"org_name,omitempty"`
-}
-
-// GetAgentParams defines parameters for GetAgent.
-type GetAgentParams struct {
-	// Limit Limit the number of objects to return
-	Limit *AppLimitParamParameter `form:"limit,omitempty" json:"limit,omitempty"`
-
-	// StartingAfter Pagination cursor id.
-	//
-	// For example, if the final item in the last page you fetched had an id of `foo`, pass `starting_after=foo` to fetch the next page. Note: you may only pass one of `starting_after` and `ending_before`
-	StartingAfter *StartingAfterParameter `form:"starting_after,omitempty" json:"starting_after,omitempty"`
-
-	// EndingBefore Pagination cursor id.
-	//
-	// For example, if the initial item in the last page you fetched had an id of `foo`, pass `ending_before=foo` to fetch the previous page. Note: you may only pass one of `starting_after` and `ending_before`
-	EndingBefore *EndingBeforeParameter `form:"ending_before,omitempty" json:"ending_before,omitempty"`
-
-	// Ids Filter search results to a particular set of object IDs. To specify a list of IDs, include the query param multiple times
-	Ids *IdsParameter `form:"ids,omitempty" json:"ids,omitempty"`
-
-	// AgentName Name of the agent to search for
-	AgentName *AgentNameParameter `form:"agent_name,omitempty" json:"agent_name,omitempty"`
 
 	// OrgName Filter search results to within a particular organization
 	OrgName *OrgNameParameter `form:"org_name,omitempty" json:"org_name,omitempty"`
@@ -10599,9 +11441,9 @@ type GetDatasetParams struct {
 
 // GetDatasetIdFetchParams defines parameters for GetDatasetIdFetch.
 type GetDatasetIdFetchParams struct {
-	// Limit limit the number of traces fetched
+	// Limit Limit the number of traces fetched
 	//
-	// Fetch queries may be paginated if the total result size is expected to be large (e.g. project_logs which accumulate over a long time). Note that fetch queries only support pagination in descending time order (from latest to earliest `_xact_id`. Furthermore, later pages may return rows which showed up in earlier pages, except with an earlier `_xact_id`. This happens because pagination occurs over the whole version history of the event log. You will most likely want to exclude any such duplicate, outdated rows (by `id`) from your combined result set.
+	// Fetch queries may be paginated if the total result size is expected to be large (e.g. project_logs which accumulate over a long time). Note that fetch queries only support pagination in descending time order (from latest to earliest `_xact_id`). Furthermore, later pages may return rows which showed up in earlier pages, except with an earlier `_xact_id`. This happens because pagination occurs over the whole version history of the event log. You will most likely want to exclude any such duplicate, outdated rows (by `id`) from your combined result set.
 	//
 	// The `limit` parameter controls the number of full traces to return. So you may end up with more individual rows than the specified limit if you are fetching events containing traces.
 	Limit *FetchLimitParamParameter `form:"limit,omitempty" json:"limit,omitempty"`
@@ -10611,6 +11453,7 @@ type GetDatasetIdFetchParams struct {
 	// Together, `max_xact_id` and `max_root_span_id` form a pagination cursor
 	//
 	// Since a paginated fetch query returns results in order from latest to earliest, the cursor for the next page can be found as the row with the minimum (earliest) value of the tuple `(_xact_id, root_span_id)`. See the documentation of `limit` for an overview of paginating fetch queries.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 	MaxXactId *MaxXactIdParameter `form:"max_xact_id,omitempty" json:"max_xact_id,omitempty"`
 
 	// MaxRootSpanId DEPRECATION NOTICE: The manually-constructed pagination cursor is deprecated in favor of the explicit 'cursor' returned by object fetch requests. Please prefer the 'cursor' argument going forwards.
@@ -10618,6 +11461,7 @@ type GetDatasetIdFetchParams struct {
 	// Together, `max_xact_id` and `max_root_span_id` form a pagination cursor
 	//
 	// Since a paginated fetch query returns results in order from latest to earliest, the cursor for the next page can be found as the row with the minimum (earliest) value of the tuple `(_xact_id, root_span_id)`. See the documentation of `limit` for an overview of paginating fetch queries.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 	MaxRootSpanId *MaxRootSpanIdParameter `form:"max_root_span_id,omitempty" json:"max_root_span_id,omitempty"`
 
 	// Version Retrieve a snapshot of events from a past time
@@ -10771,9 +11615,9 @@ type GetExperimentParams struct {
 
 // GetExperimentIdFetchParams defines parameters for GetExperimentIdFetch.
 type GetExperimentIdFetchParams struct {
-	// Limit limit the number of traces fetched
+	// Limit Limit the number of traces fetched
 	//
-	// Fetch queries may be paginated if the total result size is expected to be large (e.g. project_logs which accumulate over a long time). Note that fetch queries only support pagination in descending time order (from latest to earliest `_xact_id`. Furthermore, later pages may return rows which showed up in earlier pages, except with an earlier `_xact_id`. This happens because pagination occurs over the whole version history of the event log. You will most likely want to exclude any such duplicate, outdated rows (by `id`) from your combined result set.
+	// Fetch queries may be paginated if the total result size is expected to be large (e.g. project_logs which accumulate over a long time). Note that fetch queries only support pagination in descending time order (from latest to earliest `_xact_id`). Furthermore, later pages may return rows which showed up in earlier pages, except with an earlier `_xact_id`. This happens because pagination occurs over the whole version history of the event log. You will most likely want to exclude any such duplicate, outdated rows (by `id`) from your combined result set.
 	//
 	// The `limit` parameter controls the number of full traces to return. So you may end up with more individual rows than the specified limit if you are fetching events containing traces.
 	Limit *FetchLimitParamParameter `form:"limit,omitempty" json:"limit,omitempty"`
@@ -10783,6 +11627,7 @@ type GetExperimentIdFetchParams struct {
 	// Together, `max_xact_id` and `max_root_span_id` form a pagination cursor
 	//
 	// Since a paginated fetch query returns results in order from latest to earliest, the cursor for the next page can be found as the row with the minimum (earliest) value of the tuple `(_xact_id, root_span_id)`. See the documentation of `limit` for an overview of paginating fetch queries.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 	MaxXactId *MaxXactIdParameter `form:"max_xact_id,omitempty" json:"max_xact_id,omitempty"`
 
 	// MaxRootSpanId DEPRECATION NOTICE: The manually-constructed pagination cursor is deprecated in favor of the explicit 'cursor' returned by object fetch requests. Please prefer the 'cursor' argument going forwards.
@@ -10790,6 +11635,7 @@ type GetExperimentIdFetchParams struct {
 	// Together, `max_xact_id` and `max_root_span_id` form a pagination cursor
 	//
 	// Since a paginated fetch query returns results in order from latest to earliest, the cursor for the next page can be found as the row with the minimum (earliest) value of the tuple `(_xact_id, root_span_id)`. See the documentation of `limit` for an overview of paginating fetch queries.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 	MaxRootSpanId *MaxRootSpanIdParameter `form:"max_root_span_id,omitempty" json:"max_root_span_id,omitempty"`
 
 	// Version Retrieve a snapshot of events from a past time
@@ -10844,7 +11690,7 @@ type GetFunctionParams struct {
 
 	// Environment Filter by environment slug. Cannot be used together with `version`.
 	//
-	// For `GET /v1/prompt`, environment resolution currently requires the request to match a single prompt. If multiple prompts match, the endpoint returns `400` (for example when `limit=1` is not set). Use `limit=1` or other filters (for example `slug`, `project_id`) to narrow results.
+	// For `GET /v1/prompt`, return prompts associated with the environment at their assigned versions. Pagination applies to the matching prompts.
 	Environment *PromptEnvironmentParameter `form:"environment,omitempty" json:"environment,omitempty"`
 
 	// OrgName Filter search results to within a particular organization
@@ -10860,7 +11706,7 @@ type GetFunctionIdParams struct {
 
 	// Environment Filter by environment slug. Cannot be used together with `version`.
 	//
-	// For `GET /v1/prompt`, environment resolution currently requires the request to match a single prompt. If multiple prompts match, the endpoint returns `400` (for example when `limit=1` is not set). Use `limit=1` or other filters (for example `slug`, `project_id`) to narrow results.
+	// For `GET /v1/prompt`, return prompts associated with the environment at their assigned versions. Pagination applies to the matching prompts.
 	Environment *PromptEnvironmentParameter `form:"environment,omitempty" json:"environment,omitempty"`
 }
 
@@ -10914,31 +11760,6 @@ type GetMcpServerParams struct {
 	OrgName *OrgNameParameter `form:"org_name,omitempty" json:"org_name,omitempty"`
 }
 
-// GetOrgAutomationParams defines parameters for GetOrgAutomation.
-type GetOrgAutomationParams struct {
-	// Limit Limit the number of objects to return
-	Limit *AppLimitParamParameter `form:"limit,omitempty" json:"limit,omitempty"`
-
-	// StartingAfter Pagination cursor id.
-	//
-	// For example, if the final item in the last page you fetched had an id of `foo`, pass `starting_after=foo` to fetch the next page. Note: you may only pass one of `starting_after` and `ending_before`
-	StartingAfter *StartingAfterParameter `form:"starting_after,omitempty" json:"starting_after,omitempty"`
-
-	// EndingBefore Pagination cursor id.
-	//
-	// For example, if the initial item in the last page you fetched had an id of `foo`, pass `ending_before=foo` to fetch the previous page. Note: you may only pass one of `starting_after` and `ending_before`
-	EndingBefore *EndingBeforeParameter `form:"ending_before,omitempty" json:"ending_before,omitempty"`
-
-	// Ids Filter search results to a particular set of object IDs. To specify a list of IDs, include the query param multiple times
-	Ids *IdsParameter `form:"ids,omitempty" json:"ids,omitempty"`
-
-	// OrgAutomationName Name of the org_automation to search for
-	OrgAutomationName *OrgAutomationNameParameter `form:"org_automation_name,omitempty" json:"org_automation_name,omitempty"`
-
-	// OrgName Filter search results to within a particular organization
-	OrgName *OrgNameParameter `form:"org_name,omitempty" json:"org_name,omitempty"`
-}
-
 // GetOrganizationParams defines parameters for GetOrganization.
 type GetOrganizationParams struct {
 	// Limit Limit the number of objects to return
@@ -10959,6 +11780,37 @@ type GetOrganizationParams struct {
 
 	// OrgName Filter search results to within a particular organization
 	OrgName *OrgNameParameter `form:"org_name,omitempty" json:"org_name,omitempty"`
+}
+
+// GetOrganizationApiKeysParams defines parameters for GetOrganizationApiKeys.
+type GetOrganizationApiKeysParams struct {
+	// Limit Limit the number of objects to return
+	Limit *AppLimitWithDefaultParamParameter `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// StartingAfter Pagination cursor id.
+	//
+	// For example, if the final item in the last page you fetched had an id of `foo`, pass `starting_after=foo` to fetch the next page. Note: you may only pass one of `starting_after` and `ending_before`
+	StartingAfter *StartingAfterParameter `form:"starting_after,omitempty" json:"starting_after,omitempty"`
+
+	// EndingBefore Pagination cursor id.
+	//
+	// For example, if the initial item in the last page you fetched had an id of `foo`, pass `ending_before=foo` to fetch the previous page. Note: you may only pass one of `starting_after` and `ending_before`
+	EndingBefore *EndingBeforeParameter `form:"ending_before,omitempty" json:"ending_before,omitempty"`
+
+	// Ids Filter search results to a particular set of object IDs. To specify a list of IDs, include the query param multiple times
+	Ids *IdsParameter `form:"ids,omitempty" json:"ids,omitempty"`
+
+	// ApiKeyName Name of the api_key to search for
+	ApiKeyName *ApiKeyNameParameter `form:"api_key_name,omitempty" json:"api_key_name,omitempty"`
+
+	// OrgId Identify the organization to list API keys for
+	OrgId *OrgIdParameter `form:"org_id,omitempty" json:"org_id,omitempty"`
+
+	// CreatedAfter Include API keys created at or after this timestamp
+	CreatedAfter *CreatedAfterParameter `form:"created_after,omitempty" json:"created_after,omitempty"`
+
+	// CreatedBefore Include API keys created at or before this timestamp
+	CreatedBefore *CreatedBeforeParameter `form:"created_before,omitempty" json:"created_before,omitempty"`
 }
 
 // GetProjectParams defines parameters for GetProject.
@@ -11064,7 +11916,9 @@ type GetProjectScoreParams struct {
 	ProjectId *ProjectIdQueryParameter `form:"project_id,omitempty" json:"project_id,omitempty"`
 
 	// OrgName Filter search results to within a particular organization
-	OrgName                   *OrgNameParameter          `form:"org_name,omitempty" json:"org_name,omitempty"`
+	OrgName *OrgNameParameter `form:"org_name,omitempty" json:"org_name,omitempty"`
+
+	// ProjectScoreTypeParameter Filter by score type. To specify multiple types, include the query param multiple times
 	ProjectScoreTypeParameter *ProjectScoreTypeParameter `form:"score_type,omitempty" json:"score_type,omitempty"`
 }
 
@@ -11136,7 +11990,7 @@ type GetPromptParams struct {
 
 	// Environment Filter by environment slug. Cannot be used together with `version`.
 	//
-	// For `GET /v1/prompt`, environment resolution currently requires the request to match a single prompt. If multiple prompts match, the endpoint returns `400` (for example when `limit=1` is not set). Use `limit=1` or other filters (for example `slug`, `project_id`) to narrow results.
+	// For `GET /v1/prompt`, return prompts associated with the environment at their assigned versions. Pagination applies to the matching prompts.
 	Environment *PromptEnvironmentParameter `form:"environment,omitempty" json:"environment,omitempty"`
 
 	// OrgName Filter search results to within a particular organization
@@ -11152,7 +12006,7 @@ type GetPromptIdParams struct {
 
 	// Environment Filter by environment slug. Cannot be used together with `version`.
 	//
-	// For `GET /v1/prompt`, environment resolution currently requires the request to match a single prompt. If multiple prompts match, the endpoint returns `400` (for example when `limit=1` is not set). Use `limit=1` or other filters (for example `slug`, `project_id`) to narrow results.
+	// For `GET /v1/prompt`, return prompts associated with the environment at their assigned versions. Pagination applies to the matching prompts.
 	Environment *PromptEnvironmentParameter `form:"environment,omitempty" json:"environment,omitempty"`
 }
 
@@ -11217,7 +12071,7 @@ type PostServiceTokenJSONBody struct {
 	// OrgName For nearly all users, this parameter should be unnecessary. But in the rare case that your API key belongs to multiple organizations, you may specify the name of the organization the Service token belongs in.
 	OrgName nullable.Nullable[string] `json:"org_name,omitempty"`
 
-	// ServiceAccountId The ID of the service account to which the token should belong. To create a service account, visit [**Settings > Service tokens**](https://www.braintrust.dev/app/~/configuration/org/service-tokens) in the Braintrust UI or call [`PATCH /v1/organization/members`](https://www.braintrust.dev/docs/api-reference/organizations/modify-organization-membership).
+	// ServiceAccountId The ID of the service account to which the token should belong. To create a service account, visit [**Settings > Service tokens**](https://www.braintrust.dev/app/~/configuration/org/service-tokens) in the Braintrust UI or call [`PATCH /v1/organization/members`](https://docs.braintrust.dev/api-reference/organizations/modify-organization-membership).
 	ServiceAccountId string `json:"service_account_id"`
 }
 
@@ -11232,7 +12086,7 @@ type PutServiceTokenJSONBody struct {
 	// OrgName For nearly all users, this parameter should be unnecessary. But in the rare case that your API key belongs to multiple organizations, you may specify the name of the organization the Service token belongs in.
 	OrgName nullable.Nullable[string] `json:"org_name,omitempty"`
 
-	// ServiceAccountId The ID of the service account to which the token should belong. To create a service account, visit [**Settings > Service tokens**](https://www.braintrust.dev/app/~/configuration/org/service-tokens) in the Braintrust UI or call [`PATCH /v1/organization/members`](https://www.braintrust.dev/docs/api-reference/organizations/modify-organization-membership).
+	// ServiceAccountId The ID of the service account to which the token should belong. To create a service account, visit [**Settings > Service tokens**](https://www.braintrust.dev/app/~/configuration/org/service-tokens) in the Braintrust UI or call [`PATCH /v1/organization/members`](https://docs.braintrust.dev/api-reference/organizations/modify-organization-membership).
 	ServiceAccountId string `json:"service_account_id"`
 }
 
@@ -11347,15 +12201,6 @@ type PostAclJSONRequestBody = AclItem
 // AclBatchUpdateJSONRequestBody defines body for AclBatchUpdate for application/json ContentType.
 type AclBatchUpdateJSONRequestBody = AclBatchUpdateRequest
 
-// PostAgentJSONRequestBody defines body for PostAgent for application/json ContentType.
-type PostAgentJSONRequestBody = CreateAgent
-
-// PutAgentJSONRequestBody defines body for PutAgent for application/json ContentType.
-type PutAgentJSONRequestBody = CreateAgent
-
-// PatchAgentIdJSONRequestBody defines body for PatchAgentId for application/json ContentType.
-type PatchAgentIdJSONRequestBody = PatchAgent
-
 // DeleteAiSecretJSONRequestBody defines body for DeleteAiSecret for application/json ContentType.
 type DeleteAiSecretJSONRequestBody = DeleteAISecret
 
@@ -11382,6 +12227,12 @@ type PostDatasetIdFetchJSONRequestBody = FetchEventsRequest
 
 // PostDatasetIdInsertJSONRequestBody defines body for PostDatasetIdInsert for application/json ContentType.
 type PostDatasetIdInsertJSONRequestBody = InsertDatasetEventRequest
+
+// PostDatasetIdRestoreJSONRequestBody defines body for PostDatasetIdRestore for application/json ContentType.
+type PostDatasetIdRestoreJSONRequestBody = DatasetRestoreRequest
+
+// PostDatasetIdRestorePreviewJSONRequestBody defines body for PostDatasetIdRestorePreview for application/json ContentType.
+type PostDatasetIdRestorePreviewJSONRequestBody = DatasetRestoreRequest
 
 // PostDatasetSnapshotJSONRequestBody defines body for PostDatasetSnapshot for application/json ContentType.
 type PostDatasetSnapshotJSONRequestBody = CreateDatasetSnapshot
@@ -11445,15 +12296,6 @@ type PutMcpServerJSONRequestBody = CreateMCPServer
 
 // PatchMcpServerIdJSONRequestBody defines body for PatchMcpServerId for application/json ContentType.
 type PatchMcpServerIdJSONRequestBody = PatchMCPServer
-
-// PostOrgAutomationJSONRequestBody defines body for PostOrgAutomation for application/json ContentType.
-type PostOrgAutomationJSONRequestBody = CreateOrgAutomation
-
-// PutOrgAutomationJSONRequestBody defines body for PutOrgAutomation for application/json ContentType.
-type PutOrgAutomationJSONRequestBody = CreateOrgAutomation
-
-// PatchOrgAutomationIdJSONRequestBody defines body for PatchOrgAutomationId for application/json ContentType.
-type PatchOrgAutomationIdJSONRequestBody = PatchOrgAutomation
 
 // PatchOrganizationMembersJSONRequestBody defines body for PatchOrganizationMembers for application/json ContentType.
 type PatchOrganizationMembersJSONRequestBody = PatchOrganizationMembers
@@ -15103,6 +15945,32 @@ func (t *FunctionData) MergeFunctionData8(v FunctionData8) error {
 	return err
 }
 
+// AsFunctionData9 returns the union data inside the FunctionData as a FunctionData9
+func (t FunctionData) AsFunctionData9() (FunctionData9, error) {
+	var body FunctionData9
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFunctionData9 overwrites any union data inside the FunctionData as the provided FunctionData9
+func (t *FunctionData) FromFunctionData9(v FunctionData9) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFunctionData9 performs a merge with any union data inside the FunctionData, using the provided FunctionData9
+func (t *FunctionData) MergeFunctionData9(v FunctionData9) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
 func (t FunctionData) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
@@ -15527,6 +16395,218 @@ func (t *FunctionData_8_SourceFacetFunction) UnmarshalJSON(b []byte) error {
 	return err
 }
 
+// AsFunctionData9Config0Agent0 returns the union data inside the FunctionData_9_Config_0_Agent as a FunctionData9Config0Agent0
+func (t FunctionData_9_Config_0_Agent) AsFunctionData9Config0Agent0() (FunctionData9Config0Agent0, error) {
+	var body FunctionData9Config0Agent0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFunctionData9Config0Agent0 overwrites any union data inside the FunctionData_9_Config_0_Agent as the provided FunctionData9Config0Agent0
+func (t *FunctionData_9_Config_0_Agent) FromFunctionData9Config0Agent0(v FunctionData9Config0Agent0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFunctionData9Config0Agent0 performs a merge with any union data inside the FunctionData_9_Config_0_Agent, using the provided FunctionData9Config0Agent0
+func (t *FunctionData_9_Config_0_Agent) MergeFunctionData9Config0Agent0(v FunctionData9Config0Agent0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsFunctionData9Config0Agent1 returns the union data inside the FunctionData_9_Config_0_Agent as a FunctionData9Config0Agent1
+func (t FunctionData_9_Config_0_Agent) AsFunctionData9Config0Agent1() (FunctionData9Config0Agent1, error) {
+	var body FunctionData9Config0Agent1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFunctionData9Config0Agent1 overwrites any union data inside the FunctionData_9_Config_0_Agent as the provided FunctionData9Config0Agent1
+func (t *FunctionData_9_Config_0_Agent) FromFunctionData9Config0Agent1(v FunctionData9Config0Agent1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFunctionData9Config0Agent1 performs a merge with any union data inside the FunctionData_9_Config_0_Agent, using the provided FunctionData9Config0Agent1
+func (t *FunctionData_9_Config_0_Agent) MergeFunctionData9Config0Agent1(v FunctionData9Config0Agent1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsFunctionData9Config0Agent2 returns the union data inside the FunctionData_9_Config_0_Agent as a FunctionData9Config0Agent2
+func (t FunctionData_9_Config_0_Agent) AsFunctionData9Config0Agent2() (FunctionData9Config0Agent2, error) {
+	var body FunctionData9Config0Agent2
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFunctionData9Config0Agent2 overwrites any union data inside the FunctionData_9_Config_0_Agent as the provided FunctionData9Config0Agent2
+func (t *FunctionData_9_Config_0_Agent) FromFunctionData9Config0Agent2(v FunctionData9Config0Agent2) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFunctionData9Config0Agent2 performs a merge with any union data inside the FunctionData_9_Config_0_Agent, using the provided FunctionData9Config0Agent2
+func (t *FunctionData_9_Config_0_Agent) MergeFunctionData9Config0Agent2(v FunctionData9Config0Agent2) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t FunctionData_9_Config_0_Agent) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *FunctionData_9_Config_0_Agent) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsFunctionData9Config1Agent0 returns the union data inside the FunctionData_9_Config_1_Agent as a FunctionData9Config1Agent0
+func (t FunctionData_9_Config_1_Agent) AsFunctionData9Config1Agent0() (FunctionData9Config1Agent0, error) {
+	var body FunctionData9Config1Agent0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFunctionData9Config1Agent0 overwrites any union data inside the FunctionData_9_Config_1_Agent as the provided FunctionData9Config1Agent0
+func (t *FunctionData_9_Config_1_Agent) FromFunctionData9Config1Agent0(v FunctionData9Config1Agent0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFunctionData9Config1Agent0 performs a merge with any union data inside the FunctionData_9_Config_1_Agent, using the provided FunctionData9Config1Agent0
+func (t *FunctionData_9_Config_1_Agent) MergeFunctionData9Config1Agent0(v FunctionData9Config1Agent0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsFunctionData9Config1Agent1 returns the union data inside the FunctionData_9_Config_1_Agent as a FunctionData9Config1Agent1
+func (t FunctionData_9_Config_1_Agent) AsFunctionData9Config1Agent1() (FunctionData9Config1Agent1, error) {
+	var body FunctionData9Config1Agent1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFunctionData9Config1Agent1 overwrites any union data inside the FunctionData_9_Config_1_Agent as the provided FunctionData9Config1Agent1
+func (t *FunctionData_9_Config_1_Agent) FromFunctionData9Config1Agent1(v FunctionData9Config1Agent1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFunctionData9Config1Agent1 performs a merge with any union data inside the FunctionData_9_Config_1_Agent, using the provided FunctionData9Config1Agent1
+func (t *FunctionData_9_Config_1_Agent) MergeFunctionData9Config1Agent1(v FunctionData9Config1Agent1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t FunctionData_9_Config_1_Agent) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *FunctionData_9_Config_1_Agent) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsFunctionData9Config0 returns the union data inside the FunctionData_9_Config as a FunctionData9Config0
+func (t FunctionData_9_Config) AsFunctionData9Config0() (FunctionData9Config0, error) {
+	var body FunctionData9Config0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFunctionData9Config0 overwrites any union data inside the FunctionData_9_Config as the provided FunctionData9Config0
+func (t *FunctionData_9_Config) FromFunctionData9Config0(v FunctionData9Config0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFunctionData9Config0 performs a merge with any union data inside the FunctionData_9_Config, using the provided FunctionData9Config0
+func (t *FunctionData_9_Config) MergeFunctionData9Config0(v FunctionData9Config0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsFunctionData9Config1 returns the union data inside the FunctionData_9_Config as a FunctionData9Config1
+func (t FunctionData_9_Config) AsFunctionData9Config1() (FunctionData9Config1, error) {
+	var body FunctionData9Config1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFunctionData9Config1 overwrites any union data inside the FunctionData_9_Config as the provided FunctionData9Config1
+func (t *FunctionData_9_Config) FromFunctionData9Config1(v FunctionData9Config1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFunctionData9Config1 performs a merge with any union data inside the FunctionData_9_Config, using the provided FunctionData9Config1
+func (t *FunctionData_9_Config) MergeFunctionData9Config1(v FunctionData9Config1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t FunctionData_9_Config) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *FunctionData_9_Config) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
 // AsFunctionDataNullish0 returns the union data inside the FunctionDataNullish as a FunctionDataNullish0
 func (t FunctionDataNullish) AsFunctionDataNullish0() (FunctionDataNullish0, error) {
 	var body FunctionDataNullish0
@@ -15751,6 +16831,32 @@ func (t *FunctionDataNullish) FromFunctionDataNullish8(v FunctionDataNullish8) e
 
 // MergeFunctionDataNullish8 performs a merge with any union data inside the FunctionDataNullish, using the provided FunctionDataNullish8
 func (t *FunctionDataNullish) MergeFunctionDataNullish8(v FunctionDataNullish8) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsFunctionDataNullish9 returns the union data inside the FunctionDataNullish as a FunctionDataNullish9
+func (t FunctionDataNullish) AsFunctionDataNullish9() (FunctionDataNullish9, error) {
+	var body FunctionDataNullish9
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFunctionDataNullish9 overwrites any union data inside the FunctionDataNullish as the provided FunctionDataNullish9
+func (t *FunctionDataNullish) FromFunctionDataNullish9(v FunctionDataNullish9) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFunctionDataNullish9 performs a merge with any union data inside the FunctionDataNullish, using the provided FunctionDataNullish9
+func (t *FunctionDataNullish) MergeFunctionDataNullish9(v FunctionDataNullish9) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -16181,6 +17287,218 @@ func (t FunctionDataNullish_8_SourceFacetFunction) MarshalJSON() ([]byte, error)
 }
 
 func (t *FunctionDataNullish_8_SourceFacetFunction) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsFunctionDataNullish9Config0Agent0 returns the union data inside the FunctionDataNullish_9_Config_0_Agent as a FunctionDataNullish9Config0Agent0
+func (t FunctionDataNullish_9_Config_0_Agent) AsFunctionDataNullish9Config0Agent0() (FunctionDataNullish9Config0Agent0, error) {
+	var body FunctionDataNullish9Config0Agent0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFunctionDataNullish9Config0Agent0 overwrites any union data inside the FunctionDataNullish_9_Config_0_Agent as the provided FunctionDataNullish9Config0Agent0
+func (t *FunctionDataNullish_9_Config_0_Agent) FromFunctionDataNullish9Config0Agent0(v FunctionDataNullish9Config0Agent0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFunctionDataNullish9Config0Agent0 performs a merge with any union data inside the FunctionDataNullish_9_Config_0_Agent, using the provided FunctionDataNullish9Config0Agent0
+func (t *FunctionDataNullish_9_Config_0_Agent) MergeFunctionDataNullish9Config0Agent0(v FunctionDataNullish9Config0Agent0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsFunctionDataNullish9Config0Agent1 returns the union data inside the FunctionDataNullish_9_Config_0_Agent as a FunctionDataNullish9Config0Agent1
+func (t FunctionDataNullish_9_Config_0_Agent) AsFunctionDataNullish9Config0Agent1() (FunctionDataNullish9Config0Agent1, error) {
+	var body FunctionDataNullish9Config0Agent1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFunctionDataNullish9Config0Agent1 overwrites any union data inside the FunctionDataNullish_9_Config_0_Agent as the provided FunctionDataNullish9Config0Agent1
+func (t *FunctionDataNullish_9_Config_0_Agent) FromFunctionDataNullish9Config0Agent1(v FunctionDataNullish9Config0Agent1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFunctionDataNullish9Config0Agent1 performs a merge with any union data inside the FunctionDataNullish_9_Config_0_Agent, using the provided FunctionDataNullish9Config0Agent1
+func (t *FunctionDataNullish_9_Config_0_Agent) MergeFunctionDataNullish9Config0Agent1(v FunctionDataNullish9Config0Agent1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsFunctionDataNullish9Config0Agent2 returns the union data inside the FunctionDataNullish_9_Config_0_Agent as a FunctionDataNullish9Config0Agent2
+func (t FunctionDataNullish_9_Config_0_Agent) AsFunctionDataNullish9Config0Agent2() (FunctionDataNullish9Config0Agent2, error) {
+	var body FunctionDataNullish9Config0Agent2
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFunctionDataNullish9Config0Agent2 overwrites any union data inside the FunctionDataNullish_9_Config_0_Agent as the provided FunctionDataNullish9Config0Agent2
+func (t *FunctionDataNullish_9_Config_0_Agent) FromFunctionDataNullish9Config0Agent2(v FunctionDataNullish9Config0Agent2) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFunctionDataNullish9Config0Agent2 performs a merge with any union data inside the FunctionDataNullish_9_Config_0_Agent, using the provided FunctionDataNullish9Config0Agent2
+func (t *FunctionDataNullish_9_Config_0_Agent) MergeFunctionDataNullish9Config0Agent2(v FunctionDataNullish9Config0Agent2) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t FunctionDataNullish_9_Config_0_Agent) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *FunctionDataNullish_9_Config_0_Agent) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsFunctionDataNullish9Config1Agent0 returns the union data inside the FunctionDataNullish_9_Config_1_Agent as a FunctionDataNullish9Config1Agent0
+func (t FunctionDataNullish_9_Config_1_Agent) AsFunctionDataNullish9Config1Agent0() (FunctionDataNullish9Config1Agent0, error) {
+	var body FunctionDataNullish9Config1Agent0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFunctionDataNullish9Config1Agent0 overwrites any union data inside the FunctionDataNullish_9_Config_1_Agent as the provided FunctionDataNullish9Config1Agent0
+func (t *FunctionDataNullish_9_Config_1_Agent) FromFunctionDataNullish9Config1Agent0(v FunctionDataNullish9Config1Agent0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFunctionDataNullish9Config1Agent0 performs a merge with any union data inside the FunctionDataNullish_9_Config_1_Agent, using the provided FunctionDataNullish9Config1Agent0
+func (t *FunctionDataNullish_9_Config_1_Agent) MergeFunctionDataNullish9Config1Agent0(v FunctionDataNullish9Config1Agent0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsFunctionDataNullish9Config1Agent1 returns the union data inside the FunctionDataNullish_9_Config_1_Agent as a FunctionDataNullish9Config1Agent1
+func (t FunctionDataNullish_9_Config_1_Agent) AsFunctionDataNullish9Config1Agent1() (FunctionDataNullish9Config1Agent1, error) {
+	var body FunctionDataNullish9Config1Agent1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFunctionDataNullish9Config1Agent1 overwrites any union data inside the FunctionDataNullish_9_Config_1_Agent as the provided FunctionDataNullish9Config1Agent1
+func (t *FunctionDataNullish_9_Config_1_Agent) FromFunctionDataNullish9Config1Agent1(v FunctionDataNullish9Config1Agent1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFunctionDataNullish9Config1Agent1 performs a merge with any union data inside the FunctionDataNullish_9_Config_1_Agent, using the provided FunctionDataNullish9Config1Agent1
+func (t *FunctionDataNullish_9_Config_1_Agent) MergeFunctionDataNullish9Config1Agent1(v FunctionDataNullish9Config1Agent1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t FunctionDataNullish_9_Config_1_Agent) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *FunctionDataNullish_9_Config_1_Agent) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsFunctionDataNullish9Config0 returns the union data inside the FunctionDataNullish_9_Config as a FunctionDataNullish9Config0
+func (t FunctionDataNullish_9_Config) AsFunctionDataNullish9Config0() (FunctionDataNullish9Config0, error) {
+	var body FunctionDataNullish9Config0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFunctionDataNullish9Config0 overwrites any union data inside the FunctionDataNullish_9_Config as the provided FunctionDataNullish9Config0
+func (t *FunctionDataNullish_9_Config) FromFunctionDataNullish9Config0(v FunctionDataNullish9Config0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFunctionDataNullish9Config0 performs a merge with any union data inside the FunctionDataNullish_9_Config, using the provided FunctionDataNullish9Config0
+func (t *FunctionDataNullish_9_Config) MergeFunctionDataNullish9Config0(v FunctionDataNullish9Config0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsFunctionDataNullish9Config1 returns the union data inside the FunctionDataNullish_9_Config as a FunctionDataNullish9Config1
+func (t FunctionDataNullish_9_Config) AsFunctionDataNullish9Config1() (FunctionDataNullish9Config1, error) {
+	var body FunctionDataNullish9Config1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFunctionDataNullish9Config1 overwrites any union data inside the FunctionDataNullish_9_Config as the provided FunctionDataNullish9Config1
+func (t *FunctionDataNullish_9_Config) FromFunctionDataNullish9Config1(v FunctionDataNullish9Config1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFunctionDataNullish9Config1 performs a merge with any union data inside the FunctionDataNullish_9_Config, using the provided FunctionDataNullish9Config1
+func (t *FunctionDataNullish_9_Config) MergeFunctionDataNullish9Config1(v FunctionDataNullish9Config1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t FunctionDataNullish_9_Config) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *FunctionDataNullish_9_Config) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
@@ -17817,32 +19135,6 @@ func (t *PatchProjectAutomation_Config) MergeTopicDigestAutomationConfig(v Topic
 	return err
 }
 
-// AsPatchProjectAutomationConfig8 returns the union data inside the PatchProjectAutomation_Config as a PatchProjectAutomationConfig8
-func (t PatchProjectAutomation_Config) AsPatchProjectAutomationConfig8() (PatchProjectAutomationConfig8, error) {
-	var body PatchProjectAutomationConfig8
-	err := json.Unmarshal(t.union, &body)
-	return body, err
-}
-
-// FromPatchProjectAutomationConfig8 overwrites any union data inside the PatchProjectAutomation_Config as the provided PatchProjectAutomationConfig8
-func (t *PatchProjectAutomation_Config) FromPatchProjectAutomationConfig8(v PatchProjectAutomationConfig8) error {
-	b, err := json.Marshal(v)
-	t.union = b
-	return err
-}
-
-// MergePatchProjectAutomationConfig8 performs a merge with any union data inside the PatchProjectAutomation_Config, using the provided PatchProjectAutomationConfig8
-func (t *PatchProjectAutomation_Config) MergePatchProjectAutomationConfig8(v PatchProjectAutomationConfig8) error {
-	b, err := json.Marshal(v)
-	if err != nil {
-		return err
-	}
-
-	merged, err := runtime.JSONMerge(t.union, b)
-	t.union = merged
-	return err
-}
-
 func (t PatchProjectAutomation_Config) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
@@ -18143,6 +19435,32 @@ func (t *PromptBlockData) MergePromptBlockData1(v PromptBlockData1) error {
 	return err
 }
 
+// AsPromptBlockData2 returns the union data inside the PromptBlockData as a PromptBlockData2
+func (t PromptBlockData) AsPromptBlockData2() (PromptBlockData2, error) {
+	var body PromptBlockData2
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockData2 overwrites any union data inside the PromptBlockData as the provided PromptBlockData2
+func (t *PromptBlockData) FromPromptBlockData2(v PromptBlockData2) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockData2 performs a merge with any union data inside the PromptBlockData, using the provided PromptBlockData2
+func (t *PromptBlockData) MergePromptBlockData2(v PromptBlockData2) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
 func (t PromptBlockData) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
@@ -18150,6 +19468,326 @@ func (t PromptBlockData) MarshalJSON() ([]byte, error) {
 
 func (t *PromptBlockData) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsPromptBlockData2Input1Content0 returns the union data inside the PromptBlockData_2_Input_1_Content as a PromptBlockData2Input1Content0
+func (t PromptBlockData_2_Input_1_Content) AsPromptBlockData2Input1Content0() (PromptBlockData2Input1Content0, error) {
+	var body PromptBlockData2Input1Content0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockData2Input1Content0 overwrites any union data inside the PromptBlockData_2_Input_1_Content as the provided PromptBlockData2Input1Content0
+func (t *PromptBlockData_2_Input_1_Content) FromPromptBlockData2Input1Content0(v PromptBlockData2Input1Content0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockData2Input1Content0 performs a merge with any union data inside the PromptBlockData_2_Input_1_Content, using the provided PromptBlockData2Input1Content0
+func (t *PromptBlockData_2_Input_1_Content) MergePromptBlockData2Input1Content0(v PromptBlockData2Input1Content0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPromptBlockData2Input1Content1 returns the union data inside the PromptBlockData_2_Input_1_Content as a PromptBlockData2Input1Content1
+func (t PromptBlockData_2_Input_1_Content) AsPromptBlockData2Input1Content1() (PromptBlockData2Input1Content1, error) {
+	var body PromptBlockData2Input1Content1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockData2Input1Content1 overwrites any union data inside the PromptBlockData_2_Input_1_Content as the provided PromptBlockData2Input1Content1
+func (t *PromptBlockData_2_Input_1_Content) FromPromptBlockData2Input1Content1(v PromptBlockData2Input1Content1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockData2Input1Content1 performs a merge with any union data inside the PromptBlockData_2_Input_1_Content, using the provided PromptBlockData2Input1Content1
+func (t *PromptBlockData_2_Input_1_Content) MergePromptBlockData2Input1Content1(v PromptBlockData2Input1Content1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t PromptBlockData_2_Input_1_Content) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *PromptBlockData_2_Input_1_Content) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsPromptBlockData2Input0 returns the union data inside the PromptBlockData_2_Input as a PromptBlockData2Input0
+func (t PromptBlockData_2_Input) AsPromptBlockData2Input0() (PromptBlockData2Input0, error) {
+	var body PromptBlockData2Input0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockData2Input0 overwrites any union data inside the PromptBlockData_2_Input as the provided PromptBlockData2Input0
+func (t *PromptBlockData_2_Input) FromPromptBlockData2Input0(v PromptBlockData2Input0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockData2Input0 performs a merge with any union data inside the PromptBlockData_2_Input, using the provided PromptBlockData2Input0
+func (t *PromptBlockData_2_Input) MergePromptBlockData2Input0(v PromptBlockData2Input0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPromptBlockData2Input1 returns the union data inside the PromptBlockData_2_Input as a PromptBlockData2Input1
+func (t PromptBlockData_2_Input) AsPromptBlockData2Input1() (PromptBlockData2Input1, error) {
+	var body PromptBlockData2Input1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockData2Input1 overwrites any union data inside the PromptBlockData_2_Input as the provided PromptBlockData2Input1
+func (t *PromptBlockData_2_Input) FromPromptBlockData2Input1(v PromptBlockData2Input1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockData2Input1 performs a merge with any union data inside the PromptBlockData_2_Input, using the provided PromptBlockData2Input1
+func (t *PromptBlockData_2_Input) MergePromptBlockData2Input1(v PromptBlockData2Input1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t PromptBlockData_2_Input) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *PromptBlockData_2_Input) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsPromptBlockData2Questions1ChoicesValue0 returns the union data inside the PromptBlockData_2_Questions_1_Choices_Value as a PromptBlockData2Questions1ChoicesValue0
+func (t PromptBlockData_2_Questions_1_Choices_Value) AsPromptBlockData2Questions1ChoicesValue0() (PromptBlockData2Questions1ChoicesValue0, error) {
+	var body PromptBlockData2Questions1ChoicesValue0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockData2Questions1ChoicesValue0 overwrites any union data inside the PromptBlockData_2_Questions_1_Choices_Value as the provided PromptBlockData2Questions1ChoicesValue0
+func (t *PromptBlockData_2_Questions_1_Choices_Value) FromPromptBlockData2Questions1ChoicesValue0(v PromptBlockData2Questions1ChoicesValue0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockData2Questions1ChoicesValue0 performs a merge with any union data inside the PromptBlockData_2_Questions_1_Choices_Value, using the provided PromptBlockData2Questions1ChoicesValue0
+func (t *PromptBlockData_2_Questions_1_Choices_Value) MergePromptBlockData2Questions1ChoicesValue0(v PromptBlockData2Questions1ChoicesValue0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPromptBlockData2Questions1ChoicesValue1 returns the union data inside the PromptBlockData_2_Questions_1_Choices_Value as a PromptBlockData2Questions1ChoicesValue1
+func (t PromptBlockData_2_Questions_1_Choices_Value) AsPromptBlockData2Questions1ChoicesValue1() (PromptBlockData2Questions1ChoicesValue1, error) {
+	var body PromptBlockData2Questions1ChoicesValue1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockData2Questions1ChoicesValue1 overwrites any union data inside the PromptBlockData_2_Questions_1_Choices_Value as the provided PromptBlockData2Questions1ChoicesValue1
+func (t *PromptBlockData_2_Questions_1_Choices_Value) FromPromptBlockData2Questions1ChoicesValue1(v PromptBlockData2Questions1ChoicesValue1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockData2Questions1ChoicesValue1 performs a merge with any union data inside the PromptBlockData_2_Questions_1_Choices_Value, using the provided PromptBlockData2Questions1ChoicesValue1
+func (t *PromptBlockData_2_Questions_1_Choices_Value) MergePromptBlockData2Questions1ChoicesValue1(v PromptBlockData2Questions1ChoicesValue1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t PromptBlockData_2_Questions_1_Choices_Value) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *PromptBlockData_2_Questions_1_Choices_Value) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsPromptBlockData2Questions0 returns the union data inside the PromptBlockData_2_Questions_Item as a PromptBlockData2Questions0
+func (t PromptBlockData_2_Questions_Item) AsPromptBlockData2Questions0() (PromptBlockData2Questions0, error) {
+	var body PromptBlockData2Questions0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockData2Questions0 overwrites any union data inside the PromptBlockData_2_Questions_Item as the provided PromptBlockData2Questions0
+func (t *PromptBlockData_2_Questions_Item) FromPromptBlockData2Questions0(v PromptBlockData2Questions0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockData2Questions0 performs a merge with any union data inside the PromptBlockData_2_Questions_Item, using the provided PromptBlockData2Questions0
+func (t *PromptBlockData_2_Questions_Item) MergePromptBlockData2Questions0(v PromptBlockData2Questions0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPromptBlockData2Questions1 returns the union data inside the PromptBlockData_2_Questions_Item as a PromptBlockData2Questions1
+func (t PromptBlockData_2_Questions_Item) AsPromptBlockData2Questions1() (PromptBlockData2Questions1, error) {
+	var body PromptBlockData2Questions1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockData2Questions1 overwrites any union data inside the PromptBlockData_2_Questions_Item as the provided PromptBlockData2Questions1
+func (t *PromptBlockData_2_Questions_Item) FromPromptBlockData2Questions1(v PromptBlockData2Questions1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockData2Questions1 performs a merge with any union data inside the PromptBlockData_2_Questions_Item, using the provided PromptBlockData2Questions1
+func (t *PromptBlockData_2_Questions_Item) MergePromptBlockData2Questions1(v PromptBlockData2Questions1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPromptBlockData2Questions2 returns the union data inside the PromptBlockData_2_Questions_Item as a PromptBlockData2Questions2
+func (t PromptBlockData_2_Questions_Item) AsPromptBlockData2Questions2() (PromptBlockData2Questions2, error) {
+	var body PromptBlockData2Questions2
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockData2Questions2 overwrites any union data inside the PromptBlockData_2_Questions_Item as the provided PromptBlockData2Questions2
+func (t *PromptBlockData_2_Questions_Item) FromPromptBlockData2Questions2(v PromptBlockData2Questions2) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockData2Questions2 performs a merge with any union data inside the PromptBlockData_2_Questions_Item, using the provided PromptBlockData2Questions2
+func (t *PromptBlockData_2_Questions_Item) MergePromptBlockData2Questions2(v PromptBlockData2Questions2) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t PromptBlockData_2_Questions_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	object := make(map[string]json.RawMessage)
+	if t.union != nil {
+		err = json.Unmarshal(b, &object)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	object["instructions"], err = json.Marshal(t.Instructions)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling 'instructions': %w", err)
+	}
+
+	if t.Name != nil {
+		object["name"], err = json.Marshal(t.Name)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'name': %w", err)
+		}
+	}
+	b, err = json.Marshal(object)
+	return b, err
+}
+
+func (t *PromptBlockData_2_Questions_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	if err != nil {
+		return err
+	}
+	object := make(map[string]json.RawMessage)
+	err = json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if raw, found := object["instructions"]; found {
+		err = json.Unmarshal(raw, &t.Instructions)
+		if err != nil {
+			return fmt.Errorf("error reading 'instructions': %w", err)
+		}
+	}
+
+	if raw, found := object["name"]; found {
+		err = json.Unmarshal(raw, &t.Name)
+		if err != nil {
+			return fmt.Errorf("error reading 'name': %w", err)
+		}
+	}
+
 	return err
 }
 
@@ -18205,6 +19843,32 @@ func (t *PromptBlockDataNullish) MergePromptBlockDataNullish1(v PromptBlockDataN
 	return err
 }
 
+// AsPromptBlockDataNullish2 returns the union data inside the PromptBlockDataNullish as a PromptBlockDataNullish2
+func (t PromptBlockDataNullish) AsPromptBlockDataNullish2() (PromptBlockDataNullish2, error) {
+	var body PromptBlockDataNullish2
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockDataNullish2 overwrites any union data inside the PromptBlockDataNullish as the provided PromptBlockDataNullish2
+func (t *PromptBlockDataNullish) FromPromptBlockDataNullish2(v PromptBlockDataNullish2) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockDataNullish2 performs a merge with any union data inside the PromptBlockDataNullish, using the provided PromptBlockDataNullish2
+func (t *PromptBlockDataNullish) MergePromptBlockDataNullish2(v PromptBlockDataNullish2) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
 func (t PromptBlockDataNullish) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
@@ -18212,6 +19876,326 @@ func (t PromptBlockDataNullish) MarshalJSON() ([]byte, error) {
 
 func (t *PromptBlockDataNullish) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsPromptBlockDataNullish2Input1Content0 returns the union data inside the PromptBlockDataNullish_2_Input_1_Content as a PromptBlockDataNullish2Input1Content0
+func (t PromptBlockDataNullish_2_Input_1_Content) AsPromptBlockDataNullish2Input1Content0() (PromptBlockDataNullish2Input1Content0, error) {
+	var body PromptBlockDataNullish2Input1Content0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockDataNullish2Input1Content0 overwrites any union data inside the PromptBlockDataNullish_2_Input_1_Content as the provided PromptBlockDataNullish2Input1Content0
+func (t *PromptBlockDataNullish_2_Input_1_Content) FromPromptBlockDataNullish2Input1Content0(v PromptBlockDataNullish2Input1Content0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockDataNullish2Input1Content0 performs a merge with any union data inside the PromptBlockDataNullish_2_Input_1_Content, using the provided PromptBlockDataNullish2Input1Content0
+func (t *PromptBlockDataNullish_2_Input_1_Content) MergePromptBlockDataNullish2Input1Content0(v PromptBlockDataNullish2Input1Content0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPromptBlockDataNullish2Input1Content1 returns the union data inside the PromptBlockDataNullish_2_Input_1_Content as a PromptBlockDataNullish2Input1Content1
+func (t PromptBlockDataNullish_2_Input_1_Content) AsPromptBlockDataNullish2Input1Content1() (PromptBlockDataNullish2Input1Content1, error) {
+	var body PromptBlockDataNullish2Input1Content1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockDataNullish2Input1Content1 overwrites any union data inside the PromptBlockDataNullish_2_Input_1_Content as the provided PromptBlockDataNullish2Input1Content1
+func (t *PromptBlockDataNullish_2_Input_1_Content) FromPromptBlockDataNullish2Input1Content1(v PromptBlockDataNullish2Input1Content1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockDataNullish2Input1Content1 performs a merge with any union data inside the PromptBlockDataNullish_2_Input_1_Content, using the provided PromptBlockDataNullish2Input1Content1
+func (t *PromptBlockDataNullish_2_Input_1_Content) MergePromptBlockDataNullish2Input1Content1(v PromptBlockDataNullish2Input1Content1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t PromptBlockDataNullish_2_Input_1_Content) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *PromptBlockDataNullish_2_Input_1_Content) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsPromptBlockDataNullish2Input0 returns the union data inside the PromptBlockDataNullish_2_Input as a PromptBlockDataNullish2Input0
+func (t PromptBlockDataNullish_2_Input) AsPromptBlockDataNullish2Input0() (PromptBlockDataNullish2Input0, error) {
+	var body PromptBlockDataNullish2Input0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockDataNullish2Input0 overwrites any union data inside the PromptBlockDataNullish_2_Input as the provided PromptBlockDataNullish2Input0
+func (t *PromptBlockDataNullish_2_Input) FromPromptBlockDataNullish2Input0(v PromptBlockDataNullish2Input0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockDataNullish2Input0 performs a merge with any union data inside the PromptBlockDataNullish_2_Input, using the provided PromptBlockDataNullish2Input0
+func (t *PromptBlockDataNullish_2_Input) MergePromptBlockDataNullish2Input0(v PromptBlockDataNullish2Input0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPromptBlockDataNullish2Input1 returns the union data inside the PromptBlockDataNullish_2_Input as a PromptBlockDataNullish2Input1
+func (t PromptBlockDataNullish_2_Input) AsPromptBlockDataNullish2Input1() (PromptBlockDataNullish2Input1, error) {
+	var body PromptBlockDataNullish2Input1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockDataNullish2Input1 overwrites any union data inside the PromptBlockDataNullish_2_Input as the provided PromptBlockDataNullish2Input1
+func (t *PromptBlockDataNullish_2_Input) FromPromptBlockDataNullish2Input1(v PromptBlockDataNullish2Input1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockDataNullish2Input1 performs a merge with any union data inside the PromptBlockDataNullish_2_Input, using the provided PromptBlockDataNullish2Input1
+func (t *PromptBlockDataNullish_2_Input) MergePromptBlockDataNullish2Input1(v PromptBlockDataNullish2Input1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t PromptBlockDataNullish_2_Input) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *PromptBlockDataNullish_2_Input) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsPromptBlockDataNullish2Questions1ChoicesValue0 returns the union data inside the PromptBlockDataNullish_2_Questions_1_Choices_Value as a PromptBlockDataNullish2Questions1ChoicesValue0
+func (t PromptBlockDataNullish_2_Questions_1_Choices_Value) AsPromptBlockDataNullish2Questions1ChoicesValue0() (PromptBlockDataNullish2Questions1ChoicesValue0, error) {
+	var body PromptBlockDataNullish2Questions1ChoicesValue0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockDataNullish2Questions1ChoicesValue0 overwrites any union data inside the PromptBlockDataNullish_2_Questions_1_Choices_Value as the provided PromptBlockDataNullish2Questions1ChoicesValue0
+func (t *PromptBlockDataNullish_2_Questions_1_Choices_Value) FromPromptBlockDataNullish2Questions1ChoicesValue0(v PromptBlockDataNullish2Questions1ChoicesValue0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockDataNullish2Questions1ChoicesValue0 performs a merge with any union data inside the PromptBlockDataNullish_2_Questions_1_Choices_Value, using the provided PromptBlockDataNullish2Questions1ChoicesValue0
+func (t *PromptBlockDataNullish_2_Questions_1_Choices_Value) MergePromptBlockDataNullish2Questions1ChoicesValue0(v PromptBlockDataNullish2Questions1ChoicesValue0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPromptBlockDataNullish2Questions1ChoicesValue1 returns the union data inside the PromptBlockDataNullish_2_Questions_1_Choices_Value as a PromptBlockDataNullish2Questions1ChoicesValue1
+func (t PromptBlockDataNullish_2_Questions_1_Choices_Value) AsPromptBlockDataNullish2Questions1ChoicesValue1() (PromptBlockDataNullish2Questions1ChoicesValue1, error) {
+	var body PromptBlockDataNullish2Questions1ChoicesValue1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockDataNullish2Questions1ChoicesValue1 overwrites any union data inside the PromptBlockDataNullish_2_Questions_1_Choices_Value as the provided PromptBlockDataNullish2Questions1ChoicesValue1
+func (t *PromptBlockDataNullish_2_Questions_1_Choices_Value) FromPromptBlockDataNullish2Questions1ChoicesValue1(v PromptBlockDataNullish2Questions1ChoicesValue1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockDataNullish2Questions1ChoicesValue1 performs a merge with any union data inside the PromptBlockDataNullish_2_Questions_1_Choices_Value, using the provided PromptBlockDataNullish2Questions1ChoicesValue1
+func (t *PromptBlockDataNullish_2_Questions_1_Choices_Value) MergePromptBlockDataNullish2Questions1ChoicesValue1(v PromptBlockDataNullish2Questions1ChoicesValue1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t PromptBlockDataNullish_2_Questions_1_Choices_Value) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *PromptBlockDataNullish_2_Questions_1_Choices_Value) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsPromptBlockDataNullish2Questions0 returns the union data inside the PromptBlockDataNullish_2_Questions_Item as a PromptBlockDataNullish2Questions0
+func (t PromptBlockDataNullish_2_Questions_Item) AsPromptBlockDataNullish2Questions0() (PromptBlockDataNullish2Questions0, error) {
+	var body PromptBlockDataNullish2Questions0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockDataNullish2Questions0 overwrites any union data inside the PromptBlockDataNullish_2_Questions_Item as the provided PromptBlockDataNullish2Questions0
+func (t *PromptBlockDataNullish_2_Questions_Item) FromPromptBlockDataNullish2Questions0(v PromptBlockDataNullish2Questions0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockDataNullish2Questions0 performs a merge with any union data inside the PromptBlockDataNullish_2_Questions_Item, using the provided PromptBlockDataNullish2Questions0
+func (t *PromptBlockDataNullish_2_Questions_Item) MergePromptBlockDataNullish2Questions0(v PromptBlockDataNullish2Questions0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPromptBlockDataNullish2Questions1 returns the union data inside the PromptBlockDataNullish_2_Questions_Item as a PromptBlockDataNullish2Questions1
+func (t PromptBlockDataNullish_2_Questions_Item) AsPromptBlockDataNullish2Questions1() (PromptBlockDataNullish2Questions1, error) {
+	var body PromptBlockDataNullish2Questions1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockDataNullish2Questions1 overwrites any union data inside the PromptBlockDataNullish_2_Questions_Item as the provided PromptBlockDataNullish2Questions1
+func (t *PromptBlockDataNullish_2_Questions_Item) FromPromptBlockDataNullish2Questions1(v PromptBlockDataNullish2Questions1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockDataNullish2Questions1 performs a merge with any union data inside the PromptBlockDataNullish_2_Questions_Item, using the provided PromptBlockDataNullish2Questions1
+func (t *PromptBlockDataNullish_2_Questions_Item) MergePromptBlockDataNullish2Questions1(v PromptBlockDataNullish2Questions1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPromptBlockDataNullish2Questions2 returns the union data inside the PromptBlockDataNullish_2_Questions_Item as a PromptBlockDataNullish2Questions2
+func (t PromptBlockDataNullish_2_Questions_Item) AsPromptBlockDataNullish2Questions2() (PromptBlockDataNullish2Questions2, error) {
+	var body PromptBlockDataNullish2Questions2
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromptBlockDataNullish2Questions2 overwrites any union data inside the PromptBlockDataNullish_2_Questions_Item as the provided PromptBlockDataNullish2Questions2
+func (t *PromptBlockDataNullish_2_Questions_Item) FromPromptBlockDataNullish2Questions2(v PromptBlockDataNullish2Questions2) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromptBlockDataNullish2Questions2 performs a merge with any union data inside the PromptBlockDataNullish_2_Questions_Item, using the provided PromptBlockDataNullish2Questions2
+func (t *PromptBlockDataNullish_2_Questions_Item) MergePromptBlockDataNullish2Questions2(v PromptBlockDataNullish2Questions2) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t PromptBlockDataNullish_2_Questions_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	object := make(map[string]json.RawMessage)
+	if t.union != nil {
+		err = json.Unmarshal(b, &object)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	object["instructions"], err = json.Marshal(t.Instructions)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling 'instructions': %w", err)
+	}
+
+	if t.Name != nil {
+		object["name"], err = json.Marshal(t.Name)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'name': %w", err)
+		}
+	}
+	b, err = json.Marshal(object)
+	return b, err
+}
+
+func (t *PromptBlockDataNullish_2_Questions_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	if err != nil {
+		return err
+	}
+	object := make(map[string]json.RawMessage)
+	err = json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if raw, found := object["instructions"]; found {
+		err = json.Unmarshal(raw, &t.Instructions)
+		if err != nil {
+			return fmt.Errorf("error reading 'instructions': %w", err)
+		}
+	}
+
+	if raw, found := object["name"]; found {
+		err = json.Unmarshal(raw, &t.Name)
+		if err != nil {
+			return fmt.Errorf("error reading 'name': %w", err)
+		}
+	}
+
 	return err
 }
 

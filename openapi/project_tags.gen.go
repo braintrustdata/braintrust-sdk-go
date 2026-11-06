@@ -42,9 +42,9 @@ type ProjectTag struct {
 	UserId    openapi_types.UUID `json:"user_id"`
 }
 
-// GetProjectTag List project_tags
+// GetProjectTag List project tags
 //
-// List out all project_tags. The project_tags are sorted by creation date, with the most recently-created project_tags coming first
+// List out all project tags. The project tags are sorted by creation date, with the most recently-created project tags coming first
 //
 // Corresponds with GET /v1/project_tag (the `GetProjectTag` operationId).
 func (c *Client) GetProjectTag(ctx context.Context, params *GetProjectTagParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -59,9 +59,9 @@ func (c *Client) GetProjectTag(ctx context.Context, params *GetProjectTagParams,
 	return c.Client.Do(req)
 }
 
-// PostProjectTagWithBody Create project_tag
+// PostProjectTagWithBody Create project tag
 //
-// Create a new project_tag. If there is an existing project_tag in the project with the same name as the one specified in the request, will return the existing project_tag unmodified
+// Create a new project tag. If there is an existing project tag in the project with the same name as the one specified in the request, will return the existing project tag unmodified
 //
 // Takes any type of body and a specified content type.
 //
@@ -78,9 +78,9 @@ func (c *Client) PostProjectTagWithBody(ctx context.Context, contentType string,
 	return c.Client.Do(req)
 }
 
-// PostProjectTag Create project_tag
+// PostProjectTag Create project tag
 //
-// Create a new project_tag. If there is an existing project_tag in the project with the same name as the one specified in the request, will return the existing project_tag unmodified
+// Create a new project tag. If there is an existing project tag in the project with the same name as the one specified in the request, will return the existing project tag unmodified
 //
 // Takes a body of the `application/json` content type.
 //
@@ -97,9 +97,9 @@ func (c *Client) PostProjectTag(ctx context.Context, body PostProjectTagJSONRequ
 	return c.Client.Do(req)
 }
 
-// PutProjectTagWithBody Create or replace project_tag
+// PutProjectTagWithBody Create or replace project tag
 //
-// Create or replace project_tag. If there is an existing project_tag in the project with the same name as the one specified in the request, will replace the existing project_tag with the provided fields
+// Create or replace project tag. If there is an existing project tag in the project with the same name as the one specified in the request, will replace the existing project tag with the provided fields
 //
 // Takes any type of body and a specified content type.
 //
@@ -116,9 +116,9 @@ func (c *Client) PutProjectTagWithBody(ctx context.Context, contentType string, 
 	return c.Client.Do(req)
 }
 
-// PutProjectTag Create or replace project_tag
+// PutProjectTag Create or replace project tag
 //
-// Create or replace project_tag. If there is an existing project_tag in the project with the same name as the one specified in the request, will replace the existing project_tag with the provided fields
+// Create or replace project tag. If there is an existing project tag in the project with the same name as the one specified in the request, will replace the existing project tag with the provided fields
 //
 // Takes a body of the `application/json` content type.
 //
@@ -135,9 +135,9 @@ func (c *Client) PutProjectTag(ctx context.Context, body PutProjectTagJSONReques
 	return c.Client.Do(req)
 }
 
-// DeleteProjectTagId Delete project_tag
+// DeleteProjectTagId Delete project tag
 //
-// Delete a project_tag object by its id.
+// Delete a project tag object by its id.
 //
 // Corresponds with DELETE /v1/project_tag/{project_tag_id} (the `DeleteProjectTagId` operationId).
 func (c *Client) DeleteProjectTagId(ctx context.Context, projectTagId ProjectTagIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -152,9 +152,9 @@ func (c *Client) DeleteProjectTagId(ctx context.Context, projectTagId ProjectTag
 	return c.Client.Do(req)
 }
 
-// GetProjectTagId Get project_tag
+// GetProjectTagId Get project tag
 //
-// Get a project_tag object by its id.
+// Get a project tag object by its id.
 //
 // Corresponds with GET /v1/project_tag/{project_tag_id} (the `GetProjectTagId` operationId).
 func (c *Client) GetProjectTagId(ctx context.Context, projectTagId ProjectTagIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -169,9 +169,9 @@ func (c *Client) GetProjectTagId(ctx context.Context, projectTagId ProjectTagIdP
 	return c.Client.Do(req)
 }
 
-// PatchProjectTagIdWithBody Partially update project_tag
+// PatchProjectTagIdWithBody Partially update project tag
 //
-// Partially update a project_tag object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a project tag object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes any type of body and a specified content type.
 //
@@ -188,9 +188,9 @@ func (c *Client) PatchProjectTagIdWithBody(ctx context.Context, projectTagId Pro
 	return c.Client.Do(req)
 }
 
-// PatchProjectTagId Partially update project_tag
+// PatchProjectTagId Partially update project tag
 //
-// Partially update a project_tag object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a project tag object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -550,7 +550,7 @@ type GetProjectTagResponse struct {
 	HTTPResponse *http.Response
 	// JSON200 the response for an HTTP 200 `application/json` response
 	JSON200 *struct {
-		// Objects A list of project_tag objects
+		// Objects A list of project tag objects
 		Objects []ProjectTag `json:"objects"`
 	}
 	// JSON400 the response for an HTTP 400 `application/json` response
@@ -569,7 +569,7 @@ type GetProjectTagResponse struct {
 
 // GetJSON200 returns the response for an HTTP 200 `application/json` response
 func (r GetProjectTagResponse) GetJSON200() *struct {
-	// Objects A list of project_tag objects
+	// Objects A list of project tag objects
 	Objects []ProjectTag `json:"objects"`
 } {
 	return r.JSON200
@@ -1044,9 +1044,9 @@ func (r PatchProjectTagIdResponse) ContentType() string {
 	return ""
 }
 
-// GetProjectTagWithResponse List project_tags
+// GetProjectTagWithResponse List project tags
 //
-// List out all project_tags. The project_tags are sorted by creation date, with the most recently-created project_tags coming first
+// List out all project tags. The project tags are sorted by creation date, with the most recently-created project tags coming first
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1059,9 +1059,9 @@ func (c *ClientWithResponses) GetProjectTagWithResponse(ctx context.Context, par
 	return ParseGetProjectTagResponse(rsp)
 }
 
-// PostProjectTagWithBodyWithResponse Create project_tag
+// PostProjectTagWithBodyWithResponse Create project tag
 //
-// Create a new project_tag. If there is an existing project_tag in the project with the same name as the one specified in the request, will return the existing project_tag unmodified
+// Create a new project tag. If there is an existing project tag in the project with the same name as the one specified in the request, will return the existing project tag unmodified
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1074,9 +1074,9 @@ func (c *ClientWithResponses) PostProjectTagWithBodyWithResponse(ctx context.Con
 	return ParsePostProjectTagResponse(rsp)
 }
 
-// PostProjectTagWithResponse Create project_tag
+// PostProjectTagWithResponse Create project tag
 //
-// Create a new project_tag. If there is an existing project_tag in the project with the same name as the one specified in the request, will return the existing project_tag unmodified
+// Create a new project tag. If there is an existing project tag in the project with the same name as the one specified in the request, will return the existing project tag unmodified
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1089,9 +1089,9 @@ func (c *ClientWithResponses) PostProjectTagWithResponse(ctx context.Context, bo
 	return ParsePostProjectTagResponse(rsp)
 }
 
-// PutProjectTagWithBodyWithResponse Create or replace project_tag
+// PutProjectTagWithBodyWithResponse Create or replace project tag
 //
-// Create or replace project_tag. If there is an existing project_tag in the project with the same name as the one specified in the request, will replace the existing project_tag with the provided fields
+// Create or replace project tag. If there is an existing project tag in the project with the same name as the one specified in the request, will replace the existing project tag with the provided fields
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1104,9 +1104,9 @@ func (c *ClientWithResponses) PutProjectTagWithBodyWithResponse(ctx context.Cont
 	return ParsePutProjectTagResponse(rsp)
 }
 
-// PutProjectTagWithResponse Create or replace project_tag
+// PutProjectTagWithResponse Create or replace project tag
 //
-// Create or replace project_tag. If there is an existing project_tag in the project with the same name as the one specified in the request, will replace the existing project_tag with the provided fields
+// Create or replace project tag. If there is an existing project tag in the project with the same name as the one specified in the request, will replace the existing project tag with the provided fields
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1119,9 +1119,9 @@ func (c *ClientWithResponses) PutProjectTagWithResponse(ctx context.Context, bod
 	return ParsePutProjectTagResponse(rsp)
 }
 
-// DeleteProjectTagIdWithResponse Delete project_tag
+// DeleteProjectTagIdWithResponse Delete project tag
 //
-// Delete a project_tag object by its id.
+// Delete a project tag object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1134,9 +1134,9 @@ func (c *ClientWithResponses) DeleteProjectTagIdWithResponse(ctx context.Context
 	return ParseDeleteProjectTagIdResponse(rsp)
 }
 
-// GetProjectTagIdWithResponse Get project_tag
+// GetProjectTagIdWithResponse Get project tag
 //
-// Get a project_tag object by its id.
+// Get a project tag object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1149,9 +1149,9 @@ func (c *ClientWithResponses) GetProjectTagIdWithResponse(ctx context.Context, p
 	return ParseGetProjectTagIdResponse(rsp)
 }
 
-// PatchProjectTagIdWithBodyWithResponse Partially update project_tag
+// PatchProjectTagIdWithBodyWithResponse Partially update project tag
 //
-// Partially update a project_tag object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a project tag object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1164,9 +1164,9 @@ func (c *ClientWithResponses) PatchProjectTagIdWithBodyWithResponse(ctx context.
 	return ParsePatchProjectTagIdResponse(rsp)
 }
 
-// PatchProjectTagIdWithResponse Partially update project_tag
+// PatchProjectTagIdWithResponse Partially update project tag
 //
-// Partially update a project_tag object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
+// Partially update a project tag object. Specify the fields to update in the payload. Any object-type fields will be deep-merged with existing content. Currently we do not support removing fields or setting them to null.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1195,7 +1195,7 @@ func ParseGetProjectTagResponse(rsp *http.Response) (*GetProjectTagResponse, err
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			// Objects A list of project_tag objects
+			// Objects A list of project tag objects
 			Objects []ProjectTag `json:"objects"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

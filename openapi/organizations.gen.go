@@ -34,11 +34,16 @@ func (e PatchOrganizationMembersOutputStatus) Valid() bool {
 
 // Organization defines model for Organization.
 type Organization struct {
-	ApiUrl     nullable.Nullable[string]    `json:"api_url,omitempty"`
+	// ApiUrl URL of the organization's data plane API. If unset, the Braintrust-hosted API is used.
+	ApiUrl nullable.Nullable[string] `json:"api_url,omitempty"`
+
+	// ArchivedAt Date the organization was archived
 	ArchivedAt nullable.Nullable[time.Time] `json:"archived_at,omitempty"`
 
 	// Created Date of organization creation
-	Created   nullable.Nullable[time.Time] `json:"created,omitempty"`
+	Created nullable.Nullable[time.Time] `json:"created,omitempty"`
+
+	// DeletedAt Date the organization was deleted
 	DeletedAt nullable.Nullable[time.Time] `json:"deleted_at,omitempty"`
 
 	// Id Unique identifier for the organization
@@ -46,12 +51,20 @@ type Organization struct {
 
 	// ImageRenderingMode Controls how images are rendered in the UI: 'auto' loads images automatically, 'click_to_load' shows a placeholder until clicked, 'blocked' prevents image loading entirely
 	ImageRenderingMode nullable.Nullable[ImageRenderingMode] `json:"image_rendering_mode,omitempty"`
-	IsDataplanePrivate nullable.Nullable[bool]               `json:"is_dataplane_private,omitempty"`
-	IsUniversalApi     nullable.Nullable[bool]               `json:"is_universal_api,omitempty"`
+
+	// IsDataplanePrivate Whether the organization's data plane is only reachable from a private network
+	IsDataplanePrivate nullable.Nullable[bool] `json:"is_dataplane_private,omitempty"`
+
+	// IsUniversalApi Whether the data plane at `api_url` also serves the AI proxy, at `api_url` with `/v1/proxy` appended
+	IsUniversalApi nullable.Nullable[bool] `json:"is_universal_api,omitempty"`
 
 	// Name Name of the organization
-	Name        string                    `json:"name"`
-	ProxyUrl    nullable.Nullable[string] `json:"proxy_url,omitempty"`
+	Name string `json:"name"`
+
+	// ProxyUrl URL of the organization's AI proxy
+	ProxyUrl nullable.Nullable[string] `json:"proxy_url,omitempty"`
+
+	// RealtimeUrl URL of the organization's realtime service
 	RealtimeUrl nullable.Nullable[string] `json:"realtime_url,omitempty"`
 }
 
@@ -83,6 +96,23 @@ type PatchOrganizationMembersOutputStatus string
 // Corresponds with GET /v1/organization (the `GetOrganization` operationId).
 func (c *Client) GetOrganization(ctx context.Context, params *GetOrganizationParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetOrganizationRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// GetOrganizationApiKeys List organization API keys
+//
+// List all API keys associated with users in an organization, sorted by creation date with the newest keys first. An organization-scoped API key determines the organization; otherwise, provide `org_id`. If `org_id` does not match the organization-scoped key's organization, or the caller is not an owner of the organization, no keys are returned. Responses include key metadata only; key secrets are never returned. To list service tokens, use `GET /v1/service_token`.
+//
+// Corresponds with GET /v1/organization/api_keys (the `GetOrganizationApiKeys` operationId).
+func (c *Client) GetOrganizationApiKeys(ctx context.Context, params *GetOrganizationApiKeysParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetOrganizationApiKeysRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -265,6 +295,144 @@ func NewGetOrganizationRequest(server string, params *GetOrganizationParams) (*h
 		if params.OrgName != nil {
 
 			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "org_name", *params.OrgName, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetOrganizationApiKeysRequest constructs an http.Request for the GetOrganizationApiKeys method
+func NewGetOrganizationApiKeysRequest(server string, params *GetOrganizationApiKeysParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organization/api_keys")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "limit", *params.Limit, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "integer", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.StartingAfter != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "starting_after", *params.StartingAfter, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.EndingBefore != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "ending_before", *params.EndingBefore, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.Ids != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "ids", *params.Ids, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.ApiKeyName != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "api_key_name", *params.ApiKeyName, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.OrgId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "org_id", *params.OrgId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.CreatedAfter != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "created_after", *params.CreatedAfter, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "date-time"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.CreatedBefore != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "created_before", *params.CreatedBefore, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "date-time"}); err != nil {
 				return nil, err
 			} else {
 				for _, qp := range strings.Split(queryFrag, "&") {
@@ -492,6 +660,95 @@ func (r GetOrganizationResponse) StatusCode() int {
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
 func (r GetOrganizationResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+// GetOrganizationApiKeysResponse429Headers the declared response headers of an HTTP 429 response for GetOrganizationApiKeys
+type GetOrganizationApiKeysResponse429Headers struct {
+	RetryAfter *string
+}
+
+type GetOrganizationApiKeysResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *struct {
+		// Objects A list of api_key objects
+		Objects []ApiKey `json:"objects"`
+	}
+	// JSON400 the response for an HTTP 400 `application/json` response
+	JSON400 *interface{}
+	// JSON401 the response for an HTTP 401 `application/json` response
+	JSON401 *interface{}
+	// JSON403 the response for an HTTP 403 `application/json` response
+	JSON403 *interface{}
+	// JSON429 the response for an HTTP 429 `application/json` response
+	JSON429 *interface{}
+	// JSON500 the response for an HTTP 500 `application/json` response
+	JSON500 *interface{}
+	// Headers429 the parsed response headers for an HTTP 429 response
+	Headers429 *GetOrganizationApiKeysResponse429Headers
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r GetOrganizationApiKeysResponse) GetJSON200() *struct {
+	// Objects A list of api_key objects
+	Objects []ApiKey `json:"objects"`
+} {
+	return r.JSON200
+}
+
+// GetJSON400 returns the response for an HTTP 400 `application/json` response
+func (r GetOrganizationApiKeysResponse) GetJSON400() *interface{} {
+	return r.JSON400
+}
+
+// GetJSON401 returns the response for an HTTP 401 `application/json` response
+func (r GetOrganizationApiKeysResponse) GetJSON401() *interface{} {
+	return r.JSON401
+}
+
+// GetJSON403 returns the response for an HTTP 403 `application/json` response
+func (r GetOrganizationApiKeysResponse) GetJSON403() *interface{} {
+	return r.JSON403
+}
+
+// GetJSON429 returns the response for an HTTP 429 `application/json` response
+func (r GetOrganizationApiKeysResponse) GetJSON429() *interface{} {
+	return r.JSON429
+}
+
+// GetJSON500 returns the response for an HTTP 500 `application/json` response
+func (r GetOrganizationApiKeysResponse) GetJSON500() *interface{} {
+	return r.JSON500
+}
+
+// GetBody returns the raw response body bytes
+func (r GetOrganizationApiKeysResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r GetOrganizationApiKeysResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetOrganizationApiKeysResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetOrganizationApiKeysResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -762,6 +1019,21 @@ func (c *ClientWithResponses) GetOrganizationWithResponse(ctx context.Context, p
 	return ParseGetOrganizationResponse(rsp)
 }
 
+// GetOrganizationApiKeysWithResponse List organization API keys
+//
+// List all API keys associated with users in an organization, sorted by creation date with the newest keys first. An organization-scoped API key determines the organization; otherwise, provide `org_id`. If `org_id` does not match the organization-scoped key's organization, or the caller is not an owner of the organization, no keys are returned. Responses include key metadata only; key secrets are never returned. To list service tokens, use `GET /v1/service_token`.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /v1/organization/api_keys (the `GetOrganizationApiKeys` operationId).
+func (c *ClientWithResponses) GetOrganizationApiKeysWithResponse(ctx context.Context, params *GetOrganizationApiKeysParams, reqEditors ...RequestEditorFn) (*GetOrganizationApiKeysResponse, error) {
+	rsp, err := c.GetOrganizationApiKeys(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetOrganizationApiKeysResponse(rsp)
+}
+
 // PatchOrganizationMembersWithBodyWithResponse Modify organization membership
 //
 // Add or remove members, create service accounts.
@@ -916,6 +1188,98 @@ func ParseGetOrganizationResponse(rsp *http.Response) (*GetOrganizationResponse,
 	switch {
 	case rsp.StatusCode == 429:
 		var headers GetOrganizationResponse429Headers
+		if values := rsp.Header.Values("Retry-After"); len(values) > 0 {
+			var value string
+			if err := runtime.BindStyledParameterWithOptions("simple", "Retry-After", values[0], &value, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			}
+			headers.RetryAfter = &value
+		}
+		response.Headers429 = &headers
+	}
+
+	return response, nil
+}
+
+// ParseGetOrganizationApiKeysResponse parses an HTTP response from a GetOrganizationApiKeysWithResponse call
+func ParseGetOrganizationApiKeysResponse(rsp *http.Response) (*GetOrganizationApiKeysResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetOrganizationApiKeysResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			// Objects A list of api_key objects
+			Objects []ApiKey `json:"objects"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 429:
+		var dest interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON429 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	case rsp.StatusCode == 400:
+	// Content-type (text/plain) unsupported
+
+	case rsp.StatusCode == 401:
+	// Content-type (text/plain) unsupported
+
+	case rsp.StatusCode == 403:
+	// Content-type (text/plain) unsupported
+
+	case rsp.StatusCode == 429:
+	// Content-type (text/plain) unsupported
+
+	case rsp.StatusCode == 500:
+		// Content-type (text/plain) unsupported
+
+	}
+
+	switch {
+	case rsp.StatusCode == 429:
+		var headers GetOrganizationApiKeysResponse429Headers
 		if values := rsp.Header.Values("Retry-After"); len(values) > 0 {
 			var value string
 			if err := runtime.BindStyledParameterWithOptions("simple", "Retry-After", values[0], &value, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""}); err != nil {

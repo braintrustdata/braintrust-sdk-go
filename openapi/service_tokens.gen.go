@@ -35,8 +35,10 @@ type CreateServiceTokenOutput struct {
 	Name string `json:"name"`
 
 	// OrgId Unique identifier for the organization
-	OrgId       nullable.Nullable[openapi_types.UUID] `json:"org_id,omitempty"`
-	PreviewName string                                `json:"preview_name"`
+	OrgId nullable.Nullable[openapi_types.UUID] `json:"org_id,omitempty"`
+
+	// PreviewName Masked preview showing the token prefix and last four characters, e.g. bt-st-…AbCd.
+	PreviewName string `json:"preview_name"`
 
 	// ServiceAccountEmail The service account email (not routable)
 	ServiceAccountEmail nullable.Nullable[string] `json:"service_account_email,omitempty"`
@@ -63,8 +65,10 @@ type ServiceToken struct {
 	Name string `json:"name"`
 
 	// OrgId Unique identifier for the organization
-	OrgId       nullable.Nullable[openapi_types.UUID] `json:"org_id,omitempty"`
-	PreviewName string                                `json:"preview_name"`
+	OrgId nullable.Nullable[openapi_types.UUID] `json:"org_id,omitempty"`
+
+	// PreviewName Masked preview showing the token prefix and last four characters, e.g. bt-st-…AbCd.
+	PreviewName string `json:"preview_name"`
 
 	// ServiceAccountEmail The service account email (not routable)
 	ServiceAccountEmail nullable.Nullable[string] `json:"service_account_email,omitempty"`
@@ -76,9 +80,9 @@ type ServiceToken struct {
 	ServiceAccountName nullable.Nullable[string] `json:"service_account_name,omitempty"`
 }
 
-// DeleteServiceTokenWithBody Delete single service_token
+// DeleteServiceTokenWithBody Delete single service token
 //
-// Delete a single service_token.
+// Delete a single service token.
 //
 // Takes any type of body and a specified content type.
 //
@@ -95,9 +99,9 @@ func (c *Client) DeleteServiceTokenWithBody(ctx context.Context, contentType str
 	return c.Client.Do(req)
 }
 
-// DeleteServiceToken Delete single service_token
+// DeleteServiceToken Delete single service token
 //
-// Delete a single service_token.
+// Delete a single service token.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -114,11 +118,11 @@ func (c *Client) DeleteServiceToken(ctx context.Context, body DeleteServiceToken
 	return c.Client.Do(req)
 }
 
-// GetServiceToken List service_tokens
+// GetServiceToken List service tokens
 //
 // List out all service tokens. They are sorted by creation date, with the most recently-created tokens coming first.
 //
-// To create a service token, visit [**Settings > Service tokens**](https://www.braintrust.dev/app/~/configuration/org/service-tokens) as an organization owner, or call [`POST /v1/service_token`](https://www.braintrust.dev/docs/api-reference/servicetokens/create-service_token) and authenticate with a service token that has organization-owner permissions.
+// To create a service token, visit [**Settings > Service tokens**](https://www.braintrust.dev/app/~/configuration/org/service-tokens) as an organization owner or an Owner of an active project group in the organization, or call [`POST /v1/service_token`](https://docs.braintrust.dev/api-reference/servicetokens/create-service_token) with a service token. Results include only service tokens you can manage.
 //
 // Corresponds with GET /v1/service_token (the `GetServiceToken` operationId).
 func (c *Client) GetServiceToken(ctx context.Context, params *GetServiceTokenParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -133,11 +137,11 @@ func (c *Client) GetServiceToken(ctx context.Context, params *GetServiceTokenPar
 	return c.Client.Do(req)
 }
 
-// PostServiceTokenWithBody Create service_token
+// PostServiceTokenWithBody Create service token
 //
 // Create a new service token.
 //
-// When calling this endpoint, you must authenticate using a service token that has organization-owner permissions. User API keys cannot be used.
+// Authenticate with a service token. A service token whose service account is an organization owner can create tokens for any service account. A service token whose service account holds the Owner role on a project group can create tokens for a service account in the same organization when the target account has a permission grant on a project group it owns. The calling service account must also hold all of the target account's permissions in the organization; otherwise the request returns 403. User API keys cannot be used.
 //
 // Takes any type of body and a specified content type.
 //
@@ -154,11 +158,11 @@ func (c *Client) PostServiceTokenWithBody(ctx context.Context, contentType strin
 	return c.Client.Do(req)
 }
 
-// PostServiceToken Create service_token
+// PostServiceToken Create service token
 //
 // Create a new service token.
 //
-// When calling this endpoint, you must authenticate using a service token that has organization-owner permissions. User API keys cannot be used.
+// Authenticate with a service token. A service token whose service account is an organization owner can create tokens for any service account. A service token whose service account holds the Owner role on a project group can create tokens for a service account in the same organization when the target account has a permission grant on a project group it owns. The calling service account must also hold all of the target account's permissions in the organization; otherwise the request returns 403. User API keys cannot be used.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -175,9 +179,9 @@ func (c *Client) PostServiceToken(ctx context.Context, body PostServiceTokenJSON
 	return c.Client.Do(req)
 }
 
-// PutServiceTokenWithBody Create or replace service_token
+// PutServiceTokenWithBody Create or replace service token
 //
-// Create or replace service_token. If there is an existing service_token with the same name as the one specified in the request, will replace the existing service_token with the provided fields
+// Create or replace service token. If there is an existing service token with the same name as the one specified in the request, will replace the existing service token with the provided fields
 //
 // Takes any type of body and a specified content type.
 //
@@ -194,9 +198,9 @@ func (c *Client) PutServiceTokenWithBody(ctx context.Context, contentType string
 	return c.Client.Do(req)
 }
 
-// PutServiceToken Create or replace service_token
+// PutServiceToken Create or replace service token
 //
-// Create or replace service_token. If there is an existing service_token with the same name as the one specified in the request, will replace the existing service_token with the provided fields
+// Create or replace service token. If there is an existing service token with the same name as the one specified in the request, will replace the existing service token with the provided fields
 //
 // Takes a body of the `application/json` content type.
 //
@@ -213,9 +217,9 @@ func (c *Client) PutServiceToken(ctx context.Context, body PutServiceTokenJSONRe
 	return c.Client.Do(req)
 }
 
-// DeleteServiceTokenId Delete service_token
+// DeleteServiceTokenId Delete service token
 //
-// Delete a service_token object by its id.
+// Delete a service token object by its id.
 //
 // Corresponds with DELETE /v1/service_token/{service_token_id} (the `DeleteServiceTokenId` operationId).
 func (c *Client) DeleteServiceTokenId(ctx context.Context, serviceTokenId ServiceTokenIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -230,9 +234,9 @@ func (c *Client) DeleteServiceTokenId(ctx context.Context, serviceTokenId Servic
 	return c.Client.Do(req)
 }
 
-// GetServiceTokenId Get service_token
+// GetServiceTokenId Get service token
 //
-// Get a service_token object by its id.
+// Get a service token object by its id.
 //
 // Corresponds with GET /v1/service_token/{service_token_id} (the `GetServiceTokenId` operationId).
 func (c *Client) GetServiceTokenId(ctx context.Context, serviceTokenId ServiceTokenIdParamParameter, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -642,7 +646,7 @@ type GetServiceTokenResponse struct {
 	HTTPResponse *http.Response
 	// JSON200 the response for an HTTP 200 `application/json` response
 	JSON200 *struct {
-		// Objects A list of service_token objects
+		// Objects A list of service token objects
 		Objects []ServiceToken `json:"objects"`
 	}
 	// JSON400 the response for an HTTP 400 `application/json` response
@@ -661,7 +665,7 @@ type GetServiceTokenResponse struct {
 
 // GetJSON200 returns the response for an HTTP 200 `application/json` response
 func (r GetServiceTokenResponse) GetJSON200() *struct {
-	// Objects A list of service_token objects
+	// Objects A list of service token objects
 	Objects []ServiceToken `json:"objects"`
 } {
 	return r.JSON200
@@ -1053,9 +1057,9 @@ func (r GetServiceTokenIdResponse) ContentType() string {
 	return ""
 }
 
-// DeleteServiceTokenWithBodyWithResponse Delete single service_token
+// DeleteServiceTokenWithBodyWithResponse Delete single service token
 //
-// Delete a single service_token.
+// Delete a single service token.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1068,9 +1072,9 @@ func (c *ClientWithResponses) DeleteServiceTokenWithBodyWithResponse(ctx context
 	return ParseDeleteServiceTokenResponse(rsp)
 }
 
-// DeleteServiceTokenWithResponse Delete single service_token
+// DeleteServiceTokenWithResponse Delete single service token
 //
-// Delete a single service_token.
+// Delete a single service token.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1083,11 +1087,11 @@ func (c *ClientWithResponses) DeleteServiceTokenWithResponse(ctx context.Context
 	return ParseDeleteServiceTokenResponse(rsp)
 }
 
-// GetServiceTokenWithResponse List service_tokens
+// GetServiceTokenWithResponse List service tokens
 //
 // List out all service tokens. They are sorted by creation date, with the most recently-created tokens coming first.
 //
-// To create a service token, visit [**Settings > Service tokens**](https://www.braintrust.dev/app/~/configuration/org/service-tokens) as an organization owner, or call [`POST /v1/service_token`](https://www.braintrust.dev/docs/api-reference/servicetokens/create-service_token) and authenticate with a service token that has organization-owner permissions.
+// To create a service token, visit [**Settings > Service tokens**](https://www.braintrust.dev/app/~/configuration/org/service-tokens) as an organization owner or an Owner of an active project group in the organization, or call [`POST /v1/service_token`](https://docs.braintrust.dev/api-reference/servicetokens/create-service_token) with a service token. Results include only service tokens you can manage.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1100,11 +1104,11 @@ func (c *ClientWithResponses) GetServiceTokenWithResponse(ctx context.Context, p
 	return ParseGetServiceTokenResponse(rsp)
 }
 
-// PostServiceTokenWithBodyWithResponse Create service_token
+// PostServiceTokenWithBodyWithResponse Create service token
 //
 // Create a new service token.
 //
-// When calling this endpoint, you must authenticate using a service token that has organization-owner permissions. User API keys cannot be used.
+// Authenticate with a service token. A service token whose service account is an organization owner can create tokens for any service account. A service token whose service account holds the Owner role on a project group can create tokens for a service account in the same organization when the target account has a permission grant on a project group it owns. The calling service account must also hold all of the target account's permissions in the organization; otherwise the request returns 403. User API keys cannot be used.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1117,11 +1121,11 @@ func (c *ClientWithResponses) PostServiceTokenWithBodyWithResponse(ctx context.C
 	return ParsePostServiceTokenResponse(rsp)
 }
 
-// PostServiceTokenWithResponse Create service_token
+// PostServiceTokenWithResponse Create service token
 //
 // Create a new service token.
 //
-// When calling this endpoint, you must authenticate using a service token that has organization-owner permissions. User API keys cannot be used.
+// Authenticate with a service token. A service token whose service account is an organization owner can create tokens for any service account. A service token whose service account holds the Owner role on a project group can create tokens for a service account in the same organization when the target account has a permission grant on a project group it owns. The calling service account must also hold all of the target account's permissions in the organization; otherwise the request returns 403. User API keys cannot be used.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1134,9 +1138,9 @@ func (c *ClientWithResponses) PostServiceTokenWithResponse(ctx context.Context, 
 	return ParsePostServiceTokenResponse(rsp)
 }
 
-// PutServiceTokenWithBodyWithResponse Create or replace service_token
+// PutServiceTokenWithBodyWithResponse Create or replace service token
 //
-// Create or replace service_token. If there is an existing service_token with the same name as the one specified in the request, will replace the existing service_token with the provided fields
+// Create or replace service token. If there is an existing service token with the same name as the one specified in the request, will replace the existing service token with the provided fields
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1149,9 +1153,9 @@ func (c *ClientWithResponses) PutServiceTokenWithBodyWithResponse(ctx context.Co
 	return ParsePutServiceTokenResponse(rsp)
 }
 
-// PutServiceTokenWithResponse Create or replace service_token
+// PutServiceTokenWithResponse Create or replace service token
 //
-// Create or replace service_token. If there is an existing service_token with the same name as the one specified in the request, will replace the existing service_token with the provided fields
+// Create or replace service token. If there is an existing service token with the same name as the one specified in the request, will replace the existing service token with the provided fields
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -1164,9 +1168,9 @@ func (c *ClientWithResponses) PutServiceTokenWithResponse(ctx context.Context, b
 	return ParsePutServiceTokenResponse(rsp)
 }
 
-// DeleteServiceTokenIdWithResponse Delete service_token
+// DeleteServiceTokenIdWithResponse Delete service token
 //
-// Delete a service_token object by its id.
+// Delete a service token object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1179,9 +1183,9 @@ func (c *ClientWithResponses) DeleteServiceTokenIdWithResponse(ctx context.Conte
 	return ParseDeleteServiceTokenIdResponse(rsp)
 }
 
-// GetServiceTokenIdWithResponse Get service_token
+// GetServiceTokenIdWithResponse Get service token
 //
-// Get a service_token object by its id.
+// Get a service token object by its id.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -1299,7 +1303,7 @@ func ParseGetServiceTokenResponse(rsp *http.Response) (*GetServiceTokenResponse,
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			// Objects A list of service_token objects
+			// Objects A list of service token objects
 			Objects []ServiceToken `json:"objects"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
