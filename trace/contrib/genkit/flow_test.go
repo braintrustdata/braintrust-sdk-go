@@ -5,7 +5,9 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/firebase/genkit/go/ai"
 	"github.com/firebase/genkit/go/genkit"
+	openai "github.com/openai/openai-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel"
@@ -13,6 +15,59 @@ import (
 
 	"github.com/braintrustdata/braintrust-sdk-go/internal/oteltest"
 )
+
+func TestFlowRecordsInputAndOutput(t *testing.T) {
+	tp, exporter := oteltest.Setup(t)
+	previousProvider := otel.GetTracerProvider()
+	otel.SetTracerProvider(tp)
+	t.Cleanup(func() { otel.SetTracerProvider(previousProvider) })
+
+	ctx := context.Background()
+	g := genkit.Init(ctx,
+		genkit.WithPlugins(newOpenAIPlugin(t)),
+		genkit.WithDefaultModel("openai/gpt-4o-mini"),
+	)
+	flow := DefineFlow(g, "answer-question", func(ctx context.Context, input string) (string, error) {
+		response, err := genkit.Generate(ctx, g,
+			ai.WithPrompt(input),
+			ai.WithConfig(&openai.ChatCompletionNewParams{
+				MaxCompletionTokens: openai.Int(32),
+			}),
+		)
+		if err != nil {
+			return "", err
+		}
+		return response.Text(), nil
+	})
+
+	const input = "What is the capital of France? Answer in one word."
+	result, err := flow.Run(ctx, input)
+	require.NoError(t, err)
+	require.NotEmpty(t, result)
+
+	span := requireSpanNamed(t, exporter.Flush(), "answer-question")
+	assert.Equal(t, input, span.Input())
+	assert.Equal(t, result, span.Output())
+}
+
+func TestNewFlowRecordsInputAndOutput(t *testing.T) {
+	tp, exporter := oteltest.Setup(t)
+	previousProvider := otel.GetTracerProvider()
+	otel.SetTracerProvider(tp)
+	t.Cleanup(func() { otel.SetTracerProvider(previousProvider) })
+
+	flow := NewFlow("shout_flow", func(_ context.Context, in string) (string, error) {
+		return in + "!", nil
+	})
+
+	output, err := flow.Run(context.Background(), "hello")
+	require.NoError(t, err)
+	require.Equal(t, "hello!", output)
+
+	span := requireSpanNamed(t, exporter.Flush(), "shout_flow")
+	assert.Equal(t, "hello", span.Input())
+	assert.Equal(t, "hello!", span.Output())
+}
 
 func TestFlowErrorRecordsInputOnly(t *testing.T) {
 	tp, exporter := oteltest.Setup(t)
@@ -49,10 +104,8 @@ func TestStreamingFlowRecordsInputAndOutput(t *testing.T) {
 		func(ctx context.Context, n int, cb func(context.Context, int) error) ([]int, error) {
 			var out []int
 			for i := range n {
-				if cb != nil {
-					if err := cb(ctx, i); err != nil {
-						return nil, err
-					}
+				if err := cb(ctx, i); err != nil {
+					return nil, err
 				}
 				out = append(out, i)
 			}

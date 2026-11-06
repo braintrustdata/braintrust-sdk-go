@@ -145,7 +145,7 @@ Use `trace/contrib/genkit` as the top-level tracing layer for Genkit requests. A
 
 For manual instrumentation, define tools with `tracegenkit.DefineTool`, `tracegenkit.DefineToolWithInputSchema`, or `tracegenkit.DefineMultipartTool` so each handler is traced for its full execution, including failures.
 
-Define flows with `tracegenkit.DefineFlow` or `tracegenkit.DefineStreamingFlow` to record each flow's input and output on its Genkit flow span.
+Define flows with `tracegenkit.DefineFlow`, `tracegenkit.DefineStreamingFlow`, `tracegenkit.NewFlow`, or `tracegenkit.NewStreamingFlow` to record each flow's input and output on its Genkit flow span.
 
 With orchestrion, middleware is injected automatically into all `genkit.Generate`, `genkit.GenerateText`, and `genkit.GenerateStream` calls, and Genkit tool and flow definitions are replaced with their traced equivalents.
 

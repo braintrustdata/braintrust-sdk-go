@@ -527,6 +527,21 @@ func TestGenkitFlow(t *testing.T) {
 		}
 	}
 	require.True(t, found, "orchestrion did not replace genkit.DefineFlow")
+
+	unregistered := genkit.NewFlow("unregistered_flow", func(_ context.Context, in string) (string, error) {
+		return in + "?", nil
+	})
+	_, err = unregistered.Run(context.Background(), "hello")
+	require.NoError(t, err)
+	found = false
+	for _, span := range exporter.Flush() {
+		if span.Name() == "unregistered_flow" && span.HasAttr("braintrust.output_json") {
+			span.AssertJSONAttrEquals("braintrust.output_json", "hello?")
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "orchestrion did not replace genkit.NewFlow")
 }
 
 // TestMultipleIntegrations verifies that multiple Braintrust contrib integrations
