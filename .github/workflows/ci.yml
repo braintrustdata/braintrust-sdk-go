@@ -51,7 +51,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        go-version: [1.25.x, 1.26.x, 1.27.x]
+        go-version: [1.26.x, 1.27.x]
         # FIXME[matt] add windows testing, we need to fix some timing
         # tests.
         os: [ubuntu-latest, macos-latest]
@@ -117,14 +117,13 @@ jobs:
   # toolchain ID and invalidates the whole instrumented build. It used to be
   # the long pole of every test job, so it runs here instead: one variant per
   # runner, on Linux only (orchestrion's injection is compile-time and doesn't
-  # depend on the OS). Keep Orchestrion v1.12.1 on Go 1.25 to cover existing
-  # consumers; Orchestrion v1.14.0 requires Go 1.26+.
+  # depend on the OS).
   orchestrion:
     timeout-minutes: 20
     strategy:
       fail-fast: true
       matrix:
-        go-version: [1.25.x, 1.26.x, 1.27.x]
+        go-version: [1.26.x, 1.27.x]
         variant: [all, individual]
     runs-on: ubuntu-latest
     env:
@@ -142,13 +141,8 @@ jobs:
           # integration changes, and the Actions cache is close to its size
           # limit, so don't spend cache space on it.
           cache: false
-      - name: Install orchestrion for Go 1.25
-        timeout-minutes: 5
-        if: matrix.go-version == '1.25.x'
-        run: go install github.com/DataDog/orchestrion@v1.12.1
       - name: Install orchestrion
         timeout-minutes: 5
-        if: matrix.go-version != '1.25.x'
         run: go install github.com/DataDog/orchestrion@v1.14.0
       - name: Use local Braintrust modules
         timeout-minutes: 1
